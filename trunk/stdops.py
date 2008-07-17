@@ -70,4 +70,22 @@ def profile(kurve_id, direction, finishx, finishy):
     if off_kurve_id != kurve_id:
         kurve_delete(off_kurve_id)
 
-
+def facemill(xmax, ymax, stepover):
+    px, py, pz = current_tool_pos()
+    xtotal = xmax - px
+    print "xtotal = ", xtotal
+    xsteps = int(xtotal/stepover + 0.5)
+    print "xsteps = ", xsteps
+    dx = xtotal / xsteps / 2
+    print "dx = ", dx
+    starty = py
+    for x in range(0, xsteps):
+        x1 = px + dx * x * 2
+        x2 = px + dx * (x * 2 + 1)
+        x3 = px + dx * (x * 2 + 2)
+        feedxy(x1, ymax)
+        feedxy(x2, ymax)
+        feedxy(x2, starty)
+        feedxy(x3, starty)
+    feedxy(xmax, ymax)
+        

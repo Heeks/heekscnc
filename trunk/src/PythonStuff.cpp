@@ -867,6 +867,12 @@ bool call_file(const char* filename, bool want_error_message_boxes = true)
         return false;
     }
 
+	if (PyErr_Occurred())
+	{
+		PyErr_Print();
+		return false;
+	}
+
 	return true;
 }
 
