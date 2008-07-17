@@ -25,6 +25,6 @@ profile(1, 'left', 10, 10)
 Then press the "Run Program" icon at the edge of the Program window.
 You should see some profiling tool path.
 
-= Post-Processing
+= Post-Processing =
 Doesn't do anything yet.
 almost there...
