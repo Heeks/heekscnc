@@ -31,6 +31,6 @@ Open "HeeksCNC.sln"
 
 Press Build.
 
-Un-comment the line relevant line in HeeksCAD/AddIns.txt that tells HeeksCAD to load up HeeksCNC.dll
+Un-comment the line relevant line in "HeeksCAD/AddIns.txt" that tells HeeksCAD to load up HeeksCNC.dll
 
 Run HeeksCAD.exe and it should load up HeeksCNC.dll and add the extra windows and menu items.
