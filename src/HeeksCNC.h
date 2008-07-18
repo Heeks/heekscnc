@@ -19,8 +19,10 @@ public:
 	wxConfig* m_config;
 	bool m_draw_cutter_radius; // applies to all operations
 	CProgram* m_program;
+	wxToolBar *m_machiningBar;
 	CProgramCanvas* m_program_canvas;
 	COutputCanvas* m_output_canvas;
+	bool m_run_program_on_new_line;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();
@@ -29,7 +31,8 @@ public:
 	void OnNewOrOpen();
 	void OnInitDLL();
 	void OnDestroyDLL();
-	void GetProperties(std::list<Property *> *list);
+	void GetOptions(std::list<Property *> *list);
+	void OnFrameDelete();
 };
 
 extern CHeeksCNCApp theApp;

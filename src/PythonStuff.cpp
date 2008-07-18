@@ -15,134 +15,6 @@
 #include <python.h>
 #endif
 
-static void write_double_or_not_set(char* str, double value)
-{
-	if(value == CMove3D::MOVE_NOT_SET)sprintf(str, "'NOT_SET'");
-	else sprintf(str, "%lf", value);
-}
-
-static bool write_move(ofstream &ofs, CMove3D &move)
-{
-	switch(move.m_type){
-		case 0://rapid
-			{
-				char strx[1024];
-				write_double_or_not_set(strx, move.m_p.x);
-				char stry[1024];
-				write_double_or_not_set(stry, move.m_p.y);
-				char strz[1024];
-				write_double_or_not_set(strz, move.m_p.z);
-				char str[1024];
-				sprintf(str, "rapid(%s, %s, %s)\n", strx, stry, strz);
-				ofs<<str;
-			}
-			break;
-
-		case 1:// feed
-			{
-				char strx[1024];
-				write_double_or_not_set(strx, move.m_p.x);
-				char stry[1024];
-				write_double_or_not_set(stry, move.m_p.y);
-				char strz[1024];
-				write_double_or_not_set(strz, move.m_p.z);
-				char str[1024];
-				sprintf(str, "feed(%s, %s, %s)\n", strx, stry, strz);
-				ofs<<str;
-			}
-			break;
-
-		case 2:// clockwise arc
-			{
-				char strx[1024];
-				write_double_or_not_set(strx, move.m_p.x);
-				char stry[1024];
-				write_double_or_not_set(stry, move.m_p.y);
-				char stri[1024];
-				write_double_or_not_set(stri, move.m_c.x);
-				char strj[1024];
-				write_double_or_not_set(strj, move.m_c.y);
-				char str[1024];
-				sprintf(str, "arc('cw', %s, %s, %s, %s)\n", strx, stry, stri, strj);
-				ofs<<str;
-			}
-			break;
-
-		case 3:// anti-clockwise arc
-			{
-				char strx[1024];
-				write_double_or_not_set(strx, move.m_p.x);
-				char stry[1024];
-				write_double_or_not_set(stry, move.m_p.y);
-				char stri[1024];
-				write_double_or_not_set(stri, move.m_c.x);
-				char strj[1024];
-				write_double_or_not_set(strj, move.m_c.y);
-				char str[1024];
-				sprintf(str, "arc('acw', %s, %s, %s, %s)\n", strx, stry, stri, strj);
-				ofs<<str;
-			}
-			break;
-
-		default:
-			wxMessageBox("bad move type in write_move()");
-	}
-
-	return true;
-}
-
-static bool write_moves(ofstream &ofs, std::list<CMove3D> &moves)
-{
-	for(std::list<CMove3D>::iterator It = moves.begin(); It != moves.end(); It++)
-	{
-		CMove3D &move = *It;
-		write_move(ofs, move);
-	}
-
-	return true;
-}
-
-static bool write_all_the_operations(ofstream &ofs)
-{
-	// find the program
-	for(HeeksObj* object = heeksCAD->GetFirstObject(); object; object = heeksCAD->GetNextObject())
-	{
-		if(object->GetType() == ProgramType)
-		{
-			for(HeeksObj* op = object->GetFirstChild(); op; op = object->GetNextChild())
-			{
-				switch(op->GetType()){
-					case OpProfileType:
-						{
-							char tool_str[1024];
-							sprintf(tool_str, "tool(%d, %lf, %lf)\n", ((COpProfile*)op)->m_station_number, ((COpProfile*)op)->m_cutter.R * 2, ((COpProfile*)op)->m_cutter.r);
-							ofs<<tool_str;
-							write_moves(ofs, ((COpProfile*)op)->m_toolpath);
-						}
-						break;
-				}
-			}
-			break;// there should only be one program
-		}
-	}
-
-	return true;
-}
-
-static bool write_python_file(const wxString& python_file_path)
-{
-	ofstream ofs(python_file_path.c_str());
-	if(!ofs)return false;
-
-	ofs<<"from siegkx1 import *\n\n";
-
-	// loop through all the operations
-	write_all_the_operations(ofs);
-	ofs<<"end()\n";
-
-	return true;
-}
-
 static bool write_python_run_file(const wxString& python_file_path)
 {
 	ofstream ofs(python_file_path.c_str());
@@ -151,17 +23,22 @@ static bool write_python_run_file(const wxString& python_file_path)
 	ofs<<"import hc\n";
 	ofs<<"from hc import *\n";
 	ofs<<"import sys\n";
+	ofs<<"from math import *\n";
 	ofs<<"from stdops import *\n\n";
 
 	ofs<<"#redirect output to the HeeksCNC output canvas\n";
-	ofs<<"sys.stdout = hc\n";
+	ofs<<"sys.stdout = hc\n\n";
 
+#if 0
 	ofs<<"def runfn(a):\n";
 	int l = theApp.m_program_canvas->m_textCtrl->GetNumberOfLines();
 	for(int i = 0; i<l; i++){
 		ofs<<"    "<<theApp.m_program_canvas->m_textCtrl->GetLineText(i)<<"\n";
 	}
 	ofs<<"    return 1\n";
+#else
+	ofs<<theApp.m_program_canvas->m_textCtrl->GetValue();
+#endif
 
 	return true;
 }
@@ -177,12 +54,13 @@ void HeeksPyPostProcess()
 
 	in_here = true;
 
+#if 0
 	// write the python file
-	wxString file_path = heeksCAD->GetExeFolder() + wxString("/../HeeksCNC/sample.py");
+	wxString file_path = heeksCAD->GetExeFolder() + wxString("/../HeeksCNC/post.py");
 
-	if(!write_python_file(file_path))
+	if(!write_post_file(file_path))
 	{
-		wxMessageBox("couldn't write sample.py!");
+		wxMessageBox("couldn't write post.py!");
 	}
 	else
 	{
@@ -200,6 +78,7 @@ void HeeksPyPostProcess()
 
 		::wxExecute(batch_file_path, wxEXEC_SYNC);
 	}
+#endif
 
 	in_here = false;
 }
@@ -368,6 +247,8 @@ static PyObject* hc_rate(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
+CBox* box_for_RunProgram = NULL;
+
 static PyObject* hc_rapid(PyObject* self, PyObject* args)
 {
 	double x, y, z;
@@ -379,6 +260,7 @@ static PyObject* hc_rapid(PyObject* self, PyObject* args)
 		tool_path.tool_path_pos[2] = z;
 		glColor3ub(255, 0, 0);
 		glVertex3dv(tool_path.tool_path_pos);
+		box_for_RunProgram->Insert(tool_path.tool_path_pos);
 	}
 
 	Py_RETURN_NONE;
@@ -394,6 +276,7 @@ static PyObject* hc_rapidxy(PyObject* self, PyObject* args)
 		tool_path.tool_path_pos[1] = y;
 		glColor3ub(255, 0, 0);
 		glVertex3dv(tool_path.tool_path_pos);
+		box_for_RunProgram->Insert(tool_path.tool_path_pos);
 	}
 
 	Py_RETURN_NONE;
@@ -408,6 +291,7 @@ static PyObject* hc_rapidz(PyObject* self, PyObject* args)
 		tool_path.tool_path_pos[2] = z;
 		glColor3ub(255, 0, 0);
 		glVertex3dv(tool_path.tool_path_pos);
+		box_for_RunProgram->Insert(tool_path.tool_path_pos);
 	}
 
 	Py_RETURN_NONE;
@@ -424,6 +308,7 @@ static PyObject* hc_feed(PyObject* self, PyObject* args)
 		tool_path.tool_path_pos[2] = z;
 		glColor3ub(0, 255, 0);
 		glVertex3dv(tool_path.tool_path_pos);
+		box_for_RunProgram->Insert(tool_path.tool_path_pos);
 	}
 
 	Py_RETURN_NONE;
@@ -439,6 +324,7 @@ static PyObject* hc_feedxy(PyObject* self, PyObject* args)
 		tool_path.tool_path_pos[1] = y;
 		glColor3ub(0, 255, 0);
 		glVertex3dv(tool_path.tool_path_pos);
+		box_for_RunProgram->Insert(tool_path.tool_path_pos);
 	}
 
 	Py_RETURN_NONE;
@@ -453,6 +339,7 @@ static PyObject* hc_feedz(PyObject* self, PyObject* args)
 		tool_path.tool_path_pos[2] = z;
 		glColor3ub(0, 255, 0);
 		glVertex3dv(tool_path.tool_path_pos);
+		box_for_RunProgram->Insert(tool_path.tool_path_pos);
 	}
 
 	Py_RETURN_NONE;
@@ -460,7 +347,10 @@ static PyObject* hc_feedz(PyObject* self, PyObject* args)
 
 void glvertexfn(const double* xy)
 {
-	glVertex3d(xy[0], xy[1], tool_path.tool_path_pos[2]);
+	tool_path.tool_path_pos[0] = xy[0];
+	tool_path.tool_path_pos[1] = xy[1];
+	glVertex3dv(tool_path.tool_path_pos);
+	box_for_RunProgram->Insert(tool_path.tool_path_pos);
 }
 
 static PyObject* hc_arc(PyObject* self, PyObject* args)
@@ -477,8 +367,6 @@ static PyObject* hc_arc(PyObject* self, PyObject* args)
 		double pixels_per_mm = heeksCAD->GetPixelScale();
 		glColor3ub(0, 255, 0);
 		heeksCAD->get_2d_arc_segments(tool_path.tool_path_pos[0], tool_path.tool_path_pos[1], x, y, cx, cy, acw, false, pixels_per_mm, glvertexfn);
-		tool_path.tool_path_pos[0] = x;
-		tool_path.tool_path_pos[1] = y;
 	}
 
 	Py_RETURN_NONE;
@@ -822,51 +710,6 @@ bool call_file(const char* filename, bool want_error_message_boxes = true)
     PyObject *pName = PyString_FromString(filename);
 	PyObject *pModule = PyImport_Import(pName);
 
-    if (pModule != NULL) {
-        PyObject *pFunc = PyObject_GetAttrString(pModule, "runfn");
-        /* pFunc is a new reference */
-
-        if (pFunc && PyCallable_Check(pFunc)) {
-            PyObject *pArgs = PyTuple_New(1);
-			{
-				PyObject *pValue = PyInt_FromLong(21);
-				if (!pValue) {
-					Py_DECREF(pArgs);
-					Py_DECREF(pModule);
-					if(want_error_message_boxes)wxMessageBox("Cannot convert argument\n");
-					return false;
-				}
-				PyTuple_SetItem(pArgs, 0, pValue);
-			}
-
-			PyObject *pValue = PyObject_CallObject(pFunc, pArgs);
-            Py_DECREF(pArgs);
-            if (pValue != NULL) {
-				int return_value = PyInt_AsLong(pValue);
-                Py_DECREF(pValue);
-            }
-            else {
-                Py_DECREF(pFunc);
-                Py_DECREF(pModule);
-                PyErr_Print();
-                if(want_error_message_boxes)wxMessageBox("Call failed\n");
-                return false;
-            }
-        }
-        else {
-            if (PyErr_Occurred())
-                PyErr_Print();
-			if(want_error_message_boxes)wxMessageBox(wxString::Format("Cannot find function \"%s\"\n", "runfn"));
-        }
-        Py_XDECREF(pFunc);
-        Py_DECREF(pModule);
-    }
-    else {
-        PyErr_Print();
-        if(want_error_message_boxes)wxMessageBox(wxString::Format("Failed to load \"%s\"\n", filename));
-        return false;
-    }
-
 	if (PyErr_Occurred())
 	{
 		PyErr_Print();
@@ -876,7 +719,7 @@ bool call_file(const char* filename, bool want_error_message_boxes = true)
 	return true;
 }
 
-void HeeksPyRunProgram()
+void HeeksPyRunProgram(CBox &box)
 {
 	static bool in_here = false;
 	if(in_here)
@@ -886,6 +729,8 @@ void HeeksPyRunProgram()
 	}
 
 	in_here = true;
+
+	box_for_RunProgram = &box;
 
 	try{
 
@@ -909,6 +754,8 @@ void HeeksPyRunProgram()
 			tool_path.Reset();
 			glBegin(GL_LINE_STRIP);
 			glVertex3dv(tool_path.tool_path_pos);
+			box_for_RunProgram->m_valid = false;
+			box_for_RunProgram->Insert(tool_path.tool_path_pos);
 
 			// call the python file
 			bool success = call_file("run", false);
