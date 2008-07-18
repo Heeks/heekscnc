@@ -439,38 +439,6 @@ void COpProfile::GetProperties(std::list<Property *> *list){
 
 }
 
-class OpPickObjectsTool: public Tool
-{
-	static wxBitmap* m_bitmap;
-public:
-	COpProfile* m_op;
-
-	OpPickObjectsTool(COpProfile* op):m_op(op){}
-
-	const char* GetTitle(){return "Pick Shape";}
-	const char* GetToolTip(){return "Pick shape objects ( clears previous shape objects first )";}
-	void Run()
-	{
-		heeksCAD->PickObjects("Pick shape objects");
-		m_op->m_objects = heeksCAD->GetMarkedList();
-		m_op->CalculateOrMarkOutOfDate();
-		heeksCAD->ClearMarkedList();
-		heeksCAD->Mark(m_op);
-	}
-
-	wxBitmap* Bitmap()
-	{
-		if(m_bitmap == NULL)
-		{
-			wxString exe_folder = heeksCAD->GetExeFolder();
-			m_bitmap = new wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/pickopobjects.png", wxBITMAP_TYPE_PNG);
-		}
-		return m_bitmap;
-	}
-};
-
-wxBitmap* OpPickObjectsTool::m_bitmap = NULL;
-
 class UpdatePathTool: public Tool
 {
 	static wxBitmap* m_bitmap;
@@ -537,7 +505,6 @@ wxBitmap* OpPickSolidsTool::m_bitmap = NULL;
 
 void COpProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	t_list->push_back(new OpPickObjectsTool(this));
 	t_list->push_back(new OpPickSolidsTool(this));
 	if(m_only_calculate_if_user_says && m_out_of_date)t_list->push_back(new UpdatePathTool(this));
 }

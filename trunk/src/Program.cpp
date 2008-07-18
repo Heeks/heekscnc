@@ -42,6 +42,11 @@ wxIcon* CProgram::GetIcon()
 	return m_icon;
 }
 
+void CProgram::GetBox(CBox &box)
+{
+	box.Insert(m_box);
+}
+
 void CProgram::glCommands(bool select, bool marked, bool no_color){
 	static bool in_the_middle_of_glNewList = false;
 	if(in_the_middle_of_glNewList){
@@ -51,14 +56,16 @@ void CProgram::glCommands(bool select, bool marked, bool no_color){
 		DestroyGLLists();
 	}
 
-	glDisable(GL_LIGHTING);
+	glDepthMask(1);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 
 	if(m_create_display_list_next_render)
 	{
 		m_gl_list = glGenLists(1);
 		glNewList(m_gl_list, GL_COMPILE_AND_EXECUTE);
 		in_the_middle_of_glNewList = true;
-		HeeksPyRunProgram();
+		HeeksPyRunProgram(m_box);
 		glEndList();
 		in_the_middle_of_glNewList = false;
 		m_create_display_list_next_render = false;

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../../HeeksCAD/interface/ObjList.h"
+#include "../../HeeksCAD/interface/Box.h"
 #include "HeeksCNCTypes.h"
 
 class CProgram:public ObjList
@@ -12,6 +13,7 @@ class CProgram:public ObjList
 public:
 	static wxIcon* m_icon;
 	std::string m_machine;
+	CBox m_box;
 	int m_gl_list;
 	bool m_create_display_list_next_render;
 
@@ -24,6 +26,7 @@ public:
 	int GetType()const{return ProgramType;}
 	const char* GetTypeString(void)const{return "Program";}
 	wxIcon* GetIcon();
+	void GetBox(CBox &box);
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
