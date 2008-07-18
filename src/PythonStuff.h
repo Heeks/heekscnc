@@ -1,5 +1,6 @@
 // PythonStuff.h
+class CBox;
 
 void HeeksPyPostProcess();
-void HeeksPyRunProgram(); // to get toolpath
+void HeeksPyRunProgram(CBox &box); // to get toolpath
 

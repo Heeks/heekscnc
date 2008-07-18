@@ -5,5 +5,6 @@ extern "C"{
 
 void HEEKSCNC_EXPORT OnStartUp();
 void HEEKSCNC_EXPORT OnNewOrOpen();
-void HEEKSCNC_EXPORT GetProperties(void(*callbackfunc)(Property*));
+void HEEKSCNC_EXPORT GetOptions(void(*callbackfunc)(Property*));
+void HEEKSCNC_EXPORT OnFrameDelete();
 }
