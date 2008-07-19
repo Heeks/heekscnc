@@ -32,6 +32,8 @@ def profile(kurve_id, direction, finishx, finishy):
             if sx != px or sy != py:
                 # do a roll-on arc
                 vx, vy = kurve_span_dir(off_kurve_id, span, 0) # get start direction
+                if px == 'NOT_SET' or py == 'NOT_SET':
+                    raise "can not do an arc without a line move first"
                 rcx, rcy, rdir = tangential_arc(sx, sy, -vx, -vy, px, py)
                 rcx = rcx - px # make relative to the start position
                 rcy = rcy - py

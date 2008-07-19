@@ -15,13 +15,17 @@
 #include <python.h>
 #endif
 
-static bool write_python_run_file(const wxString& python_file_path)
+static bool post_processing = false;
+static bool running = false;
+
+static bool write_python_file(const wxString& python_file_path, bool post_processing = false /* false means running the program */)
 {
 	ofstream ofs(python_file_path.c_str());
 	if(!ofs)return false;
 
 	ofs<<"import hc\n";
 	ofs<<"from hc import *\n";
+	if(post_processing)ofs<<"import siegkx1\n";
 	ofs<<"import sys\n";
 	ofs<<"from math import *\n";
 	ofs<<"from stdops import *\n\n";
@@ -29,62 +33,25 @@ static bool write_python_run_file(const wxString& python_file_path)
 	ofs<<"#redirect output to the HeeksCNC output canvas\n";
 	ofs<<"sys.stdout = hc\n\n";
 
-#if 0
-	ofs<<"def runfn(a):\n";
-	int l = theApp.m_program_canvas->m_textCtrl->GetNumberOfLines();
-	for(int i = 0; i<l; i++){
-		ofs<<"    "<<theApp.m_program_canvas->m_textCtrl->GetLineText(i)<<"\n";
-	}
-	ofs<<"    return 1\n";
-#else
 	ofs<<theApp.m_program_canvas->m_textCtrl->GetValue();
-#endif
 
 	return true;
 }
 
-void HeeksPyPostProcess()
+bool PPCheck(const char* fnstr)
 {
-	static bool in_here = false;
-	if(in_here)
+	if(post_processing)
 	{
-		wxMessageBox("Already Post-Processing!");
-		return;
+		char str[1024];
+		sprintf(str, "This function shouldn't be called while post-processing! - %s", fnstr);
+		PyErr_SetString(PyExc_RuntimeError, str);
 	}
-
-	in_here = true;
-
-#if 0
-	// write the python file
-	wxString file_path = heeksCAD->GetExeFolder() + wxString("/../HeeksCNC/post.py");
-
-	if(!write_post_file(file_path))
-	{
-		wxMessageBox("couldn't write post.py!");
-	}
-	else
-	{
-		// write a batch file
-		wxString batch_file_path = heeksCAD->GetExeFolder() + wxString("/../HeeksCNC/sample.bat");
-		{
-			ofstream ofs(batch_file_path.c_str());
-			if(!ofs){
-				wxMessageBox("couldn't write sample.bat");
-				return;
-			}
-
-			ofs<<"@C:\\python25\\python sample.py\npause\n";
-		}
-
-		::wxExecute(batch_file_path, wxEXEC_SYNC);
-	}
-#endif
-
-	in_here = false;
+	return post_processing;
 }
 
 static PyObject* hc_DoItNow(PyObject *self, PyObject *args)
 {
+	if(PPCheck("DoItNow"))Py_RETURN_NONE;
 	double time;
 
     if(!PyArg_ParseTuple(args, "d", &time))
@@ -166,10 +133,43 @@ struct SToolPath{
 	}
 };
 
+static bool error_in_call_machine_function = false;
+
+PyObject* call_machine_function(const char* fn, PyObject *args)
+{
+    PyObject *pName = PyString_FromString("siegkx1");
+	PyObject *pModule = PyImport_Import(pName);
+
+    if (pModule != NULL) {
+        PyObject *pFunc = PyObject_GetAttrString(pModule, fn);
+        /* pFunc is a new reference */
+
+        if (pFunc && PyCallable_Check(pFunc)) {
+			PyObject *pValue = PyObject_CallObject(pFunc, args);
+			Py_XDECREF(pFunc);
+			Py_DECREF(pModule);
+			return pValue;
+        }
+		char mess[1024];
+		sprintf(mess, "siegkx1 has not implemented function - %s", fn);
+		PyErr_SetString(PyExc_RuntimeError, mess);
+
+        Py_XDECREF(pFunc);
+        Py_DECREF(pModule);
+    }
+	else{
+		error_in_call_machine_function = true;
+	}
+
+    Py_RETURN_NONE;
+}
+
 static SToolPath tool_path;
 
 static PyObject* hc_current_tool_pos(PyObject *self, PyObject *args)
 {
+	if(post_processing)return call_machine_function("current_tool_pos", args);
+
 	// return position as a tuple
 	PyObject *pTuple = PyTuple_New(3);
 	for(int i = 0; i<3; i++)
@@ -187,6 +187,8 @@ static PyObject* hc_current_tool_pos(PyObject *self, PyObject *args)
 
 static PyObject* hc_current_tool_data(PyObject *self, PyObject *args)
 {
+	if(post_processing)return call_machine_function("current_tool_data", args);
+
 	// return station number, diameter, corner radius as a tuple
 	PyObject *pTuple = PyTuple_New(3);
 	{
@@ -217,6 +219,8 @@ static PyObject* hc_current_tool_data(PyObject *self, PyObject *args)
 
 static PyObject* hc_tool(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("tool", args);
+
 	int station;
 	double diameter, corner_radius;
 	if (!PyArg_ParseTuple(args, "idd", &station, &diameter, &corner_radius)) return NULL;
@@ -230,6 +234,8 @@ static PyObject* hc_tool(PyObject* self, PyObject* args)
 
 static PyObject* hc_spindle(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("spindle", args);
+
 	double speed;
 	if (!PyArg_ParseTuple(args, "d", &speed)) return NULL;
 	tool_path.spindle_speed = speed;
@@ -239,6 +245,8 @@ static PyObject* hc_spindle(PyObject* self, PyObject* args)
 
 static PyObject* hc_rate(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("rate", args);
+
 	double hfeed, vfeed;
 	if (!PyArg_ParseTuple(args, "dd", &hfeed, &vfeed)) return NULL;
 	tool_path.hfeed = hfeed;
@@ -251,6 +259,8 @@ CBox* box_for_RunProgram = NULL;
 
 static PyObject* hc_rapid(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("rapid", args);
+
 	double x, y, z;
 	if (!PyArg_ParseTuple(args, "ddd", &x, &y, &z)) return NULL;
 	if(tool_path.CheckInitialValues())
@@ -268,6 +278,8 @@ static PyObject* hc_rapid(PyObject* self, PyObject* args)
 
 static PyObject* hc_rapidxy(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("rapidxy", args);
+
 	double x, y;
 	if (!PyArg_ParseTuple(args, "dd", &x, &y)) return NULL;
 	if(tool_path.CheckInitialValues())
@@ -284,6 +296,8 @@ static PyObject* hc_rapidxy(PyObject* self, PyObject* args)
 
 static PyObject* hc_rapidz(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("rapidz", args);
+
 	double z;
 	if (!PyArg_ParseTuple(args, "d", &z)) return NULL;
 	if(tool_path.CheckInitialValues())
@@ -299,6 +313,8 @@ static PyObject* hc_rapidz(PyObject* self, PyObject* args)
 
 static PyObject* hc_feed(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("feed", args);
+
 	double x, y, z;
 	if (!PyArg_ParseTuple(args, "ddd", &x, &y, &z)) return NULL;
 	if(tool_path.CheckInitialValues())
@@ -316,6 +332,8 @@ static PyObject* hc_feed(PyObject* self, PyObject* args)
 
 static PyObject* hc_feedxy(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("feedxy", args);
+
 	double x, y;
 	if (!PyArg_ParseTuple(args, "dd", &x, &y)) return NULL;
 	if(tool_path.CheckInitialValues())
@@ -332,6 +350,8 @@ static PyObject* hc_feedxy(PyObject* self, PyObject* args)
 
 static PyObject* hc_feedz(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("feedz", args);
+
 	double z;
 	if (!PyArg_ParseTuple(args, "d", &z)) return NULL;
 	if(tool_path.CheckInitialValues())
@@ -355,6 +375,8 @@ void glvertexfn(const double* xy)
 
 static PyObject* hc_arc(PyObject* self, PyObject* args)
 {
+	if(post_processing)return call_machine_function("arc", args);
+
 	char* direction;
 	double x, y, i, j;
 	if (!PyArg_ParseTuple(args, "sdddd", &direction, &x, &y, &i, &j)) return NULL;
@@ -705,10 +727,9 @@ static void call_redirect_errors(bool flush = false)
 }
 
 // call a given file
-bool call_file(const char* filename, bool want_error_message_boxes = true)
+bool call_file(const char* filename)
 {
-    PyObject *pName = PyString_FromString(filename);
-	PyObject *pModule = PyImport_Import(pName);
+	PyImport_ImportModule(filename);
 
 	if (PyErr_Occurred())
 	{
@@ -716,19 +737,117 @@ bool call_file(const char* filename, bool want_error_message_boxes = true)
 		return false;
 	}
 
+	if(error_in_call_machine_function){
+		error_in_call_machine_function = false;
+		PyErr_Print();
+		return false;
+	}
+
 	return true;
+}
+
+void HeeksPyPostProcess()
+{
+	if(post_processing)
+	{
+		wxMessageBox("Already post-processing the program!");
+		return;
+	}
+
+	if(running)
+	{
+		wxMessageBox("Can't post-process the program, because the program is still being run!");
+	}
+
+	post_processing = true;
+
+	box_for_RunProgram = NULL;
+
+	try{
+		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
+
+		// write the python file
+		wxString exe_folder = heeksCAD->GetExeFolder();
+		if(!write_python_file(exe_folder + wxString("/../HeeksCNC/post.py"), true))
+		{
+			wxMessageBox("couldn't write post.py!");
+		}
+		else
+		{
+			::wxSetWorkingDirectory(exe_folder + wxString("/../HeeksCNC"));
+
+			Py_Initialize();
+			Py_InitModule("hc", HCMethods);
+
+			// redirect stderr
+			call_redirect_errors();
+
+			// zero the toolpath start position
+			tool_path.Reset();
+
+			// call the python file
+			bool success = call_file("post");
+
+			// call the end() function
+			PyObject *pArgs = PyTuple_New(0);
+			call_machine_function("end", pArgs);
+			Py_DECREF(pArgs);
+
+			// flush the error file
+			call_redirect_errors(true);
+
+			// display the errors
+			if(!success)
+			{
+				FILE* fp = fopen("error.log", "r");
+				std::string error_str;
+				int i = 0;
+				while(!(feof(fp))){
+					char str[1024] = "";
+					fgets(str, 1024, fp);
+					if(i)error_str.append("\n");
+					error_str.append(str);
+					i++;
+				}
+				wxMessageBox(error_str.c_str());
+			}
+
+			Py_Finalize();
+		}
+	}
+	catch( wchar_t * str ) 
+	{
+		char mess[1024];
+		sprintf(mess, "Error while post-processing the program - %s", str);
+		wxMessageBox(mess);
+		if(PyErr_Occurred())
+			PyErr_Print();
+	}
+	catch(...)
+	{
+		wxMessageBox("Error while post-processing the program!");
+		if(PyErr_Occurred())
+			PyErr_Print();
+	}
+
+	post_processing = false;
 }
 
 void HeeksPyRunProgram(CBox &box)
 {
-	static bool in_here = false;
-	if(in_here)
+	if(running)
 	{
-		wxMessageBox("Already Running The Program!");
+		wxMessageBox("Already running the program!");
 		return;
 	}
 
-	in_here = true;
+	if(post_processing)
+	{
+		wxMessageBox("Can't run the program, post-processing is still happening!");
+		return;
+	}
+
+	running = true;
 
 	box_for_RunProgram = &box;
 
@@ -736,7 +855,7 @@ void HeeksPyRunProgram(CBox &box)
 
 		// write the python file
 		wxString exe_folder = heeksCAD->GetExeFolder();
-		if(!write_python_run_file(exe_folder + wxString("/../HeeksCNC/run.py")))
+		if(!write_python_file(exe_folder + wxString("/../HeeksCNC/run.py")))
 		{
 			wxMessageBox("couldn't write run.py!");
 		}
@@ -758,7 +877,7 @@ void HeeksPyRunProgram(CBox &box)
 			box_for_RunProgram->Insert(tool_path.tool_path_pos);
 
 			// call the python file
-			bool success = call_file("run", false);
+			bool success = call_file("run");
 
 			glEnd();
 
@@ -795,5 +914,5 @@ void HeeksPyRunProgram(CBox &box)
 		wxMessageBox("Error while running the program!");
 	}
 
-	in_here = false;
+	running = false;
 }
