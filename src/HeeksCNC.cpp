@@ -79,27 +79,6 @@ void OnSolidSimButton(wxCommandEvent& event){
 	wxMessageBox("In OnSolidSimButton");
 }
 
-void OnPostProcessButton(wxCommandEvent& event){
-	HeeksPyPostProcess();
-}
-
-
-void OnMachining( wxCommandEvent& event )
-{
-	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	wxAuiPaneInfo& pane_info = aui_manager->GetPane(theApp.m_machiningBar);
-	if(pane_info.IsOk()){
-		pane_info.Show(event.IsChecked());
-		aui_manager->Update();
-	}
-}
-
-void OnUpdateMachining( wxUpdateUIEvent& event )
-{
-	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	event.Check(aui_manager->GetPane(theApp.m_machiningBar).IsShown());
-}
-
 void OnProgramCanvas( wxCommandEvent& event )
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
@@ -136,19 +115,9 @@ void CHeeksCNCApp::OnStartUp()
 {
 	// add menus and toolbars
 
-	// add a machining toolbar
-	wxFrame* frame = heeksCAD->GetMainFrame();
-	m_machiningBar = new wxToolBar(frame, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
-	m_machiningBar->SetToolBitmapSize(wxSize(32, 32));
-	wxString exe_folder = heeksCAD->GetExeFolder();
-	heeksCAD->AddToolBarButton(m_machiningBar, _T("Profile Op"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/opprofile.png", wxBITMAP_TYPE_PNG), _T("Create a new profile operation"), OnOpProfileButton);
-	heeksCAD->AddToolBarButton(m_machiningBar, _T("Solid Sim"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/solidsim.png", wxBITMAP_TYPE_PNG), _T("Enter Solid Simulation"), OnSolidSimButton);
-	heeksCAD->AddToolBarButton(m_machiningBar, _T("Post Process"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/postprocess.png", wxBITMAP_TYPE_PNG), _T("Create NC File"), OnPostProcessButton);
-	m_machiningBar->Realize();
-	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	aui_manager->AddPane(m_machiningBar, wxAuiPaneInfo().Name("MachiningBar").Caption("Machining Tools").ToolbarPane().Top());
-
 	// add the program canvas
+	wxFrame* frame = heeksCAD->GetMainFrame();
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
     m_program_canvas = new CProgramCanvas(frame);
 	aui_manager->AddPane(m_program_canvas, wxAuiPaneInfo().Name("Program").Caption("Program").Bottom().BestSize(wxSize(600, 200)));
 
@@ -156,24 +125,19 @@ void CHeeksCNCApp::OnStartUp()
     m_output_canvas = new COutputCanvas(frame);
 	aui_manager->AddPane(m_output_canvas, wxAuiPaneInfo().Name("Output").Caption("Output").Bottom().BestSize(wxSize(600, 200)));
 
-	bool machining_tools_visible;
 	bool program_visible;
 	bool output_visible;
 
-	theApp.m_config->Read("MachiningToolsVisible", &machining_tools_visible);
 	theApp.m_config->Read("ProgramVisible", &program_visible);
 	theApp.m_config->Read("OutputVisible", &output_visible);
 
-	aui_manager->GetPane(m_machiningBar).Show(machining_tools_visible);
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
 
 	// add tick boxes for them all on the view menu
 	wxMenu* view_menu = heeksCAD->GetViewMenu();
-	heeksCAD->AddMenuCheckItem(view_menu, _T("Machining Tool Bar"), OnMachining, OnUpdateMachining);
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Program"), OnProgramCanvas, OnUpdateProgramCanvas);
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Output"), OnOutputCanvas, OnUpdateOutputCanvas);
-	heeksCAD->RegisterHideableWindow(m_machiningBar);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
 }
@@ -202,7 +166,6 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 void CHeeksCNCApp::OnFrameDelete()
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	theApp.m_config->Write("MachiningToolsVisible", aui_manager->GetPane(m_machiningBar).IsShown());
 	theApp.m_config->Write("ProgramVisible", aui_manager->GetPane(m_program_canvas).IsShown());
 	theApp.m_config->Write("OutputVisible", aui_manager->GetPane(m_output_canvas).IsShown());
 }
