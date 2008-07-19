@@ -9,6 +9,7 @@
 #include "../../HeeksCAD/interface/PropertyInt.h"
 #include "../../HeeksCAD/interface/PropertyDouble.h"
 #include "../../HeeksCAD/interface/PropertyChoice.h"
+#include "PythonStuff.h"
 
 BEGIN_EVENT_TABLE(CProgramCanvas, wxScrolledWindow)
     EVT_SIZE(CProgramCanvas::OnSize)
@@ -427,7 +428,7 @@ public:
 		if(m_bitmap == NULL)
 		{
 			wxString exe_folder = heeksCAD->GetExeFolder();
-			m_bitmap = new wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/pickopobjects.png", wxBITMAP_TYPE_PNG);
+			m_bitmap = new wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/pickoppos.png", wxBITMAP_TYPE_PNG);
 		}
 		return m_bitmap;
 	}
@@ -522,6 +523,11 @@ static void OnAddProfileOp(wxCommandEvent& event)
 	heeksCAD->SetInputMode(&profile_adder);
 }
 
+static void OnPostProcess(wxCommandEvent& event)
+{
+	HeeksPyPostProcess();
+}
+
 CProgramCanvas::CProgramCanvas(wxWindow* parent)
         : wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                            wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE)
@@ -545,6 +551,10 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XY"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/feedxy.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedXY);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed Z"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/feedz.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedZ);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Profile Operation"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/opprofile.png", wxBITMAP_TYPE_PNG), _T("Add a profile operation"), OnAddProfileOp);
+
+	// these buttons always go at then end
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/postprocess.png", wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);
+
 	m_toolBar->Realize();
 
 	Resize();
