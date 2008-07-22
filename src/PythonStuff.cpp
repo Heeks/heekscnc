@@ -81,6 +81,18 @@ static PyObject* hc_write(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
+bool hc_error_called = false;
+
+static PyObject* hc_error(PyObject* self, PyObject* args)
+{
+	char* str;
+	if (!PyArg_ParseTuple(args, "s", &str)) return NULL;
+	wxMessageBox(str);
+	hc_error_called = true;
+	throw str;
+	Py_RETURN_NONE;
+}
+
 struct SToolPath{
 	// variables needed for toolpath creation
 	int tool; // current tool
@@ -394,6 +406,21 @@ static PyObject* hc_arc(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
+static PyObject* hc_kurve_exists(PyObject* self, PyObject* args)
+{
+	int line_arcs_id;
+
+	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
+
+	HeeksObj* line_arcs = heeksCAD->GetLineArcCollection(line_arcs_id);
+
+	// return exists
+	PyObject *pValue = line_arcs ? Py_True : Py_False;
+	Py_INCREF(pValue);
+	return pValue;
+}
+
+
 static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 {
 	int line_arcs_id;
@@ -511,10 +538,8 @@ static PyObject* hc_kurve_span_data(PyObject *self, PyObject *args)
 			if(span_object->GetType() == LineType)span_type = 0;
 			else if(span_object->GetType() == ArcType)
 			{
-				if(heeksCAD->GetArcDirection(span_object))span_type = 1;
-				else span_type = -1;
 				heeksCAD->GetArcAxis(span_object, pos);
-				if(pos[2]<0)span_type = -span_type;
+				span_type = (pos[2] >=0) ? 1:-1;
 			}
 		}
 	}
@@ -678,6 +703,7 @@ static PyObject* hc_tangential_arc(PyObject *self, PyObject *args)
 static PyMethodDef HCMethods[] = {
     {"DoItNow", hc_DoItNow, METH_VARARGS, "Does all the moves added with AddMove, using the number of seconds given."},
     {"MessageBox", hc_MessageBox, METH_VARARGS, "Display the given text in a message box."},
+    {"error", hc_error, METH_VARARGS, "Show the given error message and stop processing."},
     {"write", hc_write, METH_VARARGS, "Capture stdout output."},
     {"current_tool_pos", hc_current_tool_pos, METH_VARARGS, "px, py, pz = current_tool_pos()."},
     {"current_tool_data", hc_current_tool_data, METH_VARARGS, "station_number, diameter, corner_radius = current_tool_data()."},
@@ -691,6 +717,7 @@ static PyMethodDef HCMethods[] = {
     {"feedxy", hc_feedxy, METH_VARARGS, "feedxy(x, y)."},
     {"feedz", hc_feedz, METH_VARARGS, "feedz(z)."},
     {"arc", hc_arc, METH_VARARGS, "arc('acw', x, y, i, j). ( i and j are relative to current_tool_pos )"},
+    {"kurve_exists", hc_kurve_exists, METH_VARARGS, "exists = kurve_exists(kurve_id)."},
     {"kurve_offset", hc_kurve_offset, METH_VARARGS, "kurve_offset(kurve_id, offset, direction)."},
     {"kurve_delete", hc_kurve_delete, METH_VARARGS, "kurve_delete(kurve_id)."},
     {"kurve_num_spans", hc_kurve_num_spans, METH_VARARGS, "num_span = kurve_num_spans(kurve_id)."},
@@ -815,19 +842,19 @@ void HeeksPyPostProcess()
 			Py_Finalize();
 		}
 	}
-	catch( wchar_t * str ) 
-	{
-		char mess[1024];
-		sprintf(mess, "Error while post-processing the program - %s", str);
-		wxMessageBox(mess);
-		if(PyErr_Occurred())
-			PyErr_Print();
-	}
 	catch(...)
 	{
-		wxMessageBox("Error while post-processing the program!");
-		if(PyErr_Occurred())
-			PyErr_Print();
+		if(hc_error_called)
+		{
+			hc_error_called = false;
+		}
+		else
+		{
+			wxMessageBox("Error while post-processing the program!");
+			if(PyErr_Occurred())
+				PyErr_Print();
+		}
+		Py_Finalize();
 	}
 
 	post_processing = false;
@@ -852,6 +879,7 @@ void HeeksPyRunProgram(CBox &box)
 	box_for_RunProgram = &box;
 
 	try{
+		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
 		wxString exe_folder = heeksCAD->GetExeFolder();
@@ -903,15 +931,17 @@ void HeeksPyRunProgram(CBox &box)
 			Py_Finalize();
 		}
 	}
-	catch( wchar_t * str ) 
-	{
-		char mess[1024];
-		sprintf(mess, "Error while running the program - %s", str);
-		wxMessageBox(mess);
-	}
 	catch(...)
 	{
-		wxMessageBox("Error while running the program!");
+		if(hc_error_called)
+		{
+			hc_error_called = false;
+		}
+		else
+		{
+			wxMessageBox("Error while running the program!");
+		}
+		Py_Finalize();
 	}
 
 	running = false;

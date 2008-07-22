@@ -14,6 +14,12 @@ tool_station = int(0)
 tool_diameter = float(0)
 tool_corner_rad = float(0)
 
+def nice_float3(f):
+    s = '%.3f' % f
+    s = s.strip('0')
+    s = s.strip('.')
+    return s
+
 def write_str(s):
     f.write(s)
     print s,
@@ -28,7 +34,7 @@ def spindle(speed):
     global spindle_speed
     if speed != spindle_speed:
         spindle_speed = speed
-        write_str('%sS%.3f\n' % (get_ln_str(), speed))
+        write_str('%sS%s\n' % (get_ln_str(), nice_float3(speed)))
 
 def rate(hf, vf):
     global hfeed
@@ -109,15 +115,15 @@ def move(rapid, x, y, z):
     zs = ''
     if x != 'NOT_SET':
         if movex != x:
-            xs = 'X%.3f' % (x)
+            xs = 'X%s' % (nice_float3(x))
             movex = x
     if y != 'NOT_SET':
         if movey != y:
-            ys = 'Y%.3f' % (y)
+            ys = 'Y%s' % (nice_float3(y))
             movey = y
     if z != 'NOT_SET':
         if movez != z:
-            zs = 'Z%.3f' % (z)
+            zs = 'Z%s' % (nice_float3(z))
             movez = z
 
     if xs == '' and ys == '' and zs == '':
@@ -131,7 +137,7 @@ def move(rapid, x, y, z):
     else:
         f = calculate_feed(x, y, z)
         if f != feedrate:
-            fs = 'F%.3f' % (f)
+            fs = 'F%s' % (nice_float3(f))
             feedrate = f
         
     write_str('%s%s%s%s%s%s\n' % (get_ln_str(), gs, xs, ys, zs, fs))
@@ -167,17 +173,17 @@ def arc(direction, x, y, i, j):
     else:
         raise direction, 'invalid direction given, only cw or acw allowed, but %s was found' % (direction)
 
-    xss = 'X%.3f' % (x)
-    yss = 'Y%.3f' % (y)
-    iss = 'I%.3f' % (i)
-    jss = 'J%.3f' % (j)
+    xss = 'X%s' % (nice_float3(x))
+    yss = 'Y%s' % (nice_float3(y))
+    iss = 'I%s' % (nice_float3(i))
+    jss = 'J%s' % (nice_float3(j))
     movex = x
     movey = y
 
     fs = ''
     f = calculate_feed(x, y, 'NOT_SET')
     if f != feedrate:
-        fs = 'F%.3f' % (f)
+        fs = 'F%s' % (nice_float3(f))
         feedrate = f
 
     write_str('%s%s%s%s%s%s%s\n' % (get_ln_str(), dir_str, xss, yss, iss, jss, fs))
