@@ -19,6 +19,8 @@ public:
     COutputCanvas(wxWindow* parent);
 	virtual ~COutputCanvas(){}
 
+	void Clear();
+
     void OnSize(wxSizeEvent& event);
  
     DECLARE_NO_COPY_CLASS(COutputCanvas)

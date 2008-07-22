@@ -32,3 +32,8 @@ void COutputCanvas::Resize()
     wxSize size = GetClientSize();
     m_textCtrl->SetSize(0, 0, size.x, size.y );
 }
+
+void COutputCanvas::Clear()
+{
+	m_textCtrl->Clear();
+}

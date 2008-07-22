@@ -149,6 +149,7 @@ void CHeeksCNCApp::OnNewOrOpen()
 	heeksCAD->GetMainObject()->Add(m_program, NULL);
 	heeksCAD->WasAdded(m_program);
 	theApp.m_program_canvas->Clear();
+	theApp.m_output_canvas->Clear();
 }
 
 void on_solid_sim_wd_edit(const char* wd){theApp.m_working_dir_for_solid_sim = wd;}
