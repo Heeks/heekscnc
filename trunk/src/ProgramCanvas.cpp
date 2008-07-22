@@ -6,6 +6,7 @@
 #include "OutputCanvas.h"
 #include "../../HeeksCAD/interface/Tool.h"
 #include "../../HeeksCAD/interface/InputMode.h"
+#include "../../HeeksCAD/interface/LeftAndRight.h"
 #include "../../HeeksCAD/interface/PropertyInt.h"
 #include "../../HeeksCAD/interface/PropertyDouble.h"
 #include "../../HeeksCAD/interface/PropertyChoice.h"
@@ -52,6 +53,8 @@ public:
 };
 wxBitmap* CAdderApply::m_bitmap = NULL;
 
+static CAdderApply adder_apply;
+
 class CAdderCancel:public Tool{
 private:
 	static wxBitmap* m_bitmap;
@@ -75,11 +78,16 @@ public:
 	const char* GetToolTip(){return "Finish without adding anything";}
 };
 wxBitmap* CAdderCancel::m_bitmap = NULL;
+
+static CAdderCancel adder_cancel;
+
 class CInitialApply: public CAdderApply
 {
 	void Run();
 	const char* GetToolTip(){return "Add spinde speed and feed rates, and finish";}
 };
+
+static CInitialApply initial_apply;
 
 class CInitialAdder: public CInputMode
 {
@@ -89,21 +97,34 @@ public:
 	double m_vfeed;
 	bool m_done;
 
-	CInitialAdder():m_spindle_speed(1000), m_hfeed(100), m_vfeed(100), m_done(false){}
+	CInitialAdder():m_done(false){}
 	virtual ~CInitialAdder(void){}
 
-	bool OnStart()
+	void ReadConfigValues()
 	{
-		m_spindle_speed = 1000;
-		m_hfeed = 100;
-		m_vfeed = 100;
+		theApp.m_config->Read("SpindleSpeed", &m_spindle_speed, 1000);
+		theApp.m_config->Read("HFeed", &m_hfeed, 100);
+		theApp.m_config->Read("VFeed", &m_vfeed, 100);
+	}
+	void WriteConfigValues()
+	{
+			theApp.m_config->Write("SpindleSpeed", m_spindle_speed);
+			theApp.m_config->Write("HFeed", m_hfeed);
+			theApp.m_config->Write("VFeed", m_vfeed);
+	}
+
+	const char* GetTitle(){return "Adding speeds and feeds";}
+	bool OnModeChange()
+	{
+		ReadConfigValues();
+		return true;
 	}
 
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	{
-		t_list->push_back(new CInitialApply);
-		t_list->push_back(new CAdderCancel);
+		t_list->push_back(&initial_apply);
+		t_list->push_back(&adder_cancel);
 	}
 
 	void AddTheInitialText()
@@ -112,6 +133,7 @@ public:
 		sprintf(str, "spindle(%lf)\nrate(%lf, %lf)\n", m_spindle_speed, m_hfeed, m_vfeed);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
 		m_done = true;
+		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
 	}
@@ -130,6 +152,8 @@ class CToolApply: public CAdderApply
 	const char* GetToolTip(){return "Add tool command, and finish";}
 };
 
+static CToolApply tool_apply;
+
 class CToolAdder: public CInputMode
 {
 public:
@@ -138,27 +162,41 @@ public:
 	double m_corner_radius;
 	bool m_done;
 
-	CToolAdder():m_station_number(1), m_diameter(5), m_corner_radius(0), m_done(false){}
+	CToolAdder():m_done(false){}
 	virtual ~CToolAdder(void){}
 
-	bool OnStart()
+	void ReadConfigValues()
 	{
-		m_station_number = 1;
-		m_diameter = 5;
-		m_corner_radius = 0;
+		theApp.m_config->Read("StationNumber", &m_station_number, 1);
+		theApp.m_config->Read("ToolDiameter", &m_diameter, 5);
+		theApp.m_config->Read("ToolCornerRad", &m_corner_radius, 0);
+	}
+	void WriteConfigValues()
+	{
+		theApp.m_config->Write("StationNumber", m_station_number);
+		theApp.m_config->Write("ToolDiameter", m_diameter);
+		theApp.m_config->Write("ToolCornerRad", m_corner_radius);
+	}
+
+	const char* GetTitle(){return "Adding tool command";}
+	bool OnModeChange()
+	{
+		ReadConfigValues();
+		return true;
 	}
 
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	{
-		t_list->push_back(new CToolApply);
-		t_list->push_back(new CAdderCancel);
+		t_list->push_back(&tool_apply);
+		t_list->push_back(&adder_cancel);
 	}
 
 	void AddTheToolText()
 	{
 		if(!initial_adder.m_done)
 		{
+			initial_adder.ReadConfigValues();
 			initial_adder.AddTheInitialText();
 		}
 
@@ -166,6 +204,7 @@ public:
 		sprintf(str, "tool(%d, %lf, %lf)\n", m_station_number, m_diameter, m_corner_radius);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
 		m_done = true;
+		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
 	}
@@ -179,12 +218,13 @@ public:
 static CToolAdder tool_adder;
 
 void CToolApply::Run(){
+	heeksCAD->RefreshInput();
 	tool_adder.AddTheToolText();
 }
 
-static void set_station_number(int value){tool_adder.m_station_number = value; heeksCAD->Repaint();}
-static void set_diameter(double value){tool_adder.m_diameter = value; heeksCAD->Repaint();}
-static void set_corner_radius(double value){tool_adder.m_corner_radius = value; heeksCAD->Repaint();}
+static void set_station_number(int value){tool_adder.m_station_number = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_diameter(double value){tool_adder.m_diameter = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_corner_radius(double value){tool_adder.m_corner_radius = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 void CToolAdder::GetProperties(std::list<Property *> *list)
 {
@@ -194,12 +234,13 @@ void CToolAdder::GetProperties(std::list<Property *> *list)
 }
 
 void CInitialApply::Run(){
+	heeksCAD->RefreshInput();
 	initial_adder.AddTheInitialText();
 }
 
-static void set_spindle_speed(double value){initial_adder.m_spindle_speed = value; heeksCAD->Repaint();}
-static void set_hfeed(double value){initial_adder.m_hfeed = value; heeksCAD->Repaint();}
-static void set_vfeed(double value){initial_adder.m_vfeed = value; heeksCAD->Repaint();}
+static void set_spindle_speed(double value){initial_adder.m_spindle_speed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_hfeed(double value){initial_adder.m_hfeed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_vfeed(double value){initial_adder.m_vfeed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 void CInitialAdder::GetProperties(std::list<Property *> *list)
 {
@@ -220,6 +261,7 @@ public:
 	virtual ~CMoveAdder(void){}
 
 	// virtual functions for InputMode
+	const char* GetTitle(){return "Adding a move";}
 	void OnMouse( wxMouseEvent& event )
 	{
 		if(event.MiddleIsDown() || event.GetWheelRotation() != 0)
@@ -239,13 +281,6 @@ public:
 		}
 	}
 
-	bool OnStart()
-	{
-		m_pos[0] = 0.0;
-		m_pos[1] = 0.0;
-		m_pos[2] = 0.0;
-	}
-
 	void OnRender()
 	{
 		// draw a move
@@ -255,14 +290,14 @@ public:
 
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	{
-		t_list->push_back(new CAdderApply);
-		t_list->push_back(new CAdderCancel);
+		t_list->push_back(&adder_apply);
+		t_list->push_back(&adder_cancel);
 	}
 
 	void SetPosition(const wxPoint& point)
 	{
 		if(heeksCAD->Digitize(point, m_pos)){
-			heeksCAD->RefreshOptions();
+			heeksCAD->RefreshInput();
 			heeksCAD->Repaint(true);
 		}
 	}
@@ -271,6 +306,7 @@ public:
 	{
 		if(!tool_adder.m_done)
 		{
+			tool_adder.ReadConfigValues();
 			tool_adder.AddTheToolText();
 		}
 
@@ -304,13 +340,13 @@ public:
 static CMoveAdder move_adder;
 
 void CAdderApply::Run(){
-	heeksCAD->RefreshOptions();
+	heeksCAD->RefreshInput();
 	move_adder.AddTheMove();
 }
 
-static void set_x(double value){move_adder.m_pos[0] = value; heeksCAD->Repaint();}
-static void set_y(double value){move_adder.m_pos[1] = value; heeksCAD->Repaint();}
-static void set_z(double value){move_adder.m_pos[2] = value; heeksCAD->Repaint();}
+static void set_x(double value){move_adder.m_pos[0] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_y(double value){move_adder.m_pos[1] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_z(double value){move_adder.m_pos[2] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 class CProfileApply: public CAdderApply
 {
@@ -318,7 +354,9 @@ class CProfileApply: public CAdderApply
 	const char* GetToolTip(){return "Add profile command, and finish";}
 };
 
-class CProfileAdder: public CInputMode
+static CProfileApply profile_apply;
+
+class CProfileAdder: public CInputMode, CLeftAndRight
 {
 public:
 	int m_line_arcs_number;
@@ -326,24 +364,47 @@ public:
 	double m_finish_x, m_finish_y;
 	bool m_done;
 
-	CProfileAdder():m_line_arcs_number(1), m_offset_type(0), m_finish_x(0), m_finish_y(0), m_done(false){}
+	CProfileAdder():m_done(false){}
 	virtual ~CProfileAdder(void){}
 
-	bool OnStart()
+	void ReadConfigValues()
 	{
-		m_line_arcs_number = 1;
-		m_offset_type = 0;
-		m_finish_x = 0;
-		m_finish_y = 0;
+		theApp.m_config->Read("ProfileOpLANum", &m_line_arcs_number, 1);
+		theApp.m_config->Read("ProfileOpOffsetType", &m_offset_type, 0);
+		theApp.m_config->Read("ProfileOpFinishX", &m_finish_x, 0);
+		theApp.m_config->Read("ProfileOpFinishY", &m_finish_y, 0);
+	}
+	void WriteConfigValues()
+	{
+		theApp.m_config->Write("ProfileOpLANum", m_line_arcs_number);
+		theApp.m_config->Write("ProfileOpOffsetType", m_offset_type);
+		theApp.m_config->Write("ProfileOpFinishX", m_finish_x);
+		theApp.m_config->Write("ProfileOpFinishY", m_finish_y);
+	}
+
+	const char* GetTitle(){return "Adding profile command";}
+	bool OnModeChange()
+	{
+		ReadConfigValues();
+		return true;
 	}
 
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void OnMouse( wxMouseEvent& event )
+	{
+		bool event_used = false;
+		if(LeftAndRightPressed(event, event_used))
+		{
+			AddTheProfileOpText();
+		}
+	}
 
 	void AddTheProfileOpText()
 	{
 		if(!tool_adder.m_done)
 		{
+			tool_adder.ReadConfigValues();
 			tool_adder.AddTheToolText();
 		}
 
@@ -361,6 +422,7 @@ public:
 		sprintf(str, "profile(%d, \"%s\", %lf, %lf)\n", m_line_arcs_number, dirstr, m_finish_x, m_finish_y);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
 		m_done = true;
+		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
 	}
@@ -374,6 +436,7 @@ public:
 static CProfileAdder profile_adder;
 
 void CProfileApply::Run(){
+	heeksCAD->RefreshInput();
 	profile_adder.AddTheProfileOpText();
 }
 
@@ -407,6 +470,8 @@ public:
 
 wxBitmap* OpPickObjectsTool::m_bitmap = NULL;
 
+static OpPickObjectsTool pick_objects_tool;
+
 class OpPickPosTool: public Tool
 {
 	static wxBitmap* m_bitmap;
@@ -419,7 +484,7 @@ public:
 		if(heeksCAD->PickPosition("Pick finish position", pos)){
 			profile_adder.m_finish_x = pos[0];
 			profile_adder.m_finish_y = pos[1];
-			heeksCAD->RefreshOptions();
+			heeksCAD->RefreshInput();
 		}
 	}
 
@@ -436,10 +501,12 @@ public:
 
 wxBitmap* OpPickPosTool::m_bitmap = NULL;
 
-static void set_line_arcs_number(int value){profile_adder.m_line_arcs_number = value; heeksCAD->RefreshOptions(); heeksCAD->Repaint();}
-static void set_offset_type(int value){profile_adder.m_offset_type = value; heeksCAD->RefreshOptions(); heeksCAD->Repaint();}
-static void set_finish_x(double value){profile_adder.m_finish_x = value; heeksCAD->RefreshOptions(); heeksCAD->Repaint();}
-static void set_finish_y(double value){profile_adder.m_finish_y = value; heeksCAD->RefreshOptions(); heeksCAD->Repaint();}
+static OpPickPosTool pick_pos_tool;
+
+static void set_line_arcs_number(int value){profile_adder.m_line_arcs_number = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_offset_type(int value){profile_adder.m_offset_type = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_finish_x(double value){profile_adder.m_finish_x = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_finish_y(double value){profile_adder.m_finish_y = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 void CProfileAdder::GetProperties(std::list<Property *> *list)
 {
@@ -455,10 +522,10 @@ void CProfileAdder::GetProperties(std::list<Property *> *list)
 
 void CProfileAdder::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	t_list->push_back(new CProfileApply);
-	t_list->push_back(new CAdderCancel);
-	t_list->push_back(new OpPickObjectsTool);
-	t_list->push_back(new OpPickPosTool);
+	t_list->push_back(&profile_apply);
+	t_list->push_back(&adder_cancel);
+	t_list->push_back(&pick_objects_tool);
+	t_list->push_back(&pick_pos_tool);
 }
 
 void CMoveAdder::GetProperties(std::list<Property *> *list)

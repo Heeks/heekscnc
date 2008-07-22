@@ -21,10 +21,9 @@ void add_to_kurve(HeeksObj* object, Kurve& kurve)
 		double c[3], a[3];
 		if(!object->GetStartPoint(s))return;
 		if(!object->GetEndPoint(e))return;
-		int type = heeksCAD->GetArcDirection(object) ? 1: -1;
 		if(!heeksCAD->GetArcCentre(object, c))return;
 		if(!heeksCAD->GetArcAxis(object, a))return;
-		if(a[2] < 0)type = -type;
+		int type = (a[2] >= 0) ? 1 : -1;
 		kurve.Add(Span(type, Point(s[0], s[1]), Point(e[0], e[1]), Point(c[0], c[1])));
 	}
 	else{

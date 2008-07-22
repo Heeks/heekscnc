@@ -4,6 +4,9 @@ from hc import *
 # offset should be positive in mm
 # direction should be 'left' or 'right'
 def profile(kurve_id, direction, finishx, finishy):
+    if kurve_exists(kurve_id) == 0:
+        error("Line Drawing doesn't exist, number %d" % (kurve_id))
+    
     off_kurve_id = kurve_id
 
     if direction != "on":
@@ -20,7 +23,7 @@ def profile(kurve_id, direction, finishx, finishy):
     px, py, pz = current_tool_pos()
 
     if off_kurve_id == 0:
-        raise "couldn't offset Line Drawing number ", off_kurve_id
+        error("couldn't offset Line Drawing number %d" % (off_kurve_id))
     num_spans = kurve_num_spans(off_kurve_id)
 
     if num_spans == 0:
@@ -75,11 +78,8 @@ def profile(kurve_id, direction, finishx, finishy):
 def facemill(xmax, ymax, stepover):
     px, py, pz = current_tool_pos()
     xtotal = xmax - px
-    print "xtotal = ", xtotal
     xsteps = int(xtotal/stepover + 0.5)
-    print "xsteps = ", xsteps
     dx = xtotal / xsteps / 2
-    print "dx = ", dx
     starty = py
     for x in range(0, xsteps):
         x1 = px + dx * x * 2
