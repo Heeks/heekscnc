@@ -32,6 +32,9 @@ public:
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
+	void WriteXML(TiXmlElement *root);
+
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void DestroyGLLists(void); // not void KillGLLists(void), because I don't want the display list recreated on the Redraw button
 };

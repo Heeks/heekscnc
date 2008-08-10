@@ -140,15 +140,33 @@ void CHeeksCNCApp::OnStartUp()
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Output"), OnOutputCanvas, OnUpdateOutputCanvas);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
+
+	// add object reading functions
+	heeksCAD->RegisterReadXMLfunction("Program", CProgram::ReadFromXMLElement);
 }
 
-void CHeeksCNCApp::OnNewOrOpen()
+void CHeeksCNCApp::OnNewOrOpen(bool open)
 {
-	// add the program
-	m_program = new CProgram;
-	heeksCAD->GetMainObject()->Add(m_program, NULL);
-	heeksCAD->WasAdded(m_program);
-	theApp.m_program_canvas->Clear();
+	// check for existance of a program
+
+	bool program_found = false;
+	for(HeeksObj* object = heeksCAD->GetFirstObject(); object; object = heeksCAD->GetNextObject())
+	{
+		if(object->GetType() == ProgramType)
+		{
+			program_found = true;
+			break;
+		}
+	}
+
+	if(!program_found)
+	{
+		// add the program
+		m_program = new CProgram;
+		heeksCAD->GetMainObject()->Add(m_program, NULL);
+		heeksCAD->WasAdded(m_program);
+		theApp.m_program_canvas->Clear();
+	}
 	theApp.m_output_canvas->Clear();
 }
 

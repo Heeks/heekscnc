@@ -3,6 +3,8 @@
 #include "stdafx.h"
 #include "Program.h"
 #include "PythonStuff.h"
+#include "../../HeeksCAD/tinyxml/tinyxml.h"
+#include "ProgramCanvas.h"
 
 wxIcon* CProgram::m_icon = NULL;
 
@@ -93,4 +95,32 @@ HeeksObj *CProgram::MakeACopy(void)const
 void CProgram::CopyFrom(const HeeksObj* object)
 {
 	operator=(*((CProgram*)object));
+}
+
+void CProgram::WriteXML(TiXmlElement *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "Program" );
+	root->LinkEndChild( element );  
+	element->SetAttribute("machine", m_machine.c_str());
+	element->SetAttribute("program", theApp.m_program_canvas->m_textCtrl->GetValue());
+}
+
+// static member function
+HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	CProgram* new_object = new CProgram;
+
+	// get the attributes
+	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
+	{
+		wxString name(a->Name());
+		if(name == "machine"){new_object->m_machine.assign(a->Value());}
+		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(a->Value());}
+	}
+
+	new_object->ReadXMLChildren(pElem);
+	theApp.m_program = new_object;
+
+	return new_object;
 }
