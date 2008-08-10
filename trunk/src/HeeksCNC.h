@@ -27,7 +27,7 @@ public:
 	~CHeeksCNCApp();
 
 	void OnStartUp();
-	void OnNewOrOpen();
+	void OnNewOrOpen(bool open);
 	void OnInitDLL();
 	void OnDestroyDLL();
 	void GetOptions(std::list<Property *> *list);

@@ -1,6 +1,7 @@
 from math import *
 
 f = open('test.tap', 'wb')
+f.write('G21G17G90G80G49\n')
 
 ln = int(0)
 hfeed = float(0)
@@ -25,16 +26,17 @@ def write_str(s):
     print s,
     
 def get_ln_str():
-    global ln
-    s = 'N%04d' % (ln)
-    ln = ln + 10
-    return s
+    return ""
+#    global ln
+#    s = 'N%04d' % (ln)
+#    ln = ln + 10
+#    return s
 
 def spindle(speed):
     global spindle_speed
     if speed != spindle_speed:
         spindle_speed = speed
-        write_str('%sS%s\n' % (get_ln_str(), nice_float3(speed)))
+        write_str('%sS%sM3\n' % (get_ln_str(), nice_float3(speed)))
 
 def rate(hf, vf):
     global hfeed
@@ -49,7 +51,7 @@ def tool(station, diam, corner):
     tool_station = station
     tool_diameter = diam
     tool_corner_rad = corner
-    write_str('%sT%dM6\n' % (get_ln_str(), station))
+#    write_str('%sT%dM6\n' % (get_ln_str(), station))
 
 def current_tool_pos():
     global movex
@@ -115,11 +117,11 @@ def move(rapid, x, y, z):
     zs = ''
     if x != 'NOT_SET':
         if movex != x:
-            xs = 'X%s' % (nice_float3(x))
+            xs = 'Y%s' % (nice_float3(x))
             movex = x
     if y != 'NOT_SET':
         if movey != y:
-            ys = 'Y%s' % (nice_float3(y))
+            ys = 'X%s' % (nice_float3(y))
             movey = y
     if z != 'NOT_SET':
         if movez != z:
@@ -140,7 +142,7 @@ def move(rapid, x, y, z):
             fs = 'F%s' % (nice_float3(f))
             feedrate = f
         
-    write_str('%s%s%s%s%s%s\n' % (get_ln_str(), gs, xs, ys, zs, fs))
+    write_str('%s%s%s%s%s%s\n' % (get_ln_str(), gs, ys, xs, zs, fs))
 
 def rapid(x, y, z):
     move(1, x, y, z)
@@ -164,6 +166,9 @@ def arc(direction, x, y, i, j):
     global movex
     global movey
     global feedrate
+
+    if fabs(i) < 0.000001 and fabs(j) < 0.000001:
+        return
     
     dir_str = ''
     if direction == 'cw':
