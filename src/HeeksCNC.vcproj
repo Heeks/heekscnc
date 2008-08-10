@@ -61,10 +61,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib"
+				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib tinyxml.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;,C:\Python25\libs"
+				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;,C:\Python25\libs;..\..\HeeksCAD\tinyxml"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -145,10 +145,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib"
+				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib tinyxml.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;,C:\Python25\libs"
+				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;,C:\Python25\libs;..\..\HeeksCAD\tinyxml"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -186,20 +186,12 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath="..\..\HeeksCAD\interface\LeftAndRight.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\HeeksCAD\interface\LeftAndRight.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -354,6 +346,14 @@
 					UsePrecompiledHeader="0"
 				/>
 			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCAD\interface\LeftAndRight.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCAD\interface\LeftAndRight.h"
+			>
 		</File>
 		<File
 			RelativePath=".\LinesAndArcs.cpp"

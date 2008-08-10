@@ -10,9 +10,9 @@ void OnStartUp()
 	theApp.OnStartUp();
 }
 
-void OnNewOrOpen()
+void OnNewOrOpen(int open)
 {
-	theApp.OnNewOrOpen();
+	theApp.OnNewOrOpen(open != 0);
 }
 
 void GetOptions(void(*callbackfunc)(Property*))
