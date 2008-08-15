@@ -74,11 +74,33 @@ static PyObject* hc_MessageBox(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static wxString string_to_append;
+static wxLongLong last_print_time = 0;
+
 static PyObject* hc_write(PyObject* self, PyObject* args)
 {
 	char* str;
 	if (!PyArg_ParseTuple(args, "s", &str)) return NULL;
-	theApp.m_output_canvas->m_textCtrl->AppendText(str);
+	string_to_append += str;
+	wxLongLong current_time = ::wxGetLocalTimeMillis();
+	if(current_time > last_print_time + 500)
+	{
+		theApp.m_output_canvas->m_textCtrl->AppendText(string_to_append);
+		string_to_append = "";
+		last_print_time = current_time;
+	}
+	Py_RETURN_NONE;
+}
+
+static void flush_print()
+{
+	theApp.m_output_canvas->m_textCtrl->AppendText(string_to_append);
+	string_to_append = "";
+}
+
+static PyObject* hc_flush_print(PyObject* self, PyObject* args)
+{
+	flush_print();
 	Py_RETURN_NONE;
 }
 
@@ -109,6 +131,7 @@ struct SToolPath{
 	double little_step_length;
 	std::list<GTri> tri_list;
 	bool not_set_warning_showed;
+	double current_attached_z_zero;
 
 	void Reset(){
 		tool = 0; // no tool selected
@@ -126,6 +149,7 @@ struct SToolPath{
 		little_step_length = 0.0;
 		tri_list.clear();
 		not_set_warning_showed = false;
+		current_attached_z_zero = 0.0;
 	}
 
 	bool CheckInitialValues()
@@ -296,7 +320,9 @@ static void add_move(const CMove3D &move, SToolPath& tp, bool ignore_attach = fa
 			{
 				CMove3D &small_move = *It;
 				double xy[2] = {small_move.m_p.x, small_move.m_p.y};
-				small_move.m_p.z = DropCutter::TriTest(cutter, xy, tp.tri_list, tp.low_plane);
+				if(xy[0] == CMove3D::MOVE_NOT_SET)xy[0] = tp.tool_path_pos[0];
+				if(xy[1] == CMove3D::MOVE_NOT_SET)xy[1] = tp.tool_path_pos[1];
+				tp.current_attached_z_zero = DropCutter::TriTest(cutter, xy, tp.tri_list, tp.low_plane);
 				add_move(small_move, tp, true);
 			}
 			return; // above recursive
@@ -324,7 +350,9 @@ static void add_move(const CMove3D &move, SToolPath& tp, bool ignore_attach = fa
 				PyTuple_SetItem(pArgs, 1, pValue);
 			}
 			{
-				PyObject *pValue = PyFloat_FromDouble(move.m_p.z);
+				double z= move.m_p.z;
+				if(tp.surface)z += tp.current_attached_z_zero;
+				PyObject *pValue = PyFloat_FromDouble(z);
 				if (!pValue){
 					Py_DECREF(pArgs); wxMessageBox("Cannot convert argument\n"); return;
 				}
@@ -345,7 +373,8 @@ static void add_move(const CMove3D &move, SToolPath& tp, bool ignore_attach = fa
 	}
 	else{
 		// do OpenGL vertex command
-		move.glCommands(Point3d(tp.tool_path_pos));
+		if(tp.surface != 0)	move.glCommands(Point3d(tp.tool_path_pos), &tp.current_attached_z_zero);
+		else move.glCommands(Point3d(tp.tool_path_pos));
 		if(move.m_p.x != CMove3D::MOVE_NOT_SET && move.m_p.y != CMove3D::MOVE_NOT_SET && move.m_p.z != CMove3D::MOVE_NOT_SET)
 			box_for_RunProgram->Insert(move.m_p.x, move.m_p.y, move.m_p.z);
 	}
@@ -887,6 +916,7 @@ static PyMethodDef HCMethods[] = {
     {"MessageBox", hc_MessageBox, METH_VARARGS, "Display the given text in a message box."},
     {"error", hc_error, METH_VARARGS, "Show the given error message and stop processing."},
     {"write", hc_write, METH_VARARGS, "Capture stdout output."},
+    {"flush_print", hc_flush_print, METH_VARARGS, "add all the printed text to the output canvas."},
     {"current_tool_pos", hc_current_tool_pos, METH_VARARGS, "px, py, pz = current_tool_pos()."},
     {"current_tool_data", hc_current_tool_data, METH_VARARGS, "station_number, diameter, corner_radius = current_tool_data()."},
 	{"tool", hc_tool, METH_VARARGS, "tool(station, diameter, corner_radius)."},
@@ -1095,6 +1125,9 @@ void HeeksPyRunProgram(CBox &box)
 
 			// flush the error file
 			call_redirect_errors(true);
+
+			// flush the print buffer
+			flush_print();
 
 			// display the errors
 			if(!success)

@@ -130,8 +130,20 @@ def move(rapid, x, y, z):
             move_type = 0
         save_attached = attached
         attached = 0
+        save_movex = movex
+        save_movey = movey
+        save_movez = movez
         hc.make_attached_moves(tool_diameter, tool_corner_rad, attach_low_plane, attach_little_step_length, move_type, str(movex), str(movey), str(movez), str(x), str(y), str(z), "0", "0", "0")
+        movex = save_movex
+        movey = save_movey
+        movez = save_movez
         attached = save_attached
+        if x != 'NOT_SET':
+            movex = x
+        if y != 'NOT_SET':
+            movey = y
+        if z != 'NOT_SET':
+            movez = z
         return
 
     xs = ''
