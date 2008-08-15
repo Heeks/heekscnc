@@ -257,10 +257,12 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	ToPeps(int id, bool draw = true);									// copy Point to Peps
 #endif
 		Point3d Transform(const Matrix& m);
-		double Dist(const Point3d& p);													// distance between 2 points
+		double Dist(const Point3d& p)const;													// distance between 2 points
 		double DistSq(const Point3d& p);													// distance squared between 2 points
 		Point3d	Mid(const Point3d& p, double factor = 0.5);									// midpoint
 		void get(double xyz[3]) {xyz[0] = x; xyz[1] = y; xyz[2] = z;}
+		double* getBuffer(){return &this->x;};																		// returns ptr to data
+		const double* getBuffer()const{return &this->x;};																		// returns ptr to data
 
 	};
 

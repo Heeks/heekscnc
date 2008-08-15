@@ -1,4 +1,5 @@
 from math import *
+import hc
 
 f = open('test.tap', 'wb')
 f.write('G21G17G90G80G49\n')
@@ -14,11 +15,15 @@ movez = 'NOT_SET'
 tool_station = int(0)
 tool_diameter = float(0)
 tool_corner_rad = float(0)
+attached = int(0)
+attach_low_plane = float(0)
+attach_little_step_length = float(0)
 
 def nice_float3(f):
     s = '%.3f' % f
-    s = s.strip('0')
-    s = s.strip('.')
+    s = s.rstrip('0')
+    s = s.rstrip('.')
+
     return s
 
 def write_str(s):
@@ -71,7 +76,7 @@ def calculate_feed(x, y, z):
     global movez
     global hfeed
     global vfeed
-    
+
     vx = 0
     vy = 0
     vz = 0
@@ -111,17 +116,34 @@ def move(rapid, x, y, z):
     global movey
     global movez
     global feedrate
+    global attached
+    global tool_diameter
+    global tool_corner_rad
+    global attach_low_plane
+    global attach_little_step_length
+
+    if attached:
+        if movex == 'NOT_SET' or movey == 'NOT_SET' or movez == 'NOT_SET':
+            hc.error("can't do attach until x, y and z are all known")
+        move_type = 1
+        if rapid:
+            move_type = 0
+        save_attached = attached
+        attached = 0
+        hc.make_attached_moves(tool_diameter, tool_corner_rad, attach_low_plane, attach_little_step_length, move_type, str(movex), str(movey), str(movez), str(x), str(y), str(z), "0", "0", "0")
+        attached = save_attached
+        return
 
     xs = ''
     ys = ''
     zs = ''
     if x != 'NOT_SET':
         if movex != x:
-            xs = 'Y%s' % (nice_float3(x))
+            xs = 'X%s' % (nice_float3(x))
             movex = x
     if y != 'NOT_SET':
         if movey != y:
-            ys = 'X%s' % (nice_float3(y))
+            ys = 'Y%s' % (nice_float3(y))
             movey = y
     if z != 'NOT_SET':
         if movez != z:
@@ -142,7 +164,7 @@ def move(rapid, x, y, z):
             fs = 'F%s' % (nice_float3(f))
             feedrate = f
         
-    write_str('%s%s%s%s%s%s\n' % (get_ln_str(), gs, ys, xs, zs, fs))
+    write_str('%s%s%s%s%s%s\n' % (get_ln_str(), gs, xs, ys, zs, fs))
 
 def rapid(x, y, z):
     move(1, x, y, z)
@@ -182,6 +204,7 @@ def arc(direction, x, y, i, j):
     yss = 'Y%s' % (nice_float3(y))
     iss = 'I%s' % (nice_float3(i))
     jss = 'J%s' % (nice_float3(j))
+
     movex = x
     movey = y
 
@@ -192,6 +215,19 @@ def arc(direction, x, y, i, j):
         feedrate = f
 
     write_str('%s%s%s%s%s%s%s\n' % (get_ln_str(), dir_str, xss, yss, iss, jss, fs))
+
+def attach(surface, low_plane = float(0.0), deflection = float(0.05), little_step_length = float(0.1)):
+    global attached
+    if surface == 0:
+        attached = 0
+        hc.clear_attach_surfaces()
+    else:
+        global attach_low_plane
+        global attach_little_step_length
+        attached = 1
+        attach_low_plane = low_plane
+        attach_little_step_length = little_step_length
+        hc.add_attach_surface(surface, deflection)
 
 def end():
     write_str('%sM2\n' % (get_ln_str()))

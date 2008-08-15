@@ -58,10 +58,6 @@ void CProgram::glCommands(bool select, bool marked, bool no_color){
 		DestroyGLLists();
 	}
 
-	glDepthMask(1);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
 	if(m_create_display_list_next_render)
 	{
 		m_gl_list = glGenLists(1);
