@@ -33,14 +33,17 @@ def profile(kurve_id, direction, finishx, finishy):
         sp, sx, sy, ex, ey, cx, cy = kurve_span_data(off_kurve_id, span)
         if span == 0:#first span
             if sx != px or sy != py:
-                # do a roll-on arc
-                vx, vy = kurve_span_dir(off_kurve_id, span, 0) # get start direction
-                if px == 'NOT_SET' or py == 'NOT_SET':
-                    raise "can not do an arc without a line move first"
-                rcx, rcy, rdir = tangential_arc(sx, sy, -vx, -vy, px, py)
-                rcx = rcx - px # make relative to the start position
-                rcy = rcy - py
-                rdir = -rdir # because the tangential_arc was used in reverse
+                rdir = 0 # line
+                if direction != "on":
+                    # do a roll-on arc
+                    vx, vy = kurve_span_dir(off_kurve_id, span, 0) # get start direction
+                    if px == 'NOT_SET' or py == 'NOT_SET':
+                        raise "can not do an arc without a line move first"
+                    rcx, rcy, rdir = tangential_arc(sx, sy, -vx, -vy, px, py)
+                    rcx = rcx - px # make relative to the start position
+                    rcy = rcy - py
+                    rdir = -rdir # because the tangential_arc was used in reverse
+                    
                 if rdir == 1:# anti-clockwise arc
                     arc("acw", sx, sy, rcx, rcy)
                 elif rdir == -1:# clockwise arc
@@ -58,7 +61,7 @@ def profile(kurve_id, direction, finishx, finishy):
                 arc("cw", ex, ey, cx, cy)
 
         if span == num_spans - 1:# last span
-            if finishx != ex or finishy != ey:
+            if (finishx != ex or finishy != ey) and direction != "on":
                 # do a roll off arc
                 vx, vy = kurve_span_dir(off_kurve_id, span, 1) # get end direction
                 rcx, rcy, rdir = tangential_arc(ex, ey, vx, vy, finishx, finishy)

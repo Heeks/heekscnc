@@ -6,6 +6,7 @@
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
 #include "LinesAndArcs.h"
+#include "GTri.h"
 
 #if _DEBUG
 #undef _DEBUG
@@ -102,6 +103,12 @@ struct SToolPath{
 	double spindle_speed;
 	double hfeed;
 	double vfeed;
+	int surface; // surface attached to ( and relative to, in Z ), use 0 for no surface
+	double deflection;
+	double low_plane;
+	double little_step_length;
+	std::list<GTri> tri_list;
+	bool not_set_warning_showed;
 
 	void Reset(){
 		tool = 0; // no tool selected
@@ -110,9 +117,15 @@ struct SToolPath{
 		spindle_speed = CMove3D::MOVE_NOT_SET;
 		hfeed = CMove3D::MOVE_NOT_SET;
 		vfeed = CMove3D::MOVE_NOT_SET;
-		tool_path_pos[0] = 0.0;
-		tool_path_pos[1] = 0.0;
-		tool_path_pos[2] = 1000.0; // this is just some arbitary top position, for the standard tool path
+		tool_path_pos[0] = CMove3D::MOVE_NOT_SET;
+		tool_path_pos[1] = CMove3D::MOVE_NOT_SET;
+		tool_path_pos[2] = CMove3D::MOVE_NOT_SET;
+		surface = 0;
+		deflection = 0.0;
+		low_plane = 0.0;
+		little_step_length = 0.0;
+		tri_list.clear();
+		not_set_warning_showed = false;
 	}
 
 	bool CheckInitialValues()
@@ -269,20 +282,94 @@ static PyObject* hc_rate(PyObject* self, PyObject* args)
 
 CBox* box_for_RunProgram = NULL;
 
+static void add_move(const CMove3D &move, SToolPath& tp, bool ignore_attach = false)
+{
+	if(tp.tool_path_pos[0] != CMove3D::MOVE_NOT_SET && tp.tool_path_pos[1] != CMove3D::MOVE_NOT_SET && tp.tool_path_pos[2] != CMove3D::MOVE_NOT_SET)
+	{
+		if(!ignore_attach && tp.surface != 0)
+		{
+			// split into smaller moves
+			std::list<CMove3D> small_moves;
+			move.Split(Point3d(tp.tool_path_pos), tp.little_step_length, small_moves);
+			Cutter cutter(tp.tool_diameter/2, tp.tool_corner_radius);
+			for(std::list<CMove3D>::iterator It = small_moves.begin(); It != small_moves.end(); It++)
+			{
+				CMove3D &small_move = *It;
+				double xy[2] = {small_move.m_p.x, small_move.m_p.y};
+				small_move.m_p.z = DropCutter::TriTest(cutter, xy, tp.tri_list, tp.low_plane);
+				add_move(small_move, tp, true);
+			}
+			return; // above recursive
+		}
+	}
+
+	if(post_processing)
+	{
+		// call machine's rapid or feed functions
+		if(move.m_p.x != CMove3D::MOVE_NOT_SET && move.m_p.y != CMove3D::MOVE_NOT_SET && move.m_p.z != CMove3D::MOVE_NOT_SET)
+		{
+			PyObject *pArgs = PyTuple_New(3);
+			{
+				PyObject *pValue = PyFloat_FromDouble(move.m_p.x);
+				if (!pValue){
+					Py_DECREF(pArgs); wxMessageBox("Cannot convert argument\n"); return;
+				}
+				PyTuple_SetItem(pArgs, 0, pValue);
+			}
+			{
+				PyObject *pValue = PyFloat_FromDouble(move.m_p.y);
+				if (!pValue){
+					Py_DECREF(pArgs); wxMessageBox("Cannot convert argument\n"); return;
+				}
+				PyTuple_SetItem(pArgs, 1, pValue);
+			}
+			{
+				PyObject *pValue = PyFloat_FromDouble(move.m_p.z);
+				if (!pValue){
+					Py_DECREF(pArgs); wxMessageBox("Cannot convert argument\n"); return;
+				}
+				PyTuple_SetItem(pArgs, 2, pValue);
+			}
+
+			Py_INCREF(pArgs);
+
+			if(move.m_type == 0)call_machine_function("rapid", pArgs);
+			else if(move.m_type == 1)call_machine_function("feed", pArgs);
+			else{
+				// error
+				char mess[1024];
+				sprintf(mess, "Error in add_move, expecting m_type == 0 or 1, but it is - %d", move.m_type);
+				PyErr_SetString(PyExc_RuntimeError, mess);
+			}
+		}
+	}
+	else{
+		// do OpenGL vertex command
+		move.glCommands(Point3d(tp.tool_path_pos));
+		if(move.m_p.x != CMove3D::MOVE_NOT_SET && move.m_p.y != CMove3D::MOVE_NOT_SET && move.m_p.z != CMove3D::MOVE_NOT_SET)
+			box_for_RunProgram->Insert(move.m_p.x, move.m_p.y, move.m_p.z);
+	}
+
+	if(move.m_p.x != CMove3D::MOVE_NOT_SET)tp.tool_path_pos[0] = move.m_p.x;
+	if(move.m_p.y != CMove3D::MOVE_NOT_SET)tp.tool_path_pos[1] = move.m_p.y;
+	if(move.m_p.z != CMove3D::MOVE_NOT_SET)tp.tool_path_pos[2] = move.m_p.z;
+}
+
+static void add_move(int type, double x, double y, double z)
+{
+	CMove3D move(type, Point3d(x, y, z));
+	add_move(move, tool_path);
+}
+
 static PyObject* hc_rapid(PyObject* self, PyObject* args)
 {
-	if(post_processing)return call_machine_function("rapid", args);
+	if(post_processing && tool_path.surface == 0)return call_machine_function("rapid", args);
 
 	double x, y, z;
 	if (!PyArg_ParseTuple(args, "ddd", &x, &y, &z)) return NULL;
-	if(tool_path.CheckInitialValues())
+	if(post_processing || tool_path.CheckInitialValues())
 	{
-		tool_path.tool_path_pos[0] = x;
-		tool_path.tool_path_pos[1] = y;
-		tool_path.tool_path_pos[2] = z;
-		glColor3ub(255, 0, 0);
-		glVertex3dv(tool_path.tool_path_pos);
-		box_for_RunProgram->Insert(tool_path.tool_path_pos);
+		add_move(0, x, y, z);
 	}
 
 	Py_RETURN_NONE;
@@ -290,17 +377,13 @@ static PyObject* hc_rapid(PyObject* self, PyObject* args)
 
 static PyObject* hc_rapidxy(PyObject* self, PyObject* args)
 {
-	if(post_processing)return call_machine_function("rapidxy", args);
+	if(post_processing && tool_path.surface == 0)return call_machine_function("rapidxy", args);
 
 	double x, y;
 	if (!PyArg_ParseTuple(args, "dd", &x, &y)) return NULL;
-	if(tool_path.CheckInitialValues())
+	if(post_processing || tool_path.CheckInitialValues())
 	{
-		tool_path.tool_path_pos[0] = x;
-		tool_path.tool_path_pos[1] = y;
-		glColor3ub(255, 0, 0);
-		glVertex3dv(tool_path.tool_path_pos);
-		box_for_RunProgram->Insert(tool_path.tool_path_pos);
+		add_move(0, x, y, CMove3D::MOVE_NOT_SET);
 	}
 
 	Py_RETURN_NONE;
@@ -308,16 +391,13 @@ static PyObject* hc_rapidxy(PyObject* self, PyObject* args)
 
 static PyObject* hc_rapidz(PyObject* self, PyObject* args)
 {
-	if(post_processing)return call_machine_function("rapidz", args);
+	if(post_processing && tool_path.surface == 0)return call_machine_function("rapidz", args);
 
 	double z;
 	if (!PyArg_ParseTuple(args, "d", &z)) return NULL;
-	if(tool_path.CheckInitialValues())
+	if(post_processing || tool_path.CheckInitialValues())
 	{
-		tool_path.tool_path_pos[2] = z;
-		glColor3ub(255, 0, 0);
-		glVertex3dv(tool_path.tool_path_pos);
-		box_for_RunProgram->Insert(tool_path.tool_path_pos);
+		add_move(0, CMove3D::MOVE_NOT_SET, CMove3D::MOVE_NOT_SET, z);
 	}
 
 	Py_RETURN_NONE;
@@ -325,18 +405,13 @@ static PyObject* hc_rapidz(PyObject* self, PyObject* args)
 
 static PyObject* hc_feed(PyObject* self, PyObject* args)
 {
-	if(post_processing)return call_machine_function("feed", args);
+	if(post_processing && tool_path.surface == 0)return call_machine_function("feed", args);
 
 	double x, y, z;
 	if (!PyArg_ParseTuple(args, "ddd", &x, &y, &z)) return NULL;
-	if(tool_path.CheckInitialValues())
+	if(post_processing || tool_path.CheckInitialValues())
 	{
-		tool_path.tool_path_pos[0] = x;
-		tool_path.tool_path_pos[1] = y;
-		tool_path.tool_path_pos[2] = z;
-		glColor3ub(0, 255, 0);
-		glVertex3dv(tool_path.tool_path_pos);
-		box_for_RunProgram->Insert(tool_path.tool_path_pos);
+		add_move(1, x, y, z);
 	}
 
 	Py_RETURN_NONE;
@@ -344,17 +419,13 @@ static PyObject* hc_feed(PyObject* self, PyObject* args)
 
 static PyObject* hc_feedxy(PyObject* self, PyObject* args)
 {
-	if(post_processing)return call_machine_function("feedxy", args);
+	if(post_processing && tool_path.surface == 0)return call_machine_function("feedxy", args);
 
 	double x, y;
 	if (!PyArg_ParseTuple(args, "dd", &x, &y)) return NULL;
-	if(tool_path.CheckInitialValues())
+	if(post_processing || tool_path.CheckInitialValues())
 	{
-		tool_path.tool_path_pos[0] = x;
-		tool_path.tool_path_pos[1] = y;
-		glColor3ub(0, 255, 0);
-		glVertex3dv(tool_path.tool_path_pos);
-		box_for_RunProgram->Insert(tool_path.tool_path_pos);
+		add_move(1, x, y, CMove3D::MOVE_NOT_SET);
 	}
 
 	Py_RETURN_NONE;
@@ -362,45 +433,34 @@ static PyObject* hc_feedxy(PyObject* self, PyObject* args)
 
 static PyObject* hc_feedz(PyObject* self, PyObject* args)
 {
-	if(post_processing)return call_machine_function("feedz", args);
+	if(post_processing && tool_path.surface == 0)return call_machine_function("feedz", args);
 
 	double z;
 	if (!PyArg_ParseTuple(args, "d", &z)) return NULL;
-	if(tool_path.CheckInitialValues())
+	if(post_processing || tool_path.CheckInitialValues())
 	{
-		tool_path.tool_path_pos[2] = z;
-		glColor3ub(0, 255, 0);
-		glVertex3dv(tool_path.tool_path_pos);
-		box_for_RunProgram->Insert(tool_path.tool_path_pos);
+		add_move(1, CMove3D::MOVE_NOT_SET, CMove3D::MOVE_NOT_SET, z);
 	}
 
 	Py_RETURN_NONE;
 }
 
-void glvertexfn(const double* xy)
-{
-	tool_path.tool_path_pos[0] = xy[0];
-	tool_path.tool_path_pos[1] = xy[1];
-	glVertex3dv(tool_path.tool_path_pos);
-	box_for_RunProgram->Insert(tool_path.tool_path_pos);
-}
 
 static PyObject* hc_arc(PyObject* self, PyObject* args)
 {
-	if(post_processing)return call_machine_function("arc", args);
+	if(post_processing && tool_path.surface == 0)return call_machine_function("arc", args);
 
 	char* direction;
 	double x, y, i, j;
 	if (!PyArg_ParseTuple(args, "sdddd", &direction, &x, &y, &i, &j)) return NULL;
 	// i and j must be specified relative to the previous position, but x and y are absolute position
-	if(tool_path.CheckInitialValues())
+	if(post_processing || tool_path.CheckInitialValues())
 	{
+		bool acw = !stricmp(direction, "acw");
 		double cx = tool_path.tool_path_pos[0] + i;
 		double cy = tool_path.tool_path_pos[1] + j;
-		bool acw = !stricmp(direction, "acw");
-		double pixels_per_mm = heeksCAD->GetPixelScale();
-		glColor3ub(0, 255, 0);
-		heeksCAD->get_2d_arc_segments(tool_path.tool_path_pos[0], tool_path.tool_path_pos[1], x, y, cx, cy, acw, false, pixels_per_mm, glvertexfn);
+		CMove3D move(acw ? 3:2, Point(tool_path.tool_path_pos), Point(cx, cy));
+		add_move(move, tool_path);
 	}
 
 	Py_RETURN_NONE;
@@ -700,6 +760,128 @@ static PyObject* hc_tangential_arc(PyObject *self, PyObject *args)
 	return pTuple;
 }
 
+static void add_tri(double* x, double* n)
+{
+	tool_path.tri_list.push_back(GTri(x));
+}
+
+static PyObject* hc_attach(PyObject* self, PyObject* args)
+{
+	if(post_processing)return call_machine_function("attach", args);
+
+	// check for attach(0)
+	int surface_id;
+	if(PyArg_ParseTuple(args, "i", &surface_id))
+	{
+		if(surface_id == 0){
+			tool_path.surface = 0;
+			tool_path.deflection = 0.0;
+			tool_path.low_plane = 0.0;
+			tool_path.little_step_length = 0.0;
+			tool_path.tri_list.clear();
+			Py_RETURN_NONE;
+		}
+	}
+
+	// clear the error, then try for attach(1, 0.1, 0.2, 0.3)
+	PyErr_Clear();
+
+	double low_plane, deflection, little_step_length;
+	if (!PyArg_ParseTuple(args, "iddd", &surface_id, &low_plane, &deflection, &little_step_length)) return NULL;
+	tool_path.surface = surface_id;
+	tool_path.deflection = deflection;
+	tool_path.low_plane = low_plane;
+	tool_path.little_step_length = little_step_length;
+
+	HeeksObj* object = heeksCAD->GetSolidShape(tool_path.surface);
+	if(object){
+		object->GetTriangles(add_tri, tool_path.deflection);
+	}
+
+	Py_RETURN_NONE;
+}
+
+SToolPath tool_path_for_make_attached_moves;
+
+static void add_tri_for_make_attached_moves(double* x, double* n)
+{
+	tool_path_for_make_attached_moves.tri_list.push_back(GTri(x));
+}
+
+
+static PyObject* hc_add_attach_surface(PyObject *self, PyObject *args)
+{
+	int surface;
+	double deflection;
+
+    if(!PyArg_ParseTuple(args, "id", &surface, &deflection))
+        return NULL;
+
+	HeeksObj* object = heeksCAD->GetSolidShape(surface);
+	if(object){
+		tool_path_for_make_attached_moves.surface = surface;
+		object->GetTriangles(add_tri_for_make_attached_moves, deflection);
+	}
+
+	Py_RETURN_NONE;
+}
+
+static PyObject* hc_clear_attach_surfaces(PyObject *self, PyObject *args)
+{
+	tool_path_for_make_attached_moves.tri_list.clear();
+	tool_path_for_make_attached_moves.surface = 0;
+    Py_RETURN_NONE;
+}
+
+static PyObject* hc_make_attached_moves(PyObject* self, PyObject* args)
+{
+	// make_attached_moves(tool_diameter, tool_corner_rad, low_plane, little_step_length, move_type, sx, sy, sz, ex, ey, ez, cx, cy, cz)
+	
+	double tool_diameter, tool_corner_rad;
+	double low_plane, little_step_length;
+	int move_type;
+	char *sx, *sy, *sz, *ex, *ey, *ez, *cx, *cy, *cz;
+
+	if (!PyArg_ParseTuple(args, "ddddisssssssss", &tool_diameter, &tool_corner_rad, &low_plane, &little_step_length, &move_type, &sx, &sy, &sz, &ex, &ey, &ez, &cx, &cy, &cz))return NULL;
+
+	if(!stricmp(sx, "NOT_SET") || !stricmp(sy, "NOT_SET") || !stricmp(sz, "NOT_SET"))
+	{
+		if(!tool_path.not_set_warning_showed)wxMessageBox("can't do make_attached_moves until x, y and z, are all known");
+		tool_path.not_set_warning_showed = true;
+		Py_RETURN_NONE;
+	}
+
+	double dsx, dsy, dsz, dex, dey, dez, dcx, dcy, dcz;
+
+	sscanf(sx, "%lf", &dsx);
+	sscanf(sy, "%lf", &dsy);
+	sscanf(sz, "%lf", &dsz);
+	if(!stricmp(ex, "NOT_SET"))dex = dsx; else sscanf(ex, "%lf", &dex);
+	if(!stricmp(ey, "NOT_SET"))dey = dsy; else sscanf(ey, "%lf", &dey);
+	if(!stricmp(ez, "NOT_SET"))dez = dsz; else sscanf(ez, "%lf", &dez);
+	if(!stricmp(cx, "NOT_SET"))dcx = dsx; else sscanf(cx, "%lf", &dcx);
+	if(!stricmp(cy, "NOT_SET"))dcy = dsy; else sscanf(cy, "%lf", &dcy);
+	if(!stricmp(cz, "NOT_SET"))dcz = dsz; else sscanf(cz, "%lf", &dcz);
+
+	tool_path_for_make_attached_moves.tool_diameter = tool_diameter;
+	tool_path_for_make_attached_moves.tool_corner_radius = tool_corner_rad;
+	tool_path_for_make_attached_moves.low_plane = low_plane;
+	tool_path_for_make_attached_moves.little_step_length = little_step_length;
+
+	CMove3D move(0, Point(0, 0));
+
+	tool_path_for_make_attached_moves.tool_path_pos[0] = dsx;
+	tool_path_for_make_attached_moves.tool_path_pos[1] = dsy;
+	tool_path_for_make_attached_moves.tool_path_pos[2] = dsz;
+
+	if(move_type > 1)move = CMove3D(move_type, Point(dex, dey), Point(dcx, dcy));
+	else move = CMove3D(move_type, Point3d(dex, dey, dez));
+
+	add_move(move, tool_path_for_make_attached_moves);
+
+	Py_RETURN_NONE;
+}
+
 static PyMethodDef HCMethods[] = {
     {"DoItNow", hc_DoItNow, METH_VARARGS, "Does all the moves added with AddMove, using the number of seconds given."},
     {"MessageBox", hc_MessageBox, METH_VARARGS, "Display the given text in a message box."},
@@ -724,6 +906,10 @@ static PyMethodDef HCMethods[] = {
     {"kurve_span_data", hc_kurve_span_data, METH_VARARGS, "span_type, sx, sy, ex, ey, cx, cy = kurve_span_data(kurve_id)."},
     {"kurve_span_dir", hc_kurve_span_dir, METH_VARARGS, "vx, vy = kurve_span_dir(off_kurve_id, span, fraction)."},
     {"tangential_arc", hc_tangential_arc, METH_VARARGS, "rcx, rcy, rdir = tangential_arc(px, py, sx, sy, vx, vy)."},
+    {"attach", hc_attach, METH_VARARGS, "attach(surface_id, low_plane, deflection, little_step_length). use attach(0) to turn off attach"},
+    {"add_attach_surface", hc_add_attach_surface, METH_VARARGS, "add_attach_surface(surface_id, deflection). version called from machine"},
+    {"clear_attach_surfaces", hc_clear_attach_surfaces, METH_VARARGS, "clear_attach_surfaces(). version called from machine"},
+    {"make_attached_moves", hc_make_attached_moves, METH_VARARGS, "make_attached_moves(tool_diameter, tool_corner_rad, low_plane, little_step_length, move_type, sx, sy, sz, ex, ey, ez, cx, cy, cz)"},
    {NULL, NULL, 0, NULL}
 };
 
@@ -900,9 +1086,7 @@ void HeeksPyRunProgram(CBox &box)
 			// zero the toolpath start position
 			tool_path.Reset();
 			glBegin(GL_LINE_STRIP);
-			glVertex3dv(tool_path.tool_path_pos);
 			box_for_RunProgram->m_valid = false;
-			box_for_RunProgram->Insert(tool_path.tool_path_pos);
 
 			// call the python file
 			bool success = call_file("run");

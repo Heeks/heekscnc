@@ -228,7 +228,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return Vector2d(*this, p).magnitudesqd();
 	}
 
-	double Point3d::Dist(const Point3d& p) {												// distance between 2 points
+	double Point3d::Dist(const Point3d& p)const {												// distance between 2 points
 		return Vector3d(*this, p).magnitude();
 	}
 
@@ -629,12 +629,11 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	}
 	Circle Tanto(int AT1, CLine s1, int AT2, CLine s2, int AT3, CLine s3) {
 		// circle tanto 3 CLines
-#if 1
 		double s1c = s1.c(), s2c = s2.c(), s3c = s3.c();
 		double d =	  s1.v.gety() * (AT2 * s3.v.getx() - AT3 * s2.v.getx())
 			+ s2.v.gety() * (AT3 * s1.v.getx() - AT1 * s3.v.getx())
 			+ s3.v.gety() * (AT1 * s2.v.getx() - AT2 * s1.v.getx());
-		if(fabs(d) < 1.0e-6) return INVALID_CIRCLE;
+		if(fabs(d) < UNIT_VECTOR_TOLERANCE) return INVALID_CIRCLE;
 		double radius =  (s1.v.gety() * (s2.v.getx() * s3c - s3.v.getx() * s2c)
 			+ s2.v.gety() * (s3.v.getx() * s1c - s1.v.getx() * s3c)
 			+ s3.v.gety() * (s1.v.getx() * s2c - s2.v.getx() * s1c)) / d ;
@@ -650,8 +649,6 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 			if(!p.ok) return INVALID_CIRCLE;						// 3 parallel lines
 		}
 		return Circle(p, radius);
-#endif
-
 	}
 	Circle	Thro(int LR, Point& p0, Point& p1, double rad) {
 		// circle thro' 2 points, given radius and side
@@ -751,7 +748,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		apolloniusProblem(AT1, c1 ,AT2 ,c2,AT3 ,c3, Solution1, Solution2);
 
 //		FAILURE(getMessage(L"Unfinished coding - contact the Company", GENERAL_MESSAGES, MES_UNFINISHEDCODING));
-//		return INVALID_CIRCLE;
+		return INVALID_CIRCLE;
 	}
 #endif
 
