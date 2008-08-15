@@ -58,6 +58,13 @@ void CProgram::glCommands(bool select, bool marked, bool no_color){
 		DestroyGLLists();
 	}
 
+	GLfloat save_depth_range[2];
+	if(marked){
+		glGetFloatv(GL_DEPTH_RANGE, save_depth_range);
+		glDepthRange(0, 0);
+		glLineWidth(2);
+	}
+
 	if(m_create_display_list_next_render)
 	{
 		m_gl_list = glGenLists(1);
@@ -72,6 +79,11 @@ void CProgram::glCommands(bool select, bool marked, bool no_color){
 	if(m_gl_list)
 	{
 		glCallList(m_gl_list);
+	}
+
+	if(marked){
+		glLineWidth(1);
+		glDepthRange(save_depth_range[0], save_depth_range[1]);
 	}
 }
 

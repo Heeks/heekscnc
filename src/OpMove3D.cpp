@@ -104,7 +104,7 @@ void glvertexfn(const double* xy)
 	glVertex3d(xy[0], xy[1], z_for_glvertexfn);
 }
 
-void CMove3D::glCommands(const Point3d& prev_point)const
+void CMove3D::glCommands(const Point3d& prev_point, const double *extra_z)const
 {
 	if(m_type == 0 || m_type == 1)
 	{
@@ -116,6 +116,7 @@ void CMove3D::glCommands(const Point3d& prev_point)const
 		if(p.x == MOVE_NOT_SET || p.y == MOVE_NOT_SET || p.z == MOVE_NOT_SET)return;
 		if(m_type == 0)glColor3ub(255, 0, 0);
 		else glColor3ub(0, 255, 0);
+		if(extra_z)p.z += *extra_z;
 		glVertex3d(p.x, p.y, p.z);
 	}
 	else{
@@ -124,6 +125,8 @@ void CMove3D::glCommands(const Point3d& prev_point)const
 		bool acw = (m_type == 3);
 		double pixels_per_mm = heeksCAD->GetPixelScale();
 		glColor3ub(0, 255, 0);
+		z_for_glvertexfn = prev_point.z;
+		if(extra_z)z_for_glvertexfn += *extra_z;
 		heeksCAD->get_2d_arc_segments(prev_point.x, prev_point.y, m_p.x, m_p.y, m_c.x, m_c.y, acw, false, pixels_per_mm, glvertexfn);
 	}
 }
@@ -138,6 +141,7 @@ void CMove3D::Split(const Point3d& prev_point, double little_step_length, std::l
 	if(num == 1)
 	{
 		small_moves.push_back(*this);
+		if(small_moves.back().m_p.z == MOVE_NOT_SET)small_moves.back().m_p.z = prev_point.z;
 	}
 	else
 	{
@@ -145,6 +149,7 @@ void CMove3D::Split(const Point3d& prev_point, double little_step_length, std::l
 		{
 			double f = ((double)i + 1.0)/ num;
 			Point3d p = GetPointAtFraction(f, prev_point);
+			if(p.z == MOVE_NOT_SET)p.z = prev_point.z;
 			small_moves.push_back(CMove3D(m_type, p, m_c));
 		}
 	}
