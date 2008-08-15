@@ -95,9 +95,8 @@ public:
 	double m_spindle_speed;
 	double m_hfeed;
 	double m_vfeed;
-	bool m_done;
 
-	CInitialAdder():m_done(false){}
+	CInitialAdder(){}
 	virtual ~CInitialAdder(void){}
 
 	void ReadConfigValues()
@@ -132,15 +131,14 @@ public:
 		char str[1024];
 		sprintf(str, "spindle(%lf)\nrate(%lf, %lf)\n", m_spindle_speed, m_hfeed, m_vfeed);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
-		m_done = true;
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
 	}
 
-	void Clear()
+	bool Done()
 	{
-		m_done = false;
+		return theApp.m_program_canvas->m_textCtrl->GetValue().Find("spindle") != -1;
 	}
 };
 
@@ -160,9 +158,8 @@ public:
 	int m_station_number;
 	double m_diameter;
 	double m_corner_radius;
-	bool m_done;
 
-	CToolAdder():m_done(false){}
+	CToolAdder(){}
 	virtual ~CToolAdder(void){}
 
 	void ReadConfigValues()
@@ -194,7 +191,7 @@ public:
 
 	void AddTheToolText()
 	{
-		if(!initial_adder.m_done)
+		if(!initial_adder.Done())
 		{
 			initial_adder.ReadConfigValues();
 			initial_adder.AddTheInitialText();
@@ -203,15 +200,14 @@ public:
 		char str[1024];
 		sprintf(str, "tool(%d, %lf, %lf)\n", m_station_number, m_diameter, m_corner_radius);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
-		m_done = true;
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
 	}
 
-	void Clear()
+	bool Done()
 	{
-		m_done = false;
+		return theApp.m_program_canvas->m_textCtrl->GetValue().Find("tool") != -1;
 	}
 };
 
@@ -304,7 +300,7 @@ public:
 
 	void AddTheMove()
 	{
-		if(!tool_adder.m_done)
+		if(!tool_adder.Done())
 		{
 			tool_adder.ReadConfigValues();
 			tool_adder.AddTheToolText();
@@ -362,9 +358,8 @@ public:
 	int m_line_arcs_number;
 	int m_offset_type; // 0 = "left", 1 = "right", 2 = "on"
 	double m_finish_x, m_finish_y;
-	bool m_done;
 
-	CProfileAdder():m_done(false){}
+	CProfileAdder(){}
 	virtual ~CProfileAdder(void){}
 
 	void ReadConfigValues()
@@ -402,7 +397,7 @@ public:
 
 	void AddTheProfileOpText()
 	{
-		if(!tool_adder.m_done)
+		if(!tool_adder.Done())
 		{
 			tool_adder.ReadConfigValues();
 			tool_adder.AddTheToolText();
@@ -419,17 +414,21 @@ public:
 		}
 
 		char str[1024];
-		sprintf(str, "profile(%d, \"%s\", %lf, %lf)\n", m_line_arcs_number, dirstr, m_finish_x, m_finish_y);
+		char roll_off_str[1024] = "\"NOT_SET\", \"NOT_SET\"";
+		if(m_offset_type != 2)
+		{
+			sprintf(roll_off_str, "%lf, %lf", m_finish_x, m_finish_y);
+		}
+		sprintf(str, "profile(%d, \"%s\", %s)\n", m_line_arcs_number, dirstr, roll_off_str);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
-		m_done = true;
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
 	}
 
-	void Clear()
+	bool Done()
 	{
-		m_done = false;
+		return theApp.m_program_canvas->m_textCtrl->GetValue().Find("profile") != -1;
 	}
 };
 
@@ -516,8 +515,11 @@ void CProfileAdder::GetProperties(std::list<Property *> *list)
 	choices.push_back(std::string("right"));
 	choices.push_back(std::string("on"));
 	list->push_back(new PropertyChoice("offset type", choices, m_offset_type, set_offset_type));
-	list->push_back(new PropertyDouble("X roll off position", m_finish_x, set_finish_x));
-	list->push_back(new PropertyDouble("Y roll off position", m_finish_y, set_finish_y));
+	if(m_offset_type != 2)
+	{
+		list->push_back(new PropertyDouble("X roll off position", m_finish_x, set_finish_x));
+		list->push_back(new PropertyDouble("Y roll off position", m_finish_y, set_finish_y));
+	}
 }
 
 void CProfileAdder::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
@@ -646,9 +648,6 @@ void CProgramCanvas::Resize()
 void CProgramCanvas::Clear()
 {
 	m_textCtrl->Clear();
-	tool_adder.Clear();
-	initial_adder.Clear();
-	profile_adder.Clear();
 }
 
 BEGIN_EVENT_TABLE(CProgramTextCtrl, wxTextCtrl)

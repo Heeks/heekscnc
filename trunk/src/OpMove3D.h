@@ -21,8 +21,14 @@ public:
 	// xy arc
 	CMove3D(int type, const Point& p, const Point& c):m_type(type), m_p(p.x, p.y, MOVE_NOT_SET), m_c(c){}
 
-	double Length(const Point3d& prev_point);
-	double Angle(const Point3d& prev_point, double &r); // just for arcs
-	Point3d GetPointAtFraction(double f, const Point3d& prev_point);
+	double Length(const Point3d& prev_point)const;
+	double Angle(const Point3d& prev_point, double &r)const; // just for arcs
+	Point3d GetPointAtFraction(double f, const Point3d& prev_point)const;
+
+	// render
+	void glCommands(const Point3d& prev_point)const;
+
+	// split
+	void Split(const Point3d& prev_point, double little_step_length, std::list<CMove3D> &small_moves)const;
 };
 
