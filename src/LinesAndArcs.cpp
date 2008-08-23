@@ -62,15 +62,21 @@ HeeksObj* create_line_arc(Kurve &kurve)
 			double s[3] = {span.p0.x, span.p0.y, 0};
 			double e[3] = {span.p1.x, span.p1.y, 0};
 			double c[3] = {span.pc.x, span.pc.y, 0};
-			HeeksObj* new_object = heeksCAD->NewArc(s, e, c, span.dir > 0 ? up : down);
-			new_la->Add(new_object, NULL);
+			if(fabs(s[0] - e[0]) > heeksCAD->GetTolerance() || fabs(s[1] - e[1]) > heeksCAD->GetTolerance())
+			{
+				HeeksObj* new_object = heeksCAD->NewArc(s, e, c, span.dir > 0 ? up : down);
+				new_la->Add(new_object, NULL);
+			}
 		}
 		else
 		{
 			double s[3] = {span.p0.x, span.p0.y, 0};
 			double e[3] = {span.p1.x, span.p1.y, 0};
-			HeeksObj* new_object = heeksCAD->NewLine(s, e);
-			new_la->Add(new_object, NULL);
+			if(fabs(s[0] - e[0]) > heeksCAD->GetTolerance() || fabs(s[1] - e[1]) > heeksCAD->GetTolerance())
+			{
+				HeeksObj* new_object = heeksCAD->NewLine(s, e);
+				new_la->Add(new_object, NULL);
+			}
 		}
 	}
 
