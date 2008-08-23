@@ -3,8 +3,11 @@
 #include "stdafx.h"
 #include "OpMove3D.h"
 
+#define ORANGE_CROSS
+
 //	static const
-const double CMove3D::MOVE_NOT_SET = 4000000000.0;
+long long inf = 0x7ff0000000000000;
+const double CMove3D::MOVE_NOT_SET = *((double*)(&inf));
 
 double CMove3D::Length(const Point3d& prev_point)const
 {
@@ -106,18 +109,20 @@ void glvertexfn(const double* xy)
 
 void CMove3D::glCommands(const Point3d& prev_point, const double *extra_z)const
 {
+	Point3d final_point;
+
 	if(m_type == 0 || m_type == 1)
 	{
 		// line
-		Point3d p = m_p;
-		if(p.x == MOVE_NOT_SET)p.x = prev_point.x;
-		if(p.y == MOVE_NOT_SET)p.y = prev_point.y;
-		if(p.z == MOVE_NOT_SET)p.z = prev_point.z;
-		if(p.x == MOVE_NOT_SET || p.y == MOVE_NOT_SET || p.z == MOVE_NOT_SET)return;
+		final_point = m_p;
+		if(final_point.x == MOVE_NOT_SET)final_point.x = prev_point.x;
+		if(final_point.y == MOVE_NOT_SET)final_point.y = prev_point.y;
+		if(final_point.z == MOVE_NOT_SET)final_point.z = prev_point.z;
+		if(final_point.x == MOVE_NOT_SET || final_point.y == MOVE_NOT_SET || final_point.z == MOVE_NOT_SET)return;
 		if(m_type == 0)glColor3ub(255, 0, 0);
 		else glColor3ub(0, 255, 0);
-		if(extra_z)p.z += *extra_z;
-		glVertex3d(p.x, p.y, p.z);
+		if(extra_z)final_point.z += *extra_z;
+		glVertex3d(final_point.x, final_point.y, final_point.z);
 	}
 	else{
 		// arc
@@ -127,8 +132,29 @@ void CMove3D::glCommands(const Point3d& prev_point, const double *extra_z)const
 		glColor3ub(0, 255, 0);
 		z_for_glvertexfn = prev_point.z;
 		if(extra_z)z_for_glvertexfn += *extra_z;
-		heeksCAD->get_2d_arc_segments(prev_point.x, prev_point.y, m_p.x, m_p.y, m_c.x, m_c.y, acw, false, pixels_per_mm, glvertexfn);
+		heeksCAD->get_2d_arc_segments(prev_point.x, prev_point.y, m_p.x, m_p.y, m_c.x, m_c.y, acw, true, pixels_per_mm, glvertexfn);
+		final_point.x = m_p.x;
+		final_point.y = m_p.y;
+		final_point.z = m_p.z;
+		if(final_point.x == MOVE_NOT_SET)final_point.x = prev_point.x;
+		if(final_point.y == MOVE_NOT_SET)final_point.y = prev_point.y;
+		if(final_point.z == MOVE_NOT_SET)final_point.z = prev_point.z;
 	}
+
+#ifdef ORANGE_CROSS
+	// put a little orange cross at the end of each move
+	glEnd();
+	glColor3ub(255, 128, 0);
+	glBegin(GL_LINES);
+	double size = 10 / heeksCAD->GetPixelScale();
+	glVertex3d(final_point.x - size, final_point.y - size, final_point.z);
+	glVertex3d(final_point.x + size, final_point.y + size, final_point.z);
+	glVertex3d(final_point.x - size, final_point.y + size, final_point.z);
+	glVertex3d(final_point.x + size, final_point.y - size, final_point.z);
+	glEnd();
+	glBegin(GL_LINE_STRIP);
+	glVertex3d(final_point.x, final_point.y, final_point.z);
+#endif
 }
 
 void CMove3D::Split(const Point3d& prev_point, double little_step_length, std::list<CMove3D> &small_moves)const

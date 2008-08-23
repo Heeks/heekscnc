@@ -27,6 +27,7 @@ static bool write_python_file(const wxString& python_file_path, bool post_proces
 	ofs<<"import hc\n";
 	ofs<<"from hc import *\n";
 	if(post_processing)ofs<<"import siegkx1\n";
+//		if(post_processing)ofs<<"import "<<theApp.m_program->m_machine.c_str()<<"\n";
 	ofs<<"import sys\n";
 	ofs<<"from math import *\n";
 	ofs<<"from stdops import *\n\n";
@@ -74,33 +75,12 @@ static PyObject* hc_MessageBox(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-static wxString string_to_append;
-static wxLongLong last_print_time = 0;
-
 static PyObject* hc_write(PyObject* self, PyObject* args)
 {
 	char* str;
 	if (!PyArg_ParseTuple(args, "s", &str)) return NULL;
-	string_to_append += str;
-	wxLongLong current_time = ::wxGetLocalTimeMillis();
-	if(current_time > last_print_time + 500)
-	{
-		theApp.m_output_canvas->m_textCtrl->AppendText(string_to_append);
-		string_to_append = "";
-		last_print_time = current_time;
-	}
-	Py_RETURN_NONE;
-}
+	theApp.m_output_canvas->m_textCtrl->AppendText(str);
 
-static void flush_print()
-{
-	theApp.m_output_canvas->m_textCtrl->AppendText(string_to_append);
-	string_to_append = "";
-}
-
-static PyObject* hc_flush_print(PyObject* self, PyObject* args)
-{
-	flush_print();
 	Py_RETURN_NONE;
 }
 
@@ -488,7 +468,7 @@ static PyObject* hc_arc(PyObject* self, PyObject* args)
 		bool acw = !stricmp(direction, "acw");
 		double cx = tool_path.tool_path_pos[0] + i;
 		double cy = tool_path.tool_path_pos[1] + j;
-		CMove3D move(acw ? 3:2, Point(tool_path.tool_path_pos), Point(cx, cy));
+		CMove3D move(acw ? 3:2, Point(x, y), Point(cx, cy));
 		add_move(move, tool_path);
 	}
 
@@ -508,7 +488,6 @@ static PyObject* hc_kurve_exists(PyObject* self, PyObject* args)
 	Py_INCREF(pValue);
 	return pValue;
 }
-
 
 static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 {
@@ -911,12 +890,19 @@ static PyObject* hc_make_attached_moves(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
+static PyObject* hc_geom_tol(PyObject* self, PyObject* args)
+{
+	// return geom_tol
+	PyObject *pValue = PyFloat_FromDouble(heeksCAD->GetTolerance());
+	Py_INCREF(pValue);
+	return pValue;
+}
+
 static PyMethodDef HCMethods[] = {
     {"DoItNow", hc_DoItNow, METH_VARARGS, "Does all the moves added with AddMove, using the number of seconds given."},
     {"MessageBox", hc_MessageBox, METH_VARARGS, "Display the given text in a message box."},
     {"error", hc_error, METH_VARARGS, "Show the given error message and stop processing."},
     {"write", hc_write, METH_VARARGS, "Capture stdout output."},
-    {"flush_print", hc_flush_print, METH_VARARGS, "add all the printed text to the output canvas."},
     {"current_tool_pos", hc_current_tool_pos, METH_VARARGS, "px, py, pz = current_tool_pos()."},
     {"current_tool_data", hc_current_tool_data, METH_VARARGS, "station_number, diameter, corner_radius = current_tool_data()."},
 	{"tool", hc_tool, METH_VARARGS, "tool(station, diameter, corner_radius)."},
@@ -940,6 +926,7 @@ static PyMethodDef HCMethods[] = {
     {"add_attach_surface", hc_add_attach_surface, METH_VARARGS, "add_attach_surface(surface_id, deflection). version called from machine"},
     {"clear_attach_surfaces", hc_clear_attach_surfaces, METH_VARARGS, "clear_attach_surfaces(). version called from machine"},
     {"make_attached_moves", hc_make_attached_moves, METH_VARARGS, "make_attached_moves(tool_diameter, tool_corner_rad, low_plane, little_step_length, move_type, sx, sy, sz, ex, ey, ez, cx, cy, cz)"},
+    {"geom_tol", hc_geom_tol, METH_VARARGS, "geometry_tolerance = geom_tol()."},
    {NULL, NULL, 0, NULL}
 };
 
@@ -1125,9 +1112,6 @@ void HeeksPyRunProgram(CBox &box)
 
 			// flush the error file
 			call_redirect_errors(true);
-
-			// flush the print buffer
-			flush_print();
 
 			// display the errors
 			if(!success)
