@@ -4,11 +4,10 @@
 
 #pragma once
 
-#include "../../HeeksCAD/interface/ObjList.h"
-#include "../../HeeksCAD/interface/Box.h"
+#include "../../HeeksCAD/interface/HeeksObj.h"
 #include "HeeksCNCTypes.h"
 
-class CProgram:public ObjList
+class CProgram:public HeeksObj
 {
 public:
 	static wxIcon* m_icon;
@@ -18,7 +17,7 @@ public:
 	bool m_create_display_list_next_render;
 
 	CProgram();
-	CProgram(const CProgram &p):ObjList(p){operator=(p);}
+	CProgram(const CProgram &p){operator=(p);}
 	virtual ~CProgram();
 
 	const CProgram &operator=(const CProgram &p);

@@ -6,7 +6,6 @@
 #include <wx/dynlib.h>
 #include "../../HeeksCAD/interface/PropertyString.h"
 #include "../../HeeksCAD/interface/Observer.h"
-#include "OpProfile.h"
 #include "PythonStuff.h"
 #include "Program.h"
 #include "ProgramCanvas.h"
@@ -62,17 +61,6 @@ void CHeeksCNCApp::OnDestroyDLL()
 #endif
 
 	heeksCAD = NULL;
-}
-
-void OnOpProfileButton(wxCommandEvent& event){
-	const std::list<HeeksObj*> &list = heeksCAD->GetMarkedList();
-	COpProfile* new_object = new COpProfile();
-	new_object->m_objects = list;
-	new_object->CalculateOrMarkOutOfDate();
-
-	heeksCAD->AddUndoably(new_object, theApp.m_program);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
 }
 
 void OnSolidSimButton(wxCommandEvent& event){

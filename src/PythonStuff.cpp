@@ -2,11 +2,13 @@
 
 #include "stdafx.h"
 #include "PythonStuff.h"
-#include "OpProfile.h"
+#include "OpMove3D.h"
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
 #include "LinesAndArcs.h"
 #include "GTri.h"
+#include "DropCutter.h"
+#include "../../HeeksCAD/interface/HeeksObj.h"
 
 #if _DEBUG
 #undef _DEBUG
@@ -481,7 +483,7 @@ static PyObject* hc_kurve_exists(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetLineArcCollection(line_arcs_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
 
 	// return exists
 	PyObject *pValue = line_arcs ? Py_True : Py_False;
@@ -497,7 +499,7 @@ static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "ids", &line_arcs_id, &offset, &str)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetLineArcCollection(line_arcs_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
 	int offset_id = 0;
 
 	try{
@@ -518,7 +520,7 @@ static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 			{
 				// just do the first one
 				HeeksObj* new_larc = create_line_arc(*k);
-				offset_id = heeksCAD->GetLineArcCollectionID(new_larc);
+				offset_id = new_larc->GetID();
 			}
 			delete k;
 		}
@@ -544,7 +546,7 @@ static PyObject* hc_kurve_delete(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &kurve_id))
         return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetLineArcCollection(kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	if(line_arcs)delete line_arcs;
 
     Py_RETURN_NONE;
@@ -557,7 +559,7 @@ static PyObject* hc_kurve_num_spans(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &kurve_id))
         return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetLineArcCollection(kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	int num_spans = 0;
 	if(line_arcs)num_spans = line_arcs->GetNumChildren();
 
@@ -583,7 +585,7 @@ static PyObject* hc_kurve_span_data(PyObject *self, PyObject *args)
 	double cx = 0.0;
 	double cy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetLineArcCollection(kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	if(line_arcs){
 		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
 		if(span_object){
@@ -680,7 +682,7 @@ static PyObject* hc_kurve_span_dir(PyObject *self, PyObject *args)
 	double vx = 1.0;
 	double vy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetLineArcCollection(kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	if(line_arcs){
 		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
 		if(span_object){
@@ -768,7 +770,7 @@ static PyObject* hc_tangential_arc(PyObject *self, PyObject *args)
 	return pTuple;
 }
 
-static void add_tri(double* x, double* n)
+static void add_tri(const double* x, const double* n)
 {
 	tool_path.tri_list.push_back(GTri(x));
 }
@@ -801,7 +803,7 @@ static PyObject* hc_attach(PyObject* self, PyObject* args)
 	tool_path.low_plane = low_plane;
 	tool_path.little_step_length = little_step_length;
 
-	HeeksObj* object = heeksCAD->GetSolidShape(tool_path.surface);
+	HeeksObj* object = heeksCAD->GetIDObject(SolidType, tool_path.surface);
 	if(object){
 		object->GetTriangles(add_tri, tool_path.deflection);
 	}
@@ -811,7 +813,7 @@ static PyObject* hc_attach(PyObject* self, PyObject* args)
 
 SToolPath tool_path_for_make_attached_moves;
 
-static void add_tri_for_make_attached_moves(double* x, double* n)
+static void add_tri_for_make_attached_moves(const double* x, const double* n)
 {
 	tool_path_for_make_attached_moves.tri_list.push_back(GTri(x));
 }
@@ -825,7 +827,7 @@ static PyObject* hc_add_attach_surface(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "id", &surface, &deflection))
         return NULL;
 
-	HeeksObj* object = heeksCAD->GetSolidShape(surface);
+	HeeksObj* object = heeksCAD->GetIDObject(SolidType, surface);
 	if(object){
 		tool_path_for_make_attached_moves.surface = surface;
 		object->GetTriangles(add_tri_for_make_attached_moves, deflection);
