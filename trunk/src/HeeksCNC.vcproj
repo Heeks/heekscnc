@@ -452,14 +452,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\OpProfile.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\OpProfile.h"
-			>
-		</File>
-		<File
 			RelativePath=".\OutputCanvas.cpp"
 			>
 		</File>
