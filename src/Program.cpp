@@ -8,7 +8,7 @@
 
 wxIcon* CProgram::m_icon = NULL;
 
-CProgram::CProgram():ObjList()
+CProgram::CProgram()
 {
 	m_machine.assign("siegkx1");
 	m_create_display_list_next_render = false;
@@ -89,10 +89,12 @@ void CProgram::glCommands(bool select, bool marked, bool no_color){
 
 void CProgram::GetProperties(std::list<Property *> *list)
 {
+	__super::GetProperties(list);
 }
 
 void CProgram::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
+	__super::GetTools(t_list, p);
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
@@ -112,6 +114,8 @@ void CProgram::WriteXML(TiXmlElement *root)
 	root->LinkEndChild( element );  
 	element->SetAttribute("machine", m_machine.c_str());
 	element->SetAttribute("program", theApp.m_program_canvas->m_textCtrl->GetValue());
+
+	WriteBaseXML(element);
 }
 
 // static member function
@@ -127,7 +131,7 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(a->Value());}
 	}
 
-	new_object->ReadXMLChildren(pElem);
+	new_object->ReadBaseXML(pElem);
 	theApp.m_program = new_object;
 
 	return new_object;

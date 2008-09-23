@@ -451,7 +451,7 @@ public:
 		const std::list<HeeksObj*>& marked_list = heeksCAD->GetMarkedList();
 		if(marked_list.size() > 0)
 		{
-			profile_adder.m_line_arcs_number = heeksCAD->GetLineArcCollectionID(marked_list.front());
+			profile_adder.m_line_arcs_number = marked_list.front()->GetID();
 		}
 		heeksCAD->ClearMarkedList();
 	}
