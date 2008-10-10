@@ -491,13 +491,24 @@ static PyObject* hc_kurve_exists(PyObject* self, PyObject* args)
 	return pValue;
 }
 
+static PyObject* hc_kurve_add(PyObject* self, PyObject* args)
+{
+	int line_arcs_id;
+
+	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
+
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
+	heeksCAD->AddUndoably(line_arcs, NULL);
+
+	Py_RETURN_NONE;
+}
+
 static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 {
 	int line_arcs_id;
 	double offset;
-	char* str;
 
-	if (!PyArg_ParseTuple(args, "ids", &line_arcs_id, &offset, &str)) return NULL;
+	if (!PyArg_ParseTuple(args, "id", &line_arcs_id, &offset)) return NULL;
 
 	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
 	int offset_id = 0;
@@ -520,7 +531,7 @@ static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 			{
 				// just do the first one
 				HeeksObj* new_larc = create_line_arc(*k);
-				offset_id = new_larc->GetID();
+				offset_id = new_larc->m_id;
 			}
 			delete k;
 		}
@@ -918,7 +929,8 @@ static PyMethodDef HCMethods[] = {
     {"feedz", hc_feedz, METH_VARARGS, "feedz(z)."},
     {"arc", hc_arc, METH_VARARGS, "arc('acw', x, y, i, j). ( i and j are relative to current_tool_pos )"},
     {"kurve_exists", hc_kurve_exists, METH_VARARGS, "exists = kurve_exists(kurve_id)."},
-    {"kurve_offset", hc_kurve_offset, METH_VARARGS, "kurve_offset(kurve_id, offset, direction)."},
+    {"kurve_add", hc_kurve_add, METH_VARARGS, "kurve_add(kurve_id). adds a kurve which wasn't already added"},
+    {"kurve_offset", hc_kurve_offset, METH_VARARGS, "kurve_offset(kurve_id, offset). +ve for left, -v for right"},
     {"kurve_delete", hc_kurve_delete, METH_VARARGS, "kurve_delete(kurve_id)."},
     {"kurve_num_spans", hc_kurve_num_spans, METH_VARARGS, "num_span = kurve_num_spans(kurve_id)."},
     {"kurve_span_data", hc_kurve_span_data, METH_VARARGS, "span_type, sx, sy, ex, ey, cx, cy = kurve_span_data(kurve_id)."},
