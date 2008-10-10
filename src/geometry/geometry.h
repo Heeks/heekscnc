@@ -129,10 +129,13 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		// constructors etc...
 		Matrix();													// create a unit matrix
 		Matrix(double m[16]);										// from an array
-		Matrix( Matrix& m);
-	//	const Matrix& operator=( Matrix &k);
+		Matrix(const Matrix& m);									// copy constructor
 
-	//	~Matrix();
+		~Matrix(){};
+
+		//operators
+		bool operator==(const Matrix &m)const;
+		bool operator!=(const Matrix &m)const { return !(*this == m);}
 
 		// methods
 		void	Unit();												// unit matrix
@@ -561,6 +564,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		bool OnSpan(Point& p, double* t);											//  tests if p is on sp *** FAST TEST p MUST LIE on unbounded span
 		bool	JoinSeparateSpans(Span& sp);
 		Span BlendTwoSpans(Span& sp2, double radius, double maxt);					// Blends 2 Spans
+		bool isJoinable(Span& sp);													// is this & sp joinable to 1 span?
 
 		// constructor
 		Span() {ID = 0; ok = false;};
@@ -730,7 +734,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 #define SPANSTORAGE 32			// lessens number of object pointers
 
-
+#ifdef PEPSDLL
 	class WireExtraData{
 	public:
 
@@ -760,7 +764,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		WireExtraData() { tangent = false; Blend = false; external = false, corner = 3; eTaper = 0; }
 
 	};
-
+#endif
 
 	class spVertex {
 		friend wostream& operator <<(wostream& op, spVertex& sp);
@@ -786,19 +790,43 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 	};
 
+
+	class SpanDataObject {
+		// holds everything needed for Post-Processing/Simulation
+	public:
+		int method;	// holds method type
+
+		SpanDataObject(int meth){method = meth;};
+		SpanDataObject(SpanDataObject* obj){method = obj->method;};
+	};
+
 	class SpanVertex{
 	public:
 		int type[SPANSTORAGE];							// LINEAR CW or ACW																// 0 straight (cw = -1 (T)   acw = 1 (A) )
-		int spanid[SPANSTORAGE];						// identification												// extra data (eg wire offset span info)
-		WireExtraData* index[SPANSTORAGE];				// peps	!!!										// pointer to extra data (eg WireKurve)
-		double x[SPANSTORAGE], y[SPANSTORAGE];			// vertex										// end-point
-		double xc[SPANSTORAGE], yc[SPANSTORAGE];		// centre of arc										// centre-point
+		int spanid[SPANSTORAGE];						// identification (eg wire offset span info)
+#ifdef PEPSDLL
+		WireExtraData* index[SPANSTORAGE];				// peps	!!!	 pointer to extra data (eg WireKurve)
+#else
+		SpanDataObject* index[SPANSTORAGE];					// other - pointer to 
+#endif
+		double x[SPANSTORAGE], y[SPANSTORAGE];			// vertex
+		double xc[SPANSTORAGE], yc[SPANSTORAGE];		// centre of arc
 	public:
 		// methods
 		void	Add(int offset, int type, Point& p0, Point& pc, int ID = UNMARKED);
+		SpanDataObject* GetIndex(int offset);
 		void	AddSpanID(int offset, int ID);
+		SpanVertex();
+		~SpanVertex();
+		const SpanVertex& operator= (const SpanVertex& spv );
+
+#ifdef PEPSDLL
 		inline void	Add(int offset, WireExtraData* Index );
 		inline WireExtraData*	Get(int offset);
+#else
+		void	Add(int offset, SpanDataObject* Index );
+		SpanDataObject*	Get(int offset);
+#endif
 		int		Get(int offset, Point& pe, Point& pc);
 		int GetSpanID(int offset);
 	};
@@ -862,6 +890,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	Add(Kurve* k, bool AddNullSpans = true);									// a kurve
 		void	StoreAllSpans(std::vector<Span>& kSpans);									// store all kurve spans in array, normally when fast access is reqd
 
+		void	Replace(int vertexnumber, spVertex& spv);
 		void	Replace(int vertexnumber, int type, Point& p, Point& pc, int ID = UNMARKED);
 		int		GetSpanID(int spanVertexNumber) const;											// for spanID (wire offset)
 		int		Get(int spanVertexNumber, Point& p, Point& pc) const;
@@ -870,6 +899,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		int		Get(int spannumber, Span& sp, bool returnSpanProperties = false, bool transform = false) const;
 		int		Get(int spannumber, Span3d& sp, bool returnSpanProperties = false, bool transform = false) const;
 		void	Get(Point &ps,Point &pe) const; // returns the start- and endpoint of the kurve
+		SpanDataObject* GetIndex(int vertexNumber);
 		inline double GetLength(){ return Perim();};  // returns the length of a kurve
 
 		void	minmax(Point& pmin, Point& pmax);			// minmax of span
@@ -906,14 +936,18 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 #ifdef PEPSDLL
 		void	ToPeps(int id, bool draw = true);								// convert kurve to peps kurve
 		void	FromPeps(int id, bool removenullspans = true, bool transformVertices = false);		// from a Peps to kurve
+		void	ModifyIndex(int spannumber, WireExtraData* i);
+#else
+		void	AddIndex(int vertexNumber, SpanDataObject* data);
+
 #endif
 		bool	Split(double MaximumRadius, double reslution);	// split arcs larger than MaximumRadius to resoultion
-		void	ModifyIndex(int spannumber, WireExtraData* i);
 		int		IntExtWire(Kurve& kSec, double Ref, double Sec, double height, Kurve* kOut);	// interpolate / extrapolate a mid height kurve (wire)
 		void	SetZ(double z) { e[11] = z; if(fabs(z) > 1.0e-6) m_unit = false;}				// assigns kurve to fixed height (wire)
 
 		void	Part(int startVertex, int EndVertex, Kurve *part);
 		Kurve	Part(int fromSpanno, Point& fromPt, int toSpanno, Point& toPt);					// make a Part Kurve
+		int		Break(double atParam, Kurve *secInput, Kurve *refOut, Kurve *secOut);// break kurve perimeter parameterisation with synchronised Kurve (wire)
 		void	Part(double fromParam, double toParam, Kurve *secInput, Kurve *refOut, Kurve *secOut);// part kurve perimeter parameterisation with synchronised Kurve (wire)
 		Kurve	Part(double fromParam, double toParam);											// part kurve perimeter parameterisation
 			void	AddSections(Kurve* k, bool endOfSection);		// special add kurves for rollingball
@@ -959,6 +993,9 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 	void	EqualiseSpanCountAfterOffset(Kurve& k1, Kurve&k2, Kurve& k1Out, Kurve& k2Out);// span equalisation after offset
 	void	EqualiseSpanCountAfterOffsetFromRollAround(Kurve& k1, Kurve&k2, Kurve& k1Out, Kurve& k2Out/*, double offset, int arc_direction*/);// span equalisation after offset
 
+	Point IntofIso(Span& one, Span& two, Span& three);				// for iso blend radiuses - calc intersection
+
+#ifdef PEPSDLL
 	class WireKurve : public Kurve{
 		vector<WireExtraData*> m_wirespans;
 
@@ -981,9 +1018,6 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 	};
 
-	Point IntofIso(Span& one, Span& two, Span& three);				// for iso blend radiuses - calc intersection
-
-#ifdef PEPSDLL
 
 	int FindNCIEndPoint(char* figure, Point& p, union cad_nc *nc);
 	int FindNCIOnSpan(char* name, Span& sp, union cad_nc *nc);
