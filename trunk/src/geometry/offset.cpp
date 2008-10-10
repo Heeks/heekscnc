@@ -119,7 +119,7 @@ namespace geoff_geometry {
 					kOffset.Replace(0, 0, p0, Point(0, 0), 0);
 
 			}
-			prevSpanOff = curSpanOff;
+			if(!curSpanOff.NullSpan)prevSpanOff = curSpanOff;
 		}		// end of main pre-offsetting loop
 
 
@@ -197,6 +197,7 @@ namespace geoff_geometry {
 					sp1.ID = k.GetSpanID(kinVertex++);
 					int ksaveVertex2 = kinVertex;								// mark position BB
 
+					int fwdCount = 0;
 					while(kinVertex <= k.nSpans()) {					
 						sp1.dir = k.Get(kinVertex, sp1.p1, sp1.pc);			// check span
 						sp1.ID = k.GetSpanID(kinVertex++);
@@ -233,7 +234,7 @@ namespace geoff_geometry {
 						ksaveVertex1 = ksaveVertex2 ;							// pos AA = BB
 						ksaveVertex2 = kinVertex;								// mark 
 
-						if(kinVertex > k.nSpans() && clipped == false) break;
+						if((kinVertex > k.nSpans() || fwdCount++ > 25) && clipped == false) break;
 					}
 				}
 
@@ -261,11 +262,12 @@ namespace geoff_geometry {
 		int kCheckVertex = 0;
 		k.Get(kCheckVertex++, sp.p0, sp.pc);
 
+		offset = fabs(offset) - geoff_geometry::TOLERANCE;
 		while(kCheckVertex <= k.nSpans()) {
 			sp.dir = k.Get(kCheckVertex++, sp.p1, sp.pc);
 			sp.SetProperties(true);
 			// check for interference 
-			if(Dist(sp, pInt, dummy) < fabs(offset) - geoff_geometry::TOLERANCE) return true;
+			if(Dist(sp, pInt, dummy) < offset) return true;
 			sp.p0 = sp.p1;
 		}
 		return false;	// intersection is ok

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
-//                    3d geometry classes - implements some peps 3d stuff
+//                    3d geometry classes - implements some 3d stuff
 //
 //                    g.j.hawkesford August 2003
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,9 +24,17 @@ namespace geoff_geometry {
 		this->IsUnit();
 		this->IsMirrored();
 	}
-	Matrix::Matrix( Matrix& m)
+	Matrix::Matrix( const Matrix& m)
 	{
 		*this = m;
+	}
+
+	bool Matrix::operator==(const Matrix &m)const{
+		// m1 == m2
+		if(this->m_unit != m.m_unit || this->m_mirrored != m.m_mirrored) return false;
+		for(int i = 0; i < 16; i++)
+			if(FEQ(this->e[i], m.e[i], TIGHT_TOLERANCE) == false) return false;
+		return true;
 	}
 
 #if 0
@@ -40,7 +48,7 @@ namespace geoff_geometry {
 	void	Matrix::Unit()
 	{
 		// homogenous matrix - set as unit matrix
-		for( int i = 0; i < 16; i ++ ) e[i] = 0;
+		memset(e, 0, sizeof(e));
 		e[0] = e[5] = e[10] = e[15] = 1;
 		m_unit = true;
 		m_mirrored = false;
@@ -49,12 +57,12 @@ namespace geoff_geometry {
 	void	Matrix::Get(double* p) const
 	{
 		// copy the matrix
-		for( int i = 0; i < 16; i ++ ) p[i] = e[i];
+		memcpy(p, e, sizeof(e));
 	}
 	void	Matrix::Put(double* p)
 	{
 		// assign the matrix
-		for( int i = 0; i < 16; i ++ ) e[i] = p[i];
+		memcpy(e, p, sizeof(e));
 		m_unit = false;		// don't know
 		m_mirrored = -1;	// don't know
 
@@ -161,7 +169,9 @@ namespace geoff_geometry {
 			l = i - (k = (i % 4));
 			ret.e[i] =  m.e[l] * e[k] + m.e[l+1] * e[k+4] + m.e[l+2] * e[k+8] + m.e[l+3] * e[k+12];
 		}
+		
 		*this = ret;
+		this->IsUnit();
 	}
 
 	void	Matrix::Transform(double p0[3], double p1[3]) const
