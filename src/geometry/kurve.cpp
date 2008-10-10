@@ -13,10 +13,48 @@
 
 namespace geoff_geometry {
 
+	SpanVertex::SpanVertex() {
+		for(int i = 0; i < SPANSTORAGE; i++) index[i] = NULL;
+	}
+
+	SpanVertex::~SpanVertex() {
+#ifndef PEPSDLL 
+		// don't know what peps did about this?
+		for(int i = 0; i < SPANSTORAGE; i++) {
+			if(index[i] != NULL) {
+				delete index[i];
+			}
+		}
+#endif
+	}
+
+	const SpanVertex& SpanVertex::operator= (const SpanVertex& spv ){
+		/// 
+
+		memcpy(x, spv.x, SPANSTORAGE * sizeof(double));
+		memcpy(y, spv.y, SPANSTORAGE * sizeof(double));
+		memcpy(xc, spv.xc, SPANSTORAGE * sizeof(double));
+		memcpy(yc, spv.yc, SPANSTORAGE * sizeof(double));
+
+		for(unsigned int i = 0; i < SPANSTORAGE; i++) {
+			type[i] = spv.type[i];
+			spanid[i] = spv.spanid[i];
+			index[i] = spv.index[i];
+#ifndef PEPSDLL
+			if(index[i] != NULL) {
+				SpanDataObject* obj = new SpanDataObject(index[i]);
+				index[i] = obj;
+			}
+#endif
+		}
+		return *this;
+	}
+
+
 	void SpanVertex::Add(int offset, int spantype, Point& p, Point& pc, int ID)
 	{
 		type[offset] = spantype;
-		index[offset] = NULL;
+//		index[offset] = NULL;
 		x[offset] = p.x;
 		y[offset] = p.y;
 		xc[offset] = pc.x;
@@ -27,6 +65,8 @@ namespace geoff_geometry {
 	{
 		spanid[offset] = ID;
 	}
+
+#if PEPSDLL
 	void SpanVertex::Add(int offset, WireExtraData* Index )
 	{
 		index[offset] = Index;
@@ -35,6 +75,16 @@ namespace geoff_geometry {
 	{
 		return index[offset];
 	}
+#else
+	void SpanVertex::Add(int offset, SpanDataObject* Index ) {
+		index[offset] = Index;
+	}
+		
+	SpanDataObject* SpanVertex::GetIndex(int offset) {
+		return index[offset];
+	}
+#endif
+
 	int SpanVertex::Get(int offset, Point& pe, Point& pc)
 	{
 		pe = Point(x[offset], y[offset]);
@@ -46,6 +96,7 @@ namespace geoff_geometry {
 	{
 		return spanid[offset];
 	}
+
 	Span Span::Offset(double offset)
 	{
 		Span Offsp = *this;
@@ -346,9 +397,8 @@ namespace geoff_geometry {
 		}
 	}
 
-	const Kurve& Kurve::operator=( const Kurve &k)
-	{
-		for(int i = 0; i < 16; i++) e[i] = k.e[i];
+	const Kurve& Kurve::operator=( const Kurve &k) {
+		memcpy(e, k.e, 16 * sizeof(double));
 		m_unit = k.m_unit;
 		m_mirrored = k.m_mirrored;
 		m_isReversed = k.m_isReversed;
@@ -356,13 +406,19 @@ namespace geoff_geometry {
 		this->~Kurve();
 
 		if(k.m_nVertices) m_started = true;
-		m_nVertices = 0;
+//		m_nVertices = 0;
 
-		spVertex spv;
-		for(int i = 0; i < k.m_nVertices; i++) {
-			k.Get(i, spv);
-			Add(spv);
+//		spVertex spv;
+//		for(int i = 0; i < k.m_nVertices; i++) {
+//			k.Get(i, spv);
+//			Add(spv);
+//		}
+		for(unsigned int i = 0; i < k.m_spans.size(); i++) {
+			SpanVertex* spv = new SpanVertex;
+			*spv = *k.m_spans[i];
+			this->m_spans.push_back(spv);
 		}
+		m_nVertices = k.m_nVertices;
 		return *this;
 	}
 
@@ -550,6 +606,9 @@ return;
 		}
 		for(int i = 1; i <= k->nSpans(); i++) {
 			k->Get(i, sp, false, this->m_unit);
+			#ifndef PEPSDLL
+				SpanDataObject* obj = k->GetIndex(i-1);
+			#endif
 			if(this->m_unit == false) sp.Transform(m);
 
 			if(i == 1) {
@@ -560,12 +619,32 @@ return;
 					Get(nSpans(), spLast, false, false);
 					if(spLast.p1.Dist(sp.p0) <= geoff_geometry::TOLERANCE) AddFirstVertex = false;
 				}
-				if(AddFirstVertex) Add(sp.p0, AddNullSpans);
+				if(AddFirstVertex) { 
+					Add(sp.p0, AddNullSpans);
+					#ifndef PEPSDLL
+					if(obj != NULL) {
+						SpanDataObject* objnew = new SpanDataObject(obj);
+						AddIndex(nSpans() - 1, objnew);
+					}
+					#endif
+				}
 			}
 			
 			Add(sp.dir, sp.p1, sp.pc, AddNullSpans);
+			#ifndef PEPSDLL
+				if(obj != NULL) {
+					SpanDataObject* objnew = new SpanDataObject(obj);
+					AddIndex(nSpans() - 1, objnew);
+			}
+			#endif
 		}
 	}
+
+	void Kurve::Replace(int vertexnumber, spVertex& spv) {
+		// replace a span
+		Replace(vertexnumber, spv.type, spv.p, spv.pc, spv.spanid);
+	}
+
 
 	void Kurve::Replace(int vertexnumber, int type, Point& p0, Point& pc, int ID) {
 		// replace a span
@@ -576,7 +655,7 @@ return;
 		p->Add(vertexnumber % SPANSTORAGE, type, p0, pc, ID);
 	}
 
-
+#ifdef PEPSDLL
 	void Kurve::ModifyIndex(int vertexnumber, WireExtraData* i) {
 		// replace an index
 #ifdef _DEBUG
@@ -585,6 +664,21 @@ return;
 		SpanVertex* p = (SpanVertex*) m_spans[vertexnumber / SPANSTORAGE];
 		p->Add(vertexnumber % SPANSTORAGE, i);
 	}
+#else
+	void Kurve::AddIndex(int vertexNumber, SpanDataObject* data) {
+		if(this == NULL || vertexNumber > m_nVertices - 1) FAILURE(L"Kurve::AddIndex - vertexNumber out of range");
+		SpanVertex* p = (SpanVertex*) m_spans[vertexNumber / SPANSTORAGE];
+		p->Add(vertexNumber % SPANSTORAGE, data);
+	}
+
+	SpanDataObject* Kurve::GetIndex(int vertexNumber) {
+		if(this == NULL || vertexNumber > m_nVertices - 1) FAILURE(L"Kurve::GetIndex - vertexNumber out of range");
+		SpanVertex* p = (SpanVertex*) m_spans[vertexNumber / SPANSTORAGE];
+		return p->GetIndex(vertexNumber % SPANSTORAGE);
+	}
+
+
+#endif
 
 	void Kurve::Get(int vertexnumber, spVertex& spv) const {
 		spv.type = Get(vertexnumber, spv.p, spv.pc);
@@ -1590,61 +1684,4 @@ Kurve Kurve::Part(int fromSpanno, Point& fromPt, int toSpanno, Point& toPt) {
 		return k;
 	}
 
-		void Kurve::Part(double fromParam, double toParam, Kurve *secInput, Kurve *refOut, Kurve *secOut) {
-		/// return a part Kurve - perimeter parameterisation
-		/// synchronise (for wire)
-		/// fromParam & toParam 0 - 1 perimeter parameter
-		//	this is reference Kurve
-		//	secInput is secondary Kurve
-		//	refOut	is reference Part Kurve
-		//	secOut	is secondart Part Kurve
-
-		refOut->~Kurve();
-		secOut->~Kurve();
-
-		double perimTotal = this->Perim();
-		double fromPerim = fromParam * perimTotal;
-		double toPerim = toParam * perimTotal;
-		double perim = 0.;
-		double perimLast = 0.;
-		for(int i = 1; i <= this->nSpans(); i++) {
-			Span spRef, spSec;
-			this->Get(i, spRef, true, true);
-			secInput->Get(i, spSec, true, true);
-			perim += spRef.length;
-			if(fromPerim <= perim && refOut->m_started == false) {
-				// start
-				if(FEQ(fromPerim, perim) == true) {
-					refOut->Start(spRef.p0);
-					secOut->Start(spSec.p0);
-				}
-				else {
-					double d = fromPerim - perimLast;
-					refOut->Start(spRef.MidPerim(d));
-					secOut->Start(spSec.MidParam(d/spRef.length));
-				}
-			}
-
-			if(perim >= toPerim) {
-				// end
-				if(FEQ(toPerim, perim) == true) {
-					refOut->Add(spRef);
-					secOut->Add(spSec);
-				}
-				else {
-					double d = toPerim - perimLast;
-					spRef.p1 = spRef.MidPerim(d);
-					spSec.p1 = spSec.MidParam(d/spRef.length);
-					refOut->Add(spRef);
-					secOut->Add(spSec);
-				}				
-				break;
-			}
-			if(refOut->m_started == true) {
-				refOut->Add(spRef);
-				secOut->Add(spSec);
-			}
-			perimLast = perim;
-		}
-	}
 }
