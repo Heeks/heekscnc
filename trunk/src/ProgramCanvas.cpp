@@ -451,7 +451,7 @@ public:
 		const std::list<HeeksObj*>& marked_list = heeksCAD->GetMarkedList();
 		if(marked_list.size() > 0)
 		{
-			profile_adder.m_line_arcs_number = marked_list.front()->GetID();
+			profile_adder.m_line_arcs_number = marked_list.front()->m_id;
 		}
 		heeksCAD->ClearMarkedList();
 	}
@@ -510,10 +510,10 @@ static void set_finish_y(double value){profile_adder.m_finish_y = value; heeksCA
 void CProfileAdder::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyInt("line arc collection ID", m_line_arcs_number, set_line_arcs_number));
-	std::list<std::string> choices;
-	choices.push_back(std::string("left"));
-	choices.push_back(std::string("right"));
-	choices.push_back(std::string("on"));
+	std::list<wxString> choices;
+	choices.push_back(wxString("left"));
+	choices.push_back(wxString("right"));
+	choices.push_back(wxString("on"));
 	list->push_back(new PropertyChoice("offset type", choices, m_offset_type, set_offset_type));
 	if(m_offset_type != 2)
 	{

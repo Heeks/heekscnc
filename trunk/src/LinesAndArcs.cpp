@@ -47,6 +47,7 @@ void add_to_kurve(std::list<HeeksObj*> &list, Kurve &kurve)
 HeeksObj* create_line_arc(Kurve &kurve)
 {
 	HeeksObj* new_la = heeksCAD->NewLineArcCollection();
+	new_la->SetID(heeksCAD->GetNextID(new_la->GetIDGroupType()));
 
 	std::vector<Span> spans;
 	kurve.StoreAllSpans(spans);
