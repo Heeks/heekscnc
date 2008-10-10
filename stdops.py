@@ -18,7 +18,7 @@ def profile(kurve_id, direction, finishx, finishy):
         offset = diameter/2
         if direction == "right":
             offset = -offset
-        off_kurve_id = kurve_offset(kurve_id, offset, direction)
+        off_kurve_id = kurve_offset(kurve_id, offset)
         
     px, py, pz = current_tool_pos()
 
@@ -94,3 +94,25 @@ def facemill(xmax, ymax, stepover):
         feedxy(x3, starty)
     feedxy(xmax, ymax)
         
+def remove_radii(kurve_id, minrad):
+    off_kurve_id = kurve_offset(kurve_id, minrad, "left")
+    off_kurve_id2 = kurve_offset(off_kurve_id, -minrad, "right")
+    kurve_add(off_kurve_id2)
+
+def print_kurve(kurve_id):
+    num_spans = kurve_num_spans(kurve_id)
+
+    if num_spans == 0:
+        print "no_spans"
+        return
+    
+    for span in range(0, num_spans):
+        sp, sx, sy, ex, ey, cx, cy = kurve_span_data(kurve_id, span)
+        if sp == 0:#first span
+            print "LINE start X", sx, " Y", sy, " end X", ex, " Y", ey
+        else:
+            if sp == 1:# anti-clockwise arc
+                print "CCW start X", sx, " Y", sy, " end X", ex, " Y", ey, " centre X", cx, " Y", cy
+            else:
+                print "CW start X", sx, " Y", sy, " end X", ex, " Y", ey, " centre X", cx, " Y", cy
+    
