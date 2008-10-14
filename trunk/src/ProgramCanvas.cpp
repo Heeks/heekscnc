@@ -218,15 +218,15 @@ void CToolApply::Run(){
 	tool_adder.AddTheToolText();
 }
 
-static void set_station_number(int value){tool_adder.m_station_number = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_diameter(double value){tool_adder.m_diameter = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_corner_radius(double value){tool_adder.m_corner_radius = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_station_number(int value, HeeksObj* object){tool_adder.m_station_number = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_diameter(double value, HeeksObj* object){tool_adder.m_diameter = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_corner_radius(double value, HeeksObj* object){tool_adder.m_corner_radius = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 void CToolAdder::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyInt("station number", m_station_number, set_station_number));
-	list->push_back(new PropertyDouble("diameter", m_diameter, set_diameter));
-	list->push_back(new PropertyDouble("corner radius", m_corner_radius, set_corner_radius));
+	list->push_back(new PropertyInt("station number", m_station_number, NULL, set_station_number));
+	list->push_back(new PropertyDouble("diameter", m_diameter, NULL, set_diameter));
+	list->push_back(new PropertyDouble("corner radius", m_corner_radius, NULL, set_corner_radius));
 }
 
 void CInitialApply::Run(){
@@ -234,15 +234,15 @@ void CInitialApply::Run(){
 	initial_adder.AddTheInitialText();
 }
 
-static void set_spindle_speed(double value){initial_adder.m_spindle_speed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_hfeed(double value){initial_adder.m_hfeed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_vfeed(double value){initial_adder.m_vfeed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_spindle_speed(double value, HeeksObj* object){initial_adder.m_spindle_speed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_hfeed(double value, HeeksObj* object){initial_adder.m_hfeed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_vfeed(double value, HeeksObj* object){initial_adder.m_vfeed = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 void CInitialAdder::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble("spindle speed", m_spindle_speed, set_spindle_speed));
-	list->push_back(new PropertyDouble("horizontal feed rate", m_hfeed, set_hfeed));
-	list->push_back(new PropertyDouble("vertical feed rate", m_vfeed, set_vfeed));
+	list->push_back(new PropertyDouble("spindle speed", m_spindle_speed, NULL, set_spindle_speed));
+	list->push_back(new PropertyDouble("horizontal feed rate", m_hfeed, NULL, set_hfeed));
+	list->push_back(new PropertyDouble("vertical feed rate", m_vfeed, NULL, set_vfeed));
 }
 
 class CMoveAdder: public CInputMode
@@ -340,9 +340,9 @@ void CAdderApply::Run(){
 	move_adder.AddTheMove();
 }
 
-static void set_x(double value){move_adder.m_pos[0] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_y(double value){move_adder.m_pos[1] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_z(double value){move_adder.m_pos[2] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_x(double value, HeeksObj* object){move_adder.m_pos[0] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_y(double value, HeeksObj* object){move_adder.m_pos[1] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_z(double value, HeeksObj* object){move_adder.m_pos[2] = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 class CProfileApply: public CAdderApply
 {
@@ -502,23 +502,23 @@ wxBitmap* OpPickPosTool::m_bitmap = NULL;
 
 static OpPickPosTool pick_pos_tool;
 
-static void set_line_arcs_number(int value){profile_adder.m_line_arcs_number = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_offset_type(int value){profile_adder.m_offset_type = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_finish_x(double value){profile_adder.m_finish_x = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
-static void set_finish_y(double value){profile_adder.m_finish_y = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_line_arcs_number(int value, HeeksObj* object){profile_adder.m_line_arcs_number = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_offset_type(int value, HeeksObj* object){profile_adder.m_offset_type = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_finish_x(double value, HeeksObj* object){profile_adder.m_finish_x = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
+static void set_finish_y(double value, HeeksObj* object){profile_adder.m_finish_y = value; heeksCAD->RefreshInput(); heeksCAD->Repaint();}
 
 void CProfileAdder::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyInt("line arc collection ID", m_line_arcs_number, set_line_arcs_number));
+	list->push_back(new PropertyInt("line arc collection ID", m_line_arcs_number, NULL, set_line_arcs_number));
 	std::list<wxString> choices;
 	choices.push_back(wxString("left"));
 	choices.push_back(wxString("right"));
 	choices.push_back(wxString("on"));
-	list->push_back(new PropertyChoice("offset type", choices, m_offset_type, set_offset_type));
+	list->push_back(new PropertyChoice("offset type", choices, m_offset_type, NULL, set_offset_type));
 	if(m_offset_type != 2)
 	{
-		list->push_back(new PropertyDouble("X roll off position", m_finish_x, set_finish_x));
-		list->push_back(new PropertyDouble("Y roll off position", m_finish_y, set_finish_y));
+		list->push_back(new PropertyDouble("X roll off position", m_finish_x, NULL, set_finish_x));
+		list->push_back(new PropertyDouble("Y roll off position", m_finish_y, NULL, set_finish_y));
 	}
 }
 
@@ -533,11 +533,11 @@ void CProfileAdder::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 void CMoveAdder::GetProperties(std::list<Property *> *list)
 {
 	if(m_mode != 3 && m_mode != 5){
-		list->push_back(new PropertyDouble("X", m_pos[0], set_x));
-		list->push_back(new PropertyDouble("Y", m_pos[1], set_y));
+		list->push_back(new PropertyDouble("X", m_pos[0], NULL, set_x));
+		list->push_back(new PropertyDouble("Y", m_pos[1], NULL, set_y));
 	}
 	if(m_mode != 2 && m_mode != 4){
-		list->push_back(new PropertyDouble("Z", m_pos[2], set_z));
+		list->push_back(new PropertyDouble("Z", m_pos[2], NULL, set_z));
 	}
 }
 

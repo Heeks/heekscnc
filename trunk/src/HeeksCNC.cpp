@@ -158,16 +158,16 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 	theApp.m_output_canvas->Clear();
 }
 
-void on_solid_sim_wd_edit(const char* wd){theApp.m_working_dir_for_solid_sim = wd;}
-void on_solid_sim_tf_edit(const char* tf){theApp.m_triangles_file_for_solid_sim = tf;}
-void on_solid_sim_cm_edit(const char* cm){theApp.m_command_for_solid_sim = cm;}
+void on_solid_sim_wd_edit(const char* wd, HeeksObj* object){theApp.m_working_dir_for_solid_sim = wd;}
+void on_solid_sim_tf_edit(const char* tf, HeeksObj* object){theApp.m_triangles_file_for_solid_sim = tf;}
+void on_solid_sim_cm_edit(const char* cm, HeeksObj* object){theApp.m_command_for_solid_sim = cm;}
 
 
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	// solid sim
-	list->push_back(new PropertyString("SolidSimWorkingDir", m_working_dir_for_solid_sim, on_solid_sim_wd_edit));
-	list->push_back(new PropertyString("SolidSimTrianglesFile", m_triangles_file_for_solid_sim, on_solid_sim_tf_edit));
-	list->push_back(new PropertyString("SolidSimCommand", m_command_for_solid_sim, on_solid_sim_cm_edit));
+	list->push_back(new PropertyString("SolidSimWorkingDir", m_working_dir_for_solid_sim, NULL, on_solid_sim_wd_edit));
+	list->push_back(new PropertyString("SolidSimTrianglesFile", m_triangles_file_for_solid_sim, NULL, on_solid_sim_tf_edit));
+	list->push_back(new PropertyString("SolidSimCommand", m_command_for_solid_sim, NULL, on_solid_sim_cm_edit));
 }
 
 void CHeeksCNCApp::OnFrameDelete()
