@@ -1,30 +1,19 @@
 #summary Using HeeksCNC
 
-= It's still in an early stage =
-It will have tool bar buttons soon, on the Program window, which help you do the following
-
 = An example =
-Use the HeeksCAD line/arc drawing button to draw some lines.
-
-Then copy the following text to the Program window:
-
-tool(1, 2, 0)
-
-spindle(1000)
-
-rate(100, 100)
-
-rapid(0, 0, 0)
-
-rapid(10, 0, 0)
-
-profile(1, 'left', 10, 10)
+Make sure the "Program" and "Output" windows are visible ( switch them on from the "View" menu ).
+Open the file that comes with HeeksCNC 0.2.0, "sample program.heeks"
 
 
+You can see that there is some text in the program window.
 
-Then press the "Run Program" icon at the edge of the Program window.
+Press the "Run the program" icon at the bottom left of the Program window.
 You should see some profiling tool path.
 
-= Post-Processing =
-Doesn't do anything yet.
-almost there...
+Press the "Post process" button at the bottom right of the Program window.
+You will see some NC code for my Sieg KX1 milling machine appear in the Output window.
+
+To make NC code for your machine, edit siegkx1.py.
+If it's not obvious ask me about it.   danheeks@gmail.com
+
+HeeksCNC is not finished yet.
