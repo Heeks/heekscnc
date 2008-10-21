@@ -8,8 +8,10 @@
 #include "../../HeeksCAD/interface/Observer.h"
 #include "PythonStuff.h"
 #include "Program.h"
+#include "Profile.h"
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
+#include "LinesAndArcs.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -63,8 +65,34 @@ void CHeeksCNCApp::OnDestroyDLL()
 	heeksCAD = NULL;
 }
 
-void OnSolidSimButton(wxCommandEvent& event){
-	wxMessageBox("In OnSolidSimButton");
+
+void OnMakeProfileButton(wxCommandEvent& event){
+	heeksCAD->PickObjects("Pick lines and arc to make profile");
+	CProfile* new_object = new CProfile;
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		add_to_kurve(object, new_object->m_kurve);
+	}
+	heeksCAD->AddUndoably(new_object, NULL);
+	heeksCAD->Repaint();
+}
+
+void OnCNCBar( wxCommandEvent& event )
+{
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+	wxAuiPaneInfo& pane_info = aui_manager->GetPane(theApp.m_CNCBar);
+	if(pane_info.IsOk()){
+		pane_info.Show(event.IsChecked());
+		aui_manager->Update();
+	}
+}
+
+void OnUpdateCNCBar( wxUpdateUIEvent& event )
+{
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+	event.Check(aui_manager->GetPane(theApp.m_CNCBar).IsShown());
 }
 
 void OnProgramCanvas( wxCommandEvent& event )
@@ -103,9 +131,18 @@ void CHeeksCNCApp::OnStartUp()
 {
 	// add menus and toolbars
 
-	// add the program canvas
 	wxFrame* frame = heeksCAD->GetMainFrame();
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+
+	// add CNC toolbar
+	m_CNCBar = new wxToolBar(frame, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
+	m_CNCBar->SetToolBitmapSize(wxSize(32, 32));
+	heeksCAD->AddToolBarButton((wxToolBar*)m_CNCBar, "Make Profile", wxBitmap(heeksCAD->GetExeFolder() + "/../HeeksCNC/bitmaps/makeprofile.png", wxBITMAP_TYPE_PNG), "Make profile by selecting lines and arcs", OnMakeProfileButton);
+	m_CNCBar->Realize();
+	aui_manager->AddPane(m_CNCBar, wxAuiPaneInfo().Name("SolidSimBar").Caption("MachineWorks tools").ToolbarPane().Top());
+
+
+	// add the program canvas
     m_program_canvas = new CProgramCanvas(frame);
 	aui_manager->AddPane(m_program_canvas, wxAuiPaneInfo().Name("Program").Caption("Program").Bottom().BestSize(wxSize(600, 200)));
 
@@ -115,22 +152,28 @@ void CHeeksCNCApp::OnStartUp()
 
 	bool program_visible;
 	bool output_visible;
+	bool CNCBar_visible;
 
 	theApp.m_config->Read("ProgramVisible", &program_visible);
 	theApp.m_config->Read("OutputVisible", &output_visible);
+	theApp.m_config->Read("CNCBarVisible", &CNCBar_visible);
 
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
+	aui_manager->GetPane(m_CNCBar).Show(CNCBar_visible);
 
 	// add tick boxes for them all on the view menu
 	wxMenu* view_menu = heeksCAD->GetViewMenu();
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Program"), OnProgramCanvas, OnUpdateProgramCanvas);
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Output"), OnOutputCanvas, OnUpdateOutputCanvas);
+	heeksCAD->AddMenuCheckItem(view_menu, _T("CNC Tools"), OnCNCBar, OnUpdateCNCBar);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
+	heeksCAD->RegisterHideableWindow(m_CNCBar);
 
 	// add object reading functions
 	heeksCAD->RegisterReadXMLfunction("Program", CProgram::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
 }
 
 void CHeeksCNCApp::OnNewOrOpen(bool open)
