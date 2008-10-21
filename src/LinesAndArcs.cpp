@@ -26,13 +26,6 @@ void add_to_kurve(HeeksObj* object, Kurve& kurve)
 		int type = (a[2] >= 0) ? 1 : -1;
 		kurve.Add(Span(type, Point(s[0], s[1]), Point(e[0], e[1]), Point(c[0], c[1])));
 	}
-	else{
-		// might be a container of lines and arcs
-		for(HeeksObj* child = object->GetFirstChild(); child; child = object->GetNextChild())
-		{
-			add_to_kurve(child, kurve);
-		}
-	}
 }
 
 void add_to_kurve(std::list<HeeksObj*> &list, Kurve &kurve)
@@ -44,11 +37,8 @@ void add_to_kurve(std::list<HeeksObj*> &list, Kurve &kurve)
 	}
 }
 
-HeeksObj* create_line_arc(Kurve &kurve)
+void create_lines_and_arcs(Kurve &kurve, bool undoably)
 {
-	HeeksObj* new_la = heeksCAD->NewLineArcCollection();
-	new_la->SetID(heeksCAD->GetNextID(new_la->GetIDGroupType()));
-
 	std::vector<Span> spans;
 	kurve.StoreAllSpans(spans);
 
@@ -66,7 +56,8 @@ HeeksObj* create_line_arc(Kurve &kurve)
 			if(fabs(s[0] - e[0]) > heeksCAD->GetTolerance() || fabs(s[1] - e[1]) > heeksCAD->GetTolerance())
 			{
 				HeeksObj* new_object = heeksCAD->NewArc(s, e, c, span.dir > 0 ? up : down);
-				new_la->Add(new_object, NULL);
+				if(undoably)heeksCAD->AddUndoably(new_object, NULL);
+				else heeksCAD->GetMainObject()->Add(new_object, NULL);
 			}
 		}
 		else
@@ -76,10 +67,9 @@ HeeksObj* create_line_arc(Kurve &kurve)
 			if(fabs(s[0] - e[0]) > heeksCAD->GetTolerance() || fabs(s[1] - e[1]) > heeksCAD->GetTolerance())
 			{
 				HeeksObj* new_object = heeksCAD->NewLine(s, e);
-				new_la->Add(new_object, NULL);
+				if(undoably)heeksCAD->AddUndoably(new_object, NULL);
+				else heeksCAD->GetMainObject()->Add(new_object, NULL);
 			}
 		}
 	}
-
-	return new_la;
 }
