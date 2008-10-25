@@ -8,7 +8,7 @@
 #include "LinesAndArcs.h"
 #include "GTri.h"
 #include "DropCutter.h"
-#include "Profile.h"
+#include "../../interface/HeeksObj.h"
 
 #if _DEBUG
 #undef _DEBUG
@@ -483,7 +483,7 @@ static PyObject* hc_kurve_exists(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(ProfileType, line_arcs_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
 
 	// return exists
 	PyObject *pValue = line_arcs ? Py_True : Py_False;
@@ -497,7 +497,7 @@ static PyObject* hc_kurve_add(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(ProfileType, line_arcs_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
 	heeksCAD->AddUndoably(line_arcs, NULL);
 
 	Py_RETURN_NONE;
@@ -505,20 +505,22 @@ static PyObject* hc_kurve_add(PyObject* self, PyObject* args)
 
 static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 {
-	int profile_id;
+	int line_arcs_id;
 	double offset;
 
-	if (!PyArg_ParseTuple(args, "id", &profile_id, &offset)) return NULL;
+	if (!PyArg_ParseTuple(args, "id", &line_arcs_id, &offset)) return NULL;
 
-	CProfile* profile = (CProfile*)(heeksCAD->GetIDObject(ProfileType, profile_id));
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
 	int offset_id = 0;
 
 	try{
-	if(profile){
+	if(line_arcs){
+		Kurve temp_kurve;
+		add_to_kurve(line_arcs, temp_kurve);
 		// offset the kurve
 		std::vector<Kurve*> offset_kurves;
 		int ret = 0;
-		int res = profile->m_kurve.Offset(offset_kurves, fabs(offset), offset>0 ? 1:-1, BASIC_OFFSET, ret);
+		int res = temp_kurve.Offset(offset_kurves, fabs(offset), offset>0 ? 1:-1, BASIC_OFFSET, ret);
 
 		// loop through offset kurves
 		int i = 0;
@@ -528,9 +530,8 @@ static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 			if(i == 0)
 			{
 				// just do the first one
-				CProfile* new_object = new CProfile(*k);
-				new_object->SetID(heeksCAD->GetNextID(ProfileType));
-				offset_id = new_object->m_id;
+				HeeksObj* new_larc = create_line_arc(*k);
+				offset_id = new_larc->m_id;
 			}
 			delete k;
 		}
@@ -556,7 +557,7 @@ static PyObject* hc_kurve_delete(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &kurve_id))
         return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(ProfileType, kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	if(line_arcs)delete line_arcs;
 
     Py_RETURN_NONE;
@@ -569,9 +570,9 @@ static PyObject* hc_kurve_num_spans(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &kurve_id))
         return NULL;
 
-	CProfile* profile = (CProfile*)(heeksCAD->GetIDObject(ProfileType, kurve_id));
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	int num_spans = 0;
-	if(profile)num_spans = profile->GetNumChildren();
+	if(line_arcs)num_spans = line_arcs->GetNumChildren();
 
 	// return number of spans
 	PyObject *pValue = PyInt_FromLong(num_spans);
@@ -595,7 +596,7 @@ static PyObject* hc_kurve_span_data(PyObject *self, PyObject *args)
 	double cx = 0.0;
 	double cy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(ProfileType, kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	if(line_arcs){
 		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
 		if(span_object){
@@ -692,7 +693,7 @@ static PyObject* hc_kurve_span_dir(PyObject *self, PyObject *args)
 	double vx = 1.0;
 	double vy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(ProfileType, kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
 	if(line_arcs){
 		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
 		if(span_object){
