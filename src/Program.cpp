@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include "Program.h"
 #include "PythonStuff.h"
-#include "../../HeeksCAD/tinyxml/tinyxml.h"
+#include "../../tinyxml/tinyxml.h"
 #include "ProgramCanvas.h"
 
 wxIcon* CProgram::m_icon = NULL;
@@ -38,8 +38,7 @@ wxIcon* CProgram::GetIcon()
 {
 	if(m_icon == NULL)
 	{
-		wxString exe_folder = heeksCAD->GetExeFolder();
-		m_icon = new wxIcon(exe_folder + "/../HeeksCNC/icons/program.png", wxBITMAP_TYPE_PNG);
+		m_icon = new wxIcon(theApp.GetDllFolder() + "/icons/program.png", wxBITMAP_TYPE_PNG);
 	}
 	return m_icon;
 }

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../HeeksCAD/interface/HeeksObj.h"
+#include "../../interface/HeeksObj.h"
 #include "HeeksCNCTypes.h"
 
 class CProfile: public HeeksObj

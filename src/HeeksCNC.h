@@ -2,7 +2,7 @@
 
 // defines global variables and functions
 
-#include "../../HeeksCAD/interface/HeeksCADInterface.h"
+#include "../../interface/HeeksCADInterface.h"
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -33,6 +33,7 @@ public:
 	void OnDestroyDLL();
 	void GetOptions(std::list<Property *> *list);
 	void OnFrameDelete();
+	wxString GetDllFolder();
 };
 
 extern CHeeksCNCApp theApp;

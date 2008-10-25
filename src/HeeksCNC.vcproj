@@ -64,7 +64,7 @@
 				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib tinyxml.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;,C:\Python25\libs;..\..\HeeksCAD\tinyxml"
+				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;;C:\Python25\libs;..\..\tinyxml"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -148,7 +148,7 @@
 				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib tinyxml.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;,C:\Python25\libs;..\..\HeeksCAD\tinyxml"
+				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;;C:\Python25\libs;..\..\tinyxml"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -187,7 +187,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Profile.cpp"
+				RelativePath="..\..\interface\LeftAndRight.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\interface\ObjList.cpp"
 				>
 			</File>
 		</Filter>
@@ -197,7 +201,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Profile.h"
+				RelativePath="..\..\interface\LeftAndRight.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\interface\ObjList.h"
 				>
 			</File>
 		</Filter>
@@ -208,7 +216,7 @@
 			>
 		</Filter>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\Box.h"
+			RelativePath="..\..\interface\Box.h"
 			>
 		</File>
 		<File
@@ -272,7 +280,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\HeeksCADInterface.h"
+			RelativePath="..\..\interface\HeeksCADInterface.h"
 			>
 		</File>
 		<File
@@ -284,19 +292,19 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\HeeksColor.cpp"
+			RelativePath="..\..\interface\HeeksColor.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\HeeksColor.h"
+			RelativePath="..\..\interface\HeeksColor.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\HeeksObj.cpp"
+			RelativePath="..\..\interface\HeeksObj.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\HeeksObj.h"
+			RelativePath="..\..\interface\HeeksObj.h"
 			>
 		</File>
 		<File
@@ -356,14 +364,6 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\LeftAndRight.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\HeeksCAD\interface\LeftAndRight.h"
-			>
-		</File>
-		<File
 			RelativePath=".\LinesAndArcs.cpp"
 			>
 		</File>
@@ -372,11 +372,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\MarkedObject.cpp"
+			RelativePath="..\..\interface\MarkedObject.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\MarkedObject.h"
+			RelativePath="..\..\interface\MarkedObject.h"
 			>
 		</File>
 		<File
@@ -424,14 +424,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\ObjList.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\HeeksCAD\interface\ObjList.h"
-			>
-		</File>
-		<File
 			RelativePath=".\geometry\offset.cpp"
 			>
 			<FileConfiguration
@@ -468,6 +460,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Profile.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Profile.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Program.cpp"
 			>
 		</File>
@@ -484,63 +484,63 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\Property.h"
+			RelativePath="..\..\interface\Property.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyCheck.cpp"
+			RelativePath="..\..\interface\PropertyCheck.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyCheck.h"
+			RelativePath="..\..\interface\PropertyCheck.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyChoice.cpp"
+			RelativePath="..\..\interface\PropertyChoice.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyChoice.h"
+			RelativePath="..\..\interface\PropertyChoice.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyColor.cpp"
+			RelativePath="..\..\interface\PropertyColor.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyColor.h"
+			RelativePath="..\..\interface\PropertyColor.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyDouble.cpp"
+			RelativePath="..\..\interface\PropertyDouble.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyDouble.h"
+			RelativePath="..\..\interface\PropertyDouble.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyInt.cpp"
+			RelativePath="..\..\interface\PropertyInt.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyInt.h"
+			RelativePath="..\..\interface\PropertyInt.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyList.cpp"
+			RelativePath="..\..\interface\PropertyList.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyList.h"
+			RelativePath="..\..\interface\PropertyList.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyString.cpp"
+			RelativePath="..\..\interface\PropertyString.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyString.h"
+			RelativePath="..\..\interface\PropertyString.h"
 			>
 		</File>
 		<File
@@ -572,7 +572,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\Tool.h"
+			RelativePath="..\..\interface\Tool.h"
 			>
 		</File>
 	</Files>
