@@ -12,9 +12,9 @@ while (True):
         f_vc5.write('Microsoft Visual Studio Solution File, Format Version 9.00\n');
     elif (line == '# Visual C++ Express 2008\n'):
         f_vc5.write('# Visual Studio 2005\n');
-    elif (line == 'Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeeksCNC", "HeeksCNC.vcproj", "{2702996F-5BCC-436D-A756-D9675FE828A8}"\n'):
-        f_vc3.write('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeeksCNC", "HeeksCNC VC2003.vcproj", "{2702996F-5BCC-436D-A756-D9675FE828A8}"\n');
-        f_vc5.write('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeeksCNC", "HeeksCNC VC2005.vcproj", "{2702996F-5BCC-436D-A756-D9675FE828A8}"\n');
+    elif (line == 'Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeeksCNC", "HeeksCNC.vcproj", "{BE9260B2-CF4A-413B-87BE-4AD857278689}"\n'):
+        f_vc3.write('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeeksCNC", "HeeksCNC VC2003.vcproj", "{BE9260B2-CF4A-413B-87BE-4AD857278689}"\n');
+        f_vc5.write('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeeksCNC", "HeeksCNC VC2005.vcproj", "{BE9260B2-CF4A-413B-87BE-4AD857278689}"\n');
     else:
         f_vc3.write(line);
         f_vc5.write(line);
@@ -36,6 +36,7 @@ while (True):
         f_vc3.write('\tVersion="7.10"\n');
         f_vc5.write('\tVersion="8.00"\n');
     else:
+        line = line.replace('tinyxml.lib', 'tinyxml2005.lib')
         f_vc3.write(line);
         f_vc5.write(line);
 
