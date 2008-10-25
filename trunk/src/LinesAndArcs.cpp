@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include "LinesAndArcs.h"
 #include "geometry/geometry.h"
-#include "../../HeeksCAD/interface/HeeksObj.h"
+#include "../../interface/HeeksObj.h"
 
 void add_to_kurve(HeeksObj* object, Kurve& kurve)
 {

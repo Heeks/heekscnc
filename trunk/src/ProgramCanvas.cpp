@@ -4,12 +4,12 @@
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "OutputCanvas.h"
-#include "../../HeeksCAD/interface/Tool.h"
-#include "../../HeeksCAD/interface/InputMode.h"
-#include "../../HeeksCAD/interface/LeftAndRight.h"
-#include "../../HeeksCAD/interface/PropertyInt.h"
-#include "../../HeeksCAD/interface/PropertyDouble.h"
-#include "../../HeeksCAD/interface/PropertyChoice.h"
+#include "../../interface/Tool.h"
+#include "../../interface/InputMode.h"
+#include "../../interface/LeftAndRight.h"
+#include "../../interface/PropertyInt.h"
+#include "../../interface/PropertyDouble.h"
+#include "../../interface/PropertyChoice.h"
 #include "PythonStuff.h"
 
 BEGIN_EVENT_TABLE(CProgramCanvas, wxScrolledWindow)
@@ -44,8 +44,7 @@ public:
 	{
 		if(m_bitmap == NULL)
 		{
-			wxString exe_folder = heeksCAD->GetExeFolder();
-			m_bitmap = new wxBitmap(exe_folder + "/bitmaps/apply.png", wxBITMAP_TYPE_PNG);
+			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/apply.png", wxBITMAP_TYPE_PNG);
 		}
 		return m_bitmap;
 	}
@@ -70,8 +69,7 @@ public:
 	{
 		if(m_bitmap == NULL)
 		{
-			wxString exe_folder = heeksCAD->GetExeFolder();
-			m_bitmap = new wxBitmap(exe_folder + "/bitmaps/cancel.png", wxBITMAP_TYPE_PNG);
+			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/cancel.png", wxBITMAP_TYPE_PNG);
 		}
 		return m_bitmap;
 	}
@@ -460,8 +458,7 @@ public:
 	{
 		if(m_bitmap == NULL)
 		{
-			wxString exe_folder = heeksCAD->GetExeFolder();
-			m_bitmap = new wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/pickopobjects.png", wxBITMAP_TYPE_PNG);
+			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/HeeksCNC/bitmaps/pickopobjects.png", wxBITMAP_TYPE_PNG);
 		}
 		return m_bitmap;
 	}
@@ -491,8 +488,7 @@ public:
 	{
 		if(m_bitmap == NULL)
 		{
-			wxString exe_folder = heeksCAD->GetExeFolder();
-			m_bitmap = new wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/pickoppos.png", wxBITMAP_TYPE_PNG);
+			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/HeeksCNC/bitmaps/pickoppos.png", wxBITMAP_TYPE_PNG);
 		}
 		return m_bitmap;
 	}
@@ -609,20 +605,19 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
 	m_toolBar->SetToolBitmapSize(wxSize(32, 32));
 
 	// add toolbar buttons
-	wxString exe_folder = heeksCAD->GetExeFolder();
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Run"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/run.png", wxBITMAP_TYPE_PNG), _T("Run the program"), OnRun);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Initial"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/initial.png", wxBITMAP_TYPE_PNG), _T("Add spindle speed and feed rates"), OnAddInitial);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Tool"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/tool.png", wxBITMAP_TYPE_PNG), _T("Add tool command"), OnAddTool);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XYZ"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/rapid.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapid);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XY"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/rapidxy.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidXY);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid Z"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/rapidz.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidZ);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XYZ"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/feed.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeed);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XY"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/feedxy.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedXY);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed Z"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/feedz.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedZ);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Profile Operation"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/opprofile.png", wxBITMAP_TYPE_PNG), _T("Add a profile operation"), OnAddProfileOp);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Run"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/run.png", wxBITMAP_TYPE_PNG), _T("Run the program"), OnRun);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Initial"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/initial.png", wxBITMAP_TYPE_PNG), _T("Add spindle speed and feed rates"), OnAddInitial);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Tool"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/tool.png", wxBITMAP_TYPE_PNG), _T("Add tool command"), OnAddTool);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XYZ"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/rapid.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapid);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XY"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/rapidxy.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidXY);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid Z"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/rapidz.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidZ);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XYZ"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/feed.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeed);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XY"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/feedxy.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedXY);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed Z"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/feedz.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedZ);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Profile Operation"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/opprofile.png", wxBITMAP_TYPE_PNG), _T("Add a profile operation"), OnAddProfileOp);
 
 	// these buttons always go at then end
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(exe_folder + "/../HeeksCNC/bitmaps/postprocess.png", wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/postprocess.png", wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);
 
 	m_toolBar->Realize();
 

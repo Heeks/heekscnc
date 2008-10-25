@@ -4,8 +4,8 @@
 
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
-#include "../../HeeksCAD/interface/PropertyString.h"
-#include "../../HeeksCAD/interface/Observer.h"
+#include "../../interface/PropertyString.h"
+#include "../../interface/Observer.h"
 #include "PythonStuff.h"
 #include "Program.h"
 #include "Profile.h"
@@ -67,7 +67,8 @@ void CHeeksCNCApp::OnDestroyDLL()
 
 
 void OnMakeProfileButton(wxCommandEvent& event){
-	heeksCAD->PickObjects("Pick lines and arc to make profile");
+	heeksCAD->PickObjects("Pick lines and arc to make profile", MARKING_FILTER_LINE | MARKING_FILTER_ARC);
+
 	CProfile* new_object = new CProfile;
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
@@ -137,7 +138,7 @@ void CHeeksCNCApp::OnStartUp()
 	// add CNC toolbar
 	m_CNCBar = new wxToolBar(frame, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
 	m_CNCBar->SetToolBitmapSize(wxSize(32, 32));
-	heeksCAD->AddToolBarButton((wxToolBar*)m_CNCBar, "Make Profile", wxBitmap(heeksCAD->GetExeFolder() + "/../HeeksCNC/bitmaps/makeprofile.png", wxBITMAP_TYPE_PNG), "Make profile by selecting lines and arcs", OnMakeProfileButton);
+	heeksCAD->AddToolBarButton((wxToolBar*)m_CNCBar, "Make Profile", wxBitmap(theApp.GetDllFolder() + "/bitmaps/makeprofile.png", wxBITMAP_TYPE_PNG), "Make profile by selecting lines and arcs", OnMakeProfileButton);
 	m_CNCBar->Realize();
 	aui_manager->AddPane(m_CNCBar, wxAuiPaneInfo().Name("SolidSimBar").Caption("MachineWorks tools").ToolbarPane().Top());
 
@@ -218,6 +219,11 @@ void CHeeksCNCApp::OnFrameDelete()
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
 	theApp.m_config->Write("ProgramVisible", aui_manager->GetPane(m_program_canvas).IsShown());
 	theApp.m_config->Write("OutputVisible", aui_manager->GetPane(m_output_canvas).IsShown());
+}
+
+wxString CHeeksCNCApp::GetDllFolder()
+{
+	return heeksCAD->GetExeFolder() + "/HeeksCNC";
 }
 
 class MyApp : public wxApp

@@ -1010,14 +1010,13 @@ void HeeksPyPostProcess()
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
-		wxString exe_folder = heeksCAD->GetExeFolder();
-		if(!write_python_file(exe_folder + wxString("/../HeeksCNC/post.py"), true))
+		if(!write_python_file(theApp.GetDllFolder() + wxString("/post.py"), true))
 		{
 			wxMessageBox("couldn't write post.py!");
 		}
 		else
 		{
-			::wxSetWorkingDirectory(exe_folder + wxString("/../HeeksCNC"));
+			::wxSetWorkingDirectory(theApp.GetDllFolder());
 
 			Py_Initialize();
 			Py_InitModule("hc", HCMethods);
@@ -1098,14 +1097,13 @@ void HeeksPyRunProgram(CBox &box)
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
-		wxString exe_folder = heeksCAD->GetExeFolder();
-		if(!write_python_file(exe_folder + wxString("/../HeeksCNC/run.py")))
+		if(!write_python_file(theApp.GetDllFolder() + wxString("/run.py")))
 		{
 			wxMessageBox("couldn't write run.py!");
 		}
 		else
 		{
-			::wxSetWorkingDirectory(exe_folder + wxString("/../HeeksCNC"));
+			::wxSetWorkingDirectory(theApp.GetDllFolder());
 
 			Py_Initialize();
 			Py_InitModule("hc", HCMethods);
