@@ -27,8 +27,7 @@ wxIcon* CProfile::GetIcon()
 {
 	if(m_icon == NULL)
 	{
-		wxString exe_folder = heeksCAD->GetExeFolder();
-		m_icon = new wxIcon(exe_folder + "/../HeeksCNC/icons/profile.png", wxBITMAP_TYPE_PNG);
+		m_icon = new wxIcon(theApp.GetDllFolder() + "/icons/profile.png", wxBITMAP_TYPE_PNG);
 	}
 	return m_icon;
 }
