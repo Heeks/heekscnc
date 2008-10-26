@@ -483,7 +483,7 @@ static PyObject* hc_kurve_exists(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, line_arcs_id);
 
 	// return exists
 	PyObject *pValue = line_arcs ? Py_True : Py_False;
@@ -497,7 +497,7 @@ static PyObject* hc_kurve_add(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, line_arcs_id);
 	heeksCAD->AddUndoably(line_arcs, NULL);
 
 	Py_RETURN_NONE;
@@ -510,7 +510,7 @@ static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "id", &line_arcs_id, &offset)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, line_arcs_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, line_arcs_id);
 	int offset_id = 0;
 
 	try{
@@ -557,7 +557,7 @@ static PyObject* hc_kurve_delete(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &kurve_id))
         return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
 	if(line_arcs)delete line_arcs;
 
     Py_RETURN_NONE;
@@ -570,7 +570,7 @@ static PyObject* hc_kurve_num_spans(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "i", &kurve_id))
         return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
 	int num_spans = 0;
 	if(line_arcs)num_spans = line_arcs->GetNumChildren();
 
@@ -596,7 +596,7 @@ static PyObject* hc_kurve_span_data(PyObject *self, PyObject *args)
 	double cx = 0.0;
 	double cy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
 	if(line_arcs){
 		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
 		if(span_object){
@@ -693,7 +693,7 @@ static PyObject* hc_kurve_span_dir(PyObject *self, PyObject *args)
 	double vx = 1.0;
 	double vy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(LineArcCollectionType, kurve_id);
+	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
 	if(line_arcs){
 		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
 		if(span_object){
