@@ -9,13 +9,11 @@ This is just for Windows for now.
 
 You need HeeksCAD ( see http://code.google.com/p/heekscad/ ), because HeeksCNC is an add-in for HeeksCAD.
 
-Check-out all the HeeksCNC files to a folder called "HeeksCNC" ( it has to have this name at the moment ) at the same level as the HeeksCAD folder that you checked-out the heekscad project to.
+Check-out all the HeeksCNC files to a folder called "HeeksCNC" ( it has to have this name at the moment ) under the HeeksCAD folder that you checked-out the heekscad project to.
 
 Open "HeeksCNC.sln"
 
 Press "Build Solution"
-
-Un-comment the line relevant line in "HeeksCAD/AddIns.txt" that tells HeeksCAD to load up HeeksCNC.dll
 
 Install the latest verion of Python, ( HeeksCNC uses Python scripts extensively )
 
