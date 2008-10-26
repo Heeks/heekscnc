@@ -17,4 +17,4 @@ Press "Build Solution"
 
 Install the latest verion of Python, ( HeeksCNC uses Python scripts extensively )
 
-Run HeeksCAD.exe and it should load up HeeksCNC.dll and add the extra windows and menu items.
+Run HeeksCAD.exe and it should load up HeeksCNC.dll and add the extra windows and menu items. You will have to go to the "View" menu and tick them to make them visible.
