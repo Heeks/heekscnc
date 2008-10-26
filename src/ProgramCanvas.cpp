@@ -458,7 +458,7 @@ public:
 	{
 		if(m_bitmap == NULL)
 		{
-			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/HeeksCNC/bitmaps/pickopobjects.png", wxBITMAP_TYPE_PNG);
+			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/pickopobjects.png", wxBITMAP_TYPE_PNG);
 		}
 		return m_bitmap;
 	}
@@ -488,7 +488,7 @@ public:
 	{
 		if(m_bitmap == NULL)
 		{
-			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/HeeksCNC/bitmaps/pickoppos.png", wxBITMAP_TYPE_PNG);
+			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/pickoppos.png", wxBITMAP_TYPE_PNG);
 		}
 		return m_bitmap;
 	}
