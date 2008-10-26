@@ -16,9 +16,6 @@ CHeeksCADInterface* heeksCAD = NULL;
 CHeeksCNCApp theApp;
 
 CHeeksCNCApp::CHeeksCNCApp(){
-	m_working_dir_for_solid_sim = "C:\\Documents and Settings\\dan\\Desktop\\cavedemo\\";
-	m_triangles_file_for_solid_sim = "data\\tri.tri";
-	m_command_for_solid_sim = "justfly.exe -f -d3000 -c0x808080 -sdata\\tri.tri";
 	m_draw_cutter_radius = true;
 	m_program = NULL;
 	m_run_program_on_new_line = true;
@@ -42,19 +39,12 @@ void CHeeksCNCApp::OnInitDLL()
 	}
 
 	m_config = new wxConfig("HeeksCNC");
-	m_config->Read("SolidSimWorkingDir", &m_working_dir_for_solid_sim);
-	m_config->Read("SolidSimTrianglesFile", &m_triangles_file_for_solid_sim);
-	m_config->Read("SolidSimCommand", &m_command_for_solid_sim);
 }
 
 void CHeeksCNCApp::OnDestroyDLL()
 {
-	{
-		m_config = new wxConfig("HeeksCNC");
-		m_config->Write("SolidSimWorkingDir", m_working_dir_for_solid_sim);
-		m_config->Write("SolidSimTrianglesFile", m_triangles_file_for_solid_sim);
-		m_config->Write("SolidSimCommand", m_command_for_solid_sim);
-	}
+	// save any settings
+	//m_config->Write("SolidSimWorkingDir", m_working_dir_for_solid_sim);
 
 #if !defined WXUSINGDLL
 	wxUninitialize();
@@ -158,16 +148,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 	theApp.m_output_canvas->Clear();
 }
 
-void on_solid_sim_wd_edit(const char* wd, HeeksObj* object){theApp.m_working_dir_for_solid_sim = wd;}
-void on_solid_sim_tf_edit(const char* tf, HeeksObj* object){theApp.m_triangles_file_for_solid_sim = tf;}
-void on_solid_sim_cm_edit(const char* cm, HeeksObj* object){theApp.m_command_for_solid_sim = cm;}
-
-
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
-	// solid sim
-	list->push_back(new PropertyString("SolidSimWorkingDir", m_working_dir_for_solid_sim, NULL, on_solid_sim_wd_edit));
-	list->push_back(new PropertyString("SolidSimTrianglesFile", m_triangles_file_for_solid_sim, NULL, on_solid_sim_tf_edit));
-	list->push_back(new PropertyString("SolidSimCommand", m_command_for_solid_sim, NULL, on_solid_sim_cm_edit));
 }
 
 void CHeeksCNCApp::OnFrameDelete()
