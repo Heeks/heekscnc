@@ -13,9 +13,6 @@ class COutputCanvas;
 
 class CHeeksCNCApp{
 public:
-	wxString m_working_dir_for_solid_sim;
-	wxString m_triangles_file_for_solid_sim;
-	wxString m_command_for_solid_sim;
 	wxConfig* m_config;
 	bool m_draw_cutter_radius; // applies to all operations
 	CProgram* m_program;
