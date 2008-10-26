@@ -89,6 +89,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="add a registry key"
+				CommandLine="REG ADD HKCU\Software\HeeksCAD\plugins /v HeeksCNC /t REG_SZ /d &quot;HeeksCNC/HeeksCNC.dll&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -175,6 +177,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="add a registry key"
+				CommandLine="REG ADD HKCU\Software\HeeksCAD\plugins /v HeeksCNC /t REG_SZ /d &quot;HeeksCNC/HeeksCNC.dll&quot;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -186,28 +190,12 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath="..\..\interface\LeftAndRight.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\interface\ObjList.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\interface\LeftAndRight.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\interface\ObjList.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -364,6 +352,14 @@
 			</FileConfiguration>
 		</File>
 		<File
+			RelativePath="..\..\interface\LeftAndRight.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\interface\LeftAndRight.h"
+			>
+		</File>
+		<File
 			RelativePath=".\LinesAndArcs.cpp"
 			>
 		</File>
@@ -424,6 +420,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\interface\ObjList.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\interface\ObjList.h"
+			>
+		</File>
+		<File
 			RelativePath=".\geometry\offset.cpp"
 			>
 			<FileConfiguration
@@ -457,14 +461,6 @@
 		</File>
 		<File
 			RelativePath=".\OutputCanvas.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Profile.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Profile.h"
 			>
 		</File>
 		<File
