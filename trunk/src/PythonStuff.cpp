@@ -477,46 +477,89 @@ static PyObject* hc_arc(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
-static PyObject* hc_kurve_exists(PyObject* self, PyObject* args)
+static PyObject* hc_sketch(PyObject* self, PyObject* args)
 {
-	int line_arcs_id;
+	HeeksObj* new_sketch = heeksCAD->NewSketch();
+	new_sketch->SetID(heeksCAD->GetNextID(new_sketch->GetIDGroupType()));
 
-	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
-
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, line_arcs_id);
-
-	// return exists
-	PyObject *pValue = line_arcs ? Py_True : Py_False;
+	// return offset sketch id
+	PyObject *pValue = PyInt_FromLong(new_sketch->m_id);
 	Py_INCREF(pValue);
 	return pValue;
 }
 
-static PyObject* hc_kurve_add(PyObject* self, PyObject* args)
+static PyObject* hc_sketch_add_line(PyObject* self, PyObject* args)
 {
-	int line_arcs_id;
+	int sketch_id;
+	double s[3], e[3];
 
-	if (!PyArg_ParseTuple(args, "i", &line_arcs_id)) return NULL;
+	if (!PyArg_ParseTuple(args, "idddddd", &sketch_id, &s[0], &s[1], &s[2], &e[0], &e[1], &e[2])) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, line_arcs_id);
-	heeksCAD->AddUndoably(line_arcs, NULL);
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+
+	HeeksObj* new_object = heeksCAD->NewLine(s, e);
+	sketch->Add(new_object, NULL);
 
 	Py_RETURN_NONE;
 }
 
-static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
+static PyObject* hc_sketch_add_arc(PyObject* self, PyObject* args)
 {
-	int line_arcs_id;
+	int sketch_id, dir;
+	double s[3] = {0, 0, 0}, e[3] = {0, 0, 0}, c[3] = {0, 0, 0};
+
+	if (!PyArg_ParseTuple(args, "iidddddd", &sketch_id, &dir, &s[0], &s[1], &e[0], &e[1], &c[0], &c[1])) return NULL;
+
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+
+	double up[3] = {0, 0, 1};
+	double down[3] = {0, 0, -1};
+	HeeksObj* new_object = heeksCAD->NewArc(s, e, c, dir > 0 ? up : down);
+	sketch->Add(new_object, NULL);
+
+	Py_RETURN_NONE;
+}
+
+static PyObject* hc_sketch_exists(PyObject* self, PyObject* args)
+{
+	int sketch_id;
+
+	if (!PyArg_ParseTuple(args, "i", &sketch_id)) return NULL;
+
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+
+	// return exists
+	PyObject *pValue = sketch ? Py_True : Py_False;
+	Py_INCREF(pValue);
+	return pValue;
+}
+
+static PyObject* hc_sketch_add(PyObject* self, PyObject* args)
+{
+	int sketch_id;
+
+	if (!PyArg_ParseTuple(args, "i", &sketch_id)) return NULL;
+
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+	heeksCAD->AddUndoably(sketch, NULL);
+
+	Py_RETURN_NONE;
+}
+
+static PyObject* hc_sketch_offset(PyObject* self, PyObject* args)
+{
+	int sketch_id;
 	double offset;
 
-	if (!PyArg_ParseTuple(args, "id", &line_arcs_id, &offset)) return NULL;
+	if (!PyArg_ParseTuple(args, "id", &sketch_id, &offset)) return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, line_arcs_id);
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
 	int offset_id = 0;
 
 	try{
-	if(line_arcs){
+	if(sketch){
 		Kurve temp_kurve;
-		add_to_kurve(line_arcs, temp_kurve);
+		add_to_kurve(sketch, temp_kurve);
 		// offset the kurve
 		std::vector<Kurve*> offset_kurves;
 		int ret = 0;
@@ -540,39 +583,52 @@ static PyObject* hc_kurve_offset(PyObject* self, PyObject* args)
 	catch( wchar_t * str ) 
 	{
 		char mess[1024];
-		sprintf(mess, "Error in offsetting kurve - %s", str);
+		sprintf(mess, "Error in offsetting sketch - %s", str);
 		PyErr_SetString(PyExc_RuntimeError, mess);
 	}
 
-	// return offset kurve id
+	// return offset sketch id
 	PyObject *pValue = PyInt_FromLong(offset_id);
 	Py_INCREF(pValue);
 	return pValue;
 }
 
-static PyObject* hc_kurve_delete(PyObject *self, PyObject *args)
+static PyObject* hc_sketch_delete(PyObject *self, PyObject *args)
 {
-	int kurve_id;
+	int sketch_id;
 
-    if(!PyArg_ParseTuple(args, "i", &kurve_id))
+    if(!PyArg_ParseTuple(args, "i", &sketch_id))
         return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
-	if(line_arcs)delete line_arcs;
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+	if(sketch)
+	{
+		if(sketch->m_owner)
+		{
+			// it has been added to the drawing
+			heeksCAD->DeleteUndoably(sketch);
+		}
+		else
+		{
+			// just delete it
+			heeksCAD->RemoveID(sketch);
+			delete sketch;
+		}
+	}
 
     Py_RETURN_NONE;
 }
 
-static PyObject* hc_kurve_num_spans(PyObject *self, PyObject *args)
+static PyObject* hc_sketch_num_spans(PyObject *self, PyObject *args)
 {
-	int kurve_id;
+	int sketch_id;
 
-    if(!PyArg_ParseTuple(args, "i", &kurve_id))
+    if(!PyArg_ParseTuple(args, "i", &sketch_id))
         return NULL;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
 	int num_spans = 0;
-	if(line_arcs)num_spans = line_arcs->GetNumChildren();
+	if(sketch)num_spans = sketch->GetNumChildren();
 
 	// return number of spans
 	PyObject *pValue = PyInt_FromLong(num_spans);
@@ -580,12 +636,12 @@ static PyObject* hc_kurve_num_spans(PyObject *self, PyObject *args)
 	return pValue;
 }
 
-static PyObject* hc_kurve_span_data(PyObject *self, PyObject *args)
+static PyObject* hc_sketch_span_data(PyObject *self, PyObject *args)
 {
-	int kurve_id;
+	int sketch_id;
 	int span_index; // 0 based
 
-    if(!PyArg_ParseTuple(args, "ii", &kurve_id, &span_index))
+    if(!PyArg_ParseTuple(args, "ii", &sketch_id, &span_index))
         return NULL;
 
 	int span_type = -2;
@@ -596,9 +652,9 @@ static PyObject* hc_kurve_span_data(PyObject *self, PyObject *args)
 	double cx = 0.0;
 	double cy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
-	if(line_arcs){
-		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+	if(sketch){
+		HeeksObj* span_object = sketch->GetAtIndex(span_index);
 		if(span_object){
 			double pos[3];
 			if(span_object->GetStartPoint(pos))
@@ -681,21 +737,21 @@ static PyObject* hc_kurve_span_data(PyObject *self, PyObject *args)
 	return pTuple;
 }
 
-static PyObject* hc_kurve_span_dir(PyObject *self, PyObject *args)
+static PyObject* hc_sketch_span_dir(PyObject *self, PyObject *args)
 {
-	int kurve_id;
+	int sketch_id;
 	int span_index; // 0 based
 	double fraction;
 
-    if(!PyArg_ParseTuple(args, "iid", &kurve_id, &span_index, &fraction))
+    if(!PyArg_ParseTuple(args, "iid", &sketch_id, &span_index, &fraction))
         return NULL;
 
 	double vx = 1.0;
 	double vy = 0.0;
 
-	HeeksObj* line_arcs = heeksCAD->GetIDObject(SketchType, kurve_id);
-	if(line_arcs){
-		HeeksObj* span_object = line_arcs->GetAtIndex(span_index);
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+	if(sketch){
+		HeeksObj* span_object = sketch->GetAtIndex(span_index);
 		if(span_object){
 			double v[3];
 			if(heeksCAD->GetSegmentVector(span_object, fraction, v))
@@ -928,13 +984,16 @@ static PyMethodDef HCMethods[] = {
     {"feedxy", hc_feedxy, METH_VARARGS, "feedxy(x, y)."},
     {"feedz", hc_feedz, METH_VARARGS, "feedz(z)."},
     {"arc", hc_arc, METH_VARARGS, "arc('acw', x, y, i, j). ( i and j are relative to current_tool_pos )"},
-    {"kurve_exists", hc_kurve_exists, METH_VARARGS, "exists = kurve_exists(kurve_id)."},
-    {"kurve_add", hc_kurve_add, METH_VARARGS, "kurve_add(kurve_id). adds a kurve which wasn't already added"},
-    {"kurve_offset", hc_kurve_offset, METH_VARARGS, "kurve_offset(kurve_id, offset). +ve for left, -v for right"},
-    {"kurve_delete", hc_kurve_delete, METH_VARARGS, "kurve_delete(kurve_id)."},
-    {"kurve_num_spans", hc_kurve_num_spans, METH_VARARGS, "num_span = kurve_num_spans(kurve_id)."},
-    {"kurve_span_data", hc_kurve_span_data, METH_VARARGS, "span_type, sx, sy, ex, ey, cx, cy = kurve_span_data(kurve_id)."},
-    {"kurve_span_dir", hc_kurve_span_dir, METH_VARARGS, "vx, vy = kurve_span_dir(off_kurve_id, span, fraction)."},
+    {"sketch", hc_sketch, METH_VARARGS, "sketch(). make a new sketch and return its id"},
+    {"sketch_add_line", hc_sketch_add_line, METH_VARARGS, "sketch_add_line(sketch_id, sx, sy, sz, ex, ey, ez). make a new sketch and return its id"},
+    {"sketch_add_arc", hc_sketch_add_arc, METH_VARARGS, "sketch_add_arc(sketch_id, dir, sx, sy, ex, ey, cx, cy). make a new sketch and return its id"},
+    {"sketch_exists", hc_sketch_exists, METH_VARARGS, "exists = sketch_exists(sketch_id)."},
+    {"sketch_add", hc_sketch_add, METH_VARARGS, "sketch_add(sketch_id). adds a sketch which wasn't already added"},
+    {"sketch_offset", hc_sketch_offset, METH_VARARGS, "sketch_offset(sketch_id, offset). +ve for left, -v for right"},
+    {"sketch_delete", hc_sketch_delete, METH_VARARGS, "sketch_delete(sketch_id)."},
+    {"sketch_num_spans", hc_sketch_num_spans, METH_VARARGS, "num_span = sketch_num_spans(sketch_id)."},
+    {"sketch_span_data", hc_sketch_span_data, METH_VARARGS, "span_type, sx, sy, ex, ey, cx, cy = sketch_span_data(sketch_id)."},
+    {"sketch_span_dir", hc_sketch_span_dir, METH_VARARGS, "vx, vy = sketch_span_dir(off_sketch_id, span, fraction)."},
     {"tangential_arc", hc_tangential_arc, METH_VARARGS, "rcx, rcy, rdir = tangential_arc(px, py, sx, sy, vx, vy)."},
     {"attach", hc_attach, METH_VARARGS, "attach(surface_id, low_plane, deflection, little_step_length). use attach(0) to turn off attach"},
     {"add_attach_surface", hc_add_attach_surface, METH_VARARGS, "add_attach_surface(surface_id, deflection). version called from machine"},
