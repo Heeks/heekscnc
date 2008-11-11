@@ -18,7 +18,7 @@ CHeeksCNCApp theApp;
 CHeeksCNCApp::CHeeksCNCApp(){
 	m_draw_cutter_radius = true;
 	m_program = NULL;
-	m_run_program_on_new_line = true;
+	m_run_program_on_new_line = false;
 }
 
 CHeeksCNCApp::~CHeeksCNCApp(){
