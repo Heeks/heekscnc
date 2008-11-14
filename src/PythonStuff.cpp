@@ -619,6 +619,23 @@ static PyObject* hc_sketch_delete(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject* hc_sketch_set_id(PyObject *self, PyObject *args)
+{
+	int sketch_id;
+	int new_id;
+
+    if(!PyArg_ParseTuple(args, "ii", &sketch_id, &new_id))
+        return NULL;
+
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, sketch_id);
+	if(sketch)
+	{
+		sketch->SetID(new_id);
+	}
+
+    Py_RETURN_NONE;
+}
+
 static PyObject* hc_sketch_num_spans(PyObject *self, PyObject *args)
 {
 	int sketch_id;
@@ -991,6 +1008,7 @@ static PyMethodDef HCMethods[] = {
     {"sketch_add", hc_sketch_add, METH_VARARGS, "sketch_add(sketch_id). adds a sketch which wasn't already added"},
     {"sketch_offset", hc_sketch_offset, METH_VARARGS, "sketch_offset(sketch_id, offset). +ve for left, -v for right"},
     {"sketch_delete", hc_sketch_delete, METH_VARARGS, "sketch_delete(sketch_id)."},
+    {"sketch_set_id", hc_sketch_set_id, METH_VARARGS, ""},
     {"sketch_num_spans", hc_sketch_num_spans, METH_VARARGS, "num_span = sketch_num_spans(sketch_id)."},
     {"sketch_span_data", hc_sketch_span_data, METH_VARARGS, "span_type, sx, sy, ex, ey, cx, cy = sketch_span_data(sketch_id)."},
     {"sketch_span_dir", hc_sketch_span_dir, METH_VARARGS, "vx, vy = sketch_span_dir(off_sketch_id, span, fraction)."},

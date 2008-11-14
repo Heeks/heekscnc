@@ -127,7 +127,7 @@ public:
 	void AddTheInitialText()
 	{
 		char str[1024];
-		sprintf(str, "spindle(%lf)\nrate(%lf, %lf)\n", m_spindle_speed, m_hfeed, m_vfeed);
+		sprintf(str, "spindle(%g)\nrate(%g, %g)\n", m_spindle_speed, m_hfeed, m_vfeed);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
@@ -196,7 +196,7 @@ public:
 		}
 
 		char str[1024];
-		sprintf(str, "tool(%d, %lf, %lf)\n", m_station_number, m_diameter, m_corner_radius);
+		sprintf(str, "tool(%d, %g, %g)\n", m_station_number, m_diameter, m_corner_radius);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
@@ -307,22 +307,22 @@ public:
 		char str[1024];
 		switch(m_mode){
 			case 0:
-				sprintf(str, "rapid(%lf, %lf, %lf)\n", m_pos[0], m_pos[1], m_pos[2]);
+				sprintf(str, "rapid(%g, %g, %g)\n", m_pos[0], m_pos[1], m_pos[2]);
 				break;
 			case 1:
-				sprintf(str, "feed(%lf, %lf, %lf)\n", m_pos[0], m_pos[1], m_pos[2]);
+				sprintf(str, "feed(%g, %g, %g)\n", m_pos[0], m_pos[1], m_pos[2]);
 				break;
 			case 2:
-				sprintf(str, "rapidxy(%lf, %lf)\n", m_pos[0], m_pos[1]);
+				sprintf(str, "rapidxy(%g, %g)\n", m_pos[0], m_pos[1]);
 				break;
 			case 3:
-				sprintf(str, "rapidz(%lf)\n", m_pos[2]);
+				sprintf(str, "rapidz(%g)\n", m_pos[2]);
 				break;
 			case 4:
-				sprintf(str, "feedxy(%lf, %lf)\n", m_pos[0], m_pos[1]);
+				sprintf(str, "feedxy(%g, %g)\n", m_pos[0], m_pos[1]);
 				break;
 			case 5:
-				sprintf(str, "feedz(%lf)\n", m_pos[2]);
+				sprintf(str, "feedz(%g)\n", m_pos[2]);
 				break;
 		}
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
@@ -415,7 +415,7 @@ public:
 		char roll_off_str[1024] = "\"NOT_SET\", \"NOT_SET\"";
 		if(m_offset_type != 2)
 		{
-			sprintf(roll_off_str, "%lf, %lf", m_finish_x, m_finish_y);
+			sprintf(roll_off_str, "%g, %g", m_finish_x, m_finish_y);
 		}
 		sprintf(str, "profile(%d, \"%s\", %s)\n", m_line_arcs_number, dirstr, roll_off_str);
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
