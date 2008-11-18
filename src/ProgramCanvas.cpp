@@ -34,30 +34,16 @@ static void OnRun(wxCommandEvent& event)
 
 
 class CAdderApply:public Tool{
-private:
-	static wxBitmap* m_bitmap;
-
 public:
 	void Run();
 	const char* GetTitle(){return "Apply";}
-	wxBitmap* Bitmap()
-	{
-		if(m_bitmap == NULL)
-		{
-			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/apply.png", wxBITMAP_TYPE_PNG);
-		}
-		return m_bitmap;
-	}
+	wxString BitmapPath(){return _T("apply");}
 	const char* GetToolTip(){return "Add move, and finish";}
 };
-wxBitmap* CAdderApply::m_bitmap = NULL;
 
 static CAdderApply adder_apply;
 
 class CAdderCancel:public Tool{
-private:
-	static wxBitmap* m_bitmap;
-
 public:
 	void Run(){
 		// return to Select mode
@@ -65,17 +51,9 @@ public:
 		heeksCAD->Repaint();
 	}
 	const char* GetTitle(){return "Cancel";}
-	wxBitmap* Bitmap()
-	{
-		if(m_bitmap == NULL)
-		{
-			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/cancel.png", wxBITMAP_TYPE_PNG);
-		}
-		return m_bitmap;
-	}
+	wxString BitmapPath(){return _T("cancel");}
 	const char* GetToolTip(){return "Finish without adding anything";}
 };
-wxBitmap* CAdderCancel::m_bitmap = NULL;
 
 static CAdderCancel adder_cancel;
 
@@ -439,7 +417,6 @@ void CProfileApply::Run(){
 
 class OpPickObjectsTool: public Tool
 {
-	static wxBitmap* m_bitmap;
 public:
 	const char* GetTitle(){return "Pick Shape";}
 	const char* GetToolTip(){return "Pick shape objects ( clears previous shape objects first )";}
@@ -453,24 +430,13 @@ public:
 		}
 		heeksCAD->ClearMarkedList();
 	}
-
-	wxBitmap* Bitmap()
-	{
-		if(m_bitmap == NULL)
-		{
-			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/pickopobjects.png", wxBITMAP_TYPE_PNG);
-		}
-		return m_bitmap;
-	}
+	wxString BitmapPath(){return _T("pickopobjects");}
 };
-
-wxBitmap* OpPickObjectsTool::m_bitmap = NULL;
 
 static OpPickObjectsTool pick_objects_tool;
 
 class OpPickPosTool: public Tool
 {
-	static wxBitmap* m_bitmap;
 public:
 	const char* GetTitle(){return "Pick Finish Pos";}
 	const char* GetToolTip(){return "Pick Finish XY coordinates";}
@@ -483,18 +449,8 @@ public:
 			heeksCAD->RefreshInput();
 		}
 	}
-
-	wxBitmap* Bitmap()
-	{
-		if(m_bitmap == NULL)
-		{
-			m_bitmap = new wxBitmap(theApp.GetDllFolder() + "/bitmaps/pickoppos.png", wxBITMAP_TYPE_PNG);
-		}
-		return m_bitmap;
-	}
+	wxString BitmapPath(){return _T("pickoppos");}
 };
-
-wxBitmap* OpPickPosTool::m_bitmap = NULL;
 
 static OpPickPosTool pick_pos_tool;
 
