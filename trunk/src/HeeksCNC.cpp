@@ -113,7 +113,7 @@ void CHeeksCNCApp::OnStartUp()
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
 
 	// add tick boxes for them all on the view menu
-	wxMenu* view_menu = heeksCAD->GetViewMenu();
+	wxMenu* view_menu = heeksCAD->GetWindowMenu();
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Program"), OnProgramCanvas, OnUpdateProgramCanvas);
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Output"), OnOutputCanvas, OnUpdateOutputCanvas);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
