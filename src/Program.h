@@ -4,13 +4,12 @@
 
 #pragma once
 
-#include "../../interface/HeeksObj.h"
+#include "CNCObj.h"
 #include "HeeksCNCTypes.h"
 
-class CProgram:public HeeksObj
+class CProgram:public CNCObj
 {
 public:
-	static wxIcon* m_icon;
 	std::string m_machine;
 	CBox m_box;
 	int m_gl_list;
@@ -22,9 +21,9 @@ public:
 
 	const CProgram &operator=(const CProgram &p);
 
+	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
 	const char* GetTypeString(void)const{return "Program";}
-	wxIcon* GetIcon();
 	void GetBox(CBox &box);
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetProperties(std::list<Property *> *list);
@@ -32,6 +31,9 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlElement *root);
+
+	// CNCObj's virtual functions
+	wxString GetCNCIcon(){return _T("program");}
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
