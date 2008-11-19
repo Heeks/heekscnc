@@ -6,8 +6,6 @@
 #include "../../tinyxml/tinyxml.h"
 #include "ProgramCanvas.h"
 
-wxIcon* CProgram::m_icon = NULL;
-
 CProgram::CProgram()
 {
 	m_machine.assign("siegkx1");
@@ -32,15 +30,6 @@ void CProgram::DestroyGLLists()
 		glDeleteLists(m_gl_list, 1);
 		m_gl_list = 0;
 	}
-}
-
-wxIcon* CProgram::GetIcon()
-{
-	if(m_icon == NULL)
-	{
-		m_icon = new wxIcon(theApp.GetDllFolder() + "/icons/program.png", wxBITMAP_TYPE_PNG);
-	}
-	return m_icon;
 }
 
 void CProgram::GetBox(CBox &box)
