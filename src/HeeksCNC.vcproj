@@ -89,8 +89,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="add a registry key"
-				CommandLine="REG ADD HKCU\Software\HeeksCAD\plugins /v HeeksCNC /t REG_SZ /d &quot;HeeksCNC/HeeksCNC.dll&quot;"
+				Description="(commented) add a registry key"
+				CommandLine="REM REG ADD HKCU\Software\HeeksCAD\plugins /v HeeksCNC /t REG_SZ /d &quot;HeeksCNC/HeeksCNC.dll&quot;"
 			/>
 		</Configuration>
 		<Configuration
