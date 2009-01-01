@@ -35,7 +35,6 @@
 	#define PepsToParaSolid 0.001			// imperial??
 #endif
 
-
 #include "../messages/message.h"
 
 using namespace std;
@@ -213,13 +212,14 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	DelPeps(int id);													// delete Peps Point
 		void	FromPepsCommandLine();												// read Peps Point from command line (eg DLL wiregeom.dll test p1 ...)
 #endif
-		double	Dist(Point& p);														// distance between 2 points
-		double	DistSq(Point& p);													// distance squared
-		double	Dist(CLine& cl);													// distance p to cl
-		Point	Mid(const Point& p, double factor=.5);									// mid point
+		double	Dist(const Point& p)const;														// distance between 2 points
+		double	DistSq(const Point& p)const;													// distance squared
+		double	Dist(const CLine& cl)const;													// distance p to cl
+		Point	Mid(const Point& p, double factor=.5)const;									// mid point
 		void	get(double xyz[2]) {xyz[0] = x; xyz[1] = y;}						// return to array
+#ifndef HEEKSCNC
 		void	oXML(wostream& op, wchar_t* name);
-
+#endif
 	};
 
 
@@ -248,7 +248,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 			x = p.x; y = p.y;  z = 0; /*ok = p.ok;*/}
 		inline	Point3d( const Point& p, double zord ) {								// copy constructor  Point p1(p2, z);
 			x = p.x; y = p.y;  z = zord;/* ok = p.ok;*/}
-		Point3d(Vector3d& v);
+		Point3d(const Vector3d& v);
 
 		// destructor
 //		~Point3d();
@@ -265,8 +265,8 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 #endif
 		Point3d Transform(const Matrix& m);
 		double Dist(const Point3d& p)const;													// distance between 2 points
-		double DistSq(const Point3d& p);													// distance squared between 2 points
-		Point3d	Mid(const Point3d& p, double factor = 0.5);									// midpoint
+		double DistSq(const Point3d& p)const;													// distance squared between 2 points
+		Point3d	Mid(const Point3d& p, double factor = 0.5)const;									// midpoint
 		void get(double xyz[3]) {xyz[0] = x; xyz[1] = y; xyz[2] = z;}
 		double* getBuffer(){return &this->x;};																		// returns ptr to data
 		const double* getBuffer()const{return &this->x;};																		// returns ptr to data
@@ -288,7 +288,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		inline	Vector2d(const Point& p0, const Point& p1) {dx = p1.x - p0.x; dy = p1.y - p0.y;}
 		inline	Vector2d(const Point *p0, const Point *p1) {dx = p1->x - p0->x; dy = p1->y - p0->y;}
 		inline	Vector2d(const Point& p) { dx = p.x; dy = p.y;} // from 0,0 to p
-		inline	Vector2d(double angle) {dx = cos(angle *= DegreesToRadians); dy = sin(angle);}	// constructs a vector from an angle (0° - 360°)
+		inline	Vector2d(double angle) {dx = cos(angle *= DegreesToRadians); dy = sin(angle);}	// constructs a vector from an angle (0ï¿½ - 360ï¿½)
 
 
 		// operators
@@ -303,9 +303,9 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		inline	const	Vector2d operator-(void)const{return Vector2d(-dx, -dy);}							// v1 = -v0;  (unary minus)
 
 		inline	const	double operator*(const Vector2d &v)const{return (dx * v.dx + dy * v.dy);}			// dot product	m0.m1.cos a = v0 * v1
-		inline			Vector2d operator*(double c){return Vector2d(dx*c, dy*c);}							// scalar product
+		inline			Vector2d operator*(double c)const{return Vector2d(dx*c, dy*c);}							// scalar product
 		inline	const	Vector2d& operator*=(double c){dx *= c; dy *= c; return *this;}						// scalar product
-		inline			Vector2d operator*(int c){return Vector2d(dx*(double)c, dy*(double)c);}				// scalar product
+		inline			Vector2d operator*(int c)const{return Vector2d(dx*(double)c, dy*(double)c);}				// scalar product
 
 		inline	const	double operator^(const Vector2d &v)const{return (dx * v.dy - dy * v.dx);}			// cross product m0.m1.sin a = v0 ^ v1
 		inline			Vector2d operator~(void)const{return Vector2d(-dy, dx);}							// perp to left
@@ -439,10 +439,10 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void DelPeps(int id);													// delete Peps CLine
 #endif
 		CLine Transform(Matrix& m);												// transform a CLine
-		Point Intof(CLine& s);													// intersection of 2 clines
-		Point Intof(int NF, Circle& c);											// intersection of cline & circle 
-		Point Intof(int NF, Circle& c, Point& otherInters);	double Dist(Point& p1);	//  ditto & other intersection												
-		CLine Bisector(CLine& s);												// Bisector of 2 Clines
+		Point Intof(const CLine& s);													// intersection of 2 clines
+		Point Intof(int NF, const Circle& c);											// intersection of cline & circle 
+		Point Intof(int NF, const Circle& c, Point& otherInters);	double Dist(const Point& p1)const;	//  ditto & other intersection												
+		CLine Bisector(const CLine& s);												// Bisector of 2 Clines
 
 		// destructor
 //		~CLine();
@@ -461,10 +461,10 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 		// constructors etc...
 		inline	Circle() {ok = false;};
-		Circle( Point& p, double r, bool okay = true);							// Circle  c1(Point(10,30), 20);
-		Circle( Point& p, Point& pc);											// Circle  c1(p[222], p[223]);
-		inline Circle( const Circle& c );										// copy constructor  Circle c1(c2);
-		Circle( Span& sp);														// constructor
+		Circle( const Point& p, double r, bool okay = true);							// Circle  c1(Point(10,30), 20);
+		Circle( const Point& p, const Point& pc);											// Circle  c1(p[222], p[223]);
+		Circle( const Circle& c ){*this = c;}									// copy constructor  Circle c1(c2);
+		Circle( const Span& sp);														// constructor
 
 		// methods
 #ifdef PEPSDLL
@@ -474,11 +474,13 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		bool operator==(const Circle &c)const;									// c == cc
 		bool operator!=(const Circle &c)const { return !(*this == c);}
 		Circle Transform(Matrix& m);											// transform a Circle
-		Point	Intof(int LR, Circle& c1);										// intof 2 circles
-		Point	Intof(int LR, Circle& c1, Point& otherInters);					// intof 2 circles, (returns the other intersection)
-		int		Intof(Circle& c1, Point& leftInters, Point& rightInters);		// intof 2 circles (returns number of intersections & left/right inters)
-		CLine	Tanto(int AT,  double angle, const CLine& s0 = HORIZ_CLINE);			// a cline tanto this circle at angle
+		Point	Intof(int LR, const Circle& c1);										// intof 2 circles
+		Point	Intof(int LR, const Circle& c1, Point& otherInters);					// intof 2 circles, (returns the other intersection)
+		int		Intof(const Circle& c1, Point& leftInters, Point& rightInters);		// intof 2 circles (returns number of intersections & left/right inters)
+		CLine	Tanto(int AT,  double angle, const CLine& s0 = HORIZ_CLINE)const;			// a cline tanto this circle at angle
+#ifndef HEEKSCNC
 		void oXML(wostream& op, wchar_t* name);
+#endif
 	//	~Circle();																// destructor
 	};
 
@@ -492,7 +494,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Box() { min.x = min.y = 1.0e61; max.x = max.y = -1.0e61; ok = false;};
 		Box(Point& pmin, Point& pmax) { min = pmin; max = pmax; ok = true;};
 
-		bool outside(Box& b);		// returns true if box is outside box
+		bool outside(const Box& b)const;		// returns true if box is outside box
 	};
 
 	// 3d box class
@@ -503,19 +505,19 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		bool ok;
 
 		Box3d() { min.x = min.y = min.z = 1.0e61; max.x = max.y = max.z = -1.0e61; ok = false;};
-		Box3d(Point3d& pmin, Point3d& pmax) { min = pmin; max = pmax; ok = true;};
+		Box3d(const Point3d& pmin, const Point3d& pmax) { min = pmin; max = pmax; ok = true;};
 
-		bool outside(Box3d& b);		// returns true if box is outside box
+		bool outside(const Box3d& b)const;		// returns true if box is outside box
 	};
 
-	inline void MinMax(Point& p, Point& pmin, Point& pmax) {
+	inline void MinMax(const Point& p, Point& pmin, Point& pmax) {
 		if(p.x > pmax.x) pmax.x = p.x;
 		if(p.y > pmax.y) pmax.y = p.y;
 		if(p.x < pmin.x) pmin.x = p.x;
 		if(p.y < pmin.y) pmin.y = p.y;
 	};
 
-	inline void MinMax(Point3d& p, Point3d& pmin, Point3d& pmax) {
+	inline void MinMax(const Point3d& p, Point3d& pmin, Point3d& pmax) {
 		if(p.x > pmax.x) pmax.x = p.x;
 		if(p.y > pmax.y) pmax.y = p.y;
 		if(p.z > pmax.z) pmax.z = p.z;
@@ -557,22 +559,22 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void SplitMatrix(int num_vectors, Matrix* matrix);							// returns incremental matrix from split
 		void minmax(Box& box, bool start = true);									// minmax of span
 		void minmax(Point& pmin, Point& pmax, bool start = true);					// minmax of span
-		int Intof(Span& sp, Point& pInt1, Point& pInt2);
+		int Intof(const Span& sp, Point& pInt1, Point& pInt2)const;
 		void Transform(const Matrix& m, bool setprops = true);
-		Point Near(Point& p);														// returns the near point to span from p (on or off)
-		Point NearOn(Point& p);														// returns the near point to span from p (on span)
-		Point	Mid();																// midpoint of a span
-		Point MidPerim(double d);													// interior point of Span (param 0 - d)
-		Point MidParam(double param);												// interior point of Span (param 0 - 1)
-		bool OnSpan(Point& p);														//  tests if p is on sp *** FAST TEST p MUST LIE on unbounded span
-		bool OnSpan(Point& p, double* t);											//  tests if p is on sp *** FAST TEST p MUST LIE on unbounded span
+		Point Near(const Point& p)const;														// returns the near point to span from p (on or off)
+		Point NearOn(const Point& p)const;														// returns the near point to span from p (on span)
+		Point	Mid()const;																// midpoint of a span
+		Point MidPerim(double d)const;													// interior point of Span (param 0 - d)
+		Point MidParam(double param)const;												// interior point of Span (param 0 - 1)
+		bool OnSpan(const Point& p)const;														//  tests if p is on sp *** FAST TEST p MUST LIE on unbounded span
+		bool OnSpan(const Point& p, double* t)const;											//  tests if p is on sp *** FAST TEST p MUST LIE on unbounded span
 		bool	JoinSeparateSpans(Span& sp);
 		Span BlendTwoSpans(Span& sp2, double radius, double maxt);					// Blends 2 Spans
-		bool isJoinable(Span& sp);													// is this & sp joinable to 1 span?
+		bool isJoinable(const Span& sp)const;													// is this & sp joinable to 1 span?
 
 		// constructor
 		Span() {ID = 0; ok = false;};
-		Span(int spandir, Point& pn, Point& pf, Point& c) { dir = spandir; p0 = pn, p1 = pf, pc = c; ID = 0; SetProperties(true); ok = p0.ok;};
+		Span(int spandir, const Point& pn, const Point& pf, const Point& c) { dir = spandir; p0 = pn, p1 = pf, pc = c; ID = 0; SetProperties(true); ok = p0.ok;};
 
 		// operators
 		//	bool operator==(const Span &sp)const;
@@ -636,68 +638,68 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 	//double Dist(Point& p0, Point& p1);										// distance between 2 points (3d)
 	//double Dist(CLine& s, Point& p1);											// distance between cline & point
 
-	double Dist(Point3d *p, Vector3d *vl, Point3d *pf);							// distance from line (p, vl) and pf
-	double DistSq(Point3d *p, Vector3d *vl, Point3d *pf);						// distance squared from line (p, vl) and pf
-	double Dist(Circle& c, Point& p);											// distance between c & p
-	double Dist(Point& p0, Circle& c, Point& p1);								// clockwise distance around c from p0 to p1
-	double Dist(CLine& s, Circle& c);											// distance between line and circle
-	double Dist(Circle& c0, Circle& c1);										// distance between 2 circles
-	double IncludedAngle(Vector2d& v0, Vector2d& v1, int dir = 1);				// angle between 2 vectors
-	double IncludedAngle(Vector3d& v0, Vector3d& v1, Vector3d& normal, int dir = 1);
-	inline	double IncludedAngle(CLine& s0, CLine& s1, int dir = 1) {			// angle between 2 Clines
+	double Dist(const Point3d *p, const Vector3d *vl, const Point3d *pf);							// distance from line (p, vl) and pf
+	double DistSq(const Point3d *p, const Vector3d *vl, const Point3d *pf);						// distance squared from line (p, vl) and pf
+	double Dist(const Circle& c, const Point& p);											// distance between c & p
+	double Dist(const Point& p0, const Circle& c, const Point& p1);								// clockwise distance around c from p0 to p1
+	double Dist(const CLine& s, const Circle& c);											// distance between line and circle
+	double Dist(const Circle& c0, const Circle& c1);										// distance between 2 circles
+	double IncludedAngle(const Vector2d& v0, const Vector2d& v1, int dir = 1);				// angle between 2 vectors
+	double IncludedAngle(const Vector3d& v0, const Vector3d& v1, const Vector3d& normal, int dir = 1);
+	inline	double IncludedAngle(const CLine& s0, const CLine& s1, int dir = 1) {			// angle between 2 Clines
 		return IncludedAngle(s0.v, s1.v, dir);
 	}
 
 
 	// point definitions
 	Point	Mid(const Point& p0, const Point& p1, double factor = 0.5);					//// midpoint
-	Point	Mid(Span& sp);													//// midpoint of a span
-	Point	Rel(Point& p, double x, double y);								// relative point
-	Point	Polar(Point& p, double angle, double r);						// polar from this point
-	Point	AtAngle(Circle& c, double angle);								// Point at angle on a circle
-	Point	XonCLine(CLine& s, double xval);								// returns point that has X on this line
-	Point	YonCLine(CLine& s, double yval);								// returns point that has Y on this line
-	Point	Intof(CLine& s0, CLine& s1);									//// intof 2 clines
-	Point	Intof(int NF, CLine& s, Circle& c);								//// intof of circle & a cline
-	Point	Intof(int NF, CLine& s, Circle& c, Point& otherInters);			//// intof of circle & a cline (returns the other intersection)
-	Point	Intof(int LR, Circle& c0, Circle& c1);							//// intof 2 circles
-	Point	Intof(int LR, Circle& c0, Circle& c1, Point& otherInters);		//// intof 2 circles, (returns the other intersection)
-	int		Intof(Circle& c0, Circle& c1, Point& pLeft, Point& pRight);		////    ditto
-	Point	Along(CLine& s, double d);										// distance along Cline
-	Point	Along(CLine& s, double d, Point& p);								// distance along Cline from point
-	Point	Around(Circle& c, double d, Point& p);								// distance around a circle from point
-	Point	On(CLine& s,  Point& p);											// returns a point on s nearest to p
-	Point	On(Circle& c, Point& p);											// returns a point on c nearest to p
+	Point	Mid(const Span& sp);													//// midpoint of a span
+	Point	Rel(const Point& p, double x, double y);								// relative point
+	Point	Polar(const Point& p, double angle, double r);						// polar from this point
+	Point	AtAngle(const Circle& c, double angle);								// Point at angle on a circle
+	Point	XonCLine(const CLine& s, double xval);								// returns point that has X on this line
+	Point	YonCLine(const CLine& s, double yval);								// returns point that has Y on this line
+	Point	Intof(const CLine& s0, const CLine& s1);									//// intof 2 clines
+	Point	Intof(int NF, const CLine& s, const Circle& c);								//// intof of circle & a cline
+	Point	Intof(int NF, const CLine& s, const Circle& c, Point& otherInters);			//// intof of circle & a cline (returns the other intersection)
+	Point	Intof(int LR, const Circle& c0, const Circle& c1);							//// intof 2 circles
+	Point	Intof(int LR, const Circle& c0, const Circle& c1, Point& otherInters);		//// intof 2 circles, (returns the other intersection)
+	int		Intof(const Circle& c0, const Circle& c1, Point& pLeft, Point& pRight);		////    ditto
+	Point	Along(const CLine& s, double d);										// distance along Cline
+	Point	Along(const CLine& s, double d, const Point& p);								// distance along Cline from point
+	Point	Around(const Circle& c, double d, const Point& p);								// distance around a circle from point
+	Point	On(const CLine& s,  const Point& p);											// returns a point on s nearest to p
+	Point	On(const Circle& c, const Point& p);											// returns a point on c nearest to p
 
 	// cline definitons
 
-	CLine	AtAngle(double angle, Point& p, const CLine& s = HORIZ_CLINE);		// cline at angle to line thro' point
-	CLine	Tanto(int AT, Circle& c,  double angle, const CLine& s0 = HORIZ_CLINE);//// cline tanto circle at angle to optional cline
-	CLine	Tanto(int AT, Circle& c, Point& p);								// cline tanto circle thro' a point
-	CLine	Tanto(int AT0, Circle& c0, int AT1, Circle& c1);					// cline tanto 2 circles
-	CLine	Normal(CLine& s);													// noirmal to cline
-	CLine	Normal(CLine& s, Point& p);										// normal to cline thro' p
-	CLine	Parallel(int LR, CLine& s, double distance);						// parallel to cline by distance
-	CLine	Parallel(CLine& cl, Point& p);										// parallel to cline thro' a point
+	CLine	AtAngle(double angle, const Point& p, const CLine& s = HORIZ_CLINE);		// cline at angle to line thro' point
+	CLine	Tanto(int AT, const Circle& c,  double angle, const CLine& s0 = HORIZ_CLINE);//// cline tanto circle at angle to optional cline
+	CLine	Tanto(int AT, const Circle& c, const Point& p);								// cline tanto circle thro' a point
+	CLine	Tanto(int AT0, const Circle& c0, int AT1, const Circle& c1);					// cline tanto 2 circles
+	CLine	Normal(const CLine& s);													// noirmal to cline
+	CLine	Normal(const CLine& s, const Point& p);										// normal to cline thro' p
+	CLine	Parallel(int LR, const CLine& s, double distance);						// parallel to cline by distance
+	CLine	Parallel(const CLine& cl, const Point& p);										// parallel to cline thro' a point
 
 
 	// circle definitions
-	Circle	Thro(Point& p0, Point& p1);										// circle thro 2 points (diametric)
-	Circle	Thro(Point& p0, Point& p1, Point& p2);							// circle thro 3 points
-	Circle	Tanto(int NF, CLine& s0, Point& p, double rad);					// circle tanto a CLine thro' a point with radius
-	Circle	Thro(int LR, Point& p0, Point& p1, double rad);					// circle thro' 2 points with radius
-	Circle	Tanto(int AT1, CLine& s1, int AT2, CLine& s2, double rad);		// circle tanto 2 clines with radius
-	Circle	Tanto(int AT1, CLine& s1, int AT2, CLine& s2, int AT3, CLine& s3);	// circle tanto 3 clines
-	Circle	Tanto(int LR, int AT, Circle& c, Point& p, double rad);			// circle tanto circle & thro' a point
-	Circle	Tanto(int NF, int AT0, CLine& s0, int AT1, Circle& c1, double rad);// circle tanto cline & circle with radius
-	Circle	Tanto(int LR, int AT0, Circle& c0, int AT1, Circle& c1, double rad);// circle tanto 2 circles with radius
-	Circle	Tanto(int LR, int AT1 , Circle& c1 , int AT2 , Circle& c2, int AT3 , Circle c3); // tanto 3 circles
-	int		apolloniusProblem(int AT1 , Circle& c1 , int AT2 , Circle& c2, int AT3 , Circle& c3, Circle& Solution1, Circle& Solution2);
-	int		apolloniusProblem(int AT1 , Circle& c1 , int AT2 , Circle& c2, int AT3 , CLine& cl3, Circle& Solution1, Circle& Solution2);
-	int		apolloniusProblem(int AT1 , Circle& c1 , int AT2 , CLine& cl2, int AT3 , CLine& cl3, Circle& Solution1, Circle& Solution2);
+	Circle	Thro(const Point& p0, const Point& p1);										// circle thro 2 points (diametric)
+	Circle	Thro(const Point& p0, const Point& p1, const Point& p2);							// circle thro 3 points
+	Circle	Tanto(int NF, const CLine& s0, const Point& p, double rad);					// circle tanto a CLine thro' a point with radius
+	Circle	Thro(int LR, const Point& p0, const Point& p1, double rad);					// circle thro' 2 points with radius
+	Circle	Tanto(int AT1, const CLine& s1, int AT2, const CLine& s2, double rad);		// circle tanto 2 clines with radius
+	Circle	Tanto(int AT1, const CLine& s1, int AT2, const CLine& s2, int AT3, const CLine& s3);	// circle tanto 3 clines
+	Circle	Tanto(int LR, int AT, const Circle& c, const Point& p, double rad);			// circle tanto circle & thro' a point
+	Circle	Tanto(int NF, int AT0, const CLine& s0, int AT1, const Circle& c1, double rad);// circle tanto cline & circle with radius
+	Circle	Tanto(int LR, int AT0, const Circle& c0, int AT1, const Circle& c1, double rad);// circle tanto 2 circles with radius
+	Circle	Tanto(int LR, int AT1 , const Circle& c1 , int AT2 , const Circle& c2, int AT3 , const Circle c3); // tanto 3 circles
+	int		apolloniusProblem(int AT1 , const Circle& c1 , int AT2 , const Circle& c2, int AT3 , const Circle& c3, Circle& Solution1, Circle& Solution2);
+	int		apolloniusProblem(int AT1 , const Circle& c1 , int AT2 , const Circle& c2, int AT3 , const CLine& cl3, Circle& Solution1, Circle& Solution2);
+	int		apolloniusProblem(int AT1 , const Circle& c1 , int AT2 , const CLine& cl2, int AT3 , const CLine& cl3, Circle& Solution1, Circle& Solution2);
 
 	//		Circle	Tanto(int AT0, int NF, int AT1, CLine s1, int AT2, CLine s2);	// circle tanto circle, and 2 clines
-	Circle	Parallel(int LR, Circle& c, double distance);					// parallel to circle by a distance
+	Circle	Parallel(int LR, const Circle& c, double distance);					// parallel to circle by a distance
 
 
 	// misc
@@ -705,12 +707,12 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 	inline double Degrees(double radians) { return radians * 180 / PI;}
 	int quadratic(double a, double b, double c, double& x0, double& x1);	// solve quadratic
 
-	int corner(Vector2d& v0, Vector2d& v1, double cpTol = CPTANGENTTOL);	// corner (TANGENT, LEFT, RIGHT)
-	inline	int corner(Span& span, Span& next, double cpTol = CPTANGENTTOL) {
+	int corner(const Vector2d& v0, const Vector2d& v1, double cpTol = CPTANGENTTOL);	// corner (TANGENT, LEFT, RIGHT)
+	inline	int corner(const Span& span, const Span& next, double cpTol = CPTANGENTTOL) {
 		return corner((Vector2d)span.ve, (Vector2d)next.vs, cpTol);}
 
-	Line IsPtsLine(double* a, int n, double tolerance, double* deviation);
-	Span3d IsPtsSpan3d(double* a, int n, double tolerance, double* deviation);
+	Line IsPtsLine(const double* a, int n, double tolerance, double* deviation);
+	Span3d IsPtsSpan3d(const double* a, int n, double tolerance, double* deviation);
 
 	class Plane {
 		friend wostream& operator <<(wostream& op, Plane& pl);
@@ -721,16 +723,16 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Vector3d normal;				// normal to plane a = n.dx, b = n.dy, c = n.dz
 		// constructors
 		Plane(){ok = false;};
-		Plane(double dist, Vector3d& n);
-		Plane(Point3d& p0, Point3d& p1, Point3d& p2);
-		Plane(Point3d& p0, Vector3d& n, bool normalise = true);
+		Plane(double dist, const Vector3d& n);
+		Plane(const Point3d& p0, const Point3d& p1, const Point3d& p2);
+		Plane(const Point3d& p0, const Vector3d& n, bool normalise = true);
 
 		// methods
-		double Dist(Point3d& p);							// signed distance of point to plane
-		bool Intof(Line& l, Point3d& intof, double& t);		// intersection of plane & line (0 >= t <= 1 if intersect within line) 
-		bool Intof(Plane& pl, Line& intof);					// intersection of 2 planes
-		bool Intof(Plane& pl0, Plane& pl1, Point3d& intof);	// intersection of 3 planes
-		Point3d Near(Point3d& p);							// returns near point to p on the plane
+		double Dist(const Point3d& p)const;							// signed distance of point to plane
+		bool Intof(const Line& l, Point3d& intof, double& t)const;		// intersection of plane & line (0 >= t <= 1 if intersect within line) 
+		bool Intof(const Plane& pl, Line& intof)const;					// intersection of 2 planes
+		bool Intof(const Plane& pl0, const Plane& pl1, Point3d& intof)const;	// intersection of 3 planes
+		Point3d Near(const Point3d& p)const;							// returns near point to p on the plane
 	};
 
 
@@ -801,7 +803,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		int method;	// holds method type
 
 		SpanDataObject(int meth){method = meth;};
-		SpanDataObject(SpanDataObject* obj){method = obj->method;};
+		SpanDataObject(const SpanDataObject* obj){method = obj->method;};
 	};
 
 	class SpanVertex{
@@ -811,14 +813,14 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 #ifdef PEPSDLL
 		WireExtraData* index[SPANSTORAGE];				// peps	!!!	 pointer to extra data (eg WireKurve)
 #else
-		SpanDataObject* index[SPANSTORAGE];					// other - pointer to 
+		const SpanDataObject* index[SPANSTORAGE];					// other - pointer to 
 #endif
 		double x[SPANSTORAGE], y[SPANSTORAGE];			// vertex
 		double xc[SPANSTORAGE], yc[SPANSTORAGE];		// centre of arc
 	public:
 		// methods
-		void	Add(int offset, int type, Point& p0, Point& pc, int ID = UNMARKED);
-		SpanDataObject* GetIndex(int offset);
+		void	Add(int offset, int type, const Point& p0, const Point& pc, int ID = UNMARKED);
+		const SpanDataObject* GetIndex(int offset)const;
 		void	AddSpanID(int offset, int ID);
 		SpanVertex();
 		~SpanVertex();
@@ -828,8 +830,8 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		inline void	Add(int offset, WireExtraData* Index );
 		inline WireExtraData*	Get(int offset);
 #else
-		void	Add(int offset, SpanDataObject* Index );
-		SpanDataObject*	Get(int offset);
+		void	Add(int offset, const SpanDataObject* Index );
+		const SpanDataObject*	Get(int offset);
 #endif
 		int		Get(int offset, Point& pe, Point& pc);
 		int GetSpanID(int offset);
@@ -871,51 +873,51 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 	//	Kurve& operator= ( const Kurve& k ) { return (Kurve&)k;};
 		const Kurve& operator=(const Matrix &m);
 
-		bool operator==(Kurve &k);									// k == kk (vertex check)
-		bool operator!=(Kurve &k) { return !(*this == k);}
+		bool operator==(const Kurve &k)const;									// k == kk (vertex check)
+		bool operator!=(const Kurve &k)const { return !(*this == k);}
 
 
 		// destructor
 		~Kurve();
 
 		// methods
-		inline int		nSpans(	) {return (m_nVertices)? m_nVertices - 1 : 0;}				// returns the number of spans
-		bool	Closed();																	// returns true if kurve is closed
-		inline bool	Started() {return m_started;};
-		void	FullCircle(int dir, Point& c, double radius);								// make a full circle
-		void	Start();																	// start a new kurve
-		void	Start(Point& p);															// start a new kurve with start point
-		bool	Add(spVertex& spv, bool AddNullSpans = true);								// add a vertex
+		inline int		nSpans(	)const {return (m_nVertices)? m_nVertices - 1 : 0;}				// returns the number of spans
+		bool	Closed()const;									// returns true if kurve is closed
+		inline bool	Started()const {return m_started;};
+		void	FullCircle(int dir, const Point& c, double radius);								// make a full circle
+		void	Start();												// start a new kurve
+		void	Start(const Point& p);											// start a new kurve with start point
+		bool	Add(const spVertex& spv, bool AddNullSpans = true);								// add a vertex
 		void	Get(int vertex, spVertex& spv) const;												// get a vertex
-		bool	Add(Span& sp, bool AddNullSpans = true);									// add a span
-		bool	Add(int type, Point& p0, Point& pc, bool AddNullSpans = true);				// a span
+		bool	Add(const Span& sp, bool AddNullSpans = true);									// add a span
+		bool	Add(int type, const Point& p0, const Point& pc, bool AddNullSpans = true);				// a span
 		void	AddSpanID(int ID);
-		bool	Add(Point& p0, bool AddNullSpans = true);									// linear 
-		void	Add();																		// add a null span
-		void	Add(Kurve* k, bool AddNullSpans = true);									// a kurve
-		void	StoreAllSpans(std::vector<Span>& kSpans);									// store all kurve spans in array, normally when fast access is reqd
+		bool	Add(const Point& p0, bool AddNullSpans = true);									// linear 
+		void	Add();					// add a null span
+		void	Add(const Kurve* k, bool AddNullSpans = true);									// a kurve
+		void	StoreAllSpans(std::vector<Span>& kSpans)const;			// store all kurve spans in array, normally when fast access is reqd
 
-		void	Replace(int vertexnumber, spVertex& spv);
-		void	Replace(int vertexnumber, int type, Point& p, Point& pc, int ID = UNMARKED);
-		int		GetSpanID(int spanVertexNumber) const;											// for spanID (wire offset)
+		void	Replace(int vertexnumber, const spVertex& spv);
+		void	Replace(int vertexnumber, int type, const Point& p, const Point& pc, int ID = UNMARKED);
+		int		GetSpanID(int spanVertexNumber) const;								// for spanID (wire offset)
 		int		Get(int spanVertexNumber, Point& p, Point& pc) const;
 		int		Get(int spanVertexNumber, Point3d& p, Point3d& pc) const 
 		{ Point p2d, pc2d; int d = Get(spanVertexNumber, p2d, pc2d); p = p2d; pc = pc2d; return d;}
 		int		Get(int spannumber, Span& sp, bool returnSpanProperties = false, bool transform = false) const;
 		int		Get(int spannumber, Span3d& sp, bool returnSpanProperties = false, bool transform = false) const;
 		void	Get(Point &ps,Point &pe) const; // returns the start- and endpoint of the kurve
-		SpanDataObject* GetIndex(int vertexNumber);
-		inline double GetLength(){ return Perim();};  // returns the length of a kurve
+		const SpanDataObject* GetIndex(int vertexNumber)const;
+		inline double GetLength()const{ return Perim();};  // returns the length of a kurve
 
 		void	minmax(Point& pmin, Point& pmax);			// minmax of span
 		void	minmax(Box& b);
 
-		Point	NearToVertex(Point& p, int& nearSpanNumber);
-		Point	NearToVertex(Point& p) { int nearSpanNumber; return NearToVertex(p, nearSpanNumber);};
-		Point	Near(Point& p, int& nearSpanNumber);
-		Point	Near(Point& p) { int nearSpanNumber; return Near(p, nearSpanNumber);};
-		double	Perim();									// perimeter of kurve
-		double	Area();										// area of closed kurve
+		Point	NearToVertex(const Point& p, int& nearSpanNumber)const;
+		Point	NearToVertex(const Point& p)const { int nearSpanNumber; return NearToVertex(p, nearSpanNumber);};
+		Point	Near(const Point& p, int& nearSpanNumber)const;
+		Point	Near(const Point& p) const{ int nearSpanNumber; return Near(p, nearSpanNumber);};
+		double	Perim()const;									// perimeter of kurve
+		double	Area()const;										// area of closed kurve
 		void	Reverse();									// reverse kurve direction - obsolete
 		bool	Reverse(bool isReversed) {					// reverse kurve direction - later better method
 			bool tmp = m_isReversed;
@@ -924,17 +926,17 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		};
 		int		Reduce(double tolerance);					// reduce spans which are in tolerance
 
-		int		Offset(vector <Kurve*>&OffsetKurves, double offset, int direction, int method, int& ret);	// offset methods
-		int		OffsetMethod1(Kurve& kOffset, double off, int direction,  int method, int& ret);
-		int		OffsetISOMethod(Kurve& kOffset, double off, int direction, bool BlendAll); // special offset (ISO radius - no span elimination)
-		int		Intof(Span& sp, vector<Point>& p);			// intof span
-		int		Intof(Kurve&k, vector<Point>& p);			// intof kurve
-		bool	Compare(Kurve* k, Matrix* m, bool bAllowMirror = true);				// compare 2 Kurves
-		void	ChangeStart(Point *pNewStart, int startSpanno); // change the Kurve's startpoint
+		int		Offset(vector <Kurve*>&OffsetKurves, double offset, int direction, int method, int& ret)const;	// offset methods
+		int		OffsetMethod1(Kurve& kOffset, double off, int direction,  int method, int& ret)const;
+		int		OffsetISOMethod(Kurve& kOffset, double off, int direction, bool BlendAll)const; // special offset (ISO radius - no span elimination)
+		int		Intof(const Span& sp, vector<Point>& p)const;			// intof span
+		int		Intof(const Kurve&k, vector<Point>& p)const;			// intof kurve
+		bool	Compare(const Kurve* k, Matrix* m, bool bAllowMirror = true)const;				// compare 2 Kurves
+		void	ChangeStart(const Point *pNewStart, int startSpanno); // change the Kurve's startpoint
 
 	private:
-		bool compareKurves(std::vector<struct spanCompare> &first,std::vector<struct spanCompare> &second, int &nOffset/*, Kurve *k, Matrix *m*/);
-		bool calculateMatrix(Kurve *k, Matrix *m, int nOffset, bool bMirror = false);
+		bool compareKurves(const std::vector<struct spanCompare> &first, const std::vector<struct spanCompare> &second, int &nOffset/*, Kurve *k, Matrix *m*/)const;
+		bool calculateMatrix(const Kurve *k, Matrix *m, int nOffset, bool bMirror = false)const;
 	public:
 
 
@@ -943,28 +945,29 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	FromPeps(int id, bool removenullspans = true, bool transformVertices = false);		// from a Peps to kurve
 		void	ModifyIndex(int spannumber, WireExtraData* i);
 #else
-		void	AddIndex(int vertexNumber, SpanDataObject* data);
+		void	AddIndex(int vertexNumber, const SpanDataObject* data);
 
 #endif
 		bool	Split(double MaximumRadius, double reslution);	// split arcs larger than MaximumRadius to resoultion
-		int		IntExtWire(Kurve& kSec, double Ref, double Sec, double height, Kurve* kOut);	// interpolate / extrapolate a mid height kurve (wire)
+		int	IntExtWire(const Kurve& kSec, double Ref, double Sec, double height, Kurve* kOut)const;	// interpolate / extrapolate a mid height kurve (wire)
 		void	SetZ(double z) { e[11] = z; if(fabs(z) > 1.0e-6) m_unit = false;}				// assigns kurve to fixed height (wire)
 
 		void	Part(int startVertex, int EndVertex, Kurve *part);
-		Kurve	Part(int fromSpanno, Point& fromPt, int toSpanno, Point& toPt);					// make a Part Kurve
-		int		Break(double atParam, Kurve *secInput, Kurve *refOut, Kurve *secOut);// break kurve perimeter parameterisation with synchronised Kurve (wire)
-		void	Part(double fromParam, double toParam, Kurve *secInput, Kurve *refOut, Kurve *secOut);// part kurve perimeter parameterisation with synchronised Kurve (wire)
+		Kurve	Part(int fromSpanno, const Point& fromPt, int toSpanno, const Point& toPt);					// make a Part Kurve
+		int	Break(double atParam, const Kurve *secInput, Kurve *refOut, Kurve *secOut);// break kurve perimeter parameterisation with synchronised Kurve (wire)
+		void	Part(double fromParam, double toParam, const Kurve *secInput, Kurve *refOut, Kurve *secOut);// part kurve perimeter parameterisation with synchronised Kurve (wire)
 		Kurve	Part(double fromParam, double toParam);											// part kurve perimeter parameterisation
-			void	AddSections(Kurve* k, bool endOfSection);		// special add kurves for rollingball
-
-		void	print(FILE* d, int kid, bool outSpanid);
+		void AddSections(const Kurve* k, bool endOfSection);		// special add kurves for rollingball
+#ifndef HEEKSCNC
+		void	print(FILE* d, int kid, bool outSpanid)const;
 		void	read(FILE* d, double scale);
-		void	printXML(FILE* d, int kid);					// print kurve to XML file
-		void	oXML(wostream& o, wchar_t* name){};			// output kurve to XML stream
-		void	AddEllipse(int dir, Point& pStart, Point& pEnd, Point& pCentre, Vector2d& majorAxis, double majorRadius, double minorRadius, double tolerance);
+		void	printXML(FILE* d, int kid)const;					// print kurve to XML file
+		void	oXML(wostream& o, const wchar_t* name){};			// output kurve to XML stream
+#endif
+		void	AddEllipse(int dir, const Point& pStart, const Point& pEnd, const Point& pCentre, const Vector2d& majorAxis, double majorRadius, double minorRadius, double tolerance);
 //		void Kurve::AddEllipse(int dir, Plane *plEllipse, Vector3d *cylAxis, Point3d *cylCentre, double cylradius, Point3d *pStart, Point3d *pEnd, double tolerance);		/// elliptical curve - biarc in tolerance
 
-		void	Spiral(Point& centre, double startAngle, double startRadius, double radiusRisePerRevolution, double endRadius);
+		void	Spiral(const Point& centre, double startAngle, double startRadius, double radiusRisePerRevolution, double endRadius);
 #ifdef PARASOLID
 		int ToPKcurve(PK_CURVE_t *curves, PK_INTERVAL_t *ranges, int start_spanno, int n_spans); // Convert to PK Curve
 
@@ -1086,21 +1089,21 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 
 	// finite Span routines
-	int Intof(Span& sp0 , Span& sp1, Point& p0, Point& p1);
-	int	LineLineIntof(Span& L0 , Span& L1, Point& p);
-	int LineArcIntof(Span& line, Span& arc, Point& p0, Point& p1);
-	int ArcArcIntof(Span& arc0, Span& arc1, Point& pLeft, Point& pRight);
+	int Intof(const Span& sp0 , const Span& sp1, Point& p0, Point& p1);
+	int	LineLineIntof(const Span& L0 , const Span& L1, Point& p);
+	int LineArcIntof(const Span& line, const Span& arc, Point& p0, Point& p1);
+	int ArcArcIntof(const Span& arc0, const Span& arc1, Point& pLeft, Point& pRight);
 
-	bool OnSpan(Span& sp, Point& p);
-	bool OnSpan(Span& sp, Point& p, bool nearPoints, Point& pNear, Point& pOnSpan);	// function returns true if pNear == pOnSpan
+	bool OnSpan(const Span& sp, const Point& p);
+	bool OnSpan(const Span& sp, const Point& p, bool nearPoints, Point& pNear, Point& pOnSpan);	// function returns true if pNear == pOnSpan
 	//			pNear (nearest on unbound span)
 	//			pOnSpan (nearest on finite span)
 
 
-	int Intof(Line& v0, Line& v1, Point3d& intof);							// intof 2 lines
-	double Dist(Line& l, Point3d& p, Point3d& pnear, double& t);			// distance from a point to a line
-	Point3d Near(Line& l, Point3d& p, double& t );							// near point to a line & t in 0-length range
-	double Dist(Span& sp, Point& p , Point& pnear );						// distance from p to sp, nearpoint returned as pnear
+	int Intof(const Line& v0, const Line& v1, Point3d& intof);							// intof 2 lines
+	double Dist(const Line& l, const Point3d& p, Point3d& pnear, double& t);			// distance from a point to a line
+	Point3d Near(const Line& l, const Point3d& p, double& t );							// near point to a line & t in 0-length range
+	double Dist(const Span& sp, const Point& p , Point& pnear );						// distance from p to sp, nearpoint returned as pnear
 
 //	Kurve splineUsingBiarc(CLine& cl0, CLine& cl1, std::vector<pts>);
 
@@ -1117,16 +1120,16 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 		// constructors
 		Line() {ok = false;};
-		Line(Point3d& p0, Vector3d& v0, bool boxed = true);
-		Line(Point3d& p0, Point3d& p1);
-		Line(Span& sp);
+		Line(const Point3d& p0, const Vector3d& v0, bool boxed = true);
+		Line(const Point3d& p0, const Point3d& p1);
+		Line(const Span& sp);
 
 		// methods
 		void minmax();
-		Point3d Near(Point3d& p, double& t);				// near point to line from point (0 >= t <= 1) in range
-		int Intof(Line& l, Point3d& intof) {return geoff_geometry::Intof(*this, l, intof);};	// intof 2 lines
-		bool atZ(double z, Point3d& p);						// returns p at z on line
-		bool Shortest(Line& l2, Line& lshort, double& t1, double& t2);	// calculate shortest line between this & l2
+		Point3d Near(const Point3d& p, double& t)const;				// near point to line from point (0 >= t <= 1) in range
+		int Intof(const Line& l, Point3d& intof)const {return geoff_geometry::Intof(*this, l, intof);};	// intof 2 lines
+		bool atZ(double z, Point3d& p)const;						// returns p at z on line
+		bool Shortest(const Line& l2, Line& lshort, double& t1, double& t2)const;	// calculate shortest line between this & l2
 	};
 
 
@@ -1143,13 +1146,14 @@ class Triangle3d {
 public:
 		// constructor
 		Triangle3d(){ ok = false;};
-		Triangle3d(Point3d& vert1, Point3d& vert2, Point3d& vert3);
+		Triangle3d(const Point3d& vert1, const Point3d& vert2, const Point3d& vert3);
 
 		// methods
-		bool      Intof(Line& l, Point3d& intof); // returns intersection triangle to line
+		bool Intof(const Line& l, Point3d& intof)const; // returns intersection triangle to line
 };
 
 
+#ifndef HEEKSCNC
 	// string parsing methods - primarily for test methods
 	int readLine(FILE* d, wchar_t* line, int maxCount);
 	char *stripLeadingWhiteSpace(char* line);
@@ -1166,6 +1170,7 @@ public:
 	wchar_t *getNextAddressInt(wchar_t address, wchar_t* str, int* value);
 	wchar_t *skipOver(wchar_t* str, wchar_t ch);
 	void changeFileExtension(std::wstring& fname, wchar_t *ext);
+#endif
 
 #ifdef OPENGL
 	#include "Graphics\Draw.h"
@@ -1176,8 +1181,8 @@ public:
 
 #if !defined HEEKSCNC
 #include "./rollingball/rollingball.h"
-#endif
 #include "./ioXML.h"
+#endif
 
 }
 

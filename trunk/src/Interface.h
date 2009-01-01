@@ -1,7 +1,13 @@
 // declares all the exported functions for HeeksCNC
 
+class Property;
+
 extern "C"{
+#ifdef WIN32
 #define HEEKSCNC_EXPORT __declspec( dllexport ) __cdecl
+#else
+#define HEEKSCNC_EXPORT
+#endif
 
 void HEEKSCNC_EXPORT OnStartUp();
 void HEEKSCNC_EXPORT OnNewOrOpen(int open);

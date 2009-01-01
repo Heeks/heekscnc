@@ -4,6 +4,10 @@
 
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
+#include <wx/config.h>
+#include <wx/confbase.h>
+#include <wx/fileconf.h>
+#include <wx/aui/aui.h>
 #include "../../interface/PropertyString.h"
 #include "../../interface/Observer.h"
 #include "PythonStuff.h"
@@ -33,12 +37,12 @@ void CHeeksCNCApp::OnInitDLL()
 	wxStandardPaths sp;
 
 	wxDynamicLibrary *executable = new wxDynamicLibrary(sp.GetExecutablePath());
-	CHeeksCADInterface* (*HeeksCADGetInterface)(void) = (CHeeksCADInterface* (*)(void))(executable->GetSymbol("HeeksCADGetInterface"));
+	CHeeksCADInterface* (*HeeksCADGetInterface)(void) = (CHeeksCADInterface* (*)(void))(executable->GetSymbol(_T("HeeksCADGetInterface")));
 	if(HeeksCADGetInterface){
 		heeksCAD = (*HeeksCADGetInterface)();
 	}
 
-	m_config = new wxConfig("HeeksCNC");
+	m_config = new wxConfig(_T("HeeksCNC"));
 }
 
 void CHeeksCNCApp::OnDestroyDLL()
@@ -54,7 +58,7 @@ void CHeeksCNCApp::OnDestroyDLL()
 }
 
 void OnSolidSimButton(wxCommandEvent& event){
-	wxMessageBox("In OnSolidSimButton");
+	wxMessageBox(_T("In OnSolidSimButton"));
 }
 
 void OnProgramCanvas( wxCommandEvent& event )
@@ -91,23 +95,27 @@ void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
 
 void CHeeksCNCApp::OnStartUp()
 {
+#ifndef WIN32
+	OnInitDLL();
+#endif
+
 	// add menus and toolbars
 	wxFrame* frame = heeksCAD->GetMainFrame();
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
 
 	// add the program canvas
     m_program_canvas = new CProgramCanvas(frame);
-	aui_manager->AddPane(m_program_canvas, wxAuiPaneInfo().Name("Program").Caption("Program").Bottom().BestSize(wxSize(600, 200)));
+	aui_manager->AddPane(m_program_canvas, wxAuiPaneInfo().Name(_T("Program")).Caption(_T("Program")).Bottom().BestSize(wxSize(600, 200)));
 
 	// add the output canvas
     m_output_canvas = new COutputCanvas(frame);
-	aui_manager->AddPane(m_output_canvas, wxAuiPaneInfo().Name("Output").Caption("Output").Bottom().BestSize(wxSize(600, 200)));
+	aui_manager->AddPane(m_output_canvas, wxAuiPaneInfo().Name(_T("Output")).Caption(_T("Output")).Bottom().BestSize(wxSize(600, 200)));
 
 	bool program_visible;
 	bool output_visible;
 
-	theApp.m_config->Read("ProgramVisible", &program_visible);
-	theApp.m_config->Read("OutputVisible", &output_visible);
+	theApp.m_config->Read(_T("ProgramVisible"), &program_visible);
+	theApp.m_config->Read(_T("OutputVisible"), &output_visible);
 
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
@@ -154,13 +162,13 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 void CHeeksCNCApp::OnFrameDelete()
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	theApp.m_config->Write("ProgramVisible", aui_manager->GetPane(m_program_canvas).IsShown());
-	theApp.m_config->Write("OutputVisible", aui_manager->GetPane(m_output_canvas).IsShown());
+	theApp.m_config->Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
+	theApp.m_config->Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
 {
-	return heeksCAD->GetExeFolder() + "/HeeksCNC";
+	return heeksCAD->GetExeFolder() + _T("/HeeksCNC");
 }
 
 class MyApp : public wxApp

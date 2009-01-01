@@ -83,3 +83,4 @@ HeeksObj* create_line_arc(Kurve &kurve)
 
 	return new_la;
 }
+

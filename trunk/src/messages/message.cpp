@@ -2,18 +2,18 @@
 
 namespace p4c {
 
-	void FAILURE(wchar_t* str) {
+	void FAILURE(const wchar_t* str) {
 		// called for FATAL error, no easy way back
 		throw str;
 	}
 
-	void FAILURE(std::wstring& str) {
+	void FAILURE(const std::wstring& str) {
 		// called for FATAL error, no easy way back
-		throw (wchar_t*)str.data();
+		throw (const wchar_t*)(str.data());
 	}
 
 
-	wchar_t* getMessage(wchar_t* original, int messageGroup, int StringID) {
+	const wchar_t* getMessage(const wchar_t* original, int messageGroup, int StringID) {
 		// returns international string from system yet to be written
 		//
 		// input
@@ -28,7 +28,8 @@ namespace p4c {
 		return original;
 	}
 
-	wchar_t* getMessage(wchar_t* original) {  // temp like above until proper messaging is added
+	const wchar_t* getMessage(const wchar_t* original) {  // temp like above until proper messaging is added
 		return original;
 	}
 }
+

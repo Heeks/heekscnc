@@ -15,7 +15,7 @@ Cutter::Cutter(double Rset, double rset)
 	}
 	else
 	{
-		wxMessageBox("Cutter: ERROR R<0!");
+		wxMessageBox(_T("Cutter: ERROR R<0!"));
 		R = 1;
 	}
 
@@ -27,7 +27,7 @@ Cutter::Cutter(double Rset, double rset)
 	{
 		// ERROR!
 		// Throw an exception or something
-		wxMessageBox("Cutter: ERROR r<0 or r>R!");
+		wxMessageBox(_T("Cutter: ERROR r<0 or r>R!"));
 		r = 0;
 	}
 }
@@ -143,15 +143,13 @@ double DropCutter::FacetTest(const Cutter &cu, const double *e, const GTri &t)
 	// a*rc(1)+b*rc(2)+c*rc(3)+d
 	double test = a * cc[0] + b * cc[1] + c * cc[2] + d;
 	if (test > 0.000001)
-		wxMessageBox("FacetTest ERROR! CC point not in plane");
+		wxMessageBox(_T("FacetTest ERROR! CC point not in plane"));
 
 	if (isinside(t, cc))
 	{
 		if (fabs(zf) > 100000)
 		{
-			char mess[1024];
-			sprintf(mess, "serious problem... at %lf,%lf", e[0], e[1]); 
-			wxMessageBox(mess);
+			wxMessageBox(wxString::Format(_T("serious problem... at %lf,%lf"), e[0], e[1]));
 		}
 		return zf;
 	}
@@ -218,15 +216,13 @@ double DropCutter::EdgeTest(const Cutter &cu, const double *e, const double *p1,
 
 	if (fabs(start[1]-end[1])>0.0000000001)
 	{
-		char mess[1024];
-		sprintf(mess, "EdgeTest ERROR! (start.y - end.y) = %lf", start[1]-end[1]); 
-		wxMessageBox(mess);
+		wxMessageBox(wxString::Format(_T("EdgeTest ERROR! (start.y - end.y) = %lf"), start[1]-end[1]));
 		return -10000000.0;
 	}
 
 	double l = -start[1]; // distance from cutter to edge
 	if (l < -heeksCAD->GetTolerance())
-		wxMessageBox("EdgeTest ERROR! l<0 !");
+		wxMessageBox(_T("EdgeTest ERROR! l<0 !"));
             
 	// System.Console.WriteLine("l=" + l+" start.y="+start.y+" end.y="+end.y);
             
@@ -388,7 +384,7 @@ double DropCutter::EdgeTest(const Cutter &cu, const double *e, const double *p1,
 
 
 	// if we ever get here it is probably a serious error!
-	wxMessageBox("EdgeTest: ERROR: no case returned a valid ze!");
+	wxMessageBox(_T("EdgeTest: ERROR: no case returned a valid ze!"));
 	return -10000000.0;
 }
 
@@ -482,3 +478,4 @@ double DropCutter::TriTest(const Cutter &cu, const double *e, const std::list<GT
 
 	return z;
 }
+

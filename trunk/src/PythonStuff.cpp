@@ -1,6 +1,7 @@
 // PythonStuff.cpp
 
 #include "stdafx.h"
+#include <wx/file.h>
 #include "PythonStuff.h"
 #include "OpMove3D.h"
 #include "ProgramCanvas.h"
@@ -12,10 +13,10 @@
 
 #if _DEBUG
 #undef _DEBUG
-#include <python.h>
+#include <Python.h>
 #define _DEBUG
 #else
-#include <python.h>
+#include <Python.h>
 #endif
 
 static bool post_processing = false;
@@ -23,21 +24,20 @@ static bool running = false;
 
 static bool write_python_file(const wxString& python_file_path, bool post_processing = false /* false means running the program */)
 {
-	ofstream ofs(python_file_path.c_str());
-	if(!ofs)return false;
+	wxFile ofs(python_file_path.c_str(), wxFile::write);
+	if(!ofs.IsOpened())return false;
 
-	ofs<<"import hc\n";
-	ofs<<"from hc import *\n";
-	if(post_processing)ofs<<"import siegkx1\n";
-//		if(post_processing)ofs<<"import "<<theApp.m_program->m_machine.c_str()<<"\n";
-	ofs<<"import sys\n";
-	ofs<<"from math import *\n";
-	ofs<<"from stdops import *\n\n";
+	ofs.Write(_T("import hc\n"));
+	ofs.Write(_T("from hc import *\n"));
+	if(post_processing)ofs.Write(_T("import siegkx1\n"));
+	ofs.Write(_T("import sys\n"));
+	ofs.Write(_T("from math import *\n"));
+	ofs.Write(_T("from stdops import *\n\n"));
 
-	ofs<<"#redirect output to the HeeksCNC output canvas\n";
-	ofs<<"sys.stdout = hc\n\n";
+	ofs.Write(_T("#redirect output to the HeeksCNC output canvas\n"));
+	ofs.Write(_T("sys.stdout = hc\n\n"));
 
-	ofs<<theApp.m_program_canvas->m_textCtrl->GetValue();
+	ofs.Write(theApp.m_program_canvas->m_textCtrl->GetValue());
 
 	return true;
 }
@@ -61,8 +61,7 @@ static PyObject* hc_DoItNow(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "d", &time))
         return NULL;
 
-	wxString str = wxString::Format("Do it now - time = %lf", time);
-	wxMessageBox(str);
+	wxMessageBox(wxString::Format(_T("Do it now - time = %lf"), time));
     Py_RETURN_NONE;
 }
 
@@ -73,7 +72,7 @@ static PyObject* hc_MessageBox(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "s", &str))
         return NULL;
 
-	wxMessageBox(str);
+	wxMessageBox(Ctt(str));
     Py_RETURN_NONE;
 }
 
@@ -81,7 +80,7 @@ static PyObject* hc_write(PyObject* self, PyObject* args)
 {
 	char* str;
 	if (!PyArg_ParseTuple(args, "s", &str)) return NULL;
-	theApp.m_output_canvas->m_textCtrl->AppendText(str);
+	theApp.m_output_canvas->m_textCtrl->AppendText(Ctt(str));
 
 	Py_RETURN_NONE;
 }
@@ -92,7 +91,7 @@ static PyObject* hc_error(PyObject* self, PyObject* args)
 {
 	char* str;
 	if (!PyArg_ParseTuple(args, "s", &str)) return NULL;
-	wxMessageBox(str);
+	wxMessageBox(Ctt(str));
 	hc_error_called = true;
 	throw str;
 	Py_RETURN_NONE;
@@ -207,7 +206,7 @@ static PyObject* hc_current_tool_pos(PyObject *self, PyObject *args)
 	{
 		PyObject *pValue = PyFloat_FromDouble(tool_path.tool_path_pos[i]);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, i, pValue);
 	}
@@ -225,21 +224,21 @@ static PyObject* hc_current_tool_data(PyObject *self, PyObject *args)
 	{
 		PyObject *pValue = PyInt_FromLong(tool_path.tool);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 0, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(tool_path.tool_diameter);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 1, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(tool_path.tool_corner_radius);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 2, pValue);
 	}
@@ -320,14 +319,14 @@ static void add_move(const CMove3D &move, SToolPath& tp, bool ignore_attach = fa
 			{
 				PyObject *pValue = PyFloat_FromDouble(move.m_p.x);
 				if (!pValue){
-					Py_DECREF(pArgs); wxMessageBox("Cannot convert argument\n"); return;
+					Py_DECREF(pArgs); wxMessageBox(_T("Cannot convert argument\n")); return;
 				}
 				PyTuple_SetItem(pArgs, 0, pValue);
 			}
 			{
 				PyObject *pValue = PyFloat_FromDouble(move.m_p.y);
 				if (!pValue){
-					Py_DECREF(pArgs); wxMessageBox("Cannot convert argument\n"); return;
+					Py_DECREF(pArgs); wxMessageBox(_T("Cannot convert argument\n")); return;
 				}
 				PyTuple_SetItem(pArgs, 1, pValue);
 			}
@@ -336,7 +335,7 @@ static void add_move(const CMove3D &move, SToolPath& tp, bool ignore_attach = fa
 				if(tp.surface)z += tp.current_attached_z_zero;
 				PyObject *pValue = PyFloat_FromDouble(z);
 				if (!pValue){
-					Py_DECREF(pArgs); wxMessageBox("Cannot convert argument\n"); return;
+					Py_DECREF(pArgs); wxMessageBox(_T("Cannot convert argument\n")); return;
 				}
 				PyTuple_SetItem(pArgs, 2, pValue);
 			}
@@ -467,7 +466,7 @@ static PyObject* hc_arc(PyObject* self, PyObject* args)
 	// i and j must be specified relative to the previous position, but x and y are absolute position
 	if(post_processing || tool_path.CheckInitialValues())
 	{
-		bool acw = !stricmp(direction, "acw");
+		bool acw = !strcmp(direction, "acw");
 		double cx = tool_path.tool_path_pos[0] + i;
 		double cy = tool_path.tool_path_pos[1] + j;
 		CMove3D move(acw ? 3:2, Point(x, y), Point(cx, cy));
@@ -563,7 +562,7 @@ static PyObject* hc_sketch_offset(PyObject* self, PyObject* args)
 		// offset the kurve
 		std::vector<Kurve*> offset_kurves;
 		int ret = 0;
-		int res = temp_kurve.Offset(offset_kurves, fabs(offset), offset>0 ? 1:-1, BASIC_OFFSET, ret);
+		temp_kurve.Offset(offset_kurves, fabs(offset), offset>0 ? 1:-1, BASIC_OFFSET, ret);
 
 		// loop through offset kurves
 		int i = 0;
@@ -580,7 +579,7 @@ static PyObject* hc_sketch_offset(PyObject* self, PyObject* args)
 		}
 	}
 	}
-	catch( wchar_t * str ) 
+	catch( char * str ) 
 	{
 		char mess[1024];
 		sprintf(mess, "Error in offsetting sketch - %s", str);
@@ -703,49 +702,49 @@ static PyObject* hc_sketch_span_data(PyObject *self, PyObject *args)
 	{
 		PyObject *pValue = PyInt_FromLong(span_type);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 0, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(sx);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 1, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(sy);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 2, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(ex);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 3, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(ey);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 4, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(cx);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 5, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(cy);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 6, pValue);
 	}
@@ -784,14 +783,14 @@ static PyObject* hc_sketch_span_dir(PyObject *self, PyObject *args)
 	{
 		PyObject *pValue = PyFloat_FromDouble(vx);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 0, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(vy);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 1, pValue);
 	}
@@ -831,21 +830,21 @@ static PyObject* hc_tangential_arc(PyObject *self, PyObject *args)
 	{
 		PyObject *pValue = PyFloat_FromDouble(rcx);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 0, pValue);
 	}
 	{
 		PyObject *pValue = PyFloat_FromDouble(rcy);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 1, pValue);
 	}
 	{
 		PyObject *pValue = PyInt_FromLong(rdir);
 		if (!pValue){
-			Py_DECREF(pTuple); wxMessageBox("Cannot convert argument\n"); return NULL;
+			Py_DECREF(pTuple); wxMessageBox(_T("Cannot convert argument\n")); return NULL;
 		}
 		PyTuple_SetItem(pTuple, 2, pValue);
 	}
@@ -938,9 +937,9 @@ static PyObject* hc_make_attached_moves(PyObject* self, PyObject* args)
 
 	if (!PyArg_ParseTuple(args, "ddddisssssssss", &tool_diameter, &tool_corner_rad, &low_plane, &little_step_length, &move_type, &sx, &sy, &sz, &ex, &ey, &ez, &cx, &cy, &cz))return NULL;
 
-	if(!stricmp(sx, "NOT_SET") || !stricmp(sy, "NOT_SET") || !stricmp(sz, "NOT_SET"))
+	if(!strcmp(sx, "NOT_SET") || !strcmp(sy, "NOT_SET") || !strcmp(sz, "NOT_SET"))
 	{
-		if(!tool_path.not_set_warning_showed)wxMessageBox("can't do make_attached_moves until x, y and z, are all known");
+		if(!tool_path.not_set_warning_showed)wxMessageBox(_T("can't do make_attached_moves until x, y and z, are all known"));
 		tool_path.not_set_warning_showed = true;
 		Py_RETURN_NONE;
 	}
@@ -950,12 +949,12 @@ static PyObject* hc_make_attached_moves(PyObject* self, PyObject* args)
 	sscanf(sx, "%lf", &dsx);
 	sscanf(sy, "%lf", &dsy);
 	sscanf(sz, "%lf", &dsz);
-	if(!stricmp(ex, "NOT_SET"))dex = dsx; else sscanf(ex, "%lf", &dex);
-	if(!stricmp(ey, "NOT_SET"))dey = dsy; else sscanf(ey, "%lf", &dey);
-	if(!stricmp(ez, "NOT_SET"))dez = dsz; else sscanf(ez, "%lf", &dez);
-	if(!stricmp(cx, "NOT_SET"))dcx = dsx; else sscanf(cx, "%lf", &dcx);
-	if(!stricmp(cy, "NOT_SET"))dcy = dsy; else sscanf(cy, "%lf", &dcy);
-	if(!stricmp(cz, "NOT_SET"))dcz = dsz; else sscanf(cz, "%lf", &dcz);
+	if(!strcmp(ex, "NOT_SET"))dex = dsx; else sscanf(ex, "%lf", &dex);
+	if(!strcmp(ey, "NOT_SET"))dey = dsy; else sscanf(ey, "%lf", &dey);
+	if(!strcmp(ez, "NOT_SET"))dez = dsz; else sscanf(ez, "%lf", &dez);
+	if(!strcmp(cx, "NOT_SET"))dcx = dsx; else sscanf(cx, "%lf", &dcx);
+	if(!strcmp(cy, "NOT_SET"))dcy = dsy; else sscanf(cy, "%lf", &dcy);
+	if(!strcmp(cz, "NOT_SET"))dcz = dsz; else sscanf(cz, "%lf", &dcz);
 
 	tool_path_for_make_attached_moves.tool_diameter = tool_diameter;
 	tool_path_for_make_attached_moves.tool_corner_radius = tool_corner_rad;
@@ -1071,13 +1070,13 @@ void HeeksPyPostProcess()
 {
 	if(post_processing)
 	{
-		wxMessageBox("Already post-processing the program!");
+		wxMessageBox(_T("Already post-processing the program!"));
 		return;
 	}
 
 	if(running)
 	{
-		wxMessageBox("Can't post-process the program, because the program is still being run!");
+		wxMessageBox(_T("Can't post-process the program, because the program is still being run!"));
 	}
 
 	post_processing = true;
@@ -1088,9 +1087,9 @@ void HeeksPyPostProcess()
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
-		if(!write_python_file(theApp.GetDllFolder() + wxString("/post.py"), true))
+		if(!write_python_file(theApp.GetDllFolder() + wxString(_T("/post.py")), true))
 		{
-			wxMessageBox("couldn't write post.py!");
+			wxMessageBox(_T("couldn't write post.py!"));
 		}
 		else
 		{
@@ -1129,7 +1128,7 @@ void HeeksPyPostProcess()
 					error_str.append(str);
 					i++;
 				}
-				wxMessageBox(error_str.c_str());
+				wxMessageBox(Ctt(error_str.c_str()));
 			}
 
 			Py_Finalize();
@@ -1143,7 +1142,7 @@ void HeeksPyPostProcess()
 		}
 		else
 		{
-			wxMessageBox("Error while post-processing the program!");
+			wxMessageBox(_T("Error while post-processing the program!"));
 			if(PyErr_Occurred())
 				PyErr_Print();
 		}
@@ -1157,13 +1156,13 @@ void HeeksPyRunProgram(CBox &box)
 {
 	if(running)
 	{
-		wxMessageBox("Already running the program!");
+		wxMessageBox(_T("Already running the program!"));
 		return;
 	}
 
 	if(post_processing)
 	{
-		wxMessageBox("Can't run the program, post-processing is still happening!");
+		wxMessageBox(_T("Can't run the program, post-processing is still happening!"));
 		return;
 	}
 
@@ -1175,9 +1174,9 @@ void HeeksPyRunProgram(CBox &box)
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
-		if(!write_python_file(theApp.GetDllFolder() + wxString("/run.py")))
+		if(!write_python_file(theApp.GetDllFolder() + wxString(_T("/run.py"))))
 		{
-			wxMessageBox("couldn't write run.py!");
+			wxMessageBox(_T("couldn't write run.py!"));
 		}
 		else
 		{
@@ -1215,7 +1214,7 @@ void HeeksPyRunProgram(CBox &box)
 					error_str.append(str);
 					i++;
 				}
-				wxMessageBox(error_str.c_str());
+				wxMessageBox(Ctt(error_str.c_str()));
 			}
 
 			Py_Finalize();
@@ -1229,7 +1228,7 @@ void HeeksPyRunProgram(CBox &box)
 		}
 		else
 		{
-			wxMessageBox("Error while running the program!");
+			wxMessageBox(_T("Error while running the program!"));
 		}
 		Py_Finalize();
 	}

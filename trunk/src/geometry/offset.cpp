@@ -6,10 +6,10 @@
 #include "geometry.h"
 
 namespace geoff_geometry {
-	static Kurve eliminateLoops(Kurve& k , Kurve& originalk, double offset, int& ret);
-	static bool DoesIntersInterfere(Point& pInt, Kurve& k, double offset);
+	static Kurve eliminateLoops(const Kurve& k , const Kurve& originalk, double offset, int& ret);
+	static bool DoesIntersInterfere(const Point& pInt, const Kurve& k, double offset);
 
-	int Kurve::Offset(vector<Kurve*>&OffsetKurves, double offset, int direction, int method, int& ret) {
+	int Kurve::Offset(vector<Kurve*>&OffsetKurves, double offset, int direction, int method, int& ret)const {
 
 		switch(method) {
 	case NO_ELIMINATION:
@@ -27,7 +27,7 @@ namespace geoff_geometry {
 		return 0;
 	}
 
-	int Kurve::OffsetMethod1(Kurve& kOffset, double off, int direction,  int method, int& ret)
+	int Kurve::OffsetMethod1(Kurve& kOffset, double off, int direction,  int method, int& ret)const
 	{
 		// offset kurve with simple span elimination
 		// direction 1 = left,  -1 = right
@@ -160,7 +160,7 @@ namespace geoff_geometry {
 	}
 
 
-	static Kurve eliminateLoops(Kurve& k , Kurve& originalk, double offset, int& ret) {
+	static Kurve eliminateLoops(const Kurve& k , const Kurve& originalk, double offset, int& ret) {
 		// a simple loop elimination routine based on first offset ideas in Peps
 		// this needs extensive work for future
 		// start point musn't disappear & only one valid offset is determined
@@ -255,7 +255,7 @@ namespace geoff_geometry {
 	}
 
 
-	static bool DoesIntersInterfere(Point& pInt, Kurve& k, double offset)  {
+	static bool DoesIntersInterfere(const Point& pInt, const Kurve& k, double offset)  {
 		// check that intersections don't interfere with the original kurve 
 		Span sp;
 		Point dummy;
@@ -281,7 +281,7 @@ static struct iso {
 	} isodata;
 static void isoRadius(Span& before, Span& blend, Span& after, double radius);
 
-int Kurve::OffsetISOMethod(Kurve& kOut, double off, int direction, bool BlendAll) {
+int Kurve::OffsetISOMethod(Kurve& kOut, double off, int direction, bool BlendAll)const {
 		// produces a special offset Kurve - observing so-called ISO radii
 		// eg line/arc/line tangent - keep arc radius constant
 		// this method also considers arc/arc/arc etc.

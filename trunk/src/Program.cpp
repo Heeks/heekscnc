@@ -77,12 +77,12 @@ void CProgram::glCommands(bool select, bool marked, bool no_color){
 
 void CProgram::GetProperties(std::list<Property *> *list)
 {
-	__super::GetProperties(list);
+	CNCObj::GetProperties(list);
 }
 
 void CProgram::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	__super::GetTools(t_list, p);
+	CNCObj::GetTools(t_list, p);
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
@@ -101,7 +101,7 @@ void CProgram::WriteXML(TiXmlElement *root)
 	element = new TiXmlElement( "Program" );
 	root->LinkEndChild( element );  
 	element->SetAttribute("machine", m_machine.c_str());
-	element->SetAttribute("program", theApp.m_program_canvas->m_textCtrl->GetValue());
+	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
 
 	WriteBaseXML(element);
 }
@@ -114,9 +114,9 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	// get the attributes
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
 	{
-		wxString name(a->Name());
+		std::string name(a->Name());
 		if(name == "machine"){new_object->m_machine.assign(a->Value());}
-		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(a->Value());}
+		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(Ctt(a->Value()));}
 	}
 
 	new_object->ReadBaseXML(pElem);
@@ -124,3 +124,4 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 
 	return new_object;
 }
+

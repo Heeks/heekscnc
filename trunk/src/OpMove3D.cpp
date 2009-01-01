@@ -6,7 +6,7 @@
 #define ORANGE_CROSS
 
 //	static const
-long long inf = 0x7ff0000000000000;
+long long inf = 0x7ff0000000000000LL;
 const double CMove3D::MOVE_NOT_SET = *((double*)(&inf));
 
 double CMove3D::Length(const Point3d& prev_point)const

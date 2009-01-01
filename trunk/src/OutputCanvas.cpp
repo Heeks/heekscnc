@@ -37,3 +37,4 @@ void COutputCanvas::Clear()
 {
 	m_textCtrl->Clear();
 }
+
