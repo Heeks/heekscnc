@@ -1,0 +1,22 @@
+#summary How to build for Ubuntu
+
+First build HeeksCAD for Ubuntu. ( see http://code.google.com/p/heekscad/wiki/CompilingForUbuntu )
+
+go to System->Administration->"Synaptic Package Manager"
+
+get python2.5-dev
+
+Run RapidSVN ( menu Applications->Programming->RapidSVN ) On the RapidSVN menu, choose Repository->Chekcout In the URL box put: https://heekscnc.googlecode.com/svn/trunk/ In the "Destination Directory" box, put: /home/dan/Desktop/HeeksCAD/HeeksCNC ( but replace "dan" with your username ) Click "OK". This should get all the source code files you need.
+
+On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" window appears, with some text like "dan@dan-desktop:~$" in it.
+
+Type: cd/Desktop/dan/HeeksCAD/src
+
+Then type: make
+
+If it builds OK, the last line should be something like:
+gcc -shared -Wl,-soname,libheekscnc.so.0 -o ../libheekscnc.so.0.5.1 Construction.o DropCutter.o Finite.o HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o kurve.o LinesAndArcs.o Matrix.o ObjList.o offset.o OpMove3D.o OutputCanvas.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o -lstdc++ -lGLU -lGL -lwx_gtk2u_richtext-2.8 -lwx_gtk2u_aui-2.8 -lwx_gtk2u_xrc-2.8 -lwx_gtk2u_qa-2.8 -lwx_gtk2u_html-2.8 -lwx_gtk2u_adv-2.8 -lwx_gtk2u_core-2.8 -lwx_baseu_xml-2.8 -lwx_baseu_net-2.8 -lwx_baseu-2.8 -lwx_gtk2u_gl-2.8 -lpython2.5
+dan@dan-laptop:~/Desktop/HeeksCAD/HeeksCNC/src$ 
+
+You can then run HeeksCAD by typing ../../HeeksCAD or:
+On the Ubuntu menu, go to Places->Desktop Then double click on HeeksCAD folder to open it. You will see HeeksCAD with a blue diamond icon. Double click on the blue diamond icon to run HeeksCAD.
