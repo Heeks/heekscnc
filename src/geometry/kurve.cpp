@@ -51,7 +51,7 @@ namespace geoff_geometry {
 	}
 
 
-	void SpanVertex::Add(int offset, int spantype, Point& p, Point& pc, int ID)
+	void SpanVertex::Add(int offset, int spantype, const Point& p, const Point& pc, int ID)
 	{
 		type[offset] = spantype;
 //		index[offset] = NULL;
@@ -76,11 +76,11 @@ namespace geoff_geometry {
 		return index[offset];
 	}
 #else
-	void SpanVertex::Add(int offset, SpanDataObject* Index ) {
+	void SpanVertex::Add(int offset, const SpanDataObject* Index ) {
 		index[offset] = Index;
 	}
 		
-	SpanDataObject* SpanVertex::GetIndex(int offset) {
+	const SpanDataObject* SpanVertex::GetIndex(int offset) const{
 		return index[offset];
 	}
 #endif
@@ -304,12 +304,12 @@ namespace geoff_geometry {
 		}
 	}
 
-	int Span::Intof(Span& sp, Point& pInt1, Point& pInt2) {
+	int Span::Intof(const Span& sp, Point& pInt1, Point& pInt2)const {
 		// Intof 2 spans
 		return geoff_geometry::Intof(*this, sp, pInt1, pInt2);
 	}
 
-	Point Span::Near(Point& p){
+	Point Span::Near(const Point& p)const{
 		// returns the near point to span from p 
 		if(this->dir == LINEAR) {
 			double t;
@@ -321,7 +321,7 @@ namespace geoff_geometry {
 			return(p.Mid(this->pc, (r - this->radius) / r));
 		}
 	}
-	Point Span::NearOn(Point& p){
+	Point Span::NearOn(const Point& p)const{
 		// returns the near point to span from p - returned point is always on the span
 		Point pn;
 		pn = Near(p);
@@ -354,7 +354,7 @@ namespace geoff_geometry {
 		if(setprops == true) SetProperties(true);
 	}
 
-	Point Span::Mid() {
+	Point Span::Mid()const {
 		// midpoint of a span
 
 		return geoff_geometry::Mid(*this);
@@ -362,7 +362,7 @@ namespace geoff_geometry {
 	}
 
 
-	Point Span::MidPerim(double d) {
+	Point Span::MidPerim(double d)const {
 		/// returns a point which is 0-d along span
 		Point p;
 		if(this->dir == LINEAR) {
@@ -376,7 +376,7 @@ namespace geoff_geometry {
 		return p;
 	}
 
-	Point Span::MidParam(double param) {
+	Point Span::MidParam(double param)const {
 		/// returns a point which is 0-1 along span
 		return MidPerim(param * this->length);
 	}
@@ -481,7 +481,7 @@ return;
 		m_spans.clear();
 	}
 
-	bool Kurve::Closed()
+	bool Kurve::Closed()const
 	{
 		// returns true if kurve closed
 		if(m_nVertices > 1) {
@@ -494,7 +494,7 @@ return;
 			return false;
 	}
 
-	void Kurve::FullCircle(int dir, Point& c, double radius) {
+	void Kurve::FullCircle(int dir, const Point& c, double radius) {
 		/// make a full circle Kurve (2 spans)
 		/// mark the first span for later
 		this->~Kurve();
@@ -515,13 +515,13 @@ return;
 	}
 
 
-	void Kurve::Start(Point& p)
+	void Kurve::Start(const Point& p)
 	{
 		Start();
 		Add(0, p, Point(0,0));
 	}
 
-	bool Kurve::Add(Span& sp, bool AddNullSpans) {
+	bool Kurve::Add(const Span& sp, bool AddNullSpans) {
 		// add a span, including ID
 		if(this->m_started == false) this->Start(sp.p0);
 		if(this->Add(sp.dir, sp.p1, sp.pc, AddNullSpans)) {
@@ -531,7 +531,7 @@ return;
 		return false;
 	}
 
-	bool Kurve::Add(spVertex& spv, bool AddNullSpans) {
+	bool Kurve::Add(const spVertex& spv, bool AddNullSpans) {
 		if(Add(spv.type, spv.p, spv.pc, AddNullSpans)) {
 			AddSpanID(spv.spanid);
 			return true;
@@ -539,7 +539,7 @@ return;
 		return false;
 	}
 
-	bool Kurve::Add(int span_type, Point& p0, Point& pc, bool AddNullSpans)
+	bool Kurve::Add(int span_type, const Point& p0, const Point& pc, bool AddNullSpans)
 	{
 		// add a span (cw = -1 (T)   acw = 1 (A) )
 #ifdef _DEBUG
@@ -555,7 +555,7 @@ return;
 			// see if a null span would result by the addition of this span
 			//		double xl, yl, cxl, cyl;
 			Point pv, pcc;
-			int dir = Get(m_nVertices - 1, pv, pcc);
+			Get(m_nVertices - 1, pv, pcc);
 			if(pv.Dist(p0) < geoff_geometry::TOLERANCE) {
 				if(!AddNullSpans)return false;
 				span_type = LINEAR;				// linear span
@@ -590,12 +590,12 @@ return;
 		Add(p, true);
 	}
 
-	bool Kurve::Add(Point& p0, bool AddNullSpans) {
+	bool Kurve::Add(const Point& p0, bool AddNullSpans) {
 		return Add(0, p0, Point(0,0), AddNullSpans);
 	}
 
 
-	void Kurve::Add(Kurve* k, bool AddNullSpans) {
+	void Kurve::Add(const Kurve* k, bool AddNullSpans) {
 		Span sp;
 		Matrix m;
 		if(this->m_unit == false) {
@@ -607,7 +607,7 @@ return;
 		for(int i = 1; i <= k->nSpans(); i++) {
 			k->Get(i, sp, false, this->m_unit);
 			#ifndef PEPSDLL
-				SpanDataObject* obj = k->GetIndex(i-1);
+			const SpanDataObject* obj = k->GetIndex(i-1);
 			#endif
 			if(this->m_unit == false) sp.Transform(m);
 
@@ -640,13 +640,13 @@ return;
 		}
 	}
 
-	void Kurve::Replace(int vertexnumber, spVertex& spv) {
+	void Kurve::Replace(int vertexnumber, const spVertex& spv) {
 		// replace a span
 		Replace(vertexnumber, spv.type, spv.p, spv.pc, spv.spanid);
 	}
 
 
-	void Kurve::Replace(int vertexnumber, int type, Point& p0, Point& pc, int ID) {
+	void Kurve::Replace(int vertexnumber, int type, const Point& p0, const Point& pc, int ID) {
 		// replace a span
 #ifdef _DEBUG
 		if(this == NULL || vertexnumber > m_nVertices) FAILURE(getMessage(L"Kurve::Replace - vertexNumber out of range", GEOMETRY_ERROR_MESSAGES, MES_BAD_VERTEX_NUMBER));
@@ -665,13 +665,13 @@ return;
 		p->Add(vertexnumber % SPANSTORAGE, i);
 	}
 #else
-	void Kurve::AddIndex(int vertexNumber, SpanDataObject* data) {
+	void Kurve::AddIndex(int vertexNumber, const SpanDataObject* data) {
 		if(this == NULL || vertexNumber > m_nVertices - 1) FAILURE(L"Kurve::AddIndex - vertexNumber out of range");
 		SpanVertex* p = (SpanVertex*) m_spans[vertexNumber / SPANSTORAGE];
 		p->Add(vertexNumber % SPANSTORAGE, data);
 	}
 
-	SpanDataObject* Kurve::GetIndex(int vertexNumber) {
+	const SpanDataObject* Kurve::GetIndex(int vertexNumber)const {
 		if(this == NULL || vertexNumber > m_nVertices - 1) FAILURE(L"Kurve::GetIndex - vertexNumber out of range");
 		SpanVertex* p = (SpanVertex*) m_spans[vertexNumber / SPANSTORAGE];
 		return p->GetIndex(vertexNumber % SPANSTORAGE);
@@ -860,7 +860,7 @@ return;
 	}
 
 
-	Point Mid(Span& span) {
+	Point Mid(const Span& span) {
 		// mid point of a span
 		if(span.dir) {
 			CLine chord(span.p0, span.p1);
@@ -875,7 +875,7 @@ return;
 			return Mid(span.p0, span.p1);
 	}
 
-	Point Kurve::Near(Point& p, int& nearSpanNumber) {
+	Point Kurve::Near(const Point& p, int& nearSpanNumber)const {
 		// finds the nearest span on kurve to the the given point, nearSpanNumber is the spannumber
 		double minDist = 1.0e100;
 		Point pNear, pn;
@@ -897,19 +897,23 @@ return;
 	}
 
 
-	Point Kurve::NearToVertex(Point& p, int& nearSpanNumber) {
+	Point Kurve::NearToVertex(const Point& p, int& nearSpanNumber)const {
 		// finds the nearest span endpoint on kurve to the the given point, nearSpanNumber is the spannumber
 		double minDistSquared = 1.0e100;
 		Point pn;
 
-		if(!m_unit)	p = p.Transform(Inverse()); // Inverse transform point (rather than transform each vertex!)
+		Matrix inv_mat = *this;
+		inv_mat.Inverse();
+		
+		Point tp = p;
+		if(!m_unit)	tp = tp.Transform(inv_mat); // Inverse transform point (rather than transform each vertex!)
 
 		nearSpanNumber = 0;
 
 		for(int i = 0; i < m_nVertices; i++) {
 			Point ps, pc;
 			Get(i, ps, pc);
-			double DistSquared = Vector2d(ps, p).magnitudesqd();
+			double DistSquared = Vector2d(ps, tp).magnitudesqd();
 			if(DistSquared < minDistSquared) {
 				minDistSquared = DistSquared;
 				nearSpanNumber = i;
@@ -919,7 +923,7 @@ return;
 		return pn.Transform(*this);
 	}
 
-	void Kurve::ChangeStart(Point *pNewStart, int startSpanno) {
+	void Kurve::ChangeStart(const Point *pNewStart, int startSpanno) {
 		// changes the start position of the Kurve
 		if(startSpanno == 1) {
 			Span spFirst;
@@ -983,7 +987,7 @@ return;
 		minmax(b.min, b.max);
 	}
 
-	void Kurve::StoreAllSpans(std::vector<Span>& kSpans) {	// store all kurve spans in array, normally when fast access is reqd
+	void Kurve::StoreAllSpans(std::vector<Span>& kSpans)const {	// store all kurve spans in array, normally when fast access is reqd
 		Span span;
 		for(int i = 1; i <= this->nSpans(); i++) {
 			this->Get(i, span, true, false);					
@@ -991,7 +995,7 @@ return;
 		}
 	}
 
-	bool Kurve::operator==(Kurve &k){
+	bool Kurve::operator==(const Kurve &k)const{
 		// k = kk (vertex check)
 		if(nSpans() != k.nSpans()) return false;
 		spVertex thisvertex, vertex;
@@ -1003,7 +1007,7 @@ return;
 		return true;
 	}
 
-
+#ifndef HEEKSCNC
 	void Kurve::read(FILE* d, double scale) {
 		// debug - read next kurve in peps command input format
 		// scale is for unit conversion (not using matrix for better accuracy)
@@ -1164,14 +1168,30 @@ return;
 	wchar_t *getNextDouble(wchar_t* str, double* value) {
 		wchar_t word[1024];
 		wchar_t *ptr = getNextWord(str, word);
+#ifdef WIN32
 		*value = _wtof(word);
+#else
+#ifdef UNICODE
+		*value = wcstod(word, NULL);
+#else
+		*value = atof(word);
+#endif
+#endif
 		return ptr;
 	}
 
 	wchar_t *getNextInt(wchar_t* str, int* value) {
 		wchar_t word[1024];
 		wchar_t *ptr = getNextWord(str, word);
+#ifdef WIN32
 		*value = _wtoi(word);
+#else
+#ifdef UNICODE
+		*value = wcstol(word, NULL, 10);
+#else
+		*value = atoi(word);
+#endif
+#endif
 		return ptr;
 	}
 
@@ -1229,7 +1249,7 @@ return;
 		return op;
 	}
 
-		void	Kurve::printXML(FILE* d, int kid) {
+		void	Kurve::printXML(FILE* d, int kid)const {
 		// debug - output in peps command input format
 		fprintf(d,"<Kurve id = \"%d\">\n", kid);
 		for(int i = 0; i < this->m_nVertices; i++) {
@@ -1247,8 +1267,9 @@ return;
 		}
 		fprintf(d, "</Kurve>\n");
 	}
+#endif
 
-	double Kurve::Perim() {
+	double Kurve::Perim() const{
 		// returns perimeter of kurve
 		double perim = 0;
 		Span sp;
@@ -1261,7 +1282,7 @@ return;
 		}
 		return perim * xscale;
 	}
-	double Kurve::Area() {
+	double Kurve::Area() const{
 		// returns Area of kurve (+ve clockwise , -ve anti-clockwise sense)
 		double xscale = 1.0;
 		double area = 0;
@@ -1281,7 +1302,7 @@ return;
 
 	static void bubblesort(vector<Point>&p, vector<double>& d);
 
-	int Kurve::Intof(Span& spin, vector<Point>& p) {
+	int Kurve::Intof(const Span& spin, vector<Point>& p)const {
 		// returns a vector (array) of intersection points
 		int totalPoints = 0;
 		for(int i = 1; i <= nSpans(); i++) {
@@ -1327,7 +1348,7 @@ return;
 		}
 	}
 
-	int Kurve::Intof(Kurve&k, vector<Point>& p) {
+	int Kurve::Intof(const Kurve&k, vector<Point>& p)const {
 		vector<Point> all;
 
 		int totalPoints = 0;
@@ -1531,7 +1552,7 @@ void Kurve::Part(int startVertex, int EndVertex, Kurve *part) {
 }
 
 
-Kurve Kurve::Part(int fromSpanno, Point& fromPt, int toSpanno, Point& toPt) {
+Kurve Kurve::Part(int fromSpanno, const Point& fromPt, int toSpanno, const Point& toPt) {
             // make a Part Kurve
             // if spanno are known containing from/to Points then this is used, otherwise set = 0
             Kurve kPart;
@@ -1600,7 +1621,8 @@ Kurve Kurve::Part(int fromSpanno, Point& fromPt, int toSpanno, Point& toPt) {
             return kPart;
       }
 
-	void	Kurve::print(FILE* d, int kid, bool outSpanid) {
+#ifndef HEEKSCNC
+	void	Kurve::print(FILE* d, int kid, bool outSpanid)const {
 		// debug - output in peps command input format
 		// untransformed ??
 		fprintf(d,"k%d e\n", kid);
@@ -1626,9 +1648,9 @@ Kurve Kurve::Part(int fromSpanno, Point& fromPt, int toSpanno, Point& toPt) {
 						break;
 				}
 				if(dir == LINEAR)
-					fwprintf(d, L"x%.14g y%.14g; '*** ID = %s\n", p.x, p.y, spanid);
+					fwprintf(d, L"x%.14g y%.14g; '*** ID = %s\n", p.x, p.y, spanid.c_str());
 				else
-					fwprintf(d, L"%cx%.14g y%.14g x%.14g y%.14g; '*** ID = %s\n", (dir == ACW)?'a' : 't', p.x, p.y, pc.x, pc.y, spanid);
+					fwprintf(d, L"%cx%.14g y%.14g x%.14g y%.14g; '*** ID = %s\n", (dir == ACW)?'a' : 't', p.x, p.y, pc.x, pc.y, spanid.c_str());
 			}
 			else {
 				if(dir == LINEAR)
@@ -1639,9 +1661,7 @@ Kurve Kurve::Part(int fromSpanno, Point& fromPt, int toSpanno, Point& toPt) {
 		}
 		fprintf(d,"ek\n");
 	}
-
-
-
+#endif
 
 	Kurve Kurve::Part(double fromParam, double toParam) {
 		/// return a part Kurve - perimeter parameterisation

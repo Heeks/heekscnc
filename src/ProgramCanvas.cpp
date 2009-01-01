@@ -1,6 +1,9 @@
 // ProgramCanvas.cpp
 
 #include "stdafx.h"
+#include <wx/config.h>
+#include <wx/confbase.h>
+#include <wx/fileconf.h>
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "OutputCanvas.h"
@@ -36,9 +39,9 @@ static void OnRun(wxCommandEvent& event)
 class CAdderApply:public Tool{
 public:
 	void Run();
-	const char* GetTitle(){return "Apply";}
+	const wxChar* GetTitle(){return _T("Apply");}
 	wxString BitmapPath(){return _T("apply");}
-	const char* GetToolTip(){return "Add move, and finish";}
+	const wxChar* GetToolTip(){return _T("Add move, and finish");}
 };
 
 static CAdderApply adder_apply;
@@ -50,9 +53,9 @@ public:
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
 	}
-	const char* GetTitle(){return "Cancel";}
+	const wxChar* GetTitle(){return _T("Cancel");}
 	wxString BitmapPath(){return _T("cancel");}
-	const char* GetToolTip(){return "Finish without adding anything";}
+	const wxChar* GetToolTip(){return _T("Finish without adding anything");}
 };
 
 static CAdderCancel adder_cancel;
@@ -60,7 +63,7 @@ static CAdderCancel adder_cancel;
 class CInitialApply: public CAdderApply
 {
 	void Run();
-	const char* GetToolTip(){return "Add spinde speed and feed rates, and finish";}
+	const wxChar* GetToolTip(){return _T("Add spinde speed and feed rates, and finish");}
 };
 
 static CInitialApply initial_apply;
@@ -77,18 +80,18 @@ public:
 
 	void ReadConfigValues()
 	{
-		theApp.m_config->Read("SpindleSpeed", &m_spindle_speed, 1000);
-		theApp.m_config->Read("HFeed", &m_hfeed, 100);
-		theApp.m_config->Read("VFeed", &m_vfeed, 100);
+		theApp.m_config->Read(_T("SpindleSpeed"), &m_spindle_speed, 1000);
+		theApp.m_config->Read(_T("HFeed"), &m_hfeed, 100);
+		theApp.m_config->Read(_T("VFeed"), &m_vfeed, 100);
 	}
 	void WriteConfigValues()
 	{
-			theApp.m_config->Write("SpindleSpeed", m_spindle_speed);
-			theApp.m_config->Write("HFeed", m_hfeed);
-			theApp.m_config->Write("VFeed", m_vfeed);
+			theApp.m_config->Write(_T("SpindleSpeed"), m_spindle_speed);
+			theApp.m_config->Write(_T("HFeed"), m_hfeed);
+			theApp.m_config->Write(_T("VFeed"), m_vfeed);
 	}
 
-	const char* GetTitle(){return "Adding speeds and feeds";}
+	const wxChar* GetTitle(){return _T("Adding speeds and feeds");}
 	bool OnModeChange()
 	{
 		ReadConfigValues();
@@ -104,9 +107,7 @@ public:
 
 	void AddTheInitialText()
 	{
-		char str[1024];
-		sprintf(str, "spindle(%g)\nrate(%g, %g)\n", m_spindle_speed, m_hfeed, m_vfeed);
-		theApp.m_program_canvas->m_textCtrl->WriteText(str);
+		theApp.m_program_canvas->m_textCtrl->WriteText(wxString::Format(_T("spindle(%g)\nrate(%g, %g)\n"), m_hfeed, m_vfeed));
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
@@ -114,7 +115,7 @@ public:
 
 	bool Done()
 	{
-		return theApp.m_program_canvas->m_textCtrl->GetValue().Find("spindle") != -1;
+		return theApp.m_program_canvas->m_textCtrl->GetValue().Find(_T("spindle")) != -1;
 	}
 };
 
@@ -123,7 +124,7 @@ static CInitialAdder initial_adder;
 class CToolApply: public CAdderApply
 {
 	void Run();
-	const char* GetToolTip(){return "Add tool command, and finish";}
+	const wxChar* GetToolTip(){return _T("Add tool command, and finish");}
 };
 
 static CToolApply tool_apply;
@@ -140,18 +141,18 @@ public:
 
 	void ReadConfigValues()
 	{
-		theApp.m_config->Read("StationNumber", &m_station_number, 1);
-		theApp.m_config->Read("ToolDiameter", &m_diameter, 5);
-		theApp.m_config->Read("ToolCornerRad", &m_corner_radius, 0);
+		theApp.m_config->Read(_T("StationNumber"), &m_station_number, 1);
+		theApp.m_config->Read(_T("ToolDiameter"), &m_diameter, 5);
+		theApp.m_config->Read(_T("ToolCornerRad"), &m_corner_radius, 0);
 	}
 	void WriteConfigValues()
 	{
-		theApp.m_config->Write("StationNumber", m_station_number);
-		theApp.m_config->Write("ToolDiameter", m_diameter);
-		theApp.m_config->Write("ToolCornerRad", m_corner_radius);
+		theApp.m_config->Write(_T("StationNumber"), m_station_number);
+		theApp.m_config->Write(_T("ToolDiameter"), m_diameter);
+		theApp.m_config->Write(_T("ToolCornerRad"), m_corner_radius);
 	}
 
-	const char* GetTitle(){return "Adding tool command";}
+	const wxChar* GetTitle(){return _T("Adding tool command");}
 	bool OnModeChange()
 	{
 		ReadConfigValues();
@@ -173,9 +174,7 @@ public:
 			initial_adder.AddTheInitialText();
 		}
 
-		char str[1024];
-		sprintf(str, "tool(%d, %g, %g)\n", m_station_number, m_diameter, m_corner_radius);
-		theApp.m_program_canvas->m_textCtrl->WriteText(str);
+		theApp.m_program_canvas->m_textCtrl->WriteText(wxString::Format(_T("tool(%d, %g, %g)\n"), m_station_number, m_diameter, m_corner_radius));
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
@@ -183,7 +182,7 @@ public:
 
 	bool Done()
 	{
-		return theApp.m_program_canvas->m_textCtrl->GetValue().Find("tool") != -1;
+		return theApp.m_program_canvas->m_textCtrl->GetValue().Find(_T("tool")) != -1;
 	}
 };
 
@@ -200,9 +199,9 @@ static void set_corner_radius(double value, HeeksObj* object){tool_adder.m_corne
 
 void CToolAdder::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyInt("station number", m_station_number, NULL, set_station_number));
-	list->push_back(new PropertyDouble("diameter", m_diameter, NULL, set_diameter));
-	list->push_back(new PropertyDouble("corner radius", m_corner_radius, NULL, set_corner_radius));
+	list->push_back(new PropertyInt(_T("station number"), m_station_number, NULL, set_station_number));
+	list->push_back(new PropertyDouble(_T("diameter"), m_diameter, NULL, set_diameter));
+	list->push_back(new PropertyDouble(_T("corner radius"), m_corner_radius, NULL, set_corner_radius));
 }
 
 void CInitialApply::Run(){
@@ -216,9 +215,9 @@ static void set_vfeed(double value, HeeksObj* object){initial_adder.m_vfeed = va
 
 void CInitialAdder::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble("spindle speed", m_spindle_speed, NULL, set_spindle_speed));
-	list->push_back(new PropertyDouble("horizontal feed rate", m_hfeed, NULL, set_hfeed));
-	list->push_back(new PropertyDouble("vertical feed rate", m_vfeed, NULL, set_vfeed));
+	list->push_back(new PropertyDouble(_T("spindle speed"), m_spindle_speed, NULL, set_spindle_speed));
+	list->push_back(new PropertyDouble(_T("horizontal feed rate"), m_hfeed, NULL, set_hfeed));
+	list->push_back(new PropertyDouble(_T("vertical feed rate"), m_vfeed, NULL, set_vfeed));
 }
 
 class CMoveAdder: public CInputMode
@@ -233,7 +232,7 @@ public:
 	virtual ~CMoveAdder(void){}
 
 	// virtual functions for InputMode
-	const char* GetTitle(){return "Adding a move";}
+	const wxChar* GetTitle(){return _T("Adding a move");}
 	void OnMouse( wxMouseEvent& event )
 	{
 		if(event.MiddleIsDown() || event.GetWheelRotation() != 0)
@@ -282,25 +281,25 @@ public:
 			tool_adder.AddTheToolText();
 		}
 
-		char str[1024];
+		wxString str;
 		switch(m_mode){
 			case 0:
-				sprintf(str, "rapid(%g, %g, %g)\n", m_pos[0], m_pos[1], m_pos[2]);
+				str.Format(_T("rapid(%g, %g, %g)\n"), m_pos[0], m_pos[1], m_pos[2]);
 				break;
 			case 1:
-				sprintf(str, "feed(%g, %g, %g)\n", m_pos[0], m_pos[1], m_pos[2]);
+				str.Format(_T("feed(%g, %g, %g)\n"), m_pos[0], m_pos[1], m_pos[2]);
 				break;
 			case 2:
-				sprintf(str, "rapidxy(%g, %g)\n", m_pos[0], m_pos[1]);
+				str.Format(_T("rapidxy(%g, %g)\n"), m_pos[0], m_pos[1]);
 				break;
 			case 3:
-				sprintf(str, "rapidz(%g)\n", m_pos[2]);
+				str.Format(_T("rapidz(%g)\n"), m_pos[2]);
 				break;
 			case 4:
-				sprintf(str, "feedxy(%g, %g)\n", m_pos[0], m_pos[1]);
+				str.Format(_T("feedxy(%g, %g)\n"), m_pos[0], m_pos[1]);
 				break;
 			case 5:
-				sprintf(str, "feedz(%g)\n", m_pos[2]);
+				str.Format(_T("feedz(%g)\n"), m_pos[2]);
 				break;
 		}
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
@@ -323,7 +322,7 @@ static void set_z(double value, HeeksObj* object){move_adder.m_pos[2] = value; h
 class CProfileApply: public CAdderApply
 {
 	void Run();
-	const char* GetToolTip(){return "Add profile command, and finish";}
+	const wxChar* GetToolTip(){return _T("Add profile command, and finish");}
 };
 
 static CProfileApply profile_apply;
@@ -340,20 +339,20 @@ public:
 
 	void ReadConfigValues()
 	{
-		theApp.m_config->Read("ProfileOpLANum", &m_line_arcs_number, 1);
-		theApp.m_config->Read("ProfileOpOffsetType", &m_offset_type, 0);
-		theApp.m_config->Read("ProfileOpFinishX", &m_finish_x, 0);
-		theApp.m_config->Read("ProfileOpFinishY", &m_finish_y, 0);
+		theApp.m_config->Read(_T("ProfileOpLANum"), &m_line_arcs_number, 1);
+		theApp.m_config->Read(_T("ProfileOpOffsetType"), &m_offset_type, 0);
+		theApp.m_config->Read(_T("ProfileOpFinishX"), &m_finish_x, 0);
+		theApp.m_config->Read(_T("ProfileOpFinishY"), &m_finish_y, 0);
 	}
 	void WriteConfigValues()
 	{
-		theApp.m_config->Write("ProfileOpLANum", m_line_arcs_number);
-		theApp.m_config->Write("ProfileOpOffsetType", m_offset_type);
-		theApp.m_config->Write("ProfileOpFinishX", m_finish_x);
-		theApp.m_config->Write("ProfileOpFinishY", m_finish_y);
+		theApp.m_config->Write(_T("ProfileOpLANum"), m_line_arcs_number);
+		theApp.m_config->Write(_T("ProfileOpOffsetType"), m_offset_type);
+		theApp.m_config->Write(_T("ProfileOpFinishX"), m_finish_x);
+		theApp.m_config->Write(_T("ProfileOpFinishY"), m_finish_y);
 	}
 
-	const char* GetTitle(){return "Adding profile command";}
+	const wxChar* GetTitle(){return _T("Adding profile command");}
 	bool OnModeChange()
 	{
 		ReadConfigValues();
@@ -379,23 +378,23 @@ public:
 			tool_adder.AddTheToolText();
 		}
 
-		const char* dirstr = "left";
+		wxString dirstr = _T("left");
 		switch(m_offset_type){
 			case 1:
-				dirstr = "right";
+				dirstr = _T("right");
 				break;
 			case 2:
-				dirstr = "on";
+				dirstr = _T("on");
 				break;
 		}
 
-		char str[1024];
-		char roll_off_str[1024] = "\"NOT_SET\", \"NOT_SET\"";
+		wxString str;
+		wxString roll_off_str = _T("\"NOT_SET\", \"NOT_SET\"");
 		if(m_offset_type != 2)
 		{
-			sprintf(roll_off_str, "%g, %g", m_finish_x, m_finish_y);
+			roll_off_str.Format(_T("%g, %g"), m_finish_x, m_finish_y);
 		}
-		sprintf(str, "profile(%d, \"%s\", %s)\n", m_line_arcs_number, dirstr, roll_off_str);
+		str.Format(_T("profile(%d, \"%s\", %s)\n"), m_line_arcs_number, dirstr.c_str(), roll_off_str.c_str());
 		theApp.m_program_canvas->m_textCtrl->WriteText(str);
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
@@ -404,7 +403,7 @@ public:
 
 	bool Done()
 	{
-		return theApp.m_program_canvas->m_textCtrl->GetValue().Find("profile") != -1;
+		return theApp.m_program_canvas->m_textCtrl->GetValue().Find(_T("profile")) != -1;
 	}
 };
 
@@ -418,11 +417,11 @@ void CProfileApply::Run(){
 class OpPickObjectsTool: public Tool
 {
 public:
-	const char* GetTitle(){return "Pick Shape";}
-	const char* GetToolTip(){return "Pick shape objects ( clears previous shape objects first )";}
+	const wxChar* GetTitle(){return _T("Pick Shape");}
+	const wxChar* GetToolTip(){return _T("Pick shape objects ( clears previous shape objects first )");}
 	void Run()
 	{
-		heeksCAD->PickObjects("Pick shape objects");
+		heeksCAD->PickObjects(_T("Pick shape objects"));
 		const std::list<HeeksObj*>& marked_list = heeksCAD->GetMarkedList();
 		if(marked_list.size() > 0)
 		{
@@ -438,12 +437,12 @@ static OpPickObjectsTool pick_objects_tool;
 class OpPickPosTool: public Tool
 {
 public:
-	const char* GetTitle(){return "Pick Finish Pos";}
-	const char* GetToolTip(){return "Pick Finish XY coordinates";}
+	const wxChar* GetTitle(){return _T("Pick Finish Pos");}
+	const wxChar* GetToolTip(){return _T("Pick Finish XY coordinates");}
 	void Run()
 	{
 		double pos[3];
-		if(heeksCAD->PickPosition("Pick finish position", pos)){
+		if(heeksCAD->PickPosition(_T("Pick finish position"), pos)){
 			profile_adder.m_finish_x = pos[0];
 			profile_adder.m_finish_y = pos[1];
 			heeksCAD->RefreshInput();
@@ -461,16 +460,16 @@ static void set_finish_y(double value, HeeksObj* object){profile_adder.m_finish_
 
 void CProfileAdder::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyInt("line arc collection ID", m_line_arcs_number, NULL, set_line_arcs_number));
+	list->push_back(new PropertyInt(_T("line arc collection ID"), m_line_arcs_number, NULL, set_line_arcs_number));
 	std::list<wxString> choices;
-	choices.push_back(wxString("left"));
-	choices.push_back(wxString("right"));
-	choices.push_back(wxString("on"));
-	list->push_back(new PropertyChoice("offset type", choices, m_offset_type, NULL, set_offset_type));
+	choices.push_back(wxString(_T("left")));
+	choices.push_back(wxString(_T("right")));
+	choices.push_back(wxString(_T("on")));
+	list->push_back(new PropertyChoice(_T("offset type"), choices, m_offset_type, NULL, set_offset_type));
 	if(m_offset_type != 2)
 	{
-		list->push_back(new PropertyDouble("X roll off position", m_finish_x, NULL, set_finish_x));
-		list->push_back(new PropertyDouble("Y roll off position", m_finish_y, NULL, set_finish_y));
+		list->push_back(new PropertyDouble(_T("X roll off position"), m_finish_x, NULL, set_finish_x));
+		list->push_back(new PropertyDouble(_T("Y roll off position"), m_finish_y, NULL, set_finish_y));
 	}
 }
 
@@ -485,11 +484,11 @@ void CProfileAdder::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 void CMoveAdder::GetProperties(std::list<Property *> *list)
 {
 	if(m_mode != 3 && m_mode != 5){
-		list->push_back(new PropertyDouble("X", m_pos[0], NULL, set_x));
-		list->push_back(new PropertyDouble("Y", m_pos[1], NULL, set_y));
+		list->push_back(new PropertyDouble(_T("X"), m_pos[0], NULL, set_x));
+		list->push_back(new PropertyDouble(_T("Y"), m_pos[1], NULL, set_y));
 	}
 	if(m_mode != 2 && m_mode != 4){
-		list->push_back(new PropertyDouble("Z", m_pos[2], NULL, set_z));
+		list->push_back(new PropertyDouble(_T("Z"), m_pos[2], NULL, set_z));
 	}
 }
 
@@ -561,19 +560,19 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
 	m_toolBar->SetToolBitmapSize(wxSize(32, 32));
 
 	// add toolbar buttons
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Run"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/run.png", wxBITMAP_TYPE_PNG), _T("Run the program"), OnRun);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Initial"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/initial.png", wxBITMAP_TYPE_PNG), _T("Add spindle speed and feed rates"), OnAddInitial);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Tool"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/tool.png", wxBITMAP_TYPE_PNG), _T("Add tool command"), OnAddTool);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XYZ"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/rapid.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapid);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XY"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/rapidxy.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidXY);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid Z"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/rapidz.png", wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidZ);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XYZ"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/feed.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeed);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XY"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/feedxy.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedXY);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed Z"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/feedz.png", wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedZ);
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Profile Operation"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/opprofile.png", wxBITMAP_TYPE_PNG), _T("Add a profile operation"), OnAddProfileOp);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Run"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/run.png"), wxBITMAP_TYPE_PNG), _T("Run the program"), OnRun);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Initial"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/initial.png"), wxBITMAP_TYPE_PNG), _T("Add spindle speed and feed rates"), OnAddInitial);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Tool"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/tool.png"), wxBITMAP_TYPE_PNG), _T("Add tool command"), OnAddTool);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XYZ"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/rapid.png"), wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapid);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid XY"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/rapidxy.png"), wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidXY);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Rapid Z"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/rapidz.png"), wxBITMAP_TYPE_PNG), _T("Add a rapid move"), OnAddRapidZ);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XYZ"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/feed.png"), wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeed);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed XY"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/feedxy.png"), wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedXY);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Feed Z"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/feedz.png"), wxBITMAP_TYPE_PNG), _T("Add a feed move"), OnAddFeedZ);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Add Profile Operation"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/opprofile.png"), wxBITMAP_TYPE_PNG), _T("Add a profile operation"), OnAddProfileOp);
 
 	// these buttons always go at then end
-	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(theApp.GetDllFolder() + "/bitmaps/postprocess.png", wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/postprocess.png"), wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);
 
 	m_toolBar->Realize();
 
@@ -615,12 +614,12 @@ END_EVENT_TABLE()
 
 void CProgramTextCtrl::OnDropFiles(wxDropFilesEvent& event)
 {
-	__super::OnDropFiles(event);
+	wxTextCtrl::OnDropFiles(event);
 }
 
 void CProgramTextCtrl::OnChar(wxKeyEvent& event)
 {
-	__super::OnChar(event);
+	wxTextCtrl::OnChar(event);
 
 	// check for Enter key
     switch ( event.GetKeyCode() )
@@ -638,45 +637,52 @@ void CProgramTextCtrl::OnChar(wxKeyEvent& event)
 
 void CProgramTextCtrl::OnCut(wxCommandEvent& event)
 {
-	__super::OnCut(event);
+	wxTextCtrl::OnCut(event);
 }
 
 void CProgramTextCtrl::OnCopy(wxCommandEvent& event)
 {
-	__super::OnCopy(event);
+	wxTextCtrl::OnCopy(event);
 }
 
 void CProgramTextCtrl::OnPaste(wxCommandEvent& event)
 {
-	__super::OnPaste(event);
+	wxTextCtrl::OnPaste(event);
 }
 
 void CProgramTextCtrl::OnUndo(wxCommandEvent& event)
 {
-	__super::OnUndo(event);
+	wxTextCtrl::OnUndo(event);
 }
 
 void CProgramTextCtrl::OnRedo(wxCommandEvent& event)
 {
-	__super::OnRedo(event);
+	wxTextCtrl::OnRedo(event);
 }
 
 void CProgramTextCtrl::OnDelete(wxCommandEvent& event)
 {
-	__super::OnDelete(event);
+#ifdef WIN32
+// to do, are these needed?, they don't compile for Linux
+	wxTextCtrl::OnDelete(event);
+#endif
 }
 
 void CProgramTextCtrl::OnSelectAll(wxCommandEvent& event)
 {
-	__super::OnSelectAll(event);
+#ifdef WIN32
+// to do, are these needed?, they don't compile for Linux
+	wxTextCtrl::OnSelectAll(event);
+#endif
 }
 
 void CProgramTextCtrl::WriteText(const wxString& text)
 {
-	__super::WriteText(text);
+	wxTextCtrl::WriteText(text);
 
 	if(theApp.m_run_program_on_new_line)
 	{
 		RunProgram();
 	}
 }
+

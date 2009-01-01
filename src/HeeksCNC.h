@@ -10,10 +10,11 @@ class Property;
 class CProgram;
 class CProgramCanvas;
 class COutputCanvas;
+class wxConfigBase;
 
 class CHeeksCNCApp{
 public:
-	wxConfig* m_config;
+	wxConfigBase* m_config;
 	bool m_draw_cutter_radius; // applies to all operations
 	CProgram* m_program;
 	CProgramCanvas* m_program_canvas;

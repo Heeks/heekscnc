@@ -38,5 +38,6 @@ extern "C" {
 using namespace geoff_geometry;
 
 #include "HeeksCNC.h"
+#include "../../interface/strconv.h"
 
 // TODO: reference additional headers your program requires here

@@ -5,10 +5,10 @@
 #include <iostream>
 
 namespace p4c {
-	extern wchar_t* getMessage(wchar_t* original, int messageGroup, int stringID);
-	extern wchar_t* getMessage(wchar_t* original);							// dummy
-	extern void FAILURE(wchar_t* str);
-	extern void FAILURE(std::wstring& str);
+	extern const wchar_t* getMessage(const wchar_t* original, int messageGroup, int stringID);
+	extern const wchar_t* getMessage(const wchar_t* original);							// dummy
+	extern void FAILURE(const wchar_t* str);
+	extern void FAILURE(const std::wstring& str);
 
 	enum MESSAGE_GROUPS {
 		GENERAL_MESSAGES,

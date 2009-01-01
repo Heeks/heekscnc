@@ -5,8 +5,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //            finite intersections
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifndef WIN32
+#define __min(a,b) ((a<b)?a:b)
+#define __max(a,b) ((a>b)?a:b)
+#endif
+
 namespace geoff_geometry {
-	int Intof(Span& sp0 , Span& sp1, Point& p0, Point& p1)
+	int Intof(const Span& sp0 , const Span& sp1, Point& p0, Point& p1)
 	{
 		// returns the number of intersects (lying within spans sp0, sp1)
 		if(sp0.box.outside(sp1.box) == true) return 0;
@@ -32,7 +38,7 @@ namespace geoff_geometry {
 		}
 	}
 
-	int LineLineIntof(Span& sp0 , Span& sp1, Point& p) {
+	int LineLineIntof(const Span& sp0 , const Span& sp1, Point& p) {
 		// intersection between 2 Line2d
 		// returns 0 for no intersection in range of either span
 		// returns 1 for intersction in range of both spans
@@ -59,11 +65,11 @@ namespace geoff_geometry {
 		return 1;
 	}
 
-	int LineArcIntof(Span& line, Span& arc, Point& p0, Point& p1) {
+	int LineArcIntof(const Span& line, const Span& arc, Point& p0, Point& p1) {
 		// inters of line arc
 		// solving	x = x0 + dx * t			x = y0 + dy * t
 		//			x = xc + R * cos(a)		y = yc + R * sin(a)		for t
-		// gives :-  t² (dx² + dy²) + 2t(dx*dx0 + dy*dy0) + (x0-xc)² + (y0-yc)² - R² = 0
+		// gives :-  tï¿½ (dxï¿½ + dyï¿½) + 2t(dx*dx0 + dy*dy0) + (x0-xc)ï¿½ + (y0-yc)ï¿½ - Rï¿½ = 0
 		int nRoots;
 		double t0, t1;
 		Vector2d v0(arc.pc, line.p0);
@@ -71,9 +77,8 @@ namespace geoff_geometry {
 		double s = v1.magnitudesqd();
 
 		p0.ok = p1.ok = false;
-		if(nRoots = quadratic(s, 2 * (v0 * v1), v0.magnitudesqd() - arc.radius * arc.radius, t0, t1)) {
+		if((nRoots = quadratic(s, 2 * (v0 * v1), v0.magnitudesqd() - arc.radius * arc.radius, t0, t1)) != 0) {
 			double toler = geoff_geometry::TOLERANCE / sqrt(s);							// calc a parametric tolerance
-			bool on0 = false, on1 = false;
 			if(t0 > -toler && t0 < 1 + toler) {
 				p0 = v1 * t0 + line.p0;
 				p0.ok = arc.OnSpan(p0);
@@ -93,7 +98,7 @@ namespace geoff_geometry {
 		return nRoots;
 	}
 
-	int ArcArcIntof(Span& arc0, Span& arc1, Point& pLeft, Point& pRight) {
+	int ArcArcIntof(const Span& arc0, const Span& arc1, Point& pLeft, Point& pRight) {
 		// Intof 2 arcs
 		int numInts = Intof(Circle(arc0.pc, arc0.radius), Circle(arc1.pc, arc1.radius), pLeft, pRight);
 
@@ -108,12 +113,12 @@ namespace geoff_geometry {
 		return nLeft + nRight;
 	}
 
-	bool Span::OnSpan(Point& p) {
+	bool Span::OnSpan(const Point& p)const {
 		double t;
 		return OnSpan(p, &t);
 	}
 
-	bool Span::OnSpan(Point& p, double* t) {
+	bool Span::OnSpan(const Point& p, double* t)const {
 		// FAST OnSpan test - assumes that p lies ON the unbounded span
 #if _DEBUG
 		if(this->returnSpanProperties == false) {
@@ -192,7 +197,7 @@ namespace geoff_geometry {
 		return ret;
 	}
 
-	Line::Line(Point3d& p, Vector3d& v0, bool boxed){
+	Line::Line(const Point3d& p, const Vector3d& v0, bool boxed){
 		// constructor from point & vector
 		p0 = p;
 		v = v0;
@@ -201,7 +206,7 @@ namespace geoff_geometry {
 		ok = (length > geoff_geometry::TOLERANCE);
 	}
 
-	Line::Line(Point3d& p, Point3d& p1){
+	Line::Line(const Point3d& p, const Point3d& p1){
 		// constructor from 2 points
 		p0 = p;
 		v = Vector3d(p, p1);
@@ -210,7 +215,7 @@ namespace geoff_geometry {
 		ok = (length > geoff_geometry::TOLERANCE);
 	}
 
-	Line::Line(Span& sp){
+	Line::Line(const Span& sp){
 		// contructor from linear span
 		p0 = sp.p0;
 		v = sp.vs * sp.length;
@@ -226,7 +231,7 @@ namespace geoff_geometry {
 		MinMax(this->v + this->p0, box.min, box.max);
 	}
 
-	bool Line::atZ(double z, Point3d& p) {
+	bool Line::atZ(double z, Point3d& p)const {
 		// returns p at z on line
 		if(FEQZ(this->v.getz())) return false;
 		double t = (z - this->p0.z) / this->v.getz();
@@ -235,7 +240,7 @@ namespace geoff_geometry {
 	}
 
 
-	bool Line::Shortest(Line& l2, Line& lshort, double& t1, double& t2) {
+	bool Line::Shortest(const Line& l2, Line& lshort, double& t1, double& t2)const {
 	/*
 	Calculate the line segment PaPb that is the shortest route between
 	two lines P1P2 and P3P4. Calculate also the values of mua and mub where
@@ -271,7 +276,7 @@ namespace geoff_geometry {
 		return true;
 	}
 
-	int Intof(Line& l0, Line& l1, Point3d& intof)
+	int Intof(const Line& l0, const Line& l1, Point3d& intof)
 	{
 		/* intersection of 2 vectors
 		returns 0 for  intercept but not within either vector
@@ -337,25 +342,25 @@ namespace geoff_geometry {
 	}
 
 
-	double Dist(Line& l, Point3d& p, Point3d& pnear, double& t){
+	double Dist(const Line& l, const Point3d& p, Point3d& pnear, double& t){
 		// returns the distance of a point from a line and the near point on the extended line and the parameter of the near point (0-length) in range
 		pnear = Near(l, p, t );
 		return p.Dist(pnear);
 	}
 
-	Point3d Near(Line& l, Point3d& p, double& t){
+	Point3d Near(const Line& l, const Point3d& p, double& t){
 		// returns the near point from a line on the extended line and the parameter of the near point (0-length) in range
 		t = (Vector3d(l.p0, p) * l.v) / l.length;		// t parametised 0 - line length
 		return l.v * (t / l.length) + l.p0;
 	}
 
-	Point3d Line::Near(Point3d& p, double& t){
+	Point3d Line::Near(const Point3d& p, double& t)const{
 		// returns the near point from a line on the extended line and the parameter of the near point (0-length) in range
 		t = (Vector3d(this->p0, p) * this->v) / this->length;		// t parametised 0 - line length
 		return this->v * (t / this->length) + this->p0;
 	}
 
-	double DistSq(Point3d *p, Vector3d *vl, Point3d *pf) {
+	double DistSq(const Point3d *p, const Vector3d *vl, const Point3d *pf) {
 		/// returns the distance squared of pf from the line given by p,vl
 		/// vl must be normalised
 		Vector3d v(*p, *pf);
@@ -364,7 +369,7 @@ namespace geoff_geometry {
 		return d;
 	}
 
-	double Dist(Point3d *p, Vector3d *vl, Point3d *pf) {
+	double Dist(const Point3d *p, const Vector3d *vl, const Point3d *pf) {
 		/// returns the distance of pf from the line given by p,vl
 		/// vl must be normalised
 		Vector3d v(*p, *pf);
@@ -381,11 +386,12 @@ namespace geoff_geometry {
 #endif
 	}
 
-	double Dist(Span& sp, Point& p , Point& pnear ) {
+	double Dist(const Span& sp, const Point& p , Point& pnear ) {
 		// returns distance of p from span, pnear is the nearpoint on the span (or endpoint)
 		if(!sp.dir) {
 			double d, t;
-			d = Dist(Line(sp), Point3d(p), Point3d(pnear), t);
+			Point3d unused_pnear;
+			d = Dist(Line(sp), Point3d(p), unused_pnear, t);
 			if(t < -geoff_geometry::TOLERANCE) {
 				pnear = sp.p0;						// nearpoint
 				d = pnear.Dist(p);
@@ -432,12 +438,12 @@ namespace geoff_geometry {
 		}
 	}
 
-	bool	OnSpan(Span& sp, Point& p) {
+	bool	OnSpan(const Span& sp, const Point& p) {
 		Point nullPoint;
 		return OnSpan(sp, p, false, nullPoint, nullPoint);
 	}
 
-	bool	OnSpan(Span& sp, Point& p,  bool nearPoints, Point& pNear, Point& pOnSpan) {
+	bool	OnSpan(const Span& sp, const Point& p,  bool nearPoints, Point& pNear, Point& pOnSpan) {
 		// function returns true if pNear == pOnSpan
 		//			returns pNear & pOnSpan if nearPoints true
 		//			pNear (nearest on unbound span)
@@ -479,7 +485,7 @@ namespace geoff_geometry {
 	}
 
 	// Triangle3d Constructors
-	Triangle3d::Triangle3d(Point3d& p1, Point3d& p2, Point3d& p3) {
+	Triangle3d::Triangle3d(const Point3d& p1, const Point3d& p2, const Point3d& p3) {
 		vert1 = p1;
 		vert2 = p2;
 		vert3 = p3;
@@ -498,10 +504,10 @@ namespace geoff_geometry {
 	}
 
 	// Triangle3d methods
-	bool    Triangle3d::Intof(Line& l, Point3d& intof) {
+	bool    Triangle3d::Intof(const Line& l, Point3d& intof)const {
 	 // returns intersection triangle to line in intof
 	// funtion returns true for intersection, false for no intersection
-	// method based on Möller & Trumbore(1997) (Barycentric coordinates)
+	// method based on Mï¿½ller & Trumbore(1997) (Barycentric coordinates)
 	// based on incorrect Pseudo code from "Geometric Tools for Computer Graphics" p.487
 		if(box.outside(l.box) == true) return false;
 
@@ -532,7 +538,7 @@ namespace geoff_geometry {
 
 
 	// box class
-	bool Box::outside(Box& b) {
+	bool Box::outside(const Box& b)const {
 		// returns true if this box is outside b
 		if(b.ok == false || this->ok == false) return false;	// no box set
 		if(this->max.x < b.min.x) return true;
@@ -541,7 +547,7 @@ namespace geoff_geometry {
 		if(this->min.y > b.max.y) return true;
 		return false;
 	}
-	bool Box3d::outside(Box3d& b) {
+	bool Box3d::outside(const Box3d& b) const{
 		// returns true if this box is outside b
 		if(b.ok == false || this->ok == false) return false;	// no box set
 		if(this->max.x < b.min.x) return true;
@@ -553,7 +559,7 @@ namespace geoff_geometry {
 		return false;
 	}
 
-	Span3d IsPtsSpan3d(double* a, int n, double tolerance, double* deviation) {
+	Span3d IsPtsSpan3d(const double* a, int n, double tolerance, double* deviation) {
 		// returns a span3d if all points are within tolerance
 		int np = n / 3;					// number of points
 		if(np < 2) return Span3d();		// Invalid span3d
@@ -579,7 +585,7 @@ namespace geoff_geometry {
 			Line rel(ep.Mid(mp), re, false);
 
 			Point3d pc;
-			int ii = Intof(rsl, rel, pc);
+			Intof(rsl, rel, pc);
 			double radius = pc.Dist(sp);
 
 			// check other points on circle
@@ -599,7 +605,7 @@ double tolerance = 10.0 * 1.0e-6;
 		return Span3d();
 	}
 
-	Line IsPtsLine(double* a, int n, double tolerance, double* deviation) {
+	Line IsPtsLine(const double* a, int n, double tolerance, double* deviation) {
 		// returns a Line if all points are within tolerance
 		// deviation is returned as the sum of all deviations of interior points to line(sp,ep)
 		int np = n / 3;					// number of points
