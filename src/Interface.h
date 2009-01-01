@@ -1,6 +1,7 @@
 // declares all the exported functions for HeeksCNC
 
 class Property;
+class CHeeksCADInterface;
 
 extern "C"{
 #ifdef WIN32
@@ -9,7 +10,7 @@ extern "C"{
 #define HEEKSCNC_EXPORT
 #endif
 
-void HEEKSCNC_EXPORT OnStartUp();
+void HEEKSCNC_EXPORT OnStartUp(CHeeksCADInterface* h);
 void HEEKSCNC_EXPORT OnNewOrOpen(int open);
 void HEEKSCNC_EXPORT GetOptions(void(*callbackfunc)(Property*));
 void HEEKSCNC_EXPORT OnFrameDelete();
