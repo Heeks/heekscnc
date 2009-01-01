@@ -3,12 +3,14 @@
 // simple XML output classes to implement sufficient for p4c/peps purposes
 // 
 #include "geometry.h"
+#ifdef WIN32
 #include "windows.h"
+#endif
 #include <iomanip>
 
 namespace geoff_geometry {
 
-	inputXML::inputXML(std::wstring& fname) : ip(NULL){		
+	inputXML::inputXML(const std::wstring& fname) : ip(NULL){		
 		// for some reason wifstream doesn't support wide string filename????
 		ip = new wifstream(_wfopen(fname.data(),L"r"));
 		if(ip == NULL || ip->is_open() == false){
@@ -20,7 +22,7 @@ namespace geoff_geometry {
 		scale = 1.0;
 	}
 
-	inputXML::inputXML(wchar_t* fname) : ip(NULL){
+	inputXML::inputXML(const wchar_t* fname) : ip(NULL){
 		// for some reason wifstream doesn't support wide string filename????
 		ip = new wifstream(_wfopen(fname,L"r"));
 
@@ -38,7 +40,7 @@ namespace geoff_geometry {
 		if(ip != NULL) delete ip;
 	};
 
-	bool inputXML::startElement(wchar_t* name) {
+	bool inputXML::startElement(const wchar_t* name) {
 		// first move to after next "<"
 		wchar_t ch;
 		while((ch = ip->get()) != '<'){
@@ -48,7 +50,7 @@ namespace geoff_geometry {
 		return findString(std::wstring(name));
 	};
 
-	bool inputXML::startElement(std::wstring& name) {
+	bool inputXML::startElement(const std::wstring& name) {
 		// first move to after next "<"
 		wchar_t ch;
 		while((ch = ip->get()) != '<'){
@@ -69,7 +71,7 @@ namespace geoff_geometry {
 		return true;
 	}
 
-	bool inputXML::findString(std::wstring& name){
+	bool inputXML::findString(const std::wstring& name){
 		// compares name to the next string in the input stream
 		// if not matched, then returns false and the stream pointer is reset
 		int ipos = ip->tellg();
@@ -91,7 +93,7 @@ namespace geoff_geometry {
 		return false;	
 	};
 
-	bool inputXML::Attribute(wchar_t* name, std::wstring& data) {
+	bool inputXML::Attribute(const wchar_t* name, std::wstring& data) {
 		std::wstring n(name);
 		n += L"=\"";
 		data.clear();
@@ -105,7 +107,7 @@ namespace geoff_geometry {
 	}
 
 		
-	bool inputXML::Attribute(wchar_t* name, bool& data) {
+	bool inputXML::Attribute(const wchar_t* name, bool& data) {
 		std::wstring str;
 		if(Attribute(name, str)) {
 			data = str.compare(L"TRUE")?false : true;
@@ -115,7 +117,7 @@ namespace geoff_geometry {
 	}
 
 
-	bool inputXML::Attribute(wchar_t* name, int& data) {
+	bool inputXML::Attribute(const wchar_t* name, int& data) {
 		std::wstring str;
 		if(Attribute(name, str)) {
 			data = _wtoi(str.data());
@@ -124,7 +126,7 @@ namespace geoff_geometry {
 		return false;
 	}
 
-	bool inputXML::Attribute(wchar_t* name, double& data, bool scaledata) {
+	bool inputXML::Attribute(const wchar_t* name, double& data, bool scaledata) {
 		std::wstring str;
 		if(Attribute(name, str)) {
 			data = _wtof(str.data());
@@ -177,7 +179,7 @@ namespace geoff_geometry {
 
 		endElement();
 	}
-	bool inputXML::Read(Point& p, std::wstring& name) {
+	bool inputXML::Read(const Point& p, std::wstring& name) {
 		bool good = false;
 		if(startElement(L"POINT") == true) {
 			Attribute(L"name", name);
@@ -188,7 +190,7 @@ namespace geoff_geometry {
 		return p.ok = good;
 	}
 
-	bool inputXML::Read(spVertex& spv, std::wstring& name) {
+	bool inputXML::Read(const spVertex& spv, std::wstring& name) {
 		// read XML format spVertex
 		bool good = false;
 		if(startElement(L"SPVERTEX") == true) {
@@ -214,7 +216,7 @@ namespace geoff_geometry {
 		return good;
 	}
 
-	bool inputXML::Read(Kurve& k, std::wstring& name) {
+	bool inputXML::Read(const Kurve& k, std::wstring& name) {
 		// debug - read next kurve in XML format
 		int nVertices;
 		bool good = false;
@@ -249,7 +251,7 @@ namespace geoff_geometry {
 		return good;
 	}
 
-	outXML::outXML(wchar_t* fname, bool scaleToMM):op(NULL){
+	outXML::outXML(const wchar_t* fname, bool scaleToMM):op(NULL){
 		op = new wofstream(_wfopen(fname,L"w+"));
 
 		if(op == NULL || op->is_open() == false){
@@ -263,7 +265,7 @@ namespace geoff_geometry {
 		scale = (scaleToMM == true)?((UNITS == METRES)?1000. : 1.) :1.;
 	}
 
-	outXML::outXML(std::wstring& fname, bool scaleToMM):op(NULL){
+	outXML::outXML(const std::wstring& fname, bool scaleToMM):op(NULL){
 		op = new wofstream(_wfopen(fname.data(),L"w+"));
 		
 		if(op == NULL || op->is_open() == false){
@@ -283,12 +285,12 @@ namespace geoff_geometry {
 		if(element.size() != 0) FAILURE(L"Unmatched startElement/endElement - data still in list");
 	};
 
-	void outXML::startElement(wchar_t* ele){
+	void outXML::startElement(const wchar_t* ele){
 		std::wstring elem(ele);
 		startElement(elem);
 	}
 
-	void outXML::startElement(std::wstring& ele) {
+	void outXML::startElement(const std::wstring& ele) {
 		element.push_back(ele);
 		if(lastClosed == false) *op << ">\n";
 		*op << "<" << ele.data();
@@ -311,47 +313,47 @@ namespace geoff_geometry {
 		lastClosed = true;
 	}
 
-	void outXML::Attribute(std::wstring& att, int data){
+	void outXML::Attribute(const std::wstring& att, int data){
 		*op << L" " << att.data() << L"=\"" << data << '\"';
 	}
-	void outXML::Attribute(wchar_t* att, int data){
+	void outXML::Attribute(const wchar_t* att, int data){
 		std::wstring attr(att);
 		Attribute(attr, data);
 	}
-	void outXML::Attribute(std::wstring& att, bool data){
+	void outXML::Attribute(const std::wstring& att, bool data){
 		*op << L" " << att.data() << L"=\"" << ((data)?L"TRUE" : L"FALSE") << '\"';
 	}
-	void outXML::Attribute(wchar_t* att, bool data){
+	void outXML::Attribute(const wchar_t* att, bool data){
 		std::wstring attr(att);
 		Attribute(attr, data);
 	}
 
-	void outXML::Attribute(std::wstring& att, double data, bool scaleData){
+	void outXML::Attribute(const std::wstring& att, double data, bool scaleData){
 		if(scaleData == true) data *= scale;
 		*op << L" " << att.data() << L"=\"" << data << '\"';
 	}
-	void outXML::Attribute(wchar_t* att, double data, bool scaleData){
+	void outXML::Attribute(const wchar_t* att, double data, bool scaleData){
 		std::wstring attr(att);
 		Attribute(attr, data, scaleData);
 	}
-	void outXML::Attribute(std::wstring& att, std::wstring& data){
+	void outXML::Attribute(const std::wstring& att, const std::wstring& data){
 	//	if(data.size() == 0) return;
 		*op << L" " << att.data() << L"=\"" << data.data() << '\"';
 	}
-	void outXML::Attribute(wchar_t* att, wchar_t* data){
+	void outXML::Attribute(const wchar_t* att, const wchar_t* data){
 		std::wstring attr(att);
 		std::wstring datas(data);
 		Attribute(attr, datas);
 	}
-	void outXML::Attribute(std::wstring& att, wchar_t* data){
+	void outXML::Attribute(const std::wstring& att, const wchar_t* data){
 		std::wstring datas(data);
 		Attribute(att, datas);
 	}
-	void outXML::Attribute(wchar_t* att, std::wstring data){
+	void outXML::Attribute(const wchar_t* att, std::wstring data){
 		std::wstring attr(att);
 		Attribute(attr, data);
 	}
-	void outXML::Attribute(wchar_t* att, void* data) {
+	void outXML::Attribute(const wchar_t* att, const void* data) {
 		std::wstring attr(att);
 		wchar_t d[64];
 		_ui64tow((unsigned __int64) data, d, 16);
@@ -360,11 +362,11 @@ namespace geoff_geometry {
 
 		
 
-	void outXML::Attribute(Point& p) {
+	void outXML::Attribute(const Point& p) {
 		Attribute(L"x", p.x);
 		Attribute(L"y", p.y);
 	}
-	void outXML::Attribute(Point3d& p) {
+	void outXML::Attribute(const Point3d& p) {
 		Attribute(L"x", p.x);
 		Attribute(L"y", p.y);
 		Attribute(L"z", p.z);
@@ -377,7 +379,7 @@ namespace geoff_geometry {
 	}
 
 
-	void outXML::Write(spVertex& sp, wchar_t* name, double scale) {
+	void outXML::Write(const spVertex& sp, wchar_t* name, double scale) {
 		startElement(L"SPVERTEX");
 		Attribute(L"name", name);
 
@@ -413,7 +415,7 @@ namespace geoff_geometry {
 		}		endElement();
 	}
 
-	void	outXML::Write(Matrix& m, wchar_t* name) {
+	void	outXML::Write(const Matrix& m, wchar_t* name) {
 		// debug - output matrix
 			startElement(name);
 			Attribute(L"UnitMatrix", m.IsUnit()?true : false);
@@ -435,7 +437,7 @@ namespace geoff_geometry {
 			endElement();
 	}
 
-	void	outXML::Write(Kurve& k, wchar_t* name, double scale) {
+	void	outXML::Write(const Kurve& k, wchar_t* name, double scale) {
 		// debug - output XML format
 		// untransformed
 		startElement(L"KURVE");
@@ -450,13 +452,13 @@ namespace geoff_geometry {
 		endElement();
 	}
 
-	void outXML::Comment(wchar_t* comment) {
+	void outXML::Comment(const wchar_t* comment) {
 		if(lastClosed == false) *op << L">\n";
 		lastClosed = true;
 		*op << L"<!--" << comment << L"-->\n";
 	}
 		
-	void outXML::Body(wchar_t* bodytext){
+	void outXML::Body(const wchar_t* bodytext){
 		if(lastClosed == false) *op << L">\n";
 		lastClosed = true;
 		*op << bodytext;

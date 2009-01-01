@@ -51,7 +51,8 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		}
 	}
 
-	void outXML::Write(Point& p, wchar_t* name, double scale) {
+#ifndef HEEKSCNC
+	void outXML::Write(Point& p, const wchar_t* name, double scale) {
 		startElement(L"POINT");
 		Attribute(L"name", name);
 		Attribute(L"x", p.x * scale);
@@ -59,7 +60,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Point3d& p, wchar_t* name) {
+	void outXML::Write(Point3d& p, const wchar_t* name) {
 		startElement(L"POINT3D");
 		Attribute(L"name", name);
 		Attribute(L"x", p.x);
@@ -68,7 +69,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Vector2d& v, wchar_t* name) {
+	void outXML::Write(Vector2d& v, const wchar_t* name) {
 		startElement(L"VECTOR");
 		Attribute(L"name", name);
 		Attribute(L"dx", v.getx(), false);
@@ -76,7 +77,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Vector3d& v, wchar_t* name) {
+	void outXML::Write(Vector3d& v, const wchar_t* name) {
 		startElement(L"VECTOR3D");
 		Attribute(L"name", name);
 		Attribute(L"dx", v.getx(), false);
@@ -85,7 +86,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(CLine& cl, wchar_t* name) {
+	void outXML::Write(CLine& cl, const wchar_t* name) {
 		startElement(L"CLINE");
 		Attribute(L"name", name);
 		Write(cl.p, L"");
@@ -93,14 +94,14 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Circle& c, wchar_t* name) {
+	void outXML::Write(Circle& c, const wchar_t* name) {
 		startElement(L"CIRCLE");
 		Attribute(L"name", name);
 		Write(c.pc, L"");
 		Attribute(L"radius",c.radius);
 		endElement();
 	}
-
+#endif
 
 	// ostream operators  = non-member overload
 	// *********************************************************************************************************
@@ -183,7 +184,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 			ok = true;
 	}
 
-	Point3d::Point3d(Vector3d& v) {
+	Point3d::Point3d(const Vector3d& v) {
 			x = v.getx(); y = v.gety();  z = v.getz();// ok = true;
 	}
 
@@ -220,11 +221,11 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 
 
 
-	double	Point::Dist(Point& p){													// distance between 2 points
+	double	Point::Dist(const Point& p)const{													// distance between 2 points
 		return Vector2d(*this, p).magnitude();
 	}
 
-	double	Point::DistSq(Point& p){													// distance squared between 2 points
+	double	Point::DistSq(const Point& p)const{													// distance squared between 2 points
 		return Vector2d(*this, p).magnitudesqd();
 	}
 
@@ -232,17 +233,17 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return Vector3d(*this, p).magnitude();
 	}
 
-	double Point3d::DistSq(const Point3d& p) {			// distance squared
+	double Point3d::DistSq(const Point3d& p)const {			// distance squared
 		return (this->x - p.x) * (this->x - p.x) + (this->y - p.y) * (this->y - p.y) + (this->z - p.z) * (this->z - p.z);
 	}
 
-	Point Point::Mid(const Point& p1, double factor){
+	Point Point::Mid(const Point& p1, double factor)const{
 		// Mid
 		return geoff_geometry::Mid(*this, p1, factor);
 	}
 
-	Point3d Point3d::Mid(const Point3d& p, double factor){
-		// Mid
+	Point3d Point3d::Mid(const Point3d& p, double factor)const{
+		// Mid#include "./ioXML.h"
 		return Vector3d(*this, p) * factor + *this;
 	}
 
@@ -250,21 +251,23 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		// mid or partway between 2 points
 		return Vector2d(p0, p1) * factor + p0;
 	}
-	Point Rel(Point& p, double x0, double y0) {
+	Point Rel(const Point& p, double x0, double y0) {
 		// Relative point
 		return (p.ok)?Point(p.x + x0, p.y + y0) : INVALID_POINT;
 	}
 
-	Point Polar(Point& p, double angle, double r) {
+	Point Polar(const Point& p, double angle, double r) {
 		// polar from this point
 		angle *= DegreesToRadians;
 		return (p.ok)?Point(p.x + r * cos(angle), p.y + r * sin(angle)) : INVALID_POINT;
 	}
 
+#ifndef HEEKSCNC
 	void Point::oXML(wostream& op, wchar_t* name) {
 		op << "<POINT name=\"" << name << L"\"" << *this << L"/>\n";
 		return;
 	}
+#endif
 
 	// ***************************************************************************************************************************************
 	// clines
@@ -286,14 +289,14 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		ok = sp.returnSpanProperties && !sp.NullSpan;
 	}
 
-	CLine Normal(CLine& s) {
+	CLine Normal(const CLine& s) {
 		// returns normal to this line
 		return CLine(s.p, ~s.v, false);
 	}
 	const CLine CLine::operator ~(void){
 		return CLine(this->p, ~v, false);
 	}
-	CLine Normal(CLine& s, Point& p) {
+	CLine Normal(const CLine& s, const Point& p) {
 		// returns normal to this line thro' p
 		return CLine(p, ~s.v, false);
 	}
@@ -306,31 +309,31 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	}
 
 
-	double CLine::Dist(Point& p0) {
+	double CLine::Dist(const Point& p0)const {
 		// distance between cline & point  >0 cw about point   <0 acw about point
 		return this->v ^ Vector2d(p0, this->p);
 	}
 
-	double Point::Dist(CLine& cl) {
+	double Point::Dist(const CLine& cl)const {
 		// distance between cline & point  >0 cw about point   <0 acw about point
 		return cl.v ^ Vector2d(*this, cl.p);
 	}
 
-	Point CLine::Intof(CLine& s)	{
+	Point CLine::Intof(const CLine& s)	{
 		// Intof 2 Clines
 		return geoff_geometry::Intof(*this, s);
 	}
 
-	Point CLine::Intof(int NF, Circle& c)	{
-		// Intof Cline & Circle
+	Point CLine::Intof(int NF, const Circle& c)	{
+		// Intof Cline & Circleconst 
 		return geoff_geometry::Intof(NF, *this, c);
 	}
-	Point CLine::Intof(int NF, Circle& c, Point& otherInters)	{
+	Point CLine::Intof(int NF, const Circle& c, Point& otherInters)	{
 		// Intof Cline & Circle & other intersection
 		return geoff_geometry::Intof(NF, *this, c, otherInters);
 	}
 
-	Point Intof(CLine& s0, CLine& s1)	{
+	Point Intof(const CLine& s0, const CLine& s1)	{
 		// inters of 2 clines  (parameterise lines x = x0 + t * dx)
 		double cp = s1.v ^ s0.v;
 		if(fabs (cp) > 1.0e-6) {
@@ -347,16 +350,16 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		// return point given Y on a line
 		return Intof(s, CLine(Point(0,yval),1,0,false));
 	}
-	Point Along(CLine& s, double d) {
+	Point Along(const CLine& s, double d) {
 		// distance along line
 		return Point(s.p.x + d * s.v.getx(), s.p.y + d * s.v.gety(), s.ok);
 	}
 
-	Point Along(CLine& s, double d, Point& p) {
+	Point Along(const CLine& s, double d, Point& p) {
 		// distance along line from point
 		return Point(p.x + d * s.v.getx(), p.y + d * s.v.gety(), p.ok);
 	}
-	Point Around(Circle& c, double d, Point& p) {
+	Point Around(const Circle& c, double d, const Point& p) {
 		// distance around circle from point
 		CLine radial(c.pc, p);
 		if(radial.ok) {
@@ -368,24 +371,24 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		}
 		return INVALID_POINT;
 	}
-	CLine AtAngle(double angle, Point& p0, const CLine& s) {
+	CLine AtAngle(double angle, const Point& p0, const CLine& s) {
 		// cline at angle [to a cline] thro' a point
 		angle *= DegreesToRadians;
 		Vector2d v(cos(angle), sin(angle));
 		return CLine(p0, v.getx() * s.v.getx() - v.gety() * s.v.gety(), v.gety() * s.v.getx() + v.getx() * s.v.gety());
 	}
-	CLine Parallel(int side, CLine& s0, double distance) {
+	CLine Parallel(int side, const CLine& s0, double distance) {
 		// parallel to line by distance
 		Vector2d v = ~s0.v;
 		return CLine(v * ((double)side * distance) + s0.p, s0.v.getx(), s0.v.gety());
 	}
 
-	CLine Parallel(CLine& s0, Point& p) {
+	CLine Parallel(const CLine& s0, Point& p) {
 		// parallel to line through point
 		return CLine(p, s0.v.getx(), s0.v.gety());
 	}
 
-	CLine CLine::Bisector(CLine& s) {
+	CLine CLine::Bisector(const CLine& s) {
 		//  bisector of 2 clines
 		return CLine (this->Intof(s), this->v.getx() + s.v.getx(), this->v.gety() + s.v.gety());
 	}
@@ -397,27 +400,26 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	// circle methods
 	// ***************************************************************************************************************************************
 
-	Circle::Circle(Point& p, double rad, bool okay){
+	Circle::Circle(const Point& p, double rad, bool okay){
 		// Circle
 		pc = p;
 		radius = rad;
 		ok = pc.ok;
 	}
-	Circle::Circle( Point& p, Point& pc0){
+
+	Circle::Circle( const Point& p, const Point& pc0){
 		if(ok = (p.ok && pc0.ok)) {
 			pc = pc0;
 			radius = p.Dist(pc0);
 		}
 	}
-	Circle::Circle(const Circle& c){
-		// Circle - copy constructor
-		*this = c;
-	}
-	Circle::Circle( Span& sp){
+
+	Circle::Circle( const Span& sp){
 		pc = sp.pc;
 		radius = sp.radius;
 		ok = sp.returnSpanProperties;
 	}
+
 	bool Circle::operator==(const Circle &c)const{
 		// c1 == c2 (uses TOLERANCE)
 		return FEQ(this->radius, c.radius, TOLERANCE) && (this->pc == c.pc);
@@ -430,25 +432,25 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return Circle(p0.Transform(m), radius * scale);
 	}
 
-	Point	Circle::Intof(int LR, Circle& c1) {
+	Point	Circle::Intof(int LR, const Circle& c1) {
 		// intof 2 circles
 		return geoff_geometry::Intof(LR, *this, c1);
 	}
-	Point	Circle::Intof(int LR, Circle& c1, Point& otherInters) {
+	Point	Circle::Intof(int LR, const Circle& c1, Point& otherInters) {
 		// intof 2 circles, (returns the other intersection)
 		return geoff_geometry::Intof(LR, *this, c1, otherInters);
 	}
-	int	Circle::Intof(Circle& c1, Point& leftInters, Point& rightInters) {
+	int	Circle::Intof(const Circle& c1, Point& leftInters, Point& rightInters) {
 		// intof 2 circles, (returns the other intersection)
 		return geoff_geometry::Intof(*this, c1, leftInters, rightInters);
 	}
 
-	CLine	Circle::Tanto(int AT,  double angle, CLine& s0) {
+	CLine	Circle::Tanto(int AT,  double angle, const CLine& s0) const{
 		// cline tanto circle at angle to optional cline
 		return geoff_geometry::Tanto(AT, *this, angle, s0);
 	}
 
-	CLine Tanto(int AT, Circle& c, Point& p) {
+	CLine Tanto(int AT, const Circle& c, const Point& p) {
 		// CLine tangent to a circle through a point
 		Vector2d v(p, c.pc);
 		double d = v.magnitude();
@@ -466,7 +468,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return s;
 	}
 
-	CLine Tanto(int AT0, Circle& c0, int AT1, Circle& c) {
+	CLine Tanto(int AT0, const Circle& c0, int AT1, const Circle& c) {
 		// cline tanto 2 circles
 		CLine s;
 		Circle c1 = c;
@@ -477,12 +479,14 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return s;
 	}
 
+#ifndef HEEKSCNC
 	void Circle::oXML(wostream& op, wchar_t* name) {
 		op << L"<CIRCLE name=\"" << name << L"\"" << *this << L"/>\n";
 		return;
 	}
+#endif
 
-	CLine Tanto(int AT, Circle& c, double angle, const CLine& s0) {
+	CLine Tanto(int AT, const Circle& c, double angle, const CLine& s0) {
 		// cline at an angle [to a cline] tanto a circle 
 		CLine s = AtAngle(angle, c.pc, s0);
 		s.p.x += (double) AT * c.radius * s.v.gety();
@@ -491,19 +495,19 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		s.ok = true;
 		return s;
 	}
-	Point AtAngle(Circle& c, double angle) {
+	Point AtAngle(const Circle& c, double angle) {
 		// Point at an angle on circle
 		angle *= DegreesToRadians;
 		return Point(c.pc.x + c.radius * cos(angle), c.pc.y + c.radius * sin(angle));
 	}
 
-	Point On(CLine& s, Point& p) {
+	Point On(const CLine& s, const Point& p) {
 		// returns point that is nearest to s from p
 		double t = s.v * Vector2d(s.p, p);
 		return s.v * t + s.p;
 	}
 
-	Point On(Circle& c, Point& p) {
+	Point On(const Circle& c, const Point& p) {
 		// returns point that is nearest to c from p
 		double r = p.Dist(c.pc);
 		if(r < TOLERANCE) FAILURE(getMessage(L",Point on Circle centre - On(Circle& c, Point& p)", GEOMETRY_ERROR_MESSAGES, MES_POINTONCENTRE));
@@ -511,23 +515,23 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	}
 
 
-	Point Intof( int NF, CLine& s, Circle& c) {
+	Point Intof( int NF, const CLine& s, const Circle& c) {
 		// inters of cline & circle  eg.     p1 = Intof(NEARINT, s1, c1);
 		Point otherInters;
 		return Intof(NF, s, c, otherInters);
 	}
 
-	Point Intof( int NF, CLine& s, Circle& c, Point& otherInters) {
+	Point Intof( int NF, const CLine& s, const Circle& c, Point& otherInters) {
 		// inters of cline & circle  eg.     p1 = Intof(NEARINT, s1, c1);
 		// otherInters returns the other intersection
 #if 1
 		// solving	x = x0 + dx * t			x = y0 + dy * t
 		//			x = xc + R * cos(a)		y = yc + R * sin(a)		for t
-		// gives :-  t² (dx² + dy²) + 2t(dx*dx0 + dy*dy0) + (x0-xc)² + (y0-yc)² - R² = 0
+		// gives :-  tï¿½ (dxï¿½ + dyï¿½) + 2t(dx*dx0 + dy*dy0) + (x0-xc)ï¿½ + (y0-yc)ï¿½ - Rï¿½ = 0
 		int nRoots;
 		double t, tFar, tNear, tOther;
 		Vector2d v0(c.pc, s.p);
-		if(nRoots = quadratic(1, 2 * (v0 * s.v), v0.magnitudesqd() - c.radius * c.radius, tFar, tNear)) {
+		if((nRoots = quadratic(1, 2 * (v0 * s.v), v0.magnitudesqd() - c.radius * c.radius, tFar, tNear)) != 0) {
 			if(nRoots == 2 && NF == NEARINT) {
 				t = tNear;
 				tOther = tFar;
@@ -557,13 +561,13 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return Along(s, -(double)NF * sqrt(q), intof);						// 2 intersections (return near/far case)
 	}
 #endif
-	Point Intof( int intMode, Circle& c0, Circle& c1)	{
+	Point Intof( int intMode, const Circle& c0, const Circle& c1)	{
 		// inters of 2 circles		 eg.     p1 = Intof(LEFTINT, c1, c2)
 		Point otherInters;
 		return Intof(intMode, c0, c1, otherInters);
 	}
 
-	Point Intof( int intMode, Circle& c0, Circle& c1, Point& otherInters)	{
+	Point Intof( int intMode, const Circle& c0, const Circle& c1, Point& otherInters)	{
 		// inters of 2 circles		 eg.     p1 = Intof(LEFTINT, c1, c2);u
 		Point pLeft, pRight;
 		switch(Intof(c0, c1, pLeft, pRight)) {
@@ -583,7 +587,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		}
 	}
 
-	int Intof(Circle& c0, Circle& c1, Point& pLeft, Point& pRight)	{
+	int Intof(const Circle& c0, const Circle& c1, Point& pLeft, Point& pRight)	{
 		// inters of 2 circles
 		// returns the number of intersctions
 		Vector2d v(c0.pc, c1.pc);
@@ -650,7 +654,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		}
 		return Circle(p, radius);
 	}
-	Circle	Thro(int LR, Point& p0, Point& p1, double rad) {
+	Circle	Thro(int LR, const Point& p0, const Point& p1, double rad) {
 		// circle thro' 2 points, given radius and side
 		CLine thro(p0, p1);
 		if(thro.ok) {
@@ -670,11 +674,11 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return INVALID_CIRCLE;
 	}
 
-	Circle	Thro(Point& p0, Point& p1) {
+	Circle	Thro(const Point& p0, const Point& p1) {
 		// circle thro 2 points (diametric)
 		return Circle(p0.Mid(p1), .5*p0.Dist(p1));
 	}
-	Circle	Thro(Point& p0, Point& p1, Point& p2) {
+	Circle	Thro(const Point& p0, const Point& p1, const Point& p2) {
 		// circle thro 3 points
 		CLine s0(p0, p1);
 		if(!s0.ok) return Thro(p1,p2);		// p0 & p1 coincident
@@ -688,31 +692,35 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		Point p = Intof(Normal(s0, Mid(p0, p1)),  Normal(s1, Mid(p0, p2)));
 		return (p.ok)? Circle(p, p0.Dist(p), true) : INVALID_CIRCLE;
 	}
-	Circle	Tanto(int NF, int AT0, CLine& s0, int AT1, Circle &c1, double rad) {
+	Circle	Tanto(int NF, int AT0, const CLine& s0, int AT1, const Circle &c1, double rad) {
 		// circle tanto cline & circle with radius
 		CLine Offs0	= Parallel(AT0, s0, rad);
-		c1.radius += AT1 * rad;
-		Point pc = Intof(NF, Offs0, c1);
+		Circle c2 = c1;
+		c2.radius += AT1 * rad;
+		Point pc = Intof(NF, Offs0, c2);
 		return (pc.ok)? Circle(pc, rad) : INVALID_CIRCLE;
 	}
 
-	Circle	Tanto( int LR, int AT0, Circle& c0, Point& p, double rad) {
+	Circle	Tanto( int LR, int AT0, const Circle& c0, const Point& p, double rad) {
 		// circle tanto circle & thro' a point
-		c0.radius += AT0 * rad;
+		Circle c2 = c0;
+		c2.radius += AT0 * rad;
 		Circle c1(p, rad);
-		Point pc = Intof(LR, c0, c1);
+		Point pc = Intof(LR, c2, c1);
 		return (pc.ok)? Circle(pc, rad) : INVALID_CIRCLE;
 	}
-	Circle	Tanto(int LR, int AT0, Circle& c0, int AT1, Circle& c1, double rad) {
+	Circle	Tanto(int LR, int AT0, const Circle& c0, int AT1, const Circle& c1, double rad) {
 		// circle tanto 2 circles
-		c0.radius += AT0 * rad;
-		c1.radius += AT1 * rad;
-		Point pc = Intof(LR, c0, c1);
+		Circle c2 = c0;
+		Circle c3 = c1;
+		c2.radius += AT0 * rad;
+		c3.radius += AT1 * rad;
+		Point pc = Intof(LR, c2, c3);
 		return (pc.ok)? Circle(pc, rad) : INVALID_CIRCLE;
 	}
 
 #if !defined HEEKSCNC
-	Circle Tanto(int LR, int AT1 , Circle& c1 , int AT2 , Circle& c2, int AT3 , Circle& c3) {
+	Circle Tanto(int LR, int AT1 , const Circle& c1 , int AT2 , const Circle& c2, int AT3 , const Circle& c3) {
 		// circle tanto 3 circles
 
 		//    double rr , dum1 , dum2 , dum3, rad[2] ;
@@ -753,7 +761,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 #endif
 
 
-	Circle Parallel(int side, Circle& c0, double distance) {
+	Circle Parallel(int side, const Circle& c0, double distance) {
 		// parallel to circle by distance
 		return Circle(c0.pc, c0.radius + (double) side * distance);
 	}
@@ -766,27 +774,27 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return ((ang < 0)? 2 * PI + ang : ang);
 	}
 
-	double Dist(Point& p0, Circle& c, Point& p1) {
+	double Dist(const Point& p0, const Circle& c, const Point& p1) {
 		// clockwise distance around c from p0 to p1 
 		double a0 = atn360(p0.y - c.pc.y, p0.x - c.pc.x);
 		double a1 = atn360(p1.y - c.pc.y ,p1.x - c.pc.x);
 		if ( a1 > a0 ) a1 -= 2 * PI ;
 		return (a0 - a1) * c.radius;
 	}
-	double Dist(CLine& s, Circle& c) {
+	double Dist(const CLine& s, const Circle& c) {
 		// distance between line and circle
 		return fabs(s.Dist(c.pc)) - c.radius;
 	}
-	double Dist(Circle& c0, Circle& c1) {
+	double Dist(const Circle& c0, const Circle& c1) {
 		// distance between 2 circles
 		return c0.pc.Dist(c1.pc) - c0.radius - c1.radius;
 	}
-	double Dist(Circle& c, Point& p) {
+	double Dist(const Circle& c, const Point& p) {
 		// distance between circle and point
 		return p.Dist(On(c, p));
 	}
 
-	double IncludedAngle(Vector2d& v0, Vector2d& v1, int dir) {
+	double IncludedAngle(const Vector2d& v0, const Vector2d& v1, int dir) {
 		// returns the absolute included angle between 2 vectors in the direction of dir ( 1=acw  -1=cw)
 		double inc_ang = v0 * v1;
 		if(inc_ang > 1. - UNIT_VECTOR_TOLERANCE) return 0;
@@ -801,7 +809,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return dir * inc_ang;
 	}
 
-	double IncludedAngle(Vector3d& v0, Vector3d& v1, Vector3d& normal, int dir) {
+	double IncludedAngle(const Vector3d& v0, const Vector3d& v1, const Vector3d& normal, int dir) {
 		// returns the absolute included angle between 2 vectors in the direction of dir ( 1=acw  -1=cw) about normal
 		double inc_ang = v0 * v1;
 
@@ -816,7 +824,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return dir * inc_ang;
 	}
 
-	int corner(Vector2d& v0, Vector2d& v1, double cpTol) {
+	int corner(const Vector2d& v0, const Vector2d& v1, double cpTol) {
 		// returns corner
 		//						0 (TANGENT) = tangent
 		//						1 (LEFT)    = left turn
@@ -828,7 +836,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	}
 
 	int quadratic(double a, double b, double c, double& x0, double& x1) {
-		// solves quadratic equation ax² + bx + c = 0
+		// solves quadratic equation axï¿½ + bx + c = 0
 		// returns number of real roots
 //		double epsilon = 1.0e-6;
 		double epsilon = (geoff_geometry::UNITS == METRES)?1.0e-09 : 1.0e-06;
@@ -852,7 +860,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return 1;
 	}
 
-	Plane::Plane(Point3d& p0, Point3d& p1, Point3d& p2) {
+	Plane::Plane(const Point3d& p0, const Point3d& p1, const Point3d& p2) {
 		// constructor plane from 3 points
 		normal = Vector3d(p0, p1) ^ Vector3d(p0, p2);
 		normal.normalise();
@@ -860,30 +868,30 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		d = -(normal * Vector3d(p0));
 	}
 
-	Plane::Plane(Point3d& p0, Vector3d& v, bool normalise) {
+	Plane::Plane(const Point3d& p0, const Vector3d& v, bool normalise) {
 		// constructor plane from point & vector
 		normal = v;
 		if(normalise == true) normal.normalise();
 		d = -(normal * Vector3d(p0));
 	}
 
-	Plane::Plane(double dist, Vector3d& n) {
+	Plane::Plane(double dist, const Vector3d& n) {
 		normal = n;
 		double mag = normal.normalise();
 		if(ok = (normal != NULL_VECTOR)) d = dist / mag;
 	}
 
-	double Plane::Dist(Point3d& p){
+	double Plane::Dist(const Point3d& p)const{
 		// returns signed distance to plane from point p
 	return (normal * Vector3d(p)) + d;
 }
 
-	Point3d Plane::Near(Point3d& p) {
+	Point3d Plane::Near(const Point3d& p)const {
 		// returns near point to p on the plane
 		return - normal * Dist(p) + p;
 	}
 
-	bool Plane::Intof(Line& l, Point3d& intof, double& t) {
+	bool Plane::Intof(const Line& l, Point3d& intof, double& t) const{
 		// intersection between plane and line
 		// input this plane, line
 		// output intof
@@ -896,7 +904,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return true;
 	}
 
-	bool Plane::Intof(Plane& pl, Line& intof) {
+	bool Plane::Intof(const Plane& pl, Line& intof)const {
 		// intersection of 2 planes
 		Vector3d d = this->normal ^ pl.normal;
 		d.normalise();
@@ -914,7 +922,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return true;
 	}
 
-	bool Plane::Intof(Plane& pl0, Plane& pl1, Point3d& intof) {
+	bool Plane::Intof(const Plane& pl0, const Plane& pl1, Point3d& intof) const{
 		// intersection of 3 planes
 		Line tmp;
 		if(Intof(pl0, tmp)) {
@@ -925,4 +933,10 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	}
 }
 
+namespace p4c {
+const wchar_t* getMessage(const wchar_t* original, int messageGroup, int stringID){return original;}
+const wchar_t* getMessage(const wchar_t* original){return original;}
+void FAILURE(const wchar_t* str){throw(str);}
+void FAILURE(const std::wstring& str){throw(str);}
+}
 

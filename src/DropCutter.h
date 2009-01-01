@@ -28,3 +28,4 @@ public:
 	// This one does TriTest for a whole load of triangles
     static double TriTest(const Cutter &cu, const double *e, const std::list<GTri> &tri_list, double minz);
 };
+

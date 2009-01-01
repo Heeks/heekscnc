@@ -23,7 +23,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
-	const char* GetTypeString(void)const{return "Program";}
+	const wxChar* GetTypeString(void)const{return _T("Program");}
 	void GetBox(CBox &box);
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetProperties(std::list<Property *> *list);
