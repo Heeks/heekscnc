@@ -5,9 +5,9 @@
 
 class Property;
 
-void OnStartUp()
+void OnStartUp(CHeeksCADInterface* h)
 {
-	theApp.OnStartUp();
+	theApp.OnStartUp(h);
 }
 
 void OnNewOrOpen(int open)

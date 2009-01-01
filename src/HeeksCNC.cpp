@@ -30,19 +30,6 @@ CHeeksCNCApp::~CHeeksCNCApp(){
 
 void CHeeksCNCApp::OnInitDLL()
 {
-#if !defined WXUSINGDLL
-    wxInitialize();
-#endif
-
-	wxStandardPaths sp;
-
-	wxDynamicLibrary *executable = new wxDynamicLibrary(sp.GetExecutablePath());
-	CHeeksCADInterface* (*HeeksCADGetInterface)(void) = (CHeeksCADInterface* (*)(void))(executable->GetSymbol(_T("HeeksCADGetInterface")));
-	if(HeeksCADGetInterface){
-		heeksCAD = (*HeeksCADGetInterface)();
-	}
-
-	m_config = new wxConfig(_T("HeeksCNC"));
 }
 
 void CHeeksCNCApp::OnDestroyDLL()
@@ -93,8 +80,15 @@ void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
 	event.Check(aui_manager->GetPane(theApp.m_output_canvas).IsShown());
 }
 
-void CHeeksCNCApp::OnStartUp()
+void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 {
+	heeksCAD = h;
+#if !defined WXUSINGDLL
+	wxInitialize();
+#endif
+
+	m_config = new wxConfig(_T("HeeksCNC"));
+
 #ifndef WIN32
 	OnInitDLL();
 #endif

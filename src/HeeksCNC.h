@@ -24,7 +24,7 @@ public:
 	CHeeksCNCApp();
 	~CHeeksCNCApp();
 
-	void OnStartUp();
+	void OnStartUp(CHeeksCADInterface* h);
 	void OnNewOrOpen(bool open);
 	void OnInitDLL();
 	void OnDestroyDLL();
