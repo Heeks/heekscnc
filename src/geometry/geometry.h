@@ -425,7 +425,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		inline	CLine(const Point& p0, const Vector2d& v0, bool normalise = true) {p = p0; v = v0; if(normalise) Normalise();};
 		inline	CLine( const CLine& s ) {p = s.p; v = s.v;};				// copy constructor  CLine s1(s2);
 		inline	CLine(const Point& p0, const Point& p1) {p = p0; v = Vector2d(p0, p1); Normalise();};
-		CLine(Span& sp);	
+		CLine(const Span& sp);	
 
 		// operators
 		const	CLine operator~(void);// perp to left
