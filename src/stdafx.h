@@ -3,9 +3,9 @@
 // are changed infrequently
 //
 
+#ifdef WIN32
 #pragma warning(disable : 4996)
-
-#include "windows.h"
+#endif
 
 #include <list>
 #include <vector>
@@ -14,15 +14,15 @@
 
 extern "C" {
 #include <GL/gl.h>
-//#include <GL/glx.h>
 #ifdef WIN32
 #include <GL/glu.h>
 #else
-#include <GL/glut.h>
+#include <GL/glu.h>
 #endif
 }
 
 #include <wx/wx.h>
+#if 0
 #include <wx/glcanvas.h>
 #include <wx/config.h>
 #include <wx/confbase.h>
@@ -32,6 +32,7 @@ extern "C" {
 #include <wx/msw/regconf.h>
 #endif
 #include <wx/aui/aui.h>
+#endif
 
 #include "geometry/geometry.h"
 using namespace geoff_geometry;

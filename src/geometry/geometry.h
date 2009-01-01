@@ -8,9 +8,11 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
+#ifdef WIN32
 #pragma warning( disable : 4996 )
 #ifndef WINVER
 	#define WINVER 0x501
+#endif
 #endif
 
 #include <math.h>
@@ -22,8 +24,10 @@
 #include <string.h>
 
 
+#ifdef WIN32
 #ifdef PEPSDLL
 	#include "../peps/peps.h"
+#endif
 #endif
 
 #ifdef PARASOLID
@@ -417,10 +421,10 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 		// constructors
 		inline	CLine()	{ok = false;};
-		inline	CLine(Point& p0, double dx, double dy, bool normalise = true){ p = p0; v = Vector2d(dx, dy); if(normalise) Normalise();};
-		inline	CLine(Point& p0, Vector2d& v0, bool normalise = true) {p = p0; v = v0; if(normalise) Normalise();};
+		inline	CLine(const Point& p0, double dx, double dy, bool normalise = true){ p = p0; v = Vector2d(dx, dy); if(normalise) Normalise();};
+		inline	CLine(const Point& p0, const Vector2d& v0, bool normalise = true) {p = p0; v = v0; if(normalise) Normalise();};
 		inline	CLine( const CLine& s ) {p = s.p; v = s.v;};				// copy constructor  CLine s1(s2);
-		inline	CLine(Point& p0, Point& p1) {p = p0; v = Vector2d(p0, p1); Normalise();};
+		inline	CLine(const Point& p0, const Point& p1) {p = p0; v = Vector2d(p0, p1); Normalise();};
 		CLine(Span& sp);	
 
 		// operators
@@ -444,7 +448,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 //		~CLine();
 	};
 
-#define HORIZ_CLINE CLine(Point(0,0), 1, 0)
+#define HORIZ_CLINE CLine(Point(0.0, 0.0), 1.0, 0.0, true)
 
 
 	// 2D circle 
@@ -473,7 +477,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Point	Intof(int LR, Circle& c1);										// intof 2 circles
 		Point	Intof(int LR, Circle& c1, Point& otherInters);					// intof 2 circles, (returns the other intersection)
 		int		Intof(Circle& c1, Point& leftInters, Point& rightInters);		// intof 2 circles (returns number of intersections & left/right inters)
-		CLine	Tanto(int AT,  double angle, CLine& s0 = HORIZ_CLINE);			// a cline tanto this circle at angle
+		CLine	Tanto(int AT,  double angle, const CLine& s0 = HORIZ_CLINE);			// a cline tanto this circle at angle
 		void oXML(wostream& op, wchar_t* name);
 	//	~Circle();																// destructor
 	};
@@ -667,8 +671,8 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 	// cline definitons
 
-	CLine	AtAngle(double angle, Point& p, CLine& s = HORIZ_CLINE);		// cline at angle to line thro' point
-	CLine	Tanto(int AT, Circle& c,  double angle, CLine& s0 = HORIZ_CLINE);//// cline tanto circle at angle to optional cline
+	CLine	AtAngle(double angle, Point& p, const CLine& s = HORIZ_CLINE);		// cline at angle to line thro' point
+	CLine	Tanto(int AT, Circle& c,  double angle, const CLine& s0 = HORIZ_CLINE);//// cline tanto circle at angle to optional cline
 	CLine	Tanto(int AT, Circle& c, Point& p);								// cline tanto circle thro' a point
 	CLine	Tanto(int AT0, Circle& c0, int AT1, Circle& c1);					// cline tanto 2 circles
 	CLine	Normal(CLine& s);													// noirmal to cline
@@ -835,8 +839,9 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 
 
-
+#ifdef WIN32
 #pragma warning(disable:4522)
+#endif
 
 	class Kurve : public Matrix{
 	friend wofstream& operator << (wofstream& op, Kurve& k);
@@ -973,8 +978,9 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		PK_BODY_t ToPKlofted_thickened_body(Kurve &sec, double thickness);
 #endif
 	};
+#ifdef WIN32
 #pragma warning(default:4522)
-
+#endif
 
 
 

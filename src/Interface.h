@@ -8,3 +8,4 @@ void HEEKSCNC_EXPORT OnNewOrOpen(int open);
 void HEEKSCNC_EXPORT GetOptions(void(*callbackfunc)(Property*));
 void HEEKSCNC_EXPORT OnFrameDelete();
 }
+

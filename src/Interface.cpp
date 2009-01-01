@@ -29,3 +29,4 @@ void OnFrameDelete()
 {
 	theApp.OnFrameDelete();
 }
+
