@@ -312,30 +312,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\geometry\ioXML.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\geometry\ioXML.h"
-			>
-		</File>
-		<File
 			RelativePath=".\geometry\kurve.cpp"
 			>
 			<FileConfiguration
@@ -398,30 +374,6 @@
 					UsePrecompiledHeader="0"
 				/>
 			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\messages\message.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\messages\message.h"
-			>
 		</File>
 		<File
 			RelativePath="..\..\interface\ObjList.cpp"
@@ -569,6 +521,30 @@
 		</File>
 		<File
 			RelativePath=".\stdafx.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\interface\strconv.cpp"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\interface\strconv.h"
 			>
 		</File>
 		<File

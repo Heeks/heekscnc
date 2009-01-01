@@ -283,7 +283,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		ok = v.normalise() >= TOLERANCE;
 	}
 
-	CLine::CLine(Span& sp){
+	CLine::CLine(const Span& sp){
 		p = sp.p0;
 		v = sp.vs; 
 		ok = sp.returnSpanProperties && !sp.NullSpan;

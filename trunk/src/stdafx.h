@@ -12,6 +12,8 @@
 #include <map>
 #include <set>
 
+#include <wx/wx.h>
+
 extern "C" {
 #include <GL/gl.h>
 #ifdef WIN32
@@ -20,8 +22,6 @@ extern "C" {
 #include <GL/glu.h>
 #endif
 }
-
-#include <wx/wx.h>
 #if 0
 #include <wx/glcanvas.h>
 #include <wx/config.h>
