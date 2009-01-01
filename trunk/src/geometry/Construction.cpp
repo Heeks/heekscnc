@@ -368,7 +368,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		}
 		return INVALID_POINT;
 	}
-	CLine AtAngle(double angle, Point& p0, CLine& s) {
+	CLine AtAngle(double angle, Point& p0, const CLine& s) {
 		// cline at angle [to a cline] thro' a point
 		angle *= DegreesToRadians;
 		Vector2d v(cos(angle), sin(angle));
@@ -482,7 +482,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return;
 	}
 
-	CLine Tanto(int AT, Circle& c, double angle, CLine& s0) {
+	CLine Tanto(int AT, Circle& c, double angle, const CLine& s0) {
 		// cline at an angle [to a cline] tanto a circle 
 		CLine s = AtAngle(angle, c.pc, s0);
 		s.p.x += (double) AT * c.radius * s.v.gety();
