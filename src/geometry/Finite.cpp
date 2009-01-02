@@ -12,36 +12,38 @@
 #endif
 
 namespace geoff_geometry {
-	int Intof(const Span& sp0 , const Span& sp1, Point& p0, Point& p1)
+	int Intof(const Span& sp0, const Span& sp1, Point& p0, Point& p1, double t[4])
 	{
 		// returns the number of intersects (lying within spans sp0, sp1)
 		if(sp0.box.outside(sp1.box) == true) return 0;
 		if(!sp0.dir) {
 			if(!sp1.dir) {
 				// line line
-				return LineLineIntof(sp0, sp1, p0);
+				return LineLineIntof(sp0, sp1, p0, t);
 			}
 			else {
 				// line arc
-				return LineArcIntof(sp0, sp1, p0, p1);
+				return LineArcIntof(sp0, sp1, p0, p1, t);
 			}
 		}
 		else {
 			if(!sp1.dir) {
 				// arc line
-				return LineArcIntof(sp1, sp0, p0, p1);
+				return LineArcIntof(sp1, sp0, p0, p1, t);
 			}
 			else {
 				// arc arc
-				return ArcArcIntof(sp0, sp1, p0, p1);
+				return ArcArcIntof(sp0, sp1, p0, p1, t);
 			}
 		}
 	}
 
-	int LineLineIntof(const Span& sp0 , const Span& sp1, Point& p) {
+	int LineLineIntof(const Span& sp0 , const Span& sp1, Point& p, double t[2]) {
 		// intersection between 2 Line2d
 		// returns 0 for no intersection in range of either span
 		// returns 1 for intersction in range of both spans
+		// t[0] is parameter on sp0,
+		// t[1] is parameter on sp1
 		Vector2d v0(sp0.p0, sp0.p1);
 		Vector2d v1(sp1.p0, sp1.p1);
 		Vector2d v2(sp0.p0, sp1.p0);
@@ -53,40 +55,40 @@ namespace geoff_geometry {
 			return 0;					// parallel or degenerate lines
 		}
 
-		double t = (v1 ^ v2) / cp;
-		p = v0 * t + sp0.p0;
+		t[0] = (v1 ^ v2) / cp;
+		p = v0 * t[0] + sp0.p0;
 		p.ok = true;
 		double toler = geoff_geometry::TOLERANCE / sp0.length;				// calc a parametric tolerance
-		if(t < -toler || t > 1 + toler) return 0;		// intersection on first?
 
-		t = (v0 ^ v2) / cp;
+		t[1] = (v0 ^ v2) / cp;
+		if(t[0] < -toler || t[0] > 1 + toler) return 0;						// intersection on first?
 		toler = geoff_geometry::TOLERANCE / sp1.length;						// calc a parametric tolerance
-		if(t < -toler || t > 1 + toler) return 0;		// intersection on second?
+		if(t[1] < -toler || t[1] > 1 + toler) return 0;						// intersection on second?
 		return 1;
 	}
 
-	int LineArcIntof(const Span& line, const Span& arc, Point& p0, Point& p1) {
+	int LineArcIntof(const Span& line, const Span& arc, Point& p0, Point& p1, double t[4]) {
 		// inters of line arc
 		// solving	x = x0 + dx * t			x = y0 + dy * t
 		//			x = xc + R * cos(a)		y = yc + R * sin(a)		for t
-		// gives :-  t� (dx� + dy�) + 2t(dx*dx0 + dy*dy0) + (x0-xc)� + (y0-yc)� - R� = 0
+		// gives :-  t² (dx² + dy²) + 2t(dx*dx0 + dy*dy0) + (x0-xc)² + (y0-yc)² - R² = 0
 		int nRoots;
-		double t0, t1;
 		Vector2d v0(arc.pc, line.p0);
 		Vector2d v1(line.p0, line.p1);
 		double s = v1.magnitudesqd();
 
 		p0.ok = p1.ok = false;
-		if((nRoots = quadratic(s, 2 * (v0 * v1), v0.magnitudesqd() - arc.radius * arc.radius, t0, t1)) != 0) {
+		if(nRoots = quadratic(s, 2 * (v0 * v1), v0.magnitudesqd() - arc.radius * arc.radius, t[0], t[1])) {
 			double toler = geoff_geometry::TOLERANCE / sqrt(s);							// calc a parametric tolerance
-			if(t0 > -toler && t0 < 1 + toler) {
-				p0 = v1 * t0 + line.p0;
-				p0.ok = arc.OnSpan(p0);
+			bool on0 = false, on1 = false;
+			if(t[0] > -toler && t[0] < 1 + toler) {
+				p0 = v1 * t[0] + line.p0;
+				p0.ok = arc.OnSpan(p0, &t[2]);
 			}
 			if(nRoots == 2) {
-				if(t1 > -toler && t1 < 1 + toler) {
-					p1 = v1 * t1 + line.p0;
-					p1.ok = arc.OnSpan(p1);
+				if(t[1] > -toler && t[1] < 1 + toler) {
+					p1 = v1 * t[1] + line.p0;
+					p1.ok = arc.OnSpan(p1, &t[3]);
 				}
 			}
 			if(!p0.ok && p1.ok) {
@@ -98,7 +100,7 @@ namespace geoff_geometry {
 		return nRoots;
 	}
 
-	int ArcArcIntof(const Span& arc0, const Span& arc1, Point& pLeft, Point& pRight) {
+	int ArcArcIntof(const Span& arc0, const Span& arc1, Point& pLeft, Point& pRight, double t[4]) {
 		// Intof 2 arcs
 		int numInts = Intof(Circle(arc0.pc, arc0.radius), Circle(arc1.pc, arc1.radius), pLeft, pRight);
 
@@ -507,7 +509,7 @@ namespace geoff_geometry {
 	bool    Triangle3d::Intof(const Line& l, Point3d& intof)const {
 	 // returns intersection triangle to line in intof
 	// funtion returns true for intersection, false for no intersection
-	// method based on M�ller & Trumbore(1997) (Barycentric coordinates)
+	// method based on Möller & Trumbore(1997) (Barycentric coordinates)
 	// based on incorrect Pseudo code from "Geometric Tools for Computer Graphics" p.487
 		if(box.outside(l.box) == true) return false;
 
@@ -547,6 +549,23 @@ namespace geoff_geometry {
 		if(this->min.y > b.max.y) return true;
 		return false;
 	}
+
+	void Box::combine(const Box& b) {
+		if(b.max.x > this->max.x) this->max.x = b.max.x;
+		if(b.max.y > this->max.y) this->max.y = b.max.y;
+		if(b.min.x < this->min.x) this->min.x = b.min.x;
+		if(b.min.y < this->min.y) this->min.y = b.min.y;
+	}
+
+	void Box3d::combine(const Box3d& b) {
+		if(b.max.x > this->max.x) this->max.x = b.max.x;
+		if(b.max.y > this->max.y) this->max.y = b.max.y;
+		if(b.max.z > this->max.z) this->max.z = b.max.z;
+		if(b.min.x < this->min.x) this->min.x = b.min.x;
+		if(b.min.y < this->min.y) this->min.y = b.min.y;
+		if(b.min.z < this->min.z) this->min.z = b.min.z;
+	}
+
 	bool Box3d::outside(const Box3d& b) const{
 		// returns true if this box is outside b
 		if(b.ok == false || this->ok == false) return false;	// no box set
