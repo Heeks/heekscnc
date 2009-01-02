@@ -197,7 +197,15 @@ class MyApp : public wxApp
       double RESOLUTION = 1.0e-06;
 
 }
- 
+
+// dummy functions
+namespace p4c {
+const wchar_t* getMessage(const wchar_t* original, int messageGroup, int stringID){return original;}
+const wchar_t* getMessage(const wchar_t* original){return original;}
+void FAILURE(const wchar_t* str){throw(str);}
+void FAILURE(const std::wstring& str){throw(str);}
+}
+
  DECLARE_APP(MyApp)
  
  IMPLEMENT_APP(MyApp)
