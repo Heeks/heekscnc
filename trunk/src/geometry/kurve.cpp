@@ -304,9 +304,9 @@ namespace geoff_geometry {
 		}
 	}
 
-	int Span::Intof(const Span& sp, Point& pInt1, Point& pInt2)const {
+	int Span::Intof(const Span& sp, Point& pInt1, Point& pInt2, double t[4])const {
 		// Intof 2 spans
-		return geoff_geometry::Intof(*this, sp, pInt1, pInt2);
+		return geoff_geometry::Intof(*this, sp, pInt1, pInt2, t);
 	}
 
 	Point Span::Near(const Point& p)const{
@@ -679,6 +679,15 @@ return;
 
 
 #endif
+	void Kurve::Get(std::vector<Span> *all, bool igNoreNullSpans)const {
+		/// put all spans to vector
+		for(int i = 1; i <= nSpans(); i++) {
+			Span sp;
+			Get(i, sp, true);
+			if(igNoreNullSpans == true && sp.NullSpan == true) continue;
+			all->push_back(sp);
+		}
+	}
 
 	void Kurve::Get(int vertexnumber, spVertex& spv) const {
 		spv.type = Get(vertexnumber, spv.p, spv.pc);
@@ -1168,30 +1177,14 @@ return;
 	wchar_t *getNextDouble(wchar_t* str, double* value) {
 		wchar_t word[1024];
 		wchar_t *ptr = getNextWord(str, word);
-#ifdef WIN32
 		*value = _wtof(word);
-#else
-#ifdef UNICODE
-		*value = wcstod(word, NULL);
-#else
-		*value = atof(word);
-#endif
-#endif
 		return ptr;
 	}
 
 	wchar_t *getNextInt(wchar_t* str, int* value) {
 		wchar_t word[1024];
 		wchar_t *ptr = getNextWord(str, word);
-#ifdef WIN32
 		*value = _wtoi(word);
-#else
-#ifdef UNICODE
-		*value = wcstol(word, NULL, 10);
-#else
-		*value = atoi(word);
-#endif
-#endif
 		return ptr;
 	}
 
@@ -1249,7 +1242,7 @@ return;
 		return op;
 	}
 
-		void	Kurve::printXML(FILE* d, int kid)const {
+		void	Kurve::printXML(FILE* d, int kid) {
 		// debug - output in peps command input format
 		fprintf(d,"<Kurve id = \"%d\">\n", kid);
 		for(int i = 0; i < this->m_nVertices; i++) {
@@ -1310,7 +1303,8 @@ return;
 			Get(i, sp, true, true);
 
 			Point pInt1, pInt2;
-			int numint = sp.Intof(spin, pInt1, pInt2);
+			double t[4];
+			int numint = sp.Intof(spin, pInt1, pInt2, t);
 			if(numint)		p.push_back(pInt1);
 			if(numint == 2)	p.push_back(pInt2);
 			totalPoints += numint;
@@ -1622,7 +1616,7 @@ Kurve Kurve::Part(int fromSpanno, const Point& fromPt, int toSpanno, const Point
       }
 
 #ifndef HEEKSCNC
-	void	Kurve::print(FILE* d, int kid, bool outSpanid)const {
+	void	Kurve::print(FILE* d, int kid, bool outSpanid) {
 		// debug - output in peps command input format
 		// untransformed ??
 		fprintf(d,"k%d e\n", kid);
@@ -1648,9 +1642,9 @@ Kurve Kurve::Part(int fromSpanno, const Point& fromPt, int toSpanno, const Point
 						break;
 				}
 				if(dir == LINEAR)
-					fwprintf(d, L"x%.14g y%.14g; '*** ID = %s\n", p.x, p.y, spanid.c_str());
+					fwprintf(d, L"x%.14g y%.14g; '*** ID = %s\n", p.x, p.y, spanid);
 				else
-					fwprintf(d, L"%cx%.14g y%.14g x%.14g y%.14g; '*** ID = %s\n", (dir == ACW)?'a' : 't', p.x, p.y, pc.x, pc.y, spanid.c_str());
+					fwprintf(d, L"%cx%.14g y%.14g x%.14g y%.14g; '*** ID = %s\n", (dir == ACW)?'a' : 't', p.x, p.y, pc.x, pc.y, spanid);
 			}
 			else {
 				if(dir == LINEAR)

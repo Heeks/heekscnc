@@ -52,7 +52,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	}
 
 #ifndef HEEKSCNC
-	void outXML::Write(Point& p, const wchar_t* name, double scale) {
+	void outXML::Write(Point& p, wchar_t* name, double scale) {
 		startElement(L"POINT");
 		Attribute(L"name", name);
 		Attribute(L"x", p.x * scale);
@@ -60,7 +60,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Point3d& p, const wchar_t* name) {
+	void outXML::Write(Point3d& p, wchar_t* name) {
 		startElement(L"POINT3D");
 		Attribute(L"name", name);
 		Attribute(L"x", p.x);
@@ -69,7 +69,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Vector2d& v, const wchar_t* name) {
+	void outXML::Write(Vector2d& v, wchar_t* name) {
 		startElement(L"VECTOR");
 		Attribute(L"name", name);
 		Attribute(L"dx", v.getx(), false);
@@ -77,7 +77,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Vector3d& v, const wchar_t* name) {
+	void outXML::Write(Vector3d& v, wchar_t* name) {
 		startElement(L"VECTOR3D");
 		Attribute(L"name", name);
 		Attribute(L"dx", v.getx(), false);
@@ -86,7 +86,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(CLine& cl, const wchar_t* name) {
+	void outXML::Write(CLine& cl, wchar_t* name) {
 		startElement(L"CLINE");
 		Attribute(L"name", name);
 		Write(cl.p, L"");
@@ -94,7 +94,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		endElement();
 	}
 
-	void outXML::Write(Circle& c, const wchar_t* name) {
+	void outXML::Write(Circle& c, wchar_t* name) {
 		startElement(L"CIRCLE");
 		Attribute(L"name", name);
 		Write(c.pc, L"");
@@ -243,7 +243,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 	}
 
 	Point3d Point3d::Mid(const Point3d& p, double factor)const{
-		// Mid#include "./ioXML.h"
+		// Mid
 		return Vector3d(*this, p) * factor + *this;
 	}
 
@@ -731,25 +731,31 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		if(Dist(c1, c2) < TOLERANCE) {
 			// concentric circle - calc radius
 			double radius = fabs(c1.radius - c2.radius) * 0.5;
-			c1.radius += (double)AT1 * radius;
-			c3.radius += (double)AT3 * radius;
-			Point pc = Intof(LR, c1, c3);
+			Circle tc1 = c1;
+			tc1.radius += (double)AT1 * radius;
+			Circle tc3 = c3;
+			tc3.radius += (double)AT3 * radius;
+			Point pc = Intof(LR, tc1, tc3);
 			return (pc.ok)? Circle(pc, radius) : INVALID_CIRCLE;
 		}
 		else if(Dist(c2, c3) < TOLERANCE) {
 			// concentric circle - calc radius
 			double radius = fabs(c2.radius - c3.radius) * 0.5;
-			c1.radius += (double)AT1 * radius;
-			c2.radius += (double)AT2 * radius;
-			Point pc = Intof(LR, c2, c1);
+			Circle tc1 = c1;
+			tc1.radius += (double)AT1 * radius;
+			Circle tc2 = c2;
+			tc2.radius += (double)AT2 * radius;
+			Point pc = Intof(LR, tc2, tc1);
 			return (pc.ok)? Circle(pc, radius) : INVALID_CIRCLE;
 		}
 		else if(Dist(c1, c3) < TOLERANCE) {
 			// concentric circle - calc radius
 			double radius = fabs(c1.radius - c3.radius) * 0.5;
-			c1.radius += (double)AT1 * radius;
-			c2.radius += (double)AT2 * radius;
-			Point pc = Intof(LR, c2, c1);
+			Circle tc1 = c1;
+			tc1.radius += (double)AT1 * radius;
+			Circle tc2 = c2;
+			tc2.radius += (double)AT2 * radius;
+			Point pc = Intof(LR, tc2, tc1);
 			return (pc.ok)? Circle(pc, radius) : INVALID_CIRCLE;
 		}
 		Circle Solution1, Solution2;
@@ -832,11 +838,11 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		double cp = v0 ^ v1;
 		if(fabs(cp) < cpTol) return TANGENT;
 
-		return (cp > 0)?LEFT : RIGHT;
+		return (cp > 0)?GEOFF_LEFT : GEOFF_RIGHT;
 	}
 
 	int quadratic(double a, double b, double c, double& x0, double& x1) {
-		// solves quadratic equation ax� + bx + c = 0
+		// solves quadratic equation ax² + bx + c = 0
 		// returns number of real roots
 //		double epsilon = 1.0e-6;
 		double epsilon = (geoff_geometry::UNITS == METRES)?1.0e-09 : 1.0e-06;
@@ -932,11 +938,3 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return false;
 	}
 }
-
-namespace p4c {
-const wchar_t* getMessage(const wchar_t* original, int messageGroup, int stringID){return original;}
-const wchar_t* getMessage(const wchar_t* original){return original;}
-void FAILURE(const wchar_t* str){throw(str);}
-void FAILURE(const std::wstring& str){throw(str);}
-}
-

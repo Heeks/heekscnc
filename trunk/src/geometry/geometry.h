@@ -79,6 +79,9 @@ namespace geoff_geometry {
 	extern double TOLERANCE_SQ;				// tolerance squared for faster coding.
 	extern double TIGHT_TOLERANCE;
 	extern double UNIT_VECTOR_TOLERANCE;
+	extern double SMALL_ANGLE;				// small angle tangency test eg isConvex
+	extern double SIN_SMALL_ANGLE;
+	extern double COS_SMALL_ANGLE;
 	extern double RESOLUTION;				// CNC resolution
 
 	void set_Tolerances(int mode);
@@ -110,9 +113,9 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 #define CFILLET			0	// corner fillet
 #define CHAMFER			1	// chamfer
 
-#define LEFT 1
+#define GEOFF_LEFT 1
 #define NONE 0
-#define RIGHT -1
+#define GEOFF_RIGHT -1
 
 
 #define LINEAR 0	// linear
@@ -288,7 +291,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		inline	Vector2d(const Point& p0, const Point& p1) {dx = p1.x - p0.x; dy = p1.y - p0.y;}
 		inline	Vector2d(const Point *p0, const Point *p1) {dx = p1->x - p0->x; dy = p1->y - p0->y;}
 		inline	Vector2d(const Point& p) { dx = p.x; dy = p.y;} // from 0,0 to p
-		inline	Vector2d(double angle) {dx = cos(angle *= DegreesToRadians); dy = sin(angle);}	// constructs a vector from an angle (0� - 360�)
+		inline	Vector2d(double angle) {dx = cos(angle *= DegreesToRadians); dy = sin(angle);}	// constructs a vector from an angle (0° - 360°)
 
 
 		// operators
@@ -448,7 +451,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 //		~CLine();
 	};
 
-#define HORIZ_CLINE CLine(Point(0.0, 0.0), 1.0, 0.0, true)
+#define HORIZ_CLINE CLine(geoff_geometry::Point(0,0), 1.0, 0.0, true)
 
 
 	// 2D circle 
@@ -477,7 +480,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Point	Intof(int LR, const Circle& c1);										// intof 2 circles
 		Point	Intof(int LR, const Circle& c1, Point& otherInters);					// intof 2 circles, (returns the other intersection)
 		int		Intof(const Circle& c1, Point& leftInters, Point& rightInters);		// intof 2 circles (returns number of intersections & left/right inters)
-		CLine	Tanto(int AT,  double angle, const CLine& s0 = HORIZ_CLINE)const;			// a cline tanto this circle at angle
+		CLine	Tanto(int AT,  double angle, const CLine& s0)const;			// a cline tanto this circle at angle
 #ifndef HEEKSCNC
 		void oXML(wostream& op, wchar_t* name);
 #endif
@@ -495,6 +498,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Box(Point& pmin, Point& pmax) { min = pmin; max = pmax; ok = true;};
 
 		bool outside(const Box& b)const;		// returns true if box is outside box
+		void combine(const Box& b);		// combines this with b
 	};
 
 	// 3d box class
@@ -508,6 +512,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Box3d(const Point3d& pmin, const Point3d& pmax) { min = pmin; max = pmax; ok = true;};
 
 		bool outside(const Box3d& b)const;		// returns true if box is outside box
+		void combine(const Box3d& b);		// combines this with b
 	};
 
 	inline void MinMax(const Point& p, Point& pmin, Point& pmax) {
@@ -559,7 +564,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void SplitMatrix(int num_vectors, Matrix* matrix);							// returns incremental matrix from split
 		void minmax(Box& box, bool start = true);									// minmax of span
 		void minmax(Point& pmin, Point& pmax, bool start = true);					// minmax of span
-		int Intof(const Span& sp, Point& pInt1, Point& pInt2)const;
+		int Intof(const Span& sp, Point& pInt1, Point& pInt2, double t[4])const;
 		void Transform(const Matrix& m, bool setprops = true);
 		Point Near(const Point& p)const;														// returns the near point to span from p (on or off)
 		Point NearOn(const Point& p)const;														// returns the near point to span from p (on span)
@@ -901,6 +906,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	Replace(int vertexnumber, int type, const Point& p, const Point& pc, int ID = UNMARKED);
 		int		GetSpanID(int spanVertexNumber) const;								// for spanID (wire offset)
 		int		Get(int spanVertexNumber, Point& p, Point& pc) const;
+		void	Get(std::vector<Span> *all, bool ignoreNullSpans) const;												// get all spans to vector
 		int		Get(int spanVertexNumber, Point3d& p, Point3d& pc) const 
 		{ Point p2d, pc2d; int d = Get(spanVertexNumber, p2d, pc2d); p = p2d; pc = pc2d; return d;}
 		int		Get(int spannumber, Span& sp, bool returnSpanProperties = false, bool transform = false) const;
@@ -949,7 +955,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 #endif
 		bool	Split(double MaximumRadius, double reslution);	// split arcs larger than MaximumRadius to resoultion
-		int	IntExtWire(const Kurve& kSec, double Ref, double Sec, double height, Kurve* kOut)const;	// interpolate / extrapolate a mid height kurve (wire)
+		int	IntExtWire( Kurve& kSec, double Ref, double Sec, double height, Kurve* kOut);	// interpolate / extrapolate a mid height kurve (wire)
 		void	SetZ(double z) { e[11] = z; if(fabs(z) > 1.0e-6) m_unit = false;}				// assigns kurve to fixed height (wire)
 
 		void	Part(int startVertex, int EndVertex, Kurve *part);
@@ -959,9 +965,9 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Kurve	Part(double fromParam, double toParam);											// part kurve perimeter parameterisation
 		void AddSections(const Kurve* k, bool endOfSection);		// special add kurves for rollingball
 #ifndef HEEKSCNC
-		void	print(FILE* d, int kid, bool outSpanid)const;
+		void	print(FILE* d, int kid, bool outSpanid);
 		void	read(FILE* d, double scale);
-		void	printXML(FILE* d, int kid)const;					// print kurve to XML file
+		void	printXML(FILE* d, int kid);					// print kurve to XML file
 		void	oXML(wostream& o, const wchar_t* name){};			// output kurve to XML stream
 #endif
 		void	AddEllipse(int dir, const Point& pStart, const Point& pEnd, const Point& pCentre, const Vector2d& majorAxis, double majorRadius, double minorRadius, double tolerance);
@@ -1089,10 +1095,10 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 
 
 	// finite Span routines
-	int Intof(const Span& sp0 , const Span& sp1, Point& p0, Point& p1);
-	int	LineLineIntof(const Span& L0 , const Span& L1, Point& p);
-	int LineArcIntof(const Span& line, const Span& arc, Point& p0, Point& p1);
-	int ArcArcIntof(const Span& arc0, const Span& arc1, Point& pLeft, Point& pRight);
+	int Intof(const Span& sp0 , const Span& sp1, Point& p0, Point& p1, double t[4]);
+	int	LineLineIntof(const Span& L0 , const Span& L1, Point& p, double t[2]);
+	int LineArcIntof(const Span& line, const Span& arc, Point& p0, Point& p1, double t[4]);
+	int ArcArcIntof(const Span& arc0, const Span& arc1, Point& pLeft, Point& pRight, double t[4]);
 
 	bool OnSpan(const Span& sp, const Point& p);
 	bool OnSpan(const Span& sp, const Point& p, bool nearPoints, Point& pNear, Point& pOnSpan);	// function returns true if pNear == pOnSpan

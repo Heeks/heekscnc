@@ -37,7 +37,7 @@ namespace geoff_geometry {
 		//		= 2		- offset failed
 		//      = 3		- offset too large
 		if(this == &kOffset) FAILURE(L"Illegal Call - 'this' must not be kOffset");
-		double offset = (direction == LEFT)?off : -off;
+		double offset = (direction == GEOFF_LEFT)?off : -off;
 
 		if(fabs(offset) < geoff_geometry::TOLERANCE || m_nVertices < 2) {
 			kOffset = *this;
@@ -93,10 +93,11 @@ namespace geoff_geometry {
 						// see if offset spans intersect
 
 						double cp = prevSpanOff.ve ^ curSpanOff.vs;
-						bool inters = (cp > 0 && direction == LEFT) || (cp < 0 && direction == RIGHT);
+						bool inters = (cp > 0 && direction == GEOFF_LEFT) || (cp < 0 && direction == GEOFF_RIGHT);
 
 						if(inters) {
-							numint = prevSpanOff.Intof(curSpanOff, p0, p1);
+							double t[4];
+							numint = prevSpanOff.Intof(curSpanOff, p0, p1, t);
 						}
 
 						if(numint == 1) {
@@ -203,7 +204,8 @@ namespace geoff_geometry {
 						sp1.ID = k.GetSpanID(kinVertex++);
 						sp1.SetProperties(true);
 			
-						int numint = sp0.Intof(sp1, pInt, pIntOther);			// find span intersections
+						double t[4];
+						int numint = sp0.Intof(sp1, pInt, pIntOther, t);			// find span intersections
 						if(numint && sp0.p0.Dist(pInt) < geoff_geometry::TOLERANCE ) numint=0;	// check that intersection is not at the start of the check span					
 						if(numint ) {
 
@@ -293,7 +295,7 @@ int Kurve::OffsetISOMethod(Kurve& kOut, double off, int direction, bool BlendAll
 		// Input	direction	offset direction (LEFT or RIGHT)
 		// Input	BlendAall	if false only consider ISO radius for LINE/ARC/LINE
 		//						if true consider all blended radii (ARC/ARC/ARC etc.)		
-		double offset = (direction == LEFT)?off : -off;
+		double offset = (direction == GEOFF_LEFT)?off : -off;
 		if(FEQZ(off) || nSpans() < 1) {
 			kOut = *this;
 			return 1;
