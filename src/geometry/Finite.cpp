@@ -78,9 +78,8 @@ namespace geoff_geometry {
 		double s = v1.magnitudesqd();
 
 		p0.ok = p1.ok = false;
-		if(nRoots = quadratic(s, 2 * (v0 * v1), v0.magnitudesqd() - arc.radius * arc.radius, t[0], t[1])) {
+		if((nRoots = quadratic(s, 2 * (v0 * v1), v0.magnitudesqd() - arc.radius * arc.radius, t[0], t[1])) != 0) {
 			double toler = geoff_geometry::TOLERANCE / sqrt(s);							// calc a parametric tolerance
-			bool on0 = false, on1 = false;
 			if(t[0] > -toler && t[0] < 1 + toler) {
 				p0 = v1 * t[0] + line.p0;
 				p0.ok = arc.OnSpan(p0, &t[2]);
