@@ -19,6 +19,10 @@
 #include <Python.h>
 #endif
 
+#ifndef WIN32
+#include <dlfcn.h>
+#endif
+
 static bool post_processing = false;
 static bool running = false;
 
@@ -1049,6 +1053,9 @@ static void call_redirect_errors(bool flush = false)
 // call a given file
 bool call_file(const char* filename)
 {
+	wxString wd = theApp.GetDllFolder();
+	::wxSetWorkingDirectory(wd);
+
 	PyImport_ImportModule(filename);
 
 	if (PyErr_Occurred())
@@ -1093,9 +1100,15 @@ void HeeksPyPostProcess()
 		}
 		else
 		{
+			wxString path_append_str = wxString("import sys\nsys.path.append('") + theApp.GetDllFolder() + wxString("')");
 			::wxSetWorkingDirectory(theApp.GetDllFolder());
 
+#ifndef WIN32
+			// a work around
+			dlopen("libpython2.5.so", RTLD_LAZY | RTLD_GLOBAL); 
+#endif
 			Py_Initialize();
+			PyRun_SimpleString(path_append_str.c_str());
 			Py_InitModule("hc", HCMethods);
 
 			// redirect stderr
@@ -1180,8 +1193,13 @@ void HeeksPyRunProgram(CBox &box)
 		}
 		else
 		{
+			wxString path_append_str = wxString("import sys\nsys.path.append('") + theApp.GetDllFolder() + wxString("')");
 			::wxSetWorkingDirectory(theApp.GetDllFolder());
 
+#ifndef WIN32
+			// a work around
+			dlopen("libpython2.5.so", RTLD_LAZY | RTLD_GLOBAL); 
+#endif
 			Py_Initialize();
 			Py_InitModule("hc", HCMethods);
 
