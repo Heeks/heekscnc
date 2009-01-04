@@ -2,5 +2,5 @@
 class CBox;
 
 void HeeksPyPostProcess();
-void HeeksPyRunProgram(CBox &box); // to get toolpath
+bool HeeksPyRunProgram(CBox &box, wxString &errstr); // to get toolpath
 
