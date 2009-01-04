@@ -583,11 +583,15 @@ static PyObject* hc_sketch_offset(PyObject* self, PyObject* args)
 		}
 	}
 	}
-	catch( char * str ) 
+	catch( const char * str ) 
 	{
 		char mess[1024];
-		sprintf(mess, "Error in offsetting sketch - %s", str);
-		PyErr_SetString(PyExc_RuntimeError, mess);
+		sprintf(mess, "Error in offsetting sketch - %s",str);
+		PyErr_SetString(PyExc_RuntimeError, mess );
+	}
+	catch( ... ) 
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Error in offsetting sketch");
 	}
 
 	// return offset sketch id
@@ -1165,18 +1169,18 @@ void HeeksPyPostProcess()
 	post_processing = false;
 }
 
-void HeeksPyRunProgram(CBox &box)
+bool HeeksPyRunProgram(CBox &box, wxString &errstr)
 {
 	if(running)
 	{
-		wxMessageBox(_T("Already running the program!"));
-		return;
+		errstr = _T("Already running the program!");
+		return true; //error
 	}
 
 	if(post_processing)
 	{
-		wxMessageBox(_T("Can't run the program, post-processing is still happening!"));
-		return;
+		errstr = _T("Can't run the program, post-processing is still happening!");
+		return true; //error
 	}
 
 	running = true;
@@ -1189,7 +1193,9 @@ void HeeksPyRunProgram(CBox &box)
 		// write the python file
 		if(!write_python_file(theApp.GetDllFolder() + wxString(_T("/run.py"))))
 		{
-			wxMessageBox(_T("couldn't write run.py!"));
+			errstr = _T("couldn't write run.py!");
+			running = false;
+			return true; // error
 		}
 		else
 		{
@@ -1201,6 +1207,7 @@ void HeeksPyRunProgram(CBox &box)
 			dlopen("libpython2.5.so", RTLD_LAZY | RTLD_GLOBAL); 
 #endif
 			Py_Initialize();
+			PyRun_SimpleString(path_append_str.c_str());
 			Py_InitModule("hc", HCMethods);
 
 			// redirect stderr
@@ -1232,7 +1239,9 @@ void HeeksPyRunProgram(CBox &box)
 					error_str.append(str);
 					i++;
 				}
-				wxMessageBox(Ctt(error_str.c_str()));
+				errstr = wxString(Ctt(error_str.c_str()));
+				running = false;
+				return true; // error
 			}
 
 			Py_Finalize();
@@ -1246,7 +1255,10 @@ void HeeksPyRunProgram(CBox &box)
 		}
 		else
 		{
-			wxMessageBox(_T("Error while running the program!"));
+			errstr = _T("Error while running the program!");
+			Py_Finalize();
+			running = false;
+			return true; // error
 		}
 		Py_Finalize();
 	}
