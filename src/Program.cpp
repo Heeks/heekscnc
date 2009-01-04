@@ -58,10 +58,12 @@ void CProgram::glCommands(bool select, bool marked, bool no_color){
 		m_gl_list = glGenLists(1);
 		glNewList(m_gl_list, GL_COMPILE_AND_EXECUTE);
 		in_the_middle_of_glNewList = true;
-		HeeksPyRunProgram(m_box);
+		wxString errstr;
+		bool error = HeeksPyRunProgram(m_box, errstr);
 		glEndList();
 		in_the_middle_of_glNewList = false;
 		m_create_display_list_next_render = false;
+		if(error)wxMessageBox(errstr);
 	}
 
 	if(m_gl_list)
