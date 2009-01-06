@@ -107,7 +107,7 @@ public:
 
 	void AddTheInitialText()
 	{
-		theApp.m_program_canvas->m_textCtrl->WriteText(wxString::Format(_T("spindle(%g)\nrate(%g, %g)\n"), m_hfeed, m_vfeed));
+		theApp.m_program_canvas->m_textCtrl->WriteText(wxString::Format(_T("spindle(%g)\nrate(%g, %g)\n"), m_spindle_speed, m_hfeed, m_vfeed));
 		WriteConfigValues();
 		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
 		heeksCAD->Repaint();
