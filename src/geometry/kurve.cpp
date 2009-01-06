@@ -398,12 +398,12 @@ namespace geoff_geometry {
 	}
 
 	const Kurve& Kurve::operator=( const Kurve &k) {
+		this->Clear();
+
 		memcpy(e, k.e, 16 * sizeof(double));
 		m_unit = k.m_unit;
 		m_mirrored = k.m_mirrored;
 		m_isReversed = k.m_isReversed;
-
-		this->~Kurve();
 
 		if(k.m_nVertices) m_started = true;
 //		m_nVertices = 0;
@@ -421,42 +421,6 @@ namespace geoff_geometry {
 		m_nVertices = k.m_nVertices;
 		return *this;
 	}
-
-#if 0
-
-	 Kurve::Kurve(Kurve& k) :Matrix(){
-*this = k;
-return;
-		*this = Matrix(k);
-
-		Point p, pc;
-		m_nVertices = 0;
-
-		for(int i = 0; i < k.m_nVertices; i++) {
-			int spantype = k.Get(i, p, pc);
-			int spanid = k.GetSpanID(i);
-			if(Add(spantype, p, pc)) this->AddSpanID(spanid);
-		}
-		if(k.m_nVertices) m_started = true;
-	}
-
-	const Kurve& Kurve::operator=( Kurve &k)
-	{
-		*this = Matrix(k);
-
-		Point p, pc;
-		this->~Kurve();
-		m_isReversed = k.m_isReversed;
-
-		for(int i = 0; i < k.m_nVertices; i++) {
-			int spantype = k.Get(i, p, pc);
-			int spanid = k.GetSpanID(i);
-			if(Add(spantype, p, pc)) this->AddSpanID(spanid);
-		}
-		if(k.m_nVertices) m_started = true;
-		return *this;
-	}
-#endif
 
 	const Kurve& Kurve::operator=(const Matrix &m)
 	{
@@ -497,7 +461,7 @@ return;
 	void Kurve::FullCircle(int dir, const Point& c, double radius) {
 		/// make a full circle Kurve (2 spans)
 		/// mark the first span for later
-		this->~Kurve();
+		this->Clear();
 		Point ps = c;
 		ps.x = c.x + radius;
 		this->Start(ps);
@@ -510,7 +474,7 @@ return;
 
 	void Kurve::Start()
 	{
-		if(m_started) this->~Kurve();
+		if(m_started) this->Clear();
 		m_started = true;
 	}
 
@@ -1002,6 +966,19 @@ return;
 			this->Get(i, span, true, false);					
 			kSpans.push_back(span);
 		}
+	}
+
+	void Kurve::Clear()
+	{
+		for(vector<SpanVertex*>::iterator It = m_spans.begin(); It != m_spans.end(); It++)
+		{
+			SpanVertex* spv = *It;
+			delete spv;
+		}
+		m_spans.clear();
+		m_started = false;
+		m_nVertices = 0;
+		m_isReversed = false;
 	}
 
 	bool Kurve::operator==(const Kurve &k)const{
