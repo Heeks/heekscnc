@@ -1264,4 +1264,5 @@ bool HeeksPyRunProgram(CBox &box, wxString &errstr)
 	}
 
 	running = false;
+	return false; // success
 }
