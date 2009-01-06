@@ -901,6 +901,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	Add();					// add a null span
 		void	Add(const Kurve* k, bool AddNullSpans = true);									// a kurve
 		void	StoreAllSpans(std::vector<Span>& kSpans)const;			// store all kurve spans in array, normally when fast access is reqd
+		void	Clear(); // remove all the spans
 
 		void	Replace(int vertexnumber, const spVertex& spv);
 		void	Replace(int vertexnumber, int type, const Point& p, const Point& pc, int ID = UNMARKED);
@@ -932,7 +933,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		};
 		int		Reduce(double tolerance);					// reduce spans which are in tolerance
 
-		int		Offset(vector <Kurve*>&OffsetKurves, double offset, int direction, int method, int& ret)const;	// offset methods
+		int		Offset(vector <Kurve*> &OffsetKurves, double offset, int direction, int method, int& ret)const;	// offset methods
 		int		OffsetMethod1(Kurve& kOffset, double off, int direction,  int method, int& ret)const;
 		int		OffsetISOMethod(Kurve& kOffset, double off, int direction, bool BlendAll)const; // special offset (ISO radius - no span elimination)
 		int		Intof(const Span& sp, vector<Point>& p)const;			// intof span
