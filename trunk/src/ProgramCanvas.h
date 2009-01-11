@@ -19,8 +19,6 @@ public:
     void OnDelete(wxCommandEvent& event);
     void OnSelectAll(wxCommandEvent& event);
 
-	void WriteText(const wxString& text);
-
     DECLARE_NO_COPY_CLASS(CProgramTextCtrl)
     DECLARE_EVENT_TABLE()
 };

@@ -51,7 +51,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		}
 	}
 
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 	void outXML::Write(Point& p, wchar_t* name, double scale) {
 		startElement(L"POINT");
 		Attribute(L"name", name);
@@ -184,6 +184,11 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 			ok = true;
 	}
 
+	Point::Point(const Vector2d& v)
+	{
+		x = v.getx(); y = v.gety();
+	}
+
 	Point3d::Point3d(const Vector3d& v) {
 			x = v.getx(); y = v.gety();  z = v.getz();// ok = true;
 	}
@@ -207,6 +212,10 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		m.Transform(&x, &ret.x);
 //		ret.ok = true;
 		return ret;
+	}
+
+	Point Point::operator+(const Vector2d &v)const{
+		return Point(x + v.getx(), y + v.gety());
 	}
 
 	Point3d Point3d::operator+(const Vector3d &v)const{
@@ -262,7 +271,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return (p.ok)?Point(p.x + r * cos(angle), p.y + r * sin(angle)) : INVALID_POINT;
 	}
 
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 	void Point::oXML(wostream& op, wchar_t* name) {
 		op << "<POINT name=\"" << name << L"\"" << *this << L"/>\n";
 		return;
@@ -479,7 +488,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return s;
 	}
 
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 	void Circle::oXML(wostream& op, wchar_t* name) {
 		op << L"<CIRCLE name=\"" << name << L"\"" << *this << L"/>\n";
 		return;
@@ -719,7 +728,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		return (pc.ok)? Circle(pc, rad) : INVALID_CIRCLE;
 	}
 
-#if !defined HEEKSCNC
+#if !defined OPEN_SOURCE_GEOMETRY
 	Circle Tanto(int LR, int AT1 , const Circle& c1 , int AT2 , const Circle& c2, int AT3 , const Circle& c3) {
 		// circle tanto 3 circles
 

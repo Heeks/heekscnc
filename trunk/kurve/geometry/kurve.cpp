@@ -381,6 +381,26 @@ namespace geoff_geometry {
 		return MidPerim(param * this->length);
 	}
 
+	Vector2d Span::GetVector(double fraction)const {
+		/// returns the direction vector at point which is 0-1 along span
+		if(dir == 0){
+			Vector2d v(p0, p1);
+			v.normalise();
+			return v;
+		}
+
+		Point p = MidParam(fraction);
+		Vector2d v(pc, p);
+		v.normalise();
+		if(dir == ACW)
+		{
+			return Vector2d(-v.gety(), v.getx());
+		}
+		else
+		{
+			return Vector2d(v.gety(), -v.getx());
+		}
+	}
 
 	Kurve::Kurve(const Kurve& k) :Matrix(){
 		/// copy constructor
@@ -993,7 +1013,7 @@ namespace geoff_geometry {
 		return true;
 	}
 
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 	void Kurve::read(FILE* d, double scale) {
 		// debug - read next kurve in peps command input format
 		// scale is for unit conversion (not using matrix for better accuracy)
@@ -1592,7 +1612,7 @@ Kurve Kurve::Part(int fromSpanno, const Point& fromPt, int toSpanno, const Point
             return kPart;
       }
 
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 	void	Kurve::print(FILE* d, int kid, bool outSpanid) {
 		// debug - output in peps command input format
 		// untransformed ??

@@ -1,13 +1,14 @@
-from hc import *
+import kurve
+from siegkx1 import *
+# line above will be import machine, so these operations are machine independant
 
 # profile command,
-# offset should be positive in mm
-# direction should be 'left' or 'right'
-def profile(sketch_id, direction, finishx, finishy):
-    if sketch_exists(sketch_id) == 0:
-        error("Line Drawing doesn't exist, number %d" % (sketch_id))
+# direction should be 'left' or 'right' or 'on'
+def profile2(k, direction, finishx, finishy):
+    if kurve.exists(k) == False:
+        raise "kurve doesn't exist, number %d" % (k)
     
-    off_sketch_id = sketch_id
+    offset_k = k
 
     if direction != "on":
         if direction != "left" and direction != "right":
@@ -18,28 +19,29 @@ def profile(sketch_id, direction, finishx, finishy):
         offset = diameter/2
         if direction == "right":
             offset = -offset
-        off_sketch_id = sketch_offset(sketch_id, offset)
+        offset_k = kurve.new()
+        offset_success = kurve.offset(k, offset_k, offset)
+        if offset_success == False:
+            raise "couldn't offset kurve %d" % (k)
         
     px, py, pz = current_tool_pos()
 
-    if off_sketch_id == 0:
-        error("couldn't offset Line Drawing number %d" % (off_sketch_id))
-    num_spans = sketch_num_spans(off_sketch_id)
+    num_spans = kurve.num_spans(offset_k)
 
     if num_spans == 0:
         raise "sketch has no spans!"
     
     for span in range(0, num_spans):
-        sp, sx, sy, ex, ey, cx, cy = sketch_span_data(off_sketch_id, span)
+        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, span)
         if span == 0:#first span
             if sx != px or sy != py:
                 rdir = 0 # line
                 if direction != "on":
                     # do a roll-on arc
-                    vx, vy = sketch_span_dir(off_sketch_id, span, 0) # get start direction
+                    vx, vy = kurve.get_span_dir(offset_k, span, 0) # get start direction
                     if px == 'NOT_SET' or py == 'NOT_SET':
                         raise "can not do an arc without a line move first"
-                    rcx, rcy, rdir = tangential_arc(sx, sy, -vx, -vy, px, py)
+                    rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, px, py)
                     rcx = rcx - px # make relative to the start position
                     rcy = rcy - py
                     rdir = -rdir # because the tangential_arc was used in reverse
@@ -63,8 +65,8 @@ def profile(sketch_id, direction, finishx, finishy):
         if span == num_spans - 1:# last span
             if (finishx != ex or finishy != ey) and direction != "on":
                 # do a roll off arc
-                vx, vy = sketch_span_dir(off_sketch_id, span, 1) # get end direction
-                rcx, rcy, rdir = tangential_arc(ex, ey, vx, vy, finishx, finishy)
+                vx, vy = kurve.get_span_dir(offset_k, span, 1) # get end direction
+                rcx, rcy, rdir = kurve.tangential_arc(ex, ey, vx, vy, finishx, finishy)
                 rcx = rcx - ex # make relative to the start position
                 rcy = rcy - ey
                 if rdir == 1:# anti-clockwise arc
@@ -75,44 +77,34 @@ def profile(sketch_id, direction, finishx, finishy):
                     feedxy(finishx, finishy)
                 
                 
-    if off_sketch_id != sketch_id:
-        sketch_delete(off_sketch_id)
+    if offset_k != k:
+        kurve.delete(offset_k)
 
-def facemill(xmax, ymax, stepover):
-    px, py, pz = current_tool_pos()
-    xtotal = xmax - px
-    xsteps = int(xtotal/stepover + 0.5)
-    dx = xtotal / xsteps / 2
-    starty = py
-    for x in range(0, xsteps):
-        x1 = px + dx * x * 2
-        x2 = px + dx * (x * 2 + 1)
-        x3 = px + dx * (x * 2 + 2)
-        feedxy(x1, ymax)
-        feedxy(x2, ymax)
-        feedxy(x2, starty)
-        feedxy(x3, starty)
-    feedxy(xmax, ymax)
-        
-def remove_radii(sketch_id, minrad):
-    off_sketch_id = sketch_offset(sketch_id, minrad, "left")
-    off_sketch_id2 = sketch_offset(off_sketch_id, -minrad, "right")
-    sketch_add(off_sketch_id2)
+def get_roll_on_pos(k, direction):
+    # to do
+    return 0, 0
 
-def print_sketch(sketch_id):
-    num_spans = sketch_num_spans(sketch_id)
+def get_roll_off_pos(k, direction):
+    # to do
+    return 0, 0
 
-    if num_spans == 0:
-        print "no_spans"
-        return
-    
-    for span in range(0, num_spans):
-        sp, sx, sy, ex, ey, cx, cy = sketch_span_data(sketch_id, span)
-        if sp == 0:#first span
-            print "LINE start X", sx, " Y", sy, " end X", ex, " Y", ey
-        else:
-            if sp == 1:# anti-clockwise arc
-                print "CCW start X", sx, " Y", sy, " end X", ex, " Y", ey, " centre X", cx, " Y", cy
-            else:
-                print "CW start X", sx, " Y", sy, " end X", ex, " Y", ey, " centre X", cx, " Y", cy
-    
+# direction should be 'left' or 'right' or 'on'
+# auto_profile calculates suitable roll on and roll off positions and also does rapid moves
+def profile(k, direction, clearance, rapid_down_to_height, final_depth):
+    # start - assume we are at a suitable clearance height
+
+    # get roll on position
+    x, y = get_roll_on_pos(k, direction)
+
+    # rapid across to it
+    rapidxy(x, y)
+
+    # rapid down to just above the metal
+    rapidz(rapid_down_to_height)
+
+    # profile the shape, with roll off
+    x, y = get_roll_off_pos(k, direction)
+    profile2(k, direction, x, y)
+
+    # rapid back up to clearance plane
+    rapidz(clearance)
