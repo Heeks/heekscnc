@@ -212,63 +212,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\geometry\Construction.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
 			RelativePath=".\dllmain.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\DropCutter.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\DropCutter.h"
-			>
-		</File>
-		<File
-			RelativePath=".\geometry\Finite.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\geometry\geometry.h"
-			>
-		</File>
-		<File
-			RelativePath=".\GTri.h"
 			>
 		</File>
 		<File
@@ -312,39 +256,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\geometry\kurve.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
 			RelativePath="..\..\interface\LeftAndRight.cpp"
 			>
 		</File>
 		<File
 			RelativePath="..\..\interface\LeftAndRight.h"
-			>
-		</File>
-		<File
-			RelativePath=".\LinesAndArcs.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\LinesAndArcs.h"
 			>
 		</File>
 		<File
@@ -356,26 +272,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\geometry\Matrix.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
 			RelativePath="..\..\interface\ObjList.cpp"
 			>
 		</File>
@@ -384,39 +280,19 @@
 			>
 		</File>
 		<File
-			RelativePath=".\geometry\offset.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\OpMove3D.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\OpMove3D.h"
-			>
-		</File>
-		<File
 			RelativePath=".\OutputCanvas.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\OutputCanvas.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Profile.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Profile.h"
 			>
 		</File>
 		<File

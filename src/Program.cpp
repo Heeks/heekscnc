@@ -32,51 +32,6 @@ void CProgram::DestroyGLLists()
 	}
 }
 
-void CProgram::GetBox(CBox &box)
-{
-	box.Insert(m_box);
-}
-
-void CProgram::glCommands(bool select, bool marked, bool no_color){
-	static bool in_the_middle_of_glNewList = false;
-	if(in_the_middle_of_glNewList){
-		glEndList();
-		m_create_display_list_next_render = false;
-		in_the_middle_of_glNewList = false;
-		DestroyGLLists();
-	}
-
-	GLfloat save_depth_range[2];
-	if(marked){
-		glGetFloatv(GL_DEPTH_RANGE, save_depth_range);
-		glDepthRange(0, 0);
-		glLineWidth(2);
-	}
-
-	if(m_create_display_list_next_render)
-	{
-		m_gl_list = glGenLists(1);
-		glNewList(m_gl_list, GL_COMPILE_AND_EXECUTE);
-		in_the_middle_of_glNewList = true;
-		wxString errstr;
-		bool error = HeeksPyRunProgram(m_box, errstr);
-		glEndList();
-		in_the_middle_of_glNewList = false;
-		m_create_display_list_next_render = false;
-		if(error)wxMessageBox(errstr);
-	}
-
-	if(m_gl_list)
-	{
-		glCallList(m_gl_list);
-	}
-
-	if(marked){
-		glLineWidth(1);
-		glDepthRange(save_depth_range[0], save_depth_range[1]);
-	}
-}
-
 void CProgram::GetProperties(std::list<Property *> *list)
 {
 	CNCObj::GetProperties(list);

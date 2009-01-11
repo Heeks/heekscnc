@@ -1,5 +1,4 @@
 from math import *
-import hc
 
 f = open('test.tap', 'wb')
 f.write('G21G17G90G80G49\n')
@@ -15,9 +14,6 @@ movez = 'NOT_SET'
 tool_station = int(0)
 tool_diameter = float(0)
 tool_corner_rad = float(0)
-attached = int(0)
-attach_low_plane = float(0)
-attach_little_step_length = float(0)
 
 def nice_float3(f):
     s = '%.3f' % f
@@ -119,32 +115,6 @@ def move(rapid, x, y, z):
     global attached
     global tool_diameter
     global tool_corner_rad
-    global attach_low_plane
-    global attach_little_step_length
-
-    if attached:
-        if movex == 'NOT_SET' or movey == 'NOT_SET' or movez == 'NOT_SET':
-            hc.error("can't do attach until x, y and z are all known")
-        move_type = 1
-        if rapid:
-            move_type = 0
-        save_attached = attached
-        attached = 0
-        save_movex = movex
-        save_movey = movey
-        save_movez = movez
-        hc.make_attached_moves(tool_diameter, tool_corner_rad, attach_low_plane, attach_little_step_length, move_type, str(movex), str(movey), str(movez), str(x), str(y), str(z), "0", "0", "0")
-        movex = save_movex
-        movey = save_movey
-        movez = save_movez
-        attached = save_attached
-        if x != 'NOT_SET':
-            movex = x
-        if y != 'NOT_SET':
-            movey = y
-        if z != 'NOT_SET':
-            movez = z
-        return
 
     xs = ''
     ys = ''
@@ -227,19 +197,6 @@ def arc(direction, x, y, i, j):
         feedrate = f
 
     write_str('%s%s%s%s%s%s%s\n' % (get_ln_str(), dir_str, xss, yss, iss, jss, fs))
-
-def attach(surface, low_plane = float(0.0), deflection = float(0.05), little_step_length = float(0.1)):
-    global attached
-    if surface == 0:
-        attached = 0
-        hc.clear_attach_surfaces()
-    else:
-        global attach_low_plane
-        global attach_little_step_length
-        attached = 1
-        attach_low_plane = low_plane
-        attach_little_step_length = little_step_length
-        hc.add_attach_surface(surface, deflection)
 
 def end():
     write_str('%sM2\n' % (get_ln_str()))

@@ -4,9 +4,6 @@
 
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
-#include <wx/config.h>
-#include <wx/confbase.h>
-#include <wx/fileconf.h>
 #include <wx/aui/aui.h>
 #include "../../interface/PropertyString.h"
 #include "../../interface/Observer.h"
@@ -14,6 +11,7 @@
 #include "Program.h"
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
+#include "CNCConfig.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -35,7 +33,7 @@ void CHeeksCNCApp::OnInitDLL()
 void CHeeksCNCApp::OnDestroyDLL()
 {
 	// save any settings
-	//m_config->Write("SolidSimWorkingDir", m_working_dir_for_solid_sim);
+	//config.Write("SolidSimWorkingDir", m_working_dir_for_solid_sim);
 
 #if !defined WXUSINGDLL
 	wxUninitialize();
@@ -87,7 +85,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	wxInitialize();
 #endif
 
-	m_config = new wxConfig(_T("HeeksCNC"));
+	CNCConfig config;
 
 #ifndef WIN32
 	OnInitDLL();
@@ -108,8 +106,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	bool program_visible;
 	bool output_visible;
 
-	theApp.m_config->Read(_T("ProgramVisible"), &program_visible);
-	theApp.m_config->Read(_T("OutputVisible"), &output_visible);
+	config.Read(_T("ProgramVisible"), &program_visible);
+	config.Read(_T("OutputVisible"), &output_visible);
 
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
@@ -156,8 +154,9 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 void CHeeksCNCApp::OnFrameDelete()
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	theApp.m_config->Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
-	theApp.m_config->Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
+	CNCConfig config;
+	config.Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
+	config.Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
@@ -181,30 +180,6 @@ class MyApp : public wxApp
    return true;
  
  }
-
- namespace geoff_geometry{
-
-      int   UNITS = MM;
-
-      double TOLERANCE = 1.0e-06;
-
-      double TOLERANCE_SQ = TOLERANCE * TOLERANCE;
-
-      double TIGHT_TOLERANCE = 1.0e-09;
-
-      double UNIT_VECTOR_TOLERANCE = 1.0e-10;
-
-      double RESOLUTION = 1.0e-06;
-
-}
-
-// dummy functions
-namespace p4c {
-const wchar_t* getMessage(const wchar_t* original, int messageGroup, int stringID){return original;}
-const wchar_t* getMessage(const wchar_t* original){return original;}
-void FAILURE(const wchar_t* str){throw(str);}
-void FAILURE(const std::wstring& str){throw(str);}
-}
 
  DECLARE_APP(MyApp)
  
