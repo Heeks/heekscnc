@@ -196,13 +196,15 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 			x = xord; y = yord; ok = okay;}
 		inline	Point( const Point& p ) {												// copy constructor  Point p1(p2);
 			x = p.x; y = p.y; ok = p.ok;}
-				Point( const Point3d& p );												// copy constructor  Point p1(p2);
+		Point( const Point3d& p );												// copy constructor  Point p1(p2);
+		Point(const Vector2d& v);
 
 		// operators
 		bool operator==(const Point &p)const;
 		bool operator!=(const Point &p)const { return !(*this == p);}
 		inline	Point	operator+(const Point &p)const{return Point(x + p.x, y + p.y);}		// p0 = p1 + p2;
 		inline	Point	operator+=(const Point &p){return Point(x += p.x, y += p.y);}		// p0 += p1;
+		Point operator+(const Vector2d &v)const;			// p1 = p0 + v0;
 
 		// destructor
 		//~Point(){};
@@ -220,7 +222,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		double	Dist(const CLine& cl)const;													// distance p to cl
 		Point	Mid(const Point& p, double factor=.5)const;									// mid point
 		void	get(double xyz[2]) {xyz[0] = x; xyz[1] = y;}						// return to array
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 		void	oXML(wostream& op, wchar_t* name);
 #endif
 	};
@@ -481,7 +483,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		Point	Intof(int LR, const Circle& c1, Point& otherInters);					// intof 2 circles, (returns the other intersection)
 		int		Intof(const Circle& c1, Point& leftInters, Point& rightInters);		// intof 2 circles (returns number of intersections & left/right inters)
 		CLine	Tanto(int AT,  double angle, const CLine& s0)const;			// a cline tanto this circle at angle
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 		void oXML(wostream& op, wchar_t* name);
 #endif
 	//	~Circle();																// destructor
@@ -576,6 +578,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		bool	JoinSeparateSpans(Span& sp);
 		Span BlendTwoSpans(Span& sp2, double radius, double maxt);					// Blends 2 Spans
 		bool isJoinable(const Span& sp)const;													// is this & sp joinable to 1 span?
+		Vector2d GetVector(double fraction)const; // the direction along the span, 0.0 for start, 1.0 for end
 
 		// constructor
 		Span() {ID = 0; ok = false;};
@@ -965,7 +968,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	Part(double fromParam, double toParam, const Kurve *secInput, Kurve *refOut, Kurve *secOut);// part kurve perimeter parameterisation with synchronised Kurve (wire)
 		Kurve	Part(double fromParam, double toParam);											// part kurve perimeter parameterisation
 		void AddSections(const Kurve* k, bool endOfSection);		// special add kurves for rollingball
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 		void	print(FILE* d, int kid, bool outSpanid);
 		void	read(FILE* d, double scale);
 		void	printXML(FILE* d, int kid);					// print kurve to XML file
@@ -1160,7 +1163,7 @@ public:
 };
 
 
-#ifndef HEEKSCNC
+#ifndef OPEN_SOURCE_GEOMETRY
 	// string parsing methods - primarily for test methods
 	int readLine(FILE* d, wchar_t* line, int maxCount);
 	char *stripLeadingWhiteSpace(char* line);
@@ -1186,7 +1189,7 @@ public:
 	extern CDraw* testDraw;
 #endif
 
-#if !defined HEEKSCNC
+#if !defined OPEN_SOURCE_GEOMETRY
 #include "./rollingball/rollingball.h"
 #include "./ioXML.h"
 #endif

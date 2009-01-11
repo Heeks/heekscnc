@@ -34,9 +34,6 @@ extern "C" {
 #include <wx/aui/aui.h>
 #endif
 
-#include "geometry/geometry.h"
-using namespace geoff_geometry;
-
 #include "HeeksCNC.h"
 #include "../../interface/strconv.h"
 

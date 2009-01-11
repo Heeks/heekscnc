@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeeksCNC", "HeeksCNC.vcproj", "{BE9260B2-CF4A-413B-87BE-4AD857278689}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kurve", "..\kurve\kurve.vcproj", "{3D0F040C-630B-4AF8-96A8-57C634D48926}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{BE9260B2-CF4A-413B-87BE-4AD857278689}.Debug|Win32.Build.0 = Debug|Win32
 		{BE9260B2-CF4A-413B-87BE-4AD857278689}.Release|Win32.ActiveCfg = Release|Win32
 		{BE9260B2-CF4A-413B-87BE-4AD857278689}.Release|Win32.Build.0 = Release|Win32
+		{3D0F040C-630B-4AF8-96A8-57C634D48926}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3D0F040C-630B-4AF8-96A8-57C634D48926}.Debug|Win32.Build.0 = Debug|Win32
+		{3D0F040C-630B-4AF8-96A8-57C634D48926}.Release|Win32.ActiveCfg = Release|Win32
+		{3D0F040C-630B-4AF8-96A8-57C634D48926}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
