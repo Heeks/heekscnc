@@ -3,7 +3,8 @@
 #pragma once
 
 enum{
-	OpProfileType = 10001,
-	ProgramType,
+	ProgramType = 10001,
+	NCCodeBlockType,
+	NCCodeType,
 	HeeksCNCMaximumType
 };

@@ -208,10 +208,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\CNCObj.h"
-			>
-		</File>
-		<File
 			RelativePath=".\dllmain.cpp"
 			>
 		</File>
@@ -269,6 +265,14 @@
 		</File>
 		<File
 			RelativePath="..\..\interface\MarkedObject.h"
+			>
+		</File>
+		<File
+			RelativePath=".\NCCode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\NCCode.h"
 			>
 		</File>
 		<File

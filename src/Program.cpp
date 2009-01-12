@@ -9,12 +9,10 @@
 CProgram::CProgram()
 {
 	m_machine.assign("siegkx1");
-	m_create_display_list_next_render = false;
 }
 
 CProgram::~CProgram()
 {
-	DestroyGLLists();
 }
 
 const CProgram &CProgram::operator=(const CProgram &p)
@@ -23,23 +21,14 @@ const CProgram &CProgram::operator=(const CProgram &p)
 	return *this;
 }
 
-void CProgram::DestroyGLLists()
-{
-	if (m_gl_list)
-	{
-		glDeleteLists(m_gl_list, 1);
-		m_gl_list = 0;
-	}
-}
-
 void CProgram::GetProperties(std::list<Property *> *list)
 {
-	CNCObj::GetProperties(list);
+	HeeksObj::GetProperties(list);
 }
 
 void CProgram::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	CNCObj::GetTools(t_list, p);
+	HeeksObj::GetTools(t_list, p);
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
