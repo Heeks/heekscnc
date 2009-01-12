@@ -592,4 +592,3 @@ namespace geoff_geometry {
 
 
 }
-
