@@ -172,13 +172,13 @@ namespace geoff_geometry {
 		if(returnSpanProperties == false) this->SetProperties(true);
 		return geoff_geometry::Split(tolerance, angle, radius, dir);
 	}
-
+#if 0
 	int Span3d::Split(double tolerance) {
 		// returns the number of divisions required to keep in tolerance
 		if(returnSpanProperties == false) this->SetProperties(true);
 		return geoff_geometry::Split(tolerance, angle, radius, dir);
 	}
-
+#endif
 	static int Split(double tolerance, double angle, double radius, int dir) {
 		if(dir == LINEAR) return 0;	// straight span
 		double cosa = 1 - tolerance / radius;
@@ -206,6 +206,7 @@ namespace geoff_geometry {
 		}
 	}
 
+#if 0
 	void Span3d::SplitMatrix(int num_vectors, Matrix* matrix) {
 		// returns the incremental matrix
 		matrix->Unit();
@@ -223,15 +224,16 @@ namespace geoff_geometry {
 			matrix->Translate(d * vs.getx(), d * vs.gety(), d * vs.getz());
 		}
 	}
+#endif
 
 	void Span::minmax(Box& box, bool start) {
 		minmax(box.min, box.max, start);
 	}
-
+#if 0
 	void Span3d::minmax(Box3d& box, bool start) {
 		minmax(box.min, box.max, start);
 	}
-
+#endif
 	void Span::minmax(Point& min, Point& max, bool start) {
 		// box a span (min/max)
 		if(start) {
@@ -268,6 +270,7 @@ namespace geoff_geometry {
 		}
 	}
 
+#if 0
 	void Span3d::minmax(Point3d& min, Point3d& max, bool start) {
 		// box a span (min/max)
 		if(start) {
@@ -303,6 +306,7 @@ namespace geoff_geometry {
 			}
 		}
 	}
+#endif
 
 	int Span::Intof(const Span& sp, Point& pInt1, Point& pInt2, double t[4])const {
 		// Intof 2 spans
@@ -342,6 +346,7 @@ namespace geoff_geometry {
 		if(setprops == true) SetProperties(true);
 	}
 
+#if 0
 	void Span3d::Transform(const Matrix& m, bool setprops) {
 		p0 = p0.Transform(m);
 		p1 = p1.Transform(m);
@@ -353,6 +358,7 @@ namespace geoff_geometry {
 		}
 		if(setprops == true) SetProperties(true);
 	}
+#endif
 
 	Point Span::Mid()const {
 		// midpoint of a span
@@ -418,12 +424,12 @@ namespace geoff_geometry {
 	}
 
 	const Kurve& Kurve::operator=( const Kurve &k) {
-		this->Clear();
-
 		memcpy(e, k.e, 16 * sizeof(double));
 		m_unit = k.m_unit;
 		m_mirrored = k.m_mirrored;
 		m_isReversed = k.m_isReversed;
+
+		this->Clear();
 
 		if(k.m_nVertices) m_started = true;
 //		m_nVertices = 0;
@@ -442,6 +448,42 @@ namespace geoff_geometry {
 		return *this;
 	}
 
+#if 0
+
+	 Kurve::Kurve(Kurve& k) :Matrix(){
+*this = k;
+return;
+		*this = Matrix(k);
+
+		Point p, pc;
+		m_nVertices = 0;
+
+		for(int i = 0; i < k.m_nVertices; i++) {
+			int spantype = k.Get(i, p, pc);
+			int spanid = k.GetSpanID(i);
+			if(Add(spantype, p, pc)) this->AddSpanID(spanid);
+		}
+		if(k.m_nVertices) m_started = true;
+	}
+
+	const Kurve& Kurve::operator=( Kurve &k)
+	{
+		*this = Matrix(k);
+
+		Point p, pc;
+		this->Clear();
+		m_isReversed = k.m_isReversed;
+
+		for(int i = 0; i < k.m_nVertices; i++) {
+			int spantype = k.Get(i, p, pc);
+			int spanid = k.GetSpanID(i);
+			if(Add(spantype, p, pc)) this->AddSpanID(spanid);
+		}
+		if(k.m_nVertices) m_started = true;
+		return *this;
+	}
+#endif
+
 	const Kurve& Kurve::operator=(const Matrix &m)
 	{
 //		*this = Matrix(m);
@@ -455,15 +497,10 @@ namespace geoff_geometry {
 
 	Kurve::~Kurve()
 	{
-		vector<SpanVertex*>::iterator iter = m_spans.begin();
-		while(iter != m_spans.end()) {
-			delete *iter;
-			iter++;
-		}
-		m_nVertices = 0;
-		m_started = m_isReversed = false;
-		m_spans.clear();
+		this->Clear();
 	}
+
+
 
 	bool Kurve::Closed()const
 	{
@@ -732,6 +769,7 @@ namespace geoff_geometry {
 		return sp.dir;
 	}
 
+#if 0
 	int Kurve::Get(int spannumber, Span3d& sp, bool returnSpanProperties, bool transform) const {
 		// returns span data and optional properties - the function returns as the span type
 		if(spannumber < 1 || spannumber > m_nVertices) FAILURE(getMessage(L"Kurve::Get - vertexNumber out of range", GEOMETRY_ERROR_MESSAGES, MES_BAD_VERTEX_NUMBER));
@@ -755,6 +793,7 @@ namespace geoff_geometry {
 
 		return sp.dir;
 	}
+#endif
 
 	void Kurve::Get(Point &ps,Point &pe) const
 	{
@@ -811,6 +850,7 @@ namespace geoff_geometry {
 		}
 	}
 
+#if 0
 	void Span3d::SetProperties(bool returnProperties) {
 		if(returnSpanProperties = returnProperties) {
 			// return span properties
@@ -851,6 +891,7 @@ namespace geoff_geometry {
 			minmax(box, true);
 		}
 	}
+#endif
 
 
 	Point Mid(const Span& span) {

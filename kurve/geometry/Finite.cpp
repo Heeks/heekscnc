@@ -576,7 +576,7 @@ namespace geoff_geometry {
 		if(this->min.z > b.max.z) return true;
 		return false;
 	}
-
+#if 0
 	Span3d IsPtsSpan3d(const double* a, int n, double tolerance, double* deviation) {
 		// returns a span3d if all points are within tolerance
 		int np = n / 3;					// number of points
@@ -622,6 +622,7 @@ double tolerance = 10.0 * 1.0e-6;
 		}
 		return Span3d();
 	}
+#endif
 
 	Line IsPtsLine(const double* a, int n, double tolerance, double* deviation) {
 		// returns a Line if all points are within tolerance

@@ -196,7 +196,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 			x = xord; y = yord; ok = okay;}
 		inline	Point( const Point& p ) {												// copy constructor  Point p1(p2);
 			x = p.x; y = p.y; ok = p.ok;}
-		Point( const Point3d& p );												// copy constructor  Point p1(p2);
+				Point( const Point3d& p );												// copy constructor  Point p1(p2);
 		Point(const Vector2d& v);
 
 		// operators
@@ -589,6 +589,9 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		//	bool operator!=(const Span &sp)const { return !(*this == sp);}	
 	};
 
+#if 0 // not sure if anyone uses this but if so please replace 0 with something or don't use
+	// not a good idea!!!
+
 	// 3D line arc span
 	class Span3d{
 		friend wostream& operator <<(wostream& op, Span3d& span);
@@ -636,6 +639,8 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		//	bool operator==(const Span &sp)const;
 		//	bool operator!=(const Span &sp)const { return !(*this == sp);}	
 	};
+#endif
+
 
 
 	// general
@@ -720,7 +725,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		return corner((Vector2d)span.ve, (Vector2d)next.vs, cpTol);}
 
 	Line IsPtsLine(const double* a, int n, double tolerance, double* deviation);
-	Span3d IsPtsSpan3d(const double* a, int n, double tolerance, double* deviation);
+//	Span3d IsPtsSpan3d(const double* a, int n, double tolerance, double* deviation);
 
 	class Plane {
 		friend wostream& operator <<(wostream& op, Plane& pl);
@@ -914,7 +919,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		int		Get(int spanVertexNumber, Point3d& p, Point3d& pc) const 
 		{ Point p2d, pc2d; int d = Get(spanVertexNumber, p2d, pc2d); p = p2d; pc = pc2d; return d;}
 		int		Get(int spannumber, Span& sp, bool returnSpanProperties = false, bool transform = false) const;
-		int		Get(int spannumber, Span3d& sp, bool returnSpanProperties = false, bool transform = false) const;
+//		int		Get(int spannumber, Span3d& sp, bool returnSpanProperties = false, bool transform = false) const;
 		void	Get(Point &ps,Point &pe) const; // returns the start- and endpoint of the kurve
 		const SpanDataObject* GetIndex(int vertexNumber)const;
 		inline double GetLength()const{ return Perim();};  // returns the length of a kurve
@@ -1200,4 +1205,6 @@ public:
 
 
 using namespace geoff_geometry;		// for including file
+
+
 
