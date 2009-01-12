@@ -20,22 +20,6 @@ BEGIN_EVENT_TABLE(CProgramCanvas, wxScrolledWindow)
     EVT_SIZE(CProgramCanvas::OnSize)
 END_EVENT_TABLE()
 
-static void RunProgram()
-{
-	theApp.m_program->DestroyGLLists();
-	heeksCAD->Repaint();// clear the screen
-	theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
-	theApp.m_program->m_create_display_list_next_render = true;
-	std::list<HeeksObj*> list;
-	list.push_back(theApp.m_program);
-	heeksCAD->DrawObjectsOnFront(list);
-}
-
-static void OnRun(wxCommandEvent& event)
-{
-	RunProgram();
-}
-
 //	if(heeksCAD->PickPosition(_T("Pick finish position"), pos)){
 
 static void OnProfile(wxCommandEvent& event)
@@ -144,12 +128,6 @@ void CProgramTextCtrl::OnChar(wxKeyEvent& event)
     switch ( event.GetKeyCode() )
     {
         case WXK_RETURN:
-			{
-				if(theApp.m_run_program_on_new_line)
-				{
-					RunProgram();
-				}
-			}
 			break;
 	}
 }
