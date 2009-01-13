@@ -66,9 +66,10 @@ public:
 	std::list<CNCCodeBlock*> m_blocks;
 	int m_gl_list;
 	CBox m_box;
+	CNCCodeBlock* m_highlighted_block;
 
 	CNCCode();
-	CNCCode(const CNCCode &p):m_gl_list(0){operator=(p);}
+	CNCCode(const CNCCode &p):m_gl_list(0), m_highlighted_block(NULL){operator=(p);}
 	virtual ~CNCCode();
 
 	const CNCCode &operator=(const CNCCode &p);
@@ -88,9 +89,11 @@ public:
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	bool OneOfAKind(){return true;}
+	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void DestroyGLLists(void); // not void KillGLLists(void), because I don't want the display list recreated on the Redraw button
 	void SetTextCtrl(wxTextCtrl *textCtrl);
+	void HighlightBlock(long pos);
 };

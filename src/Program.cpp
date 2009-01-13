@@ -6,13 +6,12 @@
 #include "../../tinyxml/tinyxml.h"
 #include "ProgramCanvas.h"
 #include "NCCode.h"
+#include "../../interface/MarkedObject.h"
 
 CProgram::CProgram()
 {
 	m_machine.assign("siegkx1");
-//	CNCCode* nc_code = new CNCCode();
-//	nc_code->Test();
-//	Add(nc_code, NULL);
+	m_nc_code = NULL;
 }
 
 CProgram::~CProgram()
@@ -55,6 +54,22 @@ bool CProgram::CanAddTo(HeeksObj* owner)
 	return owner->GetType() == DocumentType;
 }
 
+void CProgram::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction)
+{
+	if(marked_object->m_map.size() > 0)
+	{
+		MarkedObject* sub_marked_object = marked_object->m_map.begin()->second;
+		if(sub_marked_object)
+		{
+			HeeksObj* object = sub_marked_object->m_map.begin()->first;
+			if(object && object->GetType() == NCCodeType)
+			{
+				((CNCCode*)object)->SetClickMarkPoint(sub_marked_object, ray_start, ray_direction);
+			}
+		}
+	}
+}
+
 void CProgram::WriteXML(TiXmlElement *root)
 {
 	TiXmlElement * element;
@@ -64,6 +79,18 @@ void CProgram::WriteXML(TiXmlElement *root)
 	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
 
 	WriteBaseXML(element);
+}
+
+bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
+{
+	if(object->GetType() == NCCodeType)m_nc_code = (CNCCode*)object;
+	return ObjList::Add(object, prev_object);
+}
+
+void CProgram::Remove(HeeksObj* object)
+{
+	if(object == m_nc_code)m_nc_code = NULL;
+	ObjList::Remove(object);
 }
 
 // static member function
