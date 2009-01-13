@@ -12,6 +12,7 @@
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
 #include "CNCConfig.h"
+#include "NCCode.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -121,6 +122,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 
 	// add object reading functions
 	heeksCAD->RegisterReadXMLfunction("Program", CProgram::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("nccode", CNCCode::ReadFromXMLElement);
 }
 
 void CHeeksCNCApp::OnNewOrOpen(bool open)
