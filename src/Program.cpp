@@ -5,10 +5,14 @@
 #include "PythonStuff.h"
 #include "../../tinyxml/tinyxml.h"
 #include "ProgramCanvas.h"
+#include "NCCode.h"
 
 CProgram::CProgram()
 {
 	m_machine.assign("siegkx1");
+//	CNCCode* nc_code = new CNCCode();
+//	nc_code->Test();
+//	Add(nc_code, NULL);
 }
 
 CProgram::~CProgram()

@@ -7,27 +7,36 @@
 #pragma once
 
 #include "../../interface/HeeksObj.h"
+#include "../../interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
 
 class ColouredText
 {
 public:
 	wxString m_str;
-	wxTextAttr m_attr;
+	HeeksColor m_col;
+
+	void WriteXML(TiXmlElement *root);
+	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
 class threedoubles{
 public:
 	double m_x[3];
+	void WriteXML(TiXmlElement *root);
+	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
 class ColouredLineStrips
 {
 public:
-	unsigned char r, g, b;
+	HeeksColor m_col;
 	std::list< threedoubles > m_points;
+
 	void glCommands();
 	void GetBox(CBox &box);
+	void WriteXML(TiXmlElement *root);
+	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
 class CNCCodeBlock:public HeeksObj
@@ -35,18 +44,24 @@ class CNCCodeBlock:public HeeksObj
 public:
 	std::list<ColouredText> m_text;
 	std::list<ColouredLineStrips> m_line_strips;
-	long from_pos, to_pos; // position of block in text ctrl
+	long m_from_pos, m_to_pos; // position of block in text ctrl
+
+	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1){}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return NCCodeBlockType;}
 	HeeksObj *MakeACopy(void)const;
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
+	void WriteXML(TiXmlElement *root);
+
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
 
 class CNCCode:public HeeksObj
 {
 public:
+	static long pos; // used for setting the CNCCodeBlock objects' m_from_pos and m_to_pos
 	std::list<CNCCodeBlock*> m_blocks;
 	int m_gl_list;
 	CBox m_box;
@@ -73,4 +88,8 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void DestroyGLLists(void); // not void KillGLLists(void), because I don't want the display list recreated on the Redraw button
+
+	// remove this test, once backplotting is working
+	// this makes a sample CNCCode object
+	void Test();
 };
