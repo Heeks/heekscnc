@@ -4,6 +4,7 @@
 #include "NCCode.h"
 #include "../../tinyxml/tinyxml.h"
 #include "OutputCanvas.h"
+#include "../../interface/MarkedObject.h"
 
 void ColouredText::WriteXML(TiXmlElement *root)
 {
@@ -171,6 +172,8 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 		}
 	}
 
+	CNCCode::pos += 2; // 2 for each line ( presumably \r\n )
+
 	new_object->m_to_pos = CNCCode::pos;
 
 	//HeeksObj::ReadBaseXML(element); // read HeeksObj::m_id
@@ -192,7 +195,7 @@ void CNCCodeBlock::AppendTextCtrl(wxTextCtrl *textCtrl)
 
 long CNCCode::pos = 0;
 
-CNCCode::CNCCode():m_gl_list(0){}
+CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL){}
 
 CNCCode::~CNCCode()
 {
@@ -221,6 +224,7 @@ void CNCCode::Clear()
 	m_blocks.clear();
 	DestroyGLLists();
 	m_box = CBox();
+	m_highlighted_block = NULL;
 }
 
 void CNCCode::glCommands(bool select, bool marked, bool no_color)
@@ -243,6 +247,13 @@ void CNCCode::glCommands(bool select, bool marked, bool no_color)
 		}
 
 		glEndList();
+	}
+
+	if(m_highlighted_block)
+	{
+		glLineWidth(3);
+		m_highlighted_block->glCommands(false, false, false);
+		glLineWidth(1);
 	}
 }
 
@@ -299,6 +310,24 @@ bool CNCCode::CanAddTo(HeeksObj* owner)
 	return owner->GetType() == ProgramType;
 }
 
+void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction)
+{
+	if(marked_object->m_map.size() > 0)
+	{
+		MarkedObject* sub_marked_object = marked_object->m_map.begin()->second;
+		if(sub_marked_object)
+		{
+			HeeksObj* object = sub_marked_object->m_map.begin()->first;
+			if(object && object->GetType() == NCCodeBlockType)
+			{
+				m_highlighted_block = (CNCCodeBlock*)object;
+				theApp.m_output_canvas->m_textCtrl->SetInsertionPoint(m_highlighted_block->m_to_pos - 2);
+				theApp.m_output_canvas->m_textCtrl->SetFocus();
+			}
+		}
+	}
+}
+
 //static
 HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 {
@@ -340,5 +369,20 @@ void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
 	{
 		CNCCodeBlock* block = *It;
 		block->AppendTextCtrl(textCtrl);
+	}
+}
+
+void CNCCode::HighlightBlock(long pos)
+{
+	m_highlighted_block = NULL;
+
+	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
+	{
+		CNCCodeBlock* block = *It;
+		if(pos < block->m_to_pos)
+		{
+			m_highlighted_block = block;
+			break;
+		}
 	}
 }

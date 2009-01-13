@@ -13,6 +13,7 @@ class CProgram:public ObjList
 {
 public:
 	std::string m_machine;
+	CNCCode* m_nc_code;
 
 	CProgram();
 	CProgram(const CProgram &p){operator=(p);}
@@ -29,10 +30,13 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlElement *root);
+	bool Add(HeeksObj* object, HeeksObj* prev_object);
+	void Remove(HeeksObj* object);
 	bool CanBeRemoved(){return false;}
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	bool OneOfAKind(){return true;}
+	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
