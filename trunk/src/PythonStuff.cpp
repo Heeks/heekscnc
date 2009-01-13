@@ -86,6 +86,7 @@ bool HeeksPyBackplot()
 
 		// read the xml file, just like paste, into the program
 		heeksCAD->OpenXMLFile(xml_file_str, true, theApp.m_program);
+		heeksCAD->Repaint();
 
 		return true;
 	}
@@ -94,4 +95,21 @@ bool HeeksPyBackplot()
 		wxMessageBox(_T("Error while backplotting the program!"));
 	}
 	return false;
+}
+
+bool HeeksPyBackplot(const wxString &filepath)
+{
+	{
+		wxString backplot_file_str = theApp.GetDllFolder() + _T("/backplotfile.txt");
+		wxFile ofs(backplot_file_str.c_str(), wxFile::write);
+		if(!ofs.IsOpened())
+		{
+			wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + backplot_file_str);
+			return false;
+		}
+
+		ofs.Write(filepath.c_str());
+	}
+
+	return HeeksPyBackplot();
 }

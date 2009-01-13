@@ -18,6 +18,8 @@ class COutputCanvas: public wxScrolledWindow
 private:
     void Resize();
 
+	wxToolBar *m_toolBar;
+
 public:
     COutputTextCtrl *m_textCtrl;
 
