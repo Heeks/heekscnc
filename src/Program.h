@@ -29,6 +29,10 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlElement *root);
+	bool CanBeRemoved(){return false;}
+	bool CanAdd(HeeksObj* object);
+	bool CanAddTo(HeeksObj* owner);
+	bool OneOfAKind(){return true;}
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

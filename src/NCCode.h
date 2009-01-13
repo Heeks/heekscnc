@@ -56,6 +56,7 @@ public:
 	void WriteXML(TiXmlElement *root);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void AppendTextCtrl(wxTextCtrl *textCtrl);
 };
 
 class CNCCode:public HeeksObj
@@ -84,12 +85,12 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlElement *root);
+	bool CanAdd(HeeksObj* object);
+	bool CanAddTo(HeeksObj* owner);
+	bool OneOfAKind(){return true;}
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void DestroyGLLists(void); // not void KillGLLists(void), because I don't want the display list recreated on the Redraw button
-
-	// remove this test, once backplotting is working
-	// this makes a sample CNCCode object
-	void Test();
+	void SetTextCtrl(wxTextCtrl *textCtrl);
 };
