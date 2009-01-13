@@ -59,7 +59,8 @@ static void OnProfile(wxCommandEvent& event)
 
 static void OnPostProcess(wxCommandEvent& event)
 {
-	HeeksPyPostProcess();
+	bool pp_success = HeeksPyPostProcess();
+	if(pp_success)HeeksPyBackplot();
 }
 
 CProgramCanvas::CProgramCanvas(wxWindow* parent)
