@@ -1,5 +1,6 @@
 // PythonStuff.h
 class CBox;
 
-void HeeksPyPostProcess();
+bool HeeksPyPostProcess();
+bool HeeksPyBackplot();
 
