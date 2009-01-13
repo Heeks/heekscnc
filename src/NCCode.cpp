@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "NCCode.h"
 #include "../../tinyxml/tinyxml.h"
+#include "OutputCanvas.h"
 
 void ColouredText::WriteXML(TiXmlElement *root)
 {
@@ -177,6 +178,18 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
+void CNCCodeBlock::AppendTextCtrl(wxTextCtrl *textCtrl)
+{
+	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
+	{
+		ColouredText &text = *It;
+		wxColour c(text.m_col.red, text.m_col.green, text.m_col.blue);
+		textCtrl->SetDefaultStyle(wxTextAttr(c));
+		textCtrl->AppendText(text.m_str);
+	}
+	textCtrl->AppendText(_T("\n"));
+}
+
 long CNCCode::pos = 0;
 
 CNCCode::CNCCode():m_gl_list(0){}
@@ -276,6 +289,16 @@ void CNCCode::WriteXML(TiXmlElement *root)
 	//WriteBaseXML(element); // write HeeksObj::m_id
 }
 
+bool CNCCode::CanAdd(HeeksObj* object)
+{
+	return object->GetType() == NCCodeBlockType;
+}
+
+bool CNCCode::CanAddTo(HeeksObj* owner)
+{
+	return owner->GetType() == ProgramType;
+}
+
 //static
 HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 {
@@ -295,6 +318,8 @@ HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 
 	//HeeksObj::ReadBaseXML(element); // read HeeksObj::m_id
 
+	new_object->SetTextCtrl(theApp.m_output_canvas->m_textCtrl);
+
 	return new_object;
 }
 
@@ -307,83 +332,13 @@ void CNCCode::DestroyGLLists(void)
 	}
 }
 
-void CNCCode::Test()
+void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
 {
-	CNCCode::pos = 0;
+	textCtrl->Clear();
+
+	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
-		CNCCodeBlock* new_block = new CNCCodeBlock;
-		{
-			ColouredText t;
-			t.m_col = HeeksColor(255, 0, 0);
-			t.m_str = wxString(_T("G0"));
-			new_block->m_text.push_back(t);
-		}
-		{
-			ColouredText t;
-			t.m_col = HeeksColor(0, 0, 0);
-			t.m_str = wxString(_T("X10"));
-			new_block->m_text.push_back(t);
-		}
-		{
-			ColouredLineStrips s;
-			s.m_col = HeeksColor(255, 0, 0);
-			{
-				threedoubles td;
-				td.m_x[0] = 0.0;
-				td.m_x[1] = 0.0;
-				td.m_x[2] = 0.0;
-				s.m_points.push_back(td);
-			}
-			{
-				threedoubles td;
-				td.m_x[0] = 10.0;
-				td.m_x[1] = 0.0;
-				td.m_x[2] = 0.0;
-				s.m_points.push_back(td);
-			}
-			new_block->m_line_strips.push_back(s);
-		}
-		m_blocks.push_back(new_block);
-	}
-	{
-		CNCCodeBlock* new_block = new CNCCodeBlock;
-		{
-			ColouredText t;
-			t.m_col = HeeksColor(0, 255, 0);
-			t.m_str = wxString(_T("G1"));
-			new_block->m_text.push_back(t);
-		}
-		{
-			ColouredText t;
-			t.m_col = HeeksColor(0, 0, 0);
-			t.m_str = wxString(_T("X20"));
-			new_block->m_text.push_back(t);
-		}
-		{
-			ColouredText t;
-			t.m_col = HeeksColor(0, 0, 0);
-			t.m_str = wxString(_T("Y10"));
-			new_block->m_text.push_back(t);
-		}
-		{
-			ColouredLineStrips s;
-			s.m_col = HeeksColor(0, 255, 0);
-			{
-				threedoubles td;
-				td.m_x[0] = 10.0;
-				td.m_x[1] = 0.0;
-				td.m_x[2] = 0.0;
-				s.m_points.push_back(td);
-			}
-			{
-				threedoubles td;
-				td.m_x[0] = 20.0;
-				td.m_x[1] = 10.0;
-				td.m_x[2] = 0.0;
-				s.m_points.push_back(td);
-			}
-			new_block->m_line_strips.push_back(s);
-		}
-		m_blocks.push_back(new_block);
+		CNCCodeBlock* block = *It;
+		block->AppendTextCtrl(textCtrl);
 	}
 }

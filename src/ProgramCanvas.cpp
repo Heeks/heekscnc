@@ -66,8 +66,7 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
         : wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                            wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE)
 {
-	m_textCtrl = new CProgramTextCtrl( this, 100, _T(""),
-		wxPoint(180,170), wxSize(200,70), wxTE_MULTILINE | wxTE_DONTWRAP);
+	m_textCtrl = new wxTextCtrl( this, 100, _T(""),	wxPoint(180,170), wxSize(200,70), wxTE_MULTILINE | wxTE_DONTWRAP);
 
 	// make a tool bar
 	m_toolBar = new wxToolBar(this, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
@@ -101,74 +100,4 @@ void CProgramCanvas::Resize()
 void CProgramCanvas::Clear()
 {
 	m_textCtrl->Clear();
-}
-
-BEGIN_EVENT_TABLE(CProgramTextCtrl, wxTextCtrl)
-	EVT_CHAR(CProgramTextCtrl::OnChar)
-    EVT_DROP_FILES(CProgramTextCtrl::OnDropFiles)
-    EVT_MENU(wxID_CUT, CProgramTextCtrl::OnCut)
-    EVT_MENU(wxID_COPY, CProgramTextCtrl::OnCopy)
-    EVT_MENU(wxID_PASTE, CProgramTextCtrl::OnPaste)
-    EVT_MENU(wxID_UNDO, CProgramTextCtrl::OnUndo)
-    EVT_MENU(wxID_REDO, CProgramTextCtrl::OnRedo)
-    EVT_MENU(wxID_CLEAR, CProgramTextCtrl::OnDelete)
-    EVT_MENU(wxID_SELECTALL, CProgramTextCtrl::OnSelectAll)
-END_EVENT_TABLE()
-
-void CProgramTextCtrl::OnDropFiles(wxDropFilesEvent& event)
-{
-	wxTextCtrl::OnDropFiles(event);
-}
-
-void CProgramTextCtrl::OnChar(wxKeyEvent& event)
-{
-	wxTextCtrl::OnChar(event);
-
-	// check for Enter key
-    switch ( event.GetKeyCode() )
-    {
-        case WXK_RETURN:
-			break;
-	}
-}
-
-void CProgramTextCtrl::OnCut(wxCommandEvent& event)
-{
-	wxTextCtrl::OnCut(event);
-}
-
-void CProgramTextCtrl::OnCopy(wxCommandEvent& event)
-{
-	wxTextCtrl::OnCopy(event);
-}
-
-void CProgramTextCtrl::OnPaste(wxCommandEvent& event)
-{
-	wxTextCtrl::OnPaste(event);
-}
-
-void CProgramTextCtrl::OnUndo(wxCommandEvent& event)
-{
-	wxTextCtrl::OnUndo(event);
-}
-
-void CProgramTextCtrl::OnRedo(wxCommandEvent& event)
-{
-	wxTextCtrl::OnRedo(event);
-}
-
-void CProgramTextCtrl::OnDelete(wxCommandEvent& event)
-{
-#ifdef WIN32
-// to do, are these needed?, they don't compile for Linux
-	wxTextCtrl::OnDelete(event);
-#endif
-}
-
-void CProgramTextCtrl::OnSelectAll(wxCommandEvent& event)
-{
-#ifdef WIN32
-// to do, are these needed?, they don't compile for Linux
-	wxTextCtrl::OnSelectAll(event);
-#endif
 }

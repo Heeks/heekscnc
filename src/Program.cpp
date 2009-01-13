@@ -45,6 +45,16 @@ void CProgram::CopyFrom(const HeeksObj* object)
 	operator=(*((CProgram*)object));
 }
 
+bool CProgram::CanAdd(HeeksObj* object)
+{
+	return object->GetType() == NCCodeType;
+}
+
+bool CProgram::CanAddTo(HeeksObj* owner)
+{
+	return owner->GetType() == DocumentType;
+}
+
 void CProgram::WriteXML(TiXmlElement *root)
 {
 	TiXmlElement * element;
