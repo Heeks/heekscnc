@@ -14,8 +14,6 @@ static bool write_python_file(const wxString& python_file_path)
 
 	ofs.Write(theApp.m_program_canvas->m_textCtrl->GetValue());
 
-	ofs.Write(_T("\nend()\n"));
-
 	return true;
 }
 
