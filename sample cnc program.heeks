@@ -1,7 +1,27 @@
 <?xml version="1.0" ?>
 <HeeksCAD_Document>
-    <Program machine="siegkx1" program="spindle(7000)&#x0A;clearance = 5&#x0A;rate(100, 100)&#x0A;tool(1, 3, 0)&#x0A;k1 = kurve.new()&#x0A;kurve.add_point(k1, 0, 2, -1, 0, 0)&#x0A;kurve.add_point(k1, 0, 10, 2, 0, 0)&#x0A;profile(k1, &apos;left&apos;, 0, 0)&#x0A;" id="1" />
-    <Sketch id="1">
-        <Line col="0" sx="2.000000" sy="-1.000000" sz="0.000000" ex="10.000000" ey="2.000000" ez="0.000000" id="1" />
-    </Sketch>
+    <Program machine="siegkx1" program="from nc.nc import *&#x0A;import nc.iso&#x0A;from nc.attach import *&#x0A;import kurve&#x0A;import stdops&#x0A;&#x0A;output(&apos;test.tap&apos;)&#x0A;&#x0A;program_begin(123, &apos;Test program&apos;)&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;clearance = 5&#x0A;rapid_down_to_height = 2&#x0A;final_depth = -0.1&#x0A;tool_diameter = 3&#x0A;spindle(7000)&#x0A;feedrate(100)&#x0A;tool_change(1)&#x0A;k1 = kurve.new()&#x0A;kurve.add_point(k1, 0, -41, -5, 0, 0)&#x0A;kurve.add_point(k1, 0, -33, 2, 0, 0)&#x0A;kurve.add_point(k1, 0, -23, 4, 0, 0)&#x0A;kurve.add_point(k1, 0, -15, 5, 0, 0)&#x0A;kurve.add_point(k1, 0, -1, 5, 0, 0)&#x0A;kurve.add_point(k1, 0, 12, 4, 0, 0)&#x0A;stdops.profile(k1, &apos;left&apos;, tool_diameter/2, clearance, rapid_down_to_height, final_depth)&#x0A;&#x0A;rapid_home()&#x0A;&#x0A;program_end()&#x0A;" id="1">
+        <nccode>
+            <ncblock>
+                <text col="block">N10</text>
+                <text col="prep">G0</text>
+                <text col="axis">X10</text>
+                <text>F100</text>
+                <lines col="rapid">
+                    <p x="0.000000" y="0.000000" z="0.000000" />
+                    <p x="10.000000" y="0.000000" z="0.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text col="block">N20</text>
+                <text col="prep">G1</text>
+                <text col="axis">X20</text>
+                <text col="axis">Y10</text>
+                <lines col="feed">
+                    <p x="10.000000" y="0.000000" z="0.000000" />
+                    <p x="20.000000" y="10.000000" z="0.000000" />
+                </lines>
+            </ncblock>
+        </nccode>
+    </Program>
 </HeeksCAD_Document>
