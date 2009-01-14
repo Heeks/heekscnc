@@ -1,5 +1,5 @@
-from posts.nc import *
-import posts.iso
+from nc.nc import *
+import nc.iso
 
 output('POST_TEST.txt')
 
