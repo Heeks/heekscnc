@@ -47,20 +47,20 @@ def profile2(k, direction, finishx, finishy):
                     rdir = -rdir # because the tangential_arc was used in reverse
                     
                 if rdir == 1:# anti-clockwise arc
-                    arc("acw", sx, sy, rcx, rcy)
+                    arc_ccw(sx, sy, 0, rcx, rcy)
                 elif rdir == -1:# clockwise arc
-                    arc("cw", sx, sy, rcx, rcy)
+                    arc_cw(sx, sy, 0, rcx, rcy)
                 else:# line
-                    feedxy(sx, sy)
+                    feed(sx, sy)
         if sp == 0:#line
             feedxy(ex, ey)
         else:
             cx = cx - sx # make relative to the start position
             cy = cy - sy
             if sp == 1:# anti-clockwise arc
-                arc("acw", ex, ey, cx, cy)
+                arc_ccw(ex, ey, 0, cx, cy)
             else:
-                arc("cw", ex, ey, cx, cy)
+                arc_cw(ex, ey, 0, cx, cy)
 
         if span == num_spans - 1:# last span
             if (finishx != ex or finishy != ey) and direction != "on":
@@ -70,11 +70,11 @@ def profile2(k, direction, finishx, finishy):
                 rcx = rcx - ex # make relative to the start position
                 rcy = rcy - ey
                 if rdir == 1:# anti-clockwise arc
-                    arc("acw", finishx, finishy, rcx, rcy)
+                    arc_ccw(finishx, finishy, 0, rcx, rcy)
                 elif rdir == -1:# clockwise arc
-                    arc("cw", finishx, finishy, rcx, rcy)
+                    arc_cw(finishx, finishy, 0, rcx, rcy)
                 else:# line
-                    feedxy(finishx, finishy)
+                    feed(finishx, finishy)
                 
                 
     if offset_k != k:
@@ -97,14 +97,14 @@ def profile(k, direction, clearance, rapid_down_to_height, final_depth):
     x, y = get_roll_on_pos(k, direction)
 
     # rapid across to it
-    rapidxy(x, y)
+    rapid(x, y)
 
     # rapid down to just above the metal
-    rapidz(rapid_down_to_height)
+    rapid(z = rapid_down_to_height)
 
     # profile the shape, with roll off
     x, y = get_roll_off_pos(k, direction)
     profile2(k, direction, x, y)
 
     # rapid back up to clearance plane
-    rapidz(clearance)
+    rapid(z = clearance)
