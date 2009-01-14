@@ -132,7 +132,7 @@ class CreatorIso(nc.Creator):
         self.f = ' F' + str(f)
 
     def spindle(self, s):
-        self.s = ' S' + str(f)
+        self.s = ' S' + str(s)
 
     def coolant(self, mode=0):
         if (mode == 0) : self.m.append(' M09')

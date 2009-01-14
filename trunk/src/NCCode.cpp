@@ -109,7 +109,7 @@ void ColouredLineStrips::ReadFromXMLElement(TiXmlElement* element)
 		std::string name(a->Name());
 		if(name == "col"){
 			std::string coltype(a->Value());
-			for(int i = 0; i<MaxTextColorTypes; i++)
+			for(int i = 0; i<MaxLinesColorType; i++)
 			{
 				if(coltype == CNCCode::m_lines_colors_str[i])
 				{

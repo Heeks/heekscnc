@@ -29,6 +29,7 @@ class ColouredText
 public:
 	wxString m_str;
 	TextColorEnum m_color_type;
+	ColouredText():m_color_type(TextColorDefaultType){}
 
 	void WriteXML(TiXmlElement *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -46,6 +47,7 @@ class ColouredLineStrips
 public:
 	LinesColorEnum m_color_type;
 	std::list< threedoubles > m_points;
+	ColouredLineStrips():m_color_type(LinesColorRapidType){}
 
 	void glCommands();
 	void GetBox(CBox &box);
