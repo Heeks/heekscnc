@@ -19,6 +19,7 @@ class CreatorAttach(nc.Creator):
     ##  Shift in Z
 
     def z2(self, z):
+        if (z == None) : return None
         return z + 100
 
     ############################################################################
@@ -106,16 +107,16 @@ class CreatorAttach(nc.Creator):
     ##  Moves
 
     def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
-        self.original.rapid(x, y, z2(z), a, b, c)
+        self.original.rapid(x, y, self.z2(z), a, b, c)
 
     def feed(self, x=None, y=None, z=None):
-        self.original.feed(x, y, z2(z))
+        self.original.feed(x, y, self.z2(z))
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.original.arc_cw(x, y, z2(z), i, j, z2(k), r)
+        self.original.arc_cw(x, y, self.z2(z), i, j, self.z2(k), r)
 
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.original.arc_ccw(x, y, z2(z), i, j, z2(k), r)
+        self.original.arc_ccw(x, y, self.z2(z), i, j, self.z2(k), r)
 
     def dwell(self, t):
         self.original.dwell(t)
@@ -139,13 +140,13 @@ class CreatorAttach(nc.Creator):
         self.original.profile()
 
     def drill(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, dwell_top=None, pecks=[], peck_to_top=True):
-        self.original.drill(x, y, z2(z), z2(zretract), depth, standoff, dwell_bottom, dwell_top, pecks, peck_to_top)
+        self.original.drill(x, y, self.z2(z), self.z2(zretract), depth, standoff, dwell_bottom, dwell_top, pecks, peck_to_top)
 
     def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):
-        self.original.tap(x, y, z2(z), z2(zretract), depth, standoff, dwell_bottom, pitch, stoppos, spin_in, spin_out)
+        self.original.tap(x, y, self.z2(z), self.z2(zretract), depth, standoff, dwell_bottom, pitch, stoppos, spin_in, spin_out)
 
     def bore(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, feed_in=None, feed_out=None, stoppos=None, shift_back=None, shift_right=None, backbore=False, stop=False):
-        self.original.bore(x, y, z2(z), z2(zretract), depth, standoff, dwell_Bottom, feed_in, feed_out, stoppos, shift_back, shift_right, backbore, stop)
+        self.original.bore(x, y, self.z2(z), self.z2(zretract), depth, standoff, dwell_Bottom, feed_in, feed_out, stoppos, shift_back, shift_right, backbore, stop)
 
     ############################################################################
     ##  Misc
