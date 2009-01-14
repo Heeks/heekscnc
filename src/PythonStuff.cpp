@@ -12,11 +12,6 @@ static bool write_python_file(const wxString& python_file_path)
 	wxFile ofs(python_file_path.c_str(), wxFile::write);
 	if(!ofs.IsOpened())return false;
 
-	ofs.Write(_T("import siegkx1\n"));
-	ofs.Write(_T("import sys\n"));
-	ofs.Write(_T("from math import *\n"));
-	ofs.Write(_T("from stdops import *\n\n"));
-
 	ofs.Write(theApp.m_program_canvas->m_textCtrl->GetValue());
 
 	ofs.Write(_T("\nend()\n"));

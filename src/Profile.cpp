@@ -83,7 +83,7 @@ void CProfile::AppendTextToProgram()
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid_down_to_height = %g\n"), m_params.m_rapid_down_to_height));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("final_depth = %g\n"), m_params.m_final_depth));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("spindle(%g)\n"), m_params.m_spindle_speed));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rate(%g, %g)\n"), m_params.m_horizontal_feed_rate, m_params.m_vertical_feed_rate));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("feedrate(%g)\n"), m_params.m_horizontal_feed_rate));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool(1, %g, 0)\n"), m_params.m_tool_diameter));
 	for(std::list<HeeksObj*>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
