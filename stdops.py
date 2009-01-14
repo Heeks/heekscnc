@@ -1,10 +1,11 @@
 import kurve
-from siegkx1 import *
+from nc.nc import *
+
 # line above will be import machine, so these operations are machine independant
 
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile2(k, direction, finishx, finishy):
+def profile2(k, startx, starty, direction, radius, finishx, finishy):
     if kurve.exists(k) == False:
         raise "kurve doesn't exist, number %d" % (k)
     
@@ -15,8 +16,7 @@ def profile2(k, direction, finishx, finishy):
             raise "direction must be left or right", direction
 
         # get tool diameter
-        station, diameter, corner_rad = current_tool_data()
-        offset = diameter/2
+        offset = radius
         if direction == "right":
             offset = -offset
         offset_k = kurve.new()
@@ -24,8 +24,6 @@ def profile2(k, direction, finishx, finishy):
         if offset_success == False:
             raise "couldn't offset kurve %d" % (k)
         
-    px, py, pz = current_tool_pos()
-
     num_spans = kurve.num_spans(offset_k)
 
     if num_spans == 0:
@@ -34,16 +32,16 @@ def profile2(k, direction, finishx, finishy):
     for span in range(0, num_spans):
         sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, span)
         if span == 0:#first span
-            if sx != px or sy != py:
+            if sx != startx or sy != starty:
                 rdir = 0 # line
                 if direction != "on":
                     # do a roll-on arc
                     vx, vy = kurve.get_span_dir(offset_k, span, 0) # get start direction
-                    if px == 'NOT_SET' or py == 'NOT_SET':
+                    if startx == 'NOT_SET' or starty == 'NOT_SET':
                         raise "can not do an arc without a line move first"
-                    rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, px, py)
-                    rcx = rcx - px # make relative to the start position
-                    rcy = rcy - py
+                    rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, startx, starty)
+                    rcx = rcx - startx # make relative to the start position
+                    rcy = rcy - starty
                     rdir = -rdir # because the tangential_arc was used in reverse
                     
                 if rdir == 1:# anti-clockwise arc
@@ -53,7 +51,7 @@ def profile2(k, direction, finishx, finishy):
                 else:# line
                     feed(sx, sy)
         if sp == 0:#line
-            feedxy(ex, ey)
+            feed(ex, ey)
         else:
             cx = cx - sx # make relative to the start position
             cy = cy - sy
@@ -90,21 +88,21 @@ def get_roll_off_pos(k, direction):
 
 # direction should be 'left' or 'right' or 'on'
 # auto_profile calculates suitable roll on and roll off positions and also does rapid moves
-def profile(k, direction, clearance, rapid_down_to_height, final_depth):
+def profile(k, direction, radius, clearance, rapid_down_to_height, final_depth):
     # start - assume we are at a suitable clearance height
 
     # get roll on position
-    x, y = get_roll_on_pos(k, direction)
+    sx, sy = get_roll_on_pos(k, direction)
 
     # rapid across to it
-    rapid(x, y)
+    rapid(sx, sy)
 
     # rapid down to just above the metal
     rapid(z = rapid_down_to_height)
 
     # profile the shape, with roll off
-    x, y = get_roll_off_pos(k, direction)
-    profile2(k, direction, x, y)
+    ex, ey = get_roll_off_pos(k, direction)
+    profile2(k, sx, sy, direction, radius, ex, ey)
 
     # rapid back up to clearance plane
     rapid(z = clearance)
