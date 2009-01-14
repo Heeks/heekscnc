@@ -13,16 +13,28 @@ void ColouredText::WriteXML(TiXmlElement *root)
 	root->LinkEndChild( element ); 
 
 	element->SetAttribute("str", m_str);
-	element->SetAttribute("col", m_col.COLORREF_color());
+	if(m_color_type != TextColorDefaultType)element->SetAttribute("col", CNCCode::m_text_colors_str[m_color_type].c_str());
 }
 
 void ColouredText::ReadFromXMLElement(TiXmlElement* pElem)
 {
+	m_color_type = TextColorDefaultType;
+
 	// get the attributes
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
 	{
 		std::string name(a->Name());
-		if(name == "col"){m_col = HeeksColor(a->IntValue());}
+		if(name == "col"){
+			std::string coltype(a->Value());
+			for(int i = 0; i<MaxTextColorTypes; i++)
+			{
+				if(coltype == CNCCode::m_text_colors_str[i])
+				{
+					m_color_type = (TextColorEnum)i;
+					break;
+				}
+			}
+		}
 		else if(name == "str"){m_str = wxString(Ctt(a->Value()));}
 	}
 }
@@ -51,7 +63,7 @@ void threedoubles::ReadFromXMLElement(TiXmlElement* pElem)
 
 void ColouredLineStrips::glCommands()
 {
-	m_col.glColor();
+	CNCCode::m_lines_colors[m_color_type].glColor();
 	glBegin(GL_LINE_STRIP);
 	for(std::list< threedoubles >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
@@ -76,7 +88,7 @@ void ColouredLineStrips::WriteXML(TiXmlElement *root)
 	element = new TiXmlElement( "lines" );
 	root->LinkEndChild( element ); 
 
-	element->SetAttribute("col", m_col.COLORREF_color());
+	element->SetAttribute("col", CNCCode::m_lines_colors_str[m_color_type].c_str());
 	for(std::list< threedoubles >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
 		threedoubles &td = *It;
@@ -90,7 +102,17 @@ void ColouredLineStrips::ReadFromXMLElement(TiXmlElement* element)
 	for(TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
 	{
 		std::string name(a->Name());
-		if(name == "col"){m_col = HeeksColor(a->IntValue());}
+		if(name == "col"){
+			std::string coltype(a->Value());
+			for(int i = 0; i<MaxTextColorTypes; i++)
+			{
+				if(coltype == CNCCode::m_lines_colors_str[i])
+				{
+					m_color_type = (LinesColorEnum)i;
+					break;
+				}
+			}
+		}
 	}
 
 	// loop through all the objects
@@ -186,7 +208,8 @@ void CNCCodeBlock::AppendTextCtrl(wxTextCtrl *textCtrl)
 	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
 	{
 		ColouredText &text = *It;
-		wxColour c(text.m_col.red, text.m_col.green, text.m_col.blue);
+		HeeksColor &col = CNCCode::m_text_colors[text.m_color_type];
+		wxColour c(col.red, col.green, col.blue);
 		textCtrl->SetDefaultStyle(wxTextAttr(c));
 		textCtrl->AppendText(text.m_str);
 	}
@@ -194,6 +217,30 @@ void CNCCodeBlock::AppendTextCtrl(wxTextCtrl *textCtrl)
 }
 
 long CNCCode::pos = 0;
+
+HeeksColor CNCCode::m_text_colors[MaxTextColorTypes] = {
+	HeeksColor(0, 0, 0),
+	HeeksColor(0, 255, 0),
+	HeeksColor(0, 0, 255),
+	HeeksColor(255, 0, 0)
+};
+
+std::string CNCCode::m_text_colors_str[MaxTextColorTypes] = {
+	std::string("default"), // won't get written
+	std::string("block"),
+	std::string("prep"),
+	std::string("axis")
+};
+
+HeeksColor CNCCode::m_lines_colors[MaxLinesColorType] = {
+	HeeksColor(255, 0, 0),
+	HeeksColor(0, 255, 0)
+};
+	
+std::string CNCCode::m_lines_colors_str[MaxLinesColorType] = {
+	std::string("rapid"),
+	std::string("feed")
+};
 
 CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL){}
 

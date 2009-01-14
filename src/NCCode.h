@@ -10,11 +10,25 @@
 #include "../../interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
 
+enum TextColorEnum{
+	TextColorDefaultType,
+	TextColorBlockType,
+	TextColorPrepType,
+	TextColorAxisType,
+	MaxTextColorTypes
+};
+
+enum LinesColorEnum{
+	LinesColorRapidType,
+	LinesColorFeedType,
+	MaxLinesColorType
+};
+
 class ColouredText
 {
 public:
 	wxString m_str;
-	HeeksColor m_col;
+	TextColorEnum m_color_type;
 
 	void WriteXML(TiXmlElement *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -30,7 +44,7 @@ public:
 class ColouredLineStrips
 {
 public:
-	HeeksColor m_col;
+	LinesColorEnum m_color_type;
 	std::list< threedoubles > m_points;
 
 	void glCommands();
@@ -63,6 +77,10 @@ class CNCCode:public HeeksObj
 {
 public:
 	static long pos; // used for setting the CNCCodeBlock objects' m_from_pos and m_to_pos
+	static HeeksColor m_text_colors[MaxTextColorTypes];
+	static HeeksColor m_lines_colors[MaxLinesColorType];
+	static std::string m_text_colors_str[MaxTextColorTypes];
+	static std::string m_lines_colors_str[MaxLinesColorType];
 	std::list<CNCCodeBlock*> m_blocks;
 	int m_gl_list;
 	CBox m_box;
