@@ -12,16 +12,19 @@ void ColouredText::WriteXML(TiXmlElement *root)
 	element = new TiXmlElement( "text" );
 	root->LinkEndChild( element ); 
 
-	element->SetAttribute("str", m_str);
+	// add actual text as a child object
+    TiXmlText* text = new TiXmlText(m_str);
+    element->LinkEndChild(text);
+
 	if(m_color_type != TextColorDefaultType)element->SetAttribute("col", CNCCode::m_text_colors_str[m_color_type].c_str());
 }
 
-void ColouredText::ReadFromXMLElement(TiXmlElement* pElem)
+void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 {
 	m_color_type = TextColorDefaultType;
 
 	// get the attributes
-	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
+	for(TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
 	{
 		std::string name(a->Name());
 		if(name == "col"){
@@ -35,8 +38,10 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* pElem)
 				}
 			}
 		}
-		else if(name == "str"){m_str = wxString(Ctt(a->Value()));}
 	}
+
+	// get the text
+	m_str = wxString(Ctt(element->GetText()));
 }
 
 void threedoubles::WriteXML(TiXmlElement *root)
