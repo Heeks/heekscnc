@@ -1,5 +1,9 @@
 // PythonStuff.cpp
+
+#ifdef WIN32
 #include "windows.h"
+#endif
+
 #include "PythonStuff.h"
 #include "geometry/geometry.h"
 #include <set>
@@ -34,6 +38,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	return TRUE;
 }
 
+#endif
+
  namespace geoff_geometry{
 
       int   UNITS = MM;
@@ -57,8 +63,6 @@ const wchar_t* getMessage(const wchar_t* original){return original;}
 void FAILURE(const wchar_t* str){throw(str);}
 void FAILURE(const std::wstring& str){throw(str);}
 }
-
-#endif
 
 std::set<Kurve*> valid_kurves;
 
