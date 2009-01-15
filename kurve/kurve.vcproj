@@ -181,10 +181,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\dllmain.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\geometry\Finite.cpp"
 				>
 			</File>
