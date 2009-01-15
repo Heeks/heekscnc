@@ -1,4 +1,4 @@
-#summary Using HeeksCNC
+#summary Using HeeksCNC 0.4
 
 = An example =
 Make sure the "Program" and "Output" windows are visible ( switch them on from the "View" menu ).
