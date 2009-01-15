@@ -5,10 +5,59 @@
 #include <set>
 #if _DEBUG
 #undef _DEBUG
-#include <python.h>
+#include <Python.h>
 #define _DEBUG
 #else
-#include <python.h>
+#include <Python.h>
+#endif
+
+
+#ifdef WIN32
+
+BOOL APIENTRY DllMain( HMODULE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved
+					 )
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		break;
+
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+		break;
+
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	return TRUE;
+}
+
+ namespace geoff_geometry{
+
+      int   UNITS = MM;
+
+      double TOLERANCE = 1.0e-06;
+
+      double TOLERANCE_SQ = TOLERANCE * TOLERANCE;
+
+      double TIGHT_TOLERANCE = 1.0e-09;
+
+      double UNIT_VECTOR_TOLERANCE = 1.0e-10;
+
+      double RESOLUTION = 1.0e-06;
+
+}
+
+// dummy functions
+namespace p4c {
+const wchar_t* getMessage(const wchar_t* original, int messageGroup, int stringID){return original;}
+const wchar_t* getMessage(const wchar_t* original){return original;}
+void FAILURE(const wchar_t* str){throw(str);}
+void FAILURE(const std::wstring& str){throw(str);}
+}
+
 #endif
 
 std::set<Kurve*> valid_kurves;
