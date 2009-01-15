@@ -52,6 +52,10 @@ class Creator:
         """End the program"""
         pass
 
+    def flush_nc(self):
+        """Flush all pending codes"""
+        pass
+
     ############################################################################
     ##  Subprograms
     
@@ -133,6 +137,10 @@ class Creator:
     
     def feedrate(self, f):
         """Set the feedrate"""
+        pass
+
+    def feedrate_hv(self, fh, fv):
+        """Set the horizontal and vertical feedrates"""
         pass
 
     def spindle(self, s):
@@ -242,6 +250,9 @@ def program_stop(optional=False):
 def program_end():
     creator.program_end()
 
+def flush_nc():
+    creator.flush_nc()
+
 ############################################################################
 ##  Subprograms
 
@@ -307,6 +318,9 @@ def workplane(id):
 
 def feedrate(f):
     creator.feedrate(f)
+
+def feedrate_hv(fh, fv):
+    creator.feedrate_hv(fh, fv)
 
 def spindle(s):
     creator.spindle(s)

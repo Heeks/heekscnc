@@ -6,6 +6,7 @@
 # Hirutso Enni, 2009-01-13
 
 import nc
+import math
 
 ################################################################################
 class CreatorIso(nc.Creator):
@@ -13,12 +14,25 @@ class CreatorIso(nc.Creator):
     def __init__(self):
         nc.Creator.__init__(self)
 
+        self.a = 0
+        self.b = 0
+        self.c = 0
         self.f = ''
+        self.fh = None
+        self.fv = None
+        self.fhv = False
         self.g = ''
+        self.i = 0
+        self.j = 0
+        self.k = 0
         self.m = []
-        self.s = ''
-
         self.n = 10
+        self.r = 0
+        self.s = ''
+        self.t = None
+        self.x = 0
+        self.y = 0
+        self.z = 500
 
     ############################################################################
     ##  Internals
@@ -39,8 +53,8 @@ class CreatorIso(nc.Creator):
         self.n += 10
 
     def write_spindle(self):
-        self.write(self.f)
-        self.f = ''
+        self.write(self.s)
+        self.s = ''
 
     ############################################################################
     ##  Programs
@@ -57,6 +71,12 @@ class CreatorIso(nc.Creator):
     def program_end(self):
         self.write_blocknum()
         self.write('M02\n')
+
+    def flush_nc(self):
+        self.write_blocknum()
+        self.write_preps()
+        self.write_misc()
+        self.write('\n')
 
     ############################################################################
     ##  Subprograms
@@ -129,10 +149,23 @@ class CreatorIso(nc.Creator):
     ##  Rates + Modes
 
     def feedrate(self, f):
-        self.f = ' F' + str(f)
+        self.f = ' F%.3f' % f
+        self.fhv = False
+
+    def feedrate_hv(self, fh, fv):
+        self.fh = fh
+        self.fv = fv
+        self.fhv = True
+
+    def calc_feedrate_hv(self, h, v):
+        l = math.sqrt(h*h+v*v)
+        if (h == 0) : self.f = ' F%.3f' % self.fv
+        elif (v == 0) : self.f = ' F%.3f' % self.fh
+        else:
+            self.f = ' F%.3f' % (self.fh * l * min([1/h, 1/v]))
 
     def spindle(self, s):
-        self.s = ' S' + str(s)
+        self.s = ' S%.3f' % s
 
     def coolant(self, mode=0):
         if (mode == 0) : self.m.append(' M09')
@@ -148,18 +181,26 @@ class CreatorIso(nc.Creator):
 
     ############################################################################
     ##  Moves
-    
+
     def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
         self.write_blocknum()
         self.write('G00')
         self.write_preps()
-        if (x != None) : self.write(' X' + str(x))
-        if (y != None) : self.write(' Y' + str(y))
-        if (z != None) : self.write(' Z' + str(z))
-        if (a != None) : self.write(' A' + str(a))
-        if (b != None) : self.write(' B' + str(b))
-        if (c != None) : self.write(' C' + str(c))
-        self.write_feedrate()
+        if (x != None):
+            dx = x - self.x
+            self.write(' X%.3f' % x)
+            self.x = x
+        if (y != None):
+            dy = y - self.y
+            self.write(' Y%.3f' % y)
+            self.y = y
+        if (z != None):
+            dz = z - self.z
+            self.write(' Z%.3f' % z)
+            self.z = z
+        if (a != None) : self.write(' A%.3f' % a)
+        if (b != None) : self.write(' B%.3f' % b)
+        if (c != None) : self.write(' C%.3f' % c)
         self.write_spindle()
         self.write_misc()
         self.write('\n')
@@ -168,9 +209,22 @@ class CreatorIso(nc.Creator):
         self.write_blocknum()
         self.write('G01')
         self.write_preps()
-        if (x != None) : self.write(' X' + str(x))
-        if (y != None) : self.write(' Y' + str(y))
-        if (z != None) : self.write(' Z' + str(z))
+        dx = dy = dz = 0
+        if (x != None):
+            dx = x - self.x
+            self.write(' X%.3f' % x)
+            self.x = x
+        if (y != None):
+            dy = y - self.y
+            self.write(' Y%.3f' % y)
+            self.y = y
+        if (z != None):
+            dz = z - self.z
+            self.write(' Z%.3f' % z)
+            self.z = z
+        if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
+        self.write_feedrate()
+        self.write_spindle()
         self.write_misc()
         self.write('\n')
 
@@ -178,13 +232,25 @@ class CreatorIso(nc.Creator):
         self.write_blocknum()
         self.write('G02')
         self.write_preps()
-        if (x != None) : self.write(' X' + str(x))
-        if (y != None) : self.write(' Y' + str(y))
-        if (z != None) : self.write(' Z' + str(z))
-        if (i != None) : self.write(' I' + str(i))
-        if (j != None) : self.write(' J' + str(j))
-        if (k != None) : self.write(' K' + str(k))
-        if (r != None) : self.write(' R' + str(r))
+        if (x != None):
+            dx = x - self.x
+            self.write(' X%.3f' % x)
+            self.x = x
+        if (y != None):
+            dy = y - self.y
+            self.write(' Y%.3f' % y)
+            self.y = y
+        if (z != None):
+            dz = z - self.z
+            self.write(' Z%.3f' % z)
+            self.z = z
+        if (i != None) : self.write(' I%.3f' % i)
+        if (j != None) : self.write(' J%.3f' % j)
+        if (k != None) : self.write(' K%.3f' % k)
+        if (r != None) : self.write(' R%.3f' % r)
+#        if (self.fhv) : self.calc_feedrate_hv(ARC_LENGTH, math.fabs(dz))
+        self.write_feedrate()
+        self.write_spindle()
         self.write_misc()
         self.write('\n')
 
@@ -192,20 +258,29 @@ class CreatorIso(nc.Creator):
         self.write_blocknum()
         self.write('G03')
         self.write_preps()
-        if (x != None) : self.write(' X' + str(x))
-        if (y != None) : self.write(' Y' + str(y))
-        if (z != None) : self.write(' Z' + str(z))
-        if (i != None) : self.write(' I' + str(i))
-        if (j != None) : self.write(' J' + str(j))
-        if (k != None) : self.write(' K' + str(k))
-        if (r != None) : self.write(' R' + str(r))
+        if (x != None):
+            self.write(' X%.3f' % x)
+            self.x = x
+        if (y != None):
+            self.write(' Y%.3f' % y)
+            self.y = y
+        if (z != None):
+            self.write(' Z%.3f' % z)
+            self.z = z
+        if (i != None) : self.write(' I%.3f' % i)
+        if (j != None) : self.write(' J%.3f' % j)
+        if (k != None) : self.write(' K%.3f' % k)
+        if (r != None) : self.write(' R%.3f' % r)
+#        if (self.fhv) : self.calc_feedrate_hv(ARC_LENGTH, math.fabs(dz))
+        self.write_feedrate()
+        self.write_spindle()
         self.write_misc()
         self.write('\n')
 
     def dwell(self, t):
         self.write_blocknum()
         self.write_preps()
-        self.write('G04 P' + str(t))
+        self.write('G04 P%.3f' % t)
         self.write_misc()
         self.write('\n')
 
@@ -247,7 +322,7 @@ class CreatorIso(nc.Creator):
 
     def variable_set(self, id, value):
         self.write_blocknum()
-        self.write('#' + str(id) + '=' + str(value) + '\n')
+        self.write('#' + str(id) + ('=%.3f' % value) + '\n')
 
 ################################################################################
 
