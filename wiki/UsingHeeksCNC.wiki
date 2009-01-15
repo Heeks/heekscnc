@@ -2,7 +2,7 @@
 
 = An example =
 Make sure the "Program" and "Output" windows are visible ( switch them on from the "View" menu ).
-Open the file that comes with HeeksCNC 0.2.0, "sample program.heeks"
+Open the file that comes with HeeksCNC 0.4.0, "sample program.heeks"
 
 
 You can see that there is some text in the program window.
