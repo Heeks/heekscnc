@@ -34,6 +34,9 @@ class CreatorAttach(nc.Creator):
     def program_end(self):
         self.original.program_end()
 
+    def flush_nc(self):
+        self.original.flush_nc()
+
     ############################################################################
     ##  Subprograms
     
@@ -93,6 +96,9 @@ class CreatorAttach(nc.Creator):
 
     def feedrate(self, f):
         self.original.feedrate(f)
+
+    def feedrate_hv(self, fh, fv):
+        self.original.feedrate_hv(fh, fv)
 
     def spindle(self, s):
         self.original.spindle(s)
