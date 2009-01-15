@@ -12,7 +12,7 @@ HeeksCNC must be a sub-folder of HeeksCAD.
 
 On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" window appears, with some text like "dan@dan-desktop:~$" in it.
 
-Type: cd/Desktop/dan/HeeksCAD/src
+Type: cd Desktop/HeeksCAD/src
 
 Then type: make
 
@@ -22,3 +22,9 @@ dan@dan-laptop:~/Desktop/HeeksCAD/HeeksCNC/src$
 
 You can then run HeeksCAD by typing ../../HeeksCAD or:
 On the Ubuntu menu, go to Places->Desktop Then double click on HeeksCAD folder to open it. You will see HeeksCAD with a blue diamond icon. Double click on the blue diamond icon to run HeeksCAD.
+
+You may also need to build kurve.so, if you want to use the Python script to do profile operations.
+To do this, from terminal type cd Desktop/HeeksCAD/HeeksCNC/kurve
+and then type: make
+This will make kurve.so file in the HeeksCNC folder.
+If you make a profile operation from HeeksCNC, it will add "import kurve" into the generated "post.py", this will need the kurve.so to exist.
