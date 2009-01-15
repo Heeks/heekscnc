@@ -13,8 +13,8 @@ void ColouredText::WriteXML(TiXmlElement *root)
 	root->LinkEndChild( element ); 
 
 	// add actual text as a child object
-    TiXmlText* text = new TiXmlText(m_str);
-    element->LinkEndChild(text);
+    	TiXmlText* text = new TiXmlText(Ttc(m_str.c_str()));
+    	element->LinkEndChild(text);
 
 	if(m_color_type != TextColorDefaultType)element->SetAttribute("col", CNCCode::m_text_colors_str[m_color_type].c_str());
 }

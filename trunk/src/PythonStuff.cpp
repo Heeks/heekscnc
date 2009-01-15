@@ -37,7 +37,8 @@ bool HeeksPyPostProcess()
 			wxString batch_file_str = theApp.GetDllFolder() + wxString(_T("/post.bat"));
 			wxExecute(batch_file_str, wxEXEC_SYNC);
 #else
-			long res = wxExecute(wxString(_T("python ")) + batch_file_str, wxEXEC_SYNC);
+			wxString py_file_str = theApp.GetDllFolder() + wxString(_T("/post.py"));
+			wxExecute(wxString(_T("python ")) + py_file_str, wxEXEC_SYNC);
 #endif
 			// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
 			heeksCAD->GetMainFrame()->Raise();
@@ -63,7 +64,8 @@ bool HeeksPyBackplot()
 		wxString batch_file_str = theApp.GetDllFolder() + wxString(_T("/backplot.bat"));
 		wxExecute(batch_file_str, wxEXEC_SYNC);
 #else
-		long res = wxExecute(wxString(_T("python ")) + batch_file_str, wxEXEC_SYNC);
+		wxString py_file_str = theApp.GetDllFolder() + wxString(_T("/backplot.py"));
+		wxExecute(wxString(_T("python ")) + py_file_str, wxEXEC_SYNC);
 #endif
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
 		heeksCAD->GetMainFrame()->Raise();
