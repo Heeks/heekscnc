@@ -7,6 +7,8 @@
 #include "ProgramCanvas.h"
 #include "NCCode.h"
 #include "../../interface/MarkedObject.h"
+#include "../../interface/PropertyString.h"
+#include "Profile.h"
 
 void COperations::WriteXML(TiXmlElement *root)
 {
@@ -26,7 +28,8 @@ HeeksObj* COperations::ReadFromXMLElement(TiXmlElement* pElem)
 
 CProgram::CProgram()
 {
-	m_machine.assign(_T("siegkx1"));
+	m_machine.assign(_T("nc.iso"));
+	m_output_file.assign(_T("test.tap"));
 	m_nc_code = NULL;
 	m_operations = NULL;
 }
@@ -39,6 +42,15 @@ HeeksObj *CProgram::MakeACopy(void)const
 void CProgram::CopyFrom(const HeeksObj* object)
 {
 	operator=(*((CProgram*)object));
+}
+
+static void on_set_machine(const wxChar* value, HeeksObj* object){((CProgram*)object)->m_machine = value;}
+static void on_set_output_file(const wxChar* value, HeeksObj* object){((CProgram*)object)->m_output_file = value;}
+
+void CProgram::GetProperties(std::list<Property *> *list)
+{
+	list->push_back(new PropertyString(_("machine"), m_machine, this, on_set_machine));
+	list->push_back(new PropertyString(_("output file"), m_output_file, this, on_set_output_file));
 }
 
 bool CProgram::CanAdd(HeeksObj* object)
@@ -115,3 +127,55 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	return new_object;
 }
 
+void CProgram::RewritePythonProgram()
+{
+	theApp.m_program_canvas->m_textCtrl->Clear();
+
+	bool profile_op_exists = false;
+	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
+	{
+		if(object->GetType() == ProfileType)
+		{
+			profile_op_exists = true;
+			break;
+		}
+	}
+
+	// add standard stuff at the top
+
+	// kurve related things
+	if(profile_op_exists)
+	{
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import kurve\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import stdops\n"));
+	}
+
+	// machine general stuff
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("from nc.nc import *\n"));
+
+	// specific machine
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("import ") + m_machine + _T("\n"));
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+
+	// output file
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("output('") + m_output_file + _T("')\n"));
+
+	// begin program
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("program_begin(123, 'Test program')\n"));
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("absolute()\n"));
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("metric()\n"));
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("set_plane(0)\n"));
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+
+	// write the operations
+	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
+	{
+		switch(object->GetType())
+		{
+		case ProfileType:
+			((CProfile*)object)->AppendTextToProgram();
+			break;
+		}
+	}
+
+}
