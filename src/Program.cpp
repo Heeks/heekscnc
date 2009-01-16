@@ -26,7 +26,7 @@ HeeksObj* COperations::ReadFromXMLElement(TiXmlElement* pElem)
 
 CProgram::CProgram()
 {
-	m_machine.assign("siegkx1");
+	m_machine.assign(_T("siegkx1"));
 	m_nc_code = NULL;
 	m_operations = NULL;
 }
@@ -72,8 +72,8 @@ void CProgram::WriteXML(TiXmlElement *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "Program" );
 	root->LinkEndChild( element );  
-	element->SetAttribute("machine", m_machine.c_str());
-	element->SetAttribute("output_file", m_output_file.c_str());
+	element->SetAttribute("machine", Ttc(m_machine.c_str()));
+	element->SetAttribute("output_file", Ttc(m_output_file.c_str()));
 	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
 
 	WriteBaseXML(element);
