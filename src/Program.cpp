@@ -51,6 +51,7 @@ void CProgram::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyString(_("machine"), m_machine, this, on_set_machine));
 	list->push_back(new PropertyString(_("output file"), m_output_file, this, on_set_output_file));
+	HeeksObj::GetProperties(list);
 }
 
 bool CProgram::CanAdd(HeeksObj* object)
