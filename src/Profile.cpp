@@ -7,6 +7,7 @@
 #include "ProgramCanvas.h"
 #include "../../interface/HeeksObj.h"
 #include "../../interface/PropertyDouble.h"
+#include "../../interface/PropertyChoice.h"
 #include "../../tinyxml/tinyxml.h"
 
 void CProfileParams::set_initial_values()
@@ -19,6 +20,7 @@ void CProfileParams::set_initial_values()
 	config.Read(_T("ProfileHorizFeed"), &m_horizontal_feed_rate, 100.0);
 	config.Read(_T("ProfileVertFeed"), &m_vertical_feed_rate, 100.0);
 	config.Read(_T("ProfileSpindleSpeed"), &m_spindle_speed, 7000);
+	config.Read(_T("ProfileToolOnSide"), &m_tool_on_side, 1);
 }
 
 void CProfileParams::write_values_to_config()
@@ -31,6 +33,7 @@ void CProfileParams::write_values_to_config()
 	config.Write(_T("ProfileHorizFeed"), m_horizontal_feed_rate);
 	config.Write(_T("ProfileVertFeed"), m_vertical_feed_rate);
 	config.Write(_T("ProfileSpindleSpeed"), m_spindle_speed);
+	config.Write(_T("ProfileToolOnSide"), m_tool_on_side);
 }
 
 static void on_set_tool_diameter(double value, HeeksObj* object){((CProfile*)object)->m_params.m_tool_diameter = value;}
@@ -40,6 +43,20 @@ static void on_set_rapid_down_to_height(double value, HeeksObj* object){((CProfi
 static void on_set_horizontal_feed_rate(double value, HeeksObj* object){((CProfile*)object)->m_params.m_horizontal_feed_rate = value;}
 static void on_set_vertical_feed_rate(double value, HeeksObj* object){((CProfile*)object)->m_params.m_vertical_feed_rate = value;}
 static void on_set_spindle_speed(double value, HeeksObj* object){((CProfile*)object)->m_params.m_spindle_speed = value;}
+static void on_set_tool_on_side(int value, HeeksObj* object){
+	switch(value)
+	{
+	case 0:
+		((CProfile*)object)->m_params.m_tool_on_side = 1;
+		break;
+	case 1:
+		((CProfile*)object)->m_params.m_tool_on_side = -1;
+		break;
+	default:
+		((CProfile*)object)->m_params.m_tool_on_side = 0;
+		break;
+	}
+}
 
 void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
 {
@@ -50,6 +67,16 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 	list->push_back(new PropertyDouble(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
 	list->push_back(new PropertyDouble(_("vertical feed rate"), m_vertical_feed_rate, parent, on_set_vertical_feed_rate));
 	list->push_back(new PropertyDouble(_("spindle speed"), m_spindle_speed, parent, on_set_spindle_speed));
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("Left"));
+		choices.push_back(_("Right"));
+		choices.push_back(_("On"));
+		int choice = 0;
+		if(m_tool_on_side == -1)choice = 1;
+		else if(m_tool_on_side == 0)choice = 2;
+		list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
+	}
 }
 
 void CProfileParams::WriteXMLAttributes(TiXmlElement *root)
@@ -120,6 +147,8 @@ static void WriteSketchDefn(HeeksObj* sketch)
 			}
 		}
 	}
+
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 }
 
 void CProfile::AppendTextToProgram()
@@ -153,7 +182,7 @@ void CProfile::AppendTextToProgram()
 				side_string = _T("on");
 				break;
 			}
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("profile(k%d, '%s', tool_diameter/2, clearance, rapid_down_to_height, final_depth)\n"), sketch, side_string.c_str()));
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.profile(k%d, '%s', tool_diameter/2, clearance, rapid_down_to_height, final_depth)\n"), sketch, side_string.c_str()));
 		}
 	}
 }

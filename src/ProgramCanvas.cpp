@@ -56,6 +56,12 @@ static void OnProfile(wxCommandEvent& event)
 	heeksCAD->Mark(new_object);
 }
 
+static void OnPython(wxCommandEvent& event)
+{
+	// create the Python program
+	theApp.m_program->RewritePythonProgram();
+}
+
 static void OnPostProcess(wxCommandEvent& event)
 {
 	bool pp_success = HeeksPyPostProcess();
@@ -74,6 +80,7 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
 
 	// add toolbar buttons
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Profile"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/opprofile.png"), wxBITMAP_TYPE_PNG), _T("Cut around selected sketches"), OnProfile);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Python"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/python.png"), wxBITMAP_TYPE_PNG), _T("Create Python program from the objects"), OnPython);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/postprocess.png"), wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);
 
 	m_toolBar->Realize();
