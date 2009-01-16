@@ -40,6 +40,7 @@ public:
 	wxString GetIcon(){return _T("../HeeksCNC/icons/program");}
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
+	void GetProperties(std::list<Property *> *list);
 	void WriteXML(TiXmlElement *root);
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
@@ -50,4 +51,6 @@ public:
 	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+
+	void RewritePythonProgram();
 };
