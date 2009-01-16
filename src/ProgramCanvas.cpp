@@ -25,13 +25,13 @@ END_EVENT_TABLE()
 static void OnProfile(wxCommandEvent& event)
 {
 	// check for at least one sketch selected
-	std::list<HeeksObj*> sketches;
+	std::list<int> sketches;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if(object->GetType() == SketchType)sketches.push_back(object);
+		if(object->GetType() == SketchType)sketches.push_back(object->m_id);
 	}
 
 	// if no selected sketches, 
@@ -40,7 +40,7 @@ static void OnProfile(wxCommandEvent& event)
 		// use all the sketches in the drawing
 		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
 		{
-			if(object->GetType() == SketchType)sketches.push_back(object);
+			if(object->GetType() == SketchType)sketches.push_back(object->m_id);
 		}
 	}
 
@@ -50,11 +50,10 @@ static void OnProfile(wxCommandEvent& event)
 		return;
 	}
 
-	CProfile profile(sketches);
-	if(profile.DoDialog() == wxID_OK)
-	{
-		profile.AppendTextToProgram();
-	}
+	CProfile *new_object = new CProfile(sketches);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
 }
 
 static void OnPostProcess(wxCommandEvent& event)

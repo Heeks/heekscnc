@@ -9,24 +9,35 @@
 
 class CNCCode;
 
+class COperations: public ObjList{
+	static wxIcon* m_icon;
+public:
+	// HeeksObj's virtual functions
+	bool OneOfAKind(){return true;}
+	int GetType()const{return OperationsType;}
+	const wxChar* GetTypeString(void)const{return _("Operations");}
+	HeeksObj *MakeACopy(void)const{ return new COperations(*this);}
+	wxString GetIcon(){return _T("../HeeksCNC/icons/operations");}
+	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
+	void WriteXML(TiXmlElement *root);
+
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+};
+
 class CProgram:public ObjList
 {
 public:
-	std::string m_machine;
+	wxString m_machine;
+	wxString m_output_file;
 	CNCCode* m_nc_code;
+	COperations* m_operations;
 
 	CProgram();
-	CProgram(const CProgram &p){operator=(p);}
-	virtual ~CProgram();
-
-	const CProgram &operator=(const CProgram &p);
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("Program");}
 	wxString GetIcon(){return _T("../HeeksCNC/icons/program");}
-	void GetProperties(std::list<Property *> *list);
-	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlElement *root);
