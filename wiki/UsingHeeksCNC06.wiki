@@ -16,3 +16,4 @@ If the user edits the NC file, these edits can not be passed back up to the Pyth
 If the user edits the Python program, these edits can not be passed back up to the graphical objects.
 
 http://code.google.com/images/code_sm.png
+http://1.bp.blogspot.com/_ZnQO9nI8DrY/SWyo-ALeTCI/AAAAAAAAAGE/0UvjfD5Zm7Q/S220/Gallery_Roman.jpg
