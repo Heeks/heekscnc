@@ -15,4 +15,4 @@ The NC code is then backplotted ( yet more Python script ), so the toolpath can 
 If the user edits the NC file, these edits can not be passed back up to the Python program.
 If the user edits the Python program, these edits can not be passed back up to the graphical objects.
 
-test.png
+http://code.google.com/p/heekscnc/source/browse/wiki/test.png
