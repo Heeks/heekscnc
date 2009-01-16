@@ -1,5 +1,10 @@
 // Profile.h
 
+#include "../../interface/HeeksObj.h"
+#include "HeeksCNCTypes.h"
+
+class CProfile;
+
 class CProfileParams{
 public:
 	double m_tool_diameter;
@@ -13,37 +18,32 @@ public:
 
 	void set_initial_values();
 	void write_values_to_config();
+	void GetProperties(CProfile* parent, std::list<Property *> *list);
+	void WriteXMLAttributes(TiXmlElement* pElem);
+	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
-class CProfile{
+class CProfile: public HeeksObj{
 public:
-	std::list<HeeksObj*> m_sketches;
+	std::list<int> m_sketches;
 	CProfileParams m_params;
 
-	CProfile(const std::list<HeeksObj*> &sketches):m_sketches(sketches){m_params.set_initial_values();}
+	CProfile(){}
+	CProfile(const std::list<int> &sketches):m_sketches(sketches){m_params.set_initial_values();}
 
-	int DoDialog();
+	// HeeksObj's virtual functions
+	int GetType()const{return ProfileType;}
+	const wxChar* GetTypeString(void)const{return _T("Profile");}
+	void glCommands(bool select, bool marked, bool no_color);
+	wxString GetIcon(){return _T("../HeeksCNC/icons/profile");}
+	void GetProperties(std::list<Property *> *list);
+	HeeksObj *MakeACopy(void)const;
+	void CopyFrom(const HeeksObj* object);
+	void WriteXML(TiXmlElement *root);
+	bool CanAddTo(HeeksObj* owner);
+
+	//int DoDialog();
 	void AppendTextToProgram();
-};
 
-class CProfileDialog: public wxDialog{
-public:
-	CProfile* m_profile;
-    wxPanel *m_panel;
-	wxTextCtrl* m_diameter_text_ctrl;
-	wxComboBox* m_tool_on_side_combo;
-	wxTextCtrl* m_clearance_text_ctrl;
-	wxTextCtrl* m_final_depth_text_ctrl;
-	wxTextCtrl* m_rapid_down_text_ctrl;
-	wxTextCtrl* m_horizontal_feed_text_ctrl;
-	wxTextCtrl* m_vertical_feed_text_ctrl;
-	wxTextCtrl* m_spindle_speed_text_ctrl;
-
-	CProfileDialog(wxWindow *parent, const wxString& title, CProfile& profile);
-
-    void OnButtonOK(wxCommandEvent& event);
-    void OnButtonCancel(wxCommandEvent& event);
-
-private:
-	DECLARE_EVENT_TABLE()
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
