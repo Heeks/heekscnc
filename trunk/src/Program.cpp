@@ -8,30 +8,27 @@
 #include "NCCode.h"
 #include "../../interface/MarkedObject.h"
 
+void COperations::WriteXML(TiXmlElement *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "Operations" );
+	root->LinkEndChild( element );  
+	WriteBaseXML(element);
+}
+
+//static
+HeeksObj* COperations::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	COperations* new_object = new COperations;
+	new_object->ReadBaseXML(pElem);
+	return new_object;
+}
+
 CProgram::CProgram()
 {
 	m_machine.assign("siegkx1");
 	m_nc_code = NULL;
-}
-
-CProgram::~CProgram()
-{
-}
-
-const CProgram &CProgram::operator=(const CProgram &p)
-{
-	m_machine = p.m_machine;
-	return *this;
-}
-
-void CProgram::GetProperties(std::list<Property *> *list)
-{
-	HeeksObj::GetProperties(list);
-}
-
-void CProgram::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
-{
-	HeeksObj::GetTools(t_list, p);
+	m_operations = NULL;
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
@@ -46,7 +43,7 @@ void CProgram::CopyFrom(const HeeksObj* object)
 
 bool CProgram::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == NCCodeType;
+	return object->GetType() == NCCodeType || object->GetType() == OperationsType;
 }
 
 bool CProgram::CanAddTo(HeeksObj* owner)
@@ -76,6 +73,7 @@ void CProgram::WriteXML(TiXmlElement *root)
 	element = new TiXmlElement( "Program" );
 	root->LinkEndChild( element );  
 	element->SetAttribute("machine", m_machine.c_str());
+	element->SetAttribute("output_file", m_output_file.c_str());
 	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
 
 	WriteBaseXML(element);
@@ -84,12 +82,16 @@ void CProgram::WriteXML(TiXmlElement *root)
 bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 {
 	if(object->GetType() == NCCodeType)m_nc_code = (CNCCode*)object;
+	if(object->GetType() == OperationsType)m_operations = (COperations*)object;
 	return ObjList::Add(object, prev_object);
 }
 
 void CProgram::Remove(HeeksObj* object)
 {
+	 // these shouldn't happen, though
 	if(object == m_nc_code)m_nc_code = NULL;
+	else if(object == m_operations)m_operations = NULL;
+
 	ObjList::Remove(object);
 }
 
@@ -102,7 +104,8 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
 	{
 		std::string name(a->Name());
-		if(name == "machine"){new_object->m_machine.assign(a->Value());}
+		if(name == "machine"){new_object->m_machine.assign(Ctt(a->Value()));}
+		else if(name == "output_file"){new_object->m_output_file.assign(Ctt(a->Value()));}
 		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(Ctt(a->Value()));}
 	}
 

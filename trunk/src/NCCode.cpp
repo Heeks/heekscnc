@@ -171,7 +171,7 @@ void CNCCodeBlock::WriteXML(TiXmlElement *root)
 		line_strip.WriteXML(element);
 	}
 
-	//WriteBaseXML(element); // write HeeksObj::m_id
+	WriteBaseXML(element);
 }
 
 // static 
@@ -203,7 +203,7 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 
 	new_object->m_to_pos = CNCCode::pos;
 
-	//HeeksObj::ReadBaseXML(element); // read HeeksObj::m_id
+	new_object->ReadBaseXML(element);
 
 	return new_object;
 }
@@ -349,7 +349,7 @@ void CNCCode::WriteXML(TiXmlElement *root)
 		block->WriteXML(element);
 	}
 
-	//WriteBaseXML(element); // write HeeksObj::m_id
+	WriteBaseXML(element);
 }
 
 bool CNCCode::CanAdd(HeeksObj* object)
@@ -397,7 +397,7 @@ HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 		}
 	}
 
-	//HeeksObj::ReadBaseXML(element); // read HeeksObj::m_id
+	new_object->ReadBaseXML(element);
 
 	new_object->SetTextCtrl(theApp.m_output_canvas->m_textCtrl);
 

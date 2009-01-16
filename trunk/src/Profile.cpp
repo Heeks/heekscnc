@@ -6,6 +6,8 @@
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "../../interface/HeeksObj.h"
+#include "../../interface/PropertyDouble.h"
+#include "../../tinyxml/tinyxml.h"
 
 void CProfileParams::set_initial_values()
 {
@@ -31,10 +33,53 @@ void CProfileParams::write_values_to_config()
 	config.Write(_T("ProfileSpindleSpeed"), m_spindle_speed);
 }
 
-int CProfile::DoDialog()
+static void on_set_tool_diameter(double value, HeeksObj* object){((CProfile*)object)->m_params.m_tool_diameter = value;}
+static void on_set_clearance_height(double value, HeeksObj* object){((CProfile*)object)->m_params.m_clearance_height = value;}
+static void on_set_final_depth(double value, HeeksObj* object){((CProfile*)object)->m_params.m_final_depth = value;}
+static void on_set_rapid_down_to_height(double value, HeeksObj* object){((CProfile*)object)->m_params.m_rapid_down_to_height = value;}
+static void on_set_horizontal_feed_rate(double value, HeeksObj* object){((CProfile*)object)->m_params.m_horizontal_feed_rate = value;}
+static void on_set_vertical_feed_rate(double value, HeeksObj* object){((CProfile*)object)->m_params.m_vertical_feed_rate = value;}
+static void on_set_spindle_speed(double value, HeeksObj* object){((CProfile*)object)->m_params.m_spindle_speed = value;}
+
+void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
 {
-	CProfileDialog dlg(heeksCAD->GetMainFrame(), _("Profile Cut"), *this);
-	return dlg.ShowModal();
+	list->push_back(new PropertyDouble(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
+	list->push_back(new PropertyDouble(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
+	list->push_back(new PropertyDouble(_("final depth"), m_final_depth, parent, on_set_final_depth));
+	list->push_back(new PropertyDouble(_("rapid down to height"), m_rapid_down_to_height, parent, on_set_rapid_down_to_height));
+	list->push_back(new PropertyDouble(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
+	list->push_back(new PropertyDouble(_("vertical feed rate"), m_vertical_feed_rate, parent, on_set_vertical_feed_rate));
+	list->push_back(new PropertyDouble(_("spindle speed"), m_spindle_speed, parent, on_set_spindle_speed));
+}
+
+void CProfileParams::WriteXMLAttributes(TiXmlElement *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "params" );
+	root->LinkEndChild( element );  
+	element->SetAttribute("toold", m_tool_diameter);
+	element->SetAttribute("clear", m_clearance_height);
+	element->SetAttribute("depth", m_final_depth);
+	element->SetAttribute("r", m_rapid_down_to_height);
+	element->SetAttribute("hfeed", m_horizontal_feed_rate);
+	element->SetAttribute("vfeed", m_vertical_feed_rate);
+	element->SetAttribute("spin", m_spindle_speed);
+}
+
+void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	// get the attributes
+	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
+	{
+		std::string name(a->Name());
+		if(name == "toold"){m_tool_diameter = a->DoubleValue();}
+		else if(name == "clear"){m_clearance_height = a->DoubleValue();}
+		else if(name == "depth"){m_final_depth = a->DoubleValue();}
+		else if(name == "r"){m_rapid_down_to_height = a->DoubleValue();}
+		else if(name == "hfeed"){m_horizontal_feed_rate = a->DoubleValue();}
+		else if(name == "vfeed"){m_vertical_feed_rate = a->DoubleValue();}
+		else if(name == "spin"){m_spindle_speed = a->DoubleValue();}
+	}
 }
 
 static void WriteSketchDefn(HeeksObj* sketch)
@@ -86,165 +131,110 @@ void CProfile::AppendTextToProgram()
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("spindle(%g)\n"), m_params.m_spindle_speed));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("feedrate(%g)\n"), m_params.m_horizontal_feed_rate));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool_change(1)\n")));
-	for(std::list<HeeksObj*>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
-		HeeksObj* sketch = *It;
+		int sketch = *It;
 
 		// write a kurve definition
-		WriteSketchDefn(sketch);
-		wxString side_string;
-		switch(m_params.m_tool_on_side)
+		HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
+		if(object)
 		{
-		case 1:
-			side_string = _T("left");
-			break;
-		case -1:
-			side_string = _T("right");
-			break;
-		default:
-			side_string = _T("on");
-			break;
+			WriteSketchDefn(object);
+			wxString side_string;
+			switch(m_params.m_tool_on_side)
+			{
+			case 1:
+				side_string = _T("left");
+				break;
+			case -1:
+				side_string = _T("right");
+				break;
+			default:
+				side_string = _T("on");
+				break;
+			}
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("profile(k%d, '%s', tool_diameter/2, clearance, rapid_down_to_height, final_depth)\n"), sketch, side_string.c_str()));
 		}
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("profile(k%d, '%s', tool_diameter/2, clearance, rapid_down_to_height, final_depth)\n"), sketch->m_id, side_string.c_str()));
 	}
 }
 
-BEGIN_EVENT_TABLE( CProfileDialog, wxDialog )
-EVT_BUTTON( wxID_OK, CProfileDialog::OnButtonOK )
-EVT_BUTTON( wxID_CANCEL, CProfileDialog::OnButtonCancel )
-END_EVENT_TABLE()
-
-CProfileDialog::CProfileDialog(wxWindow *parent, const wxString& title, CProfile& profile):wxDialog(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+void CProfile::glCommands(bool select, bool marked, bool no_color)
 {
-	m_profile = &profile;
-
-    m_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-
-    // create buttons
-    wxButton *button1 = new wxButton(m_panel, wxID_OK);
-    wxButton *button2 = new wxButton(m_panel, wxID_CANCEL);
-
-    wxBoxSizer *mainsizer = new wxBoxSizer( wxVERTICAL );
-
-    wxFlexGridSizer *gridsizer = new wxFlexGridSizer(2, 5, 5);
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Tool diameter")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_diameter_text_ctrl = new wxTextCtrl(m_panel, wxID_ANY, wxString::Format(_T("%g"), m_profile->m_params.m_tool_diameter));
-	gridsizer->Add(m_diameter_text_ctrl, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-    wxString choices[] =
-    {
-        _("Left"),
-        _("Right"),
-        _("On"),
-    };
-
-	int choice = 0;
-	if(m_profile->m_params.m_tool_on_side == -1)choice = 1;
-	else if(m_profile->m_params.m_tool_on_side == 0)choice = 2;
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Tool on side")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_tool_on_side_combo = new wxComboBox( m_panel, wxID_ANY, _T("This"), wxDefaultPosition, wxDefaultSize, 3, choices, wxTE_PROCESS_ENTER);
-	m_tool_on_side_combo->SetSelection(0);
-	gridsizer->Add(m_tool_on_side_combo, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Clearance height")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_clearance_text_ctrl = new wxTextCtrl(m_panel, wxID_ANY, wxString::Format(_T("%g"), m_profile->m_params.m_clearance_height));
-	gridsizer->Add(m_clearance_text_ctrl, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Final depth")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_final_depth_text_ctrl = new wxTextCtrl(m_panel, wxID_ANY, wxString::Format(_T("%g"), m_profile->m_params.m_final_depth));
-	gridsizer->Add(m_final_depth_text_ctrl, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Rapid down to depth")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_rapid_down_text_ctrl = new wxTextCtrl(m_panel, wxID_ANY, wxString::Format(_T("%g"), m_profile->m_params.m_rapid_down_to_height));
-	gridsizer->Add(m_rapid_down_text_ctrl, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Horizontal feedrate")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_horizontal_feed_text_ctrl = new wxTextCtrl(m_panel, wxID_ANY, wxString::Format(_T("%g"), m_profile->m_params.m_horizontal_feed_rate));
-	gridsizer->Add(m_horizontal_feed_text_ctrl, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Vertical feedrate")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_vertical_feed_text_ctrl = new wxTextCtrl(m_panel, wxID_ANY, wxString::Format(_T("%g"), m_profile->m_params.m_vertical_feed_rate));
-	gridsizer->Add(m_vertical_feed_text_ctrl, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-	gridsizer->Add(new wxStaticText(m_panel, wxID_ANY, _("Spindle speed")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
-	m_spindle_speed_text_ctrl = new wxTextCtrl(m_panel, wxID_ANY, wxString::Format(_T("%g"), m_profile->m_params.m_spindle_speed));
-	gridsizer->Add(m_spindle_speed_text_ctrl, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Expand());
-
-	gridsizer->AddGrowableCol(1, 1);
-
-    wxBoxSizer *bottomsizer = new wxBoxSizer( wxHORIZONTAL );
-
-    bottomsizer->Add( button1, 0, wxALL, 10 );
-    bottomsizer->Add( button2, 0, wxALL, 10 );
-
-    mainsizer->Add( gridsizer, wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 10).Expand() );
-    mainsizer->Add( bottomsizer, wxSizerFlags().Align(wxALIGN_CENTER) );
-
-    // tell frame to make use of sizer (or constraints, if any)
-    m_panel->SetAutoLayout( true );
-    m_panel->SetSizer( mainsizer );
-
-#ifndef __WXWINCE__
-    // don't allow frame to get smaller than what the sizers tell ye
-    mainsizer->SetSizeHints( this );
-#endif
-
-    Show(true);
-}
-
-static bool GetNumber(wxTextCtrl* text_ctrl, double *value)
-{
-	if(text_ctrl->GetValue().ToDouble(value))return true;
-	wxMessageBox(_("this must be a number!")); 
-	text_ctrl->SetFocus();
-	return false;
-}
-
-static bool CheckGreaterThanZero(wxTextCtrl* text_ctrl, double value)
-{
-	if(value > 0.000000001)return true;
-	wxMessageBox(_("this must be greater than zero!")); 
-	text_ctrl->SetFocus();
-	return false;
-}
-
-void CProfileDialog::OnButtonOK(wxCommandEvent& event)
-{
-	CProfileParams temp_params;
-
-	if(!GetNumber(m_diameter_text_ctrl, &temp_params.m_tool_diameter))return;
-	if(!CheckGreaterThanZero(m_diameter_text_ctrl, temp_params.m_tool_diameter))return;
-	if(!GetNumber(m_clearance_text_ctrl, &temp_params.m_clearance_height))return;
-	if(!GetNumber(m_final_depth_text_ctrl, &temp_params.m_final_depth))return;
-	if(!GetNumber(m_rapid_down_text_ctrl, &temp_params.m_rapid_down_to_height))return;
-	if(!CheckGreaterThanZero(m_rapid_down_text_ctrl, temp_params.m_rapid_down_to_height))return;
-	if(!GetNumber(m_horizontal_feed_text_ctrl, &temp_params.m_horizontal_feed_rate))return;
-	if(!CheckGreaterThanZero(m_horizontal_feed_text_ctrl, temp_params.m_horizontal_feed_rate))return;
-	if(!GetNumber(m_vertical_feed_text_ctrl, &temp_params.m_vertical_feed_rate))return;
-	if(!CheckGreaterThanZero(m_vertical_feed_text_ctrl, temp_params.m_vertical_feed_rate))return;
-	if(!GetNumber(m_spindle_speed_text_ctrl, &temp_params.m_spindle_speed))return;
-	if(!CheckGreaterThanZero(m_spindle_speed_text_ctrl, temp_params.m_spindle_speed))return;
-	switch(m_tool_on_side_combo->GetSelection())
+	if(marked && !no_color)
 	{
-	case 0:
-		temp_params.m_tool_on_side = 1;
-		break;
-	case 1:
-		temp_params.m_tool_on_side = -1;
-		break;
-	default:
-		temp_params.m_tool_on_side = 0;
-		break;
+		for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+		{
+			int sketch = *It;
+			HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
+			if(object)object->glCommands(false, true, false);
+		}
 	}
-
-	m_profile->m_params = temp_params;
-
-	EndModal(wxID_OK);
 }
 
-void CProfileDialog::OnButtonCancel(wxCommandEvent& event)
+void CProfile::GetProperties(std::list<Property *> *list)
 {
-	EndModal(wxID_CANCEL);
+	m_params.GetProperties(this, list);
+	HeeksObj::GetProperties(list);
+}
+
+HeeksObj *CProfile::MakeACopy(void)const
+{
+	return new CProfile(*this);
+}
+
+void CProfile::CopyFrom(const HeeksObj* object)
+{
+	operator=(*((CProfile*)object));
+}
+
+bool CProfile::CanAddTo(HeeksObj* owner)
+{
+	return owner->GetType() == OperationsType;
+}
+
+void CProfile::WriteXML(TiXmlElement *root)
+{
+	TiXmlElement * element = new TiXmlElement( "Profile" );
+	root->LinkEndChild( element );  
+	m_params.WriteXMLAttributes(element);
+
+	// write sketch ids
+	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+	{
+		int sketch = *It;
+		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
+		element->LinkEndChild( sketch_element );  
+		sketch_element->SetAttribute("id", sketch);
+	}
+
+	WriteBaseXML(element);
+}
+
+// static member function
+HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
+{
+	CProfile* new_object = new CProfile;
+
+	// read sketch ids
+	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	{
+		std::string name(pElem->Value());
+		if(name == "params"){
+			new_object->m_params.ReadFromXMLElement(pElem);
+		}
+		else if(name == "sketch"){
+			for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
+			{
+				std::string name(a->Name());
+				if(name == "id"){
+					int id = a->IntValue();
+					new_object->m_sketches.push_back(id);
+				}
+			}
+		}
+	}
+
+	new_object->ReadBaseXML(element);
+
+	return new_object;
 }

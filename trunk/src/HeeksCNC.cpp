@@ -13,6 +13,7 @@
 #include "OutputCanvas.h"
 #include "CNCConfig.h"
 #include "NCCode.h"
+#include "Profile.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -123,6 +124,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	// add object reading functions
 	heeksCAD->RegisterReadXMLfunction("Program", CProgram::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("nccode", CNCCode::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Operations", COperations::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
 }
 
 void CHeeksCNCApp::OnNewOrOpen(bool open)
@@ -144,6 +147,8 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		// add the program
 		m_program = new CProgram;
 		heeksCAD->GetMainObject()->Add(m_program, NULL);
+		COperations *operations = new COperations;
+		m_program->Add(operations, NULL);
 		heeksCAD->WasAdded(m_program);
 		theApp.m_program_canvas->Clear();
 	}
