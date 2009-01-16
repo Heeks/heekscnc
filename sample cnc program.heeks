@@ -1,27 +1,88 @@
 <?xml version="1.0" ?>
 <HeeksCAD_Document>
-    <Program machine="siegkx1" program="from nc.nc import *&#x0A;import nc.iso&#x0A;from nc.attach import *&#x0A;import kurve&#x0A;import stdops&#x0A;&#x0A;output(&apos;test.tap&apos;)&#x0A;&#x0A;program_begin(123, &apos;Test program&apos;)&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;clearance = 5&#x0A;rapid_down_to_height = 2&#x0A;final_depth = -0.1&#x0A;tool_diameter = 3&#x0A;spindle(7000)&#x0A;feedrate(100)&#x0A;tool_change(1)&#x0A;k1 = kurve.new()&#x0A;kurve.add_point(k1, 0, -41, -5, 0, 0)&#x0A;kurve.add_point(k1, 0, -33, 2, 0, 0)&#x0A;kurve.add_point(k1, 0, -23, 4, 0, 0)&#x0A;kurve.add_point(k1, 0, -15, 5, 0, 0)&#x0A;kurve.add_point(k1, 0, -1, 5, 0, 0)&#x0A;kurve.add_point(k1, 0, 12, 4, 0, 0)&#x0A;stdops.profile(k1, &apos;left&apos;, tool_diameter/2, clearance, rapid_down_to_height, final_depth)&#x0A;&#x0A;rapid_home()&#x0A;&#x0A;program_end()&#x0A;" id="1">
+    <Program machine="nc.iso" output_file="test.tap" program="import kurve&#x0A;import stdops&#x0A;from nc.nc import *&#x0A;import nc.iso&#x0A;&#x0A;output(&apos;test.tap&apos;)&#x0A;program_begin(123, &apos;Test program&apos;)&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;clearance = 5&#x0A;rapid_down_to_height = 2&#x0A;final_depth = -0.1&#x0A;tool_diameter = 3&#x0A;spindle(7000)&#x0A;feedrate(100)&#x0A;tool_change(1)&#x0A;k1 = kurve.new()&#x0A;kurve.add_point(k1, 0, 5, 5, 0, 0)&#x0A;kurve.add_point(k1, 0, 15, 5, 0, 0)&#x0A;kurve.add_point(k1, 0, 15, 15, 0, 0)&#x0A;kurve.add_point(k1, 0, 5, 15, 0, 0)&#x0A;kurve.add_point(k1, 0, 5, 5, 0, 0)&#x0A;&#x0A;stdops.profile(k1, &apos;left&apos;, tool_diameter/2, clearance, rapid_down_to_height, final_depth)&#x0A;">
+        <Operations>
+            <Profile>
+                <params toold="3" clear="5" depth="0" r="2" hfeed="100" vfeed="100" spin="7000" />
+                <sketch id="1" />
+            </Profile>
+        </Operations>
         <nccode>
             <ncblock>
-                <text col="block">N10</text>
-                <text col="prep">G0</text>
-                <text col="axis">X10</text>
-                <text>F100</text>
-                <lines col="rapid">
+                <text>O123 (Test program)</text>
+            </ncblock>
+            <ncblock>
+                <text>N10 T1 M06</text>
+            </ncblock>
+            <ncblock>
+                <text>N20 G00 G90 G21 G17 X0.000 Y0.000 S7000.000</text>
+                <lines col="feed">
                     <p x="0.000000" y="0.000000" z="0.000000" />
-                    <p x="10.000000" y="0.000000" z="0.000000" />
+                    <p x="0.000000" y="0.000000" z="0.000000" />
                 </lines>
             </ncblock>
             <ncblock>
-                <text col="block">N20</text>
-                <text col="prep">G1</text>
-                <text col="axis">X20</text>
-                <text col="axis">Y10</text>
+                <text>N30 G00 Z2.000</text>
                 <lines col="feed">
-                    <p x="10.000000" y="0.000000" z="0.000000" />
-                    <p x="20.000000" y="10.000000" z="0.000000" />
+                    <p x="0.000000" y="0.000000" z="0.000000" />
+                    <p x="0.000000" y="0.000000" z="2.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text>N40 G01 X6.000 Y6.000 F100.000</text>
+                <lines col="feed">
+                    <p x="0.000000" y="0.000000" z="2.000000" />
+                    <p x="6.000000" y="6.000000" z="2.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text>N50 G01 X14.000 Y6.000</text>
+                <lines col="feed">
+                    <p x="6.000000" y="6.000000" z="2.000000" />
+                    <p x="14.000000" y="6.000000" z="2.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text>N60 G01 X14.000 Y14.000</text>
+                <lines col="feed">
+                    <p x="14.000000" y="6.000000" z="2.000000" />
+                    <p x="14.000000" y="14.000000" z="2.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text>N70 G01 X6.000 Y14.000</text>
+                <lines col="feed">
+                    <p x="14.000000" y="14.000000" z="2.000000" />
+                    <p x="6.000000" y="14.000000" z="2.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text>N80 G01 X6.000 Y6.000</text>
+                <lines col="feed">
+                    <p x="6.000000" y="14.000000" z="2.000000" />
+                    <p x="6.000000" y="6.000000" z="2.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text>N90 G01 X0.000 Y0.000</text>
+                <lines col="feed">
+                    <p x="6.000000" y="6.000000" z="2.000000" />
+                    <p x="0.000000" y="0.000000" z="2.000000" />
+                </lines>
+            </ncblock>
+            <ncblock>
+                <text>N100 G00 Z5.000</text>
+                <lines col="feed">
+                    <p x="0.000000" y="0.000000" z="2.000000" />
+                    <p x="0.000000" y="0.000000" z="5.000000" />
                 </lines>
             </ncblock>
         </nccode>
     </Program>
+    <Sketch id="1">
+        <Line col="0" sx="5.000000" sy="5.000000" sz="0.000000" ex="15.000000" ey="5.000000" ez="0.000000" />
+        <Line col="0" sx="15.000000" sy="5.000000" sz="0.000000" ex="15.000000" ey="15.000000" ez="0.000000" />
+        <Line col="0" sx="15.000000" sy="15.000000" sz="0.000000" ex="5.000000" ey="15.000000" ez="0.000000" />
+        <Line col="0" sx="5.000000" sy="15.000000" sz="0.000000" ex="5.000000" ey="5.000000" ez="0.000000" />
+    </Sketch>
 </HeeksCAD_Document>
