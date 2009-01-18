@@ -14,6 +14,7 @@
 #include "CNCConfig.h"
 #include "NCCode.h"
 #include "Profile.h"
+#include "ZigZag.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -126,6 +127,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	heeksCAD->RegisterReadXMLfunction("nccode", CNCCode::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Operations", COperations::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
 }
 
 void CHeeksCNCApp::OnNewOrOpen(bool open)
