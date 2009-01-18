@@ -151,8 +151,8 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		m_program->Add(operations, NULL);
 		heeksCAD->WasAdded(m_program);
 		theApp.m_program_canvas->Clear();
+		theApp.m_output_canvas->Clear();
 	}
-	theApp.m_output_canvas->Clear();
 }
 
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
