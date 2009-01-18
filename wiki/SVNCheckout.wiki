@@ -1,0 +1,12 @@
+#summary Name folder HeeksCNC not heekscnc-read-only
+
+HeeksCNC must be a sub folder of HeeksCAD.
+
+It must be like:
+
+HeeksCAD
+   bitmaps
+   icons
+   HeeksCNC
+      bitmaps
+      icons
