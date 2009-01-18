@@ -15,6 +15,10 @@ public:
 	double m_vertical_feed_rate;
 	double m_spindle_speed;
 	int m_tool_on_side; // -1=right, 0=on, 1=left
+	bool m_auto_roll_on;
+	bool m_auto_roll_off;
+	double m_roll_on_point[3];
+	double m_roll_off_point[3];
 
 	void set_initial_values();
 	void write_values_to_config();

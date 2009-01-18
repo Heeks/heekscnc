@@ -1,5 +1,5 @@
 # just a test to demonstrate how backplotting works
-# this writes an xml file which HeeksCNC will open, and paste into the program
+# this writes an xml file HeeksCNC and paste into the program's operations list
 
 import re # regular expressions
 
@@ -15,7 +15,7 @@ f_in = open(filename)
 
 px = float(0)
 py = float(0)
-pz = float(0)
+pz = float(200) # tool start position
 move_type = 0
 cx = float(0)
 cy = float(0)
