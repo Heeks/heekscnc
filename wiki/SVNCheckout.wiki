@@ -6,12 +6,12 @@ It must be like:
 
 HeeksCAD
 
-   bitmaps
+---bitmaps
 
-   icons
+---icons
 
-   HeeksCNC
+---HeeksCNC
 
-      bitmaps
+------bitmaps
 
-      icons
+------icons
