@@ -9,12 +9,7 @@ class CZigZagParams{
 public:
 	double m_tool_diameter;
 	double m_corner_radius;
-	double m_minx;
-	double m_maxx;
-	double m_miny;
-	double m_maxy;
-	double m_z0;
-	double m_z1;
+	CBox m_box;
 	double m_dx;
 	double m_dy;
 	double m_horizontal_feed_rate;
@@ -22,7 +17,7 @@ public:
 	double m_spindle_speed;
 	int m_direction; // 0 = x, 1 = y
 
-	void set_initial_values();
+	void set_initial_values(const std::list<int> &solids);
 	void write_values_to_config();
 	void GetProperties(CZigZag* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlElement* pElem);
@@ -36,7 +31,7 @@ public:
 	static int number_for_stl_file;
 
 	CZigZag(){}
-	CZigZag(const std::list<int> &solids):m_solids(solids){m_params.set_initial_values();}
+	CZigZag(const std::list<int> &solids):m_solids(solids){m_params.set_initial_values(solids);}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ZigZagType;}
