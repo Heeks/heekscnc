@@ -5,8 +5,13 @@ HeeksCNC must be a sub folder of HeeksCAD.
 It must be like:
 
 HeeksCAD
+
    bitmaps
+
    icons
+
    HeeksCNC
+
       bitmaps
+
       icons
