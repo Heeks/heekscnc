@@ -439,6 +439,14 @@
 			RelativePath="..\..\interface\ToolImage.h"
 			>
 		</File>
+		<File
+			RelativePath=".\ZigZag.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ZigZag.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

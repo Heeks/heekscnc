@@ -35,7 +35,7 @@ END_EVENT_TABLE()
 
 static void OnOpen(wxCommandEvent& event)
 {
-	wxString ext_str(_T("*.tap")); // to do, use the machine's NC extension
+	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
 	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
     wxFileDialog dialog(theApp.m_output_canvas, _("Open NC file"), wxEmptyString, wxEmptyString, wildcard_string);
     dialog.CentreOnParent();
