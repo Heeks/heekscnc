@@ -16,6 +16,9 @@ f_in = open(filename)
 px = float(0)
 py = float(0)
 pz = float(0)
+move_type = 0
+cx = float(0)
+cy = float(0)
 
 while (True):
     line = f_in.readline();
@@ -30,28 +33,52 @@ while (True):
     ny = py
     nz = pz
 
-    x = re.compile("X[-+]?(\d+(\.\d*)?|\.\d+)")
-    m = x.search(line)
+    c = re.compile("X([-+]?(\d+(\.\d*)?|\.\d+))")
+    m = c.search(line)
     if m != None:
         nx = float(m.group(1))
         move_found = True
         
-    y = re.compile("Y[-+]?(\d+(\.\d*)?|\.\d+)")
-    m = y.search(line)
+    c = re.compile("Y([-+]?(\d+(\.\d*)?|\.\d+))")
+    m = c.search(line)
     if m != None:
         ny = float(m.group(1))
         move_found = True
     
-    z = re.compile("Z[-+]?(\d+(\.\d*)?|\.\d+)")
-    m = z.search(line)
+    c = re.compile("Z([-+]?(\d+(\.\d*)?|\.\d+))")
+    m = c.search(line)
     if m != None:
         nz = float(m.group(1))
         move_found = True
+     
+    c = re.compile("I([-+]?(\d+(\.\d*)?|\.\d+))")
+    m = c.search(line)
+    if m != None:
+        cx = float(m.group(1))
+     
+    c = re.compile("J([-+]?(\d+(\.\d*)?|\.\d+))")
+    m = c.search(line)
+    if m != None:
+        cy = float(m.group(1))
+   
+    c = re.compile("G([-+]?(\d+(\.\d*)?|\.\d+))")
+    m = c.search(line)
+    if m != None:
+        g_code = int(m.group(1))
+        if g_code >= 0 or g_code <= 3: move_type = g_code
 
     if move_found:
-        f.write('           <lines col="feed">\n')
-        f.write('               <p x="' + str(px) + '" y="' + str(py) + '" z="' + str(pz) + '0.000000" />\n')
-        f.write('               <p x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '0.000000" />\n')
+        if move_type == 0:
+            f.write('           <lines col="rapid">\n')
+        else:
+            f.write('           <lines col="feed">\n')
+        f.write('               <p x="' + str(px) + '" y="' + str(py) + '" z="' + str(pz) + '" />\n')
+        if move_type == 2 or move_type == 3:
+            arc_str = 'ccw'
+            if move_type == 2: arc_str = 'cw'
+            f.write('               <p type="' + arc_str + ' x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" i="' + str(cx) + '" j="' + str(cy) + '" />\n')
+        else:
+            f.write('               <p x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" />\n')
         f.write('           </lines>\n')
 
     px = nx

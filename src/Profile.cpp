@@ -1,5 +1,4 @@
 // Profile.cpp
-// copyright Dan Heeks from Jan 11th 2009
 
 #include "stdafx.h"
 #include "Profile.h"

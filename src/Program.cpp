@@ -9,6 +9,7 @@
 #include "../../interface/MarkedObject.h"
 #include "../../interface/PropertyString.h"
 #include "Profile.h"
+#include "ZigZag.h"
 
 void COperations::WriteXML(TiXmlElement *root)
 {
@@ -131,14 +132,19 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 void CProgram::RewritePythonProgram()
 {
 	theApp.m_program_canvas->m_textCtrl->Clear();
+	CZigZag::number_for_stl_file = 1;
 
 	bool profile_op_exists = false;
+	bool zigzag_op_exists = false;
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
 		if(object->GetType() == ProfileType)
 		{
 			profile_op_exists = true;
-			break;
+		}
+		else if(object->GetType() == ZigZagType)
+		{
+			zigzag_op_exists = true;
 		}
 	}
 
@@ -149,6 +155,27 @@ void CProgram::RewritePythonProgram()
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import kurve\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import stdops\n"));
+	}
+
+	// pycam stuff
+	if(zigzag_op_exists)
+	{
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'.')\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Geometry import *\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.SphericalCutter import *\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.CylindricalCutter import *\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Gui.Visualization import ShowTestScene\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Importers.TestModel import TestModel\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.PathGenerators.DropCutter import DropCutter\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 	}
 
 	// machine general stuff

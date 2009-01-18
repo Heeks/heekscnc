@@ -7,6 +7,7 @@
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "Profile.h"
+#include "ZigZag.h"
 #include "OutputCanvas.h"
 #include "../../interface/Tool.h"
 #include "../../interface/InputMode.h"
@@ -51,6 +52,40 @@ static void OnProfile(wxCommandEvent& event)
 	}
 
 	CProfile *new_object = new CProfile(sketches);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
+static void OnZigZag(wxCommandEvent& event)
+{
+	// check for at least one solid selected
+	std::list<int> solids;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+	}
+
+	// if no selected solids, 
+	if(solids.size() == 0)
+	{
+		// use all the sketches in the drawing
+		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
+		{
+			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+		}
+	}
+
+	if(solids.size() == 0)
+	{
+		wxMessageBox(_("There are no solids!"));
+		return;
+	}
+
+	CZigZag *new_object = new CZigZag(solids);
 	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
