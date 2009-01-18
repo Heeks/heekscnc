@@ -4,7 +4,7 @@ CCFLAGS=-Wall -fPIC -g -I "./" -I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I
 #WX_LIB_LETTER=d
 WX_LIB_LETTER=u
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o ZigZag.o
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
 
@@ -87,6 +87,9 @@ tinyxmlerror.o: ../../tinyxml/tinyxmlerror.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 tinyxmlparser.o: ../../tinyxml/tinyxmlparser.cpp
+	gcc -c $? ${CCFLAGS} -o $@
+
+ZigZag.o: ZigZag.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 clean:
