@@ -11,23 +11,28 @@
 
 int CZigZag::number_for_stl_file = 1;
 
-void CZigZagParams::set_initial_values()
+void CZigZagParams::set_initial_values(const std::list<int> &solids)
 {
 	CNCConfig config;
 	config.Read(_T("ZigZagToolDiameter"), &m_tool_diameter, 3.0);
 	config.Read(_T("ZigZagCornerRadius"), &m_corner_radius, 5.0);
-	config.Read(_T("ZigZagMinX"), &m_minx, 0.0);
-	config.Read(_T("ZigZagMaxX"), &m_maxx, 0.0);
-	config.Read(_T("ZigZagMinY"), &m_miny, 0.0);
-	config.Read(_T("ZigZagMaxY"), &m_maxy, 0.0);
-	config.Read(_T("ZigZagZ0"), &m_z0, 0.0);
-	config.Read(_T("ZigZagZ1"), &m_z1, 0.0);
-	config.Read(_T("ZigZagDX"), &m_dx, 0.0);
-	config.Read(_T("ZigZagDY"), &m_dy, 0.0);
+
+	// these will be replaced by extents of solids
+	for(std::list<int>::const_iterator It = solids.begin(); It != solids.end(); It++)
+	{
+		int solid = *It;
+		HeeksObj* object = heeksCAD->GetIDObject(SolidType, solid);
+		if(object)object->GetBox(m_box);
+	}
+
+	if(!m_box.m_valid)m_box = CBox(-7.0, 7.0, 0.0, -7.0, 7.0, 10.0);
+
+	config.Read(_T("ZigZagDX"), &m_dx, 0.1);
+	config.Read(_T("ZigZagDY"), &m_dy, 1.0);
 	config.Read(_T("ZigZagHorizFeed"), &m_horizontal_feed_rate, 100.0);
 	config.Read(_T("ZigZagVertFeed"), &m_vertical_feed_rate, 100.0);
 	config.Read(_T("ZigZagSpindleSpeed"), &m_spindle_speed, 7000);
-	config.Read(_T("ZigZagDirection"), &m_direction, 1);
+	config.Read(_T("ZigZagDirection"), &m_direction, 0);
 }
 
 void CZigZagParams::write_values_to_config()
@@ -35,12 +40,6 @@ void CZigZagParams::write_values_to_config()
 	CNCConfig config;
 	config.Write(_T("ZigZagToolDiameter"), m_tool_diameter);
 	config.Write(_T("ZigZagCornerRadius"), m_corner_radius);
-	config.Write(_T("ZigZagMinX"), m_minx);
-	config.Write(_T("ZigZagMaxX"), m_maxx);
-	config.Write(_T("ZigZagMinY"), m_miny);
-	config.Write(_T("ZigZagMaxY"), m_maxy);
-	config.Write(_T("ZigZagZ0"), m_z0);
-	config.Write(_T("ZigZagZ1"), m_z1);
 	config.Write(_T("ZigZagDX"), m_dx);
 	config.Write(_T("ZigZagDY"), m_dy);
 	config.Write(_T("ZigZagHorizFeed"), m_horizontal_feed_rate);
@@ -51,12 +50,12 @@ void CZigZagParams::write_values_to_config()
 
 static void on_set_tool_diameter(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_tool_diameter = value;}
 static void on_set_corner_radius(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_corner_radius = value;}
-static void on_set_minx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_minx = value;}
-static void on_set_maxx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_maxx = value;}
-static void on_set_miny(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_miny = value;}
-static void on_set_maxy(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_maxy = value;}
-static void on_set_z0(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_z0 = value;}
-static void on_set_z1(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_z1 = value;}
+static void on_set_minx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[0] = value;}
+static void on_set_maxx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[3] = value;}
+static void on_set_miny(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[1] = value;}
+static void on_set_maxy(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[4] = value;}
+static void on_set_z0(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[2] = value;}
+static void on_set_z1(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[5] = value;}
 static void on_set_dx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_dx = value;}
 static void on_set_dy(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_dy = value;}
 static void on_set_horizontal_feed_rate(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_horizontal_feed_rate = value;}
@@ -68,12 +67,12 @@ void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
 	list->push_back(new PropertyDouble(_("corner radius"), m_corner_radius, parent, on_set_corner_radius));
-	list->push_back(new PropertyDouble(_("minimum x"), m_minx, parent, on_set_minx));
-	list->push_back(new PropertyDouble(_("maximum x"), m_maxx, parent, on_set_maxx));
-	list->push_back(new PropertyDouble(_("minimum y"), m_miny, parent, on_set_miny));
-	list->push_back(new PropertyDouble(_("maximum y"), m_maxy, parent, on_set_maxy));
-	list->push_back(new PropertyDouble(_("z0"), m_z0, parent, on_set_z0));
-	list->push_back(new PropertyDouble(_("z1"), m_z1, parent, on_set_z1));
+	list->push_back(new PropertyDouble(_("minimum x"), m_box.m_x[0], parent, on_set_minx));
+	list->push_back(new PropertyDouble(_("maximum x"), m_box.m_x[3], parent, on_set_maxx));
+	list->push_back(new PropertyDouble(_("minimum y"), m_box.m_x[1], parent, on_set_miny));
+	list->push_back(new PropertyDouble(_("maximum y"), m_box.m_x[4], parent, on_set_maxy));
+	list->push_back(new PropertyDouble(_("z0"), m_box.m_x[2], parent, on_set_z0));
+	list->push_back(new PropertyDouble(_("z1"), m_box.m_x[5], parent, on_set_z1));
 	list->push_back(new PropertyDouble(_("dx"), m_dx, parent, on_set_dx));
 	list->push_back(new PropertyDouble(_("dy"), m_dy, parent, on_set_dy));
 	list->push_back(new PropertyDouble(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
@@ -94,12 +93,12 @@ void CZigZagParams::WriteXMLAttributes(TiXmlElement *root)
 	root->LinkEndChild( element );  
 	element->SetAttribute("toold", m_tool_diameter);
 	element->SetAttribute("cornerrad", m_corner_radius);
-	element->SetAttribute("minx", m_minx);
-	element->SetAttribute("maxx", m_maxx);
-	element->SetAttribute("miny", m_miny);
-	element->SetAttribute("maxy", m_maxy);
-	element->SetAttribute("z0", m_z0);
-	element->SetAttribute("z1", m_z1);
+	element->SetAttribute("minx", m_box.m_x[0]);
+	element->SetAttribute("maxx", m_box.m_x[3]);
+	element->SetAttribute("miny", m_box.m_x[1]);
+	element->SetAttribute("maxy", m_box.m_x[4]);
+	element->SetAttribute("z0", m_box.m_x[2]);
+	element->SetAttribute("z1", m_box.m_x[5]);
 	element->SetAttribute("dx", m_dx);
 	element->SetAttribute("dy", m_dy);
 	element->SetAttribute("hfeed", m_horizontal_feed_rate);
@@ -116,12 +115,12 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 		std::string name(a->Name());
 		if(name == "toold"){m_tool_diameter = a->DoubleValue();}
 		else if(name == "cornerrad"){m_corner_radius = a->DoubleValue();}
-		else if(name == "minx"){m_minx = a->DoubleValue();}
-		else if(name == "maxx"){m_maxx = a->DoubleValue();}
-		else if(name == "miny"){m_miny = a->DoubleValue();}
-		else if(name == "maxy"){m_maxy = a->DoubleValue();}
-		else if(name == "z0"){m_z0 = a->DoubleValue();}
-		else if(name == "z1"){m_z1 = a->DoubleValue();}
+		else if(name == "minx"){m_box.m_x[0] = a->DoubleValue();}
+		else if(name == "maxx"){m_box.m_x[3] = a->DoubleValue();}
+		else if(name == "miny"){m_box.m_x[1] = a->DoubleValue();}
+		else if(name == "maxy"){m_box.m_x[4] = a->DoubleValue();}
+		else if(name == "z0"){m_box.m_x[2] = a->DoubleValue();}
+		else if(name == "z1"){m_box.m_x[5] = a->DoubleValue();}
 		else if(name == "dx"){m_dx = a->DoubleValue();}
 		else if(name == "dy"){m_dy = a->DoubleValue();}
 		else if(name == "hfeed"){m_horizontal_feed_rate = a->DoubleValue();}
@@ -141,10 +140,15 @@ void CZigZag::AppendTextToProgram()
 		if(object)solids.push_back(object);
 	}
 
-	wxString filepath = wxString::Format(_T("zigzag%d"), number_for_stl_file);
+	wxString filepath = wxString::Format(_T("zigzag%d.stl"), number_for_stl_file);
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
-	//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("clearance = %g\n"), m_params.m_clearance_height));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = SphericalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("model = ImportModel('%s')\n"), filepath.c_str()));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("pg = DropCutter(c, model)\n")));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("pathlist = pg.GenerateToolPath(%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, 0)\n"), m_params.m_box.m_x[0], m_params.m_box.m_x[3], m_params.m_box.m_x[1], m_params.m_box.m_x[4], m_params.m_box.m_x[2], m_params.m_box.m_x[5], m_params.m_dx, m_params.m_dy));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("h = HeeksCNCExporter()\n")));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("h.AddPathList(pathlist)\n")));
 }
 
 void CZigZag::glCommands(bool select, bool marked, bool no_color)
