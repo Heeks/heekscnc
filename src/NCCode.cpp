@@ -369,7 +369,7 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 		MarkedObject* sub_marked_object = marked_object->m_map.begin()->second;
 		if(sub_marked_object)
 		{
-			HeeksObj* object = sub_marked_object->m_map.begin()->first;
+			HeeksObj* object = sub_marked_object->GetObject();
 			if(object && object->GetType() == NCCodeBlockType)
 			{
 				m_highlighted_block = (CNCCodeBlock*)object;
