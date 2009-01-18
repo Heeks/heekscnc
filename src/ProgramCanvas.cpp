@@ -115,6 +115,7 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
 
 	// add toolbar buttons
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Profile"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/opprofile.png"), wxBITMAP_TYPE_PNG), _T("Cut around selected sketches"), OnProfile);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("ZigZag"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/zigzag.png"), wxBITMAP_TYPE_PNG), _T("Zigzag finish machining on selected solids"), OnZigZag);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Python"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/python.png"), wxBITMAP_TYPE_PNG), _T("Create Python program from the objects"), OnPython);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/postprocess.png"), wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);
 

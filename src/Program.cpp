@@ -161,20 +161,14 @@ void CProgram::RewritePythonProgram()
 	if(zigzag_op_exists)
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'.')\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'PyCam/trunk')\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Geometry import *\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.SphericalCutter import *\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.CylindricalCutter import *\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Gui.Visualization import ShowTestScene\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Importers.TestModel import TestModel\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Importers.STLImporter import ImportModel\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.PathGenerators.DropCutter import DropCutter\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from PyCamToHeeks import HeeksCNCExporter\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 	}
 
@@ -202,6 +196,9 @@ void CProgram::RewritePythonProgram()
 		{
 		case ProfileType:
 			((CProfile*)object)->AppendTextToProgram();
+			break;
+		case ZigZagType:
+			((CZigZag*)object)->AppendTextToProgram();
 			break;
 		}
 	}
