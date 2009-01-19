@@ -369,12 +369,15 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 		MarkedObject* sub_marked_object = marked_object->m_map.begin()->second;
 		if(sub_marked_object)
 		{
-			HeeksObj* object = sub_marked_object->GetObject();
-			if(object && object->GetType() == NCCodeBlockType)
+			if(sub_marked_object->m_map.size() > 0)
 			{
-				m_highlighted_block = (CNCCodeBlock*)object;
-				theApp.m_output_canvas->m_textCtrl->SetInsertionPoint(m_highlighted_block->m_to_pos - 2);
-				theApp.m_output_canvas->m_textCtrl->SetFocus();
+				HeeksObj* object = sub_marked_object->m_map.begin()->first;
+				if(object && object->GetType() == NCCodeBlockType)
+				{
+					m_highlighted_block = (CNCCodeBlock*)object;
+					theApp.m_output_canvas->m_textCtrl->SetInsertionPoint(m_highlighted_block->m_to_pos - 2);
+					theApp.m_output_canvas->m_textCtrl->SetFocus();
+				}
 			}
 		}
 	}
