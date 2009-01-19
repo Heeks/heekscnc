@@ -25,6 +25,8 @@ public:
 	void GetProperties(CProfile* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlElement* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
+	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
+	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 };
 
 class CProfile: public HeeksObj{

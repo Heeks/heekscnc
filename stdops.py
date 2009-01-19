@@ -5,7 +5,7 @@ from nc.nc import *
 
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile2(k, startx, starty, direction, radius, finishx, finishy):
+def profile(k, startx, starty, direction, radius, finishx, finishy):
     if kurve.exists(k) == False:
         raise "kurve doesn't exist, number %d" % (k)
     
@@ -74,35 +74,5 @@ def profile2(k, startx, starty, direction, radius, finishx, finishy):
                 else:# line
                     feed(finishx, finishy)
                 
-                
     if offset_k != k:
         kurve.delete(offset_k)
-
-def get_roll_on_pos(k, direction):
-    # to do
-    return 0, 0
-
-def get_roll_off_pos(k, direction):
-    # to do
-    return 0, 0
-
-# direction should be 'left' or 'right' or 'on'
-# auto_profile calculates suitable roll on and roll off positions and also does rapid moves
-def profile(k, direction, radius, clearance, rapid_down_to_height, final_depth):
-    # start - assume we are at a suitable clearance height
-
-    # get roll on position
-    sx, sy = get_roll_on_pos(k, direction)
-
-    # rapid across to it
-    rapid(sx, sy)
-
-    # rapid down to just above the metal
-    rapid(z = rapid_down_to_height)
-
-    # profile the shape, with roll off
-    ex, ey = get_roll_off_pos(k, direction)
-    profile2(k, sx, sy, direction, radius, ex, ey)
-
-    # rapid back up to clearance plane
-    rapid(z = clearance)
