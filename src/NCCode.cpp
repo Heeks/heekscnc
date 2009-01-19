@@ -199,7 +199,11 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 		}
 	}
 
+#ifdef WIN32
 	CNCCode::pos += 2; // 2 for each line ( presumably \r\n )
+#else
+	CNCCode::pos += 1;
+#endif
 
 	new_object->m_to_pos = CNCCode::pos;
 
@@ -375,7 +379,11 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 				if(object && object->GetType() == NCCodeBlockType)
 				{
 					m_highlighted_block = (CNCCodeBlock*)object;
-					theApp.m_output_canvas->m_textCtrl->SetInsertionPoint(m_highlighted_block->m_to_pos - 2);
+					int pos = m_highlighted_block->m_to_pos;
+#ifdef WIN32
+					pos -= 2;
+#endif
+					theApp.m_output_canvas->m_textCtrl->SetInsertionPoint(pos);
 					theApp.m_output_canvas->m_textCtrl->SetFocus();
 				}
 			}
