@@ -23,6 +23,13 @@ dan@dan-laptop:~/Desktop/HeeksCAD/HeeksCNC/src$
 You can then run HeeksCAD by typing ../../HeeksCAD or:
 On the Ubuntu menu, go to Places->Desktop Then double click on HeeksCAD folder to open it. You will see HeeksCAD with a blue diamond icon. Double click on the blue diamond icon to run HeeksCAD.
 
+On the menu, do File->Plugins
+You will need to add a new plugin.
+Name: HeeksCNC
+Filepath: ( browse for the HeeksCNC.so.0.5.1 )
+Then close HeeksCAD and tun it again.
+( this will have made an entry in /home/dan/.HeeksCAD, you will have to "Show Hidden Files" to see it )
+
 You may also need to build kurve.so, if you want to use the Python script to do profile operations.
 To do this, from terminal type cd Desktop/HeeksCAD/HeeksCNC/kurve
 and then type: make
