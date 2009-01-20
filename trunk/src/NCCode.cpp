@@ -44,7 +44,7 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 	m_str = wxString(Ctt(element->GetText()));
 }
 
-void threedoubles::WriteXML(TiXmlElement *root)
+void PathLine::WriteXML(TiXmlElement *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "p" );
@@ -54,7 +54,7 @@ void threedoubles::WriteXML(TiXmlElement *root)
 	element->SetDoubleAttribute("z", m_x[2]);
 }
 
-void threedoubles::ReadFromXMLElement(TiXmlElement* pElem)
+void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	// get the attributes
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
@@ -66,42 +66,139 @@ void threedoubles::ReadFromXMLElement(TiXmlElement* pElem)
 	}
 }
 
-void ColouredLineStrips::glCommands()
+void PathLine::glVertices(const PathObject* prev_po)
+{
+	glVertex3dv(m_x);
+}
+
+void PathArc::WriteXML(TiXmlElement *root)
+{
+	TiXmlElement * element;
+	if(GetType() == 1)element = new TiXmlElement( "acw" );
+	else element = new TiXmlElement( "cw" );
+	root->LinkEndChild( element ); 
+	element->SetDoubleAttribute("x", m_x[0]);
+	element->SetDoubleAttribute("y", m_x[1]);
+	element->SetDoubleAttribute("z", m_x[2]);
+	element->SetDoubleAttribute("i", m_c[0]);
+	element->SetDoubleAttribute("j", m_c[1]);
+	element->SetDoubleAttribute("k", m_c[2]);
+}
+
+void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	// get the attributes
+	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
+	{
+		std::string name(a->Name());
+		if(name == "x"){m_x[0] = a->DoubleValue();}
+		else if(name == "y"){m_x[1] = a->DoubleValue();}
+		else if(name == "z"){m_x[2] = a->DoubleValue();}
+		else if(name == "i"){m_c[0] = a->DoubleValue();}
+		else if(name == "j"){m_c[1] = a->DoubleValue();}
+		else if(name == "k"){m_c[2] = a->DoubleValue();}
+	}
+}
+
+void PathArc::glVertices(const PathObject* prev_po)
+{
+	if(prev_po == NULL)return;
+
+	double sx = -m_c[0];
+	double sy = -m_c[1];
+	// e = cs + se = -c + e - s
+	double ex = -m_c[0] + m_x[0] - prev_po->m_x[0];
+	double ey = -m_c[1] + m_x[1] - prev_po->m_x[1];
+	double rs = sqrt(sx * sx + sy * sy);
+	double re = sqrt(ex * ex + ey * ey);
+
+	double start_angle = atan2(sy, sx);
+	double end_angle = atan2(ey, ex);
+
+	if(GetType() == 1){
+		if(end_angle < start_angle)end_angle += 6.283185307179;
+	}
+	else{
+		if(start_angle < end_angle)start_angle += 6.283185307179;
+	}
+
+	double angle_step = (end_angle - start_angle) / 10;
+	for(int i = 0; i< 10; i++)
+	{
+		double angle = start_angle + angle_step * (i + 1);
+		double r = rs + ((re - rs) * (i + 1)) /10;
+		double x = prev_po->m_x[0] + m_c[0] + r * cos(angle);
+		double y = prev_po->m_x[1] + m_c[1] + r * sin(angle);
+		double z = prev_po->m_x[2] + ((m_x[2] - prev_po->m_x[2]) * (i+1))/10;
+		glVertex3d(x, y, z);
+	}
+}
+
+ColouredPath::ColouredPath(const ColouredPath& c)
+{
+	operator=(c);
+}
+
+const ColouredPath &ColouredPath::operator=(const ColouredPath& c)
+{
+	Clear();
+	m_color_type = c.m_color_type;
+	for(std::list< PathObject* >::const_iterator It = c.m_points.begin(); It != c.m_points.end(); It++)
+	{
+		PathObject* object = *It;
+		m_points.push_back(object->MakeACopy());
+	}
+	return *this;
+}
+
+void ColouredPath::Clear()
+{
+	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
+	{
+		PathObject* object = *It;
+		delete object;
+	}
+	m_points.clear();
+}
+
+void ColouredPath::glCommands()
 {
 	CNCCode::m_lines_colors[m_color_type].glColor();
 	glBegin(GL_LINE_STRIP);
-	for(std::list< threedoubles >::iterator It = m_points.begin(); It != m_points.end(); It++)
+	const PathObject* prev_po = NULL;
+	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
-		threedoubles &td = *It;
-		glVertex3dv(td.m_x);
+		PathObject* po = *It;
+		po->glVertices(prev_po);
+		prev_po = po;
 	}
 	glEnd();
 }
 
-void ColouredLineStrips::GetBox(CBox &box)
+void ColouredPath::GetBox(CBox &box)
 {
-	for(std::list< threedoubles >::iterator It = m_points.begin(); It != m_points.end(); It++)
+	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
-		threedoubles &td = *It;
-		box.Insert(td.m_x);
+		PathObject* po= *It;
+		box.Insert(po->m_x);
 	}
 }
 
-void ColouredLineStrips::WriteXML(TiXmlElement *root)
+void ColouredPath::WriteXML(TiXmlElement *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "lines" );
+	element = new TiXmlElement( "path" );
 	root->LinkEndChild( element ); 
 
 	element->SetAttribute("col", CNCCode::m_lines_colors_str[m_color_type].c_str());
-	for(std::list< threedoubles >::iterator It = m_points.begin(); It != m_points.end(); It++)
+	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
-		threedoubles &td = *It;
-		td.WriteXML(element);
+		PathObject* po = *It;
+		po->WriteXML(element);
 	}
 }
 
-void ColouredLineStrips::ReadFromXMLElement(TiXmlElement* element)
+void ColouredPath::ReadFromXMLElement(TiXmlElement* element)
 {
 	// get the attributes
 	for(TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
@@ -126,9 +223,21 @@ void ColouredLineStrips::ReadFromXMLElement(TiXmlElement* element)
 		std::string name(pElem->Value());
 		if(name == "p")
 		{
-			threedoubles td;
-			td.ReadFromXMLElement(pElem);
-			m_points.push_back(td);
+			PathLine *new_object = new PathLine;
+			new_object->ReadFromXMLElement(pElem);
+			m_points.push_back(new_object);
+		}
+		else if(name == "acw")
+		{
+			PathAcwArc *new_object = new PathAcwArc;
+			new_object->ReadFromXMLElement(pElem);
+			m_points.push_back(new_object);
+		}
+		else if(name == "cw")
+		{
+			PathCwArc *new_object = new PathCwArc;
+			new_object->ReadFromXMLElement(pElem);
+			m_points.push_back(new_object);
 		}
 	}
 }
@@ -137,18 +246,18 @@ HeeksObj *CNCCodeBlock::MakeACopy(void)const{return new CNCCodeBlock(*this);}
 
 void CNCCodeBlock::glCommands(bool select, bool marked, bool no_color)
 {
-	for(std::list<ColouredLineStrips>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
+	for(std::list<ColouredPath>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
 	{
-		ColouredLineStrips& line_strip = *It;
+		ColouredPath& line_strip = *It;
 		line_strip.glCommands();
 	}
 }
 
 void CNCCodeBlock::GetBox(CBox &box)
 {
-	for(std::list<ColouredLineStrips>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
+	for(std::list<ColouredPath>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
 	{
-		ColouredLineStrips& line_strip = *It;
+		ColouredPath& line_strip = *It;
 		line_strip.glCommands();
 	}
 }
@@ -165,9 +274,9 @@ void CNCCodeBlock::WriteXML(TiXmlElement *root)
 		text.WriteXML(element);
 	}
 
-	for(std::list<ColouredLineStrips>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
+	for(std::list<ColouredPath>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
 	{
-		ColouredLineStrips &line_strip = *It;
+		ColouredPath &line_strip = *It;
 		line_strip.WriteXML(element);
 	}
 
@@ -191,9 +300,9 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 			new_object->m_text.push_back(t);
 			CNCCode::pos += t.m_str.Len();
 		}
-		else if(name == "lines")
+		else if(name == "lines" || name == "path")
 		{
-			ColouredLineStrips l;
+			ColouredPath l;
 			l.ReadFromXMLElement(pElem);
 			new_object->m_line_strips.push_back(l);
 		}
