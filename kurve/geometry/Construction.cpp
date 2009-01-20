@@ -923,6 +923,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		// intersection of 2 planes
 		Vector3d d = this->normal ^ pl.normal;
 		d.normalise();
+		intof.ok = false;
 		if(d == NULL_VECTOR) return false;		// parallel planes
 
 		intof.v = d;
