@@ -934,6 +934,7 @@ CDraw* testDraw = NULL;							// for test graphics inside geometry.lib (can be r
 		double a = (this->d - pl.d * dot) / den;
 		double b = (pl.d - this->d * dot) / den;
 		intof.p0 = a * this->normal + b * pl.normal;
+		intof.ok = true;
 		return true;
 	}
 

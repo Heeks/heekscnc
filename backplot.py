@@ -69,17 +69,17 @@ while (True):
 
     if move_found:
         if move_type == 0:
-            f.write('           <lines col="rapid">\n')
+            f.write('           <path col="rapid">\n')
         else:
-            f.write('           <lines col="feed">\n')
+            f.write('           <path col="feed">\n')
         f.write('               <p x="' + str(px) + '" y="' + str(py) + '" z="' + str(pz) + '" />\n')
         if move_type == 2 or move_type == 3:
-            arc_str = 'ccw'
+            arc_str = 'acw'
             if move_type == 2: arc_str = 'cw'
-            f.write('               <p type="' + arc_str + ' x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" i="' + str(cx) + '" j="' + str(cy) + '" />\n')
+            f.write('               <' + arc_str + ' x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" i="' + str(cx) + '" j="' + str(cy) + '" />\n')
         else:
             f.write('               <p x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" />\n')
-        f.write('           </lines>\n')
+        f.write('           </path>\n')
 
     px = nx
     py = ny

@@ -20,6 +20,8 @@ public:
 	double m_roll_on_point[3];
 	double m_roll_off_point[3];
 
+	CProfileParams();
+
 	void set_initial_values();
 	void write_values_to_config();
 	void GetProperties(CProfile* parent, std::list<Property *> *list);
