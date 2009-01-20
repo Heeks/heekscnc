@@ -11,6 +11,22 @@
 #include "../../interface/PropertyCheck.h"
 #include "../../tinyxml/tinyxml.h"
 
+CProfileParams::CProfileParams()
+{
+	m_tool_diameter = 0.0;
+	m_clearance_height = 0.0;
+	m_final_depth = 0.0;
+	m_rapid_down_to_height = 0.0;
+	m_horizontal_feed_rate = 0.0;
+	m_vertical_feed_rate = 0.0;
+	m_spindle_speed = 0.0;
+	m_tool_on_side = 0;
+	m_auto_roll_on = true;
+	m_auto_roll_off = true;
+	m_roll_on_point[0] = m_roll_on_point[1] = m_roll_on_point[2] = 0.0;
+	m_roll_off_point[0] = m_roll_off_point[1] = m_roll_off_point[2] = 0.0;
+}
+
 void CProfileParams::set_initial_values()
 {
 	CNCConfig config;
@@ -130,14 +146,15 @@ void CProfileParams::WriteXMLAttributes(TiXmlElement *root)
 	element->SetAttribute("hfeed", m_horizontal_feed_rate);
 	element->SetAttribute("vfeed", m_vertical_feed_rate);
 	element->SetAttribute("spin", m_spindle_speed);
-	element->SetAttribute("auto_roll_on", m_auto_roll_on ? 0:1);
+	element->SetAttribute("side", m_tool_on_side);
+	element->SetAttribute("auto_roll_on", m_auto_roll_on ? 1:0);
 	if(!m_auto_roll_on)
 	{
 		element->SetAttribute("roll_onx", m_roll_on_point[0]);
 		element->SetAttribute("roll_ony", m_roll_on_point[1]);
 		element->SetAttribute("roll_onz", m_roll_on_point[2]);
 	}
-	element->SetAttribute("auto_roll_off", m_auto_roll_off ? 0:1);
+	element->SetAttribute("auto_roll_off", m_auto_roll_off ? 1:0);
 	if(!m_auto_roll_off)
 	{
 		element->SetAttribute("roll_offx", m_roll_off_point[0]);
@@ -159,6 +176,7 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 		else if(name == "hfeed"){m_horizontal_feed_rate = a->DoubleValue();}
 		else if(name == "vfeed"){m_vertical_feed_rate = a->DoubleValue();}
 		else if(name == "spin"){m_spindle_speed = a->DoubleValue();}
+		else if(name == "side"){m_tool_on_side = a->IntValue();}
 		else if(name == "auto_roll_on"){m_auto_roll_on = (a->IntValue() != 0);}
 		else if(name == "roll_onx"){m_roll_on_point[0] = a->DoubleValue();}
 		else if(name == "roll_ony"){m_roll_on_point[1] = a->DoubleValue();}
@@ -275,7 +293,6 @@ void CProfile::AppendTextToProgram()
 			// get roll off position
 			double ex = 0.0, ey =0.0;
 			m_params.GetRollOffPos(object, ex, ey);
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid(%lf, %lf)\n"), ex, ey));
 
 			// get offset side
 			wxString side_string;

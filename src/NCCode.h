@@ -35,20 +35,57 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
-class threedoubles{
+class PathObject{
 public:
 	double m_x[3];
-	void WriteXML(TiXmlElement *root);
-	void ReadFromXMLElement(TiXmlElement* pElem);
+	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
+	virtual int GetType() = 0; // 0 - line, -1 - cw arc, 1 - acw arc
+	virtual void WriteXML(TiXmlElement *root) = 0;
+	virtual void ReadFromXMLElement(TiXmlElement* pElem) = 0;
+	virtual void glVertices(const PathObject* prev_po){}
+	virtual PathObject *MakeACopy(void)const = 0;
 };
 
-class ColouredLineStrips
+class PathLine : public PathObject{
+public:
+	int GetType(){return 0;}
+	void WriteXML(TiXmlElement *root);
+	void ReadFromXMLElement(TiXmlElement* pElem);
+	void glVertices(const PathObject* prev_po);
+	PathObject *MakeACopy(void)const{return new PathLine(*this);}
+};
+
+class PathArc : public PathObject{
+public:
+	double m_c[3]; // defined relative to previous point ( span start point )
+	PathArc(){m_c[0] = m_c[1] = m_c[2] = 0.0;}
+	void WriteXML(TiXmlElement *root);
+	void ReadFromXMLElement(TiXmlElement* pElem);
+	void glVertices(const PathObject* prev_po);
+};
+
+class PathAcwArc : public PathArc{
+	int GetType(){return 1;}
+	PathObject *MakeACopy(void)const{return new PathAcwArc(*this);}
+};
+
+class PathCwArc : public PathArc{
+	int GetType(){return -1;}
+	PathObject *MakeACopy(void)const{return new PathCwArc(*this);}
+};
+
+class ColouredPath
 {
 public:
 	LinesColorEnum m_color_type;
-	std::list< threedoubles > m_points;
-	ColouredLineStrips():m_color_type(LinesColorRapidType){}
+	std::list< PathObject* > m_points;
+	ColouredPath():m_color_type(LinesColorRapidType){}
+	ColouredPath(const ColouredPath& c);
+	~ColouredPath(){Clear();}
 
+	const ColouredPath &operator=(const ColouredPath& c);
+
+	void Clear();
 	void glCommands();
 	void GetBox(CBox &box);
 	void WriteXML(TiXmlElement *root);
@@ -59,7 +96,7 @@ class CNCCodeBlock:public HeeksObj
 {
 public:
 	std::list<ColouredText> m_text;
-	std::list<ColouredLineStrips> m_line_strips;
+	std::list<ColouredPath> m_line_strips;
 	long m_from_pos, m_to_pos; // position of block in text ctrl
 
 	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1){}

@@ -343,16 +343,17 @@ void tangential_arc(const Point &p0, const Point &p1, const Vector2d &v0, Point 
 			Line lshort;
 			plane_line.Shortest(l1, lshort, t1, t2);
 			c = lshort.p0;
-			dir = (plane_line.v.getz() > 0) ? 1:-1;
+			Vector3d cross = Vector3d(v0) ^ Vector3d(v1);
+			dir = (cross.getz() > 0) ? 1:-1;
 		}
 	}
 }
 
 static PyObject* kurve_tangential_arc(PyObject* self, PyObject* args)
 {
-//                 rcx, rcy, rdir = tangential_arc(ex, ey, vx, vy, finishx, finishy)
+//                 rcx, rcy, rdir = tangential_arc(sx, sy, svx, svy, ex, ey)
 	double sx, sy, ex, ey, vx, vy;
-	if (!PyArg_ParseTuple(args, "dddddd", &sx, &sy, &ex, &ey, &vx, &vy)) return NULL;
+	if (!PyArg_ParseTuple(args, "dddddd", &sx, &sy, &vx, &vy, &ex, &ey)) return NULL;
 
 	Point p0(sx, sy);
 	Point p1(ex, ey);
