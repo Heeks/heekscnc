@@ -122,6 +122,28 @@ static PyObject* kurve_add_point(PyObject* self, PyObject* args)
 		spv.p.y = y;
 		spv.pc.x = i;
 		spv.pc.y = j;
+		if(sp)
+		{
+			// can't add arc as first span
+			if(!(k->Started())){ const char* str = "can't add arc to kurve as first point"; cout << str; throw(str);}
+
+			// fix radius by moving centre point a little bit
+			int previous_vertex = k->nSpans();
+			spVertex pv;
+			k->Get(previous_vertex, pv);
+			Vector2d v(spv.pc, pv.p);
+			double r = v.magnitude();
+			Circle c1( pv.p, r );
+			Circle c2( spv.p, r );
+			Point leftInters, rightInters;
+			if(c1.Intof(c2, leftInters, rightInters) == 2)
+			{
+				double d1 = spv.pc.Dist(leftInters);
+				double d2 = spv.pc.Dist(rightInters);
+				if(d1<d2)spv.pc = leftInters;
+				else spv.pc = rightInters;
+			}
+		}
 		k->Add(spv);
 	}
 
@@ -142,7 +164,14 @@ static PyObject* kurve_offset(PyObject* self, PyObject* args)
 	if(valid_kurves.find(k) != valid_kurves.end())
 	{
 		std::vector<Kurve*> offset_kurves;
-		k->Offset(offset_kurves, left, 1, 0, ret);
+		try
+		{
+			k->Offset(offset_kurves, fabs(left), (left > 0) ? 1:-1, 0, ret);
+		}
+		catch(const wchar_t* str)
+		{
+			wprintf(L"%s", str);
+		}
 
 		if(valid_kurves.find(k2) != valid_kurves.end())
 		{
