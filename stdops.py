@@ -1,8 +1,6 @@
 import kurve
 from nc.nc import *
 
-# line above will be import machine, so these operations are machine independant
-
 # profile command,
 # direction should be 'left' or 'right' or 'on'
 def profile(k, startx, starty, direction, radius, finishx, finishy):
@@ -45,9 +43,9 @@ def profile(k, startx, starty, direction, radius, finishx, finishy):
                     rdir = -rdir # because the tangential_arc was used in reverse
                     
                 if rdir == 1:# anti-clockwise arc
-                    arc_ccw(sx, sy, 0, rcx, rcy)
+                    arc_ccw(sx, sy, i = rcx, j = rcy)
                 elif rdir == -1:# clockwise arc
-                    arc_cw(sx, sy, 0, rcx, rcy)
+                    arc_cw(sx, sy, i = rcx, j = rcy)
                 else:# line
                     feed(sx, sy)
         if sp == 0:#line
@@ -56,9 +54,9 @@ def profile(k, startx, starty, direction, radius, finishx, finishy):
             cx = cx - sx # make relative to the start position
             cy = cy - sy
             if sp == 1:# anti-clockwise arc
-                arc_ccw(ex, ey, 0, cx, cy)
+                arc_ccw(ex, ey, i = cx, j = cy)
             else:
-                arc_cw(ex, ey, 0, cx, cy)
+                arc_cw(ex, ey, i = cx, j = cy)
 
         if span == num_spans - 1:# last span
             if (finishx != ex or finishy != ey) and direction != "on":
@@ -68,11 +66,63 @@ def profile(k, startx, starty, direction, radius, finishx, finishy):
                 rcx = rcx - ex # make relative to the start position
                 rcy = rcy - ey
                 if rdir == 1:# anti-clockwise arc
-                    arc_ccw(finishx, finishy, 0, rcx, rcy)
+                    arc_ccw(finishx, finishy, i = rcx, j = rcy)
                 elif rdir == -1:# clockwise arc
-                    arc_cw(finishx, finishy, 0, rcx, rcy)
+                    arc_cw(finishx, finishy, i = rcx, j = rcy)
                 else:# line
                     feed(finishx, finishy)
                 
     if offset_k != k:
         kurve.delete(offset_k)
+
+def roll_on_point(k, direction, radius):
+    x = float(0)
+    y = float(0)
+
+    offset = radius
+    if direction == "right":
+        offset = -offset
+    offset_k = kurve.new()
+    offset_success = kurve.offset(k, offset_k, offset)
+    if offset_success == False:
+        raise "couldn't offset kurve %d" % (k)
+
+    if kurve.num_spans(offset_k) > 0:
+        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, 0)
+        vx, vy = kurve.get_span_dir(offset_k, 0, 0) # get start direction
+        off_vx = -vy
+        off_vy = vx
+        if direction == 'right':
+            off_vx = -off_vx
+            off_vy = -off_vy
+        x = sx + off_vx * 2 - vx * 2
+        y = sy + off_vy * 2 - vy * 2
+
+    return x, y
+
+def roll_off_point(k, direction, radius):
+    x = float(0)
+    y = float(0)
+
+    offset = radius
+    if direction == "right":
+        offset = -offset
+    offset_k = kurve.new()
+    offset_success = kurve.offset(k, offset_k, offset)
+    if offset_success == False:
+        raise "couldn't offset kurve %d" % (k)
+
+    n = kurve.num_spans(offset_k)
+    
+    if n > 0:
+        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, n - 1)
+        vx, vy = kurve.get_span_dir(offset_k, n - 1, 1) # get end direction
+        off_vx = -vy
+        off_vy = vx
+        if direction == 'right':
+            off_vx = -off_vx
+            off_vy = -off_vy
+        x = ex + off_vx * 2 + vx * 2
+        y = ey + off_vy * 2 + vy * 2
+
+    return x, y
