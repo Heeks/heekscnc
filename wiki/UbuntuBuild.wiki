@@ -12,7 +12,7 @@ HeeksCNC must be a sub-folder of HeeksCAD.
 
 On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" window appears, with some text like "dan@dan-desktop:~$" in it.
 
-Type: cd Desktop/HeeksCAD/src
+Type: cd Desktop/HeeksCAD/HeeksCNC/src
 
 Then type: make
 
