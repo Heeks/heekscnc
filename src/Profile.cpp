@@ -389,7 +389,7 @@ void CProfile::AppendTextToProgram()
 			}
 
 			// profile the kurve
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.profile(k%d, %s, '%s', tool_diameter/2, %s)\n"), sketch, roll_on_string, side_string.c_str(), roll_off_string.c_str()));
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.profile(k%d, %s, '%s', tool_diameter/2, %s)\n"), sketch, roll_on_string.c_str(), side_string.c_str(), roll_off_string.c_str()));
 
 			// rapid back up to clearance plane
 			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
