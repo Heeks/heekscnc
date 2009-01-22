@@ -188,11 +188,33 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	}
 }
 
+#define AUTO_ROLL_ON_OFF_SIZE 2.0
+
 void CProfileParams::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 {
 	// roll on
 	if(m_auto_roll_on)
 	{
+		if(sketch)
+		{
+			HeeksObj* first_child = sketch->GetAtIndex(0);
+			if(first_child)
+			{
+				double s[3];
+				if(!(first_child->GetStartPoint(s)))return;
+				x = s[0];
+				y = s[1];
+				if(m_tool_on_side == 0)return;
+				double v[3];
+				if(heeksCAD->GetSegmentVector(first_child, 0.0, v))
+				{
+					double off_vec[3] = {-v[1], v[0], 0.0};
+					if(m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
+					x = s[0] + off_vec[0] * (m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[0] * AUTO_ROLL_ON_OFF_SIZE;
+					y = s[1] + off_vec[1] * (m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[1] * AUTO_ROLL_ON_OFF_SIZE;
+				}
+			}
+		}
 	}
 	else
 	{
@@ -206,6 +228,27 @@ void CProfileParams::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 	// roll off
 	if(m_auto_roll_off)
 	{
+			int num_spans = sketch->GetNumChildren();
+			if(num_spans > 0)
+			{
+				HeeksObj* last_child = sketch->GetAtIndex(num_spans - 1);
+				if(last_child)
+				{
+					double e[3];
+					if(!(last_child->GetEndPoint(e)))return;
+					x = e[0];
+					y = e[1];
+					if(m_tool_on_side == 0)return;
+					double v[3];
+					if(heeksCAD->GetSegmentVector(last_child, 0.0, v))
+					{
+						double off_vec[3] = {-v[1], v[0], 0.0};
+						if(m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
+						x = e[0] + off_vec[0] * (m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[0] * AUTO_ROLL_ON_OFF_SIZE;
+						y = e[1] + off_vec[1] * (m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[1] * AUTO_ROLL_ON_OFF_SIZE;
+					}
+				}
+			}
 	}
 	else
 	{
@@ -258,10 +301,10 @@ static void WriteSketchDefn(HeeksObj* sketch)
 
 void CProfile::AppendTextToProgram()
 {
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("clearance = %g\n"), m_params.m_clearance_height));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid_down_to_height = %g\n"), m_params.m_rapid_down_to_height));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("final_depth = %g\n"), m_params.m_final_depth));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool_diameter = %g\n"), m_params.m_tool_diameter));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("clearance = float(%g)\n"), m_params.m_clearance_height));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid_down_to_height = float(%g)\n"), m_params.m_rapid_down_to_height));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("final_depth = float(%g)\n"), m_params.m_final_depth));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool_diameter = float(%g)\n"), m_params.m_tool_diameter));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("spindle(%g)\n"), m_params.m_spindle_speed));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("feedrate(%g)\n"), m_params.m_horizontal_feed_rate));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool_change(1)\n")));
@@ -271,28 +314,13 @@ void CProfile::AppendTextToProgram()
 
 		// write a kurve definition
 		HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
+		if(object == NULL || object->GetNumChildren() == 0)continue;
+
 		if(object)
 		{
 			WriteSketchDefn(object);
 
 			// start - assume we are at a suitable clearance height
-
-			// get roll on position
-			double sx = 0.0, sy =0.0;
-			m_params.GetRollOnPos(object, sx, sy);
-
-			// rapid across to it
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid(%lf, %lf)\n"), sx, sy));
-
-			// rapid down to just above the material
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = rapid_down_to_height)\n")));
-
-			// feed down to final depth
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("feed(z = final_depth)\n")));			
-
-			// get roll off position
-			double ex = 0.0, ey =0.0;
-			m_params.GetRollOffPos(object, ex, ey);
 
 			// get offset side
 			wxString side_string;
@@ -309,8 +337,59 @@ void CProfile::AppendTextToProgram()
 				break;
 			}
 
+			// get roll on string
+			wxString roll_on_string;
+			if(m_params.m_tool_on_side)
+			{
+				if(m_params.m_auto_roll_on)
+				{
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = stdops.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
+					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
+				}
+				else
+				{
+					roll_on_string = wxString::Format(_T("%lf, %lf"), m_params.m_roll_on_point[0], m_params.m_roll_on_point[1]);
+				}
+			}
+			else
+			{
+				double s[3] = {0, 0, 0};
+				object->GetFirstChild()->GetStartPoint(s);
+				roll_on_string = wxString::Format(_T("%lf, %lf"), s[0], s[1]);
+			}
+
+			// rapid across to it
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str()));
+
+			// rapid down to just above the material
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = rapid_down_to_height)\n")));
+
+			// feed down to final depth
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("feed(z = final_depth)\n")));			
+
+			wxString roll_off_string;
+			if(m_params.m_tool_on_side)
+			{
+				if(m_params.m_auto_roll_off)
+				{
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_off_x, roll_off_y = stdops.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));			
+					roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
+				}
+				else
+				{
+					roll_off_string = wxString::Format(_T("%lf, %lf"), m_params.m_roll_off_point[0], m_params.m_roll_off_point[1]);
+				}
+			}
+			else
+			{
+				double e[3] = {0, 0, 0};
+				int n = object->GetNumChildren();
+				object->GetAtIndex(n-1)->GetEndPoint(e);
+				roll_off_string = wxString::Format(_T("%lf, %lf"), e[0], e[1]);
+			}
+
 			// profile the kurve
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.profile(k%d, %lf, %lf, '%s', tool_diameter/2, %lf, %lf)\n"), sketch, sx, sy, side_string.c_str(), ex, ey));
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.profile(k%d, %s, '%s', tool_diameter/2, %s)\n"), sketch, roll_on_string, side_string.c_str(), roll_off_string.c_str()));
 
 			// rapid back up to clearance plane
 			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			

@@ -384,6 +384,8 @@ namespace geoff_geometry {
 
 	Point Span::MidParam(double param)const {
 		/// returns a point which is 0-1 along span
+		if(fabs(param) < 0.00000000000001)return p0;
+		if(fabs(param - 1.0) < 0.00000000000001)return p1;
 		return MidPerim(param * this->length);
 	}
 
@@ -395,7 +397,7 @@ namespace geoff_geometry {
 			return v;
 		}
 
-		Point p = MidParam(fraction);
+		Point p= MidParam(fraction);
 		Vector2d v(pc, p);
 		v.normalise();
 		if(dir == ACW)
