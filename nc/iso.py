@@ -265,12 +265,15 @@ class CreatorIso(nc.Creator):
         self.write('G03')
         self.write_preps()
         if (x != None):
+            dx = x - self.x
             self.write(' X' + (self.fmt % x))
             self.x = x
         if (y != None):
+            dy = y - self.y
             self.write(' Y' + (self.fmt % y))
             self.y = y
         if (z != None):
+            dz = z - self.z
             self.write(' Z' + (self.fmt % z))
             self.z = z
         if (i != None) : self.write(' I' + (self.fmt % i))

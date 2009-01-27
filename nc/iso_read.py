@@ -15,7 +15,7 @@ class ParserIso(nc.Parser):
     def __init__(self):
         nc.Parser.__init__(self)
 
-        self.pattern_main = re.compile('(\s+|\w\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=\d*(?:\.\d*)?)')
+        self.pattern_main = re.compile('(\s+|\w(?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
 
         self.a = 0
         self.b = 0
