@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include <wx/file.h>
+#include <wx/mimetype.h>
 #include "PythonStuff.h"
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
@@ -61,8 +62,24 @@ bool HeeksPyBackplot()
 
 		// call the python file
 #ifdef WIN32
-		wxString batch_file_str = theApp.GetDllFolder() + wxString(_T("/backplot.bat"));
-		wxExecute(batch_file_str, wxEXEC_SYNC);
+		wxString filename = theApp.GetDllFolder() + wxString(_T("/backplot.py"));
+		wxString ext = (_T("py"));
+		wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
+		if ( !ft )
+		{
+			wxMessageBox(wxString::Format(_("Impossible to determine the file type for extension '%s'"), ext.c_str()));
+			return false;
+		}
+
+		wxString cmd;
+		bool ok = ft->GetOpenCommand(&cmd, wxFileType::MessageParameters(filename));
+		if ( !ok )
+		{
+			wxMessageBox(wxString::Format(_("Impossible to find out how to open files of extension '%s'"), ext.c_str()));
+			return false;
+		}
+
+		wxExecute(cmd, wxEXEC_SYNC);
 #else
 		wxString py_file_str = theApp.GetDllFolder() + wxString(_T("/backplot.py"));
 		wxExecute(wxString(_T("python ")) + py_file_str, wxEXEC_SYNC);
