@@ -13,8 +13,15 @@
 enum TextColorEnum{
 	TextColorDefaultType,
 	TextColorBlockType,
+	TextColorMiscType,
+	TextColorProgramType,
+	TextColorToolType,
+	TextColorCommentType,
+	TextColorVariableType,
 	TextColorPrepType,
 	TextColorAxisType,
+	TextColorRapidType,
+	TextColorFeedType,
 	MaxTextColorTypes
 };
 
@@ -39,7 +46,7 @@ class PathObject{
 public:
 	double m_x[3];
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
-	virtual int GetType() = 0; // 0 - line, -1 - cw arc, 1 - acw arc
+	virtual int GetType() = 0; // 0 - line, 1 - arc
 	virtual void WriteXML(TiXmlElement *root) = 0;
 	virtual void ReadFromXMLElement(TiXmlElement* pElem) = 0;
 	virtual void glVertices(const PathObject* prev_po){}
@@ -58,20 +65,13 @@ public:
 class PathArc : public PathObject{
 public:
 	double m_c[3]; // defined relative to previous point ( span start point )
-	PathArc(){m_c[0] = m_c[1] = m_c[2] = 0.0;}
+	int m_dir; // 1 - anti-clockwise, -1 - clockwise
+	PathArc(){m_c[0] = m_c[1] = m_c[2] = 0.0; m_dir = 1;}
+	int GetType(){return 1;}
 	void WriteXML(TiXmlElement *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void glVertices(const PathObject* prev_po);
-};
-
-class PathAcwArc : public PathArc{
-	int GetType(){return 1;}
-	PathObject *MakeACopy(void)const{return new PathAcwArc(*this);}
-};
-
-class PathCwArc : public PathArc{
-	int GetType(){return -1;}
-	PathObject *MakeACopy(void)const{return new PathCwArc(*this);}
+	PathObject *MakeACopy(void)const{return new PathArc(*this);}
 };
 
 class ColouredPath
@@ -124,6 +124,7 @@ public:
 	int m_gl_list;
 	CBox m_box;
 	CNCCodeBlock* m_highlighted_block;
+	static PathObject* prev_po;
 
 	CNCCode();
 	CNCCode(const CNCCode &p):m_gl_list(0), m_highlighted_block(NULL){operator=(p);}

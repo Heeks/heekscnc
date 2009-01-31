@@ -72,13 +72,12 @@ while (True):
             f.write('           <path col="rapid">\n')
         else:
             f.write('           <path col="feed">\n')
-        f.write('               <p x="' + str(px) + '" y="' + str(py) + '" z="' + str(pz) + '" />\n')
         if move_type == 2 or move_type == 3:
-            arc_str = 'acw'
-            if move_type == 2: arc_str = 'cw'
-            f.write('               <' + arc_str + ' x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" i="' + str(cx) + '" j="' + str(cy) + '" />\n')
+            arc_str = '1'
+            if move_type == 2: arc_str = '-1'
+            f.write('               <arc x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" i="' + str(cx) + '" j="' + str(cy) + '" d="' + arc_str + '" />\n')
         else:
-            f.write('               <p x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" />\n')
+            f.write('               <line x="' + str(nx) + '" y="' + str(ny) + '" z="' + str(nz) + '" />\n')
         f.write('           </path>\n')
 
     px = nx
