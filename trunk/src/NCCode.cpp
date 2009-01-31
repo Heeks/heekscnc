@@ -570,4 +570,5 @@ void CNCCode::HighlightBlock(long pos)
 			break;
 		}
 	}
+	DestroyGLLists();
 }
