@@ -47,7 +47,7 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 void PathLine::WriteXML(TiXmlElement *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "p" );
+	element = new TiXmlElement( "line" );
 	root->LinkEndChild( element ); 
 	element->SetDoubleAttribute("x", m_x[0]);
 	element->SetDoubleAttribute("y", m_x[1]);
@@ -68,21 +68,22 @@ void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
 
 void PathLine::glVertices(const PathObject* prev_po)
 {
+	if(prev_po)glVertex3dv(prev_po->m_x);
 	glVertex3dv(m_x);
 }
 
 void PathArc::WriteXML(TiXmlElement *root)
 {
-	TiXmlElement * element;
-	if(GetType() == 1)element = new TiXmlElement( "acw" );
-	else element = new TiXmlElement( "cw" );
+	TiXmlElement * element = new TiXmlElement( "arc" );
 	root->LinkEndChild( element ); 
+
 	element->SetDoubleAttribute("x", m_x[0]);
 	element->SetDoubleAttribute("y", m_x[1]);
 	element->SetDoubleAttribute("z", m_x[2]);
 	element->SetDoubleAttribute("i", m_c[0]);
 	element->SetDoubleAttribute("j", m_c[1]);
 	element->SetDoubleAttribute("k", m_c[2]);
+	element->SetDoubleAttribute("d", m_dir);
 }
 
 void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
@@ -97,6 +98,7 @@ void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
 		else if(name == "i"){m_c[0] = a->DoubleValue();}
 		else if(name == "j"){m_c[1] = a->DoubleValue();}
 		else if(name == "k"){m_c[2] = a->DoubleValue();}
+		else if(name == "d"){m_dir = a->IntValue();}
 	}
 }
 
@@ -115,7 +117,7 @@ void PathArc::glVertices(const PathObject* prev_po)
 	double start_angle = atan2(sy, sx);
 	double end_angle = atan2(ey, ex);
 
-	if(GetType() == 1){
+	if(m_dir == 1){
 		if(end_angle < start_angle)end_angle += 6.283185307179;
 	}
 	else{
@@ -123,6 +125,7 @@ void PathArc::glVertices(const PathObject* prev_po)
 	}
 
 	double angle_step = (end_angle - start_angle) / 10;
+	glVertex3dv(prev_po->m_x);
 	for(int i = 0; i< 10; i++)
 	{
 		double angle = start_angle + angle_step * (i + 1);
@@ -165,12 +168,11 @@ void ColouredPath::glCommands()
 {
 	CNCCode::m_lines_colors[m_color_type].glColor();
 	glBegin(GL_LINE_STRIP);
-	const PathObject* prev_po = NULL;
 	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
 		PathObject* po = *It;
-		po->glVertices(prev_po);
-		prev_po = po;
+		po->glVertices(CNCCode::prev_po);
+		CNCCode::prev_po = po;
 	}
 	glEnd();
 }
@@ -221,21 +223,15 @@ void ColouredPath::ReadFromXMLElement(TiXmlElement* element)
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
-		if(name == "p")
+		if(name == "line")
 		{
 			PathLine *new_object = new PathLine;
 			new_object->ReadFromXMLElement(pElem);
 			m_points.push_back(new_object);
 		}
-		else if(name == "acw")
+		else if(name == "arc")
 		{
-			PathAcwArc *new_object = new PathAcwArc;
-			new_object->ReadFromXMLElement(pElem);
-			m_points.push_back(new_object);
-		}
-		else if(name == "cw")
-		{
-			PathCwArc *new_object = new PathCwArc;
+			PathArc *new_object = new PathArc;
 			new_object->ReadFromXMLElement(pElem);
 			m_points.push_back(new_object);
 		}
@@ -246,11 +242,15 @@ HeeksObj *CNCCodeBlock::MakeACopy(void)const{return new CNCCodeBlock(*this);}
 
 void CNCCodeBlock::glCommands(bool select, bool marked, bool no_color)
 {
+	if(marked)glLineWidth(3);
+
 	for(std::list<ColouredPath>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
 	{
 		ColouredPath& line_strip = *It;
 		line_strip.glCommands();
 	}
+
+	if(marked)glLineWidth(1);
 }
 
 void CNCCodeBlock::GetBox(CBox &box)
@@ -258,7 +258,7 @@ void CNCCodeBlock::GetBox(CBox &box)
 	for(std::list<ColouredPath>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
 	{
 		ColouredPath& line_strip = *It;
-		line_strip.glCommands();
+		line_strip.GetBox(box);
 	}
 }
 
@@ -300,7 +300,7 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 			new_object->m_text.push_back(t);
 			CNCCode::pos += t.m_str.Len();
 		}
-		else if(name == "lines" || name == "path")
+		else if(name == "path")
 		{
 			ColouredPath l;
 			l.ReadFromXMLElement(pElem);
@@ -335,19 +335,35 @@ void CNCCodeBlock::AppendTextCtrl(wxTextCtrl *textCtrl)
 }
 
 long CNCCode::pos = 0;
+// static
+PathObject* CNCCode::prev_po = NULL;
 
 HeeksColor CNCCode::m_text_colors[MaxTextColorTypes] = {
 	HeeksColor(0, 0, 0),
-	HeeksColor(0, 255, 0),
-	HeeksColor(0, 0, 255),
-	HeeksColor(255, 0, 0)
+	HeeksColor(0, 128, 255),
+	HeeksColor(128, 255, 255),
+	HeeksColor(128, 128, 255),
+	HeeksColor(128, 128, 128),
+	HeeksColor(255, 128, 128),
+	HeeksColor(255, 128, 255),
+	HeeksColor(255, 0, 255),
+	HeeksColor(255, 255, 0),
+	HeeksColor(255, 0, 0),
+	HeeksColor(0, 255, 0)
 };
 
 std::string CNCCode::m_text_colors_str[MaxTextColorTypes] = {
 	std::string("default"), // won't get written
-	std::string("block"),
+	std::string("blocknum"),
+	std::string("misc"),
+	std::string("program"),
+	std::string("tool"),
+	std::string("comment"),
+	std::string("variable"),
 	std::string("prep"),
-	std::string("axis")
+	std::string("axis"),
+	std::string("rapid"),
+	std::string("feed")
 };
 
 HeeksColor CNCCode::m_lines_colors[MaxLinesColorType] = {
@@ -403,22 +419,17 @@ void CNCCode::glCommands(bool select, bool marked, bool no_color)
 		glNewList(m_gl_list, GL_COMPILE_AND_EXECUTE);
 
 		// render all the blocks
+		CNCCode::prev_po = NULL;
+
 		for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 		{
 			CNCCodeBlock* block = *It;
 			glPushName((unsigned long)block);
-			block->glCommands(true, false, false);
+			block->glCommands(true, block == m_highlighted_block, false);
 			glPopName();
 		}
 
 		glEndList();
-	}
-
-	if(m_highlighted_block)
-	{
-		glLineWidth(3);
-		m_highlighted_block->glCommands(false, false, false);
-		glLineWidth(1);
 	}
 }
 
@@ -488,11 +499,13 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 				if(object && object->GetType() == NCCodeBlockType)
 				{
 					m_highlighted_block = (CNCCodeBlock*)object;
-					int pos = m_highlighted_block->m_to_pos;
+					int from_pos = m_highlighted_block->m_from_pos;
+					int to_pos = m_highlighted_block->m_to_pos;
+					DestroyGLLists();
 #ifdef WIN32
-					pos -= 2;
+					to_pos -= 2;
 #endif
-					theApp.m_output_canvas->m_textCtrl->SetInsertionPoint(pos);
+					theApp.m_output_canvas->m_textCtrl->SetSelection(from_pos, to_pos);
 					theApp.m_output_canvas->m_textCtrl->SetFocus();
 				}
 			}
