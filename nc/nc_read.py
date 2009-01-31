@@ -54,17 +54,29 @@ class Parser:
         if (col != None) : self.file_out.write('\t\t\t<text col="'+col+'">'+s+'</text>\n')
         else : self.file_out.write('\t\t\t<text>'+s+'</text>\n')
 
-    def begin_lines(self, col=None):
-        if (col != None) : self.file_out.write('\t\t\t<lines col="'+col+'">\n')
-        else : self.file_out.write('\t\t\t<lines>\n')
+    def begin_path(self, col=None):
+        if (col != None) : self.file_out.write('\t\t\t<path col="'+col+'">\n')
+        else : self.file_out.write('\t\t\t<path>\n')
 
-    def end_lines(self):
-        self.file_out.write('\t\t\t</lines>\n')
+    def end_path(self):
+        self.file_out.write('\t\t\t</path>\n')
 
-    def add_point(self, x=None, y=None, z=None):
+    def add_line(self, x=None, y=None, z=None):
         if (x == None and y == None and z == None) : return
-        self.file_out.write('\t\t\t\t<p')
+        self.file_out.write('\t\t\t\t<line')
         if (x != None) : self.file_out.write(' x="%.6f"' % x)
         if (y != None) : self.file_out.write(' y="%.6f"' % y)
         if (z != None) : self.file_out.write(' z="%.6f"' % z)
+        self.file_out.write(' />\n')
+
+    def add_arc(self, x=None, y=None, z=None, i=None, j=None, k=None, d=None):
+        if (x == None and y == None and z == None and i == None and j == None and k == None) : return
+        self.file_out.write('\t\t\t\t<arc')
+        if (x != None) : self.file_out.write(' x="%.6f"' % x)
+        if (y != None) : self.file_out.write(' y="%.6f"' % y)
+        if (z != None) : self.file_out.write(' z="%.6f"' % z)
+        if (i != None) : self.file_out.write(' i="%.6f"' % i)
+        if (j != None) : self.file_out.write(' j="%.6f"' % j)
+        if (k != None) : self.file_out.write(' k="%.6f"' % k)
+        if (d != None) : self.file_out.write(' d="%i"' % d)
         self.file_out.write(' />\n')

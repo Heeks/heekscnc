@@ -41,10 +41,12 @@ class ParserIso(nc.Parser):
             self.begin_ncblock()
 
             move = False;
+            arc = 0;
+            path_col = None
 
             words = self.pattern_main.findall(self.line)
             for word in words:
-                col = "plain"
+                col = None
                 if (word[0] == 'A' or word[0] == 'a'):
                     col = "axis"
                     self.a = self.mul * eval(word[1:])
@@ -61,10 +63,20 @@ class ParserIso(nc.Parser):
                     col = "axis"
                     self.f = self.mul * eval(word[1:])
                     move = True
-                elif (word == 'G0' or word == 'G00' or word == 'g0' or word == 'g00') : col = "rapid"
-                elif (word == 'G1' or word == 'G01' or word == 'g1' or word == 'g01') : col = "feed"
-                elif (word == 'G2' or word == 'G02' or word == 'g2' or word == 'g02') : col = "feed"
-                elif (word == 'G3' or word == 'G03' or word == 'g3' or word == 'g03') : col = "feed"
+                elif (word == 'G0' or word == 'G00' or word == 'g0' or word == 'g00'):
+                    path_col = "rapid"
+                    col = "rapid"
+                elif (word == 'G1' or word == 'G01' or word == 'g1' or word == 'g01'):
+                    path_col = "feed"
+                    col = "feed"
+                elif (word == 'G2' or word == 'G02' or word == 'g2' or word == 'g02' or word == 'G12' or word == 'g12'):
+                    path_col = "feed"
+                    col = "feed"
+                    arc = -1
+                elif (word == 'G3' or word == 'G03' or word == 'g3' or word == 'g03' or word == 'G13' or word == 'g13'):
+                    path_col = "feed"
+                    col = "feed"
+                    arc = +1
                 elif (word == 'G20'):
                     col = "prep"
                     self.mul = 25.4
@@ -121,9 +133,10 @@ class ParserIso(nc.Parser):
                 self.add_text(word, col)
 
             if (move):
-                self.begin_lines()
-                self.add_point(self.x, self.y, self.z)
-                self.end_lines()
+                self.begin_path(path_col)
+                if (arc) : self.add_arc(self.x, self.y, self.z, self.i, self.j, self.k, arc)
+                else     : self.add_line(self.x, self.y, self.z)
+                self.end_path()
 
             self.end_ncblock()
 

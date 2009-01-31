@@ -53,7 +53,7 @@ bool HeeksPyPostProcess()
 	return false;
 }
 
-bool HeeksPyBackplot()
+bool HeeksPyBackplot(const wxString &filepath)
 {
 	try{
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
@@ -62,24 +62,8 @@ bool HeeksPyBackplot()
 
 		// call the python file
 #ifdef WIN32
-		wxString filename = theApp.GetDllFolder() + wxString(_T("/backplot.py"));
-		wxString ext = (_T("py"));
-		wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
-		if ( !ft )
-		{
-			wxMessageBox(wxString::Format(_("Impossible to determine the file type for extension '%s'"), ext.c_str()));
-			return false;
-		}
-
-		wxString cmd;
-		bool ok = ft->GetOpenCommand(&cmd, wxFileType::MessageParameters(filename));
-		if ( !ok )
-		{
-			wxMessageBox(wxString::Format(_("Impossible to find out how to open files of extension '%s'"), ext.c_str()));
-			return false;
-		}
-
-		wxExecute(cmd, wxEXEC_SYNC);
+		wxString py_file_str = wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" iso ") + filepath;
+		wxExecute(py_file_str, wxEXEC_SYNC);
 #else
 		wxString py_file_str = theApp.GetDllFolder() + wxString(_T("/backplot.py"));
 		wxExecute(wxString(_T("python ")) + py_file_str, wxEXEC_SYNC);
@@ -88,7 +72,7 @@ bool HeeksPyBackplot()
 		heeksCAD->GetMainFrame()->Raise();
 
 		// there should now be nccode.xml written
-		wxString xml_file_str = theApp.GetDllFolder() + wxString(_T("/nccode.xml"));
+		wxString xml_file_str = theApp.GetDllFolder() + wxString(_T("/")) + filepath + wxString(_T(".xml"));
 		wxFile ofs(xml_file_str.c_str());
 		if(!ofs.IsOpened())
 		{
@@ -109,19 +93,3 @@ bool HeeksPyBackplot()
 	return false;
 }
 
-bool HeeksPyBackplot(const wxString &filepath)
-{
-	{
-		wxString backplot_file_str = theApp.GetDllFolder() + _T("/backplotfile.txt");
-		wxFile ofs(backplot_file_str.c_str(), wxFile::write);
-		if(!ofs.IsOpened())
-		{
-			wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + backplot_file_str);
-			return false;
-		}
-
-		ofs.Write(filepath.c_str());
-	}
-
-	return HeeksPyBackplot();
-}
