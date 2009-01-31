@@ -65,7 +65,7 @@ bool HeeksPyBackplot(const wxString &filepath)
 		wxString py_file_str = wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" iso ") + filepath;
 		wxExecute(py_file_str, wxEXEC_SYNC);
 #else
-		wxString py_file_str = theApp.GetDllFolder() + wxString(_T("/backplot.py"));
+		wxString py_file_str = wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("/nc/iso_read.py\" ")) + filepath;
 		wxExecute(wxString(_T("python ")) + py_file_str, wxEXEC_SYNC);
 #endif
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
