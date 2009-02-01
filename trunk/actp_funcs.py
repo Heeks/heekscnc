@@ -13,11 +13,16 @@ def cut(stl_file):
         nlinkpaths = actp.getnumlinkpths(path)
         z = actp.getz(path)
         start_pos = 0
+        FirstZDone = False
         for brk in range(0, nbreaks):
             brkpos = actp.getbreak(path, brk)
             for point in range(start_pos, brkpos):
                 x, y = actp.getpoint(path, point)
-                feed(x, y, z)
+                if FirstZDone == False:
+                    feed(x, y, z)
+                    FirstZDone = True
+                else:
+                    feed(x, y)
             start_pos = brkpos
             nlinkpoints = actp.getnumlinkpoints(path, brk)
             for linkpoint in range(0, nlinkpoints):
