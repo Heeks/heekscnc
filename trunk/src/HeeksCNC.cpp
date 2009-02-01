@@ -112,6 +112,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	config.Read(_T("ProgramVisible"), &program_visible);
 	config.Read(_T("OutputVisible"), &output_visible);
 
+	// Read NC Code colors
+	CNCCode::ReadColorsFromConfig();
+
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
 
@@ -158,6 +161,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 }
 
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
+	CNCCode::GetOptions(list);
 }
 
 void CHeeksCNCApp::OnFrameDelete()
@@ -166,6 +170,8 @@ void CHeeksCNCApp::OnFrameDelete()
 	CNCConfig config;
 	config.Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
 	config.Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
+
+	CNCCode::WriteColorsToConfig();
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
