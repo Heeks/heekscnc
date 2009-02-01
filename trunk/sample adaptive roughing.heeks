@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<HeeksCAD_Document>
+    <Program machine="nc.iso" output_file="test.tap" program="import sys&#x0A;sys.path.insert(0,&apos;../../../libactp/PythonLib&apos;)&#x0A;import actp&#x0A;from nc.nc import *&#x0A;import nc.iso&#x0A;&#x0A;output(&apos;test.tap&apos;)&#x0A;program_begin(123, &apos;Test program&apos;)&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;actp.makerough(&apos;cone.stl&apos;)&#x0A;&#x0A;npaths = actp.getnumpaths()&#x0A;for path in range(0, npaths):&#x0A;    npoints = actp.getnumpoints(path)&#x0A;    nbreaks = actp.getnumbreaks(path)&#x0A;    nlinkpaths = actp.getnumlinkpths(path)&#x0A;    z = actp.getz(path)&#x0A;    start_pos = 0&#x0A;    for brk in range(0, nbreaks):&#x0A;        brkpos = actp.getbreak(path, brk)&#x0A;        for point in range(start_pos, brkpos):&#x0A;            x, y = actp.getpoint(path, point)&#x0A;            feed(x, y, z)&#x0A;        start_pos = brkpos&#x0A;        nlinkpoints = actp.getnumlinkpoints(path, brk)&#x0A;        for linkpoint in range(0, nlinkpoints):&#x0A;            x, y, z = actp.getlinkpoint(path, brk, linkpoint)&#x0A;            rapid(x, y, z)            &#x0A;">
+        <Operations />
+    </Program>
+</HeeksCAD_Document>

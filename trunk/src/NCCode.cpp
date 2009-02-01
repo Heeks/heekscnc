@@ -363,14 +363,14 @@ void CNCCode::ReadColorsFromConfig()
 	CNCConfig config;
 	long col;
 	config.Read(_T("TextColorDefaultType"),		&col, HeeksColor(0, 0, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorDefaultType] = HeeksColor(col);
-	config.Read(_T("TextColorBlockType"),		&col, HeeksColor(0, 222, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorBlockType] = HeeksColor(col);
+	config.Read(_T("TextColorBlockType"),		&col, HeeksColor(0, 0, 222).COLORREF_color()); CNCCode::m_text_colors[TextColorBlockType] = HeeksColor(col);
 	config.Read(_T("TextColorMiscType"),		&col, HeeksColor(0, 200, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorMiscType] = HeeksColor(col);
 	config.Read(_T("TextColorProgramType"),		&col, HeeksColor(255, 128, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorProgramType] = HeeksColor(col);
 	config.Read(_T("TextColorToolType"),		&col, HeeksColor(200, 200, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorToolType] = HeeksColor(col);
 	config.Read(_T("TextColorCommentType"),		&col, HeeksColor(0, 200, 200).COLORREF_color()); CNCCode::m_text_colors[TextColorCommentType] = HeeksColor(col);
 	config.Read(_T("TextColorVariableType"),	&col, HeeksColor(164, 88, 188).COLORREF_color()); CNCCode::m_text_colors[TextColorVariableType] = HeeksColor(col);
 	config.Read(_T("TextColorPrepType"),		&col, HeeksColor(255, 0, 175).COLORREF_color()); CNCCode::m_text_colors[TextColorPrepType] = HeeksColor(col);
-	config.Read(_T("TextColorAxisType"),		&col, HeeksColor(189, 86, 86).COLORREF_color()); CNCCode::m_text_colors[TextColorAxisType] = HeeksColor(col);
+	config.Read(_T("TextColorAxisType"),		&col, HeeksColor(128, 0, 255).COLORREF_color()); CNCCode::m_text_colors[TextColorAxisType] = HeeksColor(col);
 	config.Read(_T("TextColorRapidType"),		&col, HeeksColor(222, 0, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorRapidType] = HeeksColor(col);
 	config.Read(_T("TextColorFeedType"),		&col, HeeksColor(0, 179, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorFeedType] = HeeksColor(col);
 
