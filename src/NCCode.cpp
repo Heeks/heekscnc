@@ -5,6 +5,9 @@
 #include "../../tinyxml/tinyxml.h"
 #include "OutputCanvas.h"
 #include "../../interface/MarkedObject.h"
+#include "../../interface/PropertyColor.h"
+#include "../../interface/PropertyList.h"
+#include "CNCConfig.h"
 
 void ColouredText::WriteXML(TiXmlElement *root)
 {
@@ -338,19 +341,7 @@ long CNCCode::pos = 0;
 // static
 PathObject* CNCCode::prev_po = NULL;
 
-HeeksColor CNCCode::m_text_colors[MaxTextColorTypes] = {
-	HeeksColor(0, 0, 0),
-	HeeksColor(0, 128, 255),
-	HeeksColor(128, 255, 255),
-	HeeksColor(128, 128, 255),
-	HeeksColor(128, 128, 128),
-	HeeksColor(255, 128, 128),
-	HeeksColor(255, 128, 255),
-	HeeksColor(255, 0, 255),
-	HeeksColor(255, 255, 0),
-	HeeksColor(255, 0, 0),
-	HeeksColor(0, 255, 0)
-};
+HeeksColor CNCCode::m_text_colors[MaxTextColorTypes];
 
 std::string CNCCode::m_text_colors_str[MaxTextColorTypes] = {
 	std::string("default"), // won't get written
@@ -366,10 +357,91 @@ std::string CNCCode::m_text_colors_str[MaxTextColorTypes] = {
 	std::string("feed")
 };
 
-HeeksColor CNCCode::m_lines_colors[MaxLinesColorType] = {
-	HeeksColor(255, 0, 0),
-	HeeksColor(0, 255, 0)
-};
+// static
+void CNCCode::ReadColorsFromConfig()
+{
+	CNCConfig config;
+	long col;
+	config.Read(_T("TextColorDefaultType"),		&col, RGB(0, 0, 0)); CNCCode::m_text_colors[TextColorDefaultType] = HeeksColor(col);
+	config.Read(_T("TextColorBlockType"),		&col, RGB(0, 222, 0)); CNCCode::m_text_colors[TextColorBlockType] = HeeksColor(col);
+	config.Read(_T("TextColorMiscType"),		&col, RGB(0, 200, 0)); CNCCode::m_text_colors[TextColorMiscType] = HeeksColor(col);
+	config.Read(_T("TextColorProgramType"),		&col, RGB(255, 128, 0)); CNCCode::m_text_colors[TextColorProgramType] = HeeksColor(col);
+	config.Read(_T("TextColorToolType"),		&col, RGB(200, 200, 0)); CNCCode::m_text_colors[TextColorToolType] = HeeksColor(col);
+	config.Read(_T("TextColorCommentType"),		&col, RGB(0, 200, 200)); CNCCode::m_text_colors[TextColorCommentType] = HeeksColor(col);
+	config.Read(_T("TextColorVariableType"),	&col, RGB(164, 88, 188)); CNCCode::m_text_colors[TextColorVariableType] = HeeksColor(col);
+	config.Read(_T("TextColorPrepType"),		&col, RGB(255, 0, 175)); CNCCode::m_text_colors[TextColorPrepType] = HeeksColor(col);
+	config.Read(_T("TextColorAxisType"),		&col, RGB(189, 86, 86)); CNCCode::m_text_colors[TextColorAxisType] = HeeksColor(col);
+	config.Read(_T("TextColorRapidType"),		&col, RGB(222, 0, 0)); CNCCode::m_text_colors[TextColorRapidType] = HeeksColor(col);
+	config.Read(_T("TextColorFeedType"),		&col, RGB(0, 179, 0)); CNCCode::m_text_colors[TextColorFeedType] = HeeksColor(col);
+
+	config.Read(_T("LinesColorRapidType"),		&col, RGB(255, 0, 0)); CNCCode::m_lines_colors[LinesColorRapidType] = HeeksColor(col);
+	config.Read(_T("LinesColorFeedType"),		&col, RGB(0, 255, 0)); CNCCode::m_lines_colors[LinesColorFeedType] = HeeksColor(col);
+}
+
+// static
+void CNCCode::WriteColorsToConfig()
+{
+	CNCConfig config;
+
+	config.Write(_T("TextColorDefaultType"),	CNCCode::m_text_colors[TextColorDefaultType	].COLORREF_color());
+	config.Write(_T("TextColorBlockType"),		CNCCode::m_text_colors[TextColorBlockType	].COLORREF_color());
+	config.Write(_T("TextColorMiscType"),		CNCCode::m_text_colors[TextColorMiscType	].COLORREF_color());
+	config.Write(_T("TextColorProgramType"),	CNCCode::m_text_colors[TextColorProgramType	].COLORREF_color());
+	config.Write(_T("TextColorToolType"),		CNCCode::m_text_colors[TextColorToolType	].COLORREF_color());
+	config.Write(_T("TextColorCommentType"),	CNCCode::m_text_colors[TextColorCommentType	].COLORREF_color());
+	config.Write(_T("TextColorVariableType"),	CNCCode::m_text_colors[TextColorVariableType].COLORREF_color());
+	config.Write(_T("TextColorPrepType"),		CNCCode::m_text_colors[TextColorPrepType	].COLORREF_color());
+	config.Write(_T("TextColorAxisType"),		CNCCode::m_text_colors[TextColorAxisType	].COLORREF_color());
+	config.Write(_T("TextColorRapidType"),		CNCCode::m_text_colors[TextColorRapidType	].COLORREF_color());
+	config.Write(_T("TextColorFeedType"),		CNCCode::m_text_colors[TextColorFeedType	].COLORREF_color());
+
+	config.Write(_T("LinesColorRapidType"),		CNCCode::m_lines_colors[LinesColorRapidType	].COLORREF_color());
+	config.Write(_T("LinesColorFeedType"),		CNCCode::m_lines_colors[LinesColorFeedType	].COLORREF_color());
+}
+
+void on_set_default_color	(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorDefaultType	] = value;}
+void on_set_block_color		(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorBlockType		] = value;}
+void on_set_misc_color		(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorMiscType		] = value;}
+void on_set_program_color	(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorProgramType	] = value;}
+void on_set_tool_color		(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorToolType		] = value;}
+void on_set_comment_color	(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorCommentType	] = value;}
+void on_set_variable_color	(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorVariableType	] = value;}
+void on_set_prep_color		(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorPrepType		] = value;}
+void on_set_axis_color		(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorAxisType		] = value;}
+void on_set_rapid_color		(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorRapidType		] = value;}
+void on_set_feed_color		(HeeksColor value, HeeksObj* object)	{CNCCode::m_text_colors[TextColorFeedType		] = value;}
+
+void on_set_path_rapid_color(HeeksColor value, HeeksObj* object)	{CNCCode::m_lines_colors[LinesColorRapidType] = value;}
+void on_set_path_feed_color	(HeeksColor value, HeeksObj* object)	{CNCCode::m_lines_colors[LinesColorFeedType	] = value;}
+
+// static
+void CNCCode::GetOptions(std::list<Property *> *list)
+{
+	PropertyList* nc_options = new PropertyList(_("nc options"));
+
+	PropertyList* text_colors = new PropertyList(_("text colors"));
+	text_colors->m_list.push_back ( new PropertyColor ( _("default color"),		CNCCode::m_text_colors[TextColorDefaultType		], NULL, on_set_default_color	 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("block color"),		CNCCode::m_text_colors[TextColorBlockType		], NULL, on_set_block_color		 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("misc color"),		CNCCode::m_text_colors[TextColorMiscType		], NULL, on_set_misc_color		 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("program color	"),	CNCCode::m_text_colors[TextColorProgramType		], NULL, on_set_program_color	 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("tool color"),		CNCCode::m_text_colors[TextColorToolType		], NULL, on_set_tool_color		 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("comment color	"),	CNCCode::m_text_colors[TextColorCommentType		], NULL, on_set_comment_color	 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("variable color"),	CNCCode::m_text_colors[TextColorVariableType	], NULL, on_set_variable_color	 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("prep color"),		CNCCode::m_text_colors[TextColorPrepType		], NULL, on_set_prep_color		 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("axis color"),		CNCCode::m_text_colors[TextColorAxisType		], NULL, on_set_axis_color		 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("rapid color"),		CNCCode::m_text_colors[TextColorRapidType		], NULL, on_set_rapid_color		 ) );
+	text_colors->m_list.push_back ( new PropertyColor ( _("feed color"),		CNCCode::m_text_colors[TextColorFeedType		], NULL, on_set_feed_color		 ) );
+	nc_options->m_list.push_back(text_colors);
+
+	PropertyList* graphics_colors = new PropertyList(_("graphics colors"));
+	graphics_colors->m_list.push_back ( new PropertyColor ( _("rapid color"),	CNCCode::m_lines_colors[LinesColorRapidType		], NULL, on_set_path_rapid_color	 ) );
+	graphics_colors->m_list.push_back ( new PropertyColor ( _("feed color"),	CNCCode::m_lines_colors[LinesColorFeedType		], NULL, on_set_path_feed_color		 ) );
+	nc_options->m_list.push_back(graphics_colors);
+
+	list->push_back(nc_options);
+}
+
+HeeksColor CNCCode::m_lines_colors[MaxLinesColorType];
 	
 std::string CNCCode::m_lines_colors_str[MaxLinesColorType] = {
 	std::string("rapid"),
