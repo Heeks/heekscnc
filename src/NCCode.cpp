@@ -362,20 +362,20 @@ void CNCCode::ReadColorsFromConfig()
 {
 	CNCConfig config;
 	long col;
-	config.Read(_T("TextColorDefaultType"),		&col, RGB(0, 0, 0)); CNCCode::m_text_colors[TextColorDefaultType] = HeeksColor(col);
-	config.Read(_T("TextColorBlockType"),		&col, RGB(0, 222, 0)); CNCCode::m_text_colors[TextColorBlockType] = HeeksColor(col);
-	config.Read(_T("TextColorMiscType"),		&col, RGB(0, 200, 0)); CNCCode::m_text_colors[TextColorMiscType] = HeeksColor(col);
-	config.Read(_T("TextColorProgramType"),		&col, RGB(255, 128, 0)); CNCCode::m_text_colors[TextColorProgramType] = HeeksColor(col);
-	config.Read(_T("TextColorToolType"),		&col, RGB(200, 200, 0)); CNCCode::m_text_colors[TextColorToolType] = HeeksColor(col);
-	config.Read(_T("TextColorCommentType"),		&col, RGB(0, 200, 200)); CNCCode::m_text_colors[TextColorCommentType] = HeeksColor(col);
-	config.Read(_T("TextColorVariableType"),	&col, RGB(164, 88, 188)); CNCCode::m_text_colors[TextColorVariableType] = HeeksColor(col);
-	config.Read(_T("TextColorPrepType"),		&col, RGB(255, 0, 175)); CNCCode::m_text_colors[TextColorPrepType] = HeeksColor(col);
-	config.Read(_T("TextColorAxisType"),		&col, RGB(189, 86, 86)); CNCCode::m_text_colors[TextColorAxisType] = HeeksColor(col);
-	config.Read(_T("TextColorRapidType"),		&col, RGB(222, 0, 0)); CNCCode::m_text_colors[TextColorRapidType] = HeeksColor(col);
-	config.Read(_T("TextColorFeedType"),		&col, RGB(0, 179, 0)); CNCCode::m_text_colors[TextColorFeedType] = HeeksColor(col);
+	config.Read(_T("TextColorDefaultType"),		&col, HeeksColor(0, 0, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorDefaultType] = HeeksColor(col);
+	config.Read(_T("TextColorBlockType"),		&col, HeeksColor(0, 222, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorBlockType] = HeeksColor(col);
+	config.Read(_T("TextColorMiscType"),		&col, HeeksColor(0, 200, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorMiscType] = HeeksColor(col);
+	config.Read(_T("TextColorProgramType"),		&col, HeeksColor(255, 128, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorProgramType] = HeeksColor(col);
+	config.Read(_T("TextColorToolType"),		&col, HeeksColor(200, 200, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorToolType] = HeeksColor(col);
+	config.Read(_T("TextColorCommentType"),		&col, HeeksColor(0, 200, 200).COLORREF_color()); CNCCode::m_text_colors[TextColorCommentType] = HeeksColor(col);
+	config.Read(_T("TextColorVariableType"),	&col, HeeksColor(164, 88, 188).COLORREF_color()); CNCCode::m_text_colors[TextColorVariableType] = HeeksColor(col);
+	config.Read(_T("TextColorPrepType"),		&col, HeeksColor(255, 0, 175).COLORREF_color()); CNCCode::m_text_colors[TextColorPrepType] = HeeksColor(col);
+	config.Read(_T("TextColorAxisType"),		&col, HeeksColor(189, 86, 86).COLORREF_color()); CNCCode::m_text_colors[TextColorAxisType] = HeeksColor(col);
+	config.Read(_T("TextColorRapidType"),		&col, HeeksColor(222, 0, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorRapidType] = HeeksColor(col);
+	config.Read(_T("TextColorFeedType"),		&col, HeeksColor(0, 179, 0).COLORREF_color()); CNCCode::m_text_colors[TextColorFeedType] = HeeksColor(col);
 
-	config.Read(_T("LinesColorRapidType"),		&col, RGB(255, 0, 0)); CNCCode::m_lines_colors[LinesColorRapidType] = HeeksColor(col);
-	config.Read(_T("LinesColorFeedType"),		&col, RGB(0, 255, 0)); CNCCode::m_lines_colors[LinesColorFeedType] = HeeksColor(col);
+	config.Read(_T("LinesColorRapidType"),		&col, HeeksColor(255, 0, 0).COLORREF_color()); CNCCode::m_lines_colors[LinesColorRapidType] = HeeksColor(col);
+	config.Read(_T("LinesColorFeedType"),		&col, HeeksColor(0, 255, 0).COLORREF_color()); CNCCode::m_lines_colors[LinesColorFeedType] = HeeksColor(col);
 }
 
 // static
