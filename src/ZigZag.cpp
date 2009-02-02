@@ -91,19 +91,19 @@ void CZigZagParams::WriteXMLAttributes(TiXmlElement *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
-	element->SetAttribute("toold", m_tool_diameter);
-	element->SetAttribute("cornerrad", m_corner_radius);
-	element->SetAttribute("minx", m_box.m_x[0]);
-	element->SetAttribute("maxx", m_box.m_x[3]);
-	element->SetAttribute("miny", m_box.m_x[1]);
-	element->SetAttribute("maxy", m_box.m_x[4]);
-	element->SetAttribute("z0", m_box.m_x[2]);
-	element->SetAttribute("z1", m_box.m_x[5]);
-	element->SetAttribute("dx", m_dx);
-	element->SetAttribute("dy", m_dy);
-	element->SetAttribute("hfeed", m_horizontal_feed_rate);
-	element->SetAttribute("vfeed", m_vertical_feed_rate);
-	element->SetAttribute("spin", m_spindle_speed);
+	element->SetDoubleAttribute("toold", m_tool_diameter);
+	element->SetDoubleAttribute("cornerrad", m_corner_radius);
+	element->SetDoubleAttribute("minx", m_box.m_x[0]);
+	element->SetDoubleAttribute("maxx", m_box.m_x[3]);
+	element->SetDoubleAttribute("miny", m_box.m_x[1]);
+	element->SetDoubleAttribute("maxy", m_box.m_x[4]);
+	element->SetDoubleAttribute("z0", m_box.m_x[2]);
+	element->SetDoubleAttribute("z1", m_box.m_x[5]);
+	element->SetDoubleAttribute("dx", m_dx);
+	element->SetDoubleAttribute("dy", m_dy);
+	element->SetDoubleAttribute("hfeed", m_horizontal_feed_rate);
+	element->SetDoubleAttribute("vfeed", m_vertical_feed_rate);
+	element->SetDoubleAttribute("spin", m_spindle_speed);
 	element->SetAttribute("dir", m_direction);
 }
 
@@ -126,7 +126,7 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 		else if(name == "hfeed"){m_horizontal_feed_rate = a->DoubleValue();}
 		else if(name == "vfeed"){m_vertical_feed_rate = a->DoubleValue();}
 		else if(name == "spin"){m_spindle_speed = a->DoubleValue();}
-		else if(name == "spin"){m_spindle_speed = a->DoubleValue();}
+		else if(name == "dir"){m_direction = a->IntValue();}
 	}
 }
 
