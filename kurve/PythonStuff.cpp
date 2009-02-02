@@ -72,7 +72,7 @@ static PyObject* kurve_new(PyObject* self, PyObject* args)
 	valid_kurves.insert(new_object);
 
 	// return new object cast to an int
-	PyObject *pValue = PyInt_FromLong((int)new_object);
+	PyObject *pValue = PyInt_FromLong((long)new_object);
 	Py_INCREF(pValue);
 	return pValue;
 }
