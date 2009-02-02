@@ -24,6 +24,8 @@ HeeksCAD
 
 You need to add pycam, if you want to do zig zag machining, so the folders will need to be like this:
 
+( on my Windows computer for example C:\Users\Dan\HeeksCAD\HeeksCNC\PyCam\trunk\pycam\Geometry )
+
 
 
 HeeksCAD
@@ -42,7 +44,7 @@ HeeksCAD
 
 ------nc
 
-------PyCAM
+------PyCam
 
 ---------branches
 
