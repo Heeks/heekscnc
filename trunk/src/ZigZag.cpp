@@ -86,7 +86,7 @@ void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 	}
 }
 
-void CZigZagParams::WriteXMLAttributes(TiXmlElement *root)
+void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
@@ -185,7 +185,7 @@ bool CZigZag::CanAddTo(HeeksObj* owner)
 	return owner->GetType() == OperationsType;
 }
 
-void CZigZag::WriteXML(TiXmlElement *root)
+void CZigZag::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "ZigZag" );
 	root->LinkEndChild( element );  

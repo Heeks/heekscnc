@@ -19,7 +19,7 @@ public:
 	HeeksObj *MakeACopy(void)const{ return new COperations(*this);}
 	wxString GetIcon(){return _T("../HeeksCNC/icons/operations");}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
@@ -41,7 +41,7 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void GetProperties(std::list<Property *> *list);
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
 	bool CanBeRemoved(){return false;}

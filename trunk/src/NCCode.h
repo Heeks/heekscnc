@@ -38,7 +38,7 @@ public:
 	TextColorEnum m_color_type;
 	ColouredText():m_color_type(TextColorDefaultType){}
 
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
@@ -47,7 +47,7 @@ public:
 	double m_x[3];
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
 	virtual int GetType() = 0; // 0 - line, 1 - arc
-	virtual void WriteXML(TiXmlElement *root) = 0;
+	virtual void WriteXML(TiXmlNode *root) = 0;
 	virtual void ReadFromXMLElement(TiXmlElement* pElem) = 0;
 	virtual void glVertices(const PathObject* prev_po){}
 	virtual PathObject *MakeACopy(void)const = 0;
@@ -56,7 +56,7 @@ public:
 class PathLine : public PathObject{
 public:
 	int GetType(){return 0;}
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void glVertices(const PathObject* prev_po);
 	PathObject *MakeACopy(void)const{return new PathLine(*this);}
@@ -68,7 +68,7 @@ public:
 	int m_dir; // 1 - anti-clockwise, -1 - clockwise
 	PathArc(){m_c[0] = m_c[1] = m_c[2] = 0.0; m_dir = 1;}
 	int GetType(){return 1;}
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void glVertices(const PathObject* prev_po);
 	PathObject *MakeACopy(void)const{return new PathArc(*this);}
@@ -88,7 +88,7 @@ public:
 	void Clear();
 	void glCommands();
 	void GetBox(CBox &box);
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
@@ -106,7 +106,7 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AppendTextCtrl(wxTextCtrl *textCtrl);
@@ -143,7 +143,7 @@ public:
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	bool OneOfAKind(){return true;}

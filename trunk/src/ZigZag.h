@@ -20,7 +20,7 @@ public:
 	void set_initial_values(const std::list<int> &solids);
 	void write_values_to_config();
 	void GetProperties(CZigZag* parent, std::list<Property *> *list);
-	void WriteXMLAttributes(TiXmlElement* pElem);
+	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
@@ -41,7 +41,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
 	void AppendTextToProgram();
