@@ -134,7 +134,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 	if(!m_auto_roll_off)list->push_back(new PropertyVertex(_("roll_off_point"), m_roll_off_point, parent, on_set_roll_off_point));
 }
 
-void CProfileParams::WriteXMLAttributes(TiXmlElement *root)
+void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
@@ -431,7 +431,7 @@ bool CProfile::CanAddTo(HeeksObj* owner)
 	return owner->GetType() == OperationsType;
 }
 
-void CProfile::WriteXML(TiXmlElement *root)
+void CProfile::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Profile" );
 	root->LinkEndChild( element );  

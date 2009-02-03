@@ -11,7 +11,7 @@
 #include "Profile.h"
 #include "ZigZag.h"
 
-void COperations::WriteXML(TiXmlElement *root)
+void COperations::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "Operations" );
@@ -81,7 +81,7 @@ void CProgram::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_
 	}
 }
 
-void CProgram::WriteXML(TiXmlElement *root)
+void CProgram::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "Program" );

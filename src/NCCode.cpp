@@ -9,7 +9,7 @@
 #include "../../interface/PropertyList.h"
 #include "CNCConfig.h"
 
-void ColouredText::WriteXML(TiXmlElement *root)
+void ColouredText::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "text" );
@@ -47,7 +47,7 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 	m_str = wxString(Ctt(element->GetText()));
 }
 
-void PathLine::WriteXML(TiXmlElement *root)
+void PathLine::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "line" );
@@ -75,7 +75,7 @@ void PathLine::glVertices(const PathObject* prev_po)
 	glVertex3dv(m_x);
 }
 
-void PathArc::WriteXML(TiXmlElement *root)
+void PathArc::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "arc" );
 	root->LinkEndChild( element ); 
@@ -189,7 +189,7 @@ void ColouredPath::GetBox(CBox &box)
 	}
 }
 
-void ColouredPath::WriteXML(TiXmlElement *root)
+void ColouredPath::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "path" );
@@ -265,7 +265,7 @@ void CNCCodeBlock::GetBox(CBox &box)
 	}
 }
 
-void CNCCodeBlock::WriteXML(TiXmlElement *root)
+void CNCCodeBlock::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "ncblock" );
@@ -533,7 +533,7 @@ HeeksObj *CNCCode::MakeACopy(void)const{return new CNCCode(*this);}
 
 void CNCCode::CopyFrom(const HeeksObj* object){operator=(*((CNCCode*)object));}
 
-void CNCCode::WriteXML(TiXmlElement *root)
+void CNCCode::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "nccode" );

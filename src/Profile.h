@@ -25,7 +25,7 @@ public:
 	void set_initial_values();
 	void write_values_to_config();
 	void GetProperties(CProfile* parent, std::list<Property *> *list);
-	void WriteXMLAttributes(TiXmlElement* pElem);
+	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
 	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
@@ -47,7 +47,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
-	void WriteXML(TiXmlElement *root);
+	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
 	//int DoDialog();
