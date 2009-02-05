@@ -124,6 +124,7 @@ public:
 	int m_gl_list;
 	CBox m_box;
 	CNCCodeBlock* m_highlighted_block;
+	bool m_user_edited; // set, if the user has edited the nc code
 	static PathObject* prev_po;
 
 	CNCCode();

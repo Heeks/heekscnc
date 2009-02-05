@@ -25,6 +25,13 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
 
+enum ProgramUserType{
+	ProgramUserTypeUnkown,
+	ProgramUserTypeTree,
+	ProgramUserTypeScript,
+	ProgramUserTypeNC
+};
+
 class CProgram:public ObjList
 {
 public:
@@ -32,6 +39,7 @@ public:
 	wxString m_output_file;
 	CNCCode* m_nc_code;
 	COperations* m_operations;
+	bool m_script_edited;
 
 	CProgram();
 
@@ -54,4 +62,6 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void RewritePythonProgram();
+	ProgramUserType GetUserType();
+	void UpdateFromUserType();
 };
