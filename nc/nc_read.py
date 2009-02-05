@@ -16,15 +16,13 @@ class Parser:
 
     def files_open(self, name):
         self.file_in = open(name, 'r')
-        self.file_out = open(name+'.xml', 'w')
+        self.file_out = open(name+'.nc.xml', 'w')
 
         self.file_out.write('<?xml version="1.0" ?>\n')
-        self.file_out.write('<HeeksCAD_Document>\n')
-        self.file_out.write('\t<nccode>\n')
+        self.file_out.write('<nccode>\n')
 
     def files_close(self):
-        self.file_out.write('\t</nccode>\n')
-        self.file_out.write('</HeeksCAD_Document>\n')
+        self.file_out.write('</nccode>\n')
 
         self.file_in.close()
         self.file_out.close()
@@ -41,29 +39,29 @@ class Parser:
     ##  Xml
 
     def begin_ncblock(self):
-        self.file_out.write('\t\t<ncblock>\n')
+        self.file_out.write('\t<ncblock>\n')
 
     def end_ncblock(self):
-        self.file_out.write('\t\t</ncblock>\n')
+        self.file_out.write('\t</ncblock>\n')
 
     def add_text(self, s, col=None):
         s.replace('&', '&amp;')
         s.replace('"', '&quot;')
         s.replace('<', '&lt;')
         s.replace('>', '&gt;')
-        if (col != None) : self.file_out.write('\t\t\t<text col="'+col+'">'+s+'</text>\n')
-        else : self.file_out.write('\t\t\t<text>'+s+'</text>\n')
+        if (col != None) : self.file_out.write('\t\t<text col="'+col+'">'+s+'</text>\n')
+        else : self.file_out.write('\t\t<text>'+s+'</text>\n')
 
     def begin_path(self, col=None):
-        if (col != None) : self.file_out.write('\t\t\t<path col="'+col+'">\n')
-        else : self.file_out.write('\t\t\t<path>\n')
+        if (col != None) : self.file_out.write('\t\t<path col="'+col+'">\n')
+        else : self.file_out.write('\t\t<path>\n')
 
     def end_path(self):
-        self.file_out.write('\t\t\t</path>\n')
+        self.file_out.write('\t\t</path>\n')
 
     def add_line(self, x=None, y=None, z=None):
         if (x == None and y == None and z == None) : return
-        self.file_out.write('\t\t\t\t<line')
+        self.file_out.write('\t\t\t<line')
         if (x != None) : self.file_out.write(' x="%.6f"' % x)
         if (y != None) : self.file_out.write(' y="%.6f"' % y)
         if (z != None) : self.file_out.write(' z="%.6f"' % z)
@@ -71,7 +69,7 @@ class Parser:
 
     def add_arc(self, x=None, y=None, z=None, i=None, j=None, k=None, d=None):
         if (x == None and y == None and z == None and i == None and j == None and k == None) : return
-        self.file_out.write('\t\t\t\t<arc')
+        self.file_out.write('\t\t\t<arc')
         if (x != None) : self.file_out.write(' x="%.6f"' % x)
         if (y != None) : self.file_out.write(' y="%.6f"' % y)
         if (z != None) : self.file_out.write(' z="%.6f"' % z)
