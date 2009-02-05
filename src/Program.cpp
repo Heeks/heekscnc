@@ -27,12 +27,8 @@ HeeksObj* COperations::ReadFromXMLElement(TiXmlElement* pElem)
 	return new_object;
 }
 
-CProgram::CProgram()
+CProgram::CProgram():m_machine(_T("nc.iso")), m_output_file(_T("test.tap")), m_nc_code(NULL), m_operations(NULL), m_script_edited(false)
 {
-	m_machine.assign(_T("nc.iso"));
-	m_output_file.assign(_T("test.tap"));
-	m_nc_code = NULL;
-	m_operations = NULL;
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
@@ -203,4 +199,31 @@ void CProgram::RewritePythonProgram()
 		}
 	}
 
+}
+
+ProgramUserType CProgram::GetUserType()
+{
+	if(m_nc_code->m_user_edited)return ProgramUserTypeNC;
+	if(m_script_edited)return ProgramUserTypeScript;
+	if(m_operations->GetFirstChild())return ProgramUserTypeTree;
+	return ProgramUserTypeUnkown;
+}
+
+void CProgram::UpdateFromUserType()
+{
+#if 0
+	switch(GetUserType())
+	{
+	case ProgramUserTypeUnkown:
+
+	case tree:
+   Enable "Operations" icon in tree
+     editing the tree, recreates the python script
+   Read only "Program" window
+     pressing "Post-process" creates the NC code ( and backplots it )
+   Read only "Output" window
+   Disable all buttons on "Output" window
+
+	}
+#endif
 }

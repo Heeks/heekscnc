@@ -448,7 +448,7 @@ std::string CNCCode::m_lines_colors_str[MaxLinesColorType] = {
 	std::string("feed")
 };
 
-CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL){}
+CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL), m_user_edited(false){}
 
 CNCCode::~CNCCode()
 {
@@ -545,6 +545,8 @@ void CNCCode::WriteXML(TiXmlNode *root)
 		block->WriteXML(element);
 	}
 
+	element->SetAttribute("edited", m_user_edited ? 1:0);
+
 	WriteBaseXML(element);
 }
 
@@ -600,6 +602,13 @@ HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 			HeeksObj* object = CNCCodeBlock::ReadFromXMLElement(pElem);
 			new_object->m_blocks.push_back((CNCCodeBlock*)object);
 		}
+	}
+
+	// loop through the attributes
+	for(TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
+	{
+		std::string name(a->Name());
+		if(name == "edited"){new_object->m_user_edited = (a->IntValue() != 0);}
 	}
 
 	new_object->ReadBaseXML(element);
