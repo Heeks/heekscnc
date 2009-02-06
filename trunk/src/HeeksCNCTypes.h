@@ -8,6 +8,7 @@ enum{
 	NCCodeType,
 	OperationsType,
 	ProfileType,
+	PocketType,
 	ZigZagType,
 	HeeksCNCMaximumType
 };

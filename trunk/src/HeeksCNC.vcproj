@@ -292,6 +292,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Pocket.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Pocket.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Profile.cpp"
 			>
 		</File>
