@@ -9,6 +9,7 @@ class CPocketParams{
 public:
 	double m_tool_diameter;
 	double m_step_over;
+	double m_round_corner_factor;
 	double m_clearance_height;
 	double m_final_depth;
 	double m_rapid_down_to_height;

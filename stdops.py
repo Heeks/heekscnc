@@ -146,10 +146,11 @@ def cut_area(a, do_rapid):
             else:
                 feed(x, y)
     
-def pocket(a, radius, stepover):
+def pocket(a, radius, stepover, round_corner_factor):
     offset_value = radius
     a_offset = area.new()
     area.copy(a, a_offset)
+    area.set_round_corner_factor(round_corner_factor)
     area.offset(a_offset, offset_value)
 
     first = True
