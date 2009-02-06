@@ -72,7 +72,11 @@ bool HeeksPyBackplot(const wxString &filepath)
 		heeksCAD->GetMainFrame()->Raise();
 
 		// there should now be nccode.xml written
+#ifdef WIN32
 		wxString xml_file_str = theApp.GetDllFolder() + wxString(_T("/")) + filepath + wxString(_T(".xml"));
+#else
+		wxString xml_file_str = theApp.GetDllFolder() + wxString(_T("/")) + filepath + wxString(_T(".nc.xml"));
+#endif
 		wxFile ofs(xml_file_str.c_str());
 		if(!ofs.IsOpened())
 		{
