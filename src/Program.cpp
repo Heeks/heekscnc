@@ -9,6 +9,7 @@
 #include "../../interface/MarkedObject.h"
 #include "../../interface/PropertyString.h"
 #include "Profile.h"
+#include "Pocket.h"
 #include "ZigZag.h"
 
 void COperations::WriteXML(TiXmlNode *root)
@@ -131,12 +132,17 @@ void CProgram::RewritePythonProgram()
 	CZigZag::number_for_stl_file = 1;
 
 	bool profile_op_exists = false;
+	bool pocket_op_exists = false;
 	bool zigzag_op_exists = false;
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
 		if(object->GetType() == ProfileType)
 		{
 			profile_op_exists = true;
+		}
+		else if(object->GetType() == PocketType)
+		{
+			pocket_op_exists = true;
 		}
 		else if(object->GetType() == ZigZagType)
 		{
@@ -146,12 +152,28 @@ void CProgram::RewritePythonProgram()
 
 	// add standard stuff at the top
 
+	bool stdops_imported = false;
+
 	// kurve related things
 	if(profile_op_exists)
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import kurve\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import stdops\n"));
+		stdops_imported = true;
 	}
+
+	// area related things
+	if(pocket_op_exists)
+	{
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import area\n"));
+		if(!stdops_imported)
+		{
+			theApp.m_program_canvas->m_textCtrl->AppendText(_T("import stdops\n"));
+			stdops_imported = true;
+		}
+	}
+
+	// common to area and kurve
 
 	// pycam stuff
 	if(zigzag_op_exists)
@@ -192,6 +214,9 @@ void CProgram::RewritePythonProgram()
 		{
 		case ProfileType:
 			((CProfile*)object)->AppendTextToProgram();
+			break;
+		case PocketType:
+			((CPocket*)object)->AppendTextToProgram();
 			break;
 		case ZigZagType:
 			((CZigZag*)object)->AppendTextToProgram();
