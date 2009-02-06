@@ -7,6 +7,7 @@
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "Profile.h"
+#include "Pocket.h"
 #include "ZigZag.h"
 #include "OutputCanvas.h"
 #include "../../interface/Tool.h"
@@ -23,10 +24,9 @@ END_EVENT_TABLE()
 
 //	if(heeksCAD->PickPosition(_T("Pick finish position"), pos)){
 
-static void OnProfile(wxCommandEvent& event)
+static bool GetSketches(std::list<int>& sketches)
 {
 	// check for at least one sketch selected
-	std::list<int> sketches;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
@@ -48,13 +48,34 @@ static void OnProfile(wxCommandEvent& event)
 	if(sketches.size() == 0)
 	{
 		wxMessageBox(_("There are no sketches!"));
-		return;
+		return false;
 	}
 
-	CProfile *new_object = new CProfile(sketches);
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
+	return true;
+}
+
+static void OnProfile(wxCommandEvent& event)
+{
+	std::list<int> sketches;
+	if(GetSketches(sketches))
+	{
+		CProfile *new_object = new CProfile(sketches);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+		heeksCAD->ClearMarkedList();
+		heeksCAD->Mark(new_object);
+	}
+}
+
+static void OnPocket(wxCommandEvent& event)
+{
+	std::list<int> sketches;
+	if(GetSketches(sketches))
+	{
+		CPocket *new_object = new CPocket(sketches);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+		heeksCAD->ClearMarkedList();
+		heeksCAD->Mark(new_object);
+	}
 }
 
 static void OnZigZag(wxCommandEvent& event)
@@ -115,6 +136,7 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
 
 	// add toolbar buttons
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Profile"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/opprofile.png"), wxBITMAP_TYPE_PNG), _T("Cut around selected sketches"), OnProfile);
+	heeksCAD->AddToolBarButton(m_toolBar, _T("Pocket"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/pocket.png"), wxBITMAP_TYPE_PNG), _T("Area clear selected sketches"), OnPocket);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("ZigZag"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/zigzag.png"), wxBITMAP_TYPE_PNG), _T("Zigzag finish machining on selected solids"), OnZigZag);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Python"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/python.png"), wxBITMAP_TYPE_PNG), _T("Create Python program from the objects"), OnPython);
 	heeksCAD->AddToolBarButton(m_toolBar, _T("Post Process"), wxBitmap(theApp.GetDllFolder() + _T("/bitmaps/postprocess.png"), wxBITMAP_TYPE_PNG), _T("Post process"), OnPostProcess);

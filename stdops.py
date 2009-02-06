@@ -1,4 +1,5 @@
 import kurve
+import area
 from nc.nc import *
 
 # profile command,
@@ -126,3 +127,40 @@ def roll_off_point(k, direction, radius):
         y = ey + off_vy * 2 + vy * 2
 
     return x, y
+
+def cut_area(a, do_rapid):
+    for curve in range(0, area.num_curves(a)):
+        for vertex in range(0, area.num_vertices(a, curve)):
+            sp, x, y, cx, cy = area.get_vertex(a, curve, vertex)
+            if do_rapid:
+                # rapid across
+                rapid(x, y)
+
+                ##rapid down , to do, correct height
+                rapid(z = 2)
+                
+                #feed down, to do, use correct height
+                feed(z = 0)
+
+                do_rapid = False
+            else:
+                feed(x, y)
+    
+def pocket(a, radius, stepover):
+    offset_value = radius
+    a_offset = area.new()
+    area.copy(a, a_offset)
+    area.offset(a_offset, offset_value)
+
+    first = True
+
+    while area.num_curves(a_offset):
+        cut_area(a_offset, first)
+        first = False
+        area.copy(a, a_offset)
+        offset_value = offset_value + stepover
+        area.offset(a_offset, offset_value)
+
+    # rapid up, to do use clearance height
+    rapid(z = 50)
+    
