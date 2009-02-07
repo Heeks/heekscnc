@@ -71,12 +71,8 @@ bool HeeksPyBackplot(const wxString &filepath)
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
 		heeksCAD->GetMainFrame()->Raise();
 
-		// there should now be nccode.xml written
-#ifdef WIN32
-		wxString xml_file_str = theApp.GetDllFolder() + wxString(_T("/")) + filepath + wxString(_T(".xml"));
-#else
+		// there should now be a .nc.xml written
 		wxString xml_file_str = theApp.GetDllFolder() + wxString(_T("/")) + filepath + wxString(_T(".nc.xml"));
-#endif
 		wxFile ofs(xml_file_str.c_str());
 		if(!ofs.IsOpened())
 		{
