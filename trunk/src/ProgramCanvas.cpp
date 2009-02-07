@@ -120,7 +120,18 @@ static void OnPython(wxCommandEvent& event)
 
 static void OnPostProcess(wxCommandEvent& event)
 {
+	{
+		// clear the output file
+		wxFile f(theApp.m_program->m_output_file.c_str(), wxFile::write);
+		if(f.IsOpened())f.Write(_T("\n"));
+	}
 	bool pp_success = HeeksPyPostProcess();
+	{
+		// clear the backplot file
+		wxString backplot_path = theApp.m_program->m_output_file + _T(".nc.xml");
+		wxFile f(backplot_path.c_str(), wxFile::write);
+		if(f.IsOpened())f.Write(_T("\n"));
+	}
 	if(pp_success)HeeksPyBackplot(theApp.m_program->m_output_file);
 }
 
