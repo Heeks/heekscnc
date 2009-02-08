@@ -117,6 +117,8 @@ static void WriteSketchDefn(HeeksObj* sketch)
 
 	bool started = false;
 
+	double prev_e[3];
+
 	for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
 	{
 		double s[3] = {0, 0, 0};
@@ -127,9 +129,15 @@ static void WriteSketchDefn(HeeksObj* sketch)
 			int type = span_object->GetType();
 			if(type == LineType || type == ArcType)
 			{
+				span_object->GetStartPoint(s);
+				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
+				{
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area.start_new_curve(a%d)\n"), sketch->m_id));
+					started = false;
+				}
+
 				if(!started)
 				{
-					span_object->GetStartPoint(s);
 					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area.add_point(a%d, %d, %g, %g, %g, %g)\n"), sketch->m_id, 0, s[0], s[1], 0.0, 0.0));
 					started = true;
 				}
@@ -146,6 +154,7 @@ static void WriteSketchDefn(HeeksObj* sketch)
 					int span_type = (pos[2] >=0) ? 1:-1;
 					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area.add_point(a%d, %d, %g, %g, %g, %g)\n"), sketch->m_id, span_type, e[0], e[1], c[0], c[1]));
 				}
+				memcpy(prev_e, e, 3*sizeof(double));
 			}
 		}
 	}
