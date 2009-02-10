@@ -18,6 +18,7 @@ public:
 	CProgramCanvas* m_program_canvas;
 	COutputCanvas* m_output_canvas;
 	bool m_run_program_on_new_line;
+	wxToolBarBase* m_machiningBar;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();
