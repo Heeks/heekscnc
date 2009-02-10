@@ -12,6 +12,11 @@
 #include "Pocket.h"
 #include "ZigZag.h"
 
+bool COperations::CanAdd(HeeksObj* object)
+{
+	return object->GetType() == ProfileType || object->GetType() == PocketType || object->GetType() == ZigZagType;
+}
+
 void COperations::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;

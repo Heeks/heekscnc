@@ -19,6 +19,8 @@ public:
 	HeeksObj *MakeACopy(void)const{ return new COperations(*this);}
 	wxString GetIcon(){return _T("../HeeksCNC/icons/operations");}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
+	bool CanAdd(HeeksObj* object);
+	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
 
