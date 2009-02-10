@@ -62,7 +62,7 @@ bool HeeksPyBackplot(const wxString &filepath)
 
 		// call the python file
 #ifdef WIN32
-		wxString py_file_str = wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" iso ") + filepath;
+		wxString py_file_str = wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" iso \"") + filepath + _T("\"");
 		wxExecute(py_file_str, wxEXEC_SYNC);
 #else
 		wxString py_file_str = wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("/nc/iso_read.py\" ")) + filepath;
@@ -72,7 +72,7 @@ bool HeeksPyBackplot(const wxString &filepath)
 		heeksCAD->GetMainFrame()->Raise();
 
 		// there should now be a .nc.xml written
-		wxString xml_file_str = theApp.GetDllFolder() + wxString(_T("/")) + filepath + wxString(_T(".nc.xml"));
+		wxString xml_file_str = filepath + wxString(_T(".nc.xml"));
 		wxFile ofs(xml_file_str.c_str());
 		if(!ofs.IsOpened())
 		{
