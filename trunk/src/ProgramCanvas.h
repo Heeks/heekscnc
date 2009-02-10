@@ -7,8 +7,6 @@ class CProgramCanvas: public wxScrolledWindow
 private:
     void Resize();
 
-	wxToolBar *m_toolBar;
-
 public:
     wxTextCtrl *m_textCtrl;
 

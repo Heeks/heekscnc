@@ -7,6 +7,7 @@
 #include <wx/aui/aui.h>
 #include "../../interface/PropertyString.h"
 #include "../../interface/Observer.h"
+#include "../../interface/ToolImage.h"
 #include "PythonStuff.h"
 #include "Program.h"
 #include "ProgramCanvas.h"
@@ -25,6 +26,7 @@ CHeeksCNCApp::CHeeksCNCApp(){
 	m_draw_cutter_radius = true;
 	m_program = NULL;
 	m_run_program_on_new_line = false;
+	m_machiningBar = NULL;
 }
 
 CHeeksCNCApp::~CHeeksCNCApp(){
@@ -46,8 +48,20 @@ void CHeeksCNCApp::OnDestroyDLL()
 	heeksCAD = NULL;
 }
 
-void OnSolidSimButton(wxCommandEvent& event){
-	wxMessageBox(_T("In OnSolidSimButton"));
+void OnMachiningBar( wxCommandEvent& event )
+{
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+	wxAuiPaneInfo& pane_info = aui_manager->GetPane(theApp.m_machiningBar);
+	if(pane_info.IsOk()){
+		pane_info.Show(event.IsChecked());
+		aui_manager->Update();
+	}
+}
+
+void OnUpdateMachiningBar( wxUpdateUIEvent& event )
+{
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+	event.Check(aui_manager->GetPane(theApp.m_machiningBar).IsShown());
 }
 
 void OnProgramCanvas( wxCommandEvent& event )
@@ -66,7 +80,7 @@ void OnUpdateProgramCanvas( wxUpdateUIEvent& event )
 	event.Check(aui_manager->GetPane(theApp.m_program_canvas).IsShown());
 }
 
-void OnOutputCanvas( wxCommandEvent& event )
+static void OnOutputCanvas( wxCommandEvent& event )
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
 	wxAuiPaneInfo& pane_info = aui_manager->GetPane(theApp.m_output_canvas);
@@ -76,10 +90,176 @@ void OnOutputCanvas( wxCommandEvent& event )
 	}
 }
 
-void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
+static void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
 	event.Check(aui_manager->GetPane(theApp.m_output_canvas).IsShown());
+}
+
+static bool GetSketches(std::list<int>& sketches)
+{
+	// check for at least one sketch selected
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if(object->GetType() == SketchType)sketches.push_back(object->m_id);
+	}
+
+	// if no selected sketches, 
+	if(sketches.size() == 0)
+	{
+		// use all the sketches in the drawing
+		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
+		{
+			if(object->GetType() == SketchType)sketches.push_back(object->m_id);
+		}
+	}
+
+	if(sketches.size() == 0)
+	{
+		wxMessageBox(_("There are no sketches!"));
+		return false;
+	}
+
+	return true;
+}
+
+static void NewProfileOpMenuCallback(wxCommandEvent &event)
+{
+	std::list<int> sketches;
+	if(GetSketches(sketches))
+	{
+		CProfile *new_object = new CProfile(sketches);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+		heeksCAD->ClearMarkedList();
+		heeksCAD->Mark(new_object);
+	}
+}
+
+static void NewPocketOpMenuCallback(wxCommandEvent &event)
+{
+	std::list<int> sketches;
+	if(GetSketches(sketches))
+	{
+		CPocket *new_object = new CPocket(sketches);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+		heeksCAD->ClearMarkedList();
+		heeksCAD->Mark(new_object);
+	}
+}
+
+static void NewZigZagOpMenuCallback(wxCommandEvent &event)
+{
+	// check for at least one solid selected
+	std::list<int> solids;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+	}
+
+	// if no selected solids, 
+	if(solids.size() == 0)
+	{
+		// use all the sketches in the drawing
+		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
+		{
+			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+		}
+	}
+
+	if(solids.size() == 0)
+	{
+		wxMessageBox(_("There are no solids!"));
+		return;
+	}
+
+	CZigZag *new_object = new CZigZag(solids);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
+static void MakeScriptMenuCallback(wxCommandEvent &event)
+{
+	// create the Python program
+	theApp.m_program->RewritePythonProgram();
+}
+
+static void PostProcessMenuCallback(wxCommandEvent &event)
+{
+	{
+		// clear the output file
+		wxFile f(theApp.m_program->m_output_file.c_str(), wxFile::write);
+		if(f.IsOpened())f.Write(_T("\n"));
+	}
+	bool pp_success = HeeksPyPostProcess();
+	{
+		// clear the backplot file
+		wxString backplot_path = theApp.m_program->m_output_file + _T(".nc.xml");
+		wxFile f(backplot_path.c_str(), wxFile::write);
+		if(f.IsOpened())f.Write(_T("\n"));
+	}
+	if(pp_success)HeeksPyBackplot(theApp.m_program->m_output_file);
+}
+
+static void OpenNcFileMenuCallback(wxCommandEvent& event)
+{
+	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
+	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
+    wxFileDialog dialog(theApp.m_output_canvas, _("Open NC file"), wxEmptyString, wxEmptyString, wildcard_string);
+    dialog.CentreOnParent();
+
+    if (dialog.ShowModal() == wxID_OK)
+    {
+		HeeksPyBackplot(dialog.GetPath().c_str());
+	}
+}
+
+static void SaveNcFileMenuCallback(wxCommandEvent& event)
+{
+	wxString ext_str(_T("*.tap")); // to do, use the machine's NC extension
+	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
+	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), wxEmptyString, wxEmptyString, wildcard_string, wxSAVE|wxOVERWRITE_PROMPT);
+	fd.SetFilterIndex(1);
+	if (fd.ShowModal() == wxID_OK)
+	{
+		wxString nc_file_str = fd.GetPath().c_str();
+		{
+			wxFile ofs(nc_file_str.c_str(), wxFile::write);
+			if(!ofs.IsOpened())
+			{
+				wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + nc_file_str);
+				return;
+			}
+
+			ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
+		}
+		HeeksPyBackplot(nc_file_str);
+	}
+}
+
+static void AddToolBars()
+{
+	wxFrame* frame = heeksCAD->GetMainFrame();
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+	if(theApp.m_machiningBar)delete theApp.m_machiningBar;
+	theApp.m_machiningBar = new wxToolBar(frame, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
+	theApp.m_machiningBar->SetToolBitmapSize(wxSize(ToolImage::GetBitmapSize(), ToolImage::GetBitmapSize()));
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Profile"), ToolImage(_T("opprofile")), _T("New Profile Operation..."), NewProfileOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Pocket"), ToolImage(_T("pocket")), _T("New Pocket Operation..."), NewPocketOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("ZigZag"), ToolImage(_T("zigzag")), _T("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Python"), ToolImage(_T("python")), _T("Make Python Script"), MakeScriptMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _T("Post-Process"), PostProcessMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _T("Open NC File"), OpenNcFileMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("SaveNC"), ToolImage(_T("savenc")), _T("Save NC File"), SaveNcFileMenuCallback);
+	theApp.m_machiningBar->Realize();
+	aui_manager->AddPane(theApp.m_machiningBar, wxAuiPaneInfo().Name(_T("MachiningBar")).Caption(_T("MachineWorks tools")).ToolbarPane().Top());
+	heeksCAD->RegisterToolBar(theApp.m_machiningBar);
 }
 
 void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
@@ -98,6 +278,23 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	// add menus and toolbars
 	wxFrame* frame = heeksCAD->GetMainFrame();
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+
+	// tool bars
+	heeksCAD->RegisterAddToolBars(AddToolBars);
+	AddToolBars();
+
+	// Operations menu
+	wxMenu *menuOperations = new wxMenu;
+	heeksCAD->AddMenuItem(menuOperations, _("New Profile Operation..."), NewProfileOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Pocket Operation..."), NewPocketOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+
+	// Machining menu
+	wxMenu *menuMachining = new wxMenu;
+	menuMachining->AppendSubMenu(menuOperations, _("Operations"));
+	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), MakeScriptMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), PostProcessMenuCallback);
+	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
 
 	// add the program canvas
     m_program_canvas = new CProgramCanvas(frame);
@@ -123,8 +320,10 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	wxMenu* view_menu = heeksCAD->GetWindowMenu();
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Program"), OnProgramCanvas, OnUpdateProgramCanvas);
 	heeksCAD->AddMenuCheckItem(view_menu, _T("Output"), OnOutputCanvas, OnUpdateOutputCanvas);
+	heeksCAD->AddMenuCheckItem(view_menu, _T("Machining"), OnMachiningBar, OnUpdateMachiningBar);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
+	heeksCAD->RegisterHideableWindow(m_machiningBar);
 
 	// add object reading functions
 	heeksCAD->RegisterReadXMLfunction("Program", CProgram::ReadFromXMLElement);
@@ -172,6 +371,7 @@ void CHeeksCNCApp::OnFrameDelete()
 	CNCConfig config;
 	config.Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
 	config.Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
+	config.Write(_T("MachiningBarVisible"), aui_manager->GetPane(m_machiningBar).IsShown());
 
 	CNCCode::WriteColorsToConfig();
 }
