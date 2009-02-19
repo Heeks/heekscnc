@@ -16,6 +16,8 @@ CPocketParams::CPocketParams()
 {
 	m_tool_diameter = 0.0;
 	m_step_over = 0.0;
+	m_step_down = 0.0;
+	m_material_allowance = 0.0;
 	m_round_corner_factor = 0.0;
 	m_clearance_height = 0.0;
 	m_final_depth = 0.0;
@@ -30,6 +32,8 @@ void CPocketParams::set_initial_values()
 	CNCConfig config;
 	config.Read(_T("PocketToolDiameter"), &m_tool_diameter, 3.0);
 	config.Read(_T("PocketStepOver"), &m_step_over, 1.0);
+	config.Read(_T("PocketStepDown"), &m_step_down, 1.0);
+	config.Read(_T("PocketMaterialAllowance"), &m_material_allowance, 0.2);
 	config.Read(_T("PocketRoundCornerFactor"), &m_round_corner_factor, 1.5);
 	config.Read(_T("PocketClearanceHeight"), &m_clearance_height, 5.0);
 	config.Read(_T("PocketFinalDepth"), &m_final_depth, -0.1);
@@ -44,6 +48,8 @@ void CPocketParams::write_values_to_config()
 	CNCConfig config;
 	config.Write(_T("PocketToolDiameter"), m_tool_diameter);
 	config.Write(_T("PocketStepOver"), m_step_over);
+	config.Write(_T("PocketStepDown"), m_step_down);
+	config.Write(_T("PocketMaterialAllowance"), m_material_allowance);
 	config.Write(_T("PocketRoundCornerFactor"), m_round_corner_factor);
 	config.Write(_T("PocketClearanceHeight"), m_clearance_height);
 	config.Write(_T("PocketFinalDepth"), m_final_depth);
@@ -55,6 +61,8 @@ void CPocketParams::write_values_to_config()
 
 static void on_set_tool_diameter(double value, HeeksObj* object){((CPocket*)object)->m_params.m_tool_diameter = value;}
 static void on_set_step_over(double value, HeeksObj* object){((CPocket*)object)->m_params.m_step_over = value;}
+static void on_set_step_down(double value, HeeksObj* object){((CPocket*)object)->m_params.m_step_down = value;}
+static void on_set_material_allowance(double value, HeeksObj* object){((CPocket*)object)->m_params.m_material_allowance = value;}
 static void on_set_round_corner_factor(double value, HeeksObj* object){((CPocket*)object)->m_params.m_round_corner_factor = value;}
 static void on_set_clearance_height(double value, HeeksObj* object){((CPocket*)object)->m_params.m_clearance_height = value;}
 static void on_set_final_depth(double value, HeeksObj* object){((CPocket*)object)->m_params.m_final_depth = value;}
@@ -67,6 +75,8 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
 	list->push_back(new PropertyDouble(_("step over"), m_step_over, parent, on_set_step_over));
+	list->push_back(new PropertyDouble(_("step down"), m_step_down, parent, on_set_step_down));
+	list->push_back(new PropertyDouble(_("material allowance"), m_material_allowance, parent, on_set_material_allowance));
 	list->push_back(new PropertyDouble(_("round corner factor"), m_round_corner_factor, parent, on_set_round_corner_factor));
 	list->push_back(new PropertyString(wxString(_T("( ")) + _("for 90 degree corners") + _T(" )"), wxString(_T("( ")) + _("1.5 for square, 1.0 for round")  + _T(" )"), NULL));
 	list->push_back(new PropertyDouble(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
@@ -84,6 +94,8 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	root->LinkEndChild( element );  
 	element->SetAttribute("toold", m_tool_diameter);
 	element->SetAttribute("step", m_step_over);
+	element->SetAttribute("mat", m_material_allowance);
+	element->SetAttribute("down", m_step_down);
 	element->SetAttribute("rf", m_round_corner_factor);
 	element->SetAttribute("clear", m_clearance_height);
 	element->SetAttribute("depth", m_final_depth);
@@ -101,6 +113,8 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 		std::string name(a->Name());
 		if(name == "toold"){m_tool_diameter = a->DoubleValue();}
 		else if(name == "step"){m_step_over = a->DoubleValue();}
+		else if(name == "down"){m_step_down = a->DoubleValue();}
+		else if(name == "mat"){m_material_allowance = a->DoubleValue();}
 		else if(name == "rf"){m_round_corner_factor = a->DoubleValue();}
 		else if(name == "clear"){m_clearance_height = a->DoubleValue();}
 		else if(name == "depth"){m_final_depth = a->DoubleValue();}
@@ -186,7 +200,7 @@ void CPocket::AppendTextToProgram()
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.pocket(a%d, tool_diameter/2, %lf, %lf)\n"), sketch, m_params.m_step_over, m_params.m_round_corner_factor));
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_params.m_material_allowance, m_params.m_step_over, m_params.m_step_down, m_params.m_round_corner_factor));
 
 			// rapid back up to clearance plane
 			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
