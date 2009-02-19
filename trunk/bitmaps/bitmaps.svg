@@ -27,15 +27,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="146.23747"
-     inkscape:cy="947.79897"
+     inkscape:cx="159.0563"
+     inkscape:cy="860.94541"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="true"
-     inkscape:window-width="917"
-     inkscape:window-height="1108"
-     inkscape:window-x="0"
-     inkscape:window-y="-1">
+     showgrid="false"
+     inkscape:window-width="1374"
+     inkscape:window-height="948"
+     inkscape:window-x="252"
+     inkscape:window-y="173">
     <inkscape:grid
        id="grid2383"
        type="xygrid" />
@@ -10299,11 +10299,12 @@
      inkscape:groupmode="layer"
      inkscape:label="Layer 1">
     <g
-       inkscape:export-ydpi="168.31171"
-       inkscape:export-xdpi="168.31171"
+       inkscape:export-ydpi="46.919231"
+       inkscape:export-xdpi="46.919231"
        inkscape:label="#g3159"
-       transform="matrix(0.3333333,0,0,0.3333333,52,122.90812)"
-       id="opprofile">
+       transform="matrix(0.2023123,0,0,0.2294553,100.59253,130.68006)"
+       id="opprofile"
+       inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\profile.png">
       <path
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="M 110,152.36218 L 110,62.362183 L 200,62.362183 L 200,152.36218 L 200,152.36218"
@@ -10318,9 +10319,10 @@
        inkscape:export-ydpi="278.70969"
        inkscape:export-xdpi="278.70969"
        inkscape:label="#g3189"
-       id="pocket">
+       id="pocket"
+       transform="matrix(0.9915661,0,0,1,3.1174244,0)">
       <path
-         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="M 160,172.36218 L 160,142.36218 L 190,142.36218 L 190,172.36218 L 160,172.36218 z"
          id="path3183" />
       <path
@@ -10374,8 +10376,9 @@
     <g
        id="zigzag"
        inkscape:label="#g3716"
-       inkscape:export-xdpi="277.33963"
-       inkscape:export-ydpi="277.33963">
+       inkscape:export-xdpi="46.223274"
+       inkscape:export-ydpi="46.223274"
+       inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\zigzag.png">
       <path
          transform="matrix(0.9730603,0,0,1.0654311,2.9843228,-1.0853603)"
          d="M 181.82746,22.006586 A 15.404826,14.142136 0 1 1 151.01781,22.006586 A 15.404826,14.142136 0 1 1 181.82746,22.006586 z"
@@ -10524,6 +10527,22 @@
              id="tspan8837"
              sodipodi:role="line">G0</tspan></text>
       </g>
+    </g>
+    <g
+       id="g5871"
+       transform="matrix(1.2308515,0,0,1.2521453,-96.067516,-36.127501)"
+       inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\adapt.png"
+       inkscape:export-xdpi="45.93922"
+       inkscape:export-ydpi="45.93922">
+      <path
+         id="path5081"
+         d="M 243.61401,167.00521 L 269.24326,167.00521 L 269.24326,142.59161 L 243.61401,142.59161 L 243.61401,167.00521 z"
+         style="opacity:0.52808987;fill:#1a1a21;fill-opacity:1;fill-rule:evenodd;stroke:#aa4400;stroke-width:0.62535077px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         sodipodi:nodetypes="ccccccc"
+         id="path5073"
+         d="M 244.18146,157.31048 C 244.18146,157.52422 244.18146,157.52422 244.18146,157.31048 C 246.43817,162.41698 249.05684,165.37609 257.14293,165.32542 C 269.88125,165.08088 272.09326,144.94951 259.04394,144.00568 C 249.39498,143.03674 246.77788,154.83269 254.03218,159.71496 C 258.71108,162.02047 262.2012,158.94199 263.19161,155.3869 C 263.65937,149.28805 255.66539,146.10689 254.89628,153.30302"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>
