@@ -130,6 +130,8 @@ def roll_off_point(k, direction, radius):
 
 def cut_area(a, do_rapid, rapid_down_to_height, final_depth):
     for curve in range(0, area.num_curves(a)):
+        px = 0.0
+        py = 0.0
         for vertex in range(0, area.num_vertices(a, curve)):
             sp, x, y, cx, cy = area.get_vertex(a, curve, vertex)
             if do_rapid:
@@ -144,7 +146,15 @@ def cut_area(a, do_rapid, rapid_down_to_height, final_depth):
 
                 do_rapid = False
             else:
-                feed(x, y)
+                if sp == 1:
+                    arc_ccw(x, y, i = cx - px, j = cy - py)
+                elif sp == -1:
+                    arc_cw(x, y, i = cx - px, j = cy - py)
+                else:
+                    feed(x, y)
+
+            px = x
+            py = y
     
 def pocket(a, first_offset, rapid_down_to_height, final_depth, stepover, stepdown, round_corner_factor):
     offset_value = first_offset
