@@ -311,11 +311,7 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 		}
 	}
 
-#ifdef WIN32
-	CNCCode::pos += 2; // 2 for each line ( presumably \r\n )
-#else
 	CNCCode::pos += 1;
-#endif
 
 	new_object->m_to_pos = CNCCode::pos;
 
@@ -576,9 +572,6 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 					int from_pos = m_highlighted_block->m_from_pos;
 					int to_pos = m_highlighted_block->m_to_pos;
 					DestroyGLLists();
-#ifdef WIN32
-					to_pos -= 2;
-#endif
 					theApp.m_output_canvas->m_textCtrl->SetSelection(from_pos, to_pos);
 					theApp.m_output_canvas->m_textCtrl->SetFocus();
 				}
