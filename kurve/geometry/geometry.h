@@ -300,10 +300,12 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		inline	const	Vector2d& operator=(const Vector2d &v){dx = v.dx; dy = v.dy; return *this;}			// v1 = v2;
 		inline			Vector2d operator+(const Vector2d &v)const{return Vector2d(dx + v.dx, dy + v.dy);}	// v2 = v0 + v1;
 		inline			Point	operator+(const Point &p)const{return Point(this->dx + p.x, this->dy + p.y);}			// p1 = v0 + p0;
+		inline			Vector2d operator+(const double d){ return Vector2d(dx + d, dy + d); };
 
 		inline	const	Vector2d& operator+=(const Vector2d &v){dx += v.dx; dy += v.dy; return *this;}		// v1 += v0;
 		inline			Vector2d operator-(const Vector2d &v)const{return Vector2d( dx - v.dx, dy - v.dy);}	// v2 = v0 - v1;
 		inline	const	Vector2d& operator-=(const Vector2d &v){dx -= v.dx; dy =- v.dy; return *this;}		// v1 -= v0;
+		inline			Vector2d operator-(const double d){ return Vector2d(dx - d, dy - d); };
 
 		inline	const	Vector2d operator-(void)const{return Vector2d(-dx, -dy);}							// v1 = -v0;  (unary minus)
 
@@ -746,6 +748,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		bool Intof(const Plane& pl, Line& intof)const;					// intersection of 2 planes
 		bool Intof(const Plane& pl0, const Plane& pl1, Point3d& intof)const;	// intersection of 3 planes
 		Point3d Near(const Point3d& p)const;							// returns near point to p on the plane
+		void Mirrored(Matrix* m);										// returns a matrix for a mirror about this	
 	};
 
 
@@ -874,6 +877,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 			int dir;			// LINEAR, CW or ACW
 			double length;		// length of the span
 			double cp;			// cross-product to next span (sina)
+			double dp;
 		};
 		// constructors etc...
 		Kurve()	{
