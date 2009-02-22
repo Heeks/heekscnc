@@ -230,20 +230,31 @@ class CreatorIso(nc.Creator):
         self.write_misc()
         self.write('\n')
 
+    def same_xyz(self, x=None, y=None, z=None):
+        if (x != None):
+            if (self.fmt % x) != (self.fmt % self.x):
+                return False
+        if (y != None):
+            if (self.fmt % y) != (self.fmt % self.y):
+                return False
+        if (z != None):
+            if (self.fmt % z) != (self.fmt % self.z):
+                return False
+            
+        return True
+
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+        if self.same_xyz(x, y, z): return
         self.write_blocknum()
         self.write(iso.ARC_CW)
         self.write_preps()
         if (x != None):
-            dx = x - self.x
             self.write(iso.X + (self.fmt % x))
             self.x = x
         if (y != None):
-            dy = y - self.y
             self.write(iso.Y + (self.fmt % y))
             self.y = y
         if (z != None):
-            dz = z - self.z
             self.write(iso.Z + (self.fmt % z))
             self.z = z
         if (i != None) : self.write(iso.CENTRE_X + (self.fmt % i))
@@ -257,19 +268,17 @@ class CreatorIso(nc.Creator):
         self.write('\n')
 
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+        if self.same_xyz(x, y, z): return
         self.write_blocknum()
         self.write(iso.ARC_CCW)
         self.write_preps()
         if (x != None):
-            dx = x - self.x
             self.write(iso.X + (self.fmt % x))
             self.x = x
         if (y != None):
-            dy = y - self.y
             self.write(iso.Y + (self.fmt % y))
             self.y = y
         if (z != None):
-            dz = z - self.z
             self.write(iso.Z + (self.fmt % z))
             self.z = z
         if (i != None) : self.write(iso.CENTRE_X + (self.fmt % i))
