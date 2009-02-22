@@ -139,27 +139,27 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
-	element->SetAttribute("toold", m_tool_diameter);
-	element->SetAttribute("clear", m_clearance_height);
-	element->SetAttribute("depth", m_final_depth);
-	element->SetAttribute("r", m_rapid_down_to_height);
-	element->SetAttribute("hfeed", m_horizontal_feed_rate);
-	element->SetAttribute("vfeed", m_vertical_feed_rate);
-	element->SetAttribute("spin", m_spindle_speed);
-	element->SetAttribute("side", m_tool_on_side);
+	element->SetDoubleAttribute("toold", m_tool_diameter);
+	element->SetDoubleAttribute("clear", m_clearance_height);
+	element->SetDoubleAttribute("depth", m_final_depth);
+	element->SetDoubleAttribute("r", m_rapid_down_to_height);
+	element->SetDoubleAttribute("hfeed", m_horizontal_feed_rate);
+	element->SetDoubleAttribute("vfeed", m_vertical_feed_rate);
+	element->SetDoubleAttribute("spin", m_spindle_speed);
+	element->SetDoubleAttribute("side", m_tool_on_side);
 	element->SetAttribute("auto_roll_on", m_auto_roll_on ? 1:0);
 	if(!m_auto_roll_on)
 	{
-		element->SetAttribute("roll_onx", m_roll_on_point[0]);
-		element->SetAttribute("roll_ony", m_roll_on_point[1]);
-		element->SetAttribute("roll_onz", m_roll_on_point[2]);
+		element->SetDoubleAttribute("roll_onx", m_roll_on_point[0]);
+		element->SetDoubleAttribute("roll_ony", m_roll_on_point[1]);
+		element->SetDoubleAttribute("roll_onz", m_roll_on_point[2]);
 	}
 	element->SetAttribute("auto_roll_off", m_auto_roll_off ? 1:0);
 	if(!m_auto_roll_off)
 	{
-		element->SetAttribute("roll_offx", m_roll_off_point[0]);
-		element->SetAttribute("roll_offy", m_roll_off_point[1]);
-		element->SetAttribute("roll_offz", m_roll_off_point[2]);
+		element->SetDoubleAttribute("roll_offx", m_roll_off_point[0]);
+		element->SetDoubleAttribute("roll_offy", m_roll_off_point[1]);
+		element->SetDoubleAttribute("roll_offz", m_roll_off_point[2]);
 	}
 }
 
