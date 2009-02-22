@@ -354,6 +354,31 @@ static PyObject* kurve_get_span_dir(PyObject *self, PyObject *args)
 	return pTuple;
 }
 
+static PyObject* kurve_get_span_length(PyObject *self, PyObject *args)
+{
+	int ik;
+	int index; // 0 is first
+	if (!PyArg_ParseTuple(args, "ii", &ik, &index)) return NULL;
+	Kurve* k = (Kurve*)ik;
+
+	double length = 0.0;
+
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		int n = k->nSpans();
+		if(index >=0 && index <n)
+		{
+			Span span;
+			k->Get(index + 1, span, true);
+			length = span.length;
+		}
+	}
+
+	PyObject *pValue = PyFloat_FromDouble(length);
+	Py_INCREF(pValue);
+	return pValue;
+}
+
 void tangential_arc(const Point &p0, const Point &p1, const Vector2d &v0, Point &c, int &dir)
 {
 	// sets dir to 0, if a line is needed, else to 1 or -1 for acw or cw arc and sets c
@@ -430,6 +455,7 @@ static PyMethodDef KurveMethods[] = {
 	{"num_spans", kurve_num_spans, METH_VARARGS , ""},
 	{"get_span", kurve_get_span, METH_VARARGS , ""},
 	{"get_span_dir", kurve_get_span_dir, METH_VARARGS , ""},
+	{"get_span_length", kurve_get_span_length, METH_VARARGS , ""},
 	{"tangential_arc", kurve_tangential_arc, METH_VARARGS , ""},
 	{NULL, NULL, 0, NULL}
 };
