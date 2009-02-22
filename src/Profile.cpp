@@ -257,9 +257,9 @@ void CProfileParams::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 	}
 }
 
-static void WriteSketchDefn(HeeksObj* sketch)
+static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 {
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve.new()\n"), sketch->m_id));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
 
 	bool started = false;
 
@@ -276,13 +276,13 @@ static void WriteSketchDefn(HeeksObj* sketch)
 				if(!started)
 				{
 					span_object->GetStartPoint(s);
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve.add_point(k%d, %d, %g, %g, %g, %g)\n"), sketch->m_id, 0, s[0], s[1], 0.0, 0.0));
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve.add_point(k%d, %d, %g, %g, %g, %g)\n"), id_to_use > 0 ? id_to_use : sketch->m_id, 0, s[0], s[1], 0.0, 0.0));
 					started = true;
 				}
 				span_object->GetEndPoint(e);
 				if(type == LineType)
 				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve.add_point(k%d, %d, %g, %g, %g, %g)\n"), sketch->m_id, 0, e[0], e[1], 0.0, 0.0));
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve.add_point(k%d, %d, %g, %g, %g, %g)\n"), id_to_use > 0 ? id_to_use : sketch->m_id, 0, e[0], e[1], 0.0, 0.0));
 				}
 				else if(type == ArcType)
 				{
@@ -290,7 +290,7 @@ static void WriteSketchDefn(HeeksObj* sketch)
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve.add_point(k%d, %d, %g, %g, %g, %g)\n"), sketch->m_id, span_type, e[0], e[1], c[0], c[1]));
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve.add_point(k%d, %d, %g, %g, %g, %g)\n"), id_to_use > 0 ? id_to_use : sketch->m_id, span_type, e[0], e[1], c[0], c[1]));
 				}
 			}
 		}
@@ -316,9 +316,17 @@ void CProfile::AppendTextToProgram()
 		HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
 		if(object == NULL || object->GetNumChildren() == 0)continue;
 
+		HeeksObj* re_ordered_sketch = NULL;
+		if(heeksCAD->GetSketchOrder(object) == SketchOrderTypeBad)
+		{
+			re_ordered_sketch = object->MakeACopy();
+			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
+			object = re_ordered_sketch;
+		}
+
 		if(object)
 		{
-			WriteSketchDefn(object);
+			WriteSketchDefn(object, sketch);
 
 			// start - assume we are at a suitable clearance height
 
@@ -393,6 +401,11 @@ void CProfile::AppendTextToProgram()
 
 			// rapid back up to clearance plane
 			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
+		}
+
+		if(re_ordered_sketch)
+		{
+			delete re_ordered_sketch;
 		}
 	}
 }
