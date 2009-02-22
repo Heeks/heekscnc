@@ -92,17 +92,17 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
-	element->SetAttribute("toold", m_tool_diameter);
-	element->SetAttribute("step", m_step_over);
-	element->SetAttribute("mat", m_material_allowance);
-	element->SetAttribute("down", m_step_down);
-	element->SetAttribute("rf", m_round_corner_factor);
-	element->SetAttribute("clear", m_clearance_height);
-	element->SetAttribute("depth", m_final_depth);
-	element->SetAttribute("r", m_rapid_down_to_height);
-	element->SetAttribute("hfeed", m_horizontal_feed_rate);
-	element->SetAttribute("vfeed", m_vertical_feed_rate);
-	element->SetAttribute("spin", m_spindle_speed);
+	element->SetDoubleAttribute("toold", m_tool_diameter);
+	element->SetDoubleAttribute("step", m_step_over);
+	element->SetDoubleAttribute("mat", m_material_allowance);
+	element->SetDoubleAttribute("down", m_step_down);
+	element->SetDoubleAttribute("rf", m_round_corner_factor);
+	element->SetDoubleAttribute("clear", m_clearance_height);
+	element->SetDoubleAttribute("depth", m_final_depth);
+	element->SetDoubleAttribute("r", m_rapid_down_to_height);
+	element->SetDoubleAttribute("hfeed", m_horizontal_feed_rate);
+	element->SetDoubleAttribute("vfeed", m_vertical_feed_rate);
+	element->SetDoubleAttribute("spin", m_spindle_speed);
 }
 
 void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
