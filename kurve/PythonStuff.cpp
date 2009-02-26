@@ -64,6 +64,20 @@ void FAILURE(const wchar_t* str){throw(str);}
 void FAILURE(const std::wstring& str){throw(str);}
 }
 
+static void print_kurve(const Kurve &k)
+{
+	int nspans = k.nSpans();
+	printf("number of spans = %d\n", nspans);
+	for(int i = 0; i< nspans; i++)
+	{
+		Span span;
+		k.Get(i + 1, span);
+		printf("span %d dir = %d, x0 = %g, y0 = %g, x1 = %g, y1 = %g", i+1, span.dir, span.p0.x, span.p0.y, span.p1.x, span.p1.y);
+		if(span.dir)printf(", xc = %g, yc = %g", span.pc.x, span.pc.y);
+		printf("\n");
+	}
+}
+
 std::set<Kurve*> valid_kurves;
 
 static PyObject* kurve_new(PyObject* self, PyObject* args)
@@ -202,6 +216,46 @@ static PyObject* kurve_copy(PyObject* self, PyObject* args)
 		{
 			*k2 = *k;
 		}
+	}
+
+	Py_RETURN_NONE;
+}
+
+static PyObject* kurve_equal(PyObject* self, PyObject* args)
+{
+	int ik;
+	int ik2;
+	if (!PyArg_ParseTuple(args, "ii", &ik, &ik2)) return NULL;
+	Kurve* k = (Kurve*)ik;
+	Kurve* k2 = (Kurve*)ik2;
+
+	bool equal = false;
+
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		if(valid_kurves.find(k2) != valid_kurves.end())
+		{
+			equal = (*k2 == *k);
+		}
+	}
+
+	// return equal
+	PyObject *pValue = equal ? Py_True : Py_False;
+	Py_INCREF(pValue);
+	return pValue;
+}
+
+static PyObject* kurve_print_kurve(PyObject* self, PyObject* args)
+{
+	int ik;
+	if (!PyArg_ParseTuple(args, "i", &ik)) return NULL;
+	Kurve* k = (Kurve*)ik;
+
+	bool equal = false;
+
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		print_kurve(*k);
 	}
 
 	Py_RETURN_NONE;
@@ -452,6 +506,8 @@ static PyMethodDef KurveMethods[] = {
 	{"add_point", kurve_add_point, METH_VARARGS , ""},
 	{"offset", kurve_offset, METH_VARARGS , ""},
 	{"copy", kurve_copy, METH_VARARGS , ""},
+	{"equal", kurve_equal, METH_VARARGS , ""},
+	{"print_kurve", kurve_print_kurve, METH_VARARGS , ""},
 	{"num_spans", kurve_num_spans, METH_VARARGS , ""},
 	{"get_span", kurve_get_span, METH_VARARGS , ""},
 	{"get_span_dir", kurve_get_span_dir, METH_VARARGS , ""},

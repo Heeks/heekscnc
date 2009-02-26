@@ -107,19 +107,9 @@ static bool GetSketches(std::list<int>& sketches)
 		if(object->GetType() == SketchType)sketches.push_back(object->m_id);
 	}
 
-	// if no selected sketches, 
 	if(sketches.size() == 0)
 	{
-		// use all the sketches in the drawing
-		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
-		{
-			if(object->GetType() == SketchType)sketches.push_back(object->m_id);
-		}
-	}
-
-	if(sketches.size() == 0)
-	{
-		wxMessageBox(_("There are no sketches!"));
+		wxMessageBox(_("You must select some sketches, first!"));
 		return false;
 	}
 
