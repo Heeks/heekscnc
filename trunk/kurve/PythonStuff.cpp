@@ -251,8 +251,6 @@ static PyObject* kurve_print_kurve(PyObject* self, PyObject* args)
 	if (!PyArg_ParseTuple(args, "i", &ik)) return NULL;
 	Kurve* k = (Kurve*)ik;
 
-	bool equal = false;
-
 	if(valid_kurves.find(k) != valid_kurves.end())
 	{
 		print_kurve(*k);
