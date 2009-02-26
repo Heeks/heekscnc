@@ -572,8 +572,8 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 					int from_pos = m_highlighted_block->m_from_pos;
 					int to_pos = m_highlighted_block->m_to_pos;
 					DestroyGLLists();
+					theApp.m_output_canvas->m_textCtrl->ShowPosition(from_pos);
 					theApp.m_output_canvas->m_textCtrl->SetSelection(from_pos, to_pos);
-					theApp.m_output_canvas->m_textCtrl->SetFocus();
 				}
 			}
 		}
