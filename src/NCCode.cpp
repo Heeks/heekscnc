@@ -68,17 +68,29 @@ void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
 
 		if(name == "x")
 		{
+#ifdef UNICODE
 			std::wistringstream ss(Ctt(a->Value()));
+#else
+			std::istringstream ss(a->Value());
+#endif
 			ss.imbue(std::locale("C"));
 			ss >> m_x[0];
 		}
 		else if(name == "y"){
+#ifdef UNICODE
 			std::wistringstream ss(Ctt(a->Value()));
+#else
+			std::istringstream ss(a->Value());
+#endif
 			ss.imbue(std::locale("C"));
 			ss >> m_x[1];
 		}
 		else if(name == "z"){
+#ifdef UNICODE
 			std::wistringstream ss(Ctt(a->Value()));
+#else
+			std::istringstream ss(a->Value());
+#endif
 			ss.imbue(std::locale("C"));
 			ss >> m_x[2];
 		}
