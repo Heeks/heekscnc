@@ -2,7 +2,7 @@
 
 = Basic info =
 
-HeeksCNC is a graphical user interface, built using HeeksCAD. It allows the user to define an NC program using objects with graphical icons. The user can edit the properties of these. 
+HeeksCNC is a graphical user interface, built using HeeksCAD. It allows the user to define an NC program using objects with graphical icons.
 
 A Python script program file is then automatically made from this, which runs more specific scripts to make the NC code.
 
