@@ -15,6 +15,7 @@ void CZigZagParams::set_initial_values(const std::list<int> &solids)
 {
 	CNCConfig config;
 	config.Read(_T("ZigZagToolDiameter"), &m_tool_diameter, 3.0);
+	config.Read(_T("ZigZagToolType"), &m_tool_type, 0);
 	config.Read(_T("ZigZagCornerRadius"), &m_corner_radius, 5.0);
 
 	// these will be replaced by extents of solids
@@ -39,6 +40,7 @@ void CZigZagParams::write_values_to_config()
 {
 	CNCConfig config;
 	config.Write(_T("ZigZagToolDiameter"), m_tool_diameter);
+	config.Write(_T("ZigZagToolType"), m_tool_type);
 	config.Write(_T("ZigZagCornerRadius"), m_corner_radius);
 	config.Write(_T("ZigZagDX"), m_dx);
 	config.Write(_T("ZigZagDY"), m_dy);
@@ -49,6 +51,7 @@ void CZigZagParams::write_values_to_config()
 }
 
 static void on_set_tool_diameter(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_tool_diameter = value;}
+static void on_set_tool_type(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_tool_type = value;}
 static void on_set_corner_radius(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_corner_radius = value;}
 static void on_set_minx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[0] = value;}
 static void on_set_maxx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[3] = value;}
@@ -66,6 +69,13 @@ static void on_set_direction(int value, HeeksObj* object){((CZigZag*)object)->m_
 void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("spherical"));
+		choices.push_back(_("cylindrical"));
+		choices.push_back(_("toroidal"));
+		list->push_back(new PropertyChoice(_("tool type"), choices, m_tool_type, parent, on_set_tool_type));
+	}
 	list->push_back(new PropertyDouble(_("corner radius"), m_corner_radius, parent, on_set_corner_radius));
 	list->push_back(new PropertyDouble(_("minimum x"), m_box.m_x[0], parent, on_set_minx));
 	list->push_back(new PropertyDouble(_("maximum x"), m_box.m_x[3], parent, on_set_maxx));
@@ -105,6 +115,7 @@ void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("vfeed", m_vertical_feed_rate);
 	element->SetDoubleAttribute("spin", m_spindle_speed);
 	element->SetAttribute("dir", m_direction);
+	element->SetAttribute("toolt", m_tool_type);
 }
 
 void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -114,6 +125,7 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 	{
 		std::string name(a->Name());
 		if(name == "toold"){m_tool_diameter = a->DoubleValue();}
+		else if(name == "toolt"){m_tool_type = a->IntValue();}
 		else if(name == "cornerrad"){m_corner_radius = a->DoubleValue();}
 		else if(name == "minx"){m_box.m_x[0] = a->DoubleValue();}
 		else if(name == "maxx"){m_box.m_x[3] = a->DoubleValue();}
@@ -143,7 +155,20 @@ void CZigZag::AppendTextToProgram()
 	wxString filepath = wxString::Format(_T("zigzag%d.stl"), number_for_stl_file);
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = SphericalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
+
+	const wchar_t *tt = NULL;
+	switch(m_params.m_tool_type){
+	case TT_SPHERICAL:
+		tt = _T("SpericalCutter");
+		break;
+	case TT_CYLINDRICAL:
+		tt = _T("CylindricalCutter");
+		break;
+	case TT_TOROIDAL:
+		tt = _T("ToroidalCutter");
+		break;
+	};
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = %s(%lf, Point(0,0,7))\n"), tt, m_params.m_tool_diameter/2));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("model = ImportModel('%s')\n"), filepath.c_str()));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("pg = DropCutter(c, model)\n")));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("pathlist = pg.GenerateToolPath(%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, 0)\n"), m_params.m_box.m_x[0], m_params.m_box.m_x[3], m_params.m_box.m_x[1], m_params.m_box.m_x[4], m_params.m_box.m_x[2], m_params.m_box.m_x[5], m_params.m_dx, m_params.m_dy));
