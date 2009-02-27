@@ -1,5 +1,15 @@
 #summary How to use different operations in HeeksCNC
 
+= Basic info =
+
+HeeksCNC is a graphical user interface, built using HeeksCAD. It allows the user to define an NC program using objects with graphical icons. The user can edit the properties of these. 
+
+A Python script program file is then automatically made from this, which runs more specific scripts to make the NC code.
+
+The NC code is then backplotted ( yet more Python script ), so the toolpath can be shown in the graphics window of HeeksCNC. 
+
+If the user edits the NC file, these edits can not be passed back up to the Python program. If the user edits the Python program, these edits can not be passed back up to the graphical objects. 
+
 = How to use different operations in HeeksCNC =
 
 == Profile ==
@@ -11,10 +21,8 @@
   # Draw a 3D-object
   # Draw a sketch around the area to be milled
   # Select the sketch and select machining->operations->new zigzag operation (or in the machining tool bar if you have enabled it)
-  # Change some values in the bottom left "Properties" box (at least be sure that z1 (safety height) is high enough if you are going to run the g-code in a real machine)
+  # Change some values in the bottom left "Properties" box (at least be sure that z1 (safety height) is high enough if you are going to run the nc code in a real machine)
   # Hit the green V-button
   # Select machining->"make python script"
-  # Select machining->"Post-Process" to run the script and show the g-code
-  * Now you can save the g-code by clicking the save button on the machining tool bar.
-
-
+  # Select machining->"Post-Process" to run the script and show the NC code
+  * Now you can save the NC code by clicking the save button on the machining tool bar.
