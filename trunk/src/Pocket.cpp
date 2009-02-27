@@ -180,7 +180,11 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 
 void CPocket::AppendTextToProgram()
 {
+#ifdef UNICODE
 	std::wostringstream ss;
+#else
+    std::ostringstream ss;
+#endif
     ss.imbue(std::locale("C"));
 
     ss << "clearance = float(" << m_params.m_clearance_height << ")\n";
