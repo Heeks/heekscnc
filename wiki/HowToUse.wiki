@@ -1,4 +1,4 @@
-#summary Information on getting HeeksCNC to run and using it.
+#summary Information on getting HeeksCNC to run
 
 = Getting It to Work =
 
@@ -25,5 +25,3 @@ The directory tree must look like this (or at least mine looked after i built a 
   # Build libactp (type 'make' in libactp/PythonLib) (and copy to HeeksCNC/)
   # Run HeeksCAD, open file->plugins and add HeeksCNC/libheekscnc.so.0.5.1
   # Restart HeeksCAD
-
-= Using HeeksCNC =
