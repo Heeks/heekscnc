@@ -12,6 +12,7 @@
 #include "Pocket.h"
 #include "ZigZag.h"
 
+
 bool COperations::CanAdd(HeeksObj* object)
 {
 	return object->GetType() == ProfileType || object->GetType() == PocketType || object->GetType() == ZigZagType;
@@ -155,6 +156,8 @@ void CProgram::RewritePythonProgram()
 		}
 	}
 
+	char *locale_before = setlocale(LC_NUMERIC, "C");
+
 	// add standard stuff at the top
 
 	// kurve related things
@@ -221,6 +224,7 @@ void CProgram::RewritePythonProgram()
 		}
 	}
 
+	setlocale(LC_NUMERIC, locale_before);
 }
 
 ProgramUserType CProgram::GetUserType()

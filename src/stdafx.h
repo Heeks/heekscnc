@@ -38,3 +38,6 @@ extern "C" {
 #include "../../interface/strconv.h"
 
 // TODO: reference additional headers your program requires here
+
+#include "locale.h"
+
