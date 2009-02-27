@@ -180,6 +180,7 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Geometry import *\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.SphericalCutter import *\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.CylindricalCutter import *\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.ToroidalCutter import *\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Importers.STLImporter import ImportModel\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.PathGenerators.DropCutter import DropCutter\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from PyCamToHeeks import HeeksCNCExporter\n"));
