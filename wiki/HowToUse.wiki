@@ -12,11 +12,11 @@ If the user edits the NC file, these edits can not be passed back up to the Pyth
 
 = How to use different operations in HeeksCNC =
 
-== Profile ==
+== http://heekscnc.googlecode.com/svn/trunk/icons/profile.png Profile ==
 
-== Pocket ==
+== http://heekscnc.googlecode.com/svn/trunk/icons/pocket.png Pocket ==
 
-== ZigZag ==
+== http://heekscnc.googlecode.com/svn/trunk/icons/zigzag.png ZigZag ==
 
   # Draw a 3D-object
   # Draw a sketch around the area to be milled
