@@ -1,0 +1,8 @@
+= Want to help? =
+
+If you want to add or change something, first of all add an Issue to the Issue List http://code.google.com/p/heekscnc/issues/list
+
+
+When you've done it, commit your changes with SVN, mentioning the Issue number in the comment, then go to the Issue List and mark your Issue as done.
+
+I will need to add your Google account username as a member of this project, before you can commit code with SVN.
