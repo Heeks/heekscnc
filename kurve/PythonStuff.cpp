@@ -276,6 +276,23 @@ static PyObject* kurve_num_spans(PyObject* self, PyObject* args)
 	return pValue;
 }
 
+static PyObject* kurve_is_closed(PyObject* self, PyObject* args)
+{
+	int ik;
+	if (!PyArg_ParseTuple(args, "i", &ik)) return NULL;
+	Kurve* k = (Kurve*)ik;
+
+	bool closed = false;
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		closed = k->Closed();
+	}
+
+	PyObject *pValue = closed ? Py_True : Py_False;
+	Py_INCREF(pValue);
+	return pValue;
+}
+
 static PyObject* kurve_get_span(PyObject* self, PyObject* args)
 {
 	int ik;
@@ -507,6 +524,7 @@ static PyMethodDef KurveMethods[] = {
 	{"equal", kurve_equal, METH_VARARGS , ""},
 	{"print_kurve", kurve_print_kurve, METH_VARARGS , ""},
 	{"num_spans", kurve_num_spans, METH_VARARGS , ""},
+	{"is_closed", kurve_is_closed, METH_VARARGS , ""},
 	{"get_span", kurve_get_span, METH_VARARGS , ""},
 	{"get_span_dir", kurve_get_span_dir, METH_VARARGS , ""},
 	{"get_span_length", kurve_get_span_length, METH_VARARGS , ""},

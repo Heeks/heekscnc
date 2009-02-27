@@ -236,7 +236,7 @@ void CPocket::AppendTextToProgram()
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_params.m_material_allowance, m_params.m_step_over, m_params.m_step_down, m_params.m_round_corner_factor));
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area_funcs.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_params.m_material_allowance, m_params.m_step_over, m_params.m_step_down, m_params.m_round_corner_factor));
 
 			// rapid back up to clearance plane
 			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
