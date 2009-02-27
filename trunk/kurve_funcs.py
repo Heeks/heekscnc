@@ -1,11 +1,19 @@
 import kurve
 from nc.nc import *
 
+def make_smaller( k, startx = None, starty = None, finishx = None, finishy = None ):
+        if startx != None and starty != None and finishx != None and finishy != None:
+            return kurve.make_section(k, startx, starty, finishx, finshy)
+        return k
+    
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(k, startx, starty, direction, radius, finishx, finishy):
+def profile(k, rollstartx = None, rollstarty = None, direction = "on", radius = 1.0, rollfinishx = None, rollfinishy = None, startx = None, starty = None, finishx = None, finishy = None):
     if kurve.exists(k) == False:
         raise "kurve doesn't exist, number %d" % (k)
+
+    smaller_k = make_smaller( k, startx, starty, finishx, finishy )
+    k = smaller_k
     
     offset_k = k
 
@@ -30,16 +38,16 @@ def profile(k, startx, starty, direction, radius, finishx, finishy):
     for span in range(0, num_spans):
         sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, span)
         if span == 0:#first span
-            if sx != startx or sy != starty:
+            if sx != rollstartx or sy != rollstarty:
                 rdir = 0 # line
                 if direction != "on":
                     # do a roll-on arc
                     vx, vy = kurve.get_span_dir(offset_k, span, 0) # get start direction
-                    if startx == 'NOT_SET' or starty == 'NOT_SET':
+                    if rollstartx == 'NOT_SET' or rollstarty == 'NOT_SET':
                         raise "can not do an arc without a line move first"
-                    rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, startx, starty)
-                    rcx = rcx - startx # make relative to the start position
-                    rcy = rcy - starty
+                    rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, rollstartx, rollstarty)
+                    rcx = rcx - rollstartx # make relative to the start position
+                    rcy = rcy - rollstarty
                     rdir = -rdir # because the tangential_arc was used in reverse
                     
                 if rdir == 1:# anti-clockwise arc
@@ -59,21 +67,24 @@ def profile(k, startx, starty, direction, radius, finishx, finishy):
                 arc_cw(ex, ey, i = cx, j = cy)
 
         if span == num_spans - 1:# last span
-            if (finishx != ex or finishy != ey) and direction != "on":
+            if (rollfinishx != ex or rollfinishy != ey) and direction != "on":
                 # do a roll off arc
                 vx, vy = kurve.get_span_dir(offset_k, span, 1) # get end direction
-                rcx, rcy, rdir = kurve.tangential_arc(ex, ey, vx, vy, finishx, finishy)
+                rcx, rcy, rdir = kurve.tangential_arc(ex, ey, vx, vy, rollfinishx, rollfinishy)
                 rcx = rcx - ex # make relative to the start position
                 rcy = rcy - ey
                 if rdir == 1:# anti-clockwise arc
-                    arc_ccw(finishx, finishy, i = rcx, j = rcy)
+                    arc_ccw(rollfinishx, rollfinishy, i = rcx, j = rcy)
                 elif rdir == -1:# clockwise arc
-                    arc_cw(finishx, finishy, i = rcx, j = rcy)
+                    arc_cw(rollfinishx, rollfinishy, i = rcx, j = rcy)
                 else:# line
-                    feed(finishx, finishy)
+                    feed(rollfinishx, rollfinishy)
                 
     if offset_k != k:
         kurve.delete(offset_k)
+
+    if smaller_k != k:
+        kurve.delete(smaller_k)
 
 def roll_on_point(k, direction, radius):
     x = float(0)
