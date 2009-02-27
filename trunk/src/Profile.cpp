@@ -351,7 +351,7 @@ void CProfile::AppendTextToProgram()
 			{
 				if(m_params.m_auto_roll_on)
 				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = stdops.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
 					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
 				}
 				else
@@ -380,7 +380,7 @@ void CProfile::AppendTextToProgram()
 			{
 				if(m_params.m_auto_roll_off)
 				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_off_x, roll_off_y = stdops.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));			
+					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));			
 					roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
 				}
 				else
@@ -397,7 +397,7 @@ void CProfile::AppendTextToProgram()
 			}
 
 			// profile the kurve
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("stdops.profile(k%d, %s, '%s', tool_diameter/2, %s)\n"), sketch, roll_on_string.c_str(), side_string.c_str(), roll_off_string.c_str()));
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, %s, '%s', tool_diameter/2, %s)\n"), sketch, roll_on_string.c_str(), side_string.c_str(), roll_off_string.c_str()));
 
 			// rapid back up to clearance plane
 			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
