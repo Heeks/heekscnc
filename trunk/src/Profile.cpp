@@ -11,6 +11,8 @@
 #include "../../interface/PropertyCheck.h"
 #include "../../tinyxml/tinyxml.h"
 
+#include <sstream>
+
 CProfileParams::CProfileParams()
 {
 	m_tool_diameter = 0.0;
@@ -301,13 +303,37 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 
 void CProfile::AppendTextToProgram()
 {
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("clearance = float(%g)\n"), m_params.m_clearance_height));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid_down_to_height = float(%g)\n"), m_params.m_rapid_down_to_height));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("final_depth = float(%g)\n"), m_params.m_final_depth));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool_diameter = float(%g)\n"), m_params.m_tool_diameter));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("spindle(%g)\n"), m_params.m_spindle_speed));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("feedrate(%g)\n"), m_params.m_horizontal_feed_rate));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool_change(1)\n")));
+	std::wostringstream ss;
+    ss.imbue(std::locale("C"));
+
+    ss << "clearance = float(" << m_params.m_clearance_height << ")\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "rapid_down_to_height = float(" << m_params.m_rapid_down_to_height << ")\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "final_depth = float(" << m_params.m_final_depth << ")\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "tool_diameter = float(" << m_params.m_tool_diameter << ")\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "spindle(" << m_params.m_spindle_speed << ")\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "feedrate(" << m_params.m_horizontal_feed_rate << ")\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "tool_change(1)\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
@@ -351,19 +377,27 @@ void CProfile::AppendTextToProgram()
 			{
 				if(m_params.m_auto_roll_on)
 				{
+					//ss << "roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k" << sketch << ", '" << side_string.c_str() << "', tool_diameter/2)\n";
+					//theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					//ss.str().clear();
 					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
 					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
 				}
 				else
 				{
-					roll_on_string = wxString::Format(_T("%lf, %lf"), m_params.m_roll_on_point[0], m_params.m_roll_on_point[1]);
+					ss << m_params.m_roll_on_point[0] << ", " << m_params.m_roll_on_point[1];
+					roll_on_string = ss.str().c_str();
+					ss.str().clear();
 				}
 			}
 			else
 			{
 				double s[3] = {0, 0, 0};
 				object->GetFirstChild()->GetStartPoint(s);
-				roll_on_string = wxString::Format(_T("%lf, %lf"), s[0], s[1]);
+
+				ss << s[0] << ", " << s[1];
+				roll_on_string = ss.str().c_str();
+				ss.str().clear();
 			}
 
 			// rapid across to it
@@ -385,7 +419,9 @@ void CProfile::AppendTextToProgram()
 				}
 				else
 				{
-					roll_off_string = wxString::Format(_T("%lf, %lf"), m_params.m_roll_off_point[0], m_params.m_roll_off_point[1]);
+					ss << m_params.m_roll_off_point[0] << ", " << m_params.m_roll_off_point[1];
+					roll_off_string = ss.str().c_str();
+					ss.str().clear();
 				}
 			}
 			else
@@ -393,7 +429,10 @@ void CProfile::AppendTextToProgram()
 				double e[3] = {0, 0, 0};
 				int n = object->GetNumChildren();
 				object->GetAtIndex(n-1)->GetEndPoint(e);
-				roll_off_string = wxString::Format(_T("%lf, %lf"), e[0], e[1]);
+
+				ss << e[0] << ", " << e[1];
+				roll_off_string = ss.str().c_str();
+				ss.str().clear();
 			}
 
 			// profile the kurve
