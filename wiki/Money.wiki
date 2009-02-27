@@ -1,0 +1,21 @@
+#summary Pay for some work to be done
+
+= Contributing some money =
+
+If you have some open source CAD/CAM work that needs doing, but no-one seems interested in doing the work, and you really want it doing, then send me, Dan Heeks, some money and a specification. I will add an Issue on the Issues List http://code.google.com/p/heekscnc/issues/list and display the money total as a reward for whoever does the work. The specification will not be for a perfect working solution. If a software developer wants to do the work, they will ask me and then change the owner of the issue to themselves. When they think they have completed the work, I will check it and, if it matches the specification, send the total money donated for that issue to them, minus the PayPal charge, or post stamp cost.
+
+The work will be open source. It may use the license of this project ( BSD ), or the GPL license, which BSD is compatable with. The copyright will belong to whoever writes the code, but they will be giving us all a license to use the code by adding it to this project.
+
+The work may simply be a case of finding an existing open source solution.
+
+
+Issues with donations attached:
+
+
+None
+
+
+This project will become a useful, free CAD/CAM solution, even without donations, but you can make it happen quicker by getting some professionals interested.
+If you just want to donate a small amount, that's OK.
+
+Feel free to add enhancement requests and bugs without donations, this is a contribution in itself.
