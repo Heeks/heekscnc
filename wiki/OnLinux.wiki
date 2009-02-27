@@ -1,4 +1,4 @@
-summary Building HeeksCAD and HeeksCNC and getting them to work on Linux
+#summary Building HeeksCAD and HeeksCNC and getting them to work on Linux
 
 = Getting It to Work on Linux =
 
