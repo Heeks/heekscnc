@@ -159,7 +159,7 @@ void CZigZag::AppendTextToProgram()
 	const wchar_t *tt = NULL;
 	switch(m_params.m_tool_type){
 	case TT_SPHERICAL:
-		tt = _T("SpericalCutter");
+		tt = _T("SphericalCutter");
 		break;
 	case TT_CYLINDRICAL:
 		tt = _T("CylindricalCutter");
