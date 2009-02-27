@@ -158,7 +158,11 @@ void CZigZag::AppendTextToProgram()
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
 
+#ifdef UNICODE
 	std::wostringstream ss;
+#else
+    std::ostringstream ss;
+#endif
     ss.imbue(std::locale("C"));
 
 	switch(m_params.m_tool_type){
