@@ -9,6 +9,8 @@
 #include "../../interface/PropertyChoice.h"
 #include "../../tinyxml/tinyxml.h"
 
+#include <sstream>
+
 int CZigZag::number_for_stl_file = 1;
 
 void CZigZagParams::set_initial_values(const std::list<int> &solids)
@@ -156,22 +158,53 @@ void CZigZag::AppendTextToProgram()
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
 
+	std::wostringstream ss;
+    ss.imbue(std::locale("C"));
+
 	switch(m_params.m_tool_type){
 	case TT_SPHERICAL:
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = SphericalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
+		ss << "c = SphericalCutter(" << m_params.m_tool_diameter/2 << ", Point(0,0,7))\n";
+		//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = SphericalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
 		break;
 	case TT_CYLINDRICAL:
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = CylindricalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
+		ss << "c = CylindricalCutter(" << m_params.m_tool_diameter/2 << ", Point(0,0,7))\n";
+		//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = CylindricalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
 		break;
 	case TT_TOROIDAL:
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = ToroidalCutter(%lf, %lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2, m_params.m_corner_radius));
+		ss << "c = ToroidalCutter(" << m_params.m_tool_diameter/2 << ", " << m_params.m_corner_radius << ", Point(0,0,7))\n";
+		//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = ToroidalCutter(%lf, %lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2, m_params.m_corner_radius));
 		break;
 	};
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "model = ImportModel('" << filepath.c_str() << "')\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "pg = DropCutter(c, model)\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "pathlist = pg.GenerateToolPath(" << m_params.m_box.m_x[0] << ", " << m_params.m_box.m_x[3] << ", " << m_params.m_box.m_x[1] << ", " << m_params.m_box.m_x[4] << ", " << m_params.m_box.m_x[2] << ", " << m_params.m_box.m_x[5] << ", " << m_params.m_dx << ", " << m_params.m_dy << ", 0)\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "h = HeeksCNCExporter(" << m_params.m_box.m_x[5] << ")\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+    ss << "h.AddPathList(pathlist)\n";
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+    ss.str().clear();
+
+#if 0
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("model = ImportModel('%s')\n"), filepath.c_str()));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("pg = DropCutter(c, model)\n")));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("pathlist = pg.GenerateToolPath(%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, 0)\n"), m_params.m_box.m_x[0], m_params.m_box.m_x[3], m_params.m_box.m_x[1], m_params.m_box.m_x[4], m_params.m_box.m_x[2], m_params.m_box.m_x[5], m_params.m_dx, m_params.m_dy));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("h = HeeksCNCExporter(%lf)\n"), m_params.m_box.m_x[5]));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("h.AddPathList(pathlist)\n")));
+#endif
 }
 
 void CZigZag::glCommands(bool select, bool marked, bool no_color)

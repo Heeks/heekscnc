@@ -156,8 +156,6 @@ void CProgram::RewritePythonProgram()
 		}
 	}
 
-	char *locale_before = setlocale(LC_NUMERIC, "C");
-
 	// add standard stuff at the top
 
 	// kurve related things
@@ -223,8 +221,6 @@ void CProgram::RewritePythonProgram()
 			break;
 		}
 	}
-
-	setlocale(LC_NUMERIC, locale_before);
 }
 
 ProgramUserType CProgram::GetUserType()
