@@ -1,0 +1,20 @@
+#summary How to use different operations in HeeksCNC
+
+= How to use different operations in HeeksCNC =
+
+== Profile ==
+
+== Pocket ==
+
+== ZigZag ==
+
+  # Draw a 3D-object
+  # Draw a sketch around the area to be milled
+  # Select the sketch and select machining->operations->new zigzag operation (or in the machining tool bar if you have enabled it)
+  # Change some values in the bottom left "Properties" box (at least be sure that z1 (safety height) is high enough if you are going to run the g-code in a real machine)
+  # Hit the green V-button
+  # Select machining->"make python script"
+  # Select machining->"Post-Process" to run the script and show the g-code
+  * Now you can save the g-code by clicking the save button on the machining tool bar.
+
+
