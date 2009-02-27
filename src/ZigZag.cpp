@@ -158,7 +158,7 @@ void CZigZag::AppendTextToProgram()
 
 	switch(m_params.m_tool_type){
 	case TT_SPHERICAL:
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = SpericalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = SphericalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
 		break;
 	case TT_CYLINDRICAL:
 		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = CylindricalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
