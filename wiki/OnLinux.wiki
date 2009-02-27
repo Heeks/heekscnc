@@ -1,0 +1,23 @@
+= Getting It to Work on Linux =
+
+The directory tree must look like this (or at least mine looked after i built a working copy of HeeksCAD/CNC):
+
+  * HeeksCAD
+    * HeeksCNC
+      * kurve
+      * PyCam (get from sourceforge)
+        * trunk
+      * actp.so (copy here after building)
+      * area.so (copy here after building)
+  * libactp (get from googlecode)
+    * freesteel
+    * PythonLib
+  * libarea (get from googlecode)
+
+
+  # Install dev packages of wxGTK and OpenCascade
+  # Build HeeksCAD, HeeksCNC, kurve and PyCam (by typing 'make' in their directories)
+  # Build libarea (and copy to HeeksCNC/)
+  # Build libactp (type 'make' in libactp/PythonLib) (and copy to HeeksCNC/)
+  # Run HeeksCAD, open file->plugins and add HeeksCNC/libheekscnc.so.0.5.1
+  # Restart HeeksCAD
