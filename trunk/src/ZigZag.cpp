@@ -51,7 +51,7 @@ void CZigZagParams::write_values_to_config()
 }
 
 static void on_set_tool_diameter(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_tool_diameter = value;}
-static void on_set_tool_type(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_tool_type = value;}
+static void on_set_tool_type(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_tool_type = value; heeksCAD->RefreshProperties();}
 static void on_set_corner_radius(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_corner_radius = value;}
 static void on_set_minx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[0] = value;}
 static void on_set_maxx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[3] = value;}
@@ -76,7 +76,7 @@ void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 		choices.push_back(_("toroidal"));
 		list->push_back(new PropertyChoice(_("tool type"), choices, m_tool_type, parent, on_set_tool_type));
 	}
-	list->push_back(new PropertyDouble(_("corner radius"), m_corner_radius, parent, on_set_corner_radius));
+	if(m_tool_type == TT_TOROIDAL) list->push_back(new PropertyDouble(_("corner radius"), m_corner_radius, parent, on_set_corner_radius));
 	list->push_back(new PropertyDouble(_("minimum x"), m_box.m_x[0], parent, on_set_minx));
 	list->push_back(new PropertyDouble(_("maximum x"), m_box.m_x[3], parent, on_set_maxx));
 	list->push_back(new PropertyDouble(_("minimum y"), m_box.m_x[1], parent, on_set_miny));
@@ -156,19 +156,17 @@ void CZigZag::AppendTextToProgram()
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
 
-	const wchar_t *tt = NULL;
 	switch(m_params.m_tool_type){
 	case TT_SPHERICAL:
-		tt = _T("SphericalCutter");
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = SpericalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
 		break;
 	case TT_CYLINDRICAL:
-		tt = _T("CylindricalCutter");
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = CylindricalCutter(%lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2));
 		break;
 	case TT_TOROIDAL:
-		tt = _T("ToroidalCutter");
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = ToroidalCutter(%lf, %lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2, m_params.m_corner_radius));
 		break;
 	};
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = %s(%lf, Point(0,0,7))\n"), tt, m_params.m_tool_diameter/2));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("model = ImportModel('%s')\n"), filepath.c_str()));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("pg = DropCutter(c, model)\n")));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("pathlist = pg.GenerateToolPath(%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, 0)\n"), m_params.m_box.m_x[0], m_params.m_box.m_x[3], m_params.m_box.m_x[1], m_params.m_box.m_x[4], m_params.m_box.m_x[2], m_params.m_box.m_x[5], m_params.m_dx, m_params.m_dy));
