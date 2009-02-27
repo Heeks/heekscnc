@@ -12,6 +12,8 @@
 #include "../../interface/PropertyCheck.h"
 #include "../../tinyxml/tinyxml.h"
 
+#include <sstream>
+
 CPocketParams::CPocketParams()
 {
 	m_tool_diameter = 0.0;
@@ -178,9 +180,14 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 
 void CPocket::AppendTextToProgram()
 {
+	std::ostringstream ss;
+    ss.imbue(std::locale("C"));
+    ss << m_params.m_final_depth;
+    wxString str(ss.str());
+
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("clearance = float(%g)\n"), m_params.m_clearance_height));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid_down_to_height = float(%g)\n"), m_params.m_rapid_down_to_height));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("final_depth = float(%g)\n"), m_params.m_final_depth));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("final_depth = float(%s)\n"), str));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("tool_diameter = float(%g)\n"), m_params.m_tool_diameter));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("spindle(%g)\n"), m_params.m_spindle_speed));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("feedrate(%g)\n"), m_params.m_horizontal_feed_rate));
