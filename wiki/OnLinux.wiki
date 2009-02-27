@@ -1,3 +1,5 @@
+summary Building HeeksCAD and HeeksCNC and getting them to work on Linux
+
 = Getting It to Work on Linux =
 
 The directory tree must look like this (or at least mine looked after i built a working copy of HeeksCAD/CNC):
