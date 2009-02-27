@@ -1,5 +1,7 @@
 #summary How to use different operations in HeeksCNC
 
+http://heekscnc.googlecode.com/svn/wiki/HeeksCNC.png
+
 = Basic info =
 
 HeeksCNC is a graphical user interface, built using HeeksCAD. It allows the user to define an NC program using objects with graphical icons.
