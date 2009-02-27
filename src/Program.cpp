@@ -157,28 +157,19 @@ void CProgram::RewritePythonProgram()
 
 	// add standard stuff at the top
 
-	bool stdops_imported = false;
-
 	// kurve related things
 	if(profile_op_exists)
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import kurve\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import stdops\n"));
-		stdops_imported = true;
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import kurve_funcs\n"));
 	}
 
 	// area related things
 	if(pocket_op_exists)
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import area\n"));
-		if(!stdops_imported)
-		{
-			theApp.m_program_canvas->m_textCtrl->AppendText(_T("import stdops\n"));
-			stdops_imported = true;
-		}
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import area_funcs\n"));
 	}
-
-	// common to area and kurve
 
 	// pycam stuff
 	if(zigzag_op_exists)
