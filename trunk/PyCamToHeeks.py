@@ -6,7 +6,8 @@ from nc.nc import *
 
 class HeeksCNCExporter:
 
-    def __init__(self):
+    def __init__(self, safetyz):
+        self.safetyz = safetyz
         #self.file.write(gc.begin()+"\n")
         #self.file.write("F"+str(feedrate)+"\n")
         #self.file.write("S"+str(speed)+"\n")
@@ -15,12 +16,12 @@ class HeeksCNCExporter:
 
     def AddPath(self, path):
         point = path.points[0]
-        rapid(point.x,point.y, 20) # to do, use clearance height
+        rapid(point.x,point.y, self.safetyz) # to do, use clearance height
 #        self.file.write(gc.rapid(point.x,point.y,gc.safetyheight)+"\n")
         for point in path.points:
             feed(point.x,point.y,point.z)
             #self.file.write(gc.cut(point.x,point.y,point.z)+"\n")
-        rapid(z=20)
+        rapid(z=self.safetyz)
 #        self.file.write(gc.rapid(point.x,point.y,gc.safetyheight)+"\n")
 
     def AddPathList(self, pathlist):
