@@ -9,6 +9,8 @@
 #include "../../interface/PropertyList.h"
 #include "CNCConfig.h"
 
+#include <sstream>
+
 void ColouredText::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
@@ -63,9 +65,23 @@ void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
 	{
 		std::string name(a->Name());
-		if(name == "x"){m_x[0] = a->DoubleValue();}
-		else if(name == "y"){m_x[1] = a->DoubleValue();}
-		else if(name == "z"){m_x[2] = a->DoubleValue();}
+
+		if(name == "x")
+		{
+			std::wistringstream ss(Ctt(a->Value()));
+			ss.imbue(std::locale("C"));
+			ss >> m_x[0];
+		}
+		else if(name == "y"){
+			std::wistringstream ss(Ctt(a->Value()));
+			ss.imbue(std::locale("C"));
+			ss >> m_x[1];
+		}
+		else if(name == "z"){
+			std::wistringstream ss(Ctt(a->Value()));
+			ss.imbue(std::locale("C"));
+			ss >> m_x[2];
+		}
 	}
 }
 
