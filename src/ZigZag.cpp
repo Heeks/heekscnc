@@ -170,7 +170,7 @@ void CZigZag::AppendTextToProgram()
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("model = ImportModel('%s')\n"), filepath.c_str()));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("pg = DropCutter(c, model)\n")));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("pathlist = pg.GenerateToolPath(%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, 0)\n"), m_params.m_box.m_x[0], m_params.m_box.m_x[3], m_params.m_box.m_x[1], m_params.m_box.m_x[4], m_params.m_box.m_x[2], m_params.m_box.m_x[5], m_params.m_dx, m_params.m_dy));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("h = HeeksCNCExporter()\n")));
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("h = HeeksCNCExporter(%lf)\n"), m_params.m_box.m_x[5]));
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("h.AddPathList(pathlist)\n")));
 }
 
