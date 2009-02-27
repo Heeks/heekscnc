@@ -3,6 +3,13 @@
 #include "../../interface/HeeksObj.h"
 #include "HeeksCNCTypes.h"
 
+enum ToolType {
+	TT_SPHERICAL,
+	TT_CYLINDRICAL,
+	TT_TOROIDAL
+};
+
+
 class CZigZag;
 
 class CZigZagParams{
@@ -16,6 +23,7 @@ public:
 	double m_vertical_feed_rate;
 	double m_spindle_speed;
 	int m_direction; // 0 = x, 1 = y
+	int m_tool_type;
 
 	void set_initial_values(const std::list<int> &solids);
 	void write_values_to_config();
