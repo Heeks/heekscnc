@@ -32,6 +32,10 @@ void COutputTextCtrl::OnMouse( wxMouseEvent& event )
 
 void COutputTextCtrl::OnPaint(wxPaintEvent& event)
 {
+	// this is here to Format the text ( which seems to be slow in Windows, if all done at once in CNCCode::SetTextCtrl )
+	// OnPaint doesn't seem to get called from Linux, though
+	wxPaintDC dc(this);
+
 	if (theApp.m_program && theApp.m_program->m_nc_code)
 	{
 		wxSize size = GetClientSize();
