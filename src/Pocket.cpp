@@ -180,6 +180,7 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 
 void CPocket::AppendTextToProgram()
 {
+	{
 #ifdef UNICODE
 	std::wostringstream ss;
 #else
@@ -188,32 +189,14 @@ void CPocket::AppendTextToProgram()
     ss.imbue(std::locale("C"));
 
     ss << "clearance = float(" << m_params.m_clearance_height << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "rapid_down_to_height = float(" << m_params.m_rapid_down_to_height << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "final_depth = float(" << m_params.m_final_depth << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "tool_diameter = float(" << m_params.m_tool_diameter << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "spindle(" << m_params.m_spindle_speed << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "feedrate(" << m_params.m_horizontal_feed_rate << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "tool_change(1)\n";
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
+	}
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -266,9 +249,14 @@ void CPocket::AppendTextToProgram()
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
-            ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ")\n";
-            theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-            ss.str().clear();
+ #ifdef UNICODE
+			std::wostringstream ss;
+#else
+			std::ostringstream ss;
+#endif
+			ss.imbue(std::locale("C"));
+			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ")\n";
+			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 
 			//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area_funcs.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_params.m_material_allowance, m_params.m_step_over, m_params.m_step_down, m_params.m_round_corner_factor));
 
