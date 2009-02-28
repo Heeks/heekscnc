@@ -1,4 +1,9 @@
 // ZigZag.cpp
+/*
+ * Copyright (c) 2009, Dan Heeks
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
 
 #include "stdafx.h"
 #include "ZigZag.h"
@@ -179,36 +184,18 @@ void CZigZag::AppendTextToProgram()
 		//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("c = ToroidalCutter(%lf, %lf, Point(0,0,7))\n"), m_params.m_tool_diameter/2, m_params.m_corner_radius));
 		break;
 	};
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
+ 
     ss << "model = ImportModel('" << filepath.c_str() << "')\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
 
     ss << "pg = DropCutter(c, model)\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
 
     ss << "pathlist = pg.GenerateToolPath(" << m_params.m_box.m_x[0] << ", " << m_params.m_box.m_x[3] << ", " << m_params.m_box.m_x[1] << ", " << m_params.m_box.m_x[4] << ", " << m_params.m_box.m_x[2] << ", " << m_params.m_box.m_x[5] << ", " << m_params.m_dx << ", " << m_params.m_dy << ", 0)\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
 
     ss << "h = HeeksCNCExporter(" << m_params.m_box.m_x[5] << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
 
     ss << "h.AddPathList(pathlist)\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
 
-#if 0
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("model = ImportModel('%s')\n"), filepath.c_str()));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("pg = DropCutter(c, model)\n")));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("pathlist = pg.GenerateToolPath(%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, 0)\n"), m_params.m_box.m_x[0], m_params.m_box.m_x[3], m_params.m_box.m_x[1], m_params.m_box.m_x[4], m_params.m_box.m_x[2], m_params.m_box.m_x[5], m_params.m_dx, m_params.m_dy));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("h = HeeksCNCExporter(%lf)\n"), m_params.m_box.m_x[5]));
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("h.AddPathList(pathlist)\n")));
-#endif
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
 
 void CZigZag::glCommands(bool select, bool marked, bool no_color)
