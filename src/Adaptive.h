@@ -61,7 +61,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return AdaptiveType;}
-	const wxChar* GetTypeString(void)const{return _T("Adaptive");}
+	const wxChar* GetTypeString(void)const{return _T("Adaptive Roughing");}
 	void glCommands(bool select, bool marked, bool no_color);
 	wxString GetIcon(){return _T("../HeeksCNC/icons/adapt");}
 	void GetProperties(std::list<Property *> *list);
