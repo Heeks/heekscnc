@@ -1,4 +1,9 @@
 // OutputCanvas.cpp
+/*
+ * Copyright (c) 2009, Dan Heeks
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
 
 #include "stdafx.h"
 #include "OutputCanvas.h"
@@ -7,8 +12,8 @@
 
 BEGIN_EVENT_TABLE(COutputTextCtrl, wxTextCtrl)
     EVT_MOUSE_EVENTS(COutputTextCtrl::OnMouse)
+	EVT_PAINT(COutputTextCtrl::OnPaint)
 END_EVENT_TABLE()
-
 
 void COutputTextCtrl::OnMouse( wxMouseEvent& event )
 {
@@ -25,7 +30,23 @@ void COutputTextCtrl::OnMouse( wxMouseEvent& event )
 	event.Skip();
 }
 
+void COutputTextCtrl::OnPaint(wxPaintEvent& event)
+{
+	if (theApp.m_program && theApp.m_program->m_nc_code)
+	{
+		wxSize size = GetClientSize();
 
+		wxTextCoord col0, row0, col1, row1;
+		HitTest(wxPoint(0,0),      &col0, &row0);
+		HitTest(wxPoint(0,0)+size, &col1, &row1);
+
+		int pos0 = XYToPosition(0, row0);
+		int pos1 = XYToPosition(1, row1);
+
+		theApp.m_program->m_nc_code->FormatBlocks(this, pos0, pos1);
+	}
+	event.Skip();
+}
 
 BEGIN_EVENT_TABLE(COutputCanvas, wxScrolledWindow)
     EVT_SIZE(COutputCanvas::OnSize)
