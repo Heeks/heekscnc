@@ -1,4 +1,9 @@
 // NCCode.h
+/*
+ * Copyright (c) 2009, Dan Heeks
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
 
 // This is an object that can go in the tree view as a child of a program.
 // It contains lists of NC Code blocks, each one is a line of an NC file, but also contains drawing items
@@ -10,33 +15,27 @@
 #include "../../interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
 
-enum TextColorEnum{
-	TextColorDefaultType,
-	TextColorBlockType,
-	TextColorMiscType,
-	TextColorProgramType,
-	TextColorToolType,
-	TextColorCommentType,
-	TextColorVariableType,
-	TextColorPrepType,
-	TextColorAxisType,
-	TextColorRapidType,
-	TextColorFeedType,
-	MaxTextColorTypes
-};
-
-enum LinesColorEnum{
-	LinesColorRapidType,
-	LinesColorFeedType,
-	MaxLinesColorType
+enum ColorEnum{
+	ColorDefaultType,
+	ColorBlockType,
+	ColorMiscType,
+	ColorProgramType,
+	ColorToolType,
+	ColorCommentType,
+	ColorVariableType,
+	ColorPrepType,
+	ColorAxisType,
+	ColorRapidType,
+	ColorFeedType,
+	MaxColorTypes
 };
 
 class ColouredText
 {
 public:
 	wxString m_str;
-	TextColorEnum m_color_type;
-	ColouredText():m_color_type(TextColorDefaultType){}
+	ColorEnum m_color_type;
+	ColouredText():m_color_type(ColorDefaultType){}
 
 	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -77,9 +76,9 @@ public:
 class ColouredPath
 {
 public:
-	LinesColorEnum m_color_type;
+	ColorEnum m_color_type;
 	std::list< PathObject* > m_points;
-	ColouredPath():m_color_type(LinesColorRapidType){}
+	ColouredPath():m_color_type(ColorRapidType){}
 	ColouredPath(const ColouredPath& c);
 	~ColouredPath(){Clear();}
 
@@ -98,8 +97,9 @@ public:
 	std::list<ColouredText> m_text;
 	std::list<ColouredPath> m_line_strips;
 	long m_from_pos, m_to_pos; // position of block in text ctrl
+	bool m_formatted;
 
-	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1){}
+	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1), m_formatted(false) {}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return NCCodeBlockType;}
@@ -110,16 +110,27 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AppendTextCtrl(wxTextCtrl *textCtrl);
+	void AppendText(std::string& str);
+	void FormatText(wxTextCtrl *textCtrl);
 };
 
 class CNCCode:public HeeksObj
 {
 public:
 	static long pos; // used for setting the CNCCodeBlock objects' m_from_pos and m_to_pos
-	static HeeksColor m_text_colors[MaxTextColorTypes];
-	static HeeksColor m_lines_colors[MaxLinesColorType];
-	static std::string m_text_colors_str[MaxTextColorTypes];
-	static std::string m_lines_colors_str[MaxLinesColorType];
+private:
+	static std::map<std::string,ColorEnum> m_colors_s_i;
+	static std::map<ColorEnum,std::string> m_colors_i_s;
+	static std::vector<HeeksColor> m_colors;
+
+public:
+	static void ClearColors(void);
+	static void AddColor(const char* name, const HeeksColor& col);
+	static ColorEnum GetColor(const char* name, ColorEnum def=ColorDefaultType);
+	static const char* GetColor(ColorEnum i, const char* def="default");
+	static int ColorCount(void) { return m_colors.size(); }
+	static HeeksColor& Color(ColorEnum i) { return m_colors[i]; }
+
 	std::list<CNCCodeBlock*> m_blocks;
 	int m_gl_list;
 	CBox m_box;
@@ -157,5 +168,6 @@ public:
 
 	void DestroyGLLists(void); // not void KillGLLists(void), because I don't want the display list recreated on the Redraw button
 	void SetTextCtrl(wxTextCtrl *textCtrl);
+	void FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1);
 	void HighlightBlock(long pos);
 };
