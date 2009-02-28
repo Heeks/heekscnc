@@ -252,120 +252,63 @@ void CAdaptive::AppendTextToProgram()
     ss.imbue(std::locale("C"));
 
 	ss << "actp.setleadoffdz(" << m_params.m_leadoffdz << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setleadofflen(" << m_params.m_leadofflen << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setleadoffrad(" << m_params.m_leadoffrad << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setretractzheight(" << m_params.m_retractzheight << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setleadoffsamplestep(" << m_params.m_leadoffsamplestep << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.settoolcornerrad(" << m_params.m_toolcornerrad << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.settoolflatrad(" << m_params.m_toolflatrad << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setsamplestep(" << m_params.m_samplestep << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setstepdown(" << m_params.m_stepdown << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setclearcuspheight(" << m_params.m_clearcuspheight << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.settriangleweaveres(" << m_params.m_triangleweaveres << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setflatradweaveres(" << m_params.m_flatradweaveres << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setdchangright(" << m_params.m_dchangright << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setdchangrightoncontour(" << m_params.m_dchangrightoncontour << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setdchangleft(" << m_params.m_dchangleft << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setdchangefreespace(" << m_params.m_dchangefreespace << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setsidecutdisplch(" << m_params.m_sidecutdisplch << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setfcut(" << m_params.m_fcut << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setfretract(" << m_params.m_fretract << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setthintol(" << m_params.m_thintol << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setstartpoint(" << m_params.m_startpoint_x << ", " << m_params.m_startpoint_y << ", " << m_params.m_startvel_x << ", " << m_params.m_startvel_y << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.setminz(" << m_params.m_minz << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.boundaryclear(" << m_params.m_boundaryclear << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y0 << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y1 << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y1 << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y0 << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp.boundarybreak()\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 
 	ss << "actp_funcs.cut('" << filepath.c_str() << "')\n";
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
 }
 
 void CAdaptive::glCommands(bool select, bool marked, bool no_color)
