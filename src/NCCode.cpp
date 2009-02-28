@@ -321,7 +321,7 @@ void CNCCodeBlock::FormatText(wxTextCtrl *textCtrl)
 		wxColour c(col.red, col.green, col.blue);
 		int len = text.m_str.size();
 
-		wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Lucida Console", wxFONTENCODING_SYSTEM);
+		wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, _T("Lucida Console"), wxFONTENCODING_SYSTEM);
 		wxTextAttr ta(c);
 		ta.SetFont(font);
 		textCtrl->SetStyle(i, i+len, ta);
@@ -619,7 +619,7 @@ void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
 
 	textCtrl->Freeze();
 
-	wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Lucida Console", wxFONTENCODING_SYSTEM);
+	wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, _T("Lucida Console"), wxFONTENCODING_SYSTEM);
 	wxTextAttr ta;
 	ta.SetFont(font);
 	textCtrl->SetDefaultStyle(ta);
