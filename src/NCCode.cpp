@@ -320,7 +320,11 @@ void CNCCodeBlock::FormatText(wxTextCtrl *textCtrl)
 		HeeksColor &col = CNCCode::Color(text.m_color_type);
 		wxColour c(col.red, col.green, col.blue);
 		int len = text.m_str.size();
-		textCtrl->SetStyle(i, i+len, wxTextAttr(c));
+
+		wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Lucida Console", wxFONTENCODING_SYSTEM);
+		wxTextAttr ta(c);
+		ta.SetFont(font);
+		textCtrl->SetStyle(i, i+len, ta);
 		i += len;
 	}
 	m_formatted = true;
@@ -615,6 +619,11 @@ void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
 
 	textCtrl->Freeze();
 
+	wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Lucida Console", wxFONTENCODING_SYSTEM);
+	wxTextAttr ta;
+	ta.SetFont(font);
+	textCtrl->SetDefaultStyle(ta);
+
 	wxString str;
 	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
@@ -637,12 +646,14 @@ void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
 
 void CNCCode::FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1)
 {
+	textCtrl->Freeze();
 	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
 		CNCCodeBlock* block = *It;
 		if (i0 <= block->m_from_pos && block->m_from_pos <= i1)
 			block->FormatText(textCtrl);
 	}
+	textCtrl->Thaw();
 }
 
 void CNCCode::HighlightBlock(long pos)
