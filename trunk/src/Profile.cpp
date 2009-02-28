@@ -303,6 +303,7 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 
 void CProfile::AppendTextToProgram()
 {
+	{
 #ifdef UNICODE
 	std::wostringstream ss;
 #else
@@ -311,32 +312,14 @@ void CProfile::AppendTextToProgram()
     ss.imbue(std::locale("C"));
 
     ss << "clearance = float(" << m_params.m_clearance_height << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "rapid_down_to_height = float(" << m_params.m_rapid_down_to_height << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "final_depth = float(" << m_params.m_final_depth << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "tool_diameter = float(" << m_params.m_tool_diameter << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "spindle(" << m_params.m_spindle_speed << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "feedrate(" << m_params.m_horizontal_feed_rate << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
-
     ss << "tool_change(1)\n";
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-    ss.str().clear();
+	}
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -381,17 +364,19 @@ void CProfile::AppendTextToProgram()
 			{
 				if(m_params.m_auto_roll_on)
 				{
-					//ss << "roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k" << sketch << ", '" << side_string.c_str() << "', tool_diameter/2)\n";
-					//theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-					//ss.str().clear();
 					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
 					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
 				}
 				else
 				{
+#ifdef UNICODE
+					std::wostringstream ss;
+#else
+					std::ostringstream ss;
+#endif
+					ss.imbue(std::locale("C"));
 					ss << m_params.m_roll_on_point[0] << ", " << m_params.m_roll_on_point[1];
 					roll_on_string = ss.str().c_str();
-					ss.str().clear();
 				}
 			}
 			else
@@ -399,9 +384,13 @@ void CProfile::AppendTextToProgram()
 				double s[3] = {0, 0, 0};
 				object->GetFirstChild()->GetStartPoint(s);
 
+#ifdef UNICODE
+				std::wostringstream ss;
+#else
+				std::ostringstream ss;
+#endif
 				ss << s[0] << ", " << s[1];
 				roll_on_string = ss.str().c_str();
-				ss.str().clear();
 			}
 
 			// rapid across to it
@@ -423,9 +412,13 @@ void CProfile::AppendTextToProgram()
 				}
 				else
 				{
+#ifdef UNICODE
+					std::wostringstream ss;
+#else
+					std::ostringstream ss;
+#endif
 					ss << m_params.m_roll_off_point[0] << ", " << m_params.m_roll_off_point[1];
 					roll_off_string = ss.str().c_str();
-					ss.str().clear();
 				}
 			}
 			else
@@ -434,6 +427,11 @@ void CProfile::AppendTextToProgram()
 				int n = object->GetNumChildren();
 				object->GetAtIndex(n-1)->GetEndPoint(e);
 
+#ifdef UNICODE
+					std::wostringstream ss;
+#else
+				std::ostringstream ss;
+#endif
 				ss << e[0] << ", " << e[1];
 				roll_off_string = ss.str().c_str();
 				ss.str().clear();
