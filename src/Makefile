@@ -1,10 +1,11 @@
 #CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/lib/wx/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -D__WXGTK__ -DHEEKSCNC -D__WXDEBUG__ -DWXUSINGDLL
-CCFLAGS=-Wall -fPIC -g -I "./" -I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8 -D__WXGTK__ -DHEEKSCNC -DUNICODE -DWXUSINGDLL
+CCFLAGS=-Wall -fPIC -g -I "./" -I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8 -D__WXGTK__ -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL
 
 #WX_LIB_LETTER=d
 WX_LIB_LETTER=u
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o ZigZag.o
+#OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o ZigZag.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
 
@@ -86,8 +87,8 @@ ToolImage.o: ../../interface/ToolImage.cpp
 tinyxml.o: ../../tinyxml/tinyxml.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-tinystr.o: ../../tinyxml/tinystr.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+#tinystr.o: ../../tinyxml/tinystr.cpp
+#	gcc -c $? ${CCFLAGS} -o $@
 
 tinyxmlerror.o: ../../tinyxml/tinyxmlerror.cpp
 	gcc -c $? ${CCFLAGS} -o $@
