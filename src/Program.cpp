@@ -11,11 +11,12 @@
 #include "Profile.h"
 #include "Pocket.h"
 #include "ZigZag.h"
+#include "Adaptive.h"
 
 
 bool COperations::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == ProfileType || object->GetType() == PocketType || object->GetType() == ZigZagType;
+	return object->GetType() == ProfileType || object->GetType() == PocketType || object->GetType() == ZigZagType || object->GetType() == AdaptiveType;
 }
 
 void COperations::WriteXML(TiXmlNode *root)
@@ -136,10 +137,12 @@ void CProgram::RewritePythonProgram()
 {
 	theApp.m_program_canvas->m_textCtrl->Clear();
 	CZigZag::number_for_stl_file = 1;
+	CAdaptive::number_for_stl_file = 1;
 
 	bool profile_op_exists = false;
 	bool pocket_op_exists = false;
 	bool zigzag_op_exists = false;
+	bool adaptive_op_exists = false;
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
 		if(object->GetType() == ProfileType)
@@ -153,6 +156,10 @@ void CProgram::RewritePythonProgram()
 		else if(object->GetType() == ZigZagType)
 		{
 			zigzag_op_exists = true;
+		}
+		else if(object->GetType() == AdaptiveType)
+		{
+			adaptive_op_exists = true;
 		}
 	}
 
@@ -188,6 +195,16 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 	}
 
+	// pycam stuff
+	if(adaptive_op_exists)
+	{
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import actp_funcs\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'../../libactp/PythonLib')\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import actp\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+	}
+
 	// machine general stuff
 	theApp.m_program_canvas->m_textCtrl->AppendText(_T("from nc.nc import *\n"));
 
@@ -218,6 +235,9 @@ void CProgram::RewritePythonProgram()
 			break;
 		case ZigZagType:
 			((CZigZag*)object)->AppendTextToProgram();
+			break;
+		case AdaptiveType:
+			((CAdaptive*)object)->AppendTextToProgram();
 			break;
 		}
 	}

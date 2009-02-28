@@ -22,6 +22,7 @@
 #include "Profile.h"
 #include "Pocket.h"
 #include "ZigZag.h"
+#include "Adaptive.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -179,6 +180,40 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
+{
+	// check for at least one solid selected
+	std::list<int> solids;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+	}
+
+	// if no selected solids, 
+	if(solids.size() == 0)
+	{
+		// use all the sketches in the drawing
+		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
+		{
+			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+		}
+	}
+
+	if(solids.size() == 0)
+	{
+		wxMessageBox(_("There are no solids!"));
+		return;
+	}
+
+	CAdaptive *new_object = new CAdaptive(solids);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
 static void MakeScriptMenuCallback(wxCommandEvent &event)
 {
 	// create the Python program
@@ -248,6 +283,7 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Profile"), ToolImage(_T("opprofile")), _T("New Profile Operation..."), NewProfileOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Pocket"), ToolImage(_T("pocket")), _T("New Pocket Operation..."), NewPocketOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("ZigZag"), ToolImage(_T("zigzag")), _T("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Adaptive"), ToolImage(_T("adapt")), _T("New Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Python"), ToolImage(_T("python")), _T("Make Python Script"), MakeScriptMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _T("Post-Process"), PostProcessMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _T("Open NC File"), OpenNcFileMenuCallback);
@@ -283,6 +319,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	heeksCAD->AddMenuItem(menuOperations, _("New Profile Operation..."), NewProfileOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Pocket Operation..."), NewPocketOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
 
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;
@@ -327,6 +364,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Pocket", CPocket::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
 }
 
 void CHeeksCNCApp::OnNewOrOpen(bool open)
