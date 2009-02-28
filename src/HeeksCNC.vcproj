@@ -204,6 +204,14 @@
 			>
 		</Filter>
 		<File
+			RelativePath=".\Adaptive.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Adaptive.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\interface\Box.h"
 			>
 		</File>
