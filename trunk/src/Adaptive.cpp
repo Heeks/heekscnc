@@ -251,6 +251,9 @@ void CAdaptive::AppendTextToProgram()
 #endif
     ss.imbue(std::locale("C"));
 
+	ss << "rapid(z=" << m_params.m_retractzheight << ")\n";
+	ss << "rapid(x=" << m_params.m_startpoint_x << ", y=" << m_params.m_startpoint_y << ")\n";
+
 	ss << "actp.setleadoffdz(" << m_params.m_leadoffdz << ")\n";
 
 	ss << "actp.setleadofflen(" << m_params.m_leadofflen << ")\n";
@@ -308,6 +311,9 @@ void CAdaptive::AppendTextToProgram()
 	ss << "actp.boundarybreak()\n";
 
 	ss << "actp_funcs.cut('" << filepath.c_str() << "')\n";
+
+	ss << "rapid(z=" << m_params.m_retractzheight << ")\n";
+
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
 
