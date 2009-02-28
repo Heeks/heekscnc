@@ -10,5 +10,6 @@ enum{
 	ProfileType,
 	PocketType,
 	ZigZagType,
+	AdaptiveType,
 	HeeksCNCMaximumType
 };
