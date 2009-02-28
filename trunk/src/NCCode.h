@@ -110,7 +110,7 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AppendTextCtrl(wxTextCtrl *textCtrl);
-	void AppendText(std::string& str);
+	void AppendText(wxString& str);
 	void FormatText(wxTextCtrl *textCtrl);
 };
 

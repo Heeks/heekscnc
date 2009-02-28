@@ -300,7 +300,7 @@ void CNCCodeBlock::AppendTextCtrl(wxTextCtrl *textCtrl)
 	textCtrl->AppendText(_T("\n"));
 }
 
-void CNCCodeBlock::AppendText(std::string& str)
+void CNCCodeBlock::AppendText(wxString& str)
 {
 	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
 	{
@@ -615,13 +615,22 @@ void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
 
 	textCtrl->Freeze();
 
-	std::string str;
+	wxString str;
 	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
 		CNCCodeBlock* block = *It;
 		block->AppendText(str);
 	}
-	textCtrl->SetValue(str.c_str());
+	textCtrl->SetValue(str);
+
+#ifndef WIN32
+	// for Windows, this is done in COutputTextCtrl::OnPaint
+	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
+	{
+		CNCCodeBlock* block = *It;
+		block->FormatText(textCtrl);
+	}
+#endif
 
 	textCtrl->Thaw();
 }
