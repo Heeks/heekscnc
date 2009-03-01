@@ -1,0 +1,23 @@
+#summary Adaptive Roughing operation
+
+= Introduction =
+
+1. Make a solid, for example a cone, press
+http://heeksad.googlecode.com/svn/trunk/bitmaps/cone.png
+
+
+
+2. Make an adaptive roughing operation, pres
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/adaptive.png
+
+
+3. Make the Python script, press
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png
+
+
+4. Create the NC code and see the toolpath, press
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
+
+
+There will be some toolpath, probably not what you expect.
+If there is no toolpath, have a look in the terminal ( if running Linux ) to see if there are any Python script errors, like you haven't built.
