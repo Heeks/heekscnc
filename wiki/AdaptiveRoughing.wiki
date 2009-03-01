@@ -23,4 +23,4 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 
 
 There will be some toolpath, probably not what you expect.
-If there is no toolpath, have a look in the terminal ( if running Linux ) to see if there are any Python script errors, like you haven't built.
+If there is no toolpath, have a look in the terminal ( if running Linux ) to see if there are any Python script errors, like you haven't built actp.so
