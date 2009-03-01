@@ -2,27 +2,26 @@ import kurve
 from nc.nc import *
 
 def make_smaller( k, startx = None, starty = None, finishx = None, finishy = None ):
-    if startx == None and starty == None and finishx == None and finishy == None:
-        return k
+    if startx != None or starty != None:
+        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
 
-    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
-    
-    if startx == None: startx = sx
-    if starty == None: starty = sy
+        if startx == None: startx = sx
+        if starty == None: starty = sy
 
-    num_spans = kurve.num_spans(k)
-    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, num_spans - 1)
-    
-    if finishx == None: finishx = ex
-    if finishy == None: finishy = ey
+        kurve.change_start(k, startx, starty)
 
-    new_k = kurve.make_section(k, startx, starty, finishx, finishy)
-    kurve.delete(k)
-    return new_k
+    if finishx != None or finishy != None:
+        num_spans = kurve.num_spans(k)
+        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, num_spans - 1)
+
+        if finishx == None: finishx = ex
+        if finishy == None: finishy = ey
+
+        kurve.change_end(k, finishx, finishy)
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(k, direction = "on", radius = 1.0, rollstartx = None, rollstarty = None, rollfinishx = None, rollfinishy = None, startx = None, starty = None, finishx = None, finishy = None):
+def profile(k, direction = "on", radius = 1.0, rollstartx = None, rollstarty = None, rollfinishx = None, rollfinishy = None):
     if kurve.exists(k) == False:
         raise "kurve doesn't exist, number %d" % (k)
 
