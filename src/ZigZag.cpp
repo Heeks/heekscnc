@@ -189,7 +189,7 @@ void CZigZag::AppendTextToProgram()
 
     ss << "pg = DropCutter(c, model)\n";
 
-    ss << "pathlist = pg.GenerateToolPath(" << m_params.m_box.m_x[0] << ", " << m_params.m_box.m_x[3] << ", " << m_params.m_box.m_x[1] << ", " << m_params.m_box.m_x[4] << ", " << m_params.m_box.m_x[2] << ", " << m_params.m_box.m_x[5] << ", " << m_params.m_dx << ", " << m_params.m_dy << ", 0)\n";
+    ss << "pathlist = pg.GenerateToolPath(" << m_params.m_box.m_x[0] << ", " << m_params.m_box.m_x[3] << ", " << m_params.m_box.m_x[1] << ", " << m_params.m_box.m_x[4] << ", " << m_params.m_box.m_x[2] << ", " << m_params.m_box.m_x[5] << ", " << m_params.m_dx << ", " << m_params.m_dy << "," <<m_params.m_direction<< ")\n";
 
     ss << "h = HeeksCNCExporter(" << m_params.m_box.m_x[5] << ")\n";
 
