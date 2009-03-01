@@ -245,35 +245,40 @@ static PyObject* kurve_equal(PyObject* self, PyObject* args)
 	return pValue;
 }
 
-static PyObject* kurve_make_section(PyObject* self, PyObject* args)
+static PyObject* kurve_change_start(PyObject* self, PyObject* args)
 {
-	// kurve.make_section(k, startx, starty, finishx, finshy)
-
 	int ik;
-	double sx, sy, ex, ey;
-	if (!PyArg_ParseTuple(args, "idddd", &ik, &sx, &sy, &ex, &ey)) return NULL;
+	double sx, sy;
+	if (!PyArg_ParseTuple(args, "idd", &ik, &sx, &sy)) return NULL;
 	Kurve* k = (Kurve*)ik;
-
-	Kurve* new_object = NULL;
 
 	if(valid_kurves.find(k) != valid_kurves.end())
 	{
-		new_object = new Kurve(*k);
-		valid_kurves.insert(new_object);
-
 		// find nearest to start point
 		int new_start_span;
 		Point start_p = k->Near(Point(sx, sy), new_start_span);
-		new_object->ChangeStart(&start_p, new_start_span);
-		int new_end_span;
-		Point end_p = k->Near(Point(ex, ey), new_end_span);
-		//new_object->ChangeEnd(&end_p, new_end_span);
+		k->ChangeStart(&start_p, new_start_span);
 	}
 
-	// return new object cast to an int
-	PyObject *pValue = PyInt_FromLong((long)new_object);
-	Py_INCREF(pValue);
-	return pValue;
+	Py_RETURN_NONE;
+}
+
+static PyObject* kurve_change_end(PyObject* self, PyObject* args)
+{
+	int ik;
+	double ex, ey;
+	if (!PyArg_ParseTuple(args, "idd", &ik, &ex, &ey)) return NULL;
+	Kurve* k = (Kurve*)ik;
+
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		// find nearest to start point
+		int new_end_span;
+		Point end_p = k->Near(Point(ex, ey), new_end_span);
+		k->ChangeEnd(&end_p, new_end_span);
+	}
+
+	Py_RETURN_NONE;
 }
 
 static PyObject* kurve_print_kurve(PyObject* self, PyObject* args)
@@ -553,7 +558,8 @@ static PyMethodDef KurveMethods[] = {
 	{"offset", kurve_offset, METH_VARARGS , ""},
 	{"copy", kurve_copy, METH_VARARGS , ""},
 	{"equal", kurve_equal, METH_VARARGS , ""},
-	{"make_section", kurve_make_section, METH_VARARGS , ""},
+	{"change_start", kurve_change_start, METH_VARARGS , ""},
+	{"change_end", kurve_change_end, METH_VARARGS , ""},
 	{"print_kurve", kurve_print_kurve, METH_VARARGS , ""},
 	{"num_spans", kurve_num_spans, METH_VARARGS , ""},
 	{"is_closed", kurve_is_closed, METH_VARARGS , ""},

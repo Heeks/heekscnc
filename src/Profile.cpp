@@ -357,7 +357,7 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 			finish_string = ss.str().c_str();
 		}
 
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, sketch_id, start_string.c_str(), finish_string.c_str()));
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str()));
 	}
 }
 
@@ -420,9 +420,9 @@ void CProfile::AppendTextToProgram()
 
 			// get roll on string
 			wxString roll_on_string;
-			if(m_params.m_tool_on_side || (m_sketches.size() > 1))
+			if(m_params.m_tool_on_side)
 			{
-				if(m_params.m_auto_roll_on)
+				if(m_params.m_auto_roll_on || (m_sketches.size() > 1))
 				{
 					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
 					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
@@ -441,16 +441,8 @@ void CProfile::AppendTextToProgram()
 			}
 			else
 			{
-				double s[3] = {0, 0, 0};
-				object->GetFirstChild()->GetStartPoint(s);
-
-#ifdef UNICODE
-				std::wostringstream ss;
-#else
-				std::ostringstream ss;
-#endif
-				ss << s[0] << ", " << s[1];
-				roll_on_string = ss.str().c_str();
+				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch));
+				roll_on_string = _T("span1sx, span1sy");
 			}
 
 			// rapid across to it
@@ -483,18 +475,8 @@ void CProfile::AppendTextToProgram()
 			}
 			else
 			{
-				double e[3] = {0, 0, 0};
-				int n = object->GetNumChildren();
-				object->GetAtIndex(n-1)->GetEndPoint(e);
-
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-				std::ostringstream ss;
-#endif
-				ss << e[0] << ", " << e[1];
-				roll_off_string = ss.str().c_str();
-				ss.str().clear();
+				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch));
+				roll_off_string = _T("ex, ey");
 			}
 
 			// profile the kurve
