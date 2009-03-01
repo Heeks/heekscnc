@@ -2,19 +2,30 @@ import kurve
 from nc.nc import *
 
 def make_smaller( k, startx = None, starty = None, finishx = None, finishy = None ):
-        if startx != None and starty != None and finishx != None and finishy != None:
-            return kurve.make_section(k, startx, starty, finishx, finshy)
+    if startx == None and starty == None and finishx == None and finishy == None:
         return k
+
+    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
+    
+    if startx == None: startx = sx
+    if starty == None: starty = sy
+
+    num_spans = kurve.num_spans(k)
+    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, num_spans - 1)
+    
+    if finishx == None: finishx = ex
+    if finishy == None: finishy = ey
+
+    new_k = kurve.make_section(k, startx, starty, finishx, finishy)
+    kurve.delete(k)
+    return new_k
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(k, rollstartx = None, rollstarty = None, direction = "on", radius = 1.0, rollfinishx = None, rollfinishy = None, startx = None, starty = None, finishx = None, finishy = None):
+def profile(k, direction = "on", radius = 1.0, rollstartx = None, rollstarty = None, rollfinishx = None, rollfinishy = None, startx = None, starty = None, finishx = None, finishy = None):
     if kurve.exists(k) == False:
         raise "kurve doesn't exist, number %d" % (k)
 
-    smaller_k = make_smaller( k, startx, starty, finishx, finishy )
-    k = smaller_k
-    
     offset_k = k
 
     if direction != "on":
@@ -82,9 +93,6 @@ def profile(k, rollstartx = None, rollstarty = None, direction = "on", radius = 
                 
     if offset_k != k:
         kurve.delete(offset_k)
-
-    if smaller_k != k:
-        kurve.delete(smaller_k)
 
 def roll_on_point(k, direction, radius):
     x = float(0)

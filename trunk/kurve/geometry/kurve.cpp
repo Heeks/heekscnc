@@ -1004,6 +1004,45 @@ return;
 	}
 
 
+	void Kurve::ChangeEnd(const Point *pNewEnd, int endSpanno) {
+		// changes the end position of the Kurve, doesn't keep closed kurves closed
+		if(endSpanno == 1) {
+			Span spFirst;
+			this->Get(1, spFirst, false, true);
+			if(spFirst.p0 == *pNewEnd) return;
+		}
+		else if(endSpanno == this->nSpans()) {
+			Span spLast;
+			this->Get(this->nSpans(), spLast, false, true);
+			if(spLast.p1 == *pNewEnd) return;
+		}
+		Kurve temp;
+		
+		int spanno = 1;
+		Span sp;
+		while(1) {
+			this->Get(spanno, sp, false, true);
+			if(spanno == 1) {
+				temp.Start(sp.p0);
+			}
+
+			if(spanno == endSpanno)
+			{
+				sp.p1 = *pNewEnd;
+				temp.Add(sp, false);
+				break;
+			}
+			else
+			{
+				temp.Add(sp, true);
+			}
+
+			spanno++;
+		}
+
+		*this = temp;
+	}
+
 	void Kurve::minmax(Point& min, Point& max) {
 		// boxes kurve
 		double xscale = 1.0;

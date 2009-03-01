@@ -26,9 +26,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="159.0563"
-     inkscape:cy="860.94541"
+     inkscape:zoom="7.919596"
+     inkscape:cx="159.68765"
+     inkscape:cy="838.52339"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -10543,6 +10543,50 @@
          id="path5073"
          d="M 244.18146,157.31048 C 244.18146,157.52422 244.18146,157.52422 244.18146,157.31048 C 246.43817,162.41698 249.05684,165.37609 257.14293,165.32542 C 269.88125,165.08088 272.09326,144.94951 259.04394,144.00568 C 249.39498,143.03674 246.77788,154.83269 254.03218,159.71496 C 258.71108,162.02047 262.2012,158.94199 263.19161,155.3869 C 263.65937,149.28805 255.66539,146.10689 254.89628,153.30302"
          style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g4821"
+       inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\bitmaps\pickend.png"
+       inkscape:export-xdpi="277"
+       inkscape:export-ydpi="277">
+      <path
+         id="path3999"
+         d="M 167.08488,211.78269 L 172.29235,204.80687 L 186.61288,204.80687 L 184.00915,202.4816 L 184.00915,207.13214 L 186.61288,204.80687 L 186.61288,204.80687"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4007"
+         d="M 165.80217,208.68424 L 170.99675,201.87249 C 170.99675,201.87249 171.25977,201.28527 172.37759,201.28527 C 173.49542,201.28527 179.61056,201.40271 179.61056,201.40271"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4009"
+         d="M 178.03246,208.09702 L 181.18866,201.87249"
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4011"
+         d="M 181.45168,208.68424 L 178.36123,202.6946"
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+    </g>
+    <g
+       id="g4837"
+       inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\bitmaps\pickstart.png"
+       inkscape:export-xdpi="374.32791"
+       inkscape:export-ydpi="374.32791">
+      <path
+         id="path3991"
+         d="M 120.84935,210.88181 L 126.29517,204.54228 L 141.2712,204.54228 L 138.54829,202.42911 L 138.54829,206.65546 L 141.2712,204.54228 L 141.2712,204.54228"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path3993"
+         d="M 122.2108,204.54228 L 122.2108,204.54228 L 124.83904,201.51456 C 124.83904,201.51456 125.18286,200.76744 126.21433,200.76744 C 127.24578,200.76744 141.1361,200.87417 141.1361,200.87417"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path4831"
+         d="M 119.32427,205.85436 L 128.92072,207.87466"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path4835"
+         d="M 123.36488,201.1824 L 124.88011,211.789"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
   </g>
 </svg>
