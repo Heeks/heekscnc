@@ -10,6 +10,7 @@
 #include "../../interface/PropertyVertex.h"
 #include "../../interface/PropertyCheck.h"
 #include "../../tinyxml/tinyxml.h"
+#include "../../interface/Tool.h"
 
 #include <sstream>
 
@@ -27,6 +28,10 @@ CProfileParams::CProfileParams()
 	m_auto_roll_off = true;
 	m_roll_on_point[0] = m_roll_on_point[1] = m_roll_on_point[2] = 0.0;
 	m_roll_off_point[0] = m_roll_off_point[1] = m_roll_off_point[2] = 0.0;
+	m_start_given = false;
+	m_end_given = false;
+	m_start[0] = m_start[1] = m_start[2] = 0.0;
+	m_end[0] = m_end[1] = m_end[2] = 0.0;
 }
 
 void CProfileParams::set_initial_values()
@@ -40,28 +45,6 @@ void CProfileParams::set_initial_values()
 	config.Read(_T("ProfileVertFeed"), &m_vertical_feed_rate, 100.0);
 	config.Read(_T("ProfileSpindleSpeed"), &m_spindle_speed, 7000);
 	config.Read(_T("ProfileToolOnSide"), &m_tool_on_side, 1);
-	config.Read(_T("ProfileAutoRollOn"), &m_auto_roll_on, true);
-	if(m_auto_roll_on)
-	{
-		m_roll_on_point[0] = m_roll_on_point[1] = m_roll_on_point[2] = 0.0;
-	}
-	else
-	{
-		config.Read(_T("ProfileRollOnX"), &m_roll_on_point[0], 0.0);
-		config.Read(_T("ProfileRollOnY"), &m_roll_on_point[1], 0.0);
-		config.Read(_T("ProfileRollOnZ"), &m_roll_on_point[2], 0.0);
-	}
-	config.Read(_T("ProfileAutoRollOff"), &m_auto_roll_off, true);
-	if(m_auto_roll_off)
-	{
-		m_roll_off_point[0] = m_roll_off_point[1] = m_roll_off_point[2] = 0.0;
-	}
-	else
-	{
-		config.Read(_T("ProfileRollOffX"), &m_roll_off_point[0], 0.0);
-		config.Read(_T("ProfileRollOffY"), &m_roll_off_point[1], 0.0);
-		config.Read(_T("ProfileRollOffZ"), &m_roll_off_point[2], 0.0);
-	}
 }
 
 void CProfileParams::write_values_to_config()
@@ -75,14 +58,6 @@ void CProfileParams::write_values_to_config()
 	config.Write(_T("ProfileVertFeed"), m_vertical_feed_rate);
 	config.Write(_T("ProfileSpindleSpeed"), m_spindle_speed);
 	config.Write(_T("ProfileToolOnSide"), m_tool_on_side);
-	config.Write(_T("ProfileAutoRollOn"), m_auto_roll_on);
-	config.Write(_T("ProfileRollOnX"), m_roll_on_point[0]);
-	config.Write(_T("ProfileRollOnY"), m_roll_on_point[1]);
-	config.Write(_T("ProfileRollOnZ"), m_roll_on_point[2]);
-	config.Write(_T("ProfileAutoRollOff"), m_auto_roll_off);
-	config.Write(_T("ProfileRollOffX"), m_roll_off_point[0]);
-	config.Write(_T("ProfileRollOffY"), m_roll_off_point[1]);
-	config.Write(_T("ProfileRollOffZ"), m_roll_off_point[2]);
 }
 
 static void on_set_tool_diameter(double value, HeeksObj* object){((CProfile*)object)->m_params.m_tool_diameter = value;}
@@ -110,6 +85,10 @@ static void on_set_auto_roll_on(bool value, HeeksObj* object){((CProfile*)object
 static void on_set_roll_on_point(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_params.m_roll_on_point, vt, 3*sizeof(double));}
 static void on_set_auto_roll_off(bool value, HeeksObj* object){((CProfile*)object)->m_params.m_auto_roll_off = value; heeksCAD->RefreshProperties();}
 static void on_set_roll_off_point(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_params.m_roll_off_point, vt, 3*sizeof(double));}
+static void on_set_start_given(bool value, HeeksObj* object){((CProfile*)object)->m_params.m_start_given = value; heeksCAD->RefreshProperties();}
+static void on_set_start(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_params.m_start, vt, 3*sizeof(double));}
+static void on_set_end_given(bool value, HeeksObj* object){((CProfile*)object)->m_params.m_end_given = value; heeksCAD->RefreshProperties();}
+static void on_set_end(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_params.m_end, vt, 3*sizeof(double));}
 
 void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
 {
@@ -130,10 +109,18 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		else if(m_tool_on_side == 0)choice = 2;
 		list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
 	}
-	list->push_back(new PropertyCheck(_("auto roll on"), m_auto_roll_on, parent, on_set_auto_roll_on));
-	if(!m_auto_roll_on)list->push_back(new PropertyVertex(_("roll_on_point"), m_roll_on_point, parent, on_set_roll_on_point));
-	list->push_back(new PropertyCheck(_("auto roll off"), m_auto_roll_off, parent, on_set_auto_roll_off));
-	if(!m_auto_roll_off)list->push_back(new PropertyVertex(_("roll_off_point"), m_roll_off_point, parent, on_set_roll_off_point));
+
+	if(parent->m_sketches.size() == 1) // multiple sketches must use auto roll on, and can not have start and end points specified
+	{
+		list->push_back(new PropertyCheck(_("auto roll on"), m_auto_roll_on, parent, on_set_auto_roll_on));
+		if(!m_auto_roll_on)list->push_back(new PropertyVertex(_("roll on point"), m_roll_on_point, parent, on_set_roll_on_point));
+		list->push_back(new PropertyCheck(_("auto roll off"), m_auto_roll_off, parent, on_set_auto_roll_off));
+		if(!m_auto_roll_off)list->push_back(new PropertyVertex(_("roll off point"), m_roll_off_point, parent, on_set_roll_off_point));
+		list->push_back(new PropertyCheck(_("use start point"), m_start_given, parent, on_set_start_given));
+		if(m_start_given)list->push_back(new PropertyVertex(_("start point"), m_start, parent, on_set_start));
+		list->push_back(new PropertyCheck(_("use end point"), m_end_given, parent, on_set_end_given));
+		if(m_end_given)list->push_back(new PropertyVertex(_("end point"), m_end, parent, on_set_end));
+	}
 }
 
 void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
@@ -163,31 +150,50 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 		element->SetDoubleAttribute("roll_offy", m_roll_off_point[1]);
 		element->SetDoubleAttribute("roll_offz", m_roll_off_point[2]);
 	}
+	element->SetAttribute("start_given", m_start_given ? 1:0);
+	if(m_start_given)
+	{
+		element->SetDoubleAttribute("startx", m_start[0]);
+		element->SetDoubleAttribute("starty", m_start[1]);
+		element->SetDoubleAttribute("startz", m_start[2]);
+	}
+	element->SetAttribute("end_given", m_end_given ? 1:0);
+	if(m_end_given)
+	{
+		element->SetDoubleAttribute("endx", m_end[0]);
+		element->SetDoubleAttribute("endy", m_end[1]);
+		element->SetDoubleAttribute("endz", m_end[2]);
+	}
 }
 
 void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	// get the attributes
-	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
-	{
-		std::string name(a->Name());
-		if(name == "toold"){m_tool_diameter = a->DoubleValue();}
-		else if(name == "clear"){m_clearance_height = a->DoubleValue();}
-		else if(name == "depth"){m_final_depth = a->DoubleValue();}
-		else if(name == "r"){m_rapid_down_to_height = a->DoubleValue();}
-		else if(name == "hfeed"){m_horizontal_feed_rate = a->DoubleValue();}
-		else if(name == "vfeed"){m_vertical_feed_rate = a->DoubleValue();}
-		else if(name == "spin"){m_spindle_speed = a->DoubleValue();}
-		else if(name == "side"){m_tool_on_side = a->IntValue();}
-		else if(name == "auto_roll_on"){m_auto_roll_on = (a->IntValue() != 0);}
-		else if(name == "roll_onx"){m_roll_on_point[0] = a->DoubleValue();}
-		else if(name == "roll_ony"){m_roll_on_point[1] = a->DoubleValue();}
-		else if(name == "roll_onz"){m_roll_on_point[2] = a->DoubleValue();}
-		else if(name == "auto_roll_off"){m_auto_roll_off = (a->IntValue() != 0);}
-		else if(name == "roll_offx"){m_roll_off_point[0] = a->DoubleValue();}
-		else if(name == "roll_offy"){m_roll_off_point[1] = a->DoubleValue();}
-		else if(name == "roll_offz"){m_roll_off_point[2] = a->DoubleValue();}
-	}
+	int int_for_bool;
+
+	pElem->Attribute("toold", &m_tool_diameter);
+	pElem->Attribute("clear", &m_clearance_height);
+	pElem->Attribute("depth", &m_final_depth);
+	pElem->Attribute("r", &m_rapid_down_to_height);
+	pElem->Attribute("hfeed", &m_horizontal_feed_rate);
+	pElem->Attribute("vfeed", &m_vertical_feed_rate);
+	pElem->Attribute("spin", &m_spindle_speed);
+	pElem->Attribute("side", &m_tool_on_side);
+	pElem->Attribute("auto_roll_on", &int_for_bool); m_auto_roll_on = (int_for_bool != 0);
+	pElem->Attribute("roll_onx", &m_roll_on_point[0]);
+	pElem->Attribute("roll_ony", &m_roll_on_point[1]);
+	pElem->Attribute("roll_onz", &m_roll_on_point[2]);
+	pElem->Attribute("auto_roll_off", &int_for_bool); m_auto_roll_off = (int_for_bool != 0);
+	pElem->Attribute("roll_offx", &m_roll_off_point[0]);
+	pElem->Attribute("roll_offy", &m_roll_off_point[1]);
+	pElem->Attribute("roll_offz", &m_roll_off_point[2]);
+	pElem->Attribute("start_given", &int_for_bool); m_start_given = (int_for_bool != 0);
+	pElem->Attribute("startx", &m_start[0]);
+	pElem->Attribute("starty", &m_start[1]);
+	pElem->Attribute("startz", &m_start[2]);
+	pElem->Attribute("end_given", &int_for_bool); m_end_given = (int_for_bool != 0);
+	pElem->Attribute("endx", &m_end[0]);
+	pElem->Attribute("endy", &m_end[1]);
+	pElem->Attribute("endz", &m_end[2]);
 }
 
 #define AUTO_ROLL_ON_OFF_SIZE 2.0
@@ -259,11 +265,12 @@ void CProfileParams::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 	}
 }
 
-static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
+void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 {
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
 
 	bool started = false;
+	int sketch_id = (id_to_use > 0 ? id_to_use : sketch->m_id);
 
 	for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
 	{
@@ -285,7 +292,7 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 #endif
 					ss.imbue(std::locale("C"));
 
-					ss << "kurve.add_point(k" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", 0, " << s[0] << ", " << s[1] << ", 0.0, 0.0)\n";
+					ss << "kurve.add_point(k" << sketch_id << ", 0, " << s[0] << ", " << s[1] << ", 0.0, 0.0)\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 					started = true;
 				}
@@ -299,7 +306,7 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 #endif
 					ss.imbue(std::locale("C"));
 
-					ss << "kurve.add_point(k" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", 0, " << e[0] << ", " << e[1] << ", 0.0, 0.0)\n";
+					ss << "kurve.add_point(k" << sketch_id << ", 0, " << e[0] << ", " << e[1] << ", 0.0, 0.0)\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 				}
 				else if(type == ArcType)
@@ -315,7 +322,7 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 #endif
 					ss.imbue(std::locale("C"));
 
-					ss << "kurve.add_point(k" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", " << span_type << ", " << e[0] << ", " << e[1] << ", " << c[0] << ", " << c[1] << ")\n";
+					ss << "kurve.add_point(k" << sketch_id << ", " << span_type << ", " << e[0] << ", " << e[1] << ", " << c[0] << ", " << c[1] << ")\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 				}
 			}
@@ -323,6 +330,35 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 	}
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+
+	if(m_sketches.size() == 1 && (m_params.m_start_given || m_params.m_end_given))
+	{
+		wxString start_string;
+		if(m_params.m_start_given)
+		{
+#ifdef UNICODE
+			std::wostringstream ss;
+#else
+			std::ostringstream ss;
+#endif
+			ss << ", startx = " << m_params.m_start[0] << ", starty = " << m_params.m_start[1];
+			start_string = ss.str().c_str();
+		}
+
+		wxString finish_string;
+		if(m_params.m_end_given)
+		{
+#ifdef UNICODE
+			std::wostringstream ss;
+#else
+			std::ostringstream ss;
+#endif
+			ss << ", finishx = " << m_params.m_end[0] << ", finishy = " << m_params.m_end[1];
+			finish_string = ss.str().c_str();
+		}
+
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, sketch_id, start_string.c_str(), finish_string.c_str()));
+	}
 }
 
 void CProfile::AppendTextToProgram()
@@ -384,7 +420,7 @@ void CProfile::AppendTextToProgram()
 
 			// get roll on string
 			wxString roll_on_string;
-			if(m_params.m_tool_on_side)
+			if(m_params.m_tool_on_side || (m_sketches.size() > 1))
 			{
 				if(m_params.m_auto_roll_on)
 				{
@@ -429,7 +465,7 @@ void CProfile::AppendTextToProgram()
 			wxString roll_off_string;
 			if(m_params.m_tool_on_side)
 			{
-				if(m_params.m_auto_roll_off)
+				if(m_params.m_auto_roll_off || (m_sketches.size() > 1))
 				{
 					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));			
 					roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
@@ -462,7 +498,7 @@ void CProfile::AppendTextToProgram()
 			}
 
 			// profile the kurve
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, %s, '%s', tool_diameter/2, %s)\n"), sketch, roll_on_string.c_str(), side_string.c_str(), roll_off_string.c_str()));
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
 
 			// rapid back up to clearance plane
 			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
@@ -475,15 +511,50 @@ void CProfile::AppendTextToProgram()
 	}
 }
 
+static unsigned char cross16[32] = {0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80, 0x01, 0x80, 0x02, 0x40, 0x04, 0x20, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01};
+
 void CProfile::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked && !no_color)
 	{
+		// show the sketches as highlighted
 		for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 		{
 			int sketch = *It;
 			HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
 			if(object)object->glCommands(false, true, false);
+		}
+
+		if(m_sketches.size() == 1)
+		{
+			// draw roll on point
+			if(!m_params.m_auto_roll_on)
+			{
+				glColor3ub(0, 200, 200);
+				glRasterPos3dv(m_params.m_roll_on_point);
+				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
+			}
+			// draw roll off point
+			if(!m_params.m_auto_roll_on)
+			{
+				glColor3ub(255, 128, 0);
+				glRasterPos3dv(m_params.m_roll_off_point);
+				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
+			}
+			// draw start point
+			if(m_params.m_start_given)
+			{
+				glColor3ub(128, 0, 255);
+				glRasterPos3dv(m_params.m_start);
+				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
+			}
+			// draw end point
+			if(m_params.m_end_given)
+			{
+				glColor3ub(200, 200, 0);
+				glRasterPos3dv(m_params.m_end);
+				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
+			}
 		}
 	}
 }
@@ -492,6 +563,35 @@ void CProfile::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
 	HeeksObj::GetProperties(list);
+}
+
+static CProfile* object_for_pick = NULL;
+
+class PickStart: public Tool{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Pick Start");}
+	void Run(){if(heeksCAD->PickPosition("Pick new start point", object_for_pick->m_params.m_start))object_for_pick->m_params.m_start_given = true;}
+	wxString BitmapPath(){ return _T("pickstart");}
+};
+
+static PickStart pick_start;
+
+class PickEnd: public Tool{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Pick End");}
+	void Run(){if(heeksCAD->PickPosition("Pick new end point", object_for_pick->m_params.m_end))object_for_pick->m_params.m_end_given = true;}
+	wxString BitmapPath(){ return _T("pickend");}
+};
+
+static PickEnd pick_end;
+
+void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+	object_for_pick = this;
+	t_list->push_back(&pick_start);
+	t_list->push_back(&pick_end);
+
+	HeeksObj::GetTools(t_list, p);
 }
 
 HeeksObj *CProfile::MakeACopy(void)const
