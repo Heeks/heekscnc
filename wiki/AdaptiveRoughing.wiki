@@ -3,19 +3,22 @@
 = Introduction =
 
 1. Make a solid, for example a cone, press
-http://heeksad.googlecode.com/svn/trunk/bitmaps/cone.png
+
+http://heekscad.googlecode.com/svn/trunk/bitmaps/cone.png
 
 
+2. Make an adaptive roughing operation, press
 
-2. Make an adaptive roughing operation, pres
-http://heekscnc.googlecode.com/svn/trunk/bitmaps/adaptive.png
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/adapt.png
 
 
 3. Make the Python script, press
+
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png
 
 
 4. Create the NC code and see the toolpath, press
+
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 
 
