@@ -43,4 +43,4 @@ If you want to use pocket operations you will need to build area.so, from this p
 
 If you want to use adaptive roughing operations you will need to build actp.so, from this project http://code.google.com/p/libactp/
 
-If you are having trouble, come and ask some real people on the IRC channel #cam on FreeNode,  quite a few people there have built it, for example:   archivist, celeron55, crotchet1, DanielFalck, Sliptonic,  or email me danheeks@gmail.com
+If you are having trouble, come and ask some real people on the IRC channel #cam on FreeNode,  quite a few people there have built it, for example:   archivist, celeron55, crotchet1, DanielFalck, fenn, Sliptonic,  or email me danheeks@gmail.com
