@@ -10,7 +10,7 @@ Run RapidSVN ( menu Applications->Programming->RapidSVN ) On the RapidSVN menu, 
 
 HeeksCNC must be a sub-folder of HeeksCAD.
 
-make sure to rename HeeksCNC folder correctly, currently it has to be named HeeksCNC, it is case-sensitive, until I fix this bug http://code.google.com/p/heekscnc/issues/detail?id=38
+make sure to name HeeksCNC folder correctly, currently it has to be named HeeksCNC, it is case-sensitive, until I fix this bug http://code.google.com/p/heekscnc/issues/detail?id=38
 
 On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" window appears, with some text like "dan@dan-desktop:~$" in it.
 
