@@ -570,7 +570,7 @@ static CProfile* object_for_pick = NULL;
 class PickStart: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick Start");}
-	void Run(){if(heeksCAD->PickPosition("Pick new start point", object_for_pick->m_params.m_start))object_for_pick->m_params.m_start_given = true;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick new start point"), object_for_pick->m_params.m_start))object_for_pick->m_params.m_start_given = true;}
 	wxString BitmapPath(){ return _T("pickstart");}
 };
 
@@ -579,7 +579,7 @@ static PickStart pick_start;
 class PickEnd: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick End");}
-	void Run(){if(heeksCAD->PickPosition("Pick new end point", object_for_pick->m_params.m_end))object_for_pick->m_params.m_end_given = true;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick new end point"), object_for_pick->m_params.m_end))object_for_pick->m_params.m_end_given = true;}
 	wxString BitmapPath(){ return _T("pickend");}
 };
 
