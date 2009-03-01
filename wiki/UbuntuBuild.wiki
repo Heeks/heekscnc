@@ -14,6 +14,8 @@ On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" wi
 
 Type: cd Desktop/HeeksCAD/HeeksCNC/src
 
+( if you've already built HeeksCNC, you should type: make clean    now because my makefile does not always know which files are out of date )
+
 Then type: make
 
 If it builds OK, the last line should be something like:
@@ -27,11 +29,16 @@ On the menu, do File->Plugins
 You will need to add a new plugin.
 Name: HeeksCNC
 Filepath: ( browse for the HeeksCNC.so.0.5.1 )
-Then close HeeksCAD and tun it again.
-( this will have made an entry in /home/dan/.HeeksCAD, you will have to "Show Hidden Files" to see it )
+Then close HeeksCAD and run it again.
+( this will have made an entry in the configuration file /home/dan/.HeeksCAD, you will have to "Show Hidden Files" to see it )
 
 You may also need to build kurve.so, if you want to use the Python script to do profile operations.
 To do this, from terminal type cd Desktop/HeeksCAD/HeeksCNC/kurve
 and then type: make
 This will make kurve.so file in the HeeksCNC folder.
-If you make a profile operation from HeeksCNC, it will add "import kurve" into the generated "post.py", this will need the kurve.so to exist.
+
+If you want to use pocket operations you will need to build area.so, from this project http://code.google.com/p/libarea/
+
+If you want to use adaptive roughing operations you will need to build actp.so, from this project http://code.google.com/p/libactp/
+
+If you are having trouble, come and ask some real people on the IRC channel #cam on FreeNode,  quite a few people there have built it, for example:   archivist, celeron55, crotchet1, DanielFalck, fenn, Sliptonic,  or email me danheeks@gmail.com
