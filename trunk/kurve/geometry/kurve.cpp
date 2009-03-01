@@ -1026,16 +1026,10 @@ return;
 				temp.Start(sp.p0);
 			}
 
-			if(spanno == endSpanno)
-			{
-				sp.p1 = *pNewEnd;
-				temp.Add(sp, false);
-				break;
-			}
-			else
-			{
-				temp.Add(sp, true);
-			}
+			if(spanno == endSpanno)sp.p1 = *pNewEnd;
+
+			temp.Add(sp.dir, sp.p1, sp.pc, true);
+			if(spanno == endSpanno)break;
 
 			spanno++;
 		}
