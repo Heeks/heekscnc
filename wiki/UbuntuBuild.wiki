@@ -29,8 +29,11 @@ On the Ubuntu menu, go to Places->Desktop Then double click on HeeksCAD folder t
 
 On the menu, do File->Plugins
 You will need to add a new plugin.
+
 Name: HeeksCNC
-Filepath: ( browse for the HeeksCNC.so.0.5.1 )
+
+Filepath: ( browse for the HeeksCNC.so.0.5.1, you have to click "..." to browse )
+
 Then close HeeksCAD and run it again.
 ( this will have made an entry in the configuration file /home/dan/.HeeksCAD, you will have to "Show Hidden Files" to see it )
 
