@@ -15,10 +15,16 @@ public:
 	double m_vertical_feed_rate;
 	double m_spindle_speed;
 	int m_tool_on_side; // -1=right, 0=on, 1=left
+
+	// these are only used when m_sketches.size() == 1
 	bool m_auto_roll_on;
 	bool m_auto_roll_off;
 	double m_roll_on_point[3];
 	double m_roll_off_point[3];
+	bool m_start_given;
+	bool m_end_given;
+	double m_start[3];
+	double m_end[3];
 
 	CProfileParams();
 
@@ -45,12 +51,13 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	wxString GetIcon(){return _T("../HeeksCNC/icons/profile");}
 	void GetProperties(std::list<Property *> *list);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
-	//int DoDialog();
+	void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0);
 	void AppendTextToProgram();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);

@@ -953,6 +953,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		int		Intof(const Kurve&k, vector<Point>& p)const;			// intof kurve
 		bool	Compare(const Kurve* k, Matrix* m, bool bAllowMirror = true)const;				// compare 2 Kurves
 		void	ChangeStart(const Point *pNewStart, int startSpanno); // change the Kurve's startpoint
+		void	ChangeEnd(const Point *pNewEnd, int endSpanno); // change the Kurve's endpoint
 
 	private:
 		bool compareKurves(const std::vector<struct spanCompare> &first, const std::vector<struct spanCompare> &second, int &nOffset/*, Kurve *k, Matrix *m*/)const;
