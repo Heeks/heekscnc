@@ -2,7 +2,7 @@
 
 = Introduction =
 
-This is just for Windows for now.
+For Ubuntu build see http://code.google.com/p/heekscnc/wiki/UbuntuBuild
 
 
 = Details =
