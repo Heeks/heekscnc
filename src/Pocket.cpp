@@ -154,13 +154,29 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 
 				if(!started)
 				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area.add_point(a%d, %d, %g, %g, %g, %g)\n"), id_to_use > 0 ? id_to_use : sketch->m_id, 0, s[0], s[1], 0.0, 0.0));
+#ifdef UNICODE
+					std::wostringstream ss;
+#else
+					std::ostringstream ss;
+#endif
+					ss.imbue(std::locale("C"));
+
+					ss << "area.add_point(a" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", 0, " << s[0] << ", " << s[1] << ", 0, 0)\n";
+					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 					started = true;
 				}
 				span_object->GetEndPoint(e);
 				if(type == LineType)
 				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area.add_point(a%d, %d, %g, %g, %g, %g)\n"), id_to_use > 0 ? id_to_use : sketch->m_id, 0, e[0], e[1], 0.0, 0.0));
+#ifdef UNICODE
+					std::wostringstream ss;
+#else
+					std::ostringstream ss;
+#endif
+					ss.imbue(std::locale("C"));
+
+					ss << "area.add_point(a" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", 0, " << e[0] << ", " << e[1] << ", 0, 0)\n";
+					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 				}
 				else if(type == ArcType)
 				{
@@ -168,7 +184,15 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area.add_point(a%d, %d, %g, %g, %g, %g)\n"), id_to_use > 0 ? id_to_use : sketch->m_id, span_type, e[0], e[1], c[0], c[1]));
+#ifdef UNICODE
+					std::wostringstream ss;
+#else
+					std::ostringstream ss;
+#endif
+					ss.imbue(std::locale("C"));
+
+					ss << "area.add_point(a" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", " << span_type << ", " << e[0] << ", " << e[1] << ", " << c[0] << ", " << c[1] << ")\n";
+					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 				}
 				memcpy(prev_e, e, 3*sizeof(double));
 			}
