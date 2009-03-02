@@ -2,6 +2,9 @@
 //                    2d geometry classes - implements 2d kurve offset for use in dll
 //
 //                    g.j.hawkesford August 2003
+//
+// This program is released under the BSD license. See the file COPYING for details.
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #include "geometry.h"
 
