@@ -20,7 +20,9 @@ http://code.google.com/p/heekscnc/wiki/ProfileOperation
 
 == http://heekscnc.googlecode.com/svn/trunk/icons/pocket.png Pocket ==
 
-== http://heekscnc.googlecode.com/svn/trunk/icons/zigzag.png ZigZag ==
+http://code.google.com/p/heekscnc/wiki/PocketOperation
+
+== http://heekscnc.googlecode.com/svn/trunk/icons/zigzag.png Zig Zag ==
 
 http://code.google.com/p/heekscnc/wiki/ZigZagOperation
 
