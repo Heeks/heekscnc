@@ -32,3 +32,4 @@ If you see the roll-on and -off cutting the sketch, then select the profile oper
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/pickstart.png
 
+Press "Py" and "G0" again.
