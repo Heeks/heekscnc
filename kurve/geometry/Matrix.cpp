@@ -2,6 +2,9 @@
 //                    3d geometry classes - implements some 3d stuff
 //
 //                    g.j.hawkesford August 2003
+//
+// This program is released under the BSD license. See the file COPYING for details.
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "geometry.h"
