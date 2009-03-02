@@ -22,10 +22,8 @@ http://code.google.com/p/heekscnc/wiki/ProfileOperation
 
 == http://heekscnc.googlecode.com/svn/trunk/icons/zigzag.png ZigZag ==
 
-  # Draw a 3D-object
-  # http://heekscnc.googlecode.com/svn/trunk/bitmaps/zigzag.png Select the 3D-object and select machining->operations->new zigzag operation (or in the machining tool bar if you have enabled it)
-  # Change some values in the bottom left "Properties" box (at least be sure that z1 (safety height) is high enough if you are going to run the nc code in a real machine)
-  # http://heekscnc.googlecode.com/svn/trunk/bitmaps/apply.png Hit the apply button
-  # http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png Select machining->"make python script"
-  # http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png Select machining->"Post-Process" to run the script and show the NC code
-  * http://heekscnc.googlecode.com/svn/trunk/bitmaps/savenc.png Now you can save the NC code by clicking the save button on the machining tool bar 
+http://code.google.com/p/heekscnc/wiki/ZigZagOperation
+
+== http://heekscnc.googlecode.com/svn/trunk/icons/adapt.png Adaptive Roughing ==
+
+http://code.google.com/p/heekscnc/wiki/AdaptiveRoughing
