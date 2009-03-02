@@ -147,11 +147,12 @@ void CAdaptiveParams::GetProperties(CAdaptive* parent, std::list<Property *> *li
 	list->push_back(new PropertyDouble(_("startvel_y"), m_startvel_y, parent, on_set_startvel_y));
 	list->push_back(new PropertyDouble(_("minz"), m_minz, parent, on_set_minz));
 	list->push_back(new PropertyDouble(_("boundaryclear"), m_boundaryclear, parent, on_set_boundaryclear));
-	list->push_back(new PropertyDouble(_("boundary_x0"), m_boundary_x0, parent, on_set_boundary_x0));
-	list->push_back(new PropertyDouble(_("boundary_x1"), m_boundary_x1, parent, on_set_boundary_x1));
-	list->push_back(new PropertyDouble(_("boundary_y0"), m_boundary_y0, parent, on_set_boundary_y0));
-	list->push_back(new PropertyDouble(_("boundary_y1"), m_boundary_y1, parent, on_set_boundary_y1));
-
+	if(!parent->m_sketches.empty()){
+		list->push_back(new PropertyDouble(_("boundary_x0"), m_boundary_x0, parent, on_set_boundary_x0));
+		list->push_back(new PropertyDouble(_("boundary_x1"), m_boundary_x1, parent, on_set_boundary_x1));
+		list->push_back(new PropertyDouble(_("boundary_y0"), m_boundary_y0, parent, on_set_boundary_y0));
+		list->push_back(new PropertyDouble(_("boundary_y1"), m_boundary_y1, parent, on_set_boundary_y1));
+	}
 }
 
 void CAdaptiveParams::WriteXMLAttributes(TiXmlNode *root)
@@ -300,15 +301,46 @@ void CAdaptive::AppendTextToProgram()
 
 	ss << "actp.boundaryclear(" << m_params.m_boundaryclear << ")\n";
 
-	ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y0 << ")\n";
+	if(!m_sketches.empty())
+	{
+		std::list<HeeksObj*> sketches;
+		for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+		{
+			HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, *It);
+			if(sketch){
+				for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
+				{
+					double s[3] = {0, 0, 0};
+					double e[3] = {0, 0, 0};
+					if(span_object){
+						int type = span_object->GetType();
+						//TODO: add support for arcs
+						if(type == LineType)
+						{
+							span_object->GetStartPoint(s);
+							span_object->GetEndPoint(e);
+							ss << "actp.boundaryadd(" << s[0] << ", " << s[1] << ")\n";
+							ss << "actp.boundaryadd(" << e[0] << ", " << e[1] << ")\n";
+						}
+					}
+				}
+			}
+			ss << "actp.boundarybreak()\n";
+		}
+	}
+	else
+	{
+		ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y0 << ")\n";
 
-	ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y1 << ")\n";
+		ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y1 << ")\n";
 
-	ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y1 << ")\n";
+		ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y1 << ")\n";
 
-	ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y0 << ")\n";
+		ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y0 << ")\n";
 
-	ss << "actp.boundarybreak()\n";
+		ss << "actp.boundarybreak()\n";
+
+	}
 
 	ss << "actp_funcs.cut('" << filepath.c_str() << "')\n";
 
@@ -365,6 +397,14 @@ void CAdaptive::WriteXML(TiXmlNode *root)
 		element->LinkEndChild( solid_element );  
 		solid_element->SetAttribute("id", solid);
 	}
+	// write sketch ids
+	for(std::list<int>::iterator It = m_sketches.begin(); It != m_solids.end(); It++)
+	{
+		int sketch = *It;
+		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
+		element->LinkEndChild( sketch_element );  
+		sketch_element->SetAttribute("id", sketch);
+	}
 
 	WriteBaseXML(element);
 }
@@ -374,7 +414,7 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 {
 	CAdaptive* new_object = new CAdaptive;
 
-	// read solid ids
+	// read solid and sketch ids
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
@@ -388,6 +428,16 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 				if(name == "id"){
 					int id = a->IntValue();
 					new_object->m_solids.push_back(id);
+				}
+			}
+		}
+		else if(name == "sketch"){
+			for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
+			{
+				std::string name(a->Name());
+				if(name == "id"){
+					int id = a->IntValue();
+					new_object->m_sketches.push_back(id);
 				}
 			}
 		}

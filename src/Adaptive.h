@@ -53,11 +53,12 @@ public:
 class CAdaptive: public HeeksObj{
 public:
 	std::list<int> m_solids;
+	std::list<int> m_sketches;
 	CAdaptiveParams m_params;
 	static int number_for_stl_file;
 
 	CAdaptive(){}
-	CAdaptive(const std::list<int> &solids):m_solids(solids){m_params.set_initial_values(solids);}
+	CAdaptive(const std::list<int> &solids, const std::list<int> &sketches):m_solids(solids), m_sketches(sketches){m_params.set_initial_values(solids);}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return AdaptiveType;}
