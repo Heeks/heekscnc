@@ -1,0 +1,34 @@
+#summary Profile Operation
+
+= Introduction =
+
+Cut around a sketch offset by the tool radius. The sketch can be open or closed.
+
+= Details =
+
+Draw sketch, or import a dxf file.
+
+Select the sketch.
+
+Press
+
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/opprofile.png
+
+Edit the properties in the "properties" window.
+
+Press 
+
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png
+
+Press
+
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
+
+Look at the toolpath.
+
+
+If you see the roll-on and -off cutting the sketch, then select the profile operation, in the "objects" window and choose a different start point, by pressing
+
+
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/pickstart.png
+
