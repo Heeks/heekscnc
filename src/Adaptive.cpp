@@ -398,7 +398,7 @@ void CAdaptive::WriteXML(TiXmlNode *root)
 		solid_element->SetAttribute("id", solid);
 	}
 	// write sketch ids
-	for(std::list<int>::iterator It = m_sketches.begin(); It != m_solids.end(); It++)
+	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
 		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
