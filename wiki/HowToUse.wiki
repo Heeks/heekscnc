@@ -16,6 +16,8 @@ If the user edits the NC file, these edits can not be passed back up to the Pyth
 
 == http://heekscnc.googlecode.com/svn/trunk/icons/profile.png Profile ==
 
+http://code.google.com/p/heekscnc/wiki/ProfileOperation
+
 == http://heekscnc.googlecode.com/svn/trunk/icons/pocket.png Pocket ==
 
 == http://heekscnc.googlecode.com/svn/trunk/icons/zigzag.png ZigZag ==
