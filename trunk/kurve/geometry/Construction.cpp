@@ -1,6 +1,9 @@
 // ***************************************************************************************************************************************
-//                    Poimt, CLine & Circle classes part of geometry.lib
+//                    Point, CLine & Circle classes part of geometry.lib
 //                    g.j.hawkesford August 2006 for Camtek Gmbh
+//
+// This program is released under the BSD license. See the file COPYING for details.
+//
 // ***************************************************************************************************************************************
 
 #include "geometry.h"
