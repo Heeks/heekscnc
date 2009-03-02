@@ -195,7 +195,7 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 	}
 
-	// pycam stuff
+	// actp
 	if(adaptive_op_exists)
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import actp_funcs\n"));

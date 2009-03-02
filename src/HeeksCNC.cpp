@@ -161,7 +161,7 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 	// if no selected solids, 
 	if(solids.size() == 0)
 	{
-		// use all the sketches in the drawing
+		// use all the solids in the drawing
 		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
 		{
 			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
@@ -182,20 +182,21 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 
 static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 {
-	// check for at least one solid selected
 	std::list<int> solids;
+	std::list<int> sketches;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
 		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+		if(object->GetType() == SketchType) sketches.push_back(object->m_id);
 	}
 
 	// if no selected solids, 
 	if(solids.size() == 0)
 	{
-		// use all the sketches in the drawing
+		// use all the solids in the drawing
 		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
 		{
 			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
@@ -207,8 +208,14 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		wxMessageBox(_("There are no solids!"));
 		return;
 	}
-
-	CAdaptive *new_object = new CAdaptive(solids);
+#if 0
+	if(sketches.size() == 0)
+	{
+		wxMessageBox(_("You must select some sketches first!"));
+		return;
+	}
+#endif
+	CAdaptive *new_object = new CAdaptive(solids, sketches);
 	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
