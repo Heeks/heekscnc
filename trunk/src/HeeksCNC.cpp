@@ -309,9 +309,19 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
 
 	CNCConfig config;
 
-#ifndef WIN32
-	OnInitDLL();
-#endif
+	// About box, stuff
+	heeksCAD->AddToAboutBox(wxString("\n\n") + _("HeeksCNC is the free machining add-on to HeeksCAD")
+		+ _T("\n") + _("          http://code.google.com/p/heekscnc/")
+		+ _T("\n") + _("Written by Dan Heeks, Hirutso Enni, Perttu Ahola")
+		+ _T("\n") + _("With help from archivist, crotchet1, DanielFalck, fenn, Sliptonic")
+		+ _T("\n\n") + _("geometry code, donated by Geoff Hawkesford, Camtek GmbH http://www.peps.de/")
+		+ _T("\n") + _("pocketing code from http://code.google.com/p/libarea/ , derived from the kbool library written by Klaas Holwerda http://boolean.klaasholwerda.nl/bool.html")
+		+ _T("\n") + _("Zig zag code from pycam http://sourceforge.net/svn/?group_id=237831")
+		+ _T("\n") + _("Adaptive Roughing code from http://code.google.com/p/libactp/, using code written in 2004")
+		+ _T("\n") + _("For a more modern version of adaptive roughing, see Julian Todd and Martin Dunschen of http://www.freesteel.co.uk/")
+		+ _T("\n\n") + _("This HeeksCNC software installation is restricted by the GPL license http://www.gnu.org/licenses/gpl-3.0.txt")
+		+ _T("\n") + _("  which means it is free and open source, and must stay that way")
+		);
 
 	// add menus and toolbars
 	wxFrame* frame = heeksCAD->GetMainFrame();
