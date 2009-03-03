@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="HeeksCNC"
 	ProjectGUID="{BE9260B2-CF4A-413B-87BE-4AD857278689}"
 	RootNamespace="HeeksCNC"
@@ -177,8 +177,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="add a registry key"
-				CommandLine="REG ADD HKCU\Software\HeeksCAD\plugins /v HeeksCNC /t REG_SZ /d &quot;HeeksCNC/HeeksCNC.dll&quot;"
+				Description=""
+				CommandLine=""
 			/>
 		</Configuration>
 	</Configurations>

@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-<HeeksCAD_Document>
-    <Program machine="nc.iso" output_file="test.tap" program="from nc.nc import *&#x0A;import nc.iso&#x0A;import actp_funcs&#x0A;&#x0A;output(&apos;test.tap&apos;)&#x0A;program_begin(123, &apos;Test program&apos;)&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;actp_funcs.cut(&apos;test.stl&apos;)&#x0A;">
-        <Operations />
-    </Program>
-</HeeksCAD_Document>
