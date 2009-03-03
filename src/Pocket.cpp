@@ -22,6 +22,7 @@ CPocketParams::CPocketParams()
 	m_material_allowance = 0.0;
 	m_round_corner_factor = 0.0;
 	m_clearance_height = 0.0;
+	m_start_depth = 0.0;
 	m_final_depth = 0.0;
 	m_rapid_down_to_height = 0.0;
 	m_horizontal_feed_rate = 0.0;
@@ -38,6 +39,7 @@ void CPocketParams::set_initial_values()
 	config.Read(_T("PocketMaterialAllowance"), &m_material_allowance, 0.2);
 	config.Read(_T("PocketRoundCornerFactor"), &m_round_corner_factor, 1.5);
 	config.Read(_T("PocketClearanceHeight"), &m_clearance_height, 5.0);
+	config.Read(_T("PocketStartDepth"), &m_final_depth, 0.0);
 	config.Read(_T("PocketFinalDepth"), &m_final_depth, -0.1);
 	config.Read(_T("PocketRapidDown"), &m_rapid_down_to_height, 2.0);
 	config.Read(_T("PocketHorizFeed"), &m_horizontal_feed_rate, 100.0);
@@ -54,6 +56,7 @@ void CPocketParams::write_values_to_config()
 	config.Write(_T("PocketMaterialAllowance"), m_material_allowance);
 	config.Write(_T("PocketRoundCornerFactor"), m_round_corner_factor);
 	config.Write(_T("PocketClearanceHeight"), m_clearance_height);
+	config.Write(_T("PocketStartDepth"), m_start_depth);
 	config.Write(_T("PocketFinalDepth"), m_final_depth);
 	config.Write(_T("PocketRapidDown"), m_rapid_down_to_height);
 	config.Write(_T("PocketHorizFeed"), m_horizontal_feed_rate);
@@ -67,6 +70,7 @@ static void on_set_step_down(double value, HeeksObj* object){((CPocket*)object)-
 static void on_set_material_allowance(double value, HeeksObj* object){((CPocket*)object)->m_params.m_material_allowance = value;}
 static void on_set_round_corner_factor(double value, HeeksObj* object){((CPocket*)object)->m_params.m_round_corner_factor = value;}
 static void on_set_clearance_height(double value, HeeksObj* object){((CPocket*)object)->m_params.m_clearance_height = value;}
+static void on_set_start_depth(double value, HeeksObj* object){((CPocket*)object)->m_params.m_start_depth = value;}
 static void on_set_final_depth(double value, HeeksObj* object){((CPocket*)object)->m_params.m_final_depth = value;}
 static void on_set_rapid_down_to_height(double value, HeeksObj* object){((CPocket*)object)->m_params.m_rapid_down_to_height = value;}
 static void on_set_horizontal_feed_rate(double value, HeeksObj* object){((CPocket*)object)->m_params.m_horizontal_feed_rate = value;}
@@ -82,6 +86,7 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 	list->push_back(new PropertyDouble(_("round corner factor"), m_round_corner_factor, parent, on_set_round_corner_factor));
 	list->push_back(new PropertyString(wxString(_T("( ")) + _("for 90 degree corners") + _T(" )"), wxString(_T("( ")) + _("1.5 for square, 1.0 for round")  + _T(" )"), NULL));
 	list->push_back(new PropertyDouble(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
+	list->push_back(new PropertyDouble(_("start depth"), m_start_depth, parent, on_set_start_depth));
 	list->push_back(new PropertyDouble(_("final depth"), m_final_depth, parent, on_set_final_depth));
 	list->push_back(new PropertyDouble(_("rapid down to height"), m_rapid_down_to_height, parent, on_set_rapid_down_to_height));
 	list->push_back(new PropertyDouble(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
@@ -100,6 +105,7 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("down", m_step_down);
 	element->SetDoubleAttribute("rf", m_round_corner_factor);
 	element->SetDoubleAttribute("clear", m_clearance_height);
+	element->SetDoubleAttribute("startdepth", m_start_depth);
 	element->SetDoubleAttribute("depth", m_final_depth);
 	element->SetDoubleAttribute("r", m_rapid_down_to_height);
 	element->SetDoubleAttribute("hfeed", m_horizontal_feed_rate);
@@ -119,6 +125,7 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 		else if(name == "mat"){m_material_allowance = a->DoubleValue();}
 		else if(name == "rf"){m_round_corner_factor = a->DoubleValue();}
 		else if(name == "clear"){m_clearance_height = a->DoubleValue();}
+		else if(name == "startdepth"){m_start_depth = a->DoubleValue();}
 		else if(name == "depth"){m_final_depth = a->DoubleValue();}
 		else if(name == "r"){m_rapid_down_to_height = a->DoubleValue();}
 		else if(name == "hfeed"){m_horizontal_feed_rate = a->DoubleValue();}
@@ -214,6 +221,7 @@ void CPocket::AppendTextToProgram()
 
     ss << "clearance = float(" << m_params.m_clearance_height << ")\n";
     ss << "rapid_down_to_height = float(" << m_params.m_rapid_down_to_height << ")\n";
+    ss << "start_depth = float(" << m_params.m_start_depth << ")\n";
     ss << "final_depth = float(" << m_params.m_final_depth << ")\n";
     ss << "tool_diameter = float(" << m_params.m_tool_diameter << ")\n";
     ss << "spindle(" << m_params.m_spindle_speed << ")\n";
@@ -279,7 +287,7 @@ void CPocket::AppendTextToProgram()
 			std::ostringstream ss;
 #endif
 			ss.imbue(std::locale("C"));
-			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ")\n";
+			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, start_depth, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ")\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 
 			//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area_funcs.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_params.m_material_allowance, m_params.m_step_over, m_params.m_step_down, m_params.m_round_corner_factor));
