@@ -13,6 +13,7 @@ public:
 	double m_step_down;
 	double m_round_corner_factor;
 	double m_clearance_height;
+	double m_start_depth;
 	double m_final_depth;
 	double m_rapid_down_to_height;
 	double m_horizontal_feed_rate;
