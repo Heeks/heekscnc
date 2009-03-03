@@ -147,7 +147,7 @@ void CAdaptiveParams::GetProperties(CAdaptive* parent, std::list<Property *> *li
 	list->push_back(new PropertyDouble(_("startvel_y"), m_startvel_y, parent, on_set_startvel_y));
 	list->push_back(new PropertyDouble(_("minz"), m_minz, parent, on_set_minz));
 	list->push_back(new PropertyDouble(_("boundaryclear"), m_boundaryclear, parent, on_set_boundaryclear));
-	if(!parent->m_sketches.empty()){
+	if(parent->m_sketches.empty()){
 		list->push_back(new PropertyDouble(_("boundary_x0"), m_boundary_x0, parent, on_set_boundary_x0));
 		list->push_back(new PropertyDouble(_("boundary_x1"), m_boundary_x1, parent, on_set_boundary_x1));
 		list->push_back(new PropertyDouble(_("boundary_y0"), m_boundary_y0, parent, on_set_boundary_y0));
