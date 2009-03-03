@@ -287,7 +287,7 @@ void CPocket::AppendTextToProgram()
 			std::ostringstream ss;
 #endif
 			ss.imbue(std::locale("C"));
-			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, start_depth, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ")\n";
+			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, start_depth, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ", clearance)\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 
 			//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area_funcs.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_params.m_material_allowance, m_params.m_step_over, m_params.m_step_down, m_params.m_round_corner_factor));
