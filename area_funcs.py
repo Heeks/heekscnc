@@ -2,11 +2,9 @@ import area
 from nc.nc import *
 
 def cut_area(a, do_rapid, rapid_down_to_height, final_depth):
-    print "num_curves = " + str(area.num_curves(a))
     for curve in range(0, area.num_curves(a)):
         px = 0.0
         py = 0.0
-        print "num_vertices = " + str(area.num_vertices(a, curve))
         for vertex in range(0, area.num_vertices(a, curve)):
             sp, x, y, cx, cy = area.get_vertex(a, curve, vertex)
             if do_rapid:
@@ -68,11 +66,8 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
         
         first = True
 
-        #while area.num_curves(a_offset):
         b = 0
         for a_offset in areas:
-            print str(b) + ':'
-            b += 1
             cut_area(a_offset, first, rapid_down_to_height, depth)
             first = False
 
