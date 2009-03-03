@@ -199,8 +199,6 @@ void CProgram::RewritePythonProgram()
 	if(adaptive_op_exists)
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import actp_funcs\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'../../libactp/PythonLib')\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import actp\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 	}
