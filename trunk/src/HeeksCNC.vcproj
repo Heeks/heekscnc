@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib"
+				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib wxmsw28d_core.lib wxmsw28d_aui.lib wxmsw28d_gl.lib wxbase28d.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;"
@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib  rpcrt4.lib"
+				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib rpcrt4.lib wxmsw28_core.lib wxmsw28_aui.lib wxmsw28_gl.lib wxbase28.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;"
@@ -177,7 +177,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description=""
 				CommandLine=""
 			/>
 		</Configuration>
