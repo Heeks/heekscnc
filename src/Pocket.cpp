@@ -242,19 +242,17 @@ void CPocket::AppendTextToProgram()
 		}
 
 		HeeksObj* re_ordered_sketch = NULL;
-		if(heeksCAD->GetSketchOrder(object) != SketchOrderTypeCloseCW && heeksCAD->GetSketchOrder(object) != SketchOrderTypeCloseCCW)
+		SketchOrderType order = heeksCAD->GetSketchOrder(object);
+		if(order != SketchOrderTypeCloseCW && order != SketchOrderTypeCloseCCW && order != SketchOrderTypeMultipleCurves)
 		{
 			re_ordered_sketch = object->MakeACopy();
 			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
 			object = re_ordered_sketch;
-			if(heeksCAD->GetSketchOrder(object) != SketchOrderTypeCloseCW && heeksCAD->GetSketchOrder(object) != SketchOrderTypeCloseCCW)
+			order = heeksCAD->GetSketchOrder(object);
+			if(order != SketchOrderTypeCloseCW && order != SketchOrderTypeCloseCCW && order != SketchOrderTypeMultipleCurves)
 			{
 				switch(heeksCAD->GetSketchOrder(object))
 				{
-				case SketchOrderTypeCloseCW:
-				case SketchOrderTypeCloseCCW:
-					break;
-
 				case SketchOrderTypeOpen:
 					{
 						wxMessageBox(wxString::Format(_("Pocket operation - Sketch must be a closed shape - sketch %d"), sketch));
