@@ -5,7 +5,7 @@
 = celeron55 =
 http://heekscnc.googlecode.com/svn/wiki/celeron55/wc_sign_milled_small.jpg
 
-Made in Finland  link to do
+Made in Finland  http://code.google.com/p/heekscnc/wiki/celeron55
 
 
 
