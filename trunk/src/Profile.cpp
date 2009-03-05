@@ -361,6 +361,98 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 	}
 }
 
+void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
+{
+	if(object)
+	{
+		WriteSketchDefn(object, sketch);
+
+		// start - assume we are at a suitable clearance height
+
+		// get offset side
+		wxString side_string;
+		switch(m_params.m_tool_on_side)
+		{
+		case 1:
+			side_string = _T("left");
+			break;
+		case -1:
+			side_string = _T("right");
+			break;
+		default:
+			side_string = _T("on");
+			break;
+		}
+
+		// get roll on string
+		wxString roll_on_string;
+		if(m_params.m_tool_on_side)
+		{
+			if(m_params.m_auto_roll_on || (m_sketches.size() > 1))
+			{
+				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
+				roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
+			}
+			else
+			{
+#ifdef UNICODE
+				std::wostringstream ss;
+#else
+				std::ostringstream ss;
+#endif
+				ss.imbue(std::locale("C"));
+				ss << m_params.m_roll_on_point[0] << ", " << m_params.m_roll_on_point[1];
+				roll_on_string = ss.str().c_str();
+			}
+		}
+		else
+		{
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch));
+			roll_on_string = _T("span1sx, span1sy");
+		}
+
+		// rapid across to it
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str()));
+
+		// rapid down to just above the material
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = rapid_down_to_height)\n")));
+
+		// feed down to final depth
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("feed(z = final_depth)\n")));			
+
+		wxString roll_off_string;
+		if(m_params.m_tool_on_side)
+		{
+			if(m_params.m_auto_roll_off || (m_sketches.size() > 1))
+			{
+				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));			
+				roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
+			}
+			else
+			{
+#ifdef UNICODE
+				std::wostringstream ss;
+#else
+				std::ostringstream ss;
+#endif
+				ss << m_params.m_roll_off_point[0] << ", " << m_params.m_roll_off_point[1];
+				roll_off_string = ss.str().c_str();
+			}
+		}
+		else
+		{
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch));
+			roll_off_string = _T("ex, ey");
+		}
+
+		// profile the kurve
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
+
+		// rapid back up to clearance plane
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
+	}
+}
+
 void CProfile::AppendTextToProgram()
 {
 	{
@@ -397,93 +489,20 @@ void CProfile::AppendTextToProgram()
 			object = re_ordered_sketch;
 		}
 
-		if(object)
+		if(heeksCAD->GetSketchOrder(object) == SketchOrderTypeMultipleCurves)
 		{
-			WriteSketchDefn(object, sketch);
-
-			// start - assume we are at a suitable clearance height
-
-			// get offset side
-			wxString side_string;
-			switch(m_params.m_tool_on_side)
+			std::list<HeeksObj*> new_separate_sketches;
+			heeksCAD->ExtractSeparateSketches(object, new_separate_sketches);
+			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
-			case 1:
-				side_string = _T("left");
-				break;
-			case -1:
-				side_string = _T("right");
-				break;
-			default:
-				side_string = _T("on");
-				break;
+				HeeksObj* one_curve_sketch = *It;
+				AppendTextForOneSketch(one_curve_sketch, sketch);
+				delete one_curve_sketch;
 			}
-
-			// get roll on string
-			wxString roll_on_string;
-			if(m_params.m_tool_on_side)
-			{
-				if(m_params.m_auto_roll_on || (m_sketches.size() > 1))
-				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
-					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
-				}
-				else
-				{
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-					ss << m_params.m_roll_on_point[0] << ", " << m_params.m_roll_on_point[1];
-					roll_on_string = ss.str().c_str();
-				}
-			}
-			else
-			{
-				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch));
-				roll_on_string = _T("span1sx, span1sy");
-			}
-
-			// rapid across to it
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str()));
-
-			// rapid down to just above the material
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = rapid_down_to_height)\n")));
-
-			// feed down to final depth
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("feed(z = final_depth)\n")));			
-
-			wxString roll_off_string;
-			if(m_params.m_tool_on_side)
-			{
-				if(m_params.m_auto_roll_off || (m_sketches.size() > 1))
-				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));			
-					roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
-				}
-				else
-				{
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss << m_params.m_roll_off_point[0] << ", " << m_params.m_roll_off_point[1];
-					roll_off_string = ss.str().c_str();
-				}
-			}
-			else
-			{
-				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch));
-				roll_off_string = _T("ex, ey");
-			}
-
-			// profile the kurve
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
-
-			// rapid back up to clearance plane
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
+		}
+		else
+		{
+			AppendTextForOneSketch(object, sketch);
 		}
 
 		if(re_ordered_sketch)
