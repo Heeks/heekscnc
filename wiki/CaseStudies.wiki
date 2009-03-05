@@ -1,7 +1,5 @@
 #summary Case Studies
-= Some of our happy customers =
-
-Uses of HeeksCNC
+= Users of HeeksCNC =
 
 
 = celeron55 =
