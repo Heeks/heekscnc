@@ -74,7 +74,6 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
         area.set_round_corner_factor(round_corner_factor)
         area.offset(a_offset, offset_value)
         
-        b = 0
         for a_offset in areas:
             cut_area(a_offset, rapid_down_to_height, depth, clearance_height)
 
