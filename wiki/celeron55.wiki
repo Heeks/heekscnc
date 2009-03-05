@@ -1,0 +1,5 @@
+#summary celeron55
+
+= celeron55 =
+
+http://heekscnc.googlecode.com/svn/wiki/celeron55/wc_sign_in_inkscape.png
