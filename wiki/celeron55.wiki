@@ -1,5 +1,4 @@
 #summary celeron55
 
-= celeron55 =
-
+= WC sign =
 http://code.google.com/p/heekscnc/wiki/celeron55WC
