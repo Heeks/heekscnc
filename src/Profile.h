@@ -58,6 +58,7 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 
 	void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0);
+	void AppendTextForOneSketch(HeeksObj* object, int sketch);
 	void AppendTextToProgram();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
