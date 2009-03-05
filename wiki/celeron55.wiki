@@ -2,4 +2,4 @@
 
 = celeron55 =
 
-http://heekscnc.googlecode.com/svn/wiki/celeron55/wc_sign_in_inkscape.png
+http://code.google.com/p/heekscnc/wiki/celeron55WC
