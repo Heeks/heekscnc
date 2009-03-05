@@ -5,10 +5,11 @@
 = celeron55 =
 http://heekscnc.googlecode.com/svn/wiki/celeron55/wc_sign_milled_small.jpg
 
-Made in Finland  http://code.google.com/p/heekscnc/wiki/celeron55
+Made in Finland  http://code.google.com/p/heekscnc/wiki/celeron55WC
 
 
 
 = Sliptonic = 
+http://heekscnc.googlecode.com/svn/wiki/Sliptonic/carfinishedsmall.jpg
 
-pinewood derby car  link to do
+pinewood derby car  http://code.google.com/p/heekscnc/wiki/SliptonicCar
