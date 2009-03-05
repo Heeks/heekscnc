@@ -8,7 +8,7 @@ The profile was drawn in qcad and extruded in HeeksCAD as a solid. The edges wer
 
 The roughing pass was made in pycam and the smooth pass was made in Heekscnc which uses pycam.
 
-http://heekscnc.googlecode.com/svn/wiki/Sliptonic/themachine.png
+http://heekscnc.googlecode.com/svn/wiki/Sliptonic/themachine.jpg
 http://heekscnc.googlecode.com/svn/wiki/Sliptonic/carHeeksCNCsolid.jpg
 http://heekscnc.googlecode.com/svn/wiki/Sliptonic/carfinishing.jpg
 http://heekscnc.googlecode.com/svn/wiki/Sliptonic/carfinished.jpg
