@@ -1,23 +1,27 @@
 import area
 from nc.nc import *
 
-def cut_area(a, do_rapid, rapid_down_to_height, final_depth):
+def cut_area(a, rapid_down_to_height, final_depth, clearance_height):
     for curve in range(0, area.num_curves(a)):
         px = 0.0
         py = 0.0
+        
+        first = True
+
         for vertex in range(0, area.num_vertices(a, curve)):
             sp, x, y, cx, cy = area.get_vertex(a, curve, vertex)
-            if do_rapid:
+            
+            if first:
                 # rapid across
                 rapid(x, y)
-
+                
                 ##rapid down
                 rapid(z = rapid_down_to_height)
                 
                 #feed down
                 feed(z = final_depth)
 
-                do_rapid = False
+                first = False
             else:
                 if sp == 1:
                     arc_ccw(x, y, i = cx - px, j = cy - py)
@@ -28,8 +32,14 @@ def cut_area(a, do_rapid, rapid_down_to_height, final_depth):
 
             px = x
             py = y
-    
+
+        rapid(z = clearance_height)
+
+
 def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, round_corner_factor, clearance_height):
+    
+    if rapid_down_to_height > clearance_height:
+        rapid_down_to_height = clearance_height
     
     areas = list()
 
@@ -68,9 +78,7 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
 
         b = 0
         for a_offset in areas:
-            cut_area(a_offset, first, rapid_down_to_height, depth)
+            cut_area(a_offset, rapid_down_to_height, depth, clearance_height)
             first = False
-
-        rapid(z = clearance_height)
 
 
