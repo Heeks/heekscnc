@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary 
 Here is a quick and dirty rundown of what you can do with HeeksCNC currently.
 = Introduction =
 This is just a quick introduction to some of HeeksCNC's current capabilities.
