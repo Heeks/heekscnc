@@ -21,7 +21,7 @@ http://heekscnc.googlecode.com/svn/wiki/ddfalck/start_stop.png
 
 Surfacing in HeeksCNC uses Pycam python libraries to do 'dropcutter' paths on solids:
 
-http://heekscnc.googlecode.com/svn/wiki/ddfalck/Y direction.png
+http://heekscnc.googlecode.com/svn/wiki/ddfalck/Ydirection.png
 
 
 I combined the profile routine with the pycam surfacing here:
