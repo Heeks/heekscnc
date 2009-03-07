@@ -4,7 +4,7 @@
 
 1. Make a solid with a big flat surface on top of it
 
-2. Make a solid on top of it OR a pocket in it
+2. Make a solid on top of it and/or a pocket in it
 
 3. Rotate the view so that it is seen straight from the top and draw a sketch loosely around the pocket or the solid
 
