@@ -28,6 +28,7 @@ CPocketParams::CPocketParams()
 	m_horizontal_feed_rate = 0.0;
 	m_vertical_feed_rate = 0.0;
 	m_spindle_speed = 0.0;
+	m_starting_place = true;
 }
 
 void CPocketParams::set_initial_values()
@@ -45,6 +46,7 @@ void CPocketParams::set_initial_values()
 	config.Read(_T("PocketHorizFeed"), &m_horizontal_feed_rate, 100.0);
 	config.Read(_T("PocketVertFeed"), &m_vertical_feed_rate, 100.0);
 	config.Read(_T("PocketSpindleSpeed"), &m_spindle_speed, 7000);
+	config.Read(_T("FromCenter"), &m_starting_place, 1);
 }
 
 void CPocketParams::write_values_to_config()
@@ -62,6 +64,7 @@ void CPocketParams::write_values_to_config()
 	config.Write(_T("PocketHorizFeed"), m_horizontal_feed_rate);
 	config.Write(_T("PocketVertFeed"), m_vertical_feed_rate);
 	config.Write(_T("PocketSpindleSpeed"), m_spindle_speed);
+	config.Write(_T("FromCenter"), m_starting_place);
 }
 
 static void on_set_tool_diameter(double value, HeeksObj* object){((CPocket*)object)->m_params.m_tool_diameter = value;}
@@ -76,6 +79,7 @@ static void on_set_rapid_down_to_height(double value, HeeksObj* object){((CPocke
 static void on_set_horizontal_feed_rate(double value, HeeksObj* object){((CPocket*)object)->m_params.m_horizontal_feed_rate = value;}
 static void on_set_vertical_feed_rate(double value, HeeksObj* object){((CPocket*)object)->m_params.m_vertical_feed_rate = value;}
 static void on_set_spindle_speed(double value, HeeksObj* object){((CPocket*)object)->m_params.m_spindle_speed = value;}
+static void on_set_starting_place(int value, HeeksObj* object){((CPocket*)object)->m_params.m_starting_place = value;}
 
 void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
@@ -92,6 +96,12 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 	list->push_back(new PropertyDouble(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
 	list->push_back(new PropertyDouble(_("vertical feed rate"), m_vertical_feed_rate, parent, on_set_vertical_feed_rate));
 	list->push_back(new PropertyDouble(_("spindle speed"), m_spindle_speed, parent, on_set_spindle_speed));
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("Boundary"));
+		choices.push_back(_("Center"));
+		list->push_back(new PropertyChoice(_("starting_place"), choices, m_starting_place, parent, on_set_starting_place));
+	}
 }
 
 void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
@@ -111,6 +121,7 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("hfeed", m_horizontal_feed_rate);
 	element->SetDoubleAttribute("vfeed", m_vertical_feed_rate);
 	element->SetDoubleAttribute("spin", m_spindle_speed);
+	element->SetAttribute("from_center", m_starting_place);
 }
 
 void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -131,6 +142,7 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 		else if(name == "hfeed"){m_horizontal_feed_rate = a->DoubleValue();}
 		else if(name == "vfeed"){m_vertical_feed_rate = a->DoubleValue();}
 		else if(name == "spin"){m_spindle_speed = a->DoubleValue();}
+		else if(name == "from_center"){m_starting_place = a->IntValue();}
 	}
 }
 
@@ -285,7 +297,7 @@ void CPocket::AppendTextToProgram()
 			std::ostringstream ss;
 #endif
 			ss.imbue(std::locale("C"));
-			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, start_depth, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ", clearance)\n";
+			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_params.m_material_allowance << ", rapid_down_to_height, start_depth, final_depth, " << m_params.m_step_over << ", " << m_params.m_step_down << ", " << m_params.m_round_corner_factor << ", clearance, " << m_params.m_starting_place << ")\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 
 			//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area_funcs.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_params.m_material_allowance, m_params.m_step_over, m_params.m_step_down, m_params.m_round_corner_factor));

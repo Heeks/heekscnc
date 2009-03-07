@@ -35,28 +35,36 @@ def cut_area(a, rapid_down_to_height, final_depth, clearance_height):
 
         rapid(z = clearance_height)
 
+def recur(arealist, a1, stepover, from_center):
+    if from_center:
+        arealist.insert(0, a1)
+    else:
+        arealist.append(a1)
 
-def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, round_corner_factor, clearance_height):
+    a_offset = area.new()
+    area.copy(a1, a_offset)
+    area.offset(a_offset, stepover)
+    
+    for curve in range(0, area.num_curves(a_offset)):
+        a2 = area.new()
+        area.add_curve(a2, a_offset, curve)
+        recur(arealist, a2, stepover, from_center)
+
+def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, round_corner_factor, clearance_height, from_center):
     
     if rapid_down_to_height > clearance_height:
         rapid_down_to_height = clearance_height
     
-    areas = list()
-
-    offset_value = first_offset
-    a_offset = area.new()
-    area.copy(a, a_offset)
     area.set_round_corner_factor(round_corner_factor)
-    area.offset(a_offset, offset_value)
-    
-    while area.num_curves(a_offset):
-        a_1 = area.new()
-        area.copy(a_offset, a_1)
-        areas.append(a_1)
-        area.copy(a, a_offset)
-        offset_value = offset_value + stepover
-        area.offset(a_offset, offset_value)
 
+    arealist = list()
+
+    a_firstoffset = area.new()
+    area.copy(a, a_firstoffset)
+    area.offset(a_firstoffset, first_offset)
+    
+    recur(arealist, a_firstoffset, stepover, from_center)
+    
     layer_count = int((start_depth - final_depth) / stepdown)
 
     if layer_count * stepdown + 0.00001 < start_depth - final_depth:
@@ -74,7 +82,7 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
         area.set_round_corner_factor(round_corner_factor)
         area.offset(a_offset, offset_value)
         
-        for a_offset in areas:
+        for a_offset in arealist:
             cut_area(a_offset, rapid_down_to_height, depth, clearance_height)
 
 

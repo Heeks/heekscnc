@@ -19,6 +19,7 @@ public:
 	double m_horizontal_feed_rate;
 	double m_vertical_feed_rate;
 	double m_spindle_speed;
+	int m_starting_place;
 
 	CPocketParams();
 
