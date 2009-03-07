@@ -2,25 +2,29 @@
 
 = Introduction =
 
-1. Make a solid, for example a cone, press
+1. Make a solid with a big flat surface on top of it
 
-http://heekscad.googlecode.com/svn/trunk/bitmaps/cone.png
+2. Make a solid on top of it OR a pocket in it
 
+3. Rotate the view so that it is seen straight from the top and draw a sketch loosely around the pocket or the solid
 
-2. Make an adaptive roughing operation, press
+4. Select the big flat solid and the sketch and, if you made some, the solids on the big flat solid
+
+5. Make an adaptive roughing operation, press
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/adapt.png
 
+6. At the options list, on the left (as default), set the starting point somewhere in the middle of the pocket or somewhere not on the solid you made on the flat surface.
 
-3. Make the Python script, press
+7. Make the Python script, press
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png
 
 
-4. Create the NC code and see the toolpath, press
+8. Create the NC code and see the toolpath, press
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 
 
-There will be some toolpath, probably not what you expect.
+There will be some toolpath.
 If there is no toolpath, have a look in the terminal ( if running Linux ) to see if there are any Python script errors, like you haven't built actp.so
