@@ -1,24 +1,34 @@
 #summary One-sentence summary of this page.
 Here is a quick and dirty rundown of what you can do with HeeksCNC currently.
 = Introduction =
-
-I found that Qcad to Heeks is a good method for making toolpaths.
-1. You can take text in qcad and explode it into letters- then explode the letters into line segments
-2. Then save as a dxf file and import into HeeksCAD
-
-You can profile inside or outside shapes and choose which sections to cut
-
-Surfacing uses Pycam python libraries.
-
-I combined the profile routine with the pycam surfacing here:
-
-here's some adaptive roughing:
+This is just a quick introduction to some of HeeksCNC's current capabilities.
 
 
 
 = Details =
+I found that Qcad to Heeks is a good method for making toolpaths.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+1. You can take text in qcad and explode it into letters- then explode the letters into line segments
+
+2. Then save as a dxf file and import into HeeksCAD
+
+http://heekscnc.googlecode.com/svn/wiki/ddfalck/engraving.png
+
+You can profile inside or outside shapes and choose which sections to cut
+
+http://heekscnc.googlecode.com/svn/wiki/ddfalck/start_stop.png 
+
+
+Surfacing in HeeksCNC uses Pycam python libraries to do 'dropcutter' paths on solids:
+
+http://heekscnc.googlecode.com/svn/wiki/ddfalck/Y direction.png
+
+
+I combined the profile routine with the pycam surfacing here:
+
+http://heekscnc.googlecode.com/svn/wiki/ddfalck/solid.png
+
+Here is adaptive roughing:
+
+http://heekscnc.googlecode.com/svn/wiki/ddfalck/pockets3.png
+
