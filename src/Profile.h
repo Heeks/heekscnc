@@ -7,6 +7,7 @@ class CProfile;
 
 class CProfileParams{
 public:
+	int m_tool_number;    
 	double m_tool_diameter;
 	double m_clearance_height;
 	double m_final_depth;
