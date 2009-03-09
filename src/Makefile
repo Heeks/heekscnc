@@ -1,5 +1,5 @@
-#CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/lib/wx/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -D__WXGTK__ -DHEEKSCNC -D__WXDEBUG__ -DWXUSINGDLL
-CCFLAGS=-Wall -fPIC -g -I "./" -I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8 -D__WXGTK__ -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL
+#CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/lib/wx/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSCNC -D__WXDEBUG__ -DWXUSINGDLL
+CCFLAGS=-Wall -fPIC -g -I "./" -I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8 -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL
 
 #WX_LIB_LETTER=d
 WX_LIB_LETTER=u
