@@ -15,25 +15,25 @@ ${SHARED_LIBRARY}: ${OBJECTS}
 HeeksCNC.o: HeeksCNC.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-HeeksColor.o: ../../interface/HeeksColor.cpp
+HeeksColor.o: ${HEEKSCADPATH}/interface/HeeksColor.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-HeeksObj.o: ../../interface/HeeksObj.cpp
+HeeksObj.o: ${HEEKSCADPATH}/interface/HeeksObj.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 Interface.o: Interface.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-LeftAndRight.o: ../../interface/LeftAndRight.cpp
+LeftAndRight.o: ${HEEKSCADPATH}/interface/LeftAndRight.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-MarkedObject.o: ../../interface/MarkedObject.cpp
+MarkedObject.o: ${HEEKSCADPATH}/interface/MarkedObject.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 NCCode.o: NCCode.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-ObjList.o: ../../interface/ObjList.cpp
+ObjList.o: ${HEEKSCADPATH}/interface/ObjList.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 OutputCanvas.o: OutputCanvas.cpp
@@ -51,49 +51,49 @@ Program.o: Program.cpp
 ProgramCanvas.o: ProgramCanvas.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyCheck.o: ../../interface/PropertyCheck.cpp
+PropertyCheck.o: ${HEEKSCADPATH}/interface/PropertyCheck.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyChoice.o: ../../interface/PropertyChoice.cpp
+PropertyChoice.o: ${HEEKSCADPATH}/interface/PropertyChoice.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyColor.o: ../../interface/PropertyColor.cpp
+PropertyColor.o: ${HEEKSCADPATH}/interface/PropertyColor.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyDouble.o: ../../interface/PropertyDouble.cpp
+PropertyDouble.o: ${HEEKSCADPATH}/interface/PropertyDouble.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyInt.o: ../../interface/PropertyInt.cpp
+PropertyInt.o: ${HEEKSCADPATH}/interface/PropertyInt.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyList.o: ../../interface/PropertyList.cpp
+PropertyList.o: ${HEEKSCADPATH}/interface/PropertyList.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyString.o: ../../interface/PropertyString.cpp
+PropertyString.o: ${HEEKSCADPATH}/interface/PropertyString.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-PropertyVertex.o: ../../interface/PropertyVertex.cpp
+PropertyVertex.o: ${HEEKSCADPATH}/interface/PropertyVertex.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 PythonStuff.o: PythonStuff.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-strconv.o: ../../interface/strconv.cpp
+strconv.o: ${HEEKSCADPATH}/interface/strconv.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-ToolImage.o: ../../interface/ToolImage.cpp
+ToolImage.o: ${HEEKSCADPATH}/interface/ToolImage.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-tinyxml.o: ../../tinyxml/tinyxml.cpp
+tinyxml.o: ${HEEKSCADPATH}/tinyxml/tinyxml.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-#tinystr.o: ../../tinyxml/tinystr.cpp
+#tinystr.o: ${HEEKSCADPATH}/tinyxml/tinystr.cpp
 #	gcc -c $? ${CCFLAGS} -o $@
 
-tinyxmlerror.o: ../../tinyxml/tinyxmlerror.cpp
+tinyxmlerror.o: ${HEEKSCADPATH}/tinyxml/tinyxmlerror.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-tinyxmlparser.o: ../../tinyxml/tinyxmlparser.cpp
+tinyxmlparser.o: ${HEEKSCADPATH}/tinyxml/tinyxmlparser.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 ZigZag.o: ZigZag.cpp

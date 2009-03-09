@@ -5,9 +5,9 @@
 
 class Property;
 
-void OnStartUp(CHeeksCADInterface* h)
+void OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 {
-	theApp.OnStartUp(h);
+	theApp.OnStartUp(h, dll_path);
 }
 
 void OnNewOrOpen(int open)

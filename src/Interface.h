@@ -10,7 +10,7 @@ extern "C"{
 #define HEEKSCNC_EXPORT
 #endif
 
-void HEEKSCNC_EXPORT OnStartUp(CHeeksCADInterface* h);
+void HEEKSCNC_EXPORT OnStartUp(CHeeksCADInterface* h, const wxString& dll_path);
 void HEEKSCNC_EXPORT OnNewOrOpen(int open);
 void HEEKSCNC_EXPORT GetOptions(void(*callbackfunc)(Property*));
 void HEEKSCNC_EXPORT OnFrameDelete();

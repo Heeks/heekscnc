@@ -4,13 +4,13 @@
 #include "Profile.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
-#include "../../interface/HeeksObj.h"
-#include "../../interface/PropertyDouble.h"
-#include "../../interface/PropertyChoice.h"
-#include "../../interface/PropertyVertex.h"
-#include "../../interface/PropertyCheck.h"
-#include "../../tinyxml/tinyxml.h"
-#include "../../interface/Tool.h"
+#include "interface/HeeksObj.h"
+#include "interface/PropertyDouble.h"
+#include "interface/PropertyChoice.h"
+#include "interface/PropertyVertex.h"
+#include "interface/PropertyCheck.h"
+#include "tinyxml/tinyxml.h"
+#include "interface/Tool.h"
 
 #include <sstream>
 

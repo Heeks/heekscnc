@@ -7,11 +7,11 @@
 
 #include "stdafx.h"
 #include "NCCode.h"
-#include "../../tinyxml/tinyxml.h"
+#include "tinyxml/tinyxml.h"
 #include "OutputCanvas.h"
-#include "../../interface/MarkedObject.h"
-#include "../../interface/PropertyColor.h"
-#include "../../interface/PropertyList.h"
+#include "interface/MarkedObject.h"
+#include "interface/PropertyColor.h"
+#include "interface/PropertyList.h"
 #include "CNCConfig.h"
 
 #include <sstream>

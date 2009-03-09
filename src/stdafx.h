@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 #include "HeeksCNC.h"
-#include "../../interface/strconv.h"
+#include "interface/strconv.h"
 
 // TODO: reference additional headers your program requires here
 
