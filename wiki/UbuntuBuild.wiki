@@ -8,9 +8,13 @@ get python2.5-dev
 
 Run RapidSVN ( menu Applications->Programming->RapidSVN ) On the RapidSVN menu, choose Repository->Chekcout In the URL box put: https://heekscnc.googlecode.com/svn/trunk/ In the "Destination Directory" box, put: /home/dan/Desktop/HeeksCAD/HeeksCNC ( but replace "dan" with your username ) Click "OK". This should get all the source code files you need.
 
-HeeksCNC must be a sub-folder of HeeksCAD.
+edit /home/dan/.bashrc  ( you'll have to choose "Show Hidden Files" on the View menu to see it )
+add
 
-make sure to name HeeksCNC folder correctly, currently it has to be named HeeksCNC, it is case-sensitive, until I fix this bug http://code.google.com/p/heekscnc/issues/detail?id=38
+export HEEKSCADPATH=/home/dan/Desktop/HeeksCAD
+
+as the last line
+
 
 On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" window appears, with some text like "dan@dan-desktop:~$" in it.
 
