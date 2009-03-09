@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "../../interface/HeeksObj.h"
-#include "../../interface/HeeksColor.h"
+#include "interface/HeeksObj.h"
+#include "interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
 
 enum ColorEnum{
@@ -150,7 +150,7 @@ public:
 	const wxChar* GetTypeString(void)const{return _T("NC Code");}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
-	wxString GetIcon(){return _T("../HeeksCNC/icons/nccode");}
+	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/nccode");}
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;

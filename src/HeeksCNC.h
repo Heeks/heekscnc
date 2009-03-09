@@ -2,7 +2,7 @@
 
 // defines global variables and functions
 
-#include "../../interface/HeeksCADInterface.h"
+#include "interface/HeeksCADInterface.h"
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -19,11 +19,12 @@ public:
 	COutputCanvas* m_output_canvas;
 	bool m_run_program_on_new_line;
 	wxToolBarBase* m_machiningBar;
+	wxString m_dll_path;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();
 
-	void OnStartUp(CHeeksCADInterface* h);
+	void OnStartUp(CHeeksCADInterface* h, const wxString& dll_path);
 	void OnNewOrOpen(bool open);
 	void OnInitDLL();
 	void OnDestroyDLL();
