@@ -5,7 +5,7 @@
  * details.
  */
 
-#include "../../interface/HeeksObj.h"
+#include "interface/HeeksObj.h"
 #include "HeeksCNCTypes.h"
 
 class CAdaptive;
@@ -64,7 +64,7 @@ public:
 	int GetType()const{return AdaptiveType;}
 	const wxChar* GetTypeString(void)const{return _T("Adaptive Roughing");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){return _T("../HeeksCNC/icons/adapt");}
+	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/adapt");}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

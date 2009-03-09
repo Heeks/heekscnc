@@ -10,9 +10,9 @@
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
 #include <wx/aui/aui.h>
-#include "../../interface/PropertyString.h"
-#include "../../interface/Observer.h"
-#include "../../interface/ToolImage.h"
+#include "interface/PropertyString.h"
+#include "interface/Observer.h"
+#include "interface/ToolImage.h"
 #include "PythonStuff.h"
 #include "Program.h"
 #include "ProgramCanvas.h"
@@ -300,8 +300,9 @@ static void AddToolBars()
 	heeksCAD->RegisterToolBar(theApp.m_machiningBar);
 }
 
-void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h)
+void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 {
+	m_dll_path = dll_path;
 	heeksCAD = h;
 #if !defined WXUSINGDLL
 	wxInitialize();
@@ -430,7 +431,7 @@ void CHeeksCNCApp::OnFrameDelete()
 
 wxString CHeeksCNCApp::GetDllFolder()
 {
-	return heeksCAD->GetExeFolder() + _T("/HeeksCNC");
+	return m_dll_path;
 }
 
 class MyApp : public wxApp

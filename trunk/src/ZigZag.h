@@ -1,6 +1,6 @@
 // ZigZag.h
 
-#include "../../interface/HeeksObj.h"
+#include "interface/HeeksObj.h"
 #include "HeeksCNCTypes.h"
 
 enum ToolType {
@@ -45,7 +45,7 @@ public:
 	int GetType()const{return ZigZagType;}
 	const wxChar* GetTypeString(void)const{return _T("ZigZag");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){return _T("../HeeksCNC/icons/zigzag");}
+	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/zigzag");}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

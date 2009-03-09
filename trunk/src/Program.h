@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../interface/ObjList.h"
+#include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
 
 class CNCCode;
@@ -17,7 +17,7 @@ public:
 	int GetType()const{return OperationsType;}
 	const wxChar* GetTypeString(void)const{return _("Operations");}
 	HeeksObj *MakeACopy(void)const{ return new COperations(*this);}
-	wxString GetIcon(){return _T("../HeeksCNC/icons/operations");}
+	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/operations");}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object);
 	bool CanBeRemoved(){return false;}
@@ -48,7 +48,7 @@ public:
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("Program");}
-	wxString GetIcon(){return _T("../HeeksCNC/icons/program");}
+	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/program");}
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void GetProperties(std::list<Property *> *list);
