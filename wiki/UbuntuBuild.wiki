@@ -6,7 +6,7 @@ go to System->Administration->"Synaptic Package Manager"
 
 get python2.5-dev
 
-Run RapidSVN ( menu Applications->Programming->RapidSVN ) On the RapidSVN menu, choose Repository->Chekcout In the URL box put: https://heekscnc.googlecode.com/svn/trunk/ In the "Destination Directory" box, put: /home/dan/Desktop/HeeksCAD/HeeksCNC ( but replace "dan" with your username ) Click "OK". This should get all the source code files you need.
+Run RapidSVN ( menu Applications->Programming->RapidSVN ) On the RapidSVN menu, choose Repository->Chekcout In the URL box put: http://heekscnc.googlecode.com/svn/trunk/ In the "Destination Directory" box, put: /home/dan/Desktop/HeeksCAD/HeeksCNC ( but replace "dan" with your username ) Click "OK". This should get all the source code files you need.
 
 edit /home/dan/.bashrc  ( you'll have to choose "Show Hidden Files" on the View menu to see it )
 add
