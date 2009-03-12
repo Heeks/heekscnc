@@ -32,4 +32,4 @@ If there is no toolpath, have a look in the terminal ( if running Linux ) to see
 == Pocketing ==
 To specify a boundary that the tool must stay inside, you must use a solid, like this:
 
-http://heekscnc.googlecode.com/svn/wiki/Sliptonic/adaptivepocket.png
+http://heekscnc.googlecode.com/svn/wiki/adaptivepocket.png
