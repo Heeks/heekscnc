@@ -29,6 +29,15 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 There will be some toolpath.
 If there is no toolpath, have a look in the terminal ( if running Linux ) to see if there are any Python script errors, like you haven't built actp.so
 
+== Open Shapes ==
+be careful to set the starting point somewhere not on the upper solids
+
+http://heekscnc.googlecode.com/svn/wiki/adaptiveopen.png
+
+try moving the starting point a bit
+
+http://heekscnc.googlecode.com/svn/wiki/adaptiveopen2.png
+
 == Pocketing ==
 To specify a boundary that the tool must stay inside, you must use a solid, like this ( be careful to set the starting point somewhere in the middle of the pocket )
 
