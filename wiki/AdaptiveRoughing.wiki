@@ -28,3 +28,8 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 
 There will be some toolpath.
 If there is no toolpath, have a look in the terminal ( if running Linux ) to see if there are any Python script errors, like you haven't built actp.so
+
+== Pocketing ==
+To specify a boundary that the tool must stay inside, you must use a solid, like this:
+
+http://heekscnc.googlecode.com/svn/wiki/Sliptonic/adaptivepocket.png
