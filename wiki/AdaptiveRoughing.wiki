@@ -30,6 +30,6 @@ There will be some toolpath.
 If there is no toolpath, have a look in the terminal ( if running Linux ) to see if there are any Python script errors, like you haven't built actp.so
 
 == Pocketing ==
-To specify a boundary that the tool must stay inside, you must use a solid, like this:
+To specify a boundary that the tool must stay inside, you must use a solid, like this ( be careful to set the starting point somewhere in the middle of the pocket )
 
 http://heekscnc.googlecode.com/svn/wiki/adaptivepocket.png
