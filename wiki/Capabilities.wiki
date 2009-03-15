@@ -1,4 +1,3 @@
-#summary 
 Here is a quick and dirty rundown of what you can do with HeeksCNC currently.
 = Introduction =
 This is just a quick introduction to some of HeeksCNC's current capabilities.
@@ -21,7 +20,7 @@ http://heekscnc.googlecode.com/svn/wiki/ddfalck/start_stop.png
 
 Surfacing in HeeksCNC uses Pycam python libraries to do 'dropcutter' paths on solids:
 
-http://heekscnc.googlecode.com/svn/wiki/ddfalck/Ydirection.png
+http://heekscnc.googlecode.com/svn/wiki/ddfalck/Y-direction.png
 
 
 I combined the profile routine with the pycam surfacing here:
@@ -31,4 +30,3 @@ http://heekscnc.googlecode.com/svn/wiki/ddfalck/solid.png
 Here is adaptive roughing:
 
 http://heekscnc.googlecode.com/svn/wiki/ddfalck/pockets3.png
-
