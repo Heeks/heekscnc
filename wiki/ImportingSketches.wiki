@@ -1,4 +1,4 @@
-#summary Profile Operation
+#summary Importing sketches
 
 = Introduction =
 HeeksCAD can import several different file formats, including DXF and SVG files.  On this page, I want to show how to import and re-order a DXF file.
