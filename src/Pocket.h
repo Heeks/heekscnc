@@ -1,25 +1,21 @@
 // Pocket.h
+/*
+ * Copyright (c) 2009, Dan Heeks
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
 
-#include "interface/HeeksObj.h"
 #include "HeeksCNCTypes.h"
+#include "DepthOp.h"
 
 class CPocket;
 
 class CPocketParams{
 public:
-	double m_tool_diameter;
+	int m_starting_place;
+	double m_round_corner_factor;
 	double m_material_allowance;
 	double m_step_over;
-	double m_step_down;
-	double m_round_corner_factor;
-	double m_clearance_height;
-	double m_start_depth;
-	double m_final_depth;
-	double m_rapid_down_to_height;
-	double m_horizontal_feed_rate;
-	double m_vertical_feed_rate;
-	double m_spindle_speed;
-	int m_starting_place;
 
 	CPocketParams();
 
@@ -30,13 +26,13 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
-class CPocket: public HeeksObj{
+class CPocket: public CDepthOp{
 public:
 	std::list<int> m_sketches;
-	CPocketParams m_params;
+	CPocketParams m_pocket_params;
 
 	CPocket(){}
-	CPocket(const std::list<int> &sketches):m_sketches(sketches){m_params.set_initial_values();}
+	CPocket(const std::list<int> &sketches):m_sketches(sketches){m_pocket_params.set_initial_values();}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return PocketType;}

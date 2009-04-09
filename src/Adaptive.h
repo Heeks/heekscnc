@@ -5,7 +5,7 @@
  * details.
  */
 
-#include "interface/HeeksObj.h"
+#include "Op.h"
 #include "HeeksCNCTypes.h"
 
 class CAdaptive;
@@ -50,7 +50,7 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
-class CAdaptive: public HeeksObj{
+class CAdaptive: public COp{
 public:
 	std::list<int> m_solids;
 	std::list<int> m_sketches;
