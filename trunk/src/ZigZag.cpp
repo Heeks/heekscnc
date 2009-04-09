@@ -9,7 +9,6 @@
 #include "ZigZag.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
-#include "interface/HeeksObj.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
@@ -151,6 +150,8 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 
 void CZigZag::AppendTextToProgram()
 {
+	COp::AppendTextToProgram();
+
 	//write stl file
 	std::list<HeeksObj*> solids;
 	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
@@ -214,7 +215,7 @@ void CZigZag::glCommands(bool select, bool marked, bool no_color)
 void CZigZag::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
-	HeeksObj::GetProperties(list);
+	COp::GetProperties(list);
 }
 
 HeeksObj *CZigZag::MakeACopy(void)const

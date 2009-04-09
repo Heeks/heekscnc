@@ -331,7 +331,7 @@ class CreatorIso(nc.Creator):
     ##  Misc
 
     def comment(self, text):
-        self.write(iso.COMMENT % text) + '\n'
+        self.write((iso.COMMENT % text) + '\n')
 
     def variable(self, id):
         return (iso.VARIABLE % id)
