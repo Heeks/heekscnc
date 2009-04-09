@@ -323,6 +323,9 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 	{
 		WriteSketchDefn(object, sketch);
 
+		double total_to_cut = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
+		int num_step_downs = (int)(total_to_cut / fabs(m_depth_op_params.m_step_down) + 1.0 - heeksCAD->GetTolerance());
+
 		// start - assume we are at a suitable clearance height
 
 		// get offset side
@@ -373,9 +376,6 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 		// rapid down to just above the material
 		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = rapid_down_to_height)\n")));
 
-		// feed down to final depth
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("feed(z = final_depth)\n")));			
-
 		wxString roll_off_string;
 		if(m_profile_params.m_tool_on_side)
 		{
@@ -401,11 +401,33 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 			roll_off_string = _T("ex, ey");
 		}
 
-		// profile the kurve
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
+		if(num_step_downs > 1)
+		{
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("for step in range(0, %d):\n"), num_step_downs));		
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T(" depth = start_depth + ( final_depth - start_depth ) * ( step + 1 ) / %d\n"), num_step_downs));
 
-		// rapid back up to clearance plane
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
+			// rapid across to roll on point
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T(" if step != 0: rapid(%s)\n"), roll_on_string.c_str()));
+			// feed down to depth
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T(" feed(z = depth)\n")));			
+
+			// profile the kurve
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T(" kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
+
+			// rapid back up to clearance plane
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T(" rapid(z = clearance)\n")));			
+		}
+		else
+		{
+			// feed down to final depth
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("feed(z = final_depth)\n")));			
+
+			// profile the kurve
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
+
+			// rapid back up to clearance plane
+			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
+		}
 	}
 }
 
