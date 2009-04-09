@@ -1,6 +1,6 @@
 // ZigZag.h
 
-#include "interface/HeeksObj.h"
+#include "Op.h"
 #include "HeeksCNCTypes.h"
 
 enum ToolType {
@@ -32,7 +32,7 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
-class CZigZag: public HeeksObj{
+class CZigZag: public COp{
 public:
 	std::list<int> m_solids;
 	CZigZagParams m_params;

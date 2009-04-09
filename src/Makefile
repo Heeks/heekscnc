@@ -4,8 +4,7 @@ CCFLAGS=-Wall -fPIC -g -I "./" -I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I
 #WX_LIB_LETTER=d
 WX_LIB_LETTER=u
 
-#OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o ZigZag.o
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
 
@@ -87,9 +86,6 @@ ToolImage.o: ${HEEKSCADPATH}/interface/ToolImage.cpp
 tinyxml.o: ${HEEKSCADPATH}/tinyxml/tinyxml.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
-#tinystr.o: ${HEEKSCADPATH}/tinyxml/tinystr.cpp
-#	gcc -c $? ${CCFLAGS} -o $@
-
 tinyxmlerror.o: ${HEEKSCADPATH}/tinyxml/tinyxmlerror.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
@@ -100,6 +96,12 @@ ZigZag.o: ZigZag.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 Adaptive.o: Adaptive.cpp
+	gcc -c $? ${CCFLAGS} -o $@
+
+DepthOp.o: DepthOp.cpp
+	gcc -c $? ${CCFLAGS} -o $@
+
+Op.o: Op.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 clean:

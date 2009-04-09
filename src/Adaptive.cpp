@@ -233,6 +233,8 @@ void CAdaptiveParams::ReadFromXMLElement(TiXmlElement* pElem)
 
 void CAdaptive::AppendTextToProgram()
 {
+	COp::AppendTextToProgram();
+
 	//write stl file
 	std::list<HeeksObj*> solids;
 	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)

@@ -1,20 +1,17 @@
 // Profile.h
+/*
+ * Copyright (c) 2009, Dan Heeks
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
 
-#include "interface/HeeksObj.h"
 #include "HeeksCNCTypes.h"
+#include "DepthOp.h"
 
 class CProfile;
 
 class CProfileParams{
 public:
-	int m_tool_number;    
-	double m_tool_diameter;
-	double m_clearance_height;
-	double m_final_depth;
-	double m_rapid_down_to_height;
-	double m_horizontal_feed_rate;
-	double m_vertical_feed_rate;
-	double m_spindle_speed;
 	int m_tool_on_side; // -1=right, 0=on, 1=left
 
 	// these are only used when m_sketches.size() == 1
@@ -34,17 +31,15 @@ public:
 	void GetProperties(CProfile* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
-	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
-	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 };
 
-class CProfile: public HeeksObj{
+class CProfile: public CDepthOp{
 public:
 	std::list<int> m_sketches;
-	CProfileParams m_params;
+	CProfileParams m_profile_params;
 
 	CProfile(){}
-	CProfile(const std::list<int> &sketches):m_sketches(sketches){m_params.set_initial_values();}
+	CProfile(const std::list<int> &sketches):m_sketches(sketches){m_profile_params.set_initial_values();}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProfileType;}
@@ -61,6 +56,8 @@ public:
 	void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0);
 	void AppendTextForOneSketch(HeeksObj* object, int sketch);
 	void AppendTextToProgram();
+	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
+	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
