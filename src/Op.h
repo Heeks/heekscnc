@@ -14,6 +14,9 @@ class COp : public HeeksObj
 {
 public:
 	wxString m_comment;
+	bool m_active; // don't make NC code, if this is not active
+
+	COp():m_active(true){}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
