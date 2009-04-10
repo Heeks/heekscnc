@@ -147,19 +147,19 @@ void CProgram::RewritePythonProgram()
 	{
 		if(object->GetType() == ProfileType)
 		{
-			profile_op_exists = true;
+			if(((CProfile*)object)->m_active)profile_op_exists = true;
 		}
 		else if(object->GetType() == PocketType)
 		{
-			pocket_op_exists = true;
+			if(((CPocket*)object)->m_active)pocket_op_exists = true;
 		}
 		else if(object->GetType() == ZigZagType)
 		{
-			zigzag_op_exists = true;
+			if(((CZigZag*)object)->m_active)zigzag_op_exists = true;
 		}
 		else if(object->GetType() == AdaptiveType)
 		{
-			adaptive_op_exists = true;
+			if(((CAdaptive*)object)->m_active)adaptive_op_exists = true;
 		}
 	}
 
@@ -226,16 +226,16 @@ void CProgram::RewritePythonProgram()
 		switch(object->GetType())
 		{
 		case ProfileType:
-			((CProfile*)object)->AppendTextToProgram();
+			if(((CProfile*)object)->m_active)((CProfile*)object)->AppendTextToProgram();
 			break;
 		case PocketType:
-			((CPocket*)object)->AppendTextToProgram();
+			if(((CPocket*)object)->m_active)((CPocket*)object)->AppendTextToProgram();
 			break;
 		case ZigZagType:
-			((CZigZag*)object)->AppendTextToProgram();
+			if(((CZigZag*)object)->m_active)((CZigZag*)object)->AppendTextToProgram();
 			break;
 		case AdaptiveType:
-			((CAdaptive*)object)->AppendTextToProgram();
+			if(((CAdaptive*)object)->m_active)((CAdaptive*)object)->AppendTextToProgram();
 			break;
 		}
 	}
