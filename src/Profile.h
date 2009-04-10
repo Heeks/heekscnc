@@ -45,7 +45,7 @@ public:
 	int GetType()const{return ProfileType;}
 	const wxChar* GetTypeString(void)const{return _T("Profile");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/profile");}
+	wxString GetIcon(){if(m_active)return theApp.GetDllFolder() + _T("/icons/profile"); else return CDepthOp::GetIcon();}
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;

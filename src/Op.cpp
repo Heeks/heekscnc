@@ -10,7 +10,9 @@
 #include "ProgramCanvas.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyCheck.h"
+#include "interface/Tool.h"
 #include "tinyxml/tinyxml.h"
+#include "HeeksCNCTypes.h"
 
 void COp::WriteBaseXML(TiXmlElement *element)
 {
@@ -25,6 +27,12 @@ void COp::ReadBaseXML(TiXmlElement* element)
 	const char* comment = element->Attribute("comment");
 	if(comment)m_comment.assign(Ctt(comment));
 	const char* active = element->Attribute("active");
+	if(active)
+	{
+		int int_active;
+		element->Attribute("active", &int_active);
+		m_active = (int_active != 0);
+	}
 
 	HeeksObj::ReadBaseXML(element);
 }
@@ -45,6 +53,21 @@ void COp::AppendTextToProgram()
 	if(m_comment.Len() > 0)
 	{
 		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("comment('")) + m_comment + _T("')\n"));
+	}
+}
+
+//static
+bool COp::IsAnOperation(int object_type)
+{
+	switch(object_type)
+	{
+		case ProfileType:
+		case PocketType:
+		case ZigZagType:
+		case AdaptiveType:
+			return true;
+		default:
+			return false;		
 	}
 }
 
