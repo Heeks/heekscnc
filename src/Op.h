@@ -22,8 +22,11 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
+	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/noentry");}
 
 	virtual void AppendTextToProgram();
+
+	static bool IsAnOperation(int object_type);
 };
 
 #endif

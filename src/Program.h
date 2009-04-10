@@ -23,6 +23,7 @@ public:
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
