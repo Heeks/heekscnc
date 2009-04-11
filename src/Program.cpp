@@ -14,6 +14,7 @@
 #include "ZigZag.h"
 #include "Adaptive.h"
 #include "Op.h"
+#include "CNCConfig.h"
 
 bool COperations::CanAdd(HeeksObj* object)
 {
@@ -85,8 +86,11 @@ void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	ObjList::GetTools(t_list, p);
 }
 
-CProgram::CProgram():m_machine(_T("nc.iso")), m_output_file(_T("test.tap")), m_nc_code(NULL), m_operations(NULL), m_script_edited(false)
+CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_script_edited(false)
 {
+	CNCConfig config;
+	config.Read(_T("ProgramMachine"), &m_machine, _T("nc.iso"));
+	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
@@ -99,8 +103,19 @@ void CProgram::CopyFrom(const HeeksObj* object)
 	operator=(*((CProgram*)object));
 }
 
-static void on_set_machine(const wxChar* value, HeeksObj* object){((CProgram*)object)->m_machine = value;}
-static void on_set_output_file(const wxChar* value, HeeksObj* object){((CProgram*)object)->m_output_file = value;}
+static void on_set_machine(const wxChar* value, HeeksObj* object)
+{
+	((CProgram*)object)->m_machine = value;
+	CNCConfig config;
+	config.Write(_T("ProgramMachine"), ((CProgram*)object)->m_machine);
+}
+
+static void on_set_output_file(const wxChar* value, HeeksObj* object)
+{
+	((CProgram*)object)->m_output_file = value;
+	CNCConfig config;
+	config.Write(_T("ProgramOutputFile"), ((CProgram*)object)->m_output_file);
+}
 
 void CProgram::GetProperties(std::list<Property *> *list)
 {
