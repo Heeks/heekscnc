@@ -38,7 +38,7 @@ public:
 	int GetType()const{return PocketType;}
 	const wxChar* GetTypeString(void)const{return _T("Pocket");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/pocket");}
+	wxString GetIcon(){if(m_active)return theApp.GetDllFolder() + _T("/icons/pocket"); else return CDepthOp::GetIcon();}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

@@ -38,7 +38,7 @@ void COp::ReadBaseXML(TiXmlElement* element)
 }
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
-static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;}
+static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->WasModified(object);}
 
 void COp::GetProperties(std::list<Property *> *list)
 {
