@@ -6,3 +6,5 @@ One method of converting Inkscape files is to save them as .ps files.
 Then convert this .ps to .dxf with pstoedit.
 Use the Options "aproximate Splines with Polylines" and
 "splineprecision Number"
+
+Also there is avaliable a modifcation to Inkscape to make DXF files which can be read into HeeksCAD directly; http://code.google.com/p/heekscnc/wiki/Inkscape
