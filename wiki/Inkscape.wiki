@@ -5,4 +5,6 @@ Inkscape is a good drawing program. It can make text of different fonts.
 It makes splines when exporting SVG files and DXF files.
 
 Currently HeeksCAD makes lots of small lines when importing a SVG file with splines.
-The DXF file made by Inkscape contains splines, which currently are not read at all by HeeksCAD ( until this issue is fixed http://code.google.com/p/heekscad/issues/detail?id=107 ). To make a simpler DXF file that can be read by HeeksCAD, follow the instructions here: http://www.bobcookdev.com/inkscape/inkscape-dxf.html  ( Linux users, copy the four files to /usr/share/inkscape/extensions )
+The DXF file made by Inkscape contains splines, which currently are not read at all by HeeksCAD ( until this issue is fixed http://code.google.com/p/heekscad/issues/detail?id=107 ).
+
+To make a simpler DXF file that can be read by HeeksCAD, follow the instructions here: http://www.bobcookdev.com/inkscape/inkscape-dxf.html,   but this only seems to work for Windows at the moment.
