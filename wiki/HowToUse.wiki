@@ -12,6 +12,12 @@ The NC code is then backplotted ( yet more Python script ), so the toolpath can 
 
 If the user edits the NC file, these edits can not be passed back up to the Python program. If the user edits the Python program, these edits can not be passed back up to the graphical objects. 
 
+= Geometry Import =
+
+For Profile and Pocket operations you may want to import a 2D drawing
+
+http://code.google.com/p/heekscnc/wiki/GeometryImport
+
 = How to use different operations in HeeksCNC =
 
 == http://heekscnc.googlecode.com/svn/trunk/icons/profile.png Profile ==
