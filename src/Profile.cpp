@@ -236,9 +236,9 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 
 		if(span_object){
 			int type = span_object->GetType();
-			if(type == LineType || type == ArcType)
+			if(type == LineType || type == ArcType || type == CircleType)
 			{
-				if(!started)
+				if(!started && type != CircleType)
 				{
 					span_object->GetStartPoint(s);
 #ifdef UNICODE
@@ -248,6 +248,8 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 #endif
 					ss.imbue(std::locale("C"));
 
+					
+
 					ss << "kurve.add_point(k" << sketch_id << ", 0, " << s[0] << ", " << s[1] << ", 0.0, 0.0)\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 					started = true;
@@ -256,7 +258,7 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 				if(type == LineType)
 				{
 #ifdef UNICODE
-					std::wostringstream ss;
+					std::wostringstream ss;	
 #else
 					std::ostringstream ss;
 #endif
@@ -279,6 +281,23 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 					ss.imbue(std::locale("C"));
 
 					ss << "kurve.add_point(k" << sketch_id << ", " << span_type << ", " << e[0] << ", " << e[1] << ", " << c[0] << ", " << c[1] << ")\n";
+					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+				}
+				else if(type == CircleType)
+				{
+					span_object->GetCentrePoint(c);
+
+					double radius = heeksCAD->CircleGetRadius(span_object);
+#ifdef UNICODE
+					std::wostringstream ss;
+#else
+					std::ostringstream ss;
+#endif
+					ss.imbue(std::locale("C"));
+
+					ss << "kurve.add_point(k" << sketch_id << ", " << 0 << ", " << c[0] + radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
+					ss << "kurve.add_point(k" << sketch_id << ", 1, " << c[0]-radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
+					ss << "kurve.add_point(k" << sketch_id << ", 1, " << c[0]+radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 				}
 			}
@@ -444,14 +463,15 @@ void CProfile::AppendTextToProgram()
 		if(object == NULL || object->GetNumChildren() == 0)continue;
 
 		HeeksObj* re_ordered_sketch = NULL;
-		if(heeksCAD->GetSketchOrder(object) == SketchOrderTypeBad)
+		SketchOrderType sketch_order = heeksCAD->GetSketchOrder(object);
+		if(sketch_order == SketchOrderTypeBad)
 		{
 			re_ordered_sketch = object->MakeACopy();
 			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
 			object = re_ordered_sketch;
 		}
 
-		if(heeksCAD->GetSketchOrder(object) == SketchOrderTypeMultipleCurves)
+		if(sketch_order == SketchOrderTypeMultipleCurves || sketch_order == SketchOrderHasCircles)
 		{
 			std::list<HeeksObj*> new_separate_sketches;
 			heeksCAD->ExtractSeparateSketches(object, new_separate_sketches);
