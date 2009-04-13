@@ -18,6 +18,7 @@
 #include "interface/Tool.h"
 
 #include <sstream>
+#include <iomanip>
 
 CProfileParams::CProfileParams()
 {
@@ -247,8 +248,7 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 					std::ostringstream ss;
 #endif
 					ss.imbue(std::locale("C"));
-
-					
+					ss<<std::setprecision(10);
 
 					ss << "kurve.add_point(k" << sketch_id << ", 0, " << s[0] << ", " << s[1] << ", 0.0, 0.0)\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -263,6 +263,7 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 					std::ostringstream ss;
 #endif
 					ss.imbue(std::locale("C"));
+					ss<<std::setprecision(10);
 
 					ss << "kurve.add_point(k" << sketch_id << ", 0, " << e[0] << ", " << e[1] << ", 0.0, 0.0)\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -279,6 +280,7 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 					std::ostringstream ss;
 #endif
 					ss.imbue(std::locale("C"));
+					ss<<std::setprecision(10);
 
 					ss << "kurve.add_point(k" << sketch_id << ", " << span_type << ", " << e[0] << ", " << e[1] << ", " << c[0] << ", " << c[1] << ")\n";
 					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -294,6 +296,7 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 					std::ostringstream ss;
 #endif
 					ss.imbue(std::locale("C"));
+					ss<<std::setprecision(10);
 
 					ss << "kurve.add_point(k" << sketch_id << ", " << 0 << ", " << c[0] + radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
 					ss << "kurve.add_point(k" << sketch_id << ", 1, " << c[0]-radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
@@ -379,6 +382,7 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 				std::ostringstream ss;
 #endif
 				ss.imbue(std::locale("C"));
+				ss<<std::setprecision(10);
 				ss << m_profile_params.m_roll_on_point[0] << ", " << m_profile_params.m_roll_on_point[1];
 				roll_on_string = ss.str().c_str();
 			}
