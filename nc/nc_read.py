@@ -52,6 +52,11 @@ class Parser:
         if (col != None) : self.file_out.write('\t\t<text col="'+col+'">'+s+'</text>\n')
         else : self.file_out.write('\t\t<text>'+s+'</text>\n')
 
+    def set_mode(self, units=None):
+        self.file_out.write('\t\t<mode')
+        if (units != None) : self.file_out.write('units='+str(units))
+        self.file_out.write(' />\n')
+
     def begin_path(self, col=None):
         if (col != None) : self.file_out.write('\t\t<path col="'+col+'">\n')
         else : self.file_out.write('\t\t<path>\n')
