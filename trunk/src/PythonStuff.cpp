@@ -17,14 +17,14 @@ protected:
 public:
 	CPyProcess(void): wxProcess(heeksCAD->GetMainFrame()), m_pid(0) { }
 
-	void Execute(const char* cmd);
+	void Execute(const wxChar* cmd);
 	void Cancel(void);
 	void OnTerminate(int pid, int status);
 
 	virtual void ThenDo(void) { }
 };
 
-void CPyProcess::Execute(const char* cmd)
+void CPyProcess::Execute(const wxChar* cmd)
 {
 	m_pid = wxExecute(cmd, wxEXEC_ASYNC, this);
 }
@@ -57,7 +57,7 @@ protected:
 	static CPyBackPlot* m_object;
 
 public:
-	CPyBackPlot(const char* filename): m_filename(filename) { m_object = this; }
+	CPyBackPlot(const wxChar* filename): m_filename(filename) { m_object = this; }
 	~CPyBackPlot(void) { m_object = NULL; }
 
 	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
@@ -67,7 +67,7 @@ public:
 #ifdef WIN32
 		Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" iso \"") + m_filename + _T("\""));
 #else
-		Execute(wxString(_T("python \")) + theApp.GetDllFolder() + wxString(_T("/nc/iso_read.py\" ")) + m_filename);
+		Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/nc/iso_read.py\" ")) + m_filename);
 #endif
 	}
 	void ThenDo(void)
@@ -100,7 +100,7 @@ protected:
 	static CPyPostProcess* m_object;
 
 public:
-	CPyPostProcess(const char* filename): m_filename(filename) { m_object = this; }
+	CPyPostProcess(const wxChar* filename): m_filename(filename) { m_object = this; }
 	~CPyPostProcess(void) { m_object = NULL; }
 
 	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
