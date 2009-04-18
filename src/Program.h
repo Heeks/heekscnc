@@ -43,6 +43,7 @@ public:
 	CNCCode* m_nc_code;
 	COperations* m_operations;
 	bool m_script_edited;
+	double m_units; // 1.0 for mm, 25.4 for inches
 
 	CProgram();
 

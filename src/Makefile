@@ -1,6 +1,6 @@
 WXCFLAGS=$(shell wx-config --cflags)
 
-# dan heeks uncomments the next line to make it work for him
+# dan heeks uncomments the next line to make it work for him on his Inspiron 530
 #WXCFLAGS=-I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8
 
 #CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/lib/wx/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSCNC -D__WXDEBUG__ -DWXUSINGDLL
@@ -9,7 +9,7 @@ CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKS
 #WX_LIB_LETTER=d
 WX_LIB_LETTER=u
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
 
@@ -65,6 +65,9 @@ PropertyColor.o: ${HEEKSCADPATH}/interface/PropertyColor.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 PropertyDouble.o: ${HEEKSCADPATH}/interface/PropertyDouble.cpp
+	gcc -c $? ${CCFLAGS} -o $@
+
+PropertyLength.o: ${HEEKSCADPATH}/interface/PropertyLength.cpp
 	gcc -c $? ${CCFLAGS} -o $@
 
 PropertyInt.o: ${HEEKSCADPATH}/interface/PropertyInt.cpp

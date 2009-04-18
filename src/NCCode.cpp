@@ -208,6 +208,8 @@ void ColouredPath::ReadFromXMLElement(TiXmlElement* element)
 	}
 }
 
+double CNCCodeBlock::multiplier = 1.0;
+
 HeeksObj *CNCCodeBlock::MakeACopy(void)const{return new CNCCodeBlock(*this);}
 
 void CNCCodeBlock::glCommands(bool select, bool marked, bool no_color)
@@ -275,6 +277,11 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 			ColouredPath l;
 			l.ReadFromXMLElement(pElem);
 			new_object->m_line_strips.push_back(l);
+		}
+		else if(name == "mode")
+		{
+			const char* units = element->Attribute("units");
+			if(units)element->Attribute("units", &CNCCodeBlock::multiplier);
 		}
 	}
 
@@ -580,6 +587,8 @@ HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 {
 	CNCCode* new_object = new CNCCode;
 	pos = 0;
+
+	CNCCodeBlock::multiplier = 1.0;
 
 	// loop through all the objects
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem;	pElem = pElem->NextSiblingElement())
