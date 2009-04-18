@@ -234,14 +234,18 @@ static void PostProcessMenuCallback(wxCommandEvent &event)
 		wxFile f(theApp.m_program->m_output_file.c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
-	bool pp_success = HeeksPyPostProcess();
 	{
 		// clear the backplot file
 		wxString backplot_path = theApp.m_program->m_output_file + _T(".nc.xml");
 		wxFile f(backplot_path.c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
-	if(pp_success)HeeksPyBackplot(theApp.m_program->m_output_file);
+	HeeksPyPostProcess(theApp.m_program->m_output_file);
+}
+
+static void CancelMenuCallback(wxCommandEvent &event)
+{
+	HeeksPyCancel();
 }
 
 static void OpenNcFileMenuCallback(wxCommandEvent& event)
@@ -295,6 +299,7 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _T("Post-Process"), PostProcessMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _T("Open NC File"), OpenNcFileMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("SaveNC"), ToolImage(_T("savenc")), _T("Save NC File"), SaveNcFileMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cancel"), ToolImage(_T("cancel")), _T("Cancel Python Script"), CancelMenuCallback);
 	theApp.m_machiningBar->Realize();
 	aui_manager->AddPane(theApp.m_machiningBar, wxAuiPaneInfo().Name(_T("MachiningBar")).Caption(_T("Machining tools")).ToolbarPane().Top());
 	heeksCAD->RegisterToolBar(theApp.m_machiningBar);
