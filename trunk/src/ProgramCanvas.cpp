@@ -14,6 +14,8 @@
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyChoice.h"
 
+#include <sstream>
+
 BEGIN_EVENT_TABLE(CProgramCanvas, wxScrolledWindow)
     EVT_SIZE(CProgramCanvas::OnSize)
 END_EVENT_TABLE()
@@ -47,3 +49,32 @@ void CProgramCanvas::Clear()
 {
 	m_textCtrl->Clear();
 }
+
+void CProgramCanvas::AppendText(const wxString& text)
+{
+	m_textCtrl->AppendText(text);
+}
+
+void CProgramCanvas::AppendText(double value)
+{
+#ifdef UNICODE
+	std::wostringstream ss;
+#else
+	std::ostringstream ss;
+#endif
+	ss.imbue(std::locale("C"));
+	ss << value;
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+}
+
+void CProgramCanvas::AppendText(int value)
+{
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("%d"), value));
+}
+
+void CProgramCanvas::AppendText(unsigned int value)
+{
+	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("%d"), value));
+}
+
+
