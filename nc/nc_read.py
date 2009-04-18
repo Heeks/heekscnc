@@ -54,7 +54,7 @@ class Parser:
 
     def set_mode(self, units=None):
         self.file_out.write('\t\t<mode')
-        if (units != None) : self.file_out.write('units='+str(units))
+        if (units != None) : self.file_out.write(' units="'+str(units)+'"')
         self.file_out.write(' />\n')
 
     def begin_path(self, col=None):

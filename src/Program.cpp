@@ -8,6 +8,7 @@
 #include "NCCode.h"
 #include "interface/MarkedObject.h"
 #include "interface/PropertyString.h"
+#include "interface/PropertyChoice.h"
 #include "interface/Tool.h"
 #include "Profile.h"
 #include "Pocket.h"
@@ -91,6 +92,7 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_script_edited(false)
 	CNCConfig config;
 	config.Read(_T("ProgramMachine"), &m_machine, _T("nc.iso"));
 	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
+	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
@@ -117,10 +119,28 @@ static void on_set_output_file(const wxChar* value, HeeksObj* object)
 	config.Write(_T("ProgramOutputFile"), ((CProgram*)object)->m_output_file);
 }
 
+static void on_set_units(int value, HeeksObj* object)
+{
+	((CProgram*)object)->m_units = (value == 0) ? 1.0:25.4;
+	CNCConfig config;
+	config.Write(_T("ProgramUnits"), ((CProgram*)object)->m_units);
+
+	// also change HeeksCAD's view units automatically
+	heeksCAD->SetViewUnits(((CProgram*)object)->m_units, true);
+}
+
 void CProgram::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyString(_("machine"), m_machine, this, on_set_machine));
 	list->push_back(new PropertyString(_("output file"), m_output_file, this, on_set_output_file));
+	{
+		std::list< wxString > choices;
+		choices.push_back ( wxString ( _("mm") ) );
+		choices.push_back ( wxString ( _("inch") ) );
+		int choice = 0;
+		if(m_units > 25.0)choice = 1;
+		list->push_back ( new PropertyChoice ( _("units"),  choices, choice, this, on_set_units ) );
+	}
 	HeeksObj::GetProperties(list);
 }
 
@@ -158,6 +178,7 @@ void CProgram::WriteXML(TiXmlNode *root)
 	element->SetAttribute("machine", Ttc(m_machine.c_str()));
 	element->SetAttribute("output_file", Ttc(m_output_file.c_str()));
 	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
+	element->SetDoubleAttribute("units", m_units);
 
 	WriteBaseXML(element);
 }
@@ -190,6 +211,7 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 		if(name == "machine"){new_object->m_machine.assign(Ctt(a->Value()));}
 		else if(name == "output_file"){new_object->m_output_file.assign(Ctt(a->Value()));}
 		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(Ctt(a->Value()));}
+		else if(name == "units"){new_object->m_units = a->DoubleValue();}
 	}
 
 	new_object->ReadBaseXML(pElem);
@@ -281,7 +303,14 @@ void CProgram::RewritePythonProgram()
 	// begin program
 	theApp.m_program_canvas->m_textCtrl->AppendText(_T("program_begin(123, 'Test program')\n"));
 	theApp.m_program_canvas->m_textCtrl->AppendText(_T("absolute()\n"));
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("metric()\n"));
+	if(m_units > 25.0)
+	{
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("imperial()\n"));
+	}
+	else
+	{
+		theApp.m_program_canvas->m_textCtrl->AppendText(_T("metric()\n"));
+	}
 	theApp.m_program_canvas->m_textCtrl->AppendText(_T("set_plane(0)\n"));
 	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 

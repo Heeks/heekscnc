@@ -9,8 +9,10 @@
 #include "Pocket.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
+#include "Program.h"
 #include "interface/HeeksObj.h"
 #include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyVertex.h"
@@ -52,8 +54,8 @@ static void on_set_starting_place(int value, HeeksObj* object){((CPocket*)object
 
 void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("step over"), m_step_over, parent, on_set_step_over));
-	list->push_back(new PropertyDouble(_("material allowance"), m_material_allowance, parent, on_set_material_allowance));
+	list->push_back(new PropertyLength(_("step over"), m_step_over, parent, on_set_step_over));
+	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, parent, on_set_material_allowance));
 	list->push_back(new PropertyDouble(_("round corner factor"), m_round_corner_factor, parent, on_set_round_corner_factor));
 	list->push_back(new PropertyString(wxString(_T("( ")) + _("for 90 degree corners") + _T(" )"), wxString(_T("( ")) + _("1.5 for square, 1.0 for round")  + _T(" )"), NULL));
 	{
@@ -104,35 +106,33 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 				span_object->GetStartPoint(s);
 				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
 				{
-					theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area.start_new_curve(a%d)\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
+					theApp.m_program_canvas->AppendText(_T("area.start_new_curve(a"));
+					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
+					theApp.m_program_canvas->AppendText(_T(")\n"));
 					started = false;
 				}
 
 				if(!started)
 				{
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-
-					ss << "area.add_point(a" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", 0, " << s[0] << ", " << s[1] << ", 0, 0)\n";
-					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
+					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
+					theApp.m_program_canvas->AppendText(_T(", 0, "));
+					theApp.m_program_canvas->AppendText(s[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(s[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", 0, 0)\n"));
 					started = true;
 				}
 				span_object->GetEndPoint(e);
 				if(type == LineType)
 				{
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-
-					ss << "area.add_point(a" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", 0, " << e[0] << ", " << e[1] << ", 0, 0)\n";
-					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
+					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
+					theApp.m_program_canvas->AppendText(_T(", 0, "));
+					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", 0, 0)\n"));
 				}
 				else if(type == ArcType)
 				{
@@ -140,22 +140,26 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-
-					ss << "area.add_point(a" << (id_to_use > 0 ? id_to_use : sketch->m_id) << ", " << span_type << ", " << e[0] << ", " << e[1] << ", " << c[0] << ", " << c[1] << ")\n";
-					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
+					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(span_type);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(")\n"));
 				}
 				memcpy(prev_e, e, 3*sizeof(double));
 			}
 		}
 	}
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+	theApp.m_program_canvas->AppendText(_T("\n"));
 }
 
 void CPocket::AppendTextToProgram()
@@ -211,19 +215,20 @@ void CPocket::AppendTextToProgram()
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
- #ifdef UNICODE
-			std::wostringstream ss;
-#else
-			std::ostringstream ss;
-#endif
-			ss.imbue(std::locale("C"));
-			ss << "area_funcs.pocket(a" << sketch <<", tool_diameter/2 + " << m_pocket_params.m_material_allowance << ", rapid_down_to_height, start_depth, final_depth, " << m_pocket_params.m_step_over << ", step_down, " << m_pocket_params.m_round_corner_factor << ", clearance, " << m_pocket_params.m_starting_place << ")\n";
-			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-
-			//theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("area_funcs.pocket(a%d, tool_diameter/2 + %g, rapid_down_to_height, final_depth, %g, %g, %g)\n"), sketch, m_pocket_params.m_material_allowance, m_pocket_params.m_step_over, m_pocket_params.m_step_down, m_pocket_params.m_round_corner_factor));
+			theApp.m_program_canvas->AppendText(_T("area_funcs.pocket(a"));
+			theApp.m_program_canvas->AppendText(sketch);
+			theApp.m_program_canvas->AppendText(_T(", tool_diameter/2 + "));
+			theApp.m_program_canvas->AppendText(m_pocket_params.m_material_allowance);
+			theApp.m_program_canvas->AppendText(_T(", rapid_down_to_height, start_depth, final_depth, "));
+			theApp.m_program_canvas->AppendText(m_pocket_params.m_step_over);
+			theApp.m_program_canvas->AppendText(_T(", step_down, "));
+			theApp.m_program_canvas->AppendText(m_pocket_params.m_round_corner_factor);
+			theApp.m_program_canvas->AppendText(_T(", clearance, "));
+			theApp.m_program_canvas->AppendText(m_pocket_params.m_starting_place);
+			theApp.m_program_canvas->AppendText(_T(")\n"));
 
 			// rapid back up to clearance plane
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
+			theApp.m_program_canvas->AppendText(_T("rapid(z = clearance)\n"));			
 		}
 
 		if(re_ordered_sketch)

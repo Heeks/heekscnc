@@ -11,6 +11,7 @@
 #include "ProgramCanvas.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 
@@ -72,12 +73,12 @@ static void on_set_spindle_speed(double value, HeeksObj* object){((CDepthOp*)obj
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyInt(_("tool number"), m_tool_number, parent, on_set_tool_number));
-	list->push_back(new PropertyDouble(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
-	list->push_back(new PropertyDouble(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
-	list->push_back(new PropertyDouble(_("step down"), m_step_down, parent, on_set_step_down));
-	list->push_back(new PropertyDouble(_("start depth"), m_start_depth, parent, on_set_start_depth));
-	list->push_back(new PropertyDouble(_("final depth"), m_final_depth, parent, on_set_final_depth));
-	list->push_back(new PropertyDouble(_("rapid down to height"), m_rapid_down_to_height, parent, on_set_rapid_down_to_height));
+	list->push_back(new PropertyLength(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
+	list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
+	list->push_back(new PropertyLength(_("step down"), m_step_down, parent, on_set_step_down));
+	list->push_back(new PropertyLength(_("start depth"), m_start_depth, parent, on_set_start_depth));
+	list->push_back(new PropertyLength(_("final depth"), m_final_depth, parent, on_set_final_depth));
+	list->push_back(new PropertyLength(_("rapid down to height"), m_rapid_down_to_height, parent, on_set_rapid_down_to_height));
 	list->push_back(new PropertyDouble(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
 	list->push_back(new PropertyDouble(_("vertical feed rate"), m_vertical_feed_rate, parent, on_set_vertical_feed_rate));
 	list->push_back(new PropertyDouble(_("spindle speed"), m_spindle_speed, parent, on_set_spindle_speed));
