@@ -46,8 +46,18 @@ To do this, from terminal type cd Desktop/HeeksCAD/HeeksCNC/kurve
 and then type: make
 This will make kurve.so file in the HeeksCNC folder.
 
+===libarea==
 If you want to use pocket operations you will need to build area.so, from this project http://code.google.com/p/libarea/
 
+1) Run RapidSVN, now using the address http://libarea.googlecode.com/svn/trunk/ and /home/user/Desktop/libarea (and of course replace user with your user name)
+
+2) When done, get a terminal and run 'cd Desktop/libarea' (You should now have a prompt like "something@something libarea$")
+
+3) Run 'make'. It should give no errors and you should have area.so now in the directory, check if you see it if you run 'ls'.
+
+4) Copy it to the HeeksCNC directory, you can do that by running 'cp area.so ../HeeksCAD/HeeksCNC/'
+
+===libactp===
 If you want to use adaptive roughing operations you will need to build actp.so, from this project http://code.google.com/p/libactp/
 
 If you are having trouble, come and ask some real people on the IRC channel #cam on FreeNode,  quite a few people there have built it, for example:   archivist, celeron55, crotchet1, DanielFalck, fenn, Sliptonic,  or email me danheeks@gmail.com
