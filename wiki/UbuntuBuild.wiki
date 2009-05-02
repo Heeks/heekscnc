@@ -60,4 +60,13 @@ If you want to use pocket operations you will need to build area.so, from this p
 ===libactp===
 If you want to use adaptive roughing operations you will need to build actp.so, from this project http://code.google.com/p/libactp/
 
+1) Run RapidSVN, now using the address http://libactp.googlecode.com/svn/trunk/ and /home/user/Desktop/libactp (and of course replace user with your user name)
+
+2) When done, get a terminal and run 'cd Desktop/libactp/PythonLib' (You should now have a prompt like "something@something PythonLib$")
+
+3) Run 'make'. It should give no errors and you should have actp.so now in the directory, check if you see it if you run 'ls'.
+
+4) As of now, HeeksCNC actually searches actp.so in ../../libactp/PythonLib too, so it works without copying it anywhere. To not cause any confusion, it is good to not copy it anywhere. IF you used different directory structure than the one specified in these howtos, copy actp.so to the HeeksCNC directory.
+
+
 If you are having trouble, come and ask some real people on the IRC channel #cam on FreeNode,  quite a few people there have built it, for example:   archivist, celeron55, crotchet1, DanielFalck, fenn, Sliptonic,  or email me danheeks@gmail.com
