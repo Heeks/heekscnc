@@ -1,3 +1,12 @@
+#PREFIX=/usr
+#BINDIR=$(PREFIX)/bin
+#DATADIR=$(PREFIX)/share
+#use /opt/HeeksCAD untill we find a way to respect linux FHS
+INSTALLPREFIX=/opt
+HEEKSCADDIR=$(INSTALLPREFIX)/HeeksCAD
+HEEKSCNCDIR=$(HEEKSCADDIR)/HeeksCNC
+mkdir_p= mkdir -p
+
 WXCFLAGS=$(shell wx-config --cflags)
 
 # dan heeks uncomments the next line to make it work for him on his Inspiron 530
@@ -129,4 +138,21 @@ Op.o: Op.cpp
 clean:
 	-rm ${SHARED_LIBRARY} ${OBJECTS}
 
+install:
+	test -z "$(HEEKSCNCDIR)" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)"
+	test -z "$(HEEKSCNCDIR)/bitmaps" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps"
+	test -z "$(HEEKSCNCDIR)/icons" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/icons"
+	test -z "$(HEEKSCNCDIR)/nc" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/nc"
+	cp $(SHARED_LIBRARY) $(DESTDIR)$(HEEKSCNCDIR)
+	cp ../bitmaps/*.png ../bitmaps/*.svg $(DESTDIR)$(HEEKSCNCDIR)/bitmaps/
+	cp ../icons/*.png $(DESTDIR)$(HEEKSCNCDIR)/icons/
+	cp ../nc/*.py $(DESTDIR)$(HEEKSCNCDIR)/nc/
+# ugly hack because to write posy.py and works on "nc" folder user need to write on $(HEEKSCNCDIR)
+# everything made here should be done in ~/.HeeksCNC or similar folder
+#	chmod -R 766 $(DESTDIR)$(HEEKSCNCDIR)
+	chown -R root:users $(DESTDIR)$(HEEKSCNCDIR)
+	find $(DESTDIR)$(HEEKSCNCDIR) -type d -exec chmod 775 {} \;
+
+uninstall:
+	rm -rf $(DESTDIR)$(HEEKSCNCDIR)
 
