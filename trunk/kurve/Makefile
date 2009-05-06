@@ -1,31 +1,52 @@
-CCFLAGS=-Wall -fPIC -g -DOPEN_SOURCE_GEOMETRY -I/usr/include/python2.5
+# Makefile for libkurve
 
-OBJECTS=Construction.o Finite.o kurve.o Matrix.o PythonStuff.o offset.o
+PREFIX	= /usr/local
+HOME	= .
+CXX     = g++
+CC      = gcc
+LD      = g++
+LDFLAGS = -shared -rdynamic `python-config --ldflags`
+LIBS    = -lstdc++ `python-config --libs`
+CFLAGS  = -Wall -I/usr/include `python-config --includes` -I./ -g -fPIC -DOPEN_SOURCE_GEOMETRY
 
-SHARED_LIBRARY=../kurve.so
+LIBNAME	= kurve
+LIBOBJS	= Construction.o Finite.o kurve.o Matrix.o PythonStuff.o offset.o
+LIBDIR	= .libs/
+LIBOUT	= $(LIBDIR)$(LIBNAME).so
 
-${SHARED_LIBRARY}: ${OBJECTS}
-	gcc -shared -fPIC -Wl,-soname,kurve.so.0 -o ${SHARED_LIBRARY} ${OBJECTS} -lstdc++ -lpython2.5
+all:	$(LIBOUT)
 
-Construction.o: geometry/Construction.cpp
-	gcc -c $? ${CCFLAGS} -o $@
-
-Finite.o: geometry/Finite.cpp
-	gcc -c $? ${CCFLAGS} -o $@
-
-kurve.o: geometry/kurve.cpp
-	gcc -c $? ${CCFLAGS} -o $@
-
-Matrix.o: geometry/Matrix.cpp
-	gcc -c $? ${CCFLAGS} -o $@
-
-PythonStuff.o: PythonStuff.cpp
-	gcc -c $? ${CCFLAGS} -o $@
-
-offset.o: geometry/offset.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+$(LIBOUT): $(LIBOBJS)
+	@-mkdirhier $(LIBDIR)
+	$(LD) $(LDFLAGS) -fPIC -Wl,-soname,kurve.so.0 $(LIBOBJS) -o $(LIBOUT) $(LIBS)
 
 clean:
-	-rm ${SHARED_LIBRARY} ${OBJECTS}
+	@-rm -f $(LIBOBJS)
+	@-rm -f $(LIBOUT)
+	@-rmdir $(LIBDIR)
 
+install: $(LIBOUT)
+	strip $^
+	chmod 644 $^
+	install $^ $(DESTDIR)$(PREFIX)/lib/python`python -c "import sys; print sys.version[:3]"`/site-packages/
 
+test:
+#	python sample.py
+
+Construction.o: geometry/Construction.cpp
+	$(CC) -c $? ${CFLAGS} -o $@
+
+Finite.o: geometry/Finite.cpp
+	$(CC) -c $? ${CFLAGS} -o $@
+
+kurve.o: geometry/kurve.cpp
+	$(CC) -c $? ${CFLAGS} -o $@
+
+Matrix.o: geometry/Matrix.cpp
+	$(CC) -c $? ${CFLAGS} -o $@
+
+PythonStuff.o: PythonStuff.cpp
+	$(CC) -c $? ${CFLAGS} -o $@
+
+offset.o: geometry/offset.cpp
+	$(CC) -c $? ${CFLAGS} -o $@
