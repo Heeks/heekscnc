@@ -1,0 +1,22 @@
+This package was debianized by Joachim Steiger <ubuntu@hyte.de> on
+Tue, 06 May 2009 22:13:02 +0200.
+
+It was downloaded from <http://code.google.com/p/heekscnc/>
+
+Upstream Author(s):
+
+    Dan Heeks
+
+Copyright:
+
+    <Copyright (C) 2009 danheeks@gmail.com >
+
+License:
+
+	BSD
+
+The Debian packaging is (C) 2009, Joachim Steiger <ubuntu@hyte.de> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.
