@@ -14,9 +14,11 @@ class Parser:
     ############################################################################
     ##  Internals
 
-    def files_open(self, name):
+    def files_open(self, name, oname=None):
+	if (oname == None ):
+	    oname = (name+'.nc.xml')
         self.file_in = open(name, 'r')
-        self.file_out = open(name+'.nc.xml', 'w')
+        self.file_out = open(oname, 'w')
 
         self.file_out.write('<?xml version="1.0" ?>\n')
         self.file_out.write('<nccode>\n')
