@@ -1,5 +1,9 @@
 PREFIX=/usr/local
-LIBDIR=$(PREFIX)/lib
+LIBDIR=$(PREFIX)/$(LIB)
+#if arch x86
+LIB=lib
+# else if arch x86_64
+#LIB=lib64
 DATADIR=$(PREFIX)/share
 HEEKSCNCDIR=$(DATADIR)/heekscnc
 mkdir_p= mkdir -p
