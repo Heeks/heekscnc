@@ -91,7 +91,7 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_script_edited(false)
 {
 	CNCConfig config;
 	config.Read(_T("ProgramMachine"), &m_machine, _T("nc.iso"));
-	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
+	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("/tmp/test.tap"));
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 }
 
@@ -251,7 +251,11 @@ void CProgram::RewritePythonProgram()
 	}
 
 	// add standard stuff at the top
-
+	//hackhack, make it work on unix with FHS
+#ifndef WIN32
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'/usr/lib/heekscnc/')\n"));
+#endif
 	// kurve related things
 	if(profile_op_exists)
 	{
@@ -269,7 +273,9 @@ void CProgram::RewritePythonProgram()
 	// pycam stuff
 	if(zigzag_op_exists)
 	{
+#ifdef WIN32
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
+#endif
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'PyCam/trunk')\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
 		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Geometry import *\n"));

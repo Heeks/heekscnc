@@ -67,7 +67,7 @@ public:
 #ifdef WIN32
 		Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" iso \"") + m_filename + _T("\""));
 #else
-		Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/nc/iso_read.py\" ")) + m_filename);
+		Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/iso_read.py\" ")) + m_filename);
 #endif
 	}
 	void ThenDo(void)
@@ -110,7 +110,7 @@ public:
 #ifdef WIN32
 		Execute(theApp.GetDllFolder() + wxString(_T("/post.bat")));
 #else
-		Execute(wxString(_T("python ")) + theApp.GetDllFolder() + wxString(_T("/post.py")));
+		Execute(wxString(_T("python ")) + wxString(_T("/tmp/heekscnc_post.py")));
 #endif
 	}
 	void ThenDo(void) { (new CPyBackPlot(m_filename))->Do(); }
@@ -136,15 +136,22 @@ bool HeeksPyPostProcess(const wxString &filepath)
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
+#ifdef WIN32
 		wxString file_str = theApp.GetDllFolder() + wxString(_T("/post.py"));
+#else
+		wxString file_str = wxString(_T("/tmp/heekscnc_post.py"));
+#endif
 		if(!write_python_file(file_str))
 		{
 			wxMessageBox(_T("couldn't write post.py!"));
 		}
 		else
 		{
+#ifdef WIN32
 			::wxSetWorkingDirectory(theApp.GetDllFolder());
-
+#else
+			::wxSetWorkingDirectory(wxString(_T("/tmp")));
+#endif
 			// call the python file
 			(new CPyPostProcess(filepath))->Do();
 

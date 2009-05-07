@@ -31,6 +31,7 @@ public:
 	void GetOptions(std::list<Property *> *list);
 	void OnFrameDelete();
 	wxString GetDllFolder();
+	wxString GetResFolder();
 };
 
 extern CHeeksCNCApp theApp;
