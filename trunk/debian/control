@@ -9,8 +9,8 @@ Homepage: http://code.google.com/p/heekscnc
 Package: heekscnc0
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, libactp0, libarea0, libkurve0
-#libpycam0
+Depends: ${shlibs:Depends}, libactp0, libarea0, libkurve0, heekscad
+#, pycam
 Description: HeeksCNC is an add-on for HeeksCAD http://code.google.com/p/heekscad/.
  The user can add machining operations. These can then be output to NC code.
  The NC code is then shown as red and green lines on the screen.
