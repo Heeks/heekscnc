@@ -439,6 +439,16 @@ wxString CHeeksCNCApp::GetDllFolder()
 	return m_dll_path;
 }
 
+wxString CHeeksCNCApp::GetResFolder()
+{
+#ifdef WIN32
+	return m_dll_path;
+#else
+	return (m_dll_path + _T("/../../share/heekscnc"));
+#endif
+}
+
+
 class MyApp : public wxApp
 {
  

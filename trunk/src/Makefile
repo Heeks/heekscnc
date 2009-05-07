@@ -1,10 +1,7 @@
-#PREFIX=/usr
-#BINDIR=$(PREFIX)/bin
-#DATADIR=$(PREFIX)/share
-#use /opt/HeeksCAD untill we find a way to respect linux FHS
-INSTALLPREFIX=/opt
-HEEKSCADDIR=$(INSTALLPREFIX)/HeeksCAD
-HEEKSCNCDIR=$(HEEKSCADDIR)/HeeksCNC
+PREFIX=/usr/local
+LIBDIR=$(PREFIX)/lib
+DATADIR=$(PREFIX)/share
+HEEKSCNCDIR=$(DATADIR)/heekscnc
 mkdir_p= mkdir -p
 
 WXCFLAGS=$(shell wx-config --cflags)
@@ -23,16 +20,12 @@ endif
 #CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/lib/wx/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSCNC -D__WXDEBUG__ -DWXUSINGDLL
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL
 
-#WX_LIB_LETTER=d
-WX_LIB_LETTER=u
-
-
 OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
 
 ${SHARED_LIBRARY}: $(heekspathmessage) ${OBJECTS}
-	gcc -shared -fPIC -Wl,-soname,libheekscnc.so.0 -o ${SHARED_LIBRARY} ${OBJECTS} -lstdc++ -lGLU -lGL -lwx_gtk2${WX_LIB_LETTER}_richtext-2.8 -lwx_gtk2${WX_LIB_LETTER}_aui-2.8 -lwx_gtk2${WX_LIB_LETTER}_xrc-2.8 -lwx_gtk2${WX_LIB_LETTER}_qa-2.8 -lwx_gtk2${WX_LIB_LETTER}_html-2.8 -lwx_gtk2${WX_LIB_LETTER}_adv-2.8 -lwx_gtk2${WX_LIB_LETTER}_core-2.8 -lwx_base${WX_LIB_LETTER}_xml-2.8 -lwx_base${WX_LIB_LETTER}_net-2.8 -lwx_base${WX_LIB_LETTER}-2.8 -lwx_gtk2${WX_LIB_LETTER}_gl-2.8
+	$(CC) -shared -fPIC -Wl,-soname,libheekscnc.so.0 -o ${SHARED_LIBRARY} ${OBJECTS} -lstdc++ -lGLU -lGL `wx-config --libs` -lm
 
 #print a message if HEEKSCADPATH is not set
 #use escape sequences for colors.  Z gets translated to \033
@@ -40,119 +33,119 @@ message:
 	@echo Z[1mEnvironment variable HEEKSCADPATH not set. Assuming Z[32m../..Z[37mZ[0m | tr Z '\033'
 
 HeeksCNC.o: HeeksCNC.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 HeeksColor.o: ${HEEKSCADPATH}/interface/HeeksColor.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 HeeksObj.o: ${HEEKSCADPATH}/interface/HeeksObj.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 Interface.o: Interface.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 LeftAndRight.o: ${HEEKSCADPATH}/interface/LeftAndRight.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 MarkedObject.o: ${HEEKSCADPATH}/interface/MarkedObject.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 NCCode.o: NCCode.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 ObjList.o: ${HEEKSCADPATH}/interface/ObjList.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 OutputCanvas.o: OutputCanvas.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 Profile.o: Profile.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 Pocket.o: Pocket.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 Program.o: Program.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 ProgramCanvas.o: ProgramCanvas.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyCheck.o: ${HEEKSCADPATH}/interface/PropertyCheck.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyChoice.o: ${HEEKSCADPATH}/interface/PropertyChoice.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyColor.o: ${HEEKSCADPATH}/interface/PropertyColor.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyDouble.o: ${HEEKSCADPATH}/interface/PropertyDouble.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyLength.o: ${HEEKSCADPATH}/interface/PropertyLength.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyInt.o: ${HEEKSCADPATH}/interface/PropertyInt.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyList.o: ${HEEKSCADPATH}/interface/PropertyList.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyString.o: ${HEEKSCADPATH}/interface/PropertyString.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PropertyVertex.o: ${HEEKSCADPATH}/interface/PropertyVertex.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 PythonStuff.o: PythonStuff.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 strconv.o: ${HEEKSCADPATH}/interface/strconv.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 ToolImage.o: ${HEEKSCADPATH}/interface/ToolImage.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 tinyxml.o: ${HEEKSCADPATH}/tinyxml/tinyxml.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 tinyxmlerror.o: ${HEEKSCADPATH}/tinyxml/tinyxmlerror.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 tinyxmlparser.o: ${HEEKSCADPATH}/tinyxml/tinyxmlparser.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 ZigZag.o: ZigZag.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 Adaptive.o: Adaptive.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 DepthOp.o: DepthOp.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 Op.o: Op.cpp
-	gcc -c $? ${CCFLAGS} -o $@
+	$(CC) -c $? ${CCFLAGS} -o $@
 
 clean:
 	-rm ${SHARED_LIBRARY} ${OBJECTS}
 
 install:
-	test -z "$(HEEKSCNCDIR)" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)"
-	test -z "$(HEEKSCNCDIR)/bitmaps" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps"
-	test -z "$(HEEKSCNCDIR)/icons" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/icons"
-	test -z "$(HEEKSCNCDIR)/nc" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/nc"
-	cp $(SHARED_LIBRARY) $(DESTDIR)$(HEEKSCNCDIR)
+	test -z "$(DESTDIR)$(LIBDIR)/heekscad" || $(mkdir_p) "$(DESTDIR)$(LIBDIR)/heekscad"
+	test -z "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps"
+	test -z "$(DESTDIR)$(HEEKSCNCDIR)/icons" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/icons"
+	test -z "$(DESTDIR)$(LIBDIR)/heekscnc/nc" || $(mkdir_p) "$(DESTDIR)$(LIBDIR)/heekscnc/nc"
+	strip $(SHARED_LIBRARY)
+	chmod 644 $(SHARED_LIBRARY)
+	cp $(SHARED_LIBRARY) $(DESTDIR)$(LIBDIR)/heekscad/
 	cp ../bitmaps/*.png ../bitmaps/*.svg $(DESTDIR)$(HEEKSCNCDIR)/bitmaps/
 	cp ../icons/*.png $(DESTDIR)$(HEEKSCNCDIR)/icons/
-	cp ../nc/*.py $(DESTDIR)$(HEEKSCNCDIR)/nc/
-# ugly hack because to write posy.py and works on "nc" folder user need to write on $(HEEKSCNCDIR)
-# everything made here should be done in ~/.HeeksCNC or similar folder
-#	chmod -R 766 $(DESTDIR)$(HEEKSCNCDIR)
-	chown -R root:users $(DESTDIR)$(HEEKSCNCDIR)
-	find $(DESTDIR)$(HEEKSCNCDIR) -type d -exec chmod 775 {} \;
+	cp ../nc/*.py $(DESTDIR)$(LIBDIR)/heekscnc/nc/
+	cp ../*_funcs.py $(DESTDIR)$(LIBDIR)/heekscnc/
+	cp ../PyCamToHeeks.py $(DESTDIR)$(LIBDIR)/heekscnc/
 
 uninstall:
-	rm -rf $(DESTDIR)$(HEEKSCNCDIR)
-
+	-rm -f $(DESTDIR)$(LIBDIR)/heekscad/$(SHARED_LIBRARY)
+	-rm -rf $(DESTDIR)$(HEEKSCNCDIR)
+	-rm -rf $(DESTDIR)$(LIBDIR)/heekscnc
