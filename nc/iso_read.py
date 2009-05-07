@@ -32,8 +32,8 @@ class ParserIso(nc.Parser):
         self.y = 0
         self.z = 500
 
-    def Parse(self, name):
-        self.files_open(name)
+    def Parse(self, name, oname=None):
+        self.files_open(name,oname)
 
         while (self.readline()):
             self.begin_ncblock()
@@ -144,4 +144,7 @@ class ParserIso(nc.Parser):
 
 if __name__ == '__main__':
     parser = ParserIso()
-    parser.Parse(sys.argv[1])
+    if len(sys.argv)>2:
+        parser.Parse(sys.argv[1],sys.argv[2])
+    else:
+        parser.Parse(sys.argv[1])
