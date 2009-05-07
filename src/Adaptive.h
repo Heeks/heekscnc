@@ -64,7 +64,7 @@ public:
 	int GetType()const{return AdaptiveType;}
 	const wxChar* GetTypeString(void)const{return _T("Adaptive Roughing");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){if(m_active)return theApp.GetDllFolder() + _T("/icons/adapt"); else return COp::GetIcon();}
+	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/adapt"); else return COp::GetIcon();}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

@@ -22,7 +22,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
-	wxString GetIcon(){return theApp.GetDllFolder() + _T("/icons/noentry");}
+	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/noentry");}
 
 	virtual void AppendTextToProgram();
 
