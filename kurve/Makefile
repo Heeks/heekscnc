@@ -17,7 +17,7 @@ LIBOUT	= $(LIBDIR)$(LIBNAME).so
 all:	$(LIBOUT)
 
 $(LIBOUT): $(LIBOBJS)
-	@-mkdirhier $(LIBDIR)
+	@-mkdir -p $(LIBDIR)
 	$(LD) $(LDFLAGS) -fPIC -Wl,-soname,kurve.so.0 $(LIBOBJS) -o $(LIBOUT) $(LIBS)
 
 clean:
