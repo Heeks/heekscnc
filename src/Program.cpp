@@ -254,7 +254,7 @@ void CProgram::RewritePythonProgram()
 	//hackhack, make it work on unix with FHS
 #ifndef WIN32
 	theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'/usr/lib/heekscnc/')\n"));
+	theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
 #endif
 	// kurve related things
 	if(profile_op_exists)
