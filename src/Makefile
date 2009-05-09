@@ -1,4 +1,4 @@
-PREFIX=/usr/local
+PREFIX=/usr
 LIBDIR=$(PREFIX)/$(LIB)
 #if arch x86
 LIB=lib
@@ -142,7 +142,7 @@ install:
 	test -z "$(DESTDIR)$(LIBDIR)/heekscnc/nc" || $(mkdir_p) "$(DESTDIR)$(LIBDIR)/heekscnc/nc"
 	strip $(SHARED_LIBRARY)
 	chmod 644 $(SHARED_LIBRARY)
-	cp $(SHARED_LIBRARY) $(DESTDIR)$(LIBDIR)/heekscad/
+	cp $(SHARED_LIBRARY) $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../bitmaps/*.png ../bitmaps/*.svg $(DESTDIR)$(HEEKSCNCDIR)/bitmaps/
 	cp ../icons/*.png $(DESTDIR)$(HEEKSCNCDIR)/icons/
 	cp ../nc/*.py $(DESTDIR)$(LIBDIR)/heekscnc/nc/
@@ -150,6 +150,6 @@ install:
 	cp ../PyCamToHeeks.py $(DESTDIR)$(LIBDIR)/heekscnc/
 
 uninstall:
-	-rm -f $(DESTDIR)$(LIBDIR)/heekscad/$(SHARED_LIBRARY)
+	-rm -f $(DESTDIR)$(LIBDIR)/heekscnc/$(SHARED_LIBRARY)
 	-rm -rf $(DESTDIR)$(HEEKSCNCDIR)
 	-rm -rf $(DESTDIR)$(LIBDIR)/heekscnc
