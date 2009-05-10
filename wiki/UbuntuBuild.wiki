@@ -36,7 +36,8 @@ You will need to add a new plugin.
 
 Name: HeeksCNC
 
-Filepath: ( browse for the HeeksCNC.so.0.5.1, you have to click "..." to browse )
+Filepath: browse for the HeeksCNC.so.0.5.1, ( you have to click "..." to browse )
+It should be at /usr/lib/heekscnc/libheekscnc.so.0.5.1
 
 Then close HeeksCAD and run it again.
 ( this will have made an entry in the configuration file /home/dan/.HeeksCAD, you will have to "Show Hidden Files" to see it )
