@@ -243,7 +243,16 @@ void CAdaptive::AppendTextToProgram()
 		if(object)solids.push_back(object);
 	}
 
+
+#ifdef WIN32
+
 	wxString filepath = wxString::Format(_T("adaptive%d.stl"), number_for_stl_file);
+
+#else
+	wxString filepath = wxString::Format(_T("/tmp/adaptive%d.stl"), number_for_stl_file);
+#endif
+
+
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
 
