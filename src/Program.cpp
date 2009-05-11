@@ -91,7 +91,11 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_script_edited(false)
 {
 	CNCConfig config;
 	config.Read(_T("ProgramMachine"), &m_machine, _T("nc.iso"));
+#ifdef WIN32
+	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
+#else
 	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("/tmp/test.tap"));
+#endif
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 }
 

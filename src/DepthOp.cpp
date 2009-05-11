@@ -9,6 +9,7 @@
 #include "DepthOp.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
+#include "Program.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
@@ -140,22 +141,35 @@ void CDepthOp::AppendTextToProgram()
 {
 	COp::AppendTextToProgram();
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-	std::ostringstream ss;
-#endif
-	ss.imbue(std::locale("C"));
-
-	ss << "clearance = float(" << m_depth_op_params.m_clearance_height << ")\n";
-	ss << "rapid_down_to_height = float(" << m_depth_op_params.m_rapid_down_to_height << ")\n";
-	ss << "start_depth = float(" << m_depth_op_params.m_start_depth << ")\n";
-	ss << "step_down = float(" << m_depth_op_params.m_step_down << ")\n";
-	ss << "final_depth = float(" << m_depth_op_params.m_final_depth << ")\n";
-	ss << "tool_diameter = float(" << m_depth_op_params.m_tool_diameter << ")\n";
-	ss << "spindle(" << m_depth_op_params.m_spindle_speed << ")\n";
-	ss << "feedrate(" << m_depth_op_params.m_horizontal_feed_rate << ")\n";
-	ss << "tool_change(" << m_depth_op_params.m_tool_number << ")\n";
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	theApp.m_program_canvas->AppendText(_T("clearance = float("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("clearance = float("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("rapid_down_to_height = float("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("start_depth = float("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_start_depth / theApp.m_program->m_units);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("step_down = float("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_step_down / theApp.m_program->m_units);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("final_depth = float("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_final_depth / theApp.m_program->m_units);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("tool_diameter = float("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_tool_diameter / theApp.m_program->m_units);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("spindle("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_spindle_speed);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("feedrate("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_horizontal_feed_rate);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("tool_change("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_tool_number);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
 }
 

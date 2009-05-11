@@ -9,6 +9,7 @@
 #include "Profile.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
+#include "Program.h"
 #include "interface/HeeksObj.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyChoice.h"
@@ -242,31 +243,25 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 				if(!started && type != CircleType)
 				{
 					span_object->GetStartPoint(s);
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-					ss<<std::setprecision(10);
-
-					ss << "kurve.add_point(k" << sketch_id << ", 0, " << s[0] << ", " << s[1] << ", 0.0, 0.0)\n";
-					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
+					theApp.m_program_canvas->AppendText(sketch_id);
+					theApp.m_program_canvas->AppendText(_T(", 0, "));
+					theApp.m_program_canvas->AppendText(s[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(s[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", 0.0, 0.0)\n"));
 					started = true;
 				}
 				span_object->GetEndPoint(e);
 				if(type == LineType)
 				{
-#ifdef UNICODE
-					std::wostringstream ss;	
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-					ss<<std::setprecision(10);
-
-					ss << "kurve.add_point(k" << sketch_id << ", 0, " << e[0] << ", " << e[1] << ", 0.0, 0.0)\n";
-					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
+					theApp.m_program_canvas->AppendText(sketch_id);
+					theApp.m_program_canvas->AppendText(_T(", 0, "));
+					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", 0.0, 0.0)\n"));
 				}
 				else if(type == ArcType)
 				{
@@ -274,40 +269,64 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-					ss<<std::setprecision(10);
-
-					ss << "kurve.add_point(k" << sketch_id << ", " << span_type << ", " << e[0] << ", " << e[1] << ", " << c[0] << ", " << c[1] << ")\n";
-					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
+					theApp.m_program_canvas->AppendText(sketch_id);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(span_type);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(")\n"));
 				}
 				else if(type == CircleType)
 				{
 					span_object->GetCentrePoint(c);
 
 					double radius = heeksCAD->CircleGetRadius(span_object);
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-					ss<<std::setprecision(10);
-
-					ss << "kurve.add_point(k" << sketch_id << ", " << 0 << ", " << c[0] + radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
-					ss << "kurve.add_point(k" << sketch_id << ", 1, " << c[0]-radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
-					ss << "kurve.add_point(k" << sketch_id << ", 1, " << c[0]+radius << ", " << c[1] << ", " << c[0] << ", " << c[1] << ")\n";
-					theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
+					theApp.m_program_canvas->AppendText(sketch_id);
+					theApp.m_program_canvas->AppendText(_T(", 0, "));
+					theApp.m_program_canvas->AppendText((c[0] + radius) / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(")\n"));
+					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
+					theApp.m_program_canvas->AppendText(sketch_id);
+					theApp.m_program_canvas->AppendText(_T(", 1, "));
+					theApp.m_program_canvas->AppendText((c[0] - radius) / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(")\n"));
+					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
+					theApp.m_program_canvas->AppendText(sketch_id);
+					theApp.m_program_canvas->AppendText(_T(", 1, "));
+					theApp.m_program_canvas->AppendText((c[0] + radius) / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(")\n"));
 				}
 			}
 		}
 	}
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+	theApp.m_program_canvas->AppendText(_T("\n"));
 
 	if(m_sketches.size() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
 	{
@@ -319,7 +338,8 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 #else
 			std::ostringstream ss;
 #endif
-			ss << ", startx = " << m_profile_params.m_start[0] << ", starty = " << m_profile_params.m_start[1];
+			ss<<std::setprecision(10);
+			ss << ", startx = " << m_profile_params.m_start[0] / theApp.m_program->m_units << ", starty = " << m_profile_params.m_start[1] / theApp.m_program->m_units;
 			start_string = ss.str().c_str();
 		}
 
@@ -331,7 +351,8 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 #else
 			std::ostringstream ss;
 #endif
-			ss << ", finishx = " << m_profile_params.m_end[0] << ", finishy = " << m_profile_params.m_end[1];
+			ss<<std::setprecision(10);
+			ss << ", finishx = " << m_profile_params.m_end[0] / theApp.m_program->m_units << ", finishy = " << m_profile_params.m_end[1] / theApp.m_program->m_units;
 			finish_string = ss.str().c_str();
 		}
 
@@ -383,7 +404,7 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 #endif
 				ss.imbue(std::locale("C"));
 				ss<<std::setprecision(10);
-				ss << m_profile_params.m_roll_on_point[0] << ", " << m_profile_params.m_roll_on_point[1];
+				ss << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units;
 				roll_on_string = ss.str().c_str();
 			}
 		}
@@ -414,7 +435,8 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 #else
 				std::ostringstream ss;
 #endif
-				ss << m_profile_params.m_roll_off_point[0] << ", " << m_profile_params.m_roll_off_point[1];
+				ss<<std::setprecision(10);
+				ss << m_profile_params.m_roll_off_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_off_point[1] / theApp.m_program->m_units;
 				roll_off_string = ss.str().c_str();
 			}
 		}
