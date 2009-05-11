@@ -43,7 +43,7 @@ void COutputTextCtrl::OnPaint(wxPaintEvent& event)
 
 		wxSize size = GetClientSize();
 		int scrollpos = GetScrollPos(wxVERTICAL);
-		wxLogDebug("%i", scrollpos);
+		wxLogDebug(_T("%i"), scrollpos);
 
 		wxTextCoord col0, row0, col1, row1;
 		HitTest(wxPoint(0,0),      &col0, &row0);
