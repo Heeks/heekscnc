@@ -15,6 +15,7 @@
 #include "interface/PropertyChoice.h"
 
 #include <sstream>
+#include <iomanip>
 
 BEGIN_EVENT_TABLE(CProgramCanvas, wxScrolledWindow)
     EVT_SIZE(CProgramCanvas::OnSize)
@@ -63,6 +64,7 @@ void CProgramCanvas::AppendText(double value)
 	std::ostringstream ss;
 #endif
 	ss.imbue(std::locale("C"));
+	ss<<std::setprecision(10);
 	ss << value;
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
