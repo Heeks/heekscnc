@@ -271,12 +271,9 @@ void CProgram::RewritePythonProgram()
 	if(pocket_op_exists)
 	{
 		theApp.m_program_canvas->AppendText(_T("import area\n"));
-		if(fabs(m_units - 1.0) > 0.00000001)
-		{
-			theApp.m_program_canvas->AppendText(_T("area.set_units("));
-			theApp.m_program_canvas->AppendText(m_units);
-			theApp.m_program_canvas->AppendText(_T(")\n"));
-		}
+		theApp.m_program_canvas->AppendText(_T("area.set_units("));
+		theApp.m_program_canvas->AppendText(m_units);
+		theApp.m_program_canvas->AppendText(_T(")\n"));
 		theApp.m_program_canvas->AppendText(_T("import area_funcs\n"));
 	}
 
