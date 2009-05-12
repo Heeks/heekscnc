@@ -257,72 +257,78 @@ void CProgram::RewritePythonProgram()
 	// add standard stuff at the top
 	//hackhack, make it work on unix with FHS
 #ifndef WIN32
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'/usr/lib/heekscnc/')\n"));
+	theApp.m_program_canvas->AppendText(_T("import sys\n"));
+	theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/lib/heekscnc/')\n"));
 #endif
 	// kurve related things
 	if(profile_op_exists)
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import kurve\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import kurve_funcs\n"));
+		theApp.m_program_canvas->AppendText(_T("import kurve\n"));
+		theApp.m_program_canvas->AppendText(_T("import kurve_funcs\n"));
 	}
 
 	// area related things
 	if(pocket_op_exists)
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import area\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import area_funcs\n"));
+		theApp.m_program_canvas->AppendText(_T("import area\n"));
+		if(fabs(m_units - 1.0) > 0.00000001)
+		{
+			theApp.m_program_canvas->AppendText(_T("area.set_units("));
+			theApp.m_program_canvas->AppendText(m_units);
+			theApp.m_program_canvas->AppendText(_T(")\n"));
+		}
+		theApp.m_program_canvas->AppendText(_T("import area_funcs\n"));
 	}
 
 	// pycam stuff
 	if(zigzag_op_exists)
 	{
 #ifdef WIN32
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import sys\n"));
+		theApp.m_program_canvas->AppendText(_T("import sys\n"));
 #endif
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("sys.path.insert(0,'PyCam/trunk')\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Geometry import *\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.SphericalCutter import *\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.CylindricalCutter import *\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Cutters.ToroidalCutter import *\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.Importers.STLImporter import ImportModel\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from pycam.PathGenerators.DropCutter import DropCutter\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("from PyCamToHeeks import HeeksCNCExporter\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'PyCam/trunk')\n"));
+		theApp.m_program_canvas->AppendText(_T("\n"));
+		theApp.m_program_canvas->AppendText(_T("from pycam.Geometry import *\n"));
+		theApp.m_program_canvas->AppendText(_T("from pycam.Cutters.SphericalCutter import *\n"));
+		theApp.m_program_canvas->AppendText(_T("from pycam.Cutters.CylindricalCutter import *\n"));
+		theApp.m_program_canvas->AppendText(_T("from pycam.Cutters.ToroidalCutter import *\n"));
+		theApp.m_program_canvas->AppendText(_T("from pycam.Importers.STLImporter import ImportModel\n"));
+		theApp.m_program_canvas->AppendText(_T("from pycam.PathGenerators.DropCutter import DropCutter\n"));
+		theApp.m_program_canvas->AppendText(_T("from PyCamToHeeks import HeeksCNCExporter\n"));
+		theApp.m_program_canvas->AppendText(_T("\n"));
 	}
 
 	// actp
 	if(adaptive_op_exists)
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import actp_funcs\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("import actp\n"));
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+		theApp.m_program_canvas->AppendText(_T("import actp_funcs\n"));
+		theApp.m_program_canvas->AppendText(_T("import actp\n"));
+		theApp.m_program_canvas->AppendText(_T("\n"));
 	}
 
 	// machine general stuff
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("from nc.nc import *\n"));
+	theApp.m_program_canvas->AppendText(_T("from nc.nc import *\n"));
 
 	// specific machine
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("import ") + m_machine + _T("\n"));
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+	theApp.m_program_canvas->AppendText(_T("import ") + m_machine + _T("\n"));
+	theApp.m_program_canvas->AppendText(_T("\n"));
 
 	// output file
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("output('") + m_output_file + _T("')\n"));
+	theApp.m_program_canvas->AppendText(_T("output('") + m_output_file + _T("')\n"));
 
 	// begin program
-	//theApp.m_program_canvas->m_textCtrl->AppendText(_T("program_begin(123, 'Test program')\n"));
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("absolute()\n"));
+	//theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
+	theApp.m_program_canvas->AppendText(_T("absolute()\n"));
 	if(m_units > 25.0)
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("imperial()\n"));
+		theApp.m_program_canvas->AppendText(_T("imperial()\n"));
 	}
 	else
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(_T("metric()\n"));
+		theApp.m_program_canvas->AppendText(_T("metric()\n"));
 	}
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("set_plane(0)\n"));
-	theApp.m_program_canvas->m_textCtrl->AppendText(_T("\n"));
+	theApp.m_program_canvas->AppendText(_T("set_plane(0)\n"));
+	theApp.m_program_canvas->AppendText(_T("\n"));
 
 	// write the operations
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())

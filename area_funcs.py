@@ -36,6 +36,9 @@ def cut_area(a, rapid_down_to_height, final_depth, clearance_height):
         rapid(z = clearance_height)
 
 def recur(arealist, a1, stepover, from_center):
+    if area.num_curves(a1) == 0:
+        return
+    
     if from_center:
         arealist.insert(0, a1)
     else:
