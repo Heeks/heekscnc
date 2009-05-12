@@ -218,9 +218,9 @@ void CPocket::AppendTextToProgram()
 			theApp.m_program_canvas->AppendText(_T("area_funcs.pocket(a"));
 			theApp.m_program_canvas->AppendText(sketch);
 			theApp.m_program_canvas->AppendText(_T(", tool_diameter/2 + "));
-			theApp.m_program_canvas->AppendText(m_pocket_params.m_material_allowance);
+			theApp.m_program_canvas->AppendText(m_pocket_params.m_material_allowance / theApp.m_program->m_units);
 			theApp.m_program_canvas->AppendText(_T(", rapid_down_to_height, start_depth, final_depth, "));
-			theApp.m_program_canvas->AppendText(m_pocket_params.m_step_over);
+			theApp.m_program_canvas->AppendText(m_pocket_params.m_step_over / theApp.m_program->m_units);
 			theApp.m_program_canvas->AppendText(_T(", step_down, "));
 			theApp.m_program_canvas->AppendText(m_pocket_params.m_round_corner_factor);
 			theApp.m_program_canvas->AppendText(_T(", clearance, "));
