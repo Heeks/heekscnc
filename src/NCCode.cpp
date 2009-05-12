@@ -52,6 +52,10 @@ void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("x", &m_x[0]);
 	pElem->Attribute("y", &m_x[1]);
 	pElem->Attribute("z", &m_x[2]);
+
+	m_x[0] *= CNCCodeBlock::multiplier;
+	m_x[1] *= CNCCodeBlock::multiplier;
+	m_x[2] *= CNCCodeBlock::multiplier;
 }
 
 void PathLine::glVertices(const PathObject* prev_po)
@@ -84,6 +88,13 @@ void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("j", &m_c[1]);
 	pElem->Attribute("k", &m_c[2]);
 	pElem->Attribute("d", &m_dir);
+
+	m_x[0] *= CNCCodeBlock::multiplier;
+	m_x[1] *= CNCCodeBlock::multiplier;
+	m_x[2] *= CNCCodeBlock::multiplier;
+	m_c[0] *= CNCCodeBlock::multiplier;
+	m_c[1] *= CNCCodeBlock::multiplier;
+	m_c[2] *= CNCCodeBlock::multiplier;
 }
 
 void PathArc::glVertices(const PathObject* prev_po)
@@ -280,8 +291,8 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 		}
 		else if(name == "mode")
 		{
-			const char* units = element->Attribute("units");
-			if(units)element->Attribute("units", &CNCCodeBlock::multiplier);
+			const char* units = pElem->Attribute("units");
+			if(units)pElem->Attribute("units", &CNCCodeBlock::multiplier);
 		}
 	}
 
