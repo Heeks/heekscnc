@@ -144,9 +144,6 @@ void CDepthOp::AppendTextToProgram()
 	theApp.m_program_canvas->AppendText(_T("clearance = float("));
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
-	theApp.m_program_canvas->AppendText(_T("clearance = float("));
-	theApp.m_program_canvas->AppendText(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
 	theApp.m_program_canvas->AppendText(_T("rapid_down_to_height = float("));
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
