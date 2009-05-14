@@ -2,6 +2,7 @@
 
 You should find a post processor that is as similar to possible to what you want.
 Write a Python file, deriving your machine from the existing machine.
+Look at the ".py" files in HeeksCNC/nc, but not the ones that end in "_read.py", they are used for backplotting.
 
 For example, Dan Falck wanted to get rid of the O123 stuff at the beginning of the gcode, so he derived his class "CreatorCent1" from the standard ISO class "iso.CreatorIso".
 Then he made an empty "program_begin" function, so it would do nothing instead of the usual output for the beginning of a program, see code at bottom.
