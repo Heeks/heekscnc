@@ -1,0 +1,47 @@
+#summary How to customise the NC output
+
+You should find a post processor that is as similar to possible to what you want.
+Write a Python file, deriving your machine from the existing machine.
+
+For example, Dan Falck wanted to get rid of the O123 stuff at the beginning of the gcode, so he derived his class "CreatorCent1" from the standard ISO class "iso.CreatorIso".
+Then he made an empty "program_begin" function, so it would do nothing instead of the usual output for the beginning of a program, see code at bottom.
+
+Also, he wanted to output "M03" on a new line for a spndle speed command, so he wrote a different "write_spindle" to override the usual spindle speed output.
+
+
+################################################################################
+# Centroid1.py
+#
+# Simple ISO NC code creator
+#
+# Dan Falck, 9th March 2009
+
+import nc
+import iso
+import math
+
+################################################################################
+class CreatorCent1(iso.CreatorIso):
+
+    def __init__(self):
+        iso.CreatorIso.__init__(self)
+
+    def program_begin(self, id, name=''):
+
+        #self.write((iso.PROGRAM % id) + iso.SPACE + (iso.COMMENT % name))
+        #self.write(iso.COMMENT % name) 
+
+        pass
+
+
+    def write_spindle(self):
+        if self.s != '':
+            self.write('\n')
+            self.write('M03')
+            self.s = ''
+           
+            
+
+################################################################################
+
+nc.creator = CreatorCent1()
