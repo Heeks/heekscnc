@@ -38,8 +38,8 @@ public:
 	std::list<int> m_sketches;
 	CProfileParams m_profile_params;
 
-	CProfile(){}
-	CProfile(const std::list<int> &sketches):m_sketches(sketches){m_profile_params.set_initial_values();}
+	CProfile():CDepthOp(GetTypeString()){}
+	CProfile(const std::list<int> &sketches):CDepthOp(GetTypeString()), m_sketches(sketches){m_profile_params.set_initial_values();}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProfileType;}
