@@ -38,8 +38,8 @@ public:
 	CZigZagParams m_params;
 	static int number_for_stl_file;
 
-	CZigZag(){}
-	CZigZag(const std::list<int> &solids):m_solids(solids){m_params.set_initial_values(solids);}
+	CZigZag():COp(GetTypeString()){}
+	CZigZag(const std::list<int> &solids):COp(GetTypeString()), m_solids(solids){m_params.set_initial_values(solids);}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ZigZagType;}

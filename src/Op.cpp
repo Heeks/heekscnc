@@ -18,6 +18,7 @@ void COp::WriteBaseXML(TiXmlElement *element)
 {
 	if(m_comment.Len() > 0)element->SetAttribute("comment", Ttc(m_comment.c_str()));
 	if(!m_active)element->SetAttribute("active", 0);
+	element->SetAttribute("title", Ttc(m_title.c_str()));
 
 	HeeksObj::WriteBaseXML(element);
 }
@@ -33,6 +34,8 @@ void COp::ReadBaseXML(TiXmlElement* element)
 		element->Attribute("active", &int_active);
 		m_active = (int_active != 0);
 	}
+	const char* title = element->Attribute("title");
+	if(title)m_title = wxString(Ctt(title));
 
 	HeeksObj::ReadBaseXML(element);
 }
@@ -71,3 +74,7 @@ bool COp::IsAnOperation(int object_type)
 	}
 }
 
+void COp::OnEditString(const wxChar* str){
+	m_title.assign(str);
+	heeksCAD->WasModified(this);
+}

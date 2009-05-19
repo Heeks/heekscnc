@@ -41,7 +41,7 @@ class CDepthOp : public COp
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(){m_depth_op_params.set_initial_values();}
+	CDepthOp(const wxString& title):COp(title){m_depth_op_params.set_initial_values();}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
