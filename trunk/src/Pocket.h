@@ -31,8 +31,8 @@ public:
 	std::list<int> m_sketches;
 	CPocketParams m_pocket_params;
 
-	CPocket(){}
-	CPocket(const std::list<int> &sketches):m_sketches(sketches){m_pocket_params.set_initial_values();}
+	CPocket():CDepthOp(GetTypeString()){}
+	CPocket(const std::list<int> &sketches):CDepthOp(GetTypeString()), m_sketches(sketches){m_pocket_params.set_initial_values();}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return PocketType;}
