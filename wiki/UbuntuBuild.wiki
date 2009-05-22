@@ -20,7 +20,7 @@ On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" wi
 
 Type: cd Desktop/HeeksCAD/HeeksCNC/src
 
-( if you've already built HeeksCNC, you should type: make clean    now because my makefile does not always know which files are out of date )
+( if you've already built HeeksCNC, you should type: "make clean"    now because my makefile does not always know which files are out of date )
 
 Then type: make
 
