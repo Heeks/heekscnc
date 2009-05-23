@@ -263,7 +263,8 @@ class CreatorIso(nc.Creator):
         if (j != None) : self.write(iso.CENTRE_Y + (self.fmt % j))
         if (k != None) : self.write(iso.CENTRE_Z + (self.fmt % k))
         if (r != None) : self.write(iso.RADIUS + (self.fmt % r))
-#        if (self.fhv) : self.calc_feedrate_hv(ARC_LENGTH, math.fabs(dz))
+#       use horizontal feed rate
+        if (self.fhv) : self.calc_feedrate_hv(1, 0)
         self.write_feedrate()
         self.write_spindle()
         self.write_misc()
@@ -287,7 +288,8 @@ class CreatorIso(nc.Creator):
         if (j != None) : self.write(iso.CENTRE_Y + (self.fmt % j))
         if (k != None) : self.write(iso.CENTRE_Z + (self.fmt % k))
         if (r != None) : self.write(iso.RADIUS + (self.fmt % r))
-#        if (self.fhv) : self.calc_feedrate_hv(ARC_LENGTH, math.fabs(dz))
+#       use horizontal feed rate
+        if (self.fhv) : self.calc_feedrate_hv(1, 0)
         self.write_feedrate()
         self.write_spindle()
         self.write_misc()
