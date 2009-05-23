@@ -52,9 +52,8 @@ class CreatorIso(nc.Creator):
         if (len(self.m)) : self.write(self.m.pop())
 
     def write_blocknum(self):
-        pass
-        #self.write(iso.BLOCK % self.n)
-        #self.n += 10
+        self.write(iso.BLOCK % self.n)
+        self.n += 10
 
     def write_spindle(self):
         self.write(self.s)
