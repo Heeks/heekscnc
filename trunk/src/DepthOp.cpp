@@ -162,7 +162,9 @@ void CDepthOp::AppendTextToProgram()
 	theApp.m_program_canvas->AppendText(_T("spindle("));
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_spindle_speed);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
-	theApp.m_program_canvas->AppendText(_T("feedrate("));
+	theApp.m_program_canvas->AppendText(_T("feedrate_hv("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_horizontal_feed_rate);
+	theApp.m_program_canvas->AppendText(_T(", "));
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_vertical_feed_rate);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
 	theApp.m_program_canvas->AppendText(_T("tool_change("));
