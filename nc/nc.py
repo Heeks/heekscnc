@@ -143,7 +143,7 @@ class Creator:
         """Set the horizontal and vertical feedrates"""
         pass
 
-    def spindle(self, s):
+    def spindle(self, s, clockwise=True):
         """Set the spindle speed"""
         pass
 
@@ -322,8 +322,8 @@ def feedrate(f):
 def feedrate_hv(fh, fv):
     creator.feedrate_hv(fh, fv)
 
-def spindle(s):
-    creator.spindle(s)
+def spindle(s, clockwise=True):
+    creator.spindle(s, clockwise)
 
 def coolant(mode=0):
     creator.coolant(mode)
