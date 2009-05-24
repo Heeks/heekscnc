@@ -169,8 +169,14 @@ class CreatorIso(nc.Creator):
         else:
             self.f = iso.FEEDRATE + (self.fmt % (self.fh * l * min([1/h, 1/v])))
 
-    def spindle(self, s):
+    def spindle(self, s, clockwise):
+	if s < 0: clockwise = not clockwise
+	s = abs(s)
         self.s = iso.SPINDLE % s
+	if clockwise:
+		self.s = self.s + iso.SPINDLE_CW
+	else:
+		self.s = self.s + iso.SPINDLE_CCW
 
     def coolant(self, mode=0):
         if (mode <= 0) : self.m.append(iso.COOLANT_OFF)
