@@ -441,7 +441,7 @@ wxString CHeeksCNCApp::GetDllFolder()
 
 wxString CHeeksCNCApp::GetResFolder()
 {
-#ifdef WIN32
+#if defined(WIN32) || defined(RUNINPLACE) //compile with 'RUNINPLACE=yes make' then skip 'sudo make install'
 	return m_dll_path;
 #else
 	return (m_dll_path + _T("/../../share/heekscnc"));
