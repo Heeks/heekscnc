@@ -143,7 +143,7 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		choices.push_back ( wxString ( _("inch") ) );
 		int choice = 0;
 		if(m_units > 25.0)choice = 1;
-		list->push_back ( new PropertyChoice ( _("units"),  choices, choice, this, on_set_units ) );
+		list->push_back ( new PropertyChoice ( _("units for nc output"),  choices, choice, this, on_set_units ) );
 	}
 	HeeksObj::GetProperties(list);
 }
