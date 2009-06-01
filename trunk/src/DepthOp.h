@@ -16,6 +16,7 @@ class CDepthOp;
 
 class CDepthOpParams{
 public:
+	int m_workplane;
 	int m_tool_number;    
 	double m_tool_diameter;
 	double m_clearance_height;

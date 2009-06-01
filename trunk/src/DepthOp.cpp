@@ -33,6 +33,7 @@ CDepthOpParams::CDepthOpParams()
 void CDepthOpParams::set_initial_values()
 {
 	CNCConfig config;
+    config.Read(_T("DepthFixtureOffset"), &m_workplane,1);
 	config.Read(_T("DepthOpToolNumber"), &m_tool_number, 1);
 	config.Read(_T("DepthOpToolDiameter"), &m_tool_diameter, 3.0);
 	config.Read(_T("DepthOpClearanceHeight"), &m_clearance_height, 5.0);
@@ -47,6 +48,7 @@ void CDepthOpParams::set_initial_values()
 void CDepthOpParams::write_values_to_config()
 {
 	CNCConfig config;
+	config.Write(_T("DepthFixtureOffset"), m_workplane);
 	config.Write(_T("DepthOpToolNumber"), m_tool_number);
 	config.Write(_T("DepthOpToolDiameter"), m_tool_diameter);
 	config.Write(_T("DepthOpClearanceHeight"), m_clearance_height);
@@ -59,7 +61,7 @@ void CDepthOpParams::write_values_to_config()
 	config.Write(_T("DepthOpSpindleSpeed"), m_spindle_speed);
 }
 
-
+static void on_set_workplane(int value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_workplane = value;}
 static void on_set_tool_number(int value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_tool_number = value;}
 static void on_set_tool_diameter(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_tool_diameter = value;}
 static void on_set_clearance_height(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_clearance_height = value;}
@@ -73,6 +75,7 @@ static void on_set_spindle_speed(double value, HeeksObj* object){((CDepthOp*)obj
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
+	list->push_back(new PropertyInt(_("fixture offset"), m_workplane, parent, on_set_workplane));
 	list->push_back(new PropertyInt(_("tool number"), m_tool_number, parent, on_set_tool_number));
 	list->push_back(new PropertyLength(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
 	list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
@@ -88,7 +91,8 @@ void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list
 void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 {
 	TiXmlElement * element = new TiXmlElement( "depthop" );
-	pElem->LinkEndChild( element );  
+	pElem->LinkEndChild( element ); 
+	element->SetAttribute("fixture offset", m_workplane); 
 	element->SetAttribute("tooln", m_tool_number);
 	element->SetDoubleAttribute("toold", m_tool_diameter);
 	element->SetDoubleAttribute("clear", m_clearance_height);
@@ -106,6 +110,8 @@ void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 	TiXmlElement* depthop = TiXmlHandle(pElem).FirstChildElement("depthop").Element();
 	if(depthop)
 	{
+
+		depthop->Attribute("fixture offset", &m_workplane);
 		depthop->Attribute("tooln", &m_tool_number);
 		depthop->Attribute("toold", &m_tool_diameter);
 		depthop->Attribute("clear", &m_clearance_height);
@@ -170,5 +176,11 @@ void CDepthOp::AppendTextToProgram()
 	theApp.m_program_canvas->AppendText(_T("tool_change("));
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_tool_number);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("workplane("));
+	theApp.m_program_canvas->AppendText(m_depth_op_params.m_workplane);
+	theApp.m_program_canvas->AppendText(_T(")\n"));
+	theApp.m_program_canvas->AppendText(_T("flush_nc()\n"));
+
+
 }
 
