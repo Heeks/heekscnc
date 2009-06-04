@@ -10,11 +10,7 @@ http://code.google.com/p/heekscnc/wiki/ProfileOperation
 
 http://code.google.com/p/heekscnc/wiki/PocketOperation
 
-
-
-
-
-== Properties ==
+= Properties =
 
 ===tool number===
 This is the station number of the tool. The NC code will use this to output T1, for example
