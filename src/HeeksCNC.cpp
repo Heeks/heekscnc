@@ -339,16 +339,16 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// Operations menu
 	wxMenu *menuOperations = new wxMenu;
-	heeksCAD->AddMenuItem(menuOperations, _("New Profile Operation..."), NewProfileOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("New Pocket Operation..."), NewPocketOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("New Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Profile Operation..."), ToolImage(_T("opprofile")), NewProfileOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Pocket Operation..."), ToolImage(_T("pocket")), NewPocketOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Adaptive Roughing Operation..."), ToolImage(_T("adapt")), NewAdaptiveOpMenuCallback);
 
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;
-	menuMachining->AppendSubMenu(menuOperations, _("Operations"));
-	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), MakeScriptMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), PostProcessMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Operations"), ToolImage(_T("ops")), NULL, NULL, menuOperations);
+	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), ToolImage(_T("python")), MakeScriptMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), ToolImage(_T("postprocess")), PostProcessMenuCallback);
 	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
 
 	// add the program canvas
@@ -373,9 +373,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// add tick boxes for them all on the view menu
 	wxMenu* view_menu = heeksCAD->GetWindowMenu();
-	heeksCAD->AddMenuCheckItem(view_menu, _T("Program"), OnProgramCanvas, OnUpdateProgramCanvas);
-	heeksCAD->AddMenuCheckItem(view_menu, _T("Output"), OnOutputCanvas, OnUpdateOutputCanvas);
-	heeksCAD->AddMenuCheckItem(view_menu, _T("Machining"), OnMachiningBar, OnUpdateMachiningBar);
+	heeksCAD->AddMenuItem(view_menu, _T("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
+	heeksCAD->AddMenuItem(view_menu, _T("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
+	heeksCAD->AddMenuItem(view_menu, _T("Machining"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
 	heeksCAD->RegisterHideableWindow(m_machiningBar);
