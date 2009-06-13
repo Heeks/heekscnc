@@ -1,4 +1,3 @@
-#labels Featured
 Drilling Cycle.
 
 = Introduction =
