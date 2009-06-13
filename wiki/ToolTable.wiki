@@ -1,5 +1,4 @@
 #summary Cutting Tool objects define Tool Table
-#labels Featured
 
 = Introduction =
 
