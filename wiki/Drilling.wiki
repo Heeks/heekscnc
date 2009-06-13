@@ -23,9 +23,15 @@ The workflow is;
  - with these selected, add a Drilling Cycle object.
 
  - set the Drilling Cycle parameters as follows;
+
     - assuming the point's location is on the surface to be drilled, the standoff value is the height ABOVE the surface at which the drilling cycle will both begin and retract to.
+
     - the depth is the distance in the negative Z direction from the point's Z value.
+
     - the peck_depth is the amount of material to remove in each peck of the drill.  If this value is non-zero then the generated GCode will use the G83 peck drilling command.
+
     - the dwell is the time (in seconds) for which the drill should remain at the bottom of the hole to break all the 'stringers'.  If the 'peck_depth' value is zero and this dwell value is positive then the generted GCode will use the G82 (drill with dwell) cycle.
+
     - if neither the peck depth or dwell values has a positive value then the generated GCode will include the G81 drilling command.
+
     - the cutting tool number will be set automatically if a Cutting Tool object was selected during the drill cycle's creation.  If none was selected then a zero value is used and a warning is displayed indicating that this value should be set manually.  This value ties to the object ID of the Cutting Tool object.  (oops, I just realised it should be tied to the tool_number parameter of the CuttingTool object instead. I will look   into that later on.  The cutting tool number value is the one used in the GCode generation)
