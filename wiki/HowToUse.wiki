@@ -35,3 +35,6 @@ http://code.google.com/p/heekscnc/wiki/ZigZagOperation
 == http://heekscnc.googlecode.com/svn/trunk/icons/adapt.png Adaptive Roughing ==
 
 http://code.google.com/p/heekscnc/wiki/AdaptiveRoughing
+
+== Drilling ==
+http://code.google.com/p/heekscnc/wiki/Drilling
