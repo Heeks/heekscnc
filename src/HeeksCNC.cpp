@@ -23,6 +23,8 @@
 #include "Pocket.h"
 #include "ZigZag.h"
 #include "Adaptive.h"
+#include "Drilling.h"
+#include "CuttingTool.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -221,6 +223,58 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+
+static void NewDrillingOpMenuCallback(wxCommandEvent &event)
+{
+	CDrilling::Symbols_t symbols;
+	CDrilling::Symbols_t cuttingTools;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if (object->GetType() == PointType)
+		{
+			symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+		} // End if - then
+
+		if (object->GetType() == CuttingToolType)
+		{
+			cuttingTools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+		} // End if - then
+	}
+
+	if(symbols.size() == 0)
+	{
+		wxMessageBox(_("You must select some points first!"));
+		return;
+	}
+
+	if(cuttingTools.size() == 0)
+	{
+		wxMessageBox(_("You haven't selected a cutting tool for this hole.  Don't forget to set one in the parameters manually.!"));
+	}
+
+	if(cuttingTools.size() > 1)
+	{
+		wxMessageBox(_("You may only select a single cutting tool for each drilling operation.!"));
+		return;
+	}
+
+	CDrilling *new_object = new CDrilling( symbols, cuttingTools );
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
+static void NewCuttingToolOpMenuCallback(wxCommandEvent &event)
+{
+	CCuttingTool *new_object = new CCuttingTool();
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
 static void MakeScriptMenuCallback(wxCommandEvent &event)
 {
 	// create the Python program
@@ -294,7 +348,9 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Profile"), ToolImage(_T("opprofile")), _T("New Profile Operation..."), NewProfileOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Pocket"), ToolImage(_T("pocket")), _T("New Pocket Operation..."), NewPocketOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("ZigZag"), ToolImage(_T("zigzag")), _T("New ZigZag Operation..."), NewZigZagOpMenuCallback);
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Adaptive"), ToolImage(_T("adapt")), _T("New Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Adaptive"), ToolImage(_T("adapt")), _T("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Drill"), ToolImage(_T("adapt")), _T("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("adapt")), _T("New Cutting Tool Definition..."), NewCuttingToolOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Python"), ToolImage(_T("python")), _T("Make Python Script"), MakeScriptMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _T("Post-Process"), PostProcessMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _T("Open NC File"), OpenNcFileMenuCallback);
@@ -343,6 +399,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("New Pocket Operation..."), ToolImage(_T("pocket")), NewPocketOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Adaptive Roughing Operation..."), ToolImage(_T("adapt")), NewAdaptiveOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Drilling Operation..."), ToolImage(_T("adapt")), NewDrillingOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Cutting Tool Definition..."), ToolImage(_T("adapt")), NewCuttingToolOpMenuCallback);
 
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;
@@ -388,6 +446,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Pocket", CPocket::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("CuttingTool", CCuttingTool::ReadFromXMLElement);
 
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=1;pos=0;prop=100000;bestw=341;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=970;floaty=297;floatw=296;floath=57|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=1;pos=352;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=TransformBar;caption=Transformation Tools;state=2108156;dir=1;layer=10;row=1;pos=611;prop=100000;bestw=217;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MachiningBar;caption=Machining tools;state=2108156;dir=1;layer=10;row=0;pos=549;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Program;caption=Program;state=2099196;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Output;caption=Output;state=2099196;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=234|dock_size(1,10,0)=33|dock_size(1,10,1)=33|dock_size(3,0,0)=219|")));
 }

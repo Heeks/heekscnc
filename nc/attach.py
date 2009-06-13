@@ -145,8 +145,8 @@ class CreatorAttach(nc.Creator):
     def profile(self):
         self.original.profile()
 
-    def drill(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, dwell_top=None, pecks=[], peck_to_top=True):
-        self.original.drill(x, y, self.z2(z), self.z2(zretract), depth, standoff, dwell_bottom, dwell_top, pecks, peck_to_top)
+    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
+        self.original.drill(x, y, z, depth, standoff, dwell, peck_depth)
 
     def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):
         self.original.tap(x, y, self.z2(z), self.z2(zretract), depth, standoff, dwell_bottom, pitch, stoppos, spin_in, spin_out)
