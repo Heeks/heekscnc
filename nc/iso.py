@@ -53,6 +53,7 @@ class CreatorIso(nc.Creator):
 
     def write_blocknum(self):
         self.write(iso.BLOCK % self.n)
+        self.write(iso.SPACE)
         self.n += 10
 
     def write_spindle(self):
@@ -130,7 +131,17 @@ class CreatorIso(nc.Creator):
         self.write((iso.TOOL % id) + '\n')
 
     def tool_defn(self, id, name='', radius=None, length=None):
-        pass
+        self.write_blocknum()
+	self.write(iso.TOOL_DEFINITION)
+	self.write(('P%i' % id) + ' ')
+
+	if (radius != None):
+		self.write(('R%.3f' % radius) + ' ')
+
+	if (length != None):
+		self.write('Z%.3f' % length)
+
+	self.write('\n')
 
     def offset_radius(self, id, radius=None):
         pass
@@ -325,8 +336,65 @@ class CreatorIso(nc.Creator):
     def profile(self):
         pass
 
-    def drill(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, dwell_top=None, pecks=[], peck_to_top=True):
-        pass
+	# The drill routine supports drilling (G81), drilling with dwell (G82) and peck drilling (G83).
+	# The x,y,z values are INITIAL locations (above the hole to be made.  This is in contrast to
+	# the Z value used in the G8[1-3] cycles where the Z value is that of the BOTTOM of the hole.
+	# Instead, this routine combines the Z value and the depth value to determine the bottom of
+	# the hole.
+	#
+	# The standoff value is the distance up from the 'z' value (normally just above the surface) where the bit retracts
+	# to in order to clear the swarf.  This combines with 'z' to form the 'R' value in the G8[1-3] cycles.
+	#
+	# The peck_depth value is the incremental depth (Q value) that tells the peck drilling
+	# cycle how deep to go on each peck until the full depth is achieved.
+	#
+	# NOTE: This routine forces the mode to absolute mode so that the values  passed into
+	# the G8[1-3] cycles make sense.  I don't know how to find the mode to revert it so I won't
+	# revert it.  I must set the mode so that I can be sure the values I'm passing in make
+	# sense to the end-machine.
+	#
+    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
+	if (standoff == None):
+		# This is a bad thing.  All the drilling cycles need a retraction (and starting) height.
+		return
+
+	if (z == None): return	# We need a Z value as well.  This input parameter represents the top of the hole
+
+        self.write_blocknum()
+        self.write_preps()
+
+	if (peck_depth != None):
+		# We're pecking.  Let's find a tree.
+		self.write(iso.PECK_DRILL + iso.SPACE)
+	else:
+		# We're either just drilling or drilling with dwell.
+		if (dwell == None):
+			# We're just drilling.
+			self.write(iso.DRILL + iso.SPACE)
+		else:
+			# We're drilling with dwell.
+			self.write(iso.DRILL_WITH_DWELL + (iso.FORMAT_DWELL % dwell) + iso.SPACE)
+
+	# Set the retraction point to the 'standoff' distance above the starting z height.
+	retract_height = z + standoff
+	self.write(iso.RETRACT + (self.fmt % retract_height))
+        if (x != None):
+            dx = x - self.x
+            self.write(iso.X + (self.fmt % x) + iso.SPACE)
+            self.x = x
+        if (y != None):
+            dy = y - self.y
+            self.write(iso.Y + (self.fmt % y) + iso.SPACE)
+            self.y = y
+
+	dz = (z + standoff) - self.z			# In the end, we will be standoff distance above the z value passed in.
+	self.write(iso.Z + (self.fmt % (z - depth)) + iso.SPACE)	# This is the 'z' value for the bottom of the hole.
+	self.z = (z + standoff)				# We want to remember where z is at the end (at the top of the hole)
+
+        self.write_spindle()
+        self.write_misc()
+        self.write('\n')
+
 
     def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):
         pass
