@@ -11,5 +11,7 @@ enum{
 	PocketType,
 	ZigZagType,
 	AdaptiveType,
+	DrillingType,
+	CuttingToolType,
 	HeeksCNCMaximumType
 };

@@ -68,6 +68,8 @@ bool COp::IsAnOperation(int object_type)
 		case PocketType:
 		case ZigZagType:
 		case AdaptiveType:
+		case DrillingType:
+		case CuttingToolType:
 			return true;
 		default:
 			return false;		

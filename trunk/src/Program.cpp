@@ -14,12 +14,19 @@
 #include "Pocket.h"
 #include "ZigZag.h"
 #include "Adaptive.h"
+#include "Drilling.h"
+#include "CuttingTool.h"
 #include "Op.h"
 #include "CNCConfig.h"
 
 bool COperations::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == ProfileType || object->GetType() == PocketType || object->GetType() == ZigZagType || object->GetType() == AdaptiveType;
+	return 	object->GetType() == ProfileType || 
+		object->GetType() == PocketType || 
+		object->GetType() == ZigZagType || 
+		object->GetType() == AdaptiveType || 
+		object->GetType() == DrillingType ||
+		object->GetType() == CuttingToolType;
 }
 
 void COperations::WriteXML(TiXmlNode *root)
@@ -234,6 +241,9 @@ void CProgram::RewritePythonProgram()
 	bool pocket_op_exists = false;
 	bool zigzag_op_exists = false;
 	bool adaptive_op_exists = false;
+	bool drilling_op_exists = false;
+	bool cutting_tool_op_exists = false;
+
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
 		if(object->GetType() == ProfileType)
@@ -251,6 +261,14 @@ void CProgram::RewritePythonProgram()
 		else if(object->GetType() == AdaptiveType)
 		{
 			if(((CAdaptive*)object)->m_active)adaptive_op_exists = true;
+		}
+		else if(object->GetType() == DrillingType)
+		{
+			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
+		}
+		else if(object->GetType() == CuttingToolType)
+		{
+			if(((CCuttingTool*)object)->m_active)cutting_tool_op_exists = true;
 		}
 	}
 
@@ -328,6 +346,19 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("\n"));
 
 	// write the operations
+
+	// Write the new tool table entries first.
+	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
+	{
+		switch(object->GetType())
+		{
+		case CuttingToolType:
+			if(((CCuttingTool*)object)->m_active)((CCuttingTool*)object)->AppendTextToProgram();
+			break;
+		}
+	} // End for
+
+	// And then all the rest of the operations.
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
 		switch(object->GetType())
@@ -343,6 +374,9 @@ void CProgram::RewritePythonProgram()
 			break;
 		case AdaptiveType:
 			if(((CAdaptive*)object)->m_active)((CAdaptive*)object)->AppendTextToProgram();
+			break;
+		case DrillingType:
+			if(((CDrilling*)object)->m_active)((CDrilling*)object)->AppendTextToProgram();
 			break;
 		}
 	}
