@@ -1,4 +1,4 @@
-Drilling Cycle.
+#summary Drilling Cycles (G81, G82-dwell and G83-peck)
 
 = Introduction =
 
