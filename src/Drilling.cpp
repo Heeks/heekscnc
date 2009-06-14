@@ -58,24 +58,56 @@ void CDrillingParams::write_values_to_config()
 	config.Write(_T("m_cutting_tool_number"), m_cutting_tool_number);
 }
 
+static int FindCuttingTool( const int tool_number )
+{
+
+	for (int id=1; id<100; id++)
+	{
+		HeeksObj* ob = heeksCAD->GetIDObject( CuttingToolType, id );
+		if (! ob) continue;
+		if (ob->GetType() != CuttingToolType) continue;
+
+		if (((CCuttingTool *) ob)->m_params.m_tool_number == tool_number)
+		{
+			return(id);
+		} // End if - then
+	} // End for
+
+	return(-1);
+
+} // End FindCuttingTool() method
+
+
 static void on_set_standoff(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_standoff = value;}
 static void on_set_dwell(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_dwell = value;}
 static void on_set_depth(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_depth = value;}
 static void on_set_peck_depth(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_peck_depth = value;}
+
 static void on_set_cutting_tool_number(int value, HeeksObj* object)
+{
+	// If they've set a negative or zero value then they must want to disassociate this
+	// from a tool.  This just means they won't get prompted to change tools in the GCode.
+	if (value <= 0)
 	{
 		((CDrilling*)object)->m_params.m_cutting_tool_number = value;
+		return;
+	}
 
-		HeeksObj* cuttingTool = heeksCAD->GetIDObject(CuttingToolType, value);
-		if (cuttingTool != NULL)
+	// Look through all objects to find a CuttingTool object whose tool number
+	// matches this one.  If none are found then let the operator know.
+
+	if (int id=FindCuttingTool( value ))
+	{
+		HeeksObj* ob = heeksCAD->GetIDObject( CuttingToolType, id );
+		if ((ob != NULL) && (ob->GetType() == CuttingToolType))
 		{
-			wxMessageBox(_T("That's just fine."));
-		}
-		else
-		{
-			wxMessageBox(_T("This tool number has not been defined as a cutting tool yet."));
-		} // End if - else
-	} // End on_set_cutting_tool_number() routine
+			((CDrilling*)object)->m_params.m_cutting_tool_number = value;
+			return;
+		} // End if - then
+	} // End for
+		
+	wxMessageBox(_T("This tool number has not been defined as a cutting tool yet."));
+} // End on_set_cutting_tool_number() routine
 
 
 
@@ -128,10 +160,9 @@ void CDrilling::AppendTextToProgram()
 #endif
     ss.imbue(std::locale("C"));
 
-	if (m_symbols.size() > 0)
+	if ((m_symbols.size() > 0) && (m_params.m_cutting_tool_number > 0))
 	{
 		// Select the right tool.
-
 		ss << "tool_change( id=" << m_params.m_cutting_tool_number << ")\n";
 	} // End if - then
 	
@@ -289,7 +320,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			// If we found something, ask its CAD code to draw itself highlighted.
 			if(object)object->glCommands(false, true, false);
 
-			double l_dHoleDiameter = 10;	// Default.
+			double l_dHoleDiameter = 12.7;	// Default at half-inch
 			if (m_params.m_cutting_tool_number > 0)
 			{
 				HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_params.m_cutting_tool_number );
