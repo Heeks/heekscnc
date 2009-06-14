@@ -7,6 +7,8 @@
 
 #include "Op.h"
 #include "HeeksCNCTypes.h"
+#include <list>
+#include <set>
 
 class CDrilling;
 
@@ -41,7 +43,7 @@ public:
  */
 
 class CDrilling: public COp {
-private:
+public:
 	/**
 		There are all types of 3d point classes around but most of them seem to be in the HeeksCAD code
 		rather than in cod that's accessible by the plugin.  I suspect I'm missing something on this
@@ -52,6 +54,33 @@ private:
 		double y;
 		double z;
 		Point3d( double a, double b, double c ) : x(a), y(b), z(c) { }
+		Point3d() : x(0), y(0), z(0) { }
+
+		bool operator==( const Point3d & rhs ) const
+		{
+			if (x != rhs.x) return(false);
+			if (y != rhs.y) return(false);
+			if (z != rhs.z) return(false);
+
+			return(true);
+		} // End equivalence operator
+
+		bool operator!=( const Point3d & rhs ) const
+		{
+			return(! (*this == rhs));
+		} // End not-equal operator
+
+		bool operator<( const Point3d & rhs ) const
+		{
+			if (x > rhs.x) return(false);
+			if (x < rhs.x) return(true);
+			if (y > rhs.y) return(false);
+			if (y < rhs.y) return(true);
+			if (z > rhs.z) return(false);
+			if (z < rhs.z) return(true);
+
+			return(false);	// They're equal
+		} // End equivalence operator
 	} Point3d;
 
 	/**
@@ -81,7 +110,12 @@ public:
 
 	//	Constructors.
 	CDrilling():COp(GetTypeString()){}
-	CDrilling(const Symbols_t &symbols, const Symbols_t &cuttingTools):COp(GetTypeString()), m_symbols(symbols) { m_params.set_initial_values(cuttingTools);  }
+	CDrilling(	const Symbols_t &symbols, 
+			const Symbols_t &cuttingTools ) 
+		: COp(GetTypeString()), m_symbols(symbols)
+	{
+		m_params.set_initial_values(cuttingTools);
+	}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return DrillingType;}
@@ -103,6 +137,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
+	static std::set<Point3d> FindAllIntersections( const CDrilling::Symbols_t & symbols );
 
 };
 

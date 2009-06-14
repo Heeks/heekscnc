@@ -226,6 +226,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 {
+	std::set<CDrilling::Point3d> intersections;
 	CDrilling::Symbols_t symbols;
 	CDrilling::Symbols_t cuttingTools;
 
@@ -233,18 +234,19 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if (object->GetType() == PointType)
-		{
-			symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
-		} // End if - then
-
 		if (object->GetType() == CuttingToolType)
 		{
 			cuttingTools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
 		} // End if - then
-	}
+		else
+		{
+			symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+		} // End if - else
+	} // End for
 
-	if(symbols.size() == 0)
+	intersections = CDrilling::FindAllIntersections( symbols );
+
+	if((symbols.size() == 0) && (intersections.size() == 0))
 	{
 		wxMessageBox(_("You must select some points first!"));
 		return;
