@@ -42,4 +42,4 @@ points as well as the intersections of all other selected objects.
     If neither the peck depth or dwell values has a positive value then the generated GCode will include the G81 drilling command.
 
 === Tool Number ===
-    The cutting tool number will be set automatically if a Cutting Tool object was selected during the drill cycle's creation.  If none was selected then a zero value is used and a warning is displayed indicating that this value should be set manually.  This value ties to the object ID of the Cutting Tool object.  (oops, I just realised it should be tied to the tool_number parameter of the CuttingTool object instead. I will look   into that later on.  The cutting tool number value is the one used in the GCode generation)
+    The cutting tool number will be set automatically if a Cutting Tool object was selected during the drill cycle's creation.  If none was selected then a zero value is used and a warning is displayed indicating that this value should be set manually.  This value ties to the tool number of the Cutting Tool object.
