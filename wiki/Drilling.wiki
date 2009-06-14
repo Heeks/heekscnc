@@ -9,6 +9,8 @@ added to the Drilling Cycle object.
 It also refers to the new Cutting Tool object to find tool diameter
 for its graphical representation.
 
+Drilling cycles will be located at an aggregation of all selected
+points as well as the intersections of all other selected objects.
 
 = Details =
 
@@ -17,7 +19,7 @@ for its graphical representation.
 
  - Place one/more points at the locations where the holes should begin (i.e. this would be at the surface of the material)
 
- - Select both the Cutting Tool object and all the point objects.
+ - Select the Cutting Tool object and all the other objects.  Holes will be located both at the selected point object locations as well as the intersection points of all other selected objects.
 
  - with these selected, add a Drilling Cycle object.
 
