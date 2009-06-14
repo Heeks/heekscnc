@@ -160,12 +160,9 @@ void CDrilling::AppendTextToProgram()
 #endif
     ss.imbue(std::locale("C"));
 
-	if ((m_symbols.size() > 0) && (m_params.m_cutting_tool_number > 0))
-	{
-		// Select the right tool.
-		ss << "tool_change( id=" << m_params.m_cutting_tool_number << ")\n";
-	} // End if - then
-	
+
+	std::set<Point3d> locations = FindAllIntersections( m_symbols );
+
 	std::list<HeeksObj*> points;
 	for(Symbols_t::iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 	{
@@ -178,16 +175,28 @@ void CDrilling::AppendTextToProgram()
 			double pos[3];
 
 			object->GetStartPoint(pos);
-			ss << "drill("
-				<< "x=" << pos[0] << ", "
-				<< "y=" << pos[1] << ", "
-				<< "z=" << pos[2] << ", "
-				<< "depth=" << m_params.m_depth << ", "
-				<< "standoff=" << m_params.m_standoff << ", "
-				<< "dwell=" << m_params.m_dwell << ", "
-				<< "peck_depth=" << m_params.m_peck_depth // << ", "
-				<< ")\n";
+			locations.insert( Point3d( pos[0], pos[1], pos[2] ) );
 		} // End if - then
+	} // End for
+
+	if ((locations.size() > 0) && (m_params.m_cutting_tool_number > 0))
+	{
+		// Select the right tool.
+		ss << "tool_change( id=" << m_params.m_cutting_tool_number << ")\n";
+	} // End if - then
+
+	for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+	{
+		ss << "drill("
+			<< "x=" << l_itLocation->x << ", "
+			<< "y=" << l_itLocation->y << ", "
+			<< "z=" << l_itLocation->z << ", "
+			<< "depth=" << m_params.m_depth << ", "
+			<< "standoff=" << m_params.m_standoff << ", "
+			<< "dwell=" << m_params.m_dwell << ", "
+			<< "peck_depth=" << m_params.m_peck_depth // << ", "
+			<< ")\n";
+		
 	} // End for
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -313,6 +322,19 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked && !no_color)
 	{
+
+		double l_dHoleDiameter = 12.7;	// Default at half-inch
+		if (m_params.m_cutting_tool_number > 0)
+		{
+			HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_params.m_cutting_tool_number );
+			if (cuttingTool != NULL)
+			{
+				l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter;
+			} // End if - then
+		} // End if - then
+
+		std::set<Point3d> locations = FindAllIntersections( m_symbols );
+
 		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 		{
 			HeeksObj* object = heeksCAD->GetIDObject(l_itSymbol->first, l_itSymbol->second);
@@ -320,46 +342,49 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			// If we found something, ask its CAD code to draw itself highlighted.
 			if(object)object->glCommands(false, true, false);
 
-			double l_dHoleDiameter = 12.7;	// Default at half-inch
-			if (m_params.m_cutting_tool_number > 0)
-			{
-				HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_params.m_cutting_tool_number );
-				if (cuttingTool != NULL)
-				{
-					l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter;
-				} // End if - then
-			} // End if - then
-
 			// If it's a point then draw a Drill Cycle picture so that we can imagine what's going to happen.
 			if (l_itSymbol->first == PointType)
 			{ 
-				GLdouble start[3], end[3];
+				GLdouble start[3];
 
 				object->GetStartPoint(start);
-				object->GetStartPoint(end);
-		
-				end[2] -= m_params.m_depth;
-					
-				glBegin(GL_LINE_STRIP);
-				glVertex3dv( start );
-				glVertex3dv( end );
-				glEnd();
-
-				std::list< CDrilling::Point3d > pointsAroundCircle = DrillBitVertices( 	CDrilling::Point3d( start[0], start[1], start[2] ), 
-													l_dHoleDiameter / 2, 
-													m_params.m_depth);
-
-				glBegin(GL_LINE_STRIP);
-				CDrilling::Point3d previous = *(pointsAroundCircle.begin());
-				for (std::list< CDrilling::Point3d >::const_iterator l_itPoint = pointsAroundCircle.begin();
-					l_itPoint != pointsAroundCircle.end();
-					l_itPoint++)
-				{
-					
-					glVertex3d( l_itPoint->x, l_itPoint->y, l_itPoint->z );
-				}
-				glEnd();
+				locations.insert( Point3d( start[0], start[1], start[2] ) );
 			} // End if - then
+		} // End for
+
+		for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+		{
+			GLdouble start[3], end[3];
+
+			start[0] = l_itLocation->x;
+			start[1] = l_itLocation->y;
+			start[2] = l_itLocation->z;
+
+			end[0] = l_itLocation->x;
+			end[1] = l_itLocation->y;
+			end[2] = l_itLocation->z;
+
+			end[2] -= m_params.m_depth;
+				
+			glBegin(GL_LINE_STRIP);
+			glVertex3dv( start );
+			glVertex3dv( end );
+			glEnd();
+
+			std::list< CDrilling::Point3d > pointsAroundCircle = DrillBitVertices( 	*l_itLocation, 
+												l_dHoleDiameter / 2, 
+												m_params.m_depth);
+
+			glBegin(GL_LINE_STRIP);
+			CDrilling::Point3d previous = *(pointsAroundCircle.begin());
+			for (std::list< CDrilling::Point3d >::const_iterator l_itPoint = pointsAroundCircle.begin();
+				l_itPoint != pointsAroundCircle.end();
+				l_itPoint++)
+			{
+				
+				glVertex3d( l_itPoint->x, l_itPoint->y, l_itPoint->z );
+			}
+			glEnd();
 		} // End for
 	} // End if - then
 }
@@ -427,7 +452,7 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 					new_object->AddSymbol( atoi(child->Attribute("type")), atoi(child->Attribute("id")) );
 				}
 			} // End for
-		}
+		} // End if
 	}
 
 	new_object->ReadBaseXML(element);
@@ -435,4 +460,44 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
+std::set<CDrilling::Point3d> CDrilling::FindAllIntersections( const CDrilling::Symbols_t & symbols )
+{
+	std::set<CDrilling::Point3d> intersections;
+
+	// Look to find all intersections between all selected objects.  At all these locations, create
+        // a drilling cycle.
+
+        for (CDrilling::Symbols_t::const_iterator lhs = symbols.begin(); lhs != symbols.end(); lhs++)
+        {
+                for (CDrilling::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
+                {
+                        if (lhs == rhs) continue;
+
+                        std::list<double> results;
+                        HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
+                        HeeksObj *rhsPtr = heeksCAD->GetIDObject( rhs->first, rhs->second );
+
+                        if (lhsPtr->Intersects( rhsPtr, &results ))
+                        {
+                                while (((results.size() % 3) == 0) && (results.size() > 0))
+                                {
+                                        CDrilling::Point3d intersection;
+
+                                        intersection.x = *(results.begin());
+                                        results.erase(results.begin());
+
+                                        intersection.y = *(results.begin());
+                                        results.erase(results.begin());
+
+                                        intersection.z = *(results.begin());
+                                        results.erase(results.begin());
+
+                                        intersections.insert(intersection);
+                                } // End while
+                        } // End if - then
+                } // End for
+        } // End for
+
+	return(intersections);
+} // End FindAllIntersections() method
 
