@@ -365,7 +365,7 @@ class CreatorIso(nc.Creator):
 
 	if (peck_depth != None):
 		# We're pecking.  Let's find a tree.
-		self.write(iso.PECK_DRILL + iso.SPACE)
+		self.write(iso.PECK_DRILL + iso.SPACE + iso.PECK_DEPTH + (self.fmt % peck_depth ))
 	else:
 		# We're either just drilling or drilling with dwell.
 		if (dwell == None):
