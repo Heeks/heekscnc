@@ -1,4 +1,6 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
+// Copyright (c) 2009, Dan Heeks
+// This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 
 BOOL APIENTRY DllMain( HMODULE hModule,
