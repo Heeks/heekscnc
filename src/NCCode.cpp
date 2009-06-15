@@ -34,7 +34,8 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 	m_color_type = CNCCode::GetColor(element->Attribute("col"));
 
 	// get the text
-	m_str = wxString(Ctt(element->GetText()));
+	const char* text = element->GetText();
+	if(text)m_str = wxString(Ctt(text));
 }
 
 void PathLine::WriteXML(TiXmlNode *root)
