@@ -5,6 +5,7 @@
  * details.
  */
 
+#include "Program.h"
 #include "Op.h"
 #include "HeeksCNCTypes.h"
 
@@ -32,13 +33,13 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 };
 
-class CCuttingTool: public COp {
+class CCuttingTool: public CTools {
 public:
 	//	These are references to the CAD elements whose position indicate where the CuttingTool Cycle begins.
 	CCuttingToolParams m_params;
 
 	//	Constructors.
-	CCuttingTool():COp(GetTypeString()) { m_params.set_initial_values();  }
+	CCuttingTool():CTools() { m_params.set_initial_values();  }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return CuttingToolType;}
@@ -46,7 +47,6 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 
 	// TODO Draw a drill cycle icon and refer to it here.
-	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/tool"); else return COp::GetIcon();}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
