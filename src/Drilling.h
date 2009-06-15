@@ -20,12 +20,14 @@ public:
 	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
 	double m_peck_depth;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 
-	int m_cutting_tool_number;	// Reference into CuttingTool object from whence radius comes
+	int m_cutting_tool_number;	// Reference into CuttingTool object from whence radius comes.  If this value is negative or zero then it just
+					// means that this Drilling object doesn't use a tool table entry to do its work.  i.e. the Generated GCode
+					// will not include either a table insertion (G10 L1) or a tool selection (M6?).  It's still valid.
 
 	// The following line is the prototype setup in the Python routines for the drill sequence.
 	// def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
 
-	void set_initial_values( const std::list< std::pair<int, int> >  & cuttingTools );
+	void set_initial_values( const std::list< std::pair<int, int> >  & cuttingTools, const double depth );
 	void write_values_to_config();
 	void GetProperties(CDrilling* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -37,6 +39,12 @@ public:
 	of a drilling cycle.  In the first instance, we use PointType objects as starting points.  Rather than copy
 	the PointType elements into this class, we just refer to them by ID.  In the case of PointType objects,
 	the class assumes that the drilling will occur in the negative Z direction.
+
+	It also accepts references to circle objects.  For this special case, the circle may not intersect any of
+	the other objects.  If this is the case then the circle's centre will be used as a hole location.
+
+	Finally the code tries to intersect all selected objects and places holes (Drilling Cycles) at all
+	intersection points.
 
 	One day, when I get clever, I intend supporting the reference of line elements whose length defines the
 	drill's depth and whose orientation describes the drill's orientation at machining time (i.e. rotate A, B and/or C axes)
@@ -94,9 +102,9 @@ public:
 	/**
 		Define some data structures to hold references to CAD elements.  We store both the type and id because
 			a) the ID values are only relevant within the context of a type.
-			b) we don't want to limit this class to PointType elements alone.  I can imagine
-			   using it to identify pairs of intersecting elements and placing a drilling cycle
-			   at their intersection (again, one day when I grow up)
+			b) we don't want to limit this class to PointType elements alone.  We use these
+			   symbols to identify pairs of intersecting elements and place a drilling cycle
+			   at their intersection.
  	 */
 	typedef int SymbolType_t;
 	typedef int SymbolId_t;
@@ -111,10 +119,11 @@ public:
 	//	Constructors.
 	CDrilling():COp(GetTypeString()){}
 	CDrilling(	const Symbols_t &symbols, 
-			const Symbols_t &cuttingTools ) 
+			const Symbols_t &cuttingTools,
+			const double depth ) 
 		: COp(GetTypeString()), m_symbols(symbols)
 	{
-		m_params.set_initial_values(cuttingTools);
+		m_params.set_initial_values(cuttingTools, depth);
 	}
 
 	// HeeksObj's virtual functions
@@ -137,7 +146,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	static std::set<Point3d> FindAllIntersections( const CDrilling::Symbols_t & symbols );
+	static std::set<Point3d> FindAllLocations( const CDrilling::Symbols_t & symbols );
 
 };
 

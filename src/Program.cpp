@@ -276,7 +276,6 @@ void CProgram::RewritePythonProgram()
 	bool zigzag_op_exists = false;
 	bool adaptive_op_exists = false;
 	bool drilling_op_exists = false;
-	bool cutting_tool_op_exists = false;
 
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
@@ -299,10 +298,6 @@ void CProgram::RewritePythonProgram()
 		else if(object->GetType() == DrillingType)
 		{
 			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
-		}
-		else if(object->GetType() == CuttingToolType)
-		{
-			if(((CCuttingTool*)object)->m_active)cutting_tool_op_exists = true;
 		}
 	}
 
@@ -387,7 +382,7 @@ void CProgram::RewritePythonProgram()
 		switch(object->GetType())
 		{
 		case CuttingToolType:
-			if(((CCuttingTool*)object)->m_active)((CCuttingTool*)object)->AppendTextToProgram();
+			((CCuttingTool*)object)->AppendTextToProgram();
 			break;
 		}
 	} // End for

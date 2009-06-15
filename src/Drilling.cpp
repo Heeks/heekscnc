@@ -21,12 +21,19 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-void CDrillingParams::set_initial_values( const CDrilling::Symbols_t & cuttingTools )
+void CDrillingParams::set_initial_values( const CDrilling::Symbols_t & cuttingTools, const double depth )
 {
 	CNCConfig config;
 	config.Read(_T("m_standoff"), &m_standoff, 5.0);
 	config.Read(_T("m_dwell"), &m_dwell, 1);
 	config.Read(_T("m_depth"), &m_depth, 21);
+
+	if (depth > 0)
+	{
+		// We've found the depth we want used.  Assign it now.
+		m_depth = depth;
+	} // End if - then
+
 	config.Read(_T("m_peck_depth"), &m_peck_depth, 3);
 
 	config.Read(_T("m_cutting_tool_number"), &m_cutting_tool_number, 0);
@@ -58,18 +65,18 @@ void CDrillingParams::write_values_to_config()
 	config.Write(_T("m_cutting_tool_number"), m_cutting_tool_number);
 }
 
+/**
+ * Find the CuttingTool object whose tool number matches that passed in.
+ */
 static int FindCuttingTool( const int tool_number )
 {
-
-	for (int id=1; id<100; id++)
+	for (HeeksObj *ob = heeksCAD->GetFirstObject(); ob != NULL; ob = heeksCAD->GetNextObject())
 	{
-		HeeksObj* ob = heeksCAD->GetIDObject( CuttingToolType, id );
-		if (! ob) continue;
 		if (ob->GetType() != CuttingToolType) continue;
 
 		if (((CCuttingTool *) ob)->m_params.m_tool_number == tool_number)
 		{
-			return(id);
+			return(ob->m_id);
 		} // End if - then
 	} // End for
 
@@ -96,7 +103,8 @@ static void on_set_cutting_tool_number(int value, HeeksObj* object)
 	// Look through all objects to find a CuttingTool object whose tool number
 	// matches this one.  If none are found then let the operator know.
 
-	if (int id=FindCuttingTool( value ))
+	int id = 0;
+	if ((id=FindCuttingTool( value )) > 0)
 	{
 		HeeksObj* ob = heeksCAD->GetIDObject( CuttingToolType, id );
 		if ((ob != NULL) && (ob->GetType() == CuttingToolType))
@@ -106,7 +114,7 @@ static void on_set_cutting_tool_number(int value, HeeksObj* object)
 		} // End if - then
 	} // End for
 		
-	wxMessageBox(_T("This tool number has not been defined as a cutting tool yet."));
+	wxMessageBox(_T("This tool number has not been defined as a cutting tool yet. Set the tool number to zero (0) if no tool table functionality is required for this Drilling Cycle."));
 } // End on_set_cutting_tool_number() routine
 
 
@@ -161,23 +169,7 @@ void CDrilling::AppendTextToProgram()
     ss.imbue(std::locale("C"));
 
 
-	std::set<Point3d> locations = FindAllIntersections( m_symbols );
-
-	std::list<HeeksObj*> points;
-	for(Symbols_t::iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-	{
-		SymbolType_t symbol_type = l_itSymbol->first;
-		SymbolId_t symbol_id = l_itSymbol->second;
-
-		if (symbol_type == PointType)
-		{
-			HeeksObj* object = heeksCAD->GetIDObject(symbol_type, symbol_id);
-			double pos[3];
-
-			object->GetStartPoint(pos);
-			locations.insert( Point3d( pos[0], pos[1], pos[2] ) );
-		} // End if - then
-	} // End for
+	std::set<Point3d> locations = FindAllLocations( m_symbols );
 
 	if ((locations.size() > 0) && (m_params.m_cutting_tool_number > 0))
 	{
@@ -333,7 +325,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			} // End if - then
 		} // End if - then
 
-		std::set<Point3d> locations = FindAllIntersections( m_symbols );
+		std::set<Point3d> locations = FindAllLocations( m_symbols );
 
 		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 		{
@@ -460,25 +452,66 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
-std::set<CDrilling::Point3d> CDrilling::FindAllIntersections( const CDrilling::Symbols_t & symbols )
+
+/**
+ * 	This method looks through the symbols in the list.  If they're PointType objects
+ * 	then the object's location is added to the result set.  If it's a circle object
+ * 	that doesn't intersect any other element (selected) then add its centre to
+ * 	the result set.  Finally, find the intersections of all of these elements and
+ * 	add the intersection points to the result set.  We use std::set<Point3d> so that
+ * 	we end up with no duplicate points.
+ */
+std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbols_t & symbols )
 {
-	std::set<CDrilling::Point3d> intersections;
+	std::set<CDrilling::Point3d> locations;
+
+	// We want to avoid calling the (expensive) intersection code too often.  If we've
+	// already intersected objects a and b then we shouldn't worry about intersecting 'b' with 'a'
+	// the next time through the loop.
+	// std::set< std::pair< Symbol_t, Symbol_t > > alreadyChecked;
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
         // a drilling cycle.
 
         for (CDrilling::Symbols_t::const_iterator lhs = symbols.begin(); lhs != symbols.end(); lhs++)
         {
+		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
+							// intersect anything else, we want to know
+							// about it.
+		
+		if (lhs->first == PointType)
+		{
+			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
+			double pos[3];
+			lhsPtr->GetStartPoint(pos);
+			locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+			continue;	// No need to intersect a point with anything.
+		} // End if - then		
+
                 for (CDrilling::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
                 {
                         if (lhs == rhs) continue;
+			if (lhs->first == PointType) continue;	// No need to intersect a point type.
+
+			// Avoid repeated calls to the intersection code where possible.
+			/*
+			if ((alreadyChecked.find( std::make_pair( *lhs, *rhs ))) ||
+				(alreadyChecked.find( std::make_pair( *rhs, *lhs ))))
+			{
+				// We've already checked this for intersections.  Avoid this repetition.
+				continue;
+			} // End if - then
+			*/
 
                         std::list<double> results;
                         HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
                         HeeksObj *rhsPtr = heeksCAD->GetIDObject( rhs->first, rhs->second );
 
+			// alreadyChecked.insert( *lhs, *rhs );
+
                         if (lhsPtr->Intersects( rhsPtr, &results ))
                         {
+				l_bIntersectionsFound = true;
                                 while (((results.size() % 3) == 0) && (results.size() > 0))
                                 {
                                         CDrilling::Point3d intersection;
@@ -492,12 +525,28 @@ std::set<CDrilling::Point3d> CDrilling::FindAllIntersections( const CDrilling::S
                                         intersection.z = *(results.begin());
                                         results.erase(results.begin());
 
-                                        intersections.insert(intersection);
+                                        locations.insert(intersection);
                                 } // End while
                         } // End if - then
                 } // End for
+
+		if (! l_bIntersectionsFound)
+		{
+			// This element didn't intersect anything else.  If it's a circle
+			// then add its centre point to the result set.
+
+			if (lhs->first == CircleType)
+			{
+                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
+				double pos[3];
+				if (heeksCAD->GetArcCentre( lhsPtr, pos ))
+				{
+					locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+				} // End if - then
+			} // End if - then
+		} // End if - then
         } // End for
 
-	return(intersections);
-} // End FindAllIntersections() method
+	return(locations);
+} // End FindAllLocations() method
 

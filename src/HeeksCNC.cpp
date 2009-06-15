@@ -244,17 +244,30 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		} // End if - else
 	} // End for
 
-	intersections = CDrilling::FindAllIntersections( symbols );
+	double depth = -1;
+	CDrilling::Symbols_t cuttingToolsThatMatchCircles;
 
-	if((symbols.size() == 0) && (intersections.size() == 0))
+	intersections = CDrilling::FindAllLocations( symbols );
+
+	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
 	{
-		wxMessageBox(_("You must select some points first!"));
+		// The operator didn't point to a cutting tool object and one of the circles that they
+		// did point to happenned to match the diameter of an existing cutting tool.  Use that
+		// one as our default.  The operator can always overwrite it later on.
+
+		std::copy( cuttingToolsThatMatchCircles.begin(), cuttingToolsThatMatchCircles.end(),
+				std::inserter( cuttingTools, cuttingTools.begin() ));
+	} // End if - then
+
+	if (intersections.size() == 0)
+	{
+		wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
 		return;
 	}
 
 	if(cuttingTools.size() == 0)
 	{
-		wxMessageBox(_("You haven't selected a cutting tool for this hole.  Don't forget to set one in the parameters manually.!"));
+		wxMessageBox(_("You haven't selected a cutting tool for this hole.  By default no 'tool definition' or 'select tool' code will be generated for this drilling cycle."));
 	}
 
 	if(cuttingTools.size() > 1)
@@ -263,7 +276,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	CDrilling *new_object = new CDrilling( symbols, cuttingTools );
+	CDrilling *new_object = new CDrilling( symbols, cuttingTools, depth );
 	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
