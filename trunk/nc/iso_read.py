@@ -75,12 +75,25 @@ class ParserIso(nc.Parser):
                     path_col = "feed"
                     col = "feed"
                     arc = +1
+                elif (word == 'G10' or word == 'g10'):
+		    move = False
+                elif (word == 'L1' or word == 'l1'):
+		    move = False
                 elif (word == 'G20'):
                     col = "prep"
                     self.set_mode(units=25.4)
                 elif (word == 'G21'):
                     col = "prep"
                     self.set_mode(units=1.0)
+                elif (word == 'G81' or word == 'g81'):
+                    path_col = "feed"
+                    col = "feed"
+                elif (word == 'G82' or word == 'g82'):
+                    path_col = "feed"
+                    col = "feed"
+                elif (word == 'G83' or word == 'g83'):
+                    path_col = "feed"
+                    col = "feed"
                 elif (word[0] == 'G') : col = "prep"
                 elif (word[0] == 'I' or word[0] == 'i'):
                     col = "axis"

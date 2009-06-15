@@ -20,6 +20,7 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
+
 void CCuttingToolParams::set_initial_values()
 {
 	CNCConfig config;
@@ -99,7 +100,6 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
  */
 void CCuttingTool::AppendTextToProgram()
 {
-	COp::AppendTextToProgram();
 
 #ifdef UNICODE
 	std::wostringstream ss;
