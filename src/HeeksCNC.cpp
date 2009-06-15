@@ -272,7 +272,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 static void NewCuttingToolOpMenuCallback(wxCommandEvent &event)
 {
 	CCuttingTool *new_object = new CCuttingTool();
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_tools);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
@@ -351,8 +351,8 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Pocket"), ToolImage(_T("pocket")), _T("New Pocket Operation..."), NewPocketOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("ZigZag"), ToolImage(_T("zigzag")), _T("New ZigZag Operation..."), NewZigZagOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Adaptive"), ToolImage(_T("adapt")), _T("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Drill"), ToolImage(_T("adapt")), _T("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("adapt")), _T("New Cutting Tool Definition..."), NewCuttingToolOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Drill"), ToolImage(_T("drilling")), _T("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("tool")), _T("New Cutting Tool Definition..."), NewCuttingToolOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Python"), ToolImage(_T("python")), _T("Make Python Script"), MakeScriptMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _T("Post-Process"), PostProcessMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _T("Open NC File"), OpenNcFileMenuCallback);
@@ -401,8 +401,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("New Pocket Operation..."), ToolImage(_T("pocket")), NewPocketOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Adaptive Roughing Operation..."), ToolImage(_T("adapt")), NewAdaptiveOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("New Drilling Operation..."), ToolImage(_T("adapt")), NewDrillingOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("New Cutting Tool Definition..."), ToolImage(_T("adapt")), NewCuttingToolOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Drilling Operation..."), ToolImage(_T("drilling")), NewDrillingOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Cutting Tool Definition..."), ToolImage(_T("tool")), NewCuttingToolOpMenuCallback);
 
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;
@@ -446,6 +446,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Program", CProgram::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("nccode", CNCCode::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Operations", COperations::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Tools", CTools::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Pocket", CPocket::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
@@ -477,6 +478,8 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		heeksCAD->GetMainObject()->Add(m_program, NULL);
 		COperations *operations = new COperations;
 		m_program->Add(operations, NULL);
+		CTools *tools = new CTools;
+		m_program->Add(tools, NULL);
 		heeksCAD->WasAdded(m_program);
 		theApp.m_program_canvas->Clear();
 		theApp.m_output_canvas->Clear();

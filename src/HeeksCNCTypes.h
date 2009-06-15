@@ -13,5 +13,6 @@ enum{
 	AdaptiveType,
 	DrillingType,
 	CuttingToolType,
+	ToolsType,
 	HeeksCNCMaximumType
 };
