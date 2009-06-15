@@ -2,6 +2,8 @@
 // or project specific include files that are used frequently, but
 // are changed infrequently
 //
+// Copyright (c) 2009, Dan Heeks
+// This program is released under the BSD license. See the file COPYING for details.
 
 #ifdef WIN32
 #pragma warning(disable : 4996)

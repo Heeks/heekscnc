@@ -1,4 +1,6 @@
 // Program.h
+// Copyright (c) 2009, Dan Heeks
+// This program is released under the BSD license. See the file COPYING for details.
 
 // one of these stores all the operations, and which machine it is for, and stuff like clamping info if I ever get round to it
 
