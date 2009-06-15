@@ -25,8 +25,7 @@ bool COperations::CanAdd(HeeksObj* object)
 		object->GetType() == PocketType || 
 		object->GetType() == ZigZagType || 
 		object->GetType() == AdaptiveType || 
-		object->GetType() == DrillingType ||
-		object->GetType() == CuttingToolType;
+		object->GetType() == DrillingType;
 }
 
 void COperations::WriteXML(TiXmlNode *root)
@@ -94,7 +93,28 @@ void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	ObjList::GetTools(t_list, p);
 }
 
-CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_script_edited(false)
+bool CTools::CanAdd(HeeksObj* object)
+{
+	return 	object->GetType() == CuttingToolType;
+}
+
+void CTools::WriteXML(TiXmlNode *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "Tools" );
+	root->LinkEndChild( element );  
+	WriteBaseXML(element);
+}
+
+//static
+HeeksObj* CTools::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	CTools* new_object = new CTools;
+	new_object->ReadBaseXML(pElem);
+	return new_object;
+}
+
+CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_script_edited(false)
 {
 	CNCConfig config;
 	config.Read(_T("ProgramMachine"), &m_machine, _T("nc.iso"));
@@ -157,7 +177,7 @@ void CProgram::GetProperties(std::list<Property *> *list)
 
 bool CProgram::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == NCCodeType || object->GetType() == OperationsType;
+	return object->GetType() == NCCodeType || object->GetType() == OperationsType || object->GetType() == ToolsType;
 }
 
 bool CProgram::CanAddTo(HeeksObj* owner)
@@ -196,8 +216,21 @@ void CProgram::WriteXML(TiXmlNode *root)
 
 bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 {
-	if(object->GetType() == NCCodeType)m_nc_code = (CNCCode*)object;
-	if(object->GetType() == OperationsType)m_operations = (COperations*)object;
+	switch(object->GetType())
+	{
+	case NCCodeType:
+		m_nc_code = (CNCCode*)object;
+		break;
+
+	case OperationsType:
+		m_operations = (COperations*)object;
+		break;
+
+	case ToolsType:
+		m_tools = (CTools*)object;
+		break;
+	}
+
 	return ObjList::Add(object, prev_object);
 }
 
@@ -206,6 +239,7 @@ void CProgram::Remove(HeeksObj* object)
 	 // these shouldn't happen, though
 	if(object == m_nc_code)m_nc_code = NULL;
 	else if(object == m_operations)m_operations = NULL;
+	else if(object == m_tools)m_tools = NULL;
 
 	ObjList::Remove(object);
 }
