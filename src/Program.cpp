@@ -382,7 +382,7 @@ void CProgram::RewritePythonProgram()
 	// write the operations
 
 	// Write the new tool table entries first.
-	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
+	for(HeeksObj* object = m_tools->GetFirstChild(); object; object = m_tools->GetNextChild())
 	{
 		switch(object->GetType())
 		{
