@@ -17,7 +17,7 @@ points as well as the intersections of all other selected objects.
 = Workflow =
  - Add a Cutting Tool object and set its parameters (length/width)
 
- - Place one/more points at the locations where the holes should begin (i.e. this would be at the surface of the material)
+ - Place one/more points at the locations where the holes should begin (i.e. this would be at the surface of the material).  Alternatively, select other object types.  The intersections of these selected objects will be used as the starting point for drilling cycles.
 
  - Select the Cutting Tool object and all the other objects.  Holes will be located both at the selected point object locations as well as the intersection points of all other selected objects.
 
@@ -42,4 +42,4 @@ points as well as the intersections of all other selected objects.
     If neither the peck depth or dwell values has a positive value then the generated GCode will include the G81 drilling command.
 
 === Tool Number ===
-    The cutting tool number will be set automatically if a Cutting Tool object was selected during the drill cycle's creation.  If none was selected then a zero value is used and a warning is displayed indicating that this value should be set manually.  This value ties to the tool number of the Cutting Tool object.
+    The cutting tool number will be set automatically if a Cutting Tool object was selected during the drill cycle's creation.  If none was selected then a zero value is used and a warning is displayed indicating that this value should be set manually.  This value ties to the tool number of the Cutting Tool object.  If no tool table insertions and/or tool selections are required in the resultant GCode, leave the tool number as zero (0).  The graphics presented will default to a 12.7mmm (half inch) diameter but the NC code will omit the tool table insertion and tool selection lines.
