@@ -123,7 +123,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 
 	// TODO Draw a drill cycle icon and refer to it here.
-	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/adapt"); else return COp::GetIcon();}
+	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/drilling"); else return COp::GetIcon();}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
