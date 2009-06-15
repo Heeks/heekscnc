@@ -28,6 +28,23 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
 
+class CTools: public ObjList{
+public:
+	// HeeksObj's virtual functions
+	bool OneOfAKind(){return true;}
+	int GetType()const{return ToolsType;}
+	const wxChar* GetTypeString(void)const{return _("Tools");}
+	HeeksObj *MakeACopy(void)const{ return new CTools(*this);}
+	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/tools");}
+	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
+	bool CanAdd(HeeksObj* object);
+	bool CanBeRemoved(){return false;}
+	void WriteXML(TiXmlNode *root);
+	bool AutoExpand(){return true;}
+
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+};
+
 enum ProgramUserType{
 	ProgramUserTypeUnkown,
 	ProgramUserTypeTree,
@@ -42,6 +59,7 @@ public:
 	wxString m_output_file;
 	CNCCode* m_nc_code;
 	COperations* m_operations;
+	CTools* m_tools;
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches
 
