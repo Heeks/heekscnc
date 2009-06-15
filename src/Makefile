@@ -11,7 +11,7 @@ mkdir_p= mkdir -p
 WXCFLAGS=$(shell wx-config --cflags)
 
 # dan heeks uncomments the next line to make it work for him on his Inspiron 530
-#WXCFLAGS=-I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8
+#WXCFLAGS=-I/usr/l${HEEKSCADPATH}/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8
 
 #check the environment variable HEEKSCADPATH.  If it's not set, print a message and assume ../..
 ifeq ($(strip $(HEEKSCADPATH)),)
@@ -21,7 +21,7 @@ else
   heekspathmessage = 
 endif
 
-#CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/lib/wx/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -D__WXDEBUG__ -DWXUSINGDLL
+#CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/l${HEEKSCADPATH}/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -D__WXDEBUG__ -DWXUSINGDLL
 
 #run-in-place, for people on linux who don't want to 'sudo make install':
 ifeq ($(strip $(RUNINPLACE)),yes)
@@ -44,107 +44,285 @@ ${SHARED_LIBRARY}: $(heekspathmessage) ${OBJECTS}
 message:
 	@echo Z[1mEnvironment variable HEEKSCADPATH not set. Assuming Z[32m../..Z[37mZ[0m | tr Z '\033'
 
-HeeksCNC.o: HeeksCNC.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+HeeksCNC.o: HeeksCNC.cpp \
+		${HEEKSCADPATH}/interface/PropertyString.h	\
+		${HEEKSCADPATH}/interface/Observer.h		\
+		${HEEKSCADPATH}/interface/ToolImage.h		\
+		PythonStuff.h \
+		Program.h \
+		ProgramCanvas.h \
+		OutputCanvas.h \
+		CNCConfig.h \
+		NCCode.h \
+		Profile.h \
+		Pocket.h \
+		ZigZag.h \
+		Adaptive.h \
+		Drilling.h \
+		CuttingTool.h
+	$(CC) -c HeeksCNC.cpp ${CCFLAGS} -o $@
 
-HeeksColor.o: ${HEEKSCADPATH}/interface/HeeksColor.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+HeeksColor.o: ${HEEKSCADPATH}/interface/HeeksColor.cpp  \
+		${HEEKSCADPATH}/interface/HeeksColor.h
+	$(CC) -c ${HEEKSCADPATH}/interface/HeeksColor.cpp ${CCFLAGS} -o $@
 
-HeeksObj.o: ${HEEKSCADPATH}/interface/HeeksObj.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+HeeksObj.o: ${HEEKSCADPATH}/interface/HeeksObj.cpp \
+		${HEEKSCADPATH}/interface/Box.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyString.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h \
+		${HEEKSCADPATH}/interface/PropertyColor.h \
+		${HEEKSCADPATH}/interface/PropertyCheck.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		${HEEKSCADPATH}/interface/ObjList.h \
+		${HEEKSCADPATH}/src/Gripper.h \
+		${HEEKSCADPATH}/src/HeeksFrame.h \
+		${HEEKSCADPATH}/src/ObjPropsCanvas.h
+	$(CC) -c ${HEEKSCADPATH}/interface/HeeksObj.cpp ${CCFLAGS} -o $@
 
-Interface.o: Interface.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+Interface.o: Interface.cpp Interface.h
+	$(CC) -c Interface.cpp ${CCFLAGS} -o $@
 
-LeftAndRight.o: ${HEEKSCADPATH}/interface/LeftAndRight.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+LeftAndRight.o: ${HEEKSCADPATH}/interface/LeftAndRight.cpp ${HEEKSCADPATH}/interface/LeftAndRight.h
+	$(CC) -c ${HEEKSCADPATH}/interface/LeftAndRight.cpp ${CCFLAGS} -o $@
 
-MarkedObject.o: ${HEEKSCADPATH}/interface/MarkedObject.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+MarkedObject.o: ${HEEKSCADPATH}/interface/MarkedObject.cpp	\
+		${HEEKSCADPATH}/interface/MarkedObject.h	\
+		${HEEKSCADPATH}/interface/MarkedObject.h	\
+		${HEEKSCADPATH}/interface/HeeksObj.h	\
+		${HEEKSCADPATH}/interface/ToolList.h
+	$(CC) -c ${HEEKSCADPATH}/interface/MarkedObject.cpp ${CCFLAGS} -o $@
 
-NCCode.o: NCCode.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+NCCode.o: NCCode.cpp \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/HeeksColor.h \
+		HeeksCNCTypes.h \
+		NCCode.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		OutputCanvas.h \
+		${HEEKSCADPATH}/interface/MarkedObject.h \
+		${HEEKSCADPATH}/interface/PropertyColor.h \
+		${HEEKSCADPATH}/interface/PropertyList.h \
+		CNCConfig.h
+	$(CC) -c NCCode.cpp ${CCFLAGS} -o $@
 
-ObjList.o: ${HEEKSCADPATH}/interface/ObjList.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+ObjList.o: ${HEEKSCADPATH}/interface/ObjList.cpp \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/src/MarkedList.h \
+		${HEEKSCADPATH}/interface/HeeksCADInterface.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c ${HEEKSCADPATH}/interface/ObjList.cpp ${CCFLAGS} -o $@
 
-OutputCanvas.o: OutputCanvas.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+OutputCanvas.o: OutputCanvas.cpp \
+		OutputCanvas.h \
+		Program.h \
+		NCCode.h
+	$(CC) -c OutputCanvas.cpp ${CCFLAGS} -o $@
 
-Profile.o: Profile.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+Profile.o: Profile.cpp \
+		HeeksCNCTypes.h \
+		DepthOp.h \
+		Profile.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		Program.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/interface/PropertyVertex.h \
+		${HEEKSCADPATH}/interface/PropertyCheck.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		${HEEKSCADPATH}/interface/Tool.h
+	$(CC) -c Profile.cpp ${CCFLAGS} -o $@
 
-Pocket.o: Pocket.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+Pocket.o: Pocket.cpp \
+		HeeksCNCTypes.h \
+		DepthOp.h \
+		Pocket.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		Program.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyLength.h \
+		${HEEKSCADPATH}/interface/PropertyString.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/interface/PropertyVertex.h \
+		${HEEKSCADPATH}/interface/PropertyCheck.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c Pocket.cpp ${CCFLAGS} -o $@
 
-Program.o: Program.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+Program.o: Program.cpp \
+		${HEEKSCADPATH}/interface/ObjList.h \
+		HeeksCNCTypes.h \
+		Program.h \
+		PythonStuff.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		ProgramCanvas.h \
+		NCCode.h \
+		${HEEKSCADPATH}/interface/MarkedObject.h \
+		${HEEKSCADPATH}/interface/PropertyString.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/interface/Tool.h \
+		Profile.h \
+		Pocket.h \
+		ZigZag.h \
+		Adaptive.h \
+		Drilling.h \
+		CuttingTool.h \
+		Op.h \
+		CNCConfig.h
+	$(CC) -c Program.cpp ${CCFLAGS} -o $@
 
-ProgramCanvas.o: ProgramCanvas.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+ProgramCanvas.o: ProgramCanvas.cpp \
+		ProgramCanvas.h \
+		Program.h \
+		OutputCanvas.h \
+		${HEEKSCADPATH}/interface/Tool.h \
+		${HEEKSCADPATH}/interface/InputMode.h \
+		${HEEKSCADPATH}/interface/LeftAndRight.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h
+	$(CC) -c ProgramCanvas.cpp ${CCFLAGS} -o $@
 
-PropertyCheck.o: ${HEEKSCADPATH}/interface/PropertyCheck.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyCheck.o: ${HEEKSCADPATH}/interface/PropertyCheck.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyCheck.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyCheck.cpp ${CCFLAGS} -o $@
 
-PropertyChoice.o: ${HEEKSCADPATH}/interface/PropertyChoice.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyChoice.o: ${HEEKSCADPATH}/interface/PropertyChoice.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyChoice.cpp ${CCFLAGS} -o $@
 
-PropertyColor.o: ${HEEKSCADPATH}/interface/PropertyColor.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyColor.o: ${HEEKSCADPATH}/interface/PropertyColor.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/HeeksColor.h \
+		${HEEKSCADPATH}/interface/PropertyColor.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyColor.cpp ${CCFLAGS} -o $@
 
-PropertyDouble.o: ${HEEKSCADPATH}/interface/PropertyDouble.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyDouble.o: ${HEEKSCADPATH}/interface/PropertyDouble.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyDouble.cpp ${CCFLAGS} -o $@
 
-PropertyLength.o: ${HEEKSCADPATH}/interface/PropertyLength.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyLength.o: ${HEEKSCADPATH}/interface/PropertyLength.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyLength.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyLength.cpp ${CCFLAGS} -o $@
 
-PropertyInt.o: ${HEEKSCADPATH}/interface/PropertyInt.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyInt.o: ${HEEKSCADPATH}/interface/PropertyInt.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyInt.cpp ${CCFLAGS} -o $@
 
-PropertyList.o: ${HEEKSCADPATH}/interface/PropertyList.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyList.o: ${HEEKSCADPATH}/interface/PropertyList.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyList.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyList.cpp ${CCFLAGS} -o $@
 
-PropertyString.o: ${HEEKSCADPATH}/interface/PropertyString.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyString.o: ${HEEKSCADPATH}/interface/PropertyString.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyString.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyString.cpp ${CCFLAGS} -o $@
 
-PropertyVertex.o: ${HEEKSCADPATH}/interface/PropertyVertex.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PropertyVertex.o: ${HEEKSCADPATH}/interface/PropertyVertex.cpp \
+		${HEEKSCADPATH}/interface/Property.h \
+		${HEEKSCADPATH}/interface/PropertyVertex.h
+	$(CC) -c ${HEEKSCADPATH}/interface/PropertyVertex.cpp ${CCFLAGS} -o $@
 
-PythonStuff.o: PythonStuff.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+PythonStuff.o: PythonStuff.cpp \
+		PythonStuff.h \
+		ProgramCanvas.h \
+		OutputCanvas.h \
+		Program.h
+	$(CC) -c PythonStuff.cpp ${CCFLAGS} -o $@
 
 strconv.o: ${HEEKSCADPATH}/interface/strconv.cpp
 	$(CC) -c $? ${CCFLAGS} -o $@
 
-ToolImage.o: ${HEEKSCADPATH}/interface/ToolImage.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+ToolImage.o: ${HEEKSCADPATH}/interface/ToolImage.cpp \
+	${HEEKSCADPATH}/interface/ToolImage.h
+	$(CC) -c ${HEEKSCADPATH}/interface/ToolImage.cpp ${CCFLAGS} -o $@
 
-tinyxml.o: ${HEEKSCADPATH}/tinyxml/tinyxml.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+tinyxml.o: ${HEEKSCADPATH}/tinyxml/tinyxml.cpp \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c ${HEEKSCADPATH}/tinyxml/tinyxml.cpp ${CCFLAGS} -o $@
 
-tinyxmlerror.o: ${HEEKSCADPATH}/tinyxml/tinyxmlerror.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+tinyxmlerror.o: ${HEEKSCADPATH}/tinyxml/tinyxmlerror.cpp \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c ${HEEKSCADPATH}/tinyxml/tinyxmlerror.cpp ${CCFLAGS} -o $@
 
-tinyxmlparser.o: ${HEEKSCADPATH}/tinyxml/tinyxmlparser.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+tinyxmlparser.o: ${HEEKSCADPATH}/tinyxml/tinyxmlparser.cpp \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c ${HEEKSCADPATH}/tinyxml/tinyxmlparser.cpp ${CCFLAGS} -o $@
 
-ZigZag.o: ZigZag.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+ZigZag.o: ZigZag.cpp \
+		Op.h \
+		HeeksCNCTypes.h
+	$(CC) -c ZigZag.cpp ${CCFLAGS} -o $@
 
-Adaptive.o: Adaptive.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+Adaptive.o: Adaptive.cpp \
+		Op.h \
+		HeeksCNCTypes.h \
+		Adaptive.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c Adaptive.cpp ${CCFLAGS} -o $@
 
-DepthOp.o: DepthOp.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+DepthOp.o: DepthOp.cpp \
+		Op.h \
+		DepthOp.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		Program.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyLength.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		${HEEKSCADPATH}/interface/Tool.h
+	$(CC) -c DepthOp.cpp ${CCFLAGS} -o $@
 
-Op.o: Op.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+Op.o: Op.cpp \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		Op.h \
+		ProgramCanvas.h \
+		${HEEKSCADPATH}/interface/PropertyString.h \
+		${HEEKSCADPATH}/interface/PropertyCheck.h \
+		${HEEKSCADPATH}/interface/Tool.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		HeeksCNCTypes.h
+	$(CC) -c Op.cpp ${CCFLAGS} -o $@
 
-Drilling.o: Drilling.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+Drilling.o: Drilling.cpp \
+		Op.h \
+		HeeksCNCTypes.h \
+		Drilling.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		CuttingTool.h
+	$(CC) -c Drilling.cpp ${CCFLAGS} -o $@
 
-CuttingTool.o: CuttingTool.cpp
-	$(CC) -c $? ${CCFLAGS} -o $@
+CuttingTool.o: CuttingTool.cpp \
+		CuttingTool.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c CuttingTool.cpp ${CCFLAGS} -o $@
 
 clean:
 	-rm ${SHARED_LIBRARY} ${OBJECTS}
@@ -159,7 +337,7 @@ install:
 	cp $(SHARED_LIBRARY) $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../bitmaps/*.png ../bitmaps/*.svg $(DESTDIR)$(HEEKSCNCDIR)/bitmaps/
 	cp ../icons/*.png $(DESTDIR)$(HEEKSCNCDIR)/icons/
-	cp ../nc/*.py $(DESTDIR)$(LIBDIR)/heekscnc/nc/
+	cp ${HEEKSCADPATH}/*.py $(DESTDIR)$(LIBDIR)/heeksc${HEEKSCADPATH}/
 	cp ../*_funcs.py $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../PyCamToHeeks.py $(DESTDIR)$(LIBDIR)/heekscnc/
 
