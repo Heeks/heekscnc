@@ -37,7 +37,7 @@ public:
 	int GetType()const{return ToolsType;}
 	const wxChar* GetTypeString(void)const{return _("Tools");}
 	HeeksObj *MakeACopy(void)const{ return new CTools(*this);}
-	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/tools");}
+	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/tool");}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object);
 	bool CanBeRemoved(){return false;}
