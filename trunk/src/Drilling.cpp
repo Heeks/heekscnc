@@ -302,15 +302,6 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 
 			// If we found something, ask its CAD code to draw itself highlighted.
 			if(object)object->glCommands(false, true, false);
-
-			// If it's a point then draw a Drill Cycle picture so that we can imagine what's going to happen.
-			if (l_itSymbol->first == PointType)
-			{ 
-				GLdouble start[3];
-
-				object->GetStartPoint(start);
-				locations.insert( Point3d( start[0], start[1], start[2] ) );
-			} // End if - then
 		} // End for
 
 		for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
