@@ -11,7 +11,12 @@
 
 class CNCCode;
 
-class COperations: public ObjList{
+class OperationsList: public ObjList{
+public:
+	
+}; // End OperationsList class definition.
+
+class COperations: public OperationsList {
 	static wxIcon* m_icon;
 public:
 	// HeeksObj's virtual functions

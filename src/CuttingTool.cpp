@@ -194,6 +194,7 @@ HeeksObj* CCuttingTool::ReadFromXMLElement(TiXmlElement* element)
 
 void CCuttingTool::OnEditString(const wxChar* str){
         m_title.assign(str);
+	heeksCAD->WasModified(this);
 }
 
 
