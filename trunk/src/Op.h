@@ -17,8 +17,9 @@ public:
 	bool m_active; // don't make NC code, if this is not active
 	wxString m_title;
 	int m_execution_order;	// Order by which the GCode sequences are generated.
+	int m_cutting_tool_number;	// joins the m_tool_number in one of the CCuttingTool objects in the tools list.
 
-	COp(const wxString& title):m_active(true), m_title(title), m_execution_order(0) {}
+	COp(const wxString& title, const int cutting_tool_number = 0):m_active(true), m_title(title), m_execution_order(0), m_cutting_tool_number(cutting_tool_number) {}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
