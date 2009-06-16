@@ -65,25 +65,6 @@ void CDrillingParams::write_values_to_config()
 	config.Write(_T("m_cutting_tool_number"), m_cutting_tool_number);
 }
 
-/**
- * Find the CuttingTool object whose tool number matches that passed in.
- */
-static int FindCuttingTool( const int tool_number )
-{
-	for (HeeksObj *ob = heeksCAD->GetFirstObject(); ob != NULL; ob = heeksCAD->GetNextObject())
-	{
-		if (ob->GetType() != CuttingToolType) continue;
-
-		if (((CCuttingTool *) ob)->m_tool_number == tool_number)
-		{
-			return(ob->m_id);
-		} // End if - then
-	} // End for
-
-	return(-1);
-
-} // End FindCuttingTool() method
-
 
 static void on_set_standoff(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_standoff = value;}
 static void on_set_dwell(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_dwell = value;}
@@ -104,7 +85,7 @@ static void on_set_cutting_tool_number(int value, HeeksObj* object)
 	// matches this one.  If none are found then let the operator know.
 
 	int id = 0;
-	if ((id=FindCuttingTool( value )) > 0)
+	if ((id=CCuttingTool::FindCuttingTool( value )) > 0)
 	{
 		HeeksObj* ob = heeksCAD->GetIDObject( CuttingToolType, id );
 		if ((ob != NULL) && (ob->GetType() == CuttingToolType))
@@ -238,10 +219,24 @@ std::list< CDrilling::Point3d > CDrilling::DrillBitVertices( const CDrilling::Po
 	std::list<CDrilling::Point3d> top, spiral, bottom, countersink, result;
 
 	double flutePitch = 5.0;	// 5mm of depth per spiral of the drill bit's flute.
-	double countersinkDepth = 3;	// this is the depth of the countersink cone at the end of the drill bit.
+	double countersinkDepth = -1 * radius * tan(31); // this is the depth of the countersink cone at the end of the drill bit. (for a typical 118 degree bevel)
 	unsigned int numPoints = 20;	// number of points in one circle (360 degrees) i.e. how smooth do we want the graphics
 	const double pi = 3.1415926;
 	double alpha = 2 * pi / numPoints;
+
+	if (theApp.m_program->m_units >= 25.4)
+	{
+		// We're using inches.
+
+		flutePitch = 5 / 25.4;	// inches
+	} // End if - then
+	else
+	{
+		// We're using mm.
+
+		flutePitch = 5.0;	// mm
+	} // End if - else
+
 
 	// Get a circle at the top of the dill bit's path
 	top = PointsAround( origin, radius, numPoints );
@@ -314,8 +309,18 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked && !no_color)
 	{
+		double l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
 
-		double l_dHoleDiameter = 12.7;	// Default at half-inch
+		if (theApp.m_program->m_units >= 25.4)
+		{
+			// We're using inches at the moment.  Set a default of 0.5 rather instead.
+			l_dHoleDiameter = 0.5;	// Half an inch (in inches)
+		} // End if - then
+		else
+		{
+			l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
+		} // End if - else
+
 		if (m_params.m_cutting_tool_number > 0)
 		{
 			HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_params.m_cutting_tool_number );

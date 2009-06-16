@@ -29,14 +29,39 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_x_offset"), &m_x_offset, 0);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, 0);
 	config.Read(_T("m_orientation"), &m_orientation, 9);
+
+	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
+	// If we're now in inches then convert the values.
+	if (theApp.m_program->m_units >= 25.4)
+	{
+		m_diameter = m_diameter / 25.4;
+		m_x_offset = m_x_offset / 25.4;
+		m_tool_length_offset = m_x_offset / 25.4;
+	} // End if - then
 }
 
 void CCuttingToolParams::write_values_to_config()
 {
 	CNCConfig config;
-	config.Write(_T("m_diameter"), m_diameter);
-	config.Write(_T("m_x_offset"), m_x_offset);
-	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
+
+	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
+	// If we're now in inches then convert the values.
+	if (theApp.m_program->m_units >= 25.4)
+	{
+		// We're in inches right now.
+
+		config.Write(_T("m_diameter"), (m_diameter * 25.4));
+		config.Write(_T("m_x_offset"), (m_x_offset * 25.4));
+		config.Write(_T("m_tool_length_offset"), (m_tool_length_offset * 25.4));
+	} // End if - then
+	else
+	{
+		// We're in mm already.
+		config.Write(_T("m_diameter"), m_diameter);
+		config.Write(_T("m_x_offset"), m_x_offset);
+		config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
+	} // End if - else
+
 	config.Write(_T("m_orientation"), m_orientation);
 }
 
@@ -197,4 +222,35 @@ void CCuttingTool::OnEditString(const wxChar* str){
 	heeksCAD->WasModified(this);
 }
 
+/**
+ * Find the CuttingTool object whose tool number matches that passed in.
+ */
+int CCuttingTool::FindCuttingTool( const int tool_number )
+{
+        /* Can't make this work.  Need to figure out why */
+        for (HeeksObj *ob = heeksCAD->GetFirstObject(); ob != NULL; ob = heeksCAD->GetNextObject())
+        {
+                if (ob->GetType() != CuttingToolType) continue;
+
+                if (((CCuttingTool *) ob)->m_tool_number == tool_number)
+                {
+                        return(ob->m_id);
+                } // End if - then
+        } // End for
+
+        // This is a hack but it works.  As long as we don't get more than 100 tools in the holder.
+        for (int id=1; id<100; id++)
+        {
+                HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, id );
+                if (! ob) continue;
+
+                if (((CCuttingTool *) ob)->m_tool_number == tool_number)
+                {
+                        return(ob->m_id);
+                } // End if - then
+        } // End for
+
+        return(-1);
+
+} // End FindCuttingTool() method
 
