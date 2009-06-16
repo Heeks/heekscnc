@@ -30,18 +30,18 @@ Drilling cycles will be located at an aggregation of;
 
  - set the Drilling Cycle parameters
 
-== Parameters ==
+= Parameters =
 
-=== Standoff ===
+== Standoff ==
     Assuming the point's location is on the surface to be drilled, the standoff value is the height ABOVE the surface at which the drilling cycle will both begin and retract to.  By default a standoff of 6.35mm (0.25 inches) will be used.
 
-=== Depth ===
+== Depth ==
     The depth is the distance in the negative Z direction from the point's Z value. By default a hole depth of 25.4mm (1 inch) will be used.
 
-=== Peck Depth ===
+== Peck Depth ==
     The peck_depth is the amount of material to remove in each peck of the drill.  If this value is non-zero then the generated GCode will use the G83 peck drilling command.  By default a peck depth of 2.54mm (0.1 inches) will be used.
 
-=== Dwell ===
+== Dwell ==
     The dwell is the time (in seconds) for which the drill should remain at the bottom of the hole to break all the 'stringers'.  If the 'peck_depth' value is zero and this dwell value is positive then the generted GCode will use the G82 (drill with dwell) cycle.
 
     If neither the peck depth or dwell values has a positive value then the generated GCode will include the G81 drilling command.
