@@ -229,6 +229,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	std::set<CDrilling::Point3d> intersections;
 	CDrilling::Symbols_t symbols;
 	CDrilling::Symbols_t cuttingTools;
+	int cutting_tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
@@ -237,6 +238,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		if (object->GetType() == CuttingToolType)
 		{
 			cuttingTools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
 		} // End if - then
 		else
 		{
@@ -276,7 +278,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	CDrilling *new_object = new CDrilling( symbols, cuttingTools, depth );
+	CDrilling *new_object = new CDrilling( symbols, cutting_tool_number, depth );
 	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);

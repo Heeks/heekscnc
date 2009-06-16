@@ -21,7 +21,7 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-void CDrillingParams::set_initial_values( const CDrilling::Symbols_t & cuttingTools, const double depth )
+void CDrillingParams::set_initial_values( const double depth )
 {
 	CNCConfig config;
 	config.Read(_T("m_standoff"), &m_standoff, 5.0);
@@ -35,24 +35,6 @@ void CDrillingParams::set_initial_values( const CDrilling::Symbols_t & cuttingTo
 	} // End if - then
 
 	config.Read(_T("m_peck_depth"), &m_peck_depth, 3);
-
-	config.Read(_T("m_cutting_tool_number"), &m_cutting_tool_number, 0);
-
-	// Override this value if we've been given one.
-	if (cuttingTools.size() > 0)
-	{
-		HeeksObj* object = heeksCAD->GetIDObject(CuttingToolType, cuttingTools.begin()->second );
-		if (object != NULL)
-		{
-			m_cutting_tool_number = ((CCuttingTool *) object)->m_tool_number;
-		} // End if - then
-		else
-		{
-			std::wostringstream l_ossMsg;
-			l_ossMsg << "Could not find existing cutting tool with an id='" << cuttingTools.begin()->second << "'";
-			wxMessageBox(l_ossMsg.str().c_str());
-		} // End if - else
-	} // End if - then
 }
 
 void CDrillingParams::write_values_to_config()
@@ -62,7 +44,6 @@ void CDrillingParams::write_values_to_config()
 	config.Write(_T("m_dwell"), m_dwell);
 	config.Write(_T("m_depth"), m_depth);
 	config.Write(_T("m_peck_depth"), m_peck_depth);
-	config.Write(_T("m_cutting_tool_number"), m_cutting_tool_number);
 }
 
 
@@ -71,34 +52,6 @@ static void on_set_dwell(double value, HeeksObj* object){((CDrilling*)object)->m
 static void on_set_depth(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_depth = value;}
 static void on_set_peck_depth(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_peck_depth = value;}
 
-static void on_set_cutting_tool_number(int value, HeeksObj* object)
-{
-	// If they've set a negative or zero value then they must want to disassociate this
-	// from a tool.  This just means they won't get prompted to change tools in the GCode.
-	if (value <= 0)
-	{
-		((CDrilling*)object)->m_params.m_cutting_tool_number = value;
-		return;
-	}
-
-	// Look through all objects to find a CuttingTool object whose tool number
-	// matches this one.  If none are found then let the operator know.
-
-	int id = 0;
-	if ((id=CCuttingTool::FindCuttingTool( value )) > 0)
-	{
-		HeeksObj* ob = heeksCAD->GetIDObject( CuttingToolType, id );
-		if ((ob != NULL) && (ob->GetType() == CuttingToolType))
-		{
-			((CDrilling*)object)->m_params.m_cutting_tool_number = value;
-			return;
-		} // End if - then
-	} // End for
-		
-	wxMessageBox(_T("This tool number has not been defined as a cutting tool yet. Set the tool number to zero (0) if no tool table functionality is required for this Drilling Cycle. Otherwise, define a CuttingTool object with its own tool number before referring this Drilling Cycle to it."));
-} // End on_set_cutting_tool_number() routine
-
-
 
 void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *list)
 {
@@ -106,7 +59,6 @@ void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *li
 	list->push_back(new PropertyDouble(_("dwell"), m_dwell, parent, on_set_dwell));
 	list->push_back(new PropertyDouble(_("depth"), m_depth, parent, on_set_depth));
 	list->push_back(new PropertyDouble(_("peck_depth"), m_peck_depth, parent, on_set_peck_depth));
-	list->push_back(new PropertyInt(_("cutting_tool_number"), m_cutting_tool_number, parent, on_set_cutting_tool_number));
 }
 
 void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
@@ -118,10 +70,6 @@ void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("dwell", m_dwell);
 	element->SetDoubleAttribute("depth", m_depth);
 	element->SetDoubleAttribute("peck_depth", m_peck_depth);
-
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_cutting_tool_number;
-	element->SetAttribute("cutting_tool_number", l_ossValue.str().c_str() );
 }
 
 void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -130,7 +78,6 @@ void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("dwell")) m_dwell = atof(pElem->Attribute("dwell"));
 	if (pElem->Attribute("depth")) m_depth = atof(pElem->Attribute("depth"));
 	if (pElem->Attribute("peck_depth")) m_peck_depth = atof(pElem->Attribute("peck_depth"));
-	if (pElem->Attribute("cutting_tool_number")) m_cutting_tool_number = atof(pElem->Attribute("cutting_tool_number"));
 }
 
 /**
@@ -149,15 +96,7 @@ void CDrilling::AppendTextToProgram()
 #endif
     ss.imbue(std::locale("C"));
 
-
 	std::set<Point3d> locations = FindAllLocations( m_symbols );
-
-	if ((locations.size() > 0) && (m_params.m_cutting_tool_number > 0))
-	{
-		// Select the right tool.
-		ss << "tool_change( id=" << m_params.m_cutting_tool_number << ")\n";
-	} // End if - then
-
 	for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		ss << "drill("
@@ -321,9 +260,9 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
 		} // End if - else
 
-		if (m_params.m_cutting_tool_number > 0)
+		if (m_cutting_tool_number > 0)
 		{
-			HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_params.m_cutting_tool_number );
+			HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
 			if (cuttingTool != NULL)
 			{
 				l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter;
