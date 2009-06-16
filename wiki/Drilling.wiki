@@ -17,8 +17,6 @@ Drilling cycles will be located at an aggregation of;
 
  - the centre of any selected circles where those circles don't intersect any other selected object.
 
-= Details =
-
 = Workflow =
  - Add a Cutting Tool object and set its parameters (length/width)
 
