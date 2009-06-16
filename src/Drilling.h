@@ -1,3 +1,7 @@
+
+#ifndef DRILLING_CYCLE_CLASS_DEFINITION
+#define DRILLING_CYCLE_CLASS_DEFINITION
+
 // Drilling.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
@@ -149,3 +153,4 @@ public:
 
 
 
+#endif // DRILLING_CYCLE_CLASS_DEFINITION

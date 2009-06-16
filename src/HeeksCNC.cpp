@@ -25,6 +25,7 @@
 #include "Adaptive.h"
 #include "Drilling.h"
 #include "CuttingTool.h"
+#include "CounterBore.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -284,6 +285,66 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+
+
+static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
+{
+	std::set<CCounterBore::Point3d> intersections;
+	CCounterBore::Symbols_t symbols;
+	CCounterBore::Symbols_t cuttingTools;
+	int cutting_tool_number = 0;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if (object->GetType() == CuttingToolType)
+		{
+			cuttingTools.push_back( CCounterBore::Symbol_t( object->GetType(), object->m_id ) );
+			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+		} // End if - then
+		else
+		{
+			symbols.push_back( CCounterBore::Symbol_t( object->GetType(), object->m_id ) );
+		} // End if - else
+	} // End for
+
+	CCounterBore::Symbols_t cuttingToolsThatMatchCircles;
+	intersections = CCounterBore::FindAllLocations( symbols, NULL );
+
+	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
+	{
+		// The operator didn't point to a cutting tool object and one of the circles that they
+		// did point to happenned to match the diameter of an existing cutting tool.  Use that
+		// one as our default.  The operator can always overwrite it later on.
+
+		std::copy( cuttingToolsThatMatchCircles.begin(), cuttingToolsThatMatchCircles.end(),
+				std::inserter( cuttingTools, cuttingTools.begin() ));
+	} // End if - then
+
+	if (intersections.size() == 0)
+	{
+		wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
+		return;
+	}
+
+	if(cuttingTools.size() == 0)
+	{
+		wxMessageBox(_("You haven't selected a cutting tool for this hole.  By default no 'tool definition' or 'select tool' code will be generated for this drilling cycle."));
+	}
+
+	if(cuttingTools.size() > 1)
+	{
+		wxMessageBox(_("You may only select a single cutting tool for each drilling operation.!"));
+		return;
+	}
+
+	CCounterBore *new_object = new CCounterBore( symbols, cutting_tool_number );
+	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
 static void NewCuttingToolOpMenuCallback(wxCommandEvent &event)
 {
 	// Step through the tools we already have and allocate the next tool number.
@@ -380,6 +441,7 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("ZigZag"), ToolImage(_T("zigzag")), _T("New ZigZag Operation..."), NewZigZagOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Adaptive"), ToolImage(_T("adapt")), _T("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Drill"), ToolImage(_T("drilling")), _T("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("CounterBore"), ToolImage(_T("counterbore")), _T("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("tool")), _T("New Cutting Tool Definition..."), NewCuttingToolOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Python"), ToolImage(_T("python")), _T("Make Python Script"), MakeScriptMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _T("Post-Process"), PostProcessMenuCallback);
@@ -430,6 +492,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("New ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Adaptive Roughing Operation..."), ToolImage(_T("adapt")), NewAdaptiveOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Drilling Operation..."), ToolImage(_T("drilling")), NewDrillingOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New CounterBore Operation..."), ToolImage(_T("counterbore")), NewCounterBoreOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Cutting Tool Definition..."), ToolImage(_T("tool")), NewCuttingToolOpMenuCallback);
 
 	// Machining menu
@@ -480,6 +543,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("CounterBore", CCounterBore::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingTool", CCuttingTool::ReadFromXMLElement);
 
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=1;pos=0;prop=100000;bestw=341;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=970;floaty=297;floatw=296;floath=57|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=1;pos=352;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=TransformBar;caption=Transformation Tools;state=2108156;dir=1;layer=10;row=1;pos=611;prop=100000;bestw=217;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MachiningBar;caption=Machining tools;state=2108156;dir=1;layer=10;row=0;pos=549;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Program;caption=Program;state=2099196;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Output;caption=Output;state=2099196;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=234|dock_size(1,10,0)=33|dock_size(1,10,1)=33|dock_size(3,0,0)=219|")));
