@@ -121,6 +121,11 @@ void CCuttingTool::AppendTextToProgram()
         // table from within a program.
         // G10 L1 P[tool number] R[radius] X[offset] Z[offset] Q[orientation]
 
+	if (m_title.size() > 0)
+	{
+		ss << "(" << m_title.c_str() << ")\n";
+	} // End if - then
+
 	ss << "tool_defn( id=" << m_tool_number << ", "
 		<< "name=None, ";
 	if (m_params.m_diameter > 0)
