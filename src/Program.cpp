@@ -277,29 +277,38 @@ void CProgram::RewritePythonProgram()
 	bool adaptive_op_exists = false;
 	bool drilling_op_exists = false;
 
+	typedef std::multimap< int, COp * > OperationsMap_t;
+	OperationsMap_t operations;
+
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
 		if(object->GetType() == ProfileType)
 		{
 			if(((CProfile*)object)->m_active)profile_op_exists = true;
+			operations.insert( std::make_pair( ((CProfile *) object)->m_execution_order, ((CProfile *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == PocketType)
 		{
 			if(((CPocket*)object)->m_active)pocket_op_exists = true;
+			operations.insert( std::make_pair( ((CPocket *) object)->m_execution_order, ((CPocket *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == ZigZagType)
 		{
 			if(((CZigZag*)object)->m_active)zigzag_op_exists = true;
+			operations.insert( std::make_pair( ((CZigZag *) object)->m_execution_order, ((CZigZag *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == AdaptiveType)
 		{
 			if(((CAdaptive*)object)->m_active)adaptive_op_exists = true;
+			operations.insert( std::make_pair( ((CAdaptive *) object)->m_execution_order, ((CAdaptive *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == DrillingType)
 		{
 			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
+			operations.insert( std::make_pair( ((CDrilling *) object)->m_execution_order, ((CDrilling *) object) ) );	// Will I go to hell for this?
 		}
 	}
+
 
 	// add standard stuff at the top
 	//hackhack, make it work on unix with FHS
@@ -387,9 +396,23 @@ void CProgram::RewritePythonProgram()
 		}
 	} // End for
 
+
 	// And then all the rest of the operations.
-	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
+	int current_tool = 0;
+	for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 	{
+		HeeksObj *object = (HeeksObj *) l_itOperation->second;
+
+		if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
+		{
+			// Select the right tool.
+			std::ostringstream l_ossValue;
+
+			l_ossValue << "tool_change( id=" << ((COp *) object)->m_cutting_tool_number << ")\n";
+			theApp.m_program_canvas->AppendText(Ctt(l_ossValue.str().c_str()));
+			current_tool = ((COp *) object)->m_cutting_tool_number;
+		} // End if - then
+
 		switch(object->GetType())
 		{
 		case ProfileType:

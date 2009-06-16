@@ -20,14 +20,10 @@ public:
 	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
 	double m_peck_depth;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 
-	int m_cutting_tool_number;	// Reference into CuttingTool object from whence radius comes.  If this value is negative or zero then it just
-					// means that this Drilling object doesn't use a tool table entry to do its work.  i.e. the Generated GCode
-					// will not include either a table insertion (G10 L1) or a tool selection (M6?).  It's still valid.
-
 	// The following line is the prototype setup in the Python routines for the drill sequence.
 	// def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
 
-	void set_initial_values( const std::list< std::pair<int, int> >  & cuttingTools, const double depth );
+	void set_initial_values( const double depth );
 	void write_values_to_config();
 	void GetProperties(CDrilling* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -117,13 +113,13 @@ public:
 	CDrillingParams m_params;
 
 	//	Constructors.
-	CDrilling():COp(GetTypeString()){}
+	CDrilling():COp(GetTypeString(), 0){}
 	CDrilling(	const Symbols_t &symbols, 
-			const Symbols_t &cuttingTools,
+			const int cutting_tool_number,
 			const double depth ) 
-		: COp(GetTypeString()), m_symbols(symbols)
+		: COp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
 	{
-		m_params.set_initial_values(cuttingTools, depth);
+		m_params.set_initial_values(depth);
 	}
 
 	// HeeksObj's virtual functions
