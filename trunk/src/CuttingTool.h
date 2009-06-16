@@ -1,3 +1,7 @@
+
+#ifndef CUTTING_TOOL_CLASS_DEFINTION
+#define CUTTING_TOOL_CLASS_DEFINTION
+
 // CuttingTool.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
@@ -79,3 +83,4 @@ public:
 
 
 
+#endif // CUTTING_TOOL_CLASS_DEFINTION

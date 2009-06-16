@@ -14,5 +14,6 @@ enum{
 	DrillingType,
 	CuttingToolType,
 	ToolsType,
+	CounterBoreType,
 	HeeksCNCMaximumType
 };
