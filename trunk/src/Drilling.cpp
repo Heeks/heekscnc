@@ -24,9 +24,19 @@ extern CHeeksCADInterface* heeksCAD;
 void CDrillingParams::set_initial_values( const double depth )
 {
 	CNCConfig config;
-	config.Read(_T("m_standoff"), &m_standoff, 5.0);
+	
+	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
 	config.Read(_T("m_dwell"), &m_dwell, 1);
-	config.Read(_T("m_depth"), &m_depth, 21);
+	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
+	config.Read(_T("m_peck_depth"), &m_peck_depth, (25.4 / 10));	// One tenth of an inch
+
+	if (theApp.m_program->m_units >= 25.4)
+	{
+		// We're using inches.  Change the default settings.
+		m_standoff = m_standoff / 25.4;
+		m_depth = m_depth / 25.4;
+		m_peck_depth = m_peck_depth / 25.4;
+	} // End if - then
 
 	if (depth > 0)
 	{
@@ -34,16 +44,31 @@ void CDrillingParams::set_initial_values( const double depth )
 		m_depth = depth;
 	} // End if - then
 
-	config.Read(_T("m_peck_depth"), &m_peck_depth, 3);
 }
 
 void CDrillingParams::write_values_to_config()
 {
+	// We always want to store the parameters in mm and convert them back later on.
+
 	CNCConfig config;
-	config.Write(_T("m_standoff"), m_standoff);
-	config.Write(_T("m_dwell"), m_dwell);
-	config.Write(_T("m_depth"), m_depth);
-	config.Write(_T("m_peck_depth"), m_peck_depth);
+	if (theApp.m_program->m_units >= 25.4)
+	{
+		// We're currently in inches.  Store them in mm
+
+		config.Write(_T("m_standoff"), (m_standoff * 25.4));
+		config.Write(_T("m_dwell"), m_dwell);
+		config.Write(_T("m_depth"), (m_depth * 25.4));
+		config.Write(_T("m_peck_depth"), (m_peck_depth * 25.4));
+	} // End if - then
+	else
+	{	
+		// They're already in mm.  Store them just the way they are.
+
+		config.Write(_T("m_standoff"), m_standoff);
+		config.Write(_T("m_dwell"), m_dwell);
+		config.Write(_T("m_depth"), m_depth);
+		config.Write(_T("m_peck_depth"), m_peck_depth);
+	} // End if - else
 }
 
 
