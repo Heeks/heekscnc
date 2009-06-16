@@ -11,3 +11,5 @@ The various NC operations (Adaptive, Profile, Drilling etc.) objects also refer 
 The Cutting Tool object has been added to define a single tool.  It's GCode produces a 'G10 L1' command to add a tool to the logical tool table from within the GCode program.  (from the EMC2 documentation).
 
 The tool_number value may be assigned to any of the NC operation objects within their Properties page.  If no tool table and/or tool change commands are wanted, a tool_number value of zero (0) should be assigned.
+
+An operation's tool_number may not be updated to any value except zero unless a corresponding Cutting Tool object already exists for the tool number.  If an invalid tool number is entered, a warning dialog will appear and the change will not be made.
