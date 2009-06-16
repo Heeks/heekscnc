@@ -4,10 +4,10 @@
 
 The Cutting Tool object defines a single tool in what will eventually become a tool table.  For each Cutting Tool object, a G10 L1 command is added to the GCode to add the cutting tool to the tool table 'on the fly'.
 
-The Drilling Cycle objects also refer to these Cutting Tool objects and add a 'selct tool' command immediately prior to the drilling cycle commands generated.
+The various NC operations (Adaptive, Profile, Drilling etc.) objects also refer to these Cutting Tool objects and add a 'select tool' command immediately prior to that operation's GCode generation.
 
 
 = Details =
 The Cutting Tool object has been added to define a single tool.  It's GCode produces a 'G10 L1' command to add a tool to the logical tool table from within the GCode program.  (from the EMC2 documentation).
 
-At the moment, only the Drilling Cycle object refers to it.  This reference is used for graphics generation when the operator selects the Drilling Cycle object.  It is also used to generate the 'select tool' command prior to listing the drilling cycles in the GCode.
+The tool_number value may be assigned to any of the NC operation objects within their Properties page.  If no tool table and/or tool change commands are wanted, a tool_number value of zero (0) should be assigned.
