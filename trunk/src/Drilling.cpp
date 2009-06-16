@@ -44,7 +44,7 @@ void CDrillingParams::set_initial_values( const CDrilling::Symbols_t & cuttingTo
 		HeeksObj* object = heeksCAD->GetIDObject(CuttingToolType, cuttingTools.begin()->second );
 		if (object != NULL)
 		{
-			m_cutting_tool_number = ((CCuttingTool *) object)->m_params.m_tool_number;
+			m_cutting_tool_number = ((CCuttingTool *) object)->m_tool_number;
 		} // End if - then
 		else
 		{
@@ -74,7 +74,7 @@ static int FindCuttingTool( const int tool_number )
 	{
 		if (ob->GetType() != CuttingToolType) continue;
 
-		if (((CCuttingTool *) ob)->m_params.m_tool_number == tool_number)
+		if (((CCuttingTool *) ob)->m_tool_number == tool_number)
 		{
 			return(ob->m_id);
 		} // End if - then
@@ -114,7 +114,7 @@ static void on_set_cutting_tool_number(int value, HeeksObj* object)
 		} // End if - then
 	} // End for
 		
-	wxMessageBox(_T("This tool number has not been defined as a cutting tool yet. Set the tool number to zero (0) if no tool table functionality is required for this Drilling Cycle."));
+	wxMessageBox(_T("This tool number has not been defined as a cutting tool yet. Set the tool number to zero (0) if no tool table functionality is required for this Drilling Cycle. Otherwise, define a CuttingTool object with its own tool number before referring this Drilling Cycle to it."));
 } // End on_set_cutting_tool_number() routine
 
 
