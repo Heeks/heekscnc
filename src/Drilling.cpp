@@ -385,7 +385,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 void CDrilling::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
-	HeeksObj::GetProperties(list);
+	COp::GetProperties(list);
 }
 
 HeeksObj *CDrilling::MakeACopy(void)const

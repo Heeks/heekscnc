@@ -16,8 +16,9 @@ public:
 	wxString m_comment;
 	bool m_active; // don't make NC code, if this is not active
 	wxString m_title;
+	int m_execution_order;	// Order by which the GCode sequences are generated.
 
-	COp(const wxString& title):m_active(true), m_title(title){}
+	COp(const wxString& title):m_active(true), m_title(title), m_execution_order(0) {}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
