@@ -153,6 +153,7 @@ void CAdaptiveParams::GetProperties(CAdaptive* parent, std::list<Property *> *li
 		list->push_back(new PropertyDouble(_("boundary_y0"), m_boundary_y0, parent, on_set_boundary_y0));
 		list->push_back(new PropertyDouble(_("boundary_y1"), m_boundary_y1, parent, on_set_boundary_y1));
 	}
+
 }
 
 void CAdaptiveParams::WriteXMLAttributes(TiXmlNode *root)
@@ -376,7 +377,7 @@ void CAdaptive::glCommands(bool select, bool marked, bool no_color)
 void CAdaptive::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
-	HeeksObj::GetProperties(list);
+	COp::GetProperties(list);
 }
 
 HeeksObj *CAdaptive::MakeACopy(void)const

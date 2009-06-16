@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include "Op.h"
 #include "ProgramCanvas.h"
+#include "interface/PropertyInt.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyCheck.h"
 #include "interface/Tool.h"
@@ -19,6 +20,7 @@ void COp::WriteBaseXML(TiXmlElement *element)
 	if(m_comment.Len() > 0)element->SetAttribute("comment", Ttc(m_comment.c_str()));
 	if(!m_active)element->SetAttribute("active", 0);
 	element->SetAttribute("title", Ttc(m_title.c_str()));
+	element->SetAttribute("execution_order", m_execution_order);
 
 	HeeksObj::WriteBaseXML(element);
 }
@@ -37,16 +39,23 @@ void COp::ReadBaseXML(TiXmlElement* element)
 	const char* title = element->Attribute("title");
 	if(title)m_title = wxString(Ctt(title));
 
+	if (element->Attribute("execution_order") != NULL)
+	{
+		m_execution_order = atoi(element->Attribute("execution_order"));
+	} // End if - then
+
 	HeeksObj::ReadBaseXML(element);
 }
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
 static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->WasModified(object);}
+static void on_set_execution_order(int value, HeeksObj* object){((COp*)object)->m_execution_order = value;heeksCAD->WasModified(object);}
 
 void COp::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyString(_("comment"), m_comment, this, on_set_comment));
 	list->push_back(new PropertyCheck(_("active"), m_active, this, on_set_active));
+	list->push_back(new PropertyInt(_("execution_order"), m_execution_order, this, on_set_execution_order));
 
 	HeeksObj::GetProperties(list);
 }
