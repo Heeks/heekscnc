@@ -248,7 +248,7 @@ std::list< CDrilling::Point3d > CDrilling::DrillBitVertices( const CDrilling::Po
 	top.push_back( *(top.begin()) );	// Close the circle
 
 	double depthPerItteration;
-	countersinkDepth = length / 10;	// 10% of the full length instead.
+	countersinkDepth = -1 * radius * tan(31.0);	// For a typical (118 degree bevel on the drill bit tip)
 
 	unsigned int l_iNumItterations = numPoints * (length / flutePitch);
 	depthPerItteration = (length - countersinkDepth) / l_iNumItterations;
