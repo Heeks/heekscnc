@@ -285,15 +285,15 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 static void NewCuttingToolOpMenuCallback(wxCommandEvent &event)
 {
 	// Step through the tools we already have and allocate the next tool number.
-	int largest_tool_number = -1;
-	for (HeeksObj *object = heeksCAD->GetFirstObject(); object != NULL; object = heeksCAD->GetNextObject())
+	int largest_tool_number = 0;
+	for (int id=1; id<100; id++)
 	{
-		if (object->GetType() == CuttingToolType)
+		HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, id );
+		if (ob == NULL) continue;
+
+		if (((CCuttingTool *) ob)->m_tool_number > largest_tool_number)
 		{
-			if (((CCuttingTool *) object)->m_tool_number > largest_tool_number)
-			{
-				largest_tool_number = ((CCuttingTool *) object)->m_tool_number;
-			} // End if - then
+			largest_tool_number = ((CCuttingTool *) ob)->m_tool_number;
 		} // End if - then
 	} // End for
 
