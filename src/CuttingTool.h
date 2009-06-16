@@ -72,6 +72,8 @@ public:
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
 
+	static int FindCuttingTool( const int tool_number );
+
 }; // End CCuttingTool class definition.
 
 
