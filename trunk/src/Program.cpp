@@ -18,7 +18,7 @@
 #include "CuttingTool.h"
 #include "Op.h"
 #include "CNCConfig.h"
-//#include "CounterBore.h"
+#include "CounterBore.h"
 
 bool COperations::CanAdd(HeeksObj* object)
 {
@@ -26,8 +26,8 @@ bool COperations::CanAdd(HeeksObj* object)
 		object->GetType() == PocketType || 
 		object->GetType() == ZigZagType || 
 		object->GetType() == AdaptiveType || 
-		object->GetType() == DrillingType;/* ||
-		object->GetType() == CounterBoreType;*/
+		object->GetType() == DrillingType ||
+		object->GetType() == CounterBoreType;
 }
 
 void COperations::WriteXML(TiXmlNode *root)
@@ -278,6 +278,7 @@ void CProgram::RewritePythonProgram()
 	bool zigzag_op_exists = false;
 	bool adaptive_op_exists = false;
 	bool drilling_op_exists = false;
+	bool counterbore_op_exists = false;
 
 	typedef std::multimap< int, COp * > OperationsMap_t;
 	OperationsMap_t operations;
@@ -309,11 +310,12 @@ void CProgram::RewritePythonProgram()
 			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
 			operations.insert( std::make_pair( ((CDrilling *) object)->m_execution_order, ((CDrilling *) object) ) );	// Will I go to hell for this?
 		}
-/*		else if(object->GetType() == CounterBoreType)
+		else if(object->GetType() == CounterBoreType)
 		{
 			operations.insert( std::make_pair( ((CCounterBore *) object)->m_execution_order, ((CCounterBore *) object) ) );	// Will I go to hell for this?
+			counterbore_op_exists = true;
 		}
-*/	}
+	}
 
 
 	// add standard stuff at the top
@@ -364,6 +366,13 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->AppendText(_T("import actp\n"));
 		theApp.m_program_canvas->AppendText(_T("\n"));
 	}
+
+	if(counterbore_op_exists)
+	{
+		theApp.m_program_canvas->AppendText(_T("import nc.circular_pocket as circular\n"));
+		theApp.m_program_canvas->AppendText(_T("\n"));
+	}
+
 
 	// machine general stuff
 	theApp.m_program_canvas->AppendText(_T("from nc.nc import *\n"));
@@ -436,11 +445,12 @@ void CProgram::RewritePythonProgram()
 		case DrillingType:
 			if(((CDrilling*)object)->m_active)((CDrilling*)object)->AppendTextToProgram();
 			break;
-/*		case CounterBoreType:
+		case CounterBoreType:
 			if(((CCounterBore *)object)->m_active)((CCounterBore *)object)->AppendTextToProgram();
 			break;
-*/		}
+		}
 	}
+	theApp.m_program_canvas->AppendText(_T("program_end()\n"));
 }
 
 ProgramUserType CProgram::GetUserType()
