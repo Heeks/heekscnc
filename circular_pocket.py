@@ -7,28 +7,7 @@
     Version 1.3
     Copyright (C) <2008>  <John Thornton>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    e-mail me any suggestions to "jet1024 at semo dot net"
-    If you make money using this software
-    you must donate $20 USD to a local food bank
-    or the food police will get you! Think of others from time to time...
-    
-    1.2 Fix bug that incorrectly calculated the number of circles when the tool
-    	was less than 1/2 the diameter of the hole
-    1.3 Fix bug that did not calculate the depth of the hole if it was a single cut	
-
+    It is being used with permission from John Thornton for inclusion in the HeeksCNC project.
 """
 from math import *
 import os
