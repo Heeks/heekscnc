@@ -1,0 +1,33 @@
+#summary Counter Bore - circular pockets for Socket Head Cap Screws
+
+= Introduction =
+
+The CounterBore operation adds circular pockets at each of the selected locations.  The intent is to select a DrillingCycle operation and add circular pockets at the top of each hole position to allow for the heads of socket head cap screws.
+
+The idea behind this object comes from a python utility produced by John Thornton.  This utility can be found at http://wiki.linuxcnc.org/uploads/counterbore.py
+
+= Details =
+
+The CounterBore operation accepts all the same object selections as does a DrillingCycle operation.  i.e. it accepts locations based on selected point objects, selected standalone circle objects (standalone in that they must not intersect other selected objects) and other intersecting objects.  Finally, the CounterBore operation can reference a DrillingCycle object.
+
+= Workflow =
+
+- Define a cutting tool object for use in drilling the holes.
+
+- Place points, standalone circles and/or intersecting objects.
+
+- Select the cutting tool as well as the other graphics ojbects mentioned above.
+
+- Create a DrillingCycle object.
+
+- Define another cutting tool object for use in milling the circular pockets.
+
+- Select the DrillingCycle object created earlier.
+
+- Select the milling bit cutting tool object.
+
+- Create a CounterBore operation.
+
+- Generate the Python script
+
+- Run the Python script to generate the GCode.
