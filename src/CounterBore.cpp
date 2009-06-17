@@ -26,6 +26,7 @@ void CCounterBoreParams::set_initial_values()
 {
 	CNCConfig config;
 	
+	config.Read(_T("m_feedrate"), &m_feedrate, 100);	// 100 mm per minute
 	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
 	config.Read(_T("m_dwell"), &m_dwell, 1);
 	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
@@ -34,6 +35,7 @@ void CCounterBoreParams::set_initial_values()
 	if (theApp.m_program->m_units >= 25.4)
 	{
 		// We're using inches.  Change the default settings.
+		m_feedrate = m_feedrate / 25.4;
 		m_standoff = m_standoff / 25.4;
 		m_depth = m_depth / 25.4;
 		m_diameter = m_diameter / 25.4;
@@ -49,6 +51,7 @@ void CCounterBoreParams::write_values_to_config()
 	{
 		// We're currently in inches.  Store them in mm
 
+		config.Write(_T("m_feedrate"), (m_feedrate * 25.4));
 		config.Write(_T("m_standoff"), (m_standoff * 25.4));
 		config.Write(_T("m_dwell"), m_dwell);
 		config.Write(_T("m_depth"), (m_depth * 25.4));
@@ -58,6 +61,7 @@ void CCounterBoreParams::write_values_to_config()
 	{	
 		// They're already in mm.  Store them just the way they are.
 
+		config.Write(_T("m_feedrate"), m_feedrate);
 		config.Write(_T("m_standoff"), m_standoff);
 		config.Write(_T("m_dwell"), m_dwell);
 		config.Write(_T("m_depth"), m_depth);
@@ -66,6 +70,7 @@ void CCounterBoreParams::write_values_to_config()
 }
 
 
+static void on_set_feedrate(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_feedrate = value;}
 static void on_set_standoff(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_standoff = value;}
 static void on_set_dwell(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_dwell = value;}
 static void on_set_depth(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_depth = value;}
@@ -74,6 +79,7 @@ static void on_set_diameter(double value, HeeksObj* object){((CCounterBore*)obje
 
 void CCounterBoreParams::GetProperties(CCounterBore* parent, std::list<Property *> *list)
 {
+	list->push_back(new PropertyDouble(_("feedrate"), m_feedrate, parent, on_set_feedrate));
 	list->push_back(new PropertyDouble(_("standoff"), m_standoff, parent, on_set_standoff));
 	list->push_back(new PropertyDouble(_("dwell"), m_dwell, parent, on_set_dwell));
 	list->push_back(new PropertyDouble(_("depth"), m_depth, parent, on_set_depth));
@@ -85,6 +91,7 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
+	element->SetDoubleAttribute("feedrate", m_feedrate);
 	element->SetDoubleAttribute("standoff", m_standoff);
 	element->SetDoubleAttribute("dwell", m_dwell);
 	element->SetDoubleAttribute("depth", m_depth);
@@ -93,6 +100,7 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 
 void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
+	if (pElem->Attribute("feedrate")) m_feedrate = atof(pElem->Attribute("feedrate"));
 	if (pElem->Attribute("standoff")) m_standoff = atof(pElem->Attribute("standoff"));
 	if (pElem->Attribute("dwell")) m_dwell = atof(pElem->Attribute("dwell"));
 	if (pElem->Attribute("depth")) m_depth = atof(pElem->Attribute("depth"));
@@ -123,16 +131,16 @@ void CCounterBore::AppendTextToProgram()
 		std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
 		for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
-			ss << "circular_pocket("
-				<< "x=" << l_itLocation->x << ", "
-				<< "y=" << l_itLocation->y << ", "
-				<< "z=" << l_itLocation->z << ", "
-				<< "depth=" << m_params.m_depth << ", "
-				<< "standoff=" << m_params.m_standoff << ", "
-				<< "pocket_diameter=" << m_params.m_diameter << ", "
-				<< "tool_diameter=" << pCuttingTool->m_params.m_diameter
-				<< ")\n";
-		
+			ss << "circular_pocket( "
+						<< "x=" << l_itLocation->x << ", "
+						<< "y=" << l_itLocation->y << ", "
+                                		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter << ", "
+                                		<< "HoleDiameter=" << m_params.m_diameter << ", "
+                                		<< "ClearanceHeight=" << m_params.m_standoff << ", "
+                                		<< "StartHeight=" << l_itLocation->z + m_params.m_standoff << ", "
+                                		<< "MaterialTop=" << l_itLocation->z << ", "
+                                		<< "FeedRate=" << m_params.m_feedrate << ", "
+                                		<< "HoleDepth=" << m_params.m_depth << ")\n";
 		} // End for
 
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
