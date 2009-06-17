@@ -361,6 +361,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\CounterBore.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\CounterBore.h"
+			>
+		</File>
+		<File
 			RelativePath=".\CuttingTool.cpp"
 			>
 		</File>
