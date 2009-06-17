@@ -123,7 +123,7 @@ void CCuttingTool::AppendTextToProgram()
 
 	if (m_title.size() > 0)
 	{
-		ss << "(" << m_title.c_str() << ")\n";
+		ss << "#(" << m_title.c_str() << ")\n";
 	} // End if - then
 
 	ss << "tool_defn( id=" << m_tool_number << ", "

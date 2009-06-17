@@ -18,7 +18,7 @@
 #include "CuttingTool.h"
 #include "Op.h"
 #include "CNCConfig.h"
-#include "CounterBore.h"
+//#include "CounterBore.h"
 
 bool COperations::CanAdd(HeeksObj* object)
 {
@@ -26,8 +26,8 @@ bool COperations::CanAdd(HeeksObj* object)
 		object->GetType() == PocketType || 
 		object->GetType() == ZigZagType || 
 		object->GetType() == AdaptiveType || 
-		object->GetType() == DrillingType ||
-		object->GetType() == CounterBoreType;
+		object->GetType() == DrillingType;/* ||
+		object->GetType() == CounterBoreType;*/
 }
 
 void COperations::WriteXML(TiXmlNode *root)
@@ -309,11 +309,11 @@ void CProgram::RewritePythonProgram()
 			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
 			operations.insert( std::make_pair( ((CDrilling *) object)->m_execution_order, ((CDrilling *) object) ) );	// Will I go to hell for this?
 		}
-		else if(object->GetType() == CounterBoreType)
+/*		else if(object->GetType() == CounterBoreType)
 		{
 			operations.insert( std::make_pair( ((CCounterBore *) object)->m_execution_order, ((CCounterBore *) object) ) );	// Will I go to hell for this?
 		}
-	}
+*/	}
 
 
 	// add standard stuff at the top
@@ -436,10 +436,10 @@ void CProgram::RewritePythonProgram()
 		case DrillingType:
 			if(((CDrilling*)object)->m_active)((CDrilling*)object)->AppendTextToProgram();
 			break;
-		case CounterBoreType:
+/*		case CounterBoreType:
 			if(((CCounterBore *)object)->m_active)((CCounterBore *)object)->AppendTextToProgram();
 			break;
-		}
+*/		}
 	}
 }
 
