@@ -184,7 +184,7 @@ std::list< CCounterBore::Point3d > CCounterBore::DrillBitVertices( const CCounte
 	std::list<CCounterBore::Point3d> top, spiral, bottom, countersink, result;
 
 	double flutePitch = 5.0;	// 5mm of depth per spiral of the drill bit's flute.
-	double countersinkDepth = -1 * radius * tan(31); // this is the depth of the countersink cone at the end of the drill bit. (for a typical 118 degree bevel)
+	double countersinkDepth = -1 * radius * tan(31.0); // this is the depth of the countersink cone at the end of the drill bit. (for a typical 118 degree bevel)
 	unsigned int numPoints = 20;	// number of points in one circle (360 degrees) i.e. how smooth do we want the graphics
 	const double pi = 3.1415926;
 	double alpha = 2 * pi / numPoints;
