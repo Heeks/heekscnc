@@ -145,6 +145,9 @@ class CreatorAttach(nc.Creator):
     def profile(self):
         self.original.profile()
 
+    def circular_pocket(self, x=None, y=None, ToolDiameter=None, HoleDiameter=None, ClearanceHeight=None, StartHeight=None, MaterialTop=None, FeedRate=None, SpindleRPM=None, HoleDepth=None, DepthOfCut=None, StepOver=None ):
+		self.circular_pocket(x, y, ToolDiameter, HoleDiameter, ClearanceHeight, StartHeight, MaterialTop, FeedRate, SpindleRPM, HoleDepth, DepthOfCut, StepOver)
+
     def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
         self.original.drill(x, y, z, depth, standoff, dwell, peck_depth)
 
