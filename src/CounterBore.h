@@ -21,6 +21,7 @@ class CCounterBoreParams{
 	
 public:
 	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
+	double m_feedrate;
 	double m_dwell;			// If dwell_bottom is non-zero then we're using the G82 drill cycle rather than G83 peck drill cycle.  This is the 'P' word
 	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
 	double m_diameter;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
