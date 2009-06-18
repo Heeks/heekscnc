@@ -109,7 +109,7 @@ public:
 			   at their intersection.
  	 */
 	typedef int SymbolType_t;
-	typedef int SymbolId_t;
+	typedef unsigned int SymbolId_t;
 	typedef std::pair< SymbolType_t, SymbolId_t > Symbol_t;
 	typedef std::list< Symbol_t > Symbols_t;
 

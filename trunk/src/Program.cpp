@@ -97,7 +97,7 @@ void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 bool CTools::CanAdd(HeeksObj* object)
 {
-	return 	object->GetType() == CuttingToolType;
+	return 	((object->GetType() == CuttingToolType) || (object->GetType() == CorrelationToolType));
 }
 
 void CTools::WriteXML(TiXmlNode *root)
