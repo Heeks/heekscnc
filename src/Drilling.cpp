@@ -12,12 +12,14 @@
 #include "interface/HeeksObj.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "CorrelationTool.h"
 
 #include <sstream>
+#include <iomanip>
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -25,19 +27,11 @@ extern CHeeksCADInterface* heeksCAD;
 void CDrillingParams::set_initial_values( const double depth )
 {
 	CNCConfig config;
-	
+
 	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
 	config.Read(_T("m_dwell"), &m_dwell, 1);
 	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
 	config.Read(_T("m_peck_depth"), &m_peck_depth, (25.4 / 10));	// One tenth of an inch
-
-	if (theApp.m_program->m_units >= 25.4)
-	{
-		// We're using inches.  Change the default settings.
-		m_standoff = m_standoff / 25.4;
-		m_depth = m_depth / 25.4;
-		m_peck_depth = m_peck_depth / 25.4;
-	} // End if - then
 
 	if (depth > 0)
 	{
@@ -52,24 +46,12 @@ void CDrillingParams::write_values_to_config()
 	// We always want to store the parameters in mm and convert them back later on.
 
 	CNCConfig config;
-	if (theApp.m_program->m_units >= 25.4)
-	{
-		// We're currently in inches.  Store them in mm
 
-		config.Write(_T("m_standoff"), (m_standoff * 25.4));
-		config.Write(_T("m_dwell"), m_dwell);
-		config.Write(_T("m_depth"), (m_depth * 25.4));
-		config.Write(_T("m_peck_depth"), (m_peck_depth * 25.4));
-	} // End if - then
-	else
-	{	
-		// They're already in mm.  Store them just the way they are.
-
-		config.Write(_T("m_standoff"), m_standoff);
-		config.Write(_T("m_dwell"), m_dwell);
-		config.Write(_T("m_depth"), m_depth);
-		config.Write(_T("m_peck_depth"), m_peck_depth);
-	} // End if - else
+	// These values are in mm.
+	config.Write(_T("m_standoff"), m_standoff);
+	config.Write(_T("m_dwell"), m_dwell);
+	config.Write(_T("m_depth"), m_depth);
+	config.Write(_T("m_peck_depth"), m_peck_depth);
 }
 
 
@@ -81,10 +63,10 @@ static void on_set_peck_depth(double value, HeeksObj* object){((CDrilling*)objec
 
 void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("standoff"), m_standoff, parent, on_set_standoff));
+	list->push_back(new PropertyLength(_("standoff"), m_standoff, parent, on_set_standoff));
 	list->push_back(new PropertyDouble(_("dwell"), m_dwell, parent, on_set_dwell));
-	list->push_back(new PropertyDouble(_("depth"), m_depth, parent, on_set_depth));
-	list->push_back(new PropertyDouble(_("peck_depth"), m_peck_depth, parent, on_set_peck_depth));
+	list->push_back(new PropertyLength(_("depth"), m_depth, parent, on_set_depth));
+	list->push_back(new PropertyLength(_("peck_depth"), m_peck_depth, parent, on_set_peck_depth));
 }
 
 void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
@@ -121,48 +103,23 @@ void CDrilling::AppendTextToProgram()
     std::ostringstream ss;
 #endif
     ss.imbue(std::locale("C"));
+	ss<<std::setprecision(10);
 
 	std::set<Point3d> locations = FindAllLocations( m_symbols );
 	for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 
 
-    if (theApp.m_program->m_units >= 25.4)
-	{
-		// We're using inches.
 		ss << "drill("
-			<< "x=" << l_itLocation->x/25.4 << ", "
-			<< "y=" << l_itLocation->y/25.4 << ", "
-			<< "z=" << l_itLocation->z/25.4 << ", "
-			<< "depth=" << m_params.m_depth << ", "
-			<< "standoff=" << m_params.m_standoff << ", "
+			<< "x=" << l_itLocation->x/theApp.m_program->m_units << ", "
+			<< "y=" << l_itLocation->y/theApp.m_program->m_units << ", "
+			<< "z=" << l_itLocation->z/theApp.m_program->m_units << ", "
+			<< "depth=" << m_params.m_depth/theApp.m_program->m_units << ", "
+			<< "standoff=" << m_params.m_standoff/theApp.m_program->m_units << ", "
 			<< "dwell=" << m_params.m_dwell << ", "
-			<< "peck_depth=" << m_params.m_peck_depth // << ", "
+			<< "peck_depth=" << m_params.m_peck_depth/theApp.m_program->m_units // << ", "
 			<< ")\n";
 
-	} // End if - then
-	else
-	{
-		// We're using mm.
-
-		ss << "drill("
-			<< "x=" << l_itLocation->x << ", "
-			<< "y=" << l_itLocation->y << ", "
-			<< "z=" << l_itLocation->z << ", "
-			<< "depth=" << m_params.m_depth << ", "
-			<< "standoff=" << m_params.m_standoff << ", "
-			<< "dwell=" << m_params.m_dwell << ", "
-			<< "peck_depth=" << m_params.m_peck_depth // << ", "
-			<< ")\n";
-
-	} // End if - else
-
-
-
-
-
-
-		
 	} // End for
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
