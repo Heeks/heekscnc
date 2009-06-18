@@ -174,20 +174,6 @@ std::list< CDrilling::Point3d > CDrilling::DrillBitVertices( const CDrilling::Po
 	const double pi = 3.1415926;
 	double alpha = 2 * pi / numPoints;
 
-	if (theApp.m_program->m_units >= 25.4)
-	{
-		// We're using inches.
-
-		flutePitch = 5 / 25.4;	// inches
-	} // End if - then
-	else
-	{
-		// We're using mm.
-
-		flutePitch = 5.0;	// mm
-	} // End if - else
-
-
 	// Get a circle at the top of the dill bit's path
 	top = PointsAround( origin, radius, numPoints );
 	top.push_back( *(top.begin()) );	// Close the circle
@@ -260,16 +246,6 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 	if(marked && !no_color)
 	{
 		double l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
-
-		if (theApp.m_program->m_units >= 25.4)
-		{
-			// We're using inches at the moment.  Set a default of 0.5 rather instead.
-			l_dHoleDiameter = 0.5;	// Half an inch (in inches)
-		} // End if - then
-		else
-		{
-			l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
-		} // End if - else
 
 		if (m_cutting_tool_number > 0)
 		{
