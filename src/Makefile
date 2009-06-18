@@ -355,6 +355,7 @@ install:
 	cp ../nc/*.py $(DESTDIR)$(LIBDIR)/heekscnc/nc/
 	cp ../*_funcs.py $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../PyCamToHeeks.py $(DESTDIR)$(LIBDIR)/heekscnc/
+	cp ../circular_pocket.py $(DESTDIR)$(LIBDIR)/heekscnc/
 
 uninstall:
 	-rm -f $(DESTDIR)$(LIBDIR)/heekscnc/$(SHARED_LIBRARY)
