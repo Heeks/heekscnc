@@ -26,7 +26,7 @@
 #include "Drilling.h"
 #include "CuttingTool.h"
 #include "CounterBore.h"
-#include "CorrelationTool.h"
+// #include "CorrelationTool.h"
 
 CHeeksCADInterface* heeksCAD = NULL;
 
@@ -286,6 +286,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+/*
 static void NewCorrelationToolMenuCallback(wxCommandEvent &event)
 {
 	CCorrelationTool::Symbol_t reference_symbol;
@@ -311,6 +312,8 @@ static void NewCorrelationToolMenuCallback(wxCommandEvent &event)
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
+*/
+
 
 static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 {
