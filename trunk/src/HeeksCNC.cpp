@@ -303,8 +303,6 @@ static void NewCorrelationToolMenuCallback(wxCommandEvent &event)
 		HeeksObj* object = *It;
 		reference_symbol.first = object->GetType();
 		reference_symbol.second = object->m_id;
-
-		printf("Manually selected type='%d', id='%d'\n", reference_symbol.first, reference_symbol.second );
 	} // End for
 
 	CCorrelationTool *new_object = new CCorrelationTool( NULL, reference_symbol );

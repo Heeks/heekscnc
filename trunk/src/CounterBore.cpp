@@ -127,23 +127,31 @@ void CCounterBore::AppendTextToProgram()
 	{
 		HeeksObj *cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
 		CCuttingTool *pCuttingTool = (CCuttingTool *)cuttingTool;
-
-		std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
-		for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+		if (pCuttingTool != NULL)
 		{
-			ss << "circular_pocket( "
-						<< "x=" << l_itLocation->x << ", "
-						<< "y=" << l_itLocation->y << ", "
-                                		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter << ", "
-                                		<< "HoleDiameter=" << m_params.m_diameter << ", "
-                                		<< "ClearanceHeight=" << m_params.m_standoff << ", "
-                                		<< "StartHeight=" << l_itLocation->z + m_params.m_standoff << ", "
-                                		<< "MaterialTop=" << l_itLocation->z << ", "
-                                		<< "FeedRate=" << m_params.m_feedrate << ", "
-                                		<< "HoleDepth=" << m_params.m_depth << ")\n";
-		} // End for
+			if (pCuttingTool->m_params.m_diameter >= m_params.m_diameter)
+			{
+				wxMessageBox(_T("Error.  Tool diameter >= hole diameter"));
+				return;
+			} // End if - then
 
-		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+			std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
+			for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+			{
+				ss << "circular_pocket( "
+							<< "x=" << l_itLocation->x << ", "
+							<< "y=" << l_itLocation->y << ", "
+       		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter << ", "
+       		                         		<< "HoleDiameter=" << m_params.m_diameter << ", "
+       		                         		<< "ClearanceHeight=" << m_params.m_standoff << ", "
+       		                         		<< "StartHeight=" << l_itLocation->z + m_params.m_standoff << ", "
+       		                         		<< "MaterialTop=" << l_itLocation->z << ", "
+       		                         		<< "FeedRate=" << m_params.m_feedrate << ", "
+       		                         		<< "HoleDepth=" << m_params.m_depth << ")\n";
+			} // End for
+
+			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+		} // End if - then
 	} // End if - then
 
 }
@@ -283,7 +291,6 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 	if(marked && !no_color)
 	{
 		std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
-
 		for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
 
@@ -453,11 +460,6 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
 {
 	std::set<CCounterBore::Point3d> locations;
 
-	// We want to avoid calling the (expensive) intersection code too often.  If we've
-	// already intersected objects a and b then we shouldn't worry about intersecting 'b' with 'a'
-	// the next time through the loop.
-	// std::set< std::pair< Symbol_t, Symbol_t > > alreadyChecked;
-
 	// Look to find all intersections between all selected objects.  At all these locations, create
         // a drilling cycle.
 
@@ -469,26 +471,32 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
 		
 		if (lhs->first == PointType)
 		{
-			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			double pos[3];
-			lhsPtr->GetStartPoint(pos);
-			locations.insert( CCounterBore::Point3d( pos[0], pos[1], pos[2] ) );
-			continue;	// No need to intersect a point with anything.
+			HeeksObj *obj = heeksCAD->GetIDObject( lhs->first, lhs->second );
+			if (obj != NULL)
+			{
+				double pos[3];
+				obj->GetStartPoint(pos);
+				locations.insert( CCounterBore::Point3d( pos[0], pos[1], pos[2] ) );
+				continue;	// No need to intersect a point with anything.
+			} // End if - then
 		} // End if - then		
 
 		if (lhs->first == DrillingType)
 		{
 			// Ask the Drilling object what reference points it uses.
 
+
 			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			if (lhsPtr)
+			// Ask the Drilling object what reference points it uses.
+			if (lhsPtr != NULL)
 			{
 				if ((((COp *) lhsPtr)->m_cutting_tool_number > 0) && (pToolNumbersReferenced != NULL))
 				{
 					pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_cutting_tool_number );
 				} // End if - then
 
-				std::set<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations( ((CDrilling *)lhsPtr)->m_symbols );
+				// std::set<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations( ((CDrilling *)lhsPtr)->m_symbols );
+				std::set<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
 				for (std::set<CDrilling::Point3d>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
 				{
 					locations.insert( CCounterBore::Point3d( l_itHole->x, l_itHole->y, l_itHole->z ) );
@@ -505,6 +513,9 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
                         std::list<double> results;
                         HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
                         HeeksObj *rhsPtr = heeksCAD->GetIDObject( rhs->first, rhs->second );
+
+			if (lhsPtr == NULL) continue;
+			if (rhsPtr == NULL) continue;
 
                         if (lhsPtr->Intersects( rhsPtr, &results ))
                         {
@@ -535,10 +546,13 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
 			if (lhs->first == CircleType)
 			{
                         	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-				double pos[3];
-				if (heeksCAD->GetArcCentre( lhsPtr, pos ))
+				if (lhsPtr != NULL)
 				{
-					locations.insert( CCounterBore::Point3d( pos[0], pos[1], pos[2] ) );
+					double pos[3];
+					if (heeksCAD->GetArcCentre( lhsPtr, pos ))
+					{
+						locations.insert( CCounterBore::Point3d( pos[0], pos[1], pos[2] ) );
+					} // End if - then
 				} // End if - then
 			} // End if - then
 		} // End if - then
