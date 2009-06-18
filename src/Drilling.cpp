@@ -15,6 +15,7 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
+#include "CorrelationTool.h"
 
 #include <sstream>
 
@@ -448,20 +449,25 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 			continue;	// No need to intersect a point with anything.
 		} // End if - then		
 
+		if (lhs->first == CorrelationToolType)
+		{
+			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
+			if (lhsPtr)
+			{
+				std::set<CCorrelationTool::Point3d> ref = ((CCorrelationTool *)lhsPtr)->FindAllLocations();
+				for (std::set<CCorrelationTool::Point3d>::const_iterator l_itPoint = ref.begin(); l_itPoint != ref.end(); l_itPoint++)
+				{
+					locations.insert( CDrilling::Point3d( l_itPoint->x, l_itPoint->y, l_itPoint->z ) );
+				} // End for
+			} // End if - then
+
+			continue;
+		} // End if - then
+
                 for (CDrilling::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
                 {
                         if (lhs == rhs) continue;
 			if (lhs->first == PointType) continue;	// No need to intersect a point type.
-
-			// Avoid repeated calls to the intersection code where possible.
-			/*
-			if ((alreadyChecked.find( std::make_pair( *lhs, *rhs ))) ||
-				(alreadyChecked.find( std::make_pair( *rhs, *lhs ))))
-			{
-				// We've already checked this for intersections.  Avoid this repetition.
-				continue;
-			} // End if - then
-			*/
 
                         std::list<double> results;
                         HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
@@ -510,3 +516,7 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 	return(locations);
 } // End FindAllLocations() method
 
+std::set<CDrilling::Point3d> CDrilling::FindAllLocations() const
+{
+	return( FindAllLocations( m_symbols ) );
+} // End FindAllLocations() method

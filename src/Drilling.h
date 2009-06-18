@@ -107,7 +107,7 @@ public:
 			   at their intersection.
  	 */
 	typedef int SymbolType_t;
-	typedef int SymbolId_t;
+	typedef unsigned int SymbolId_t;
 	typedef std::pair< SymbolType_t, SymbolId_t > Symbol_t;
 	typedef std::list< Symbol_t > Symbols_t;
 
@@ -147,6 +147,7 @@ public:
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
 	static std::set<Point3d> FindAllLocations( const CDrilling::Symbols_t & symbols );
+	std::set<Point3d> FindAllLocations() const;
 
 };
 
