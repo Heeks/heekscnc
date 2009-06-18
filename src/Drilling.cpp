@@ -125,6 +125,26 @@ void CDrilling::AppendTextToProgram()
 	std::set<Point3d> locations = FindAllLocations( m_symbols );
 	for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
+
+
+    if (theApp.m_program->m_units >= 25.4)
+	{
+		// We're using inches.
+		ss << "drill("
+			<< "x=" << l_itLocation->x/25.4 << ", "
+			<< "y=" << l_itLocation->y/25.4 << ", "
+			<< "z=" << l_itLocation->z/25.4 << ", "
+			<< "depth=" << m_params.m_depth << ", "
+			<< "standoff=" << m_params.m_standoff << ", "
+			<< "dwell=" << m_params.m_dwell << ", "
+			<< "peck_depth=" << m_params.m_peck_depth // << ", "
+			<< ")\n";
+
+	} // End if - then
+	else
+	{
+		// We're using mm.
+
 		ss << "drill("
 			<< "x=" << l_itLocation->x << ", "
 			<< "y=" << l_itLocation->y << ", "
@@ -134,6 +154,14 @@ void CDrilling::AppendTextToProgram()
 			<< "dwell=" << m_params.m_dwell << ", "
 			<< "peck_depth=" << m_params.m_peck_depth // << ", "
 			<< ")\n";
+
+	} // End if - else
+
+
+
+
+
+
 		
 	} // End for
 
@@ -520,3 +548,4 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations() const
 {
 	return( FindAllLocations( m_symbols ) );
 } // End FindAllLocations() method
+
