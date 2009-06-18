@@ -150,8 +150,6 @@ public:
 			m_title = GetTypeString();
 		} // End if - else
 
-		printf("constructor ref type='%d',id='%d'\n", m_reference_symbol.first, m_reference_symbol.second );
-	
 		CorrelationData( 	reference_symbol, reference_symbol, 10, 1.5 );
 
 		m_similar_symbols = SimilarSymbols( reference_symbol );
