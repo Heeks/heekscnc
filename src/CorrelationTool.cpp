@@ -16,6 +16,7 @@
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
 #include "Drilling.h"
+#include "interface/Box.h"
 
 #include <sstream>
 
