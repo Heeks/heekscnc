@@ -31,7 +31,7 @@
      inkscape:cy="891.8015"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
+     showgrid="true"
      inkscape:window-width="1374"
      inkscape:window-height="948"
      inkscape:window-x="256"
@@ -10695,7 +10695,7 @@
     <g
        id="g4036"
        transform="matrix(0.3657469,0,0,0.3783683,284.27344,43.83031)"
-       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\ops.png"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\icons\operations.png"
        inkscape:export-xdpi="305.68433"
        inkscape:export-ydpi="305.68433">
       <g
@@ -11113,5 +11113,9 @@
            id="path4129" />
       </g>
     </g>
+    <path
+       style="fill:#0000ff;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 330,92.362183 L 360,92.362183 L 345,67.362183 L 330,92.362183 z"
+       id="path4086" />
   </g>
 </svg>
