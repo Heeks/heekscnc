@@ -12,15 +12,15 @@ The CounterBore operation accepts all the same object selections as does a Drill
 
 = Workflow =
 
-- Define a cutting tool object for use in drilling the holes.
+- Select or define a cutting tool object to represent the drill bit used to drill the holes.
 
 - Place points, standalone circles and/or intersecting objects.
 
-- Select the cutting tool as well as the other graphics ojbects mentioned above.
+- Select the drill bit cutting tool as well as the other graphics ojbects mentioned above.
 
 - Create a DrillingCycle object.
 
-- Define another cutting tool object for use in milling the circular pockets.
+- Define another cutting tool object to represent the milling bit used in milling the circular pockets.
 
 - Select the DrillingCycle object created earlier.
 
