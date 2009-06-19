@@ -167,7 +167,7 @@ std::list< CDrilling::Point3d > CDrilling::PointsAround( const CDrilling::Point3
 std::list< CDrilling::Point3d > CDrilling::DrillBitVertices( const CDrilling::Point3d & origin, const double radius, const double length ) const
 {
 	std::list<CDrilling::Point3d> top, spiral, bottom, countersink, result;
-
+    
 	double flutePitch = 5.0;	// 5mm of depth per spiral of the drill bit's flute.
 	double countersinkDepth = -1 * radius * tan(31.0); // this is the depth of the countersink cone at the end of the drill bit. (for a typical 118 degree bevel)
 	unsigned int numPoints = 20;	// number of points in one circle (360 degrees) i.e. how smooth do we want the graphics
@@ -252,7 +252,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
 			if (cuttingTool != NULL)
 			{
-				l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter;
+				l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter*(theApp.m_program->m_units);
 			} // End if - then
 		} // End if - then
 
