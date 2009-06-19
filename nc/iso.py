@@ -370,12 +370,12 @@ class CreatorIso(nc.Creator):
         self.write_blocknum()
         self.write_preps()
 
-	if (peck_depth != None):
+	if (peck_depth != 0):
 		# We're pecking.  Let's find a tree.
 		self.write(iso.PECK_DRILL + iso.SPACE + iso.PECK_DEPTH + (self.fmt % peck_depth ))
 	else:
 		# We're either just drilling or drilling with dwell.
-		if (dwell == None):
+		if (dwell == 0):
 			# We're just drilling.
 			self.write(iso.DRILL + iso.SPACE)
 		else:
@@ -384,7 +384,7 @@ class CreatorIso(nc.Creator):
 
 	# Set the retraction point to the 'standoff' distance above the starting z height.
 	retract_height = z + standoff
-	self.write(iso.RETRACT + (self.fmt % retract_height))
+	#self.write(iso.RETRACT + (self.fmt % retract_height))
         if (x != None):
             dx = x - self.x
             self.write(iso.X + (self.fmt % x) + iso.SPACE)
@@ -397,7 +397,7 @@ class CreatorIso(nc.Creator):
 	dz = (z + standoff) - self.z			# In the end, we will be standoff distance above the z value passed in.
 	self.write(iso.Z + (self.fmt % (z - depth)) + iso.SPACE)	# This is the 'z' value for the bottom of the hole.
 	self.z = (z + standoff)				# We want to remember where z is at the end (at the top of the hole)
-
+	self.write(iso.RETRACT + (self.fmt % retract_height))
         self.write_spindle()
         self.write_misc()
         self.write('\n')
