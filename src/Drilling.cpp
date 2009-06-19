@@ -404,9 +404,13 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 		if (lhs->first == PointType)
 		{
 			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			double pos[3];
-			lhsPtr->GetStartPoint(pos);
-			locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+			if (lhsPtr != NULL)
+			{
+				double pos[3];
+				lhsPtr->GetStartPoint(pos);
+				locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+			} // End if - then
+
 			continue;	// No need to intersect a point with anything.
 		} // End if - then		
 
@@ -434,9 +438,7 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
                         HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
                         HeeksObj *rhsPtr = heeksCAD->GetIDObject( rhs->first, rhs->second );
 
-			// alreadyChecked.insert( *lhs, *rhs );
-
-                        if (lhsPtr->Intersects( rhsPtr, &results ))
+                        if ((lhsPtr != NULL) && (rhsPtr != NULL) && (lhsPtr->Intersects( rhsPtr, &results )))
                         {
 				l_bIntersectionsFound = true;
                                 while (((results.size() % 3) == 0) && (results.size() > 0))
@@ -466,7 +468,7 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 			{
                         	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
 				double pos[3];
-				if (heeksCAD->GetArcCentre( lhsPtr, pos ))
+				if ((lhsPtr != NULL) && (heeksCAD->GetArcCentre( lhsPtr, pos )))
 				{
 					locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
 				} // End if - then
