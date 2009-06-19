@@ -3,7 +3,7 @@ FORMAT_IN = '%.5f'
 FORMAT_MM = '%.3f'
 FORMAT_ANG = '%.1f'
 FORMAT_TIME = '%.2f'
-FORMAT_DWELL = 'P%i'
+FORMAT_DWELL = 'P%f'
 
 BLOCK = 'N%i' + SPACE
 COMMENT = '(%s)'
