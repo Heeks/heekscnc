@@ -92,7 +92,7 @@ void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 {
 	TiXmlElement * element = new TiXmlElement( "depthop" );
 	pElem->LinkEndChild( element ); 
-	element->SetAttribute("fixture offset", m_workplane); 
+	element->SetAttribute("fixture_offset", m_workplane); 
 	element->SetAttribute("tooln", m_tool_number);
 	element->SetDoubleAttribute("toold", m_tool_diameter);
 	element->SetDoubleAttribute("clear", m_clearance_height);
