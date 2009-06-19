@@ -20,6 +20,9 @@
 #include "CNCConfig.h"
 #include "CounterBore.h"
 
+#include <vector>
+#include <algorithm>
+
 bool COperations::CanAdd(HeeksObj* object)
 {
 	return 	object->GetType() == ProfileType || 
@@ -267,6 +270,8 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	return new_object;
 }
 
+
+
 void CProgram::RewritePythonProgram()
 {
 	theApp.m_program_canvas->m_textCtrl->Clear();
@@ -282,6 +287,13 @@ void CProgram::RewritePythonProgram()
 
 	typedef std::multimap< int, COp * > OperationsMap_t;
 	OperationsMap_t operations;
+
+	if (m_operations == NULL)
+	{
+		// If there are no operations then there is no GCode. 
+		// No socks, no shirt, no service.
+		return;
+	} // End if - then
 
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
@@ -398,18 +410,20 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("set_plane(0)\n"));
 	theApp.m_program_canvas->AppendText(_T("\n"));
 
-	// write the operations
-
-	// Write the new tool table entries first.
-	for(HeeksObj* object = m_tools->GetFirstChild(); object; object = m_tools->GetNextChild())
+	// write the tools setup code.
+	if (m_tools != NULL)
 	{
-		switch(object->GetType())
+		// Write the new tool table entries first.
+		for(HeeksObj* object = m_tools->GetFirstChild(); object; object = m_tools->GetNextChild())
 		{
-		case CuttingToolType:
-			((CCuttingTool*)object)->AppendTextToProgram();
-			break;
-		}
-	} // End for
+			switch(object->GetType())
+			{
+			case CuttingToolType:
+				((CCuttingTool*)object)->AppendTextToProgram();
+				break;
+			}
+		} // End for
+	} // End if - then
 
 
 	// And then all the rest of the operations.
@@ -417,7 +431,8 @@ void CProgram::RewritePythonProgram()
 	for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 	{
 		HeeksObj *object = (HeeksObj *) l_itOperation->second;
-
+		if (object == NULL) continue;
+		
 		if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
 		{
 			// Select the right tool.
