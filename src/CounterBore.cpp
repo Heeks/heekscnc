@@ -131,7 +131,12 @@ void CCounterBore::AppendTextToProgram()
 		{
 			if (pCuttingTool->m_params.m_diameter >= m_params.m_diameter)
 			{
-				wxMessageBox(_T("Error.  Tool diameter >= hole diameter"));
+				std::ostringstream l_ossMsg;
+				l_ossMsg << "Error: Tool diameter (" << pCuttingTool->m_params.m_diameter << ") "
+					 << ">= hole diameter (" << m_params.m_diameter << ") "
+					 << "in counter bore operation.  "
+					 << "Skipping this counter bore operation (ID=" << m_id << ")";
+				wxMessageBox(Ctt(l_ossMsg.str().c_str()));
 				return;
 			} // End if - then
 
@@ -152,7 +157,22 @@ void CCounterBore::AppendTextToProgram()
 
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		} // End if - then
+		else
+		{
+			std::ostringstream l_ossMsg;
+			l_ossMsg << "Warning: Counter bore refers to a cutting tool "
+				 << "that can't be found in the model.  "
+				 << "Skipping this counter bore operation (ID=" << m_id << ")";
+			wxMessageBox(Ctt(l_ossMsg.str().c_str()));
+		} // End if - else
 	} // End if - then
+	else
+	{
+		std::ostringstream l_ossMsg;
+		l_ossMsg << "Warning: Counter bore operations MUST refer to a cutting tool.  "
+			 << "Skipping this counter bore operation (ID=" << m_id << ")";
+		wxMessageBox(Ctt(l_ossMsg.str().c_str()));
+	} // End if - else
 
 }
 

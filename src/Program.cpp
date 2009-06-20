@@ -470,9 +470,9 @@ void CProgram::RewritePythonProgram()
 
 ProgramUserType CProgram::GetUserType()
 {
-	if(m_nc_code->m_user_edited)return ProgramUserTypeNC;
+	if((m_nc_code != NULL) && (m_nc_code->m_user_edited)) return ProgramUserTypeNC;
 	if(m_script_edited)return ProgramUserTypeScript;
-	if(m_operations->GetFirstChild())return ProgramUserTypeTree;
+	if((m_operations != NULL) && (m_operations->GetFirstChild()))return ProgramUserTypeTree;
 	return ProgramUserTypeUnkown;
 }
 
