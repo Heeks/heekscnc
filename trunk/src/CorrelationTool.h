@@ -184,7 +184,7 @@ public:
 
 	std::set<Point3d> ReferencePoints( const Symbols_t & sample_symbols ) const;
 
-	bool SimilarScale( const CBox &reference_box, const CBox &sample_box, const double max_scale_threshold ) const;
+	bool SimilarScale( const CBox &reference_box, const CBox &sample_box, const double max_scale_threshold, double *pRequiredScaling ) const;
 	double Score( const CorrelationData_t & sample, const CorrelationData_t & reference ) const;
 
 	std::set<Point3d> FindAllLocations() const;
