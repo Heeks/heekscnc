@@ -129,94 +129,6 @@ void CCorrelationTool::glCommands(bool select, bool marked, bool no_color)
 
                         if(object)object->glCommands(false, true, false);
                 } // End for
-
-	/*
-	HeeksObj *sample_object = heeksCAD->GetIDObject( m_reference_symbol.first, m_reference_symbol.second );
-	if (! sample_object)
-	{
-		printf("glCommands() Could not find ref ob\n");
-		return;
-	}
-
-	int number_of_sample_points = 10;
-	double max_scale_threshold = 4;
-	for (int sample=0; sample<number_of_sample_points; sample++)
-	{
-		// We want to draw a line from the centre of the bounding box out at this
-		// sample's angle for a length that is long enough to overlap the bounding box's edge.
-	
-		CBox sample_box;
-		double sample_centroid[3];
-
-		sample_object->GetBox(sample_box);
-		sample_box.Centre( sample_centroid );
-
-		double radius = ((max_scale_threshold * (sample_box.Width() * 2)) + (max_scale_threshold * (sample_box.Height() * 2)));
-		double alpha = 3.1415926 * 2 / number_of_sample_points;
-                double theta = alpha * sample;
-
-		// Construct a line from the centre of the sample object to somewhere away from it at this sample's angle.  Make
-		// sure we're comparing both sets on the same Z plane.  We will worry about rotation matrices when I get
-		// smarter.
-
-		sample_centroid[2] = 0.0;
-                double verification_line_end[3] = { (cos( theta ) * radius) + sample_centroid[0], (sin( theta ) * radius) + sample_centroid[1], 0.0 };
-
-		// Now find all intersection points between this verification line and the sample object.
-		HeeksObj* verification_line = heeksCAD->NewLine(sample_centroid, verification_line_end);
-		if (verification_line)
-		{
-			std::list<double> intersections;
-
-			verification_line->glCommands( false, true, false );
-
-                        if (sample_object->Intersects( verification_line, &intersections ))
-                        {
-				CorrelationSample_t correlation_sample;
-                                while (((intersections.size() % 3) == 0) && (intersections.size() > 0))
-                                {
-                                        Point3d intersection;
-
-                                        intersection.x = *(intersections.begin());
-                                        intersections.erase(intersections.begin());
-
-                                        intersection.y = *(intersections.begin());
-                                        intersections.erase(intersections.begin());
-
-                                        intersection.z = *(intersections.begin());
-                                        intersections.erase(intersections.begin());
-				
-					correlation_sample.m_intersection_points.insert( intersection );
-
-					
-					glBegin(GL_LINE_STRIP);
-                        		glVertex3d( intersection.x-5, intersection.y-5, intersection.z );
-                        		glVertex3d( intersection.x-5, intersection.y+5, intersection.z );
-                        		glVertex3d( intersection.x+5, intersection.y+5, intersection.z );
-                        		glVertex3d( intersection.x+5, intersection.y-5, intersection.z );
-                        		glVertex3d( intersection.x-5, intersection.y-5, intersection.z );
-                        		glEnd();			
-	
-					// pythagorus	
-					double distance = sqrt( ((intersection.x - sample_centroid[0]) * (intersection.x - sample_centroid[0])) +
-								((intersection.y - sample_centroid[1]) * (intersection.y - sample_centroid[1])) );
-
-					correlation_sample.m_intersection_distances.insert( distance );
-                                } // End while
-
-                        } // End if - then
-			else
-			{
-				// It didn't intersect it.  We need to remember this.
-				CorrelationSample_t empty;
-			} // End if - else
-
-			heeksCAD->DeleteUndoably(verification_line);
-			verification_line = NULL;
-		} // End if - then
-	} // End for
-	*/
-
 	} // End if - then
 } // End glCommands() method
 
@@ -292,32 +204,45 @@ void CCorrelationTool::OnEditString(const wxChar* str){
 }
 
 
-bool CCorrelationTool::SimilarScale( const CBox &reference_box, const CBox &sample_box, const double max_scale_threshold ) const
+/**
+	This routine determines how different the two bounding boxes are in size.  If the difference
+	is less than the max_scale_threshold (either bigger or smaller) then it returns 'true'
+	indicating that the two objects are of a similar size.
+
+	It also returns the scale factor required to be applied to the sample bounding box to make
+	it the same size as the reference object.
+ */
+bool CCorrelationTool::SimilarScale( 
+	const CBox &reference_box, 
+	const CBox &sample_box, 
+	const double max_scale_threshold,
+	double *pRequiredScaling ) const
 {
-	if (sample_box.Width() < reference_box.Width())
+	// Calculate the diagonal distance for each bounding box.  This is as good an estimate
+	// as any.
+
+	double sample_diagonal = sqrt( 	(sample_box.Width() * sample_box.Width()) +
+					(sample_box.Height() * sample_box.Height()));
+
+	double reference_diagonal = sqrt( 	(reference_box.Width() * reference_box.Width()) +
+						(reference_box.Height() * reference_box.Height()));
+
+	if (sample_diagonal > reference_diagonal)
 	{
-		// We would need to scale up to be similar.
-		if ((sample_box.Width() / reference_box.Width()) > max_scale_threshold) return(false);
+		// It's bigger. How much do we need to scale it down?
+		double required_scaling = reference_diagonal / sample_diagonal;
+
+		if (pRequiredScaling) *pRequiredScaling = required_scaling;
+		return( (1.0 / required_scaling) < max_scale_threshold);
 	} // End if - then
 	else
 	{
-		// We would need to scale down to be similar.
-		if ((reference_box.Width() / sample_box.Width()) > max_scale_threshold) return(false);
+		// It's smaller. How much do we need to scale it up?
+		double required_scaling = reference_diagonal / sample_diagonal;
+
+		if (pRequiredScaling) *pRequiredScaling = required_scaling;
+		return( required_scaling < max_scale_threshold);
 	} // End if - else
-
-	if (sample_box.Height() < reference_box.Height())
-	{
-		// We would need to scale up to be similar.
-		if ((sample_box.Height() / reference_box.Height()) > max_scale_threshold) return(false);
-	} // End if - then
-	else
-	{
-		// We would need to scale down to be similar.
-		if ((reference_box.Height() / sample_box.Height()) > max_scale_threshold) return(false);
-	} // End if - else
-
-	return(true);
-
 } // End SimilarScale() method
 
 
@@ -330,12 +255,14 @@ CCorrelationTool::CorrelationData_t CCorrelationTool::CorrelationData(      cons
                                                 const double max_scale_threshold ) const
 {
 	CorrelationData_t results;
+	double required_scaling = 1.0;	// How much do we need to scale the sample object to make it the same
+					// size as the reference object?  We need this value so that we can
+					// scale the distance values as well.
 
 	HeeksObj *sample_object = heeksCAD->GetIDObject( sample_symbol.first, sample_symbol.second );
 	if (! sample_object)
 	{
 		// Couldn't find reference.  Return an empty set.
-		printf("CorrelationData() Couldn't find sample object\n");
 		return(results);
 	} // End if - then
 
@@ -343,7 +270,6 @@ CCorrelationTool::CorrelationData_t CCorrelationTool::CorrelationData(      cons
 	if (! reference_object)
 	{
 		// Couldn't find reference.  Return an empty set.
-		printf("CorrelationData() Couldn't find reference object\n");
 		return(results);
 	} // End if - then
 
@@ -353,10 +279,9 @@ CCorrelationTool::CorrelationData_t CCorrelationTool::CorrelationData(      cons
 	sample_object->GetBox(sample_box);
 
 	// First see if they're close enough in size to be a possible match.
-	if (! SimilarScale( reference_box, sample_box, max_scale_threshold ))
+	if (! SimilarScale( reference_box, sample_box, max_scale_threshold, &required_scaling ))
 	{
 		// They're too different in size.
-		printf("Failed comparison on size constraints\n");
 		return(results);	// return an empty data set.
 	} // End if - then
 
@@ -411,6 +336,12 @@ CCorrelationTool::CorrelationData_t CCorrelationTool::CorrelationData(      cons
 					double distance = sqrt( ((intersection.x - sample_centroid[0]) * (intersection.x - sample_centroid[0])) +
 								((intersection.y - sample_centroid[1]) * (intersection.y - sample_centroid[1])) );
 
+					// Now scale the distance up or down so that it's proportional to the
+					// reference object's bounding box.  We've decided the scales are
+					// close enough to be acceptable.  The distance valus are really
+					// designed to compare shapes rather than sizes.  Make the two similar.
+					distance *= required_scaling;
+
 					correlation_sample.m_intersection_distances.insert( distance );
                                 } // End while
 
@@ -426,10 +357,6 @@ CCorrelationTool::CorrelationData_t CCorrelationTool::CorrelationData(      cons
 			heeksCAD->DeleteUndoably(verification_line);
 			verification_line = NULL;
 		} // End if - then
-		else
-		{
-			printf("Failed to create NewLine()\n");
-		} // End if - else
 	} // End for
 
 	return(results);
@@ -562,22 +489,14 @@ CCorrelationTool::Symbols_t CCorrelationTool::SimilarSymbols( const CCorrelation
 	CCorrelationTool::Symbols_t result_set;
 	std::set<CCorrelationTool::Point3d> reference_points;
 
-	printf("Looking for symbol type='%d', id='%d'\n", reference_symbol.first, reference_symbol.second );
-
 	HeeksObj *pReference = heeksCAD->GetIDObject( reference_symbol.first, reference_symbol.second );
 	if (! pReference)
 	{
 		// Can't find the reference object.  Return an empty set.
-		printf("Can't find reference symbol with type='%d', id='%d'\n", reference_symbol.first, reference_symbol.second );
 		return(result_set);
 	} // End if - then
 
 	CorrelationData_t reference_correlation_data = CorrelationData( reference_symbol, reference_symbol, m_params.m_number_of_sample_points, m_params.m_max_scale_threshold );
-
-	printf("Found %d correlation points for reference symbol\n", reference_correlation_data.begin()->second.m_intersection_points.size() );
-
-	printf("Score for ref and itself is %lf\n", Score( reference_correlation_data, reference_correlation_data ));
-
 
 	// Scan through all objects looking for something that's like this one.
 	for (HeeksObj *ob = heeksCAD->GetFirstObject(); ob != NULL; ob = heeksCAD->GetNextObject())
@@ -597,13 +516,9 @@ CCorrelationTool::Symbols_t CCorrelationTool::SimilarSymbols( const CCorrelation
 
 		if (Score( sample_correlation_data, reference_correlation_data ) > m_params.m_min_correlation_factor)
 		{
-			printf("Adding symbol type='%d', id='%d' to results set\n", ob->GetType(), ob->m_id );
-
 			result_set.push_back( Symbol_t( ob->GetType(), ob->m_id ) );
 		} // End if - then
 	} // End for
-
-	printf("Found %d similar objects\n", result_set.size());
 
 	return(result_set);
 
@@ -623,102 +538,8 @@ CCorrelationTool::Symbols_t CCorrelationTool::SimilarSymbols( const CCorrelation
  */
 std::set<CCorrelationTool::Point3d> CCorrelationTool::FindAllLocations() const
 {
-	std::set<CCorrelationTool::Point3d> locations;
+	Symbols_t similar_symbols = SimilarSymbols( m_reference_symbol );
+	return(ReferencePoints( similar_symbols ));
 
-	// We want to avoid calling the (expensive) intersection code too often.  If we've
-	// already intersected objects a and b then we shouldn't worry about intersecting 'b' with 'a'
-	// the next time through the loop.
-	// std::set< std::pair< Symbol_t, Symbol_t > > alreadyChecked;
-
-	// Look to find all intersections between all selected objects.  At all these locations, create
-        // a drilling cycle.
-
-	Symbols_t symbols = SimilarSymbols( m_reference_symbol );
-        for (CCorrelationTool::Symbols_t::const_iterator lhs = symbols.begin(); lhs != symbols.end(); lhs++)
-        {
-		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
-							// intersect anything else, we want to know
-							// about it.
-		
-		if (lhs->first == PointType)
-		{
-			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			double pos[3];
-			lhsPtr->GetStartPoint(pos);
-			locations.insert( CCorrelationTool::Point3d( pos[0], pos[1], pos[2] ) );
-			continue;	// No need to intersect a point with anything.
-		} // End if - then		
-
-		if (lhs->first == DrillingType)
-		{
-			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			std::set<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
-			for (std::set<CDrilling::Point3d>::const_iterator l_itPoint = holes.begin(); l_itPoint != holes.end(); l_itPoint++)
-			{
-				locations.insert( Point3d( l_itPoint->x, l_itPoint->y, l_itPoint->z ) );
-			} // End for
-			continue;
-		} // End if - then		
-
-                for (CCorrelationTool::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
-                {
-                        if (lhs == rhs) continue;
-			if (lhs->first == PointType) continue;	// No need to intersect a point type.
-
-			// Avoid repeated calls to the intersection code where possible.
-			/*
-			if ((alreadyChecked.find( std::make_pair( *lhs, *rhs ))) ||
-				(alreadyChecked.find( std::make_pair( *rhs, *lhs ))))
-			{
-				// We've already checked this for intersections.  Avoid this repetition.
-				continue;
-			} // End if - then
-			*/
-
-                        std::list<double> results;
-                        HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-                        HeeksObj *rhsPtr = heeksCAD->GetIDObject( rhs->first, rhs->second );
-
-			// alreadyChecked.insert( *lhs, *rhs );
-
-                        if (lhsPtr->Intersects( rhsPtr, &results ))
-                        {
-				l_bIntersectionsFound = true;
-                                while (((results.size() % 3) == 0) && (results.size() > 0))
-                                {
-                                        CCorrelationTool::Point3d intersection;
-
-                                        intersection.x = *(results.begin());
-                                        results.erase(results.begin());
-
-                                        intersection.y = *(results.begin());
-                                        results.erase(results.begin());
-
-                                        intersection.z = *(results.begin());
-                                        results.erase(results.begin());
-
-                                        locations.insert(intersection);
-                                } // End while
-                        } // End if - then
-                } // End for
-
-		if (! l_bIntersectionsFound)
-		{
-			// This element didn't intersect anything else.  If it's a circle
-			// then add its centre point to the result set.
-
-			if (lhs->first == CircleType)
-			{
-                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-				double pos[3];
-				if (heeksCAD->GetArcCentre( lhsPtr, pos ))
-				{
-					locations.insert( CCorrelationTool::Point3d( pos[0], pos[1], pos[2] ) );
-				} // End if - then
-			} // End if - then
-		} // End if - then
-        } // End for
-
-	return(locations);
 } // End FindAllLocations() method
 
