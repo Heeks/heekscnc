@@ -142,8 +142,9 @@ void CCounterBore::AppendTextToProgram()
 
 			std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
 			for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
-			{
-				ss << "circular_pocket( "
+			{   
+                
+				ss << "flush_nc()\ncircular_pocket( "
 							<< "x=" << l_itLocation->x << ", "
 							<< "y=" << l_itLocation->y << ", "
        		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter << ", "
@@ -590,5 +591,6 @@ std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_
 	return( std::make_pair( drill_hole_diameter * 1, drill_hole_diameter * 1.7 )  );
 
 } // End SelectSizeForHead() method
+
 
 
