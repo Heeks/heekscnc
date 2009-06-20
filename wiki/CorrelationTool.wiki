@@ -14,7 +14,7 @@ I recognise that this workflow is not quite right so I suspect it will be moved 
 
 This module tests size by comparing the diagonal length of each bounding box.  The reference object's bounding box diagonal length is compared with each other graphics element's bounding box diagonal.  This comparison allows for both smaller and larger scaling based on a configurable parameter.
 
-The second check is to determine shape.  The algorithm is to draw a line from the centre of each object at a configurable number of angles.  This line is intersected with the object and both the number of intersections and the distance between the intersection and the centre is recorded.  Each distance is, of course, scaled based on the scaling test above.  Once this is complete, a score is assigned based both on the number of intersections at each angle and the intersection distance at each angle.  This score is averaged over the number of samples and compared with a configurable parameter.
+The second check is to determine shape.  The algorithm is to draw a line from the centre of each object at a configurable number of angles.  Thes lines are intersected with the object and both the number of intersections and the distance between the intersection and the centre is recorded.  Each distance is, of course, scaled based on the scaling test above.  Once this is complete, a score is assigned based both on the number of intersections at each angle and the intersection distance at each angle.  This score is averaged over the number of samples and compared with a configurable parameter.
 
 All objects that are found to be similar enough are added to a result set of type/id pairs.
 
@@ -28,11 +28,11 @@ I did this with the intent of generating the drilling cycles required to produce
 
  - Import the SVG file into a HeeksCNC model.
 
-http://heekscnc.googlecode.com/svn/trunk/bitmaps/Wiki_CorrelationTool_pcb_following_edge_detection.png
+http://heekscnc.googlecode.com/svn/trunk/wiki/Wiki_CorrelationTool_pcb_following_edge_detection.png
 
  - Manually select one of the circles that surrounds a drill hole.
 
-http://heekscnc.googlecode.com/svn/trunk/bitmaps/Wiki_CorrelationTool_with_drill_bit_made_and_pad_selected.png
+http://heekscnc.googlecode.com/svn/trunk/wiki/Wiki_CorrelationTool_with_drill_bit_made_and_pad_selected.png
 
  - Add a CorrelationTool object from the Operations menu.
 
@@ -44,6 +44,6 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/Wiki_CorrelationTool_with_drill
 
  - Insert a DrillingCycle operation.
 
-http://heekscnc.googlecode.com/svn/trunk/bitmaps/Wiki_CorrelationTool_with_drilling_operations_found.png
+http://heekscnc.googlecode.com/svn/trunk/wiki/Wiki_CorrelationTool_with_drilling_operations_found.png
 
  - Adjust the DrillingCycle operation's parameters such as depth etc.
