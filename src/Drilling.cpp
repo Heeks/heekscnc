@@ -16,7 +16,6 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
-#include "CorrelationTool.h"
 
 #include <sstream>
 #include <iomanip>
@@ -414,21 +413,6 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 			continue;	// No need to intersect a point with anything.
 		} // End if - then		
 
-		if (lhs->first == CorrelationToolType)
-		{
-			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			if (lhsPtr)
-			{
-				std::set<CCorrelationTool::Point3d> ref = ((CCorrelationTool *)lhsPtr)->FindAllLocations();
-				for (std::set<CCorrelationTool::Point3d>::const_iterator l_itPoint = ref.begin(); l_itPoint != ref.end(); l_itPoint++)
-				{
-					locations.insert( CDrilling::Point3d( l_itPoint->x, l_itPoint->y, l_itPoint->z ) );
-				} // End for
-			} // End if - then
-
-			continue;
-		} // End if - then
-
                 for (CDrilling::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
                 {
                         if (lhs == rhs) continue;
@@ -470,6 +454,20 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 				double pos[3];
 				if ((lhsPtr != NULL) && (heeksCAD->GetArcCentre( lhsPtr, pos )))
 				{
+					locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+				} // End if - then
+			} // End if - then
+
+
+			if (lhs->first == SketchType)
+			{
+                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
+				if (lhsPtr != NULL)
+				{
+					CBox bounding_box;
+					lhsPtr->GetBox( bounding_box );
+					double pos[3];
+					bounding_box.Centre(pos);
 					locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
 				} // End if - then
 			} // End if - then
