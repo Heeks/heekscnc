@@ -27,9 +27,6 @@ void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
 {
 	CNCConfig config;
 	
-	config.Read(_T("m_feedrate"), &m_feedrate, 100);	// 100 mm per minute
-	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
-	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
 	config.Read(_T("m_diameter"), &m_diameter, (25.4 / 10));	// One tenth of an inch
 
 	if ((cutting_tool_number > 0) && (CCuttingTool::FindCuttingTool( cutting_tool_number )))
@@ -38,7 +35,6 @@ void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
 		if (ob != NULL)
 		{
 			std::pair< double, double > depth_and_diameter = CCounterBore::SelectSizeForHead( ((CCuttingTool *)ob)->m_params.m_diameter );
-			m_depth = depth_and_diameter.first;
 			m_diameter = depth_and_diameter.second;
 		} // End if - then
 	} // End if - then
@@ -49,24 +45,15 @@ void CCounterBoreParams::write_values_to_config()
 	// We always want to store the parameters in mm and convert them back later on.
 
 	CNCConfig config;
-	config.Write(_T("m_feedrate"), m_feedrate);
-	config.Write(_T("m_standoff"), m_standoff);
-	config.Write(_T("m_depth"), m_depth);
 	config.Write(_T("m_diameter"), m_diameter);
 }
 
 
-static void on_set_feedrate(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_feedrate = value;}
-static void on_set_standoff(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_standoff = value;}
-static void on_set_depth(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_depth = value;}
 static void on_set_diameter(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_diameter = value;}
 
 
 void CCounterBoreParams::GetProperties(CCounterBore* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("feedrate"), m_feedrate, parent, on_set_feedrate));
-	list->push_back(new PropertyLength(_("standoff"), m_standoff, parent, on_set_standoff));
-	list->push_back(new PropertyLength(_("depth"), m_depth, parent, on_set_depth));
 	list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
 }
 
@@ -75,17 +62,11 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
-	element->SetDoubleAttribute("feedrate", m_feedrate);
-	element->SetDoubleAttribute("standoff", m_standoff);
-	element->SetDoubleAttribute("depth", m_depth);
 	element->SetDoubleAttribute("diameter", m_diameter);
 }
 
 void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	if (pElem->Attribute("feedrate")) m_feedrate = atof(pElem->Attribute("feedrate"));
-	if (pElem->Attribute("standoff")) m_standoff = atof(pElem->Attribute("standoff"));
-	if (pElem->Attribute("depth")) m_depth = atof(pElem->Attribute("depth"));
 	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
 }
 
@@ -131,11 +112,11 @@ void CCounterBore::AppendTextToProgram()
 							<< "y=" << l_itLocation->y << ", "
        		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter << ", "
        		                         		<< "HoleDiameter=" << m_params.m_diameter << ", "
-       		                         		<< "ClearanceHeight=" << m_params.m_standoff << ", "
-       		                         		<< "StartHeight=" << l_itLocation->z + m_params.m_standoff << ", "
+       		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height << ", "
+       		                         		<< "StartHeight=" << l_itLocation->z + m_depth_op_params.m_start_depth << ", "
        		                         		<< "MaterialTop=" << l_itLocation->z << ", "
-       		                         		<< "FeedRate=" << m_params.m_feedrate << ", "
-       		                         		<< "HoleDepth=" << m_params.m_depth << ")\n";
+       		                         		<< "FeedRate=" << m_depth_op_params.m_vertical_feed_rate << ", "
+       		                         		<< "HoleDepth=" << m_depth_op_params.m_final_depth << ")\n";
 			} // End for
 
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -244,7 +225,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 
 				start[0] = l_itPoint->x;
 				start[1] = l_itPoint->y;
-				start[2] = l_itPoint->z - m_params.m_depth;
+				start[2] = l_itPoint->z - m_depth_op_params.m_final_depth;
 
 				l_itPoint++;
 
@@ -252,7 +233,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 				{
 					end[0] = l_itPoint->x;
 					end[1] = l_itPoint->y;
-					end[2] = l_itPoint->z - m_params.m_depth;
+					end[2] = l_itPoint->z - m_depth_op_params.m_final_depth;
 				
 					glVertex3dv( start );
 					glVertex3dv( end );
@@ -270,7 +251,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 
 				end[0] = l_itPoint->x;
 				end[1] = l_itPoint->y;
-				end[2] = l_itPoint->z - m_params.m_depth;
+				end[2] = l_itPoint->z - m_depth_op_params.m_final_depth;
 			
 				glVertex3dv( start );
 				glVertex3dv( end );
@@ -285,7 +266,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 void CCounterBore::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
-	COp::GetProperties(list);
+	CDepthOp::GetProperties(list);
 }
 
 HeeksObj *CCounterBore::MakeACopy(void)const
