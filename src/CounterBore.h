@@ -9,7 +9,7 @@
  * details.
  */
 
-#include "Op.h"
+#include "DepthOp.h"
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
 #include <list>
@@ -20,9 +20,6 @@ class CCounterBore;
 class CCounterBoreParams{
 	
 public:
-	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
-	double m_feedrate;
-	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
 	double m_diameter;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 
 	void set_initial_values( const int cutting_tool_number );
@@ -51,7 +48,7 @@ public:
 	holes move along with them.
  */
 
-class CCounterBore: public COp {
+class CCounterBore: public CDepthOp {
 public:
 	/**
 		There are all types of 3d point classes around but most of them seem to be in the HeeksCAD code
@@ -121,10 +118,10 @@ public:
 	static std::pair< double, double > SelectSizeForHead( const double drill_hole_diameter );
 
 	//	Constructors.
-	CCounterBore():COp(GetTypeString(), 0){}
+	CCounterBore():CDepthOp(GetTypeString()){}
 	CCounterBore(	const Symbols_t &symbols, 
 			const int cutting_tool_number )
-		: COp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
+		: CDepthOp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
 	{
 		m_params.set_initial_values( cutting_tool_number );
 
@@ -141,7 +138,7 @@ public:
 				if (object != NULL)
 				{
 					std::pair< double, double > screw_size = SelectSizeForHead( ((CCuttingTool *) object)->m_params.m_diameter );
-					m_params.m_depth = screw_size.first;
+					m_depth_op_params.m_final_depth = screw_size.first;
 					m_params.m_diameter = screw_size.second;
 				} // End if - then
 			} // End for

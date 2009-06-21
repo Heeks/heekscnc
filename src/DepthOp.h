@@ -17,8 +17,8 @@ class CDepthOp;
 class CDepthOpParams{
 public:
 	int m_workplane;
-	int m_tool_number;    
-	double m_tool_diameter;
+	int m_tool_number;    		// Reference to CCuttingToolParams::m_tool_number - separate object.
+	double m_tool_diameter;	// I think this should be removed in preference for CCuttingToolParams::m_diameter
 	double m_clearance_height;
 	double m_start_depth;
 	double m_step_down;
@@ -30,7 +30,7 @@ public:
 
 	CDepthOpParams();
 
-	void set_initial_values();
+	void set_initial_values(const int cutting_tool_number = -1);
 	void write_values_to_config();
 	void GetProperties(CDepthOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -42,7 +42,7 @@ class CDepthOp : public COp
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(const wxString& title):COp(title){m_depth_op_params.set_initial_values();}
+	CDepthOp(const wxString& title, const int cutting_tool_number = -1 ):COp(title, cutting_tool_number){m_depth_op_params.set_initial_values(cutting_tool_number);}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
