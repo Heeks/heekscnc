@@ -30,15 +30,6 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_x_offset"), &m_x_offset, 0);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, 0);
 	config.Read(_T("m_orientation"), &m_orientation, 9);
-
-	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
-	// If we're now in inches then convert the values.
-	if (theApp.m_program->m_units >= 25.4)
-	{
-		m_diameter = m_diameter / 25.4;
-		m_x_offset = m_x_offset / 25.4;
-		m_tool_length_offset = m_x_offset / 25.4;
-	} // End if - then
 }
 
 void CCuttingToolParams::write_values_to_config()
@@ -47,22 +38,10 @@ void CCuttingToolParams::write_values_to_config()
 
 	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
 	// If we're now in inches then convert the values.
-	if (theApp.m_program->m_units >= 25.4)
-	{
-		// We're in inches right now.
-
-		config.Write(_T("m_diameter"), (m_diameter * 25.4));
-		config.Write(_T("m_x_offset"), (m_x_offset * 25.4));
-		config.Write(_T("m_tool_length_offset"), (m_tool_length_offset * 25.4));
-	} // End if - then
-	else
-	{
-		// We're in mm already.
-		config.Write(_T("m_diameter"), m_diameter);
-		config.Write(_T("m_x_offset"), m_x_offset);
-		config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
-	} // End if - else
-
+	// We're in mm already.
+	config.Write(_T("m_diameter"), m_diameter);
+	config.Write(_T("m_x_offset"), m_x_offset);
+	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
 	config.Write(_T("m_orientation"), m_orientation);
 }
 
