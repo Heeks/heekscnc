@@ -97,7 +97,6 @@ public:
 		cycle activity when the operator selects the CounterBore Cycle operation in the data list.
 	 */
 	std::list< Point3d > PointsAround( const Point3d & origin, const double radius, const unsigned int numPoints ) const;
-	std::list< Point3d > DrillBitVertices( const Point3d & origin, const double radius, const double length ) const;
 
 public:
 	/**
