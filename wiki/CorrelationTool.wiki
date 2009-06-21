@@ -28,11 +28,11 @@ I did this with the intent of generating the drilling cycles required to produce
 
  - Import the SVG file into a HeeksCNC model.
 
-http://heekscnc.googlecode.com/svn/trunk/wiki/CorrelationTool/Wiki_CorrelationTool_pcb_following_edge_detection.png
+http://heekscnc.googlecode.com/svn/wiki/CorrelationTool/Wiki_CorrelationTool_pcb_following_edge_detection.png
 
  - Manually select one of the circles that surrounds a drill hole.
 
-http://heekscnc.googlecode.com/svn/trunk/wiki/CorrelationTool/Wiki_CorrelationTool_with_drill_bit_made_and_pad_selected.png
+http://heekscnc.googlecode.com/svn/wiki/CorrelationTool/Wiki_CorrelationTool_with_drill_bit_made_and_pad_selected.png
 
  - Add a CorrelationTool object from the Operations menu.
 
@@ -44,6 +44,6 @@ http://heekscnc.googlecode.com/svn/trunk/wiki/CorrelationTool/Wiki_CorrelationTo
 
  - Insert a DrillingCycle operation.
 
-http://heekscnc.googlecode.com/svn/trunk/wiki/CorrelationTool/Wiki_CorrelationTool_with_drilling_operations_found.png
+http://heekscnc.googlecode.com/svn/wiki/CorrelationTool/Wiki_CorrelationTool_with_drilling_operations_found.png
 
  - Adjust the DrillingCycle operation's parameters such as depth etc.
