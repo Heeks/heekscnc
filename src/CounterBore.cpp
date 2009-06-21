@@ -12,6 +12,7 @@
 #include "interface/HeeksObj.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
@@ -22,23 +23,24 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-void CCounterBoreParams::set_initial_values()
+void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
 {
 	CNCConfig config;
 	
 	config.Read(_T("m_feedrate"), &m_feedrate, 100);	// 100 mm per minute
 	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
-	config.Read(_T("m_dwell"), &m_dwell, 1);
 	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
 	config.Read(_T("m_diameter"), &m_diameter, (25.4 / 10));	// One tenth of an inch
 
-	if (theApp.m_program->m_units >= 25.4)
+	if ((cutting_tool_number > 0) && (CCuttingTool::FindCuttingTool( cutting_tool_number )))
 	{
-		// We're using inches.  Change the default settings.
-		m_feedrate = m_feedrate / 25.4;
-		m_standoff = m_standoff / 25.4;
-		m_depth = m_depth / 25.4;
-		m_diameter = m_diameter / 25.4;
+		HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( cutting_tool_number ) );
+		if (ob != NULL)
+		{
+			std::pair< double, double > depth_and_diameter = CCounterBore::SelectSizeForHead( ((CCuttingTool *)ob)->m_params.m_diameter );
+			m_depth = depth_and_diameter.first;
+			m_diameter = depth_and_diameter.second;
+		} // End if - then
 	} // End if - then
 }
 
@@ -47,32 +49,15 @@ void CCounterBoreParams::write_values_to_config()
 	// We always want to store the parameters in mm and convert them back later on.
 
 	CNCConfig config;
-	if (theApp.m_program->m_units >= 25.4)
-	{
-		// We're currently in inches.  Store them in mm
-
-		config.Write(_T("m_feedrate"), (m_feedrate * 25.4));
-		config.Write(_T("m_standoff"), (m_standoff * 25.4));
-		config.Write(_T("m_dwell"), m_dwell);
-		config.Write(_T("m_depth"), (m_depth * 25.4));
-		config.Write(_T("m_diameter"), (m_diameter * 25.4));
-	} // End if - then
-	else
-	{	
-		// They're already in mm.  Store them just the way they are.
-
-		config.Write(_T("m_feedrate"), m_feedrate);
-		config.Write(_T("m_standoff"), m_standoff);
-		config.Write(_T("m_dwell"), m_dwell);
-		config.Write(_T("m_depth"), m_depth);
-		config.Write(_T("m_diameter"), m_diameter);
-	} // End if - else
+	config.Write(_T("m_feedrate"), m_feedrate);
+	config.Write(_T("m_standoff"), m_standoff);
+	config.Write(_T("m_depth"), m_depth);
+	config.Write(_T("m_diameter"), m_diameter);
 }
 
 
 static void on_set_feedrate(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_feedrate = value;}
 static void on_set_standoff(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_standoff = value;}
-static void on_set_dwell(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_dwell = value;}
 static void on_set_depth(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_depth = value;}
 static void on_set_diameter(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_diameter = value;}
 
@@ -80,10 +65,9 @@ static void on_set_diameter(double value, HeeksObj* object){((CCounterBore*)obje
 void CCounterBoreParams::GetProperties(CCounterBore* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("feedrate"), m_feedrate, parent, on_set_feedrate));
-	list->push_back(new PropertyDouble(_("standoff"), m_standoff, parent, on_set_standoff));
-	list->push_back(new PropertyDouble(_("dwell"), m_dwell, parent, on_set_dwell));
-	list->push_back(new PropertyDouble(_("depth"), m_depth, parent, on_set_depth));
-	list->push_back(new PropertyDouble(_("diameter"), m_diameter, parent, on_set_diameter));
+	list->push_back(new PropertyLength(_("standoff"), m_standoff, parent, on_set_standoff));
+	list->push_back(new PropertyLength(_("depth"), m_depth, parent, on_set_depth));
+	list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
 }
 
 void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
@@ -93,7 +77,6 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 	root->LinkEndChild( element );  
 	element->SetDoubleAttribute("feedrate", m_feedrate);
 	element->SetDoubleAttribute("standoff", m_standoff);
-	element->SetDoubleAttribute("dwell", m_dwell);
 	element->SetDoubleAttribute("depth", m_depth);
 	element->SetDoubleAttribute("diameter", m_diameter);
 }
@@ -102,7 +85,6 @@ void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	if (pElem->Attribute("feedrate")) m_feedrate = atof(pElem->Attribute("feedrate"));
 	if (pElem->Attribute("standoff")) m_standoff = atof(pElem->Attribute("standoff"));
-	if (pElem->Attribute("dwell")) m_dwell = atof(pElem->Attribute("dwell"));
 	if (pElem->Attribute("depth")) m_depth = atof(pElem->Attribute("depth"));
 	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
 }
@@ -584,7 +566,7 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
 
 
 // Return depth and diameter in that order.
-std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_hole_diameter ) const
+std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_hole_diameter )
 {
 	// Just bluf it for now.  We will implement a lookup table eventually.
 

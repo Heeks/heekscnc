@@ -12,6 +12,7 @@
 #include "interface/HeeksObj.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
@@ -72,9 +73,9 @@ static void on_set_orientation(int value, HeeksObj* object){((CCuttingTool*)obje
 
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("diameter"), m_diameter, parent, on_set_diameter));
-	list->push_back(new PropertyDouble(_("x_offset"), m_x_offset, parent, on_set_x_offset));
-	list->push_back(new PropertyDouble(_("tool_length_offset"), m_x_offset, parent, on_set_tool_length_offset));
+	list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
+	list->push_back(new PropertyLength(_("x_offset"), m_x_offset, parent, on_set_x_offset));
+	list->push_back(new PropertyLength(_("tool_length_offset"), m_x_offset, parent, on_set_tool_length_offset));
 	list->push_back(new PropertyInt(_("orientation"), m_orientation, parent, on_set_orientation));
 }
 
