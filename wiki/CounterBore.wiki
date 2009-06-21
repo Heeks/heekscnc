@@ -16,13 +16,13 @@ The CounterBore operation accepts all the same object selections as does a Drill
 
 - Place points, standalone circles and/or intersecting objects.
 
-http://heekscnc.googlecode.com/svn/wiki/CounterBore-SelectObjects.png
+http://heekscnc.googlecode.com/svn/wiki/CounterBore/CounterBore-SelectObjects.png
 
 - Select the drill bit cutting tool as well as the other graphics ojbects mentioned above.
 
 - Create a DrillingCycle object.
 
-http://heekscnc.googlecode.com/svn/wiki/CounterBore-InsertDrillingOperation.png
+http://heekscnc.googlecode.com/svn/wiki/CounterBore/CounterBore-InsertDrillingOperation.png
 
 - Define another cutting tool object to represent the milling bit used in milling the circular pockets.
 
@@ -32,7 +32,7 @@ http://heekscnc.googlecode.com/svn/wiki/CounterBore-InsertDrillingOperation.png
 
 - Create a CounterBore operation.
 
-http://heekscnc.googlecode.com/svn/wiki/CounterBore-AddCounterBore.png
+http://heekscnc.googlecode.com/svn/wiki/CounterBore/CounterBore-AddCounterBore.png
 
 - Generate the Python script
 
