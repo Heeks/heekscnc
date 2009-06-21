@@ -271,6 +271,26 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 }
 
 
+/**
+	Sort the NC operations by execution order first and then
+	by cutting tool number.
+ */
+struct sort_operations : public std::binary_function< bool, COp *, COp * >
+{
+	bool operator() ( const COp *lhs, const COp *rhs ) const
+	{
+		if (lhs->m_execution_order < rhs->m_execution_order) return(true);
+		if (lhs->m_execution_order > rhs->m_execution_order) return(false);
+
+		// The execution orders are the same.  Let's group on tool number so as
+		// to avoid unnecessary tool change operations.
+
+		if (lhs->m_cutting_tool_number < rhs->m_cutting_tool_number) return(true);
+		if (lhs->m_cutting_tool_number > rhs->m_cutting_tool_number) return(false);
+
+		return(false);
+	} // End operator
+};
 
 void CProgram::RewritePythonProgram()
 {
@@ -285,7 +305,8 @@ void CProgram::RewritePythonProgram()
 	bool drilling_op_exists = false;
 	bool counterbore_op_exists = false;
 
-	typedef std::multimap< int, COp * > OperationsMap_t;
+
+	typedef std::vector< COp * > OperationsMap_t;
 	OperationsMap_t operations;
 
 	if (m_operations == NULL)
@@ -297,38 +318,36 @@ void CProgram::RewritePythonProgram()
 
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
 	{
+		operations.push_back( (COp *) object );
+
 		if(object->GetType() == ProfileType)
 		{
 			if(((CProfile*)object)->m_active)profile_op_exists = true;
-			operations.insert( std::make_pair( ((CProfile *) object)->m_execution_order, ((CProfile *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == PocketType)
 		{
 			if(((CPocket*)object)->m_active)pocket_op_exists = true;
-			operations.insert( std::make_pair( ((CPocket *) object)->m_execution_order, ((CPocket *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == ZigZagType)
 		{
 			if(((CZigZag*)object)->m_active)zigzag_op_exists = true;
-			operations.insert( std::make_pair( ((CZigZag *) object)->m_execution_order, ((CZigZag *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == AdaptiveType)
 		{
 			if(((CAdaptive*)object)->m_active)adaptive_op_exists = true;
-			operations.insert( std::make_pair( ((CAdaptive *) object)->m_execution_order, ((CAdaptive *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == DrillingType)
 		{
 			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
-			operations.insert( std::make_pair( ((CDrilling *) object)->m_execution_order, ((CDrilling *) object) ) );	// Will I go to hell for this?
 		}
 		else if(object->GetType() == CounterBoreType)
 		{
-			operations.insert( std::make_pair( ((CCounterBore *) object)->m_execution_order, ((CCounterBore *) object) ) );	// Will I go to hell for this?
 			counterbore_op_exists = true;
 		}
 	}
 
+	// Sort the operations in order of execution_order and then by cutting_tool_number
+	std::sort( operations.begin(), operations.end(), sort_operations() );
 
 	// add standard stuff at the top
 	//hackhack, make it work on unix with FHS
@@ -430,7 +449,7 @@ void CProgram::RewritePythonProgram()
 	int current_tool = 0;
 	for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 	{
-		HeeksObj *object = (HeeksObj *) l_itOperation->second;
+		HeeksObj *object = (HeeksObj *) *l_itOperation;
 		if (object == NULL) continue;
 		
 		if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
