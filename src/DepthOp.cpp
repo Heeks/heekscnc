@@ -15,6 +15,8 @@
 #include "interface/PropertyLength.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
+#include "CuttingTool.h"
+
 
 CDepthOpParams::CDepthOpParams()
 {
@@ -30,7 +32,7 @@ CDepthOpParams::CDepthOpParams()
 	m_spindle_speed = 0.0;
 }
 
-void CDepthOpParams::set_initial_values()
+void CDepthOpParams::set_initial_values( const int cutting_tool_number )
 {
 	CNCConfig config;
     config.Read(_T("DepthFixtureOffset"), &m_workplane,1);
@@ -43,7 +45,22 @@ void CDepthOpParams::set_initial_values()
 	config.Read(_T("DepthOpRapidDown"), &m_rapid_down_to_height, 2.0);
 	config.Read(_T("DepthOpHorizFeed"), &m_horizontal_feed_rate, 100.0);
 	config.Read(_T("DepthOpVertFeed"), &m_vertical_feed_rate, 100.0);
-	config.Read(_T("DepthOpSpindleSpeed"), &m_spindle_speed, 7000);}
+	config.Read(_T("DepthOpSpindleSpeed"), &m_spindle_speed, 7000);
+
+	if (cutting_tool_number > 0)
+	{
+		m_tool_number = cutting_tool_number;
+
+		if (CCuttingTool::FindCuttingTool( m_tool_number ) > 0)
+		{
+			HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( m_tool_number ) );
+			if (ob != NULL)
+			{
+				m_tool_diameter = ((CCuttingTool *) ob)->m_params.m_diameter;
+			} // End if - then
+		} // End if - then
+	} // End if - then
+}
 
 void CDepthOpParams::write_values_to_config()
 {

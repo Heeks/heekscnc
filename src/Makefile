@@ -338,6 +338,7 @@ CorrelationTool.o: CorrelationTool.cpp \
 CounterBore.o: CounterBore.cpp \
 		CounterBore.h \
 		Op.h \
+		DepthOp.h \
 		HeeksCNCTypes.h \
 		Drilling.h \
 		CNCConfig.h \
