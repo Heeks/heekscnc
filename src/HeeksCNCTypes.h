@@ -15,6 +15,5 @@ enum{
 	CuttingToolType,
 	ToolsType,
 	CounterBoreType,
-	CorrelationToolType,
 	HeeksCNCMaximumType
 };
