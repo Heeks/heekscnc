@@ -22,11 +22,10 @@ class CCounterBoreParams{
 public:
 	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
 	double m_feedrate;
-	double m_dwell;			// If dwell_bottom is non-zero then we're using the G82 drill cycle rather than G83 peck drill cycle.  This is the 'P' word
 	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
 	double m_diameter;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 
-	void set_initial_values();
+	void set_initial_values( const int cutting_tool_number );
 	void write_values_to_config();
 	void GetProperties(CCounterBore* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -120,7 +119,7 @@ public:
 
 
 	// depth and diameter (in that order)
-	std::pair< double, double > SelectSizeForHead( const double drill_hole_diameter ) const;
+	static std::pair< double, double > SelectSizeForHead( const double drill_hole_diameter );
 
 	//	Constructors.
 	CCounterBore():COp(GetTypeString(), 0){}
@@ -128,7 +127,7 @@ public:
 			const int cutting_tool_number )
 		: COp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
 	{
-		m_params.set_initial_values();
+		m_params.set_initial_values( cutting_tool_number );
 
 		std::list<int> drillbits;
 		std::set<CCounterBore::Point3d> locations = FindAllLocations( symbols, &drillbits );
