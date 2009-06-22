@@ -251,7 +251,8 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
 			if (cuttingTool != NULL)
 			{
-				l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter*(theApp.m_program->m_units);
+				//l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter*(theApp.m_program->m_units);
+                l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter;
 			} // End if - then
 		} // End if - then
 
