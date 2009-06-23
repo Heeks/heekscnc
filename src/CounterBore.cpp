@@ -181,18 +181,21 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked && !no_color)
 	{
+		// For all graphical symbols that this module refers to, highlight them as well.
+		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
+		{
+			HeeksObj* object = heeksCAD->GetIDObject(l_itSymbol->first, l_itSymbol->second);
+
+			// If we found something, ask its CAD code to draw itself highlighted.
+			if(object)object->glCommands(false, true, false);
+		} // End for
+
+		// For all coordinates that relate to these reference objects, draw the graphics that represents
+		// both a drilling hole and a counterbore.
+
 		std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
 		for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
-
-			for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-			{
-				HeeksObj* object = heeksCAD->GetIDObject(l_itSymbol->first, l_itSymbol->second);
-
-				// If we found something, ask its CAD code to draw itself highlighted.
-				if(object)object->glCommands(false, true, false);
-			} // End for
-
 			std::list< CCounterBore::Point3d > circle = PointsAround( *l_itLocation, m_params.m_diameter / 2, 10 );
 
 			glBegin(GL_LINE_STRIP);
