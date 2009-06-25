@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="HeeksCNC" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/libheekscnc.so.0.5.1" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="/usr/local/bin" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="src" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/libheekscnc.so.0.5.1" prefix_auto="0" extension_auto="0" />
+				<Option object_output="obj/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="`wx-config --cxxflags`\" />
+			<Add option='-Wall -fPIC -g -I &quot;./&quot; $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DRUNINPLACE -DCODEBLOCKS' />
+			<Add directory="/usr/include/opencascade" />
+			<Add directory="../../HeeksCAD" />
+		</Compiler>
+		<Linker>
+			<Add option="`wx-config --libs`" />
+			<Add option="`wx-config --gl-libs`" />
+			<Add option="-lTKVRML -lTKSTL -lTKBRep -lTKIGES -lTKShHealing -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKXSBase -lTKShapeSchema -lFWOSPlugin -lTKBool -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKMath -lTKOffset -lTKPrim -lTKPShape -lTKService -lTKTopAlgo -lTKV2d -lTKV3d -lTKMesh -lTKAdvTools -lTKBO -lTKXDESTEP -lTKXCAF -lTKXCAFSchema -lTKLCAF -lTKPLCAF -lstdc++ -lGLU -lGL ${WXLIBS}" />
+		</Linker>
+		<Unit filename="src/Adaptive.cpp" />
+		<Unit filename="src/Adaptive.h" />
+		<Unit filename="src/CNCConfig.h" />
+		<Unit filename="src/CounterBore.cpp" />
+		<Unit filename="src/CounterBore.h" />
+		<Unit filename="src/CuttingTool.cpp" />
+		<Unit filename="src/CuttingTool.h" />
+		<Unit filename="src/DepthOp.cpp" />
+		<Unit filename="src/DepthOp.h" />
+		<Unit filename="src/Drilling.cpp" />
+		<Unit filename="src/Drilling.h" />
+		<Unit filename="src/DropCutter.cpp" />
+		<Unit filename="src/DropCutter.h" />
+		<Unit filename="src/GTri.h" />
+		<Unit filename="src/HeeksCNC.cpp" />
+		<Unit filename="src/HeeksCNC.h" />
+		<Unit filename="src/HeeksCNCTypes.h" />
+		<Unit filename="src/Interface.cpp" />
+		<Unit filename="src/Interface.h" />
+		<Unit filename="src/NCCode.cpp" />
+		<Unit filename="src/NCCode.h" />
+		<Unit filename="src/Op.cpp" />
+		<Unit filename="src/Op.h" />
+		<Unit filename="src/OutputCanvas.cpp" />
+		<Unit filename="src/OutputCanvas.h" />
+		<Unit filename="src/Pocket.cpp" />
+		<Unit filename="src/Pocket.h" />
+		<Unit filename="src/Profile.cpp" />
+		<Unit filename="src/Profile.h" />
+		<Unit filename="src/Program.cpp" />
+		<Unit filename="src/Program.h" />
+		<Unit filename="src/ProgramCanvas.cpp" />
+		<Unit filename="src/ProgramCanvas.h" />
+		<Unit filename="src/PythonStuff.cpp" />
+		<Unit filename="src/PythonStuff.h" />
+		<Unit filename="src/ZigZag.cpp" />
+		<Unit filename="src/ZigZag.h" />
+		<Unit filename="src/stdafx.cpp" />
+		<Unit filename="src/stdafx.h" />
+		<Unit filename="../interface/HeeksColor.cpp" />
+		<Unit filename="../interface/HeeksColor.h" />
+		<Unit filename="../interface/HeeksObj.cpp" />
+		<Unit filename="../interface/HeeksObj.h" />
+		<Unit filename="../interface/LeftAndRight.cpp" />
+		<Unit filename="../interface/LeftAndRight.h" />
+		<Unit filename="../interface/MarkedObject.cpp" />
+		<Unit filename="../interface/MarkedObject.h" />
+		<Unit filename="../interface/ObjList.cpp" />
+		<Unit filename="../interface/ObjList.h" />
+		<Unit filename="../interface/PropertyCheck.cpp" />
+		<Unit filename="../interface/PropertyCheck.h" />
+		<Unit filename="../interface/PropertyChoice.cpp" />
+		<Unit filename="../interface/PropertyChoice.h" />
+		<Unit filename="../interface/PropertyColor.cpp" />
+		<Unit filename="../interface/PropertyColor.h" />
+		<Unit filename="../interface/PropertyDouble.cpp" />
+		<Unit filename="../interface/PropertyDouble.h" />
+		<Unit filename="../interface/PropertyInt.cpp" />
+		<Unit filename="../interface/PropertyInt.h" />
+		<Unit filename="../interface/PropertyLength.cpp" />
+		<Unit filename="../interface/PropertyLength.h" />
+		<Unit filename="../interface/PropertyList.cpp" />
+		<Unit filename="../interface/PropertyList.h" />
+		<Unit filename="../interface/PropertyString.cpp" />
+		<Unit filename="../interface/PropertyString.h" />
+		<Unit filename="../interface/PropertyVertex.cpp" />
+		<Unit filename="../interface/PropertyVertex.h" />
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
