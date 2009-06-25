@@ -110,13 +110,13 @@ void CCounterBore::AppendTextToProgram()
 				ss << "flush_nc()\ncircular_pocket( "
 							<< "x=" << l_itLocation->x << ", "
 							<< "y=" << l_itLocation->y << ", "
-       		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter << ", "
-       		                         		<< "HoleDiameter=" << m_params.m_diameter << ", "
-       		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height << ", "
-       		                         		<< "StartHeight=" << l_itLocation->z + m_depth_op_params.m_start_depth << ", "
-       		                         		<< "MaterialTop=" << l_itLocation->z << ", "
+       		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter / theApp.m_program->m_units << ", "
+       		                         		<< "HoleDiameter=" << m_params.m_diameter / theApp.m_program->m_units << ", "
+       		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
+       		                         		<< "StartHeight=" << (l_itLocation->z + m_depth_op_params.m_start_depth) / theApp.m_program->m_units << ", "
+       		                         		<< "MaterialTop=" << l_itLocation->z / theApp.m_program->m_units << ", "
        		                         		<< "FeedRate=" << m_depth_op_params.m_vertical_feed_rate << ", "
-       		                         		<< "HoleDepth=" << m_depth_op_params.m_final_depth << ")\n";
+       		                         		<< "HoleDepth=" << m_depth_op_params.m_final_depth / theApp.m_program->m_units << ")\n";
 			} // End for
 
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
