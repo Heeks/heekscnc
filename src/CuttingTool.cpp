@@ -110,7 +110,7 @@ void CCuttingTool::AppendTextToProgram()
 		<< "name=None, ";
 	if (m_params.m_diameter > 0)
 	{
-		ss << "radius=" << m_params.m_diameter / 2 << ", ";
+		ss << "radius=" << m_params.m_diameter / 2 /theApp.m_program->m_units << ", ";
 	} // End if - then
 	else
 	{
@@ -119,7 +119,7 @@ void CCuttingTool::AppendTextToProgram()
 
 	if (m_params.m_tool_length_offset > 0)
 	{
-		ss << "length=" << m_params.m_tool_length_offset;
+		ss << "length=" << m_params.m_tool_length_offset /theApp.m_program->m_units;
 	} // End if - then
 	else
 	{
