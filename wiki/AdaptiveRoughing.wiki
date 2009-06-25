@@ -42,3 +42,87 @@ http://heekscnc.googlecode.com/svn/wiki/adaptiveopen2.png
 To specify a boundary that the tool must stay inside, you must use a solid, like this ( be careful to set the starting point somewhere in the middle of the pocket )
 
 http://heekscnc.googlecode.com/svn/wiki/adaptivepocket.png
+
+= Properties =
+All operations have some common properties, see here:
+http://code.google.com/p/heekscnc/wiki/Operations
+
+===leadoffdz===
+We don't know what this does
+
+===leadofflen===
+We don't know what this does
+
+===leadoffrad===
+We don't know what this does
+
+===retractzheight===
+We don't know what this does
+
+===leadoffsamplestep===
+We don't know what this does
+
+===toolcornerrad===
+We don't know what this does
+
+===toolflatrad===
+We don't know what this does
+
+===samplestep===
+We don't know what this does
+
+===stepdown===
+We don't know what this does
+
+===clearcuspheight===
+We don't know what this does
+
+===triangleweaveres===
+We don't know what this does
+
+===flatradweaveres===
+We don't know what this does
+
+===dchangright===
+We don't know what this does
+
+===dchangrightoncontour===
+We don't know what this does
+
+===dchangleft===
+We don't know what this does
+
+===dchangefreespace===
+We don't know what this does
+
+===sidecutdisplch===
+We don't know what this does
+
+===fcut===
+We don't know what this does
+
+===fretract===
+We don't know what this does
+
+===thintol===
+We don't know what this does
+
+===startpoint_x===
+The start point x co-ordinate
+
+===startpoint_y===
+The start point y co-ordinate
+
+===startvel_x===
+The start direction x
+
+===startvel_y===
+The start direction y
+
+===minz===
+We don't know what this does
+
+===boundaryclear===
+The z height of the boundary. This should be a little above the solid.
+
+If there is a sketch selected when creating an Adaptive Roughing operation, 
