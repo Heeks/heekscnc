@@ -108,8 +108,8 @@ void CCounterBore::AppendTextToProgram()
 			{   
                 
 				ss << "flush_nc()\ncircular_pocket( "
-							<< "x=" << l_itLocation->x << ", "
-							<< "y=" << l_itLocation->y << ", "
+							<< "x=" << l_itLocation->x/ theApp.m_program->m_units << ", "
+							<< "y=" << l_itLocation->y/ theApp.m_program->m_units << ", "
        		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter / theApp.m_program->m_units << ", "
        		                         		<< "HoleDiameter=" << m_params.m_diameter / theApp.m_program->m_units << ", "
        		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
