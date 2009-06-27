@@ -106,8 +106,17 @@ void CCuttingTool::AppendTextToProgram()
 		ss << "#(" << m_title.c_str() << ")\n";
 	} // End if - then
 
-	ss << "tool_defn( id=" << m_tool_number << ", "
-		<< "name=None, ";
+	ss << "tool_defn( id=" << m_tool_number << ", ";
+
+	if (m_title.size() > 0)
+	{
+		ss << "name='" << m_title.c_str() << "\', ";
+	} // End if - then
+	else
+	{
+		ss << "name=None, ";
+	} // End if - else
+
 	if (m_params.m_diameter > 0)
 	{
 		ss << "radius=" << m_params.m_diameter / 2 /theApp.m_program->m_units << ", ";

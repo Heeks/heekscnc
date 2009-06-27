@@ -105,7 +105,7 @@ static void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
 	event.Check(aui_manager->GetPane(theApp.m_output_canvas).IsShown());
 }
 
-static bool GetSketches(std::list<int>& sketches)
+static bool GetSketches(std::list<int>& sketches, int *p_piCuttingToolNumber = NULL )
 {
 	// check for at least one sketch selected
 
@@ -113,7 +113,15 @@ static bool GetSketches(std::list<int>& sketches)
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if(object->GetType() == SketchType)sketches.push_back(object->m_id);
+		if(object->GetType() == SketchType)
+		{
+			sketches.push_back(object->m_id);
+		} // End if - then
+
+		if ((object != NULL) && (object->GetType() == CuttingToolType) && (p_piCuttingToolNumber != NULL))
+		{
+			*p_piCuttingToolNumber = ((CCuttingTool *) object)->m_tool_number;
+		} // End if - then
 	}
 
 	if(sketches.size() == 0)
@@ -127,10 +135,11 @@ static bool GetSketches(std::list<int>& sketches)
 
 static void NewProfileOpMenuCallback(wxCommandEvent &event)
 {
+	int cutting_tool_number = -1;
 	std::list<int> sketches;
-	if(GetSketches(sketches))
+	if(GetSketches(sketches, &cutting_tool_number))
 	{
-		CProfile *new_object = new CProfile(sketches);
+		CProfile *new_object = new CProfile(sketches, cutting_tool_number);
 		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
@@ -139,10 +148,11 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 
 static void NewPocketOpMenuCallback(wxCommandEvent &event)
 {
+	int cutting_tool_number = -1;
 	std::list<int> sketches;
-	if(GetSketches(sketches))
+	if(GetSketches(sketches, &cutting_tool_number))
 	{
-		CPocket *new_object = new CPocket(sketches);
+		CPocket *new_object = new CPocket(sketches, cutting_tool_number);
 		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
