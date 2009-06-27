@@ -39,7 +39,13 @@ public:
 	CProfileParams m_profile_params;
 
 	CProfile():CDepthOp(GetTypeString()){}
-	CProfile(const std::list<int> &sketches):CDepthOp(GetTypeString()), m_sketches(sketches){m_profile_params.set_initial_values();}
+	CProfile(const std::list<int> &sketches, const int cutting_tool_number )
+		: 	CDepthOp(GetTypeString(), cutting_tool_number), 
+			m_sketches(sketches)
+	{
+		m_profile_params.set_initial_values();
+	} // End constructor
+
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProfileType;}
