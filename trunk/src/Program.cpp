@@ -305,7 +305,6 @@ void CProgram::RewritePythonProgram()
 	bool drilling_op_exists = false;
 	bool counterbore_op_exists = false;
 
-
 	typedef std::vector< COp * > OperationsMap_t;
 	OperationsMap_t operations;
 
