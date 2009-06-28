@@ -225,6 +225,11 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 
 void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 {
+	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
+	{
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("comment('%s')\n"), wxString(sketch->GetShortString()).c_str()));
+	}
+
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
 
 	bool started = false;
