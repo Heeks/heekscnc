@@ -100,6 +100,12 @@ void CCuttingTool::AppendTextToProgram()
 	// The G10 command can be used (within EMC2) to add a tool to the tool
         // table from within a program.
         // G10 L1 P[tool number] R[radius] X[offset] Z[offset] Q[orientation]
+	//
+	// The radius value must be expressed in MACHINE CONFIGURATION UNITS.  This may be different
+	// to this model's drawing units.  The value is interpreted, at lease for EMC2, in terms
+	// of the units setup for the machine's configuration (someting.ini in EMC2 parlence).  At
+	// the moment we don't have a MACHINE CONFIGURATION UNITS parameter so we've got a 50%
+	// chance of getting it right.
 
 	if (m_title.size() > 0)
 	{
