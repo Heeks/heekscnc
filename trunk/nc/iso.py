@@ -159,8 +159,13 @@ class CreatorIso(nc.Creator):
     def datum_set(self, x=None, y=None, z=None, a=None, b=None, c=None):
         pass
 
+    # This is the coordinate system we're using.  G54->G59, G59.1, G59.2, G59.3
+    # These are selected by values from 1 to 9 inclusive.
     def workplane(self, id):
-        self.g += iso.WORKPLANE % (id + iso.WORKPLANE_BASE)
+	if ((id >= 1) and (id <= 6)):
+		self.g += iso.WORKPLANE % (id + iso.WORKPLANE_BASE)
+	if ((id >= 7) and (id <= 9)):
+		self.g += ((iso.WORKPLANE % (6 + iso.WORKPLANE_BASE)) + ('.%i' % (id - 6)))
 
     ############################################################################
     ##  Rates + Modes
