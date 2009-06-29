@@ -19,6 +19,14 @@ class CCuttingToolParams{
 	
 public:
 
+	typedef enum {
+		eDrill = 0,
+		eEndmill,
+		eSlotCutter,
+		eBallEndMill,
+		eChamfer
+	} eCuttingToolType;
+
 	// The G10 command can be used (within EMC2) to add a tool to the tool
 	// table from within a program.
 	// G10 L1 P[tool number] R[radius] X[offset] Z[offset] Q[orientation]
@@ -27,6 +35,39 @@ public:
 	double m_x_offset;
 	double m_tool_length_offset;
 	int m_orientation;
+
+	/**
+		The next three parameters describe the cutting surfaces of the bit.
+
+		The two radii go from the centre of the bit -> flat radius -> corner radius.
+		The vertical_cutting_edge_angle is the angle between the centre line of the
+		milling bit and the angle of the outside cutting edges.  For an end-mill, this
+		would be zero.  i.e. the cutting edges are parallel to the centre line
+		of the milling bit.  For a chamfering bit, it may be something like 45 degrees.
+		i.e. 45 degrees from the centre line which has both cutting edges at 2 * 45 = 90
+		degrees to each other
+
+		For a ball-nose milling bit we would have;
+			- m_corner_radius = m_diameter / 2
+			- m_flat_radius = 0;	// No middle bit at the bottom of the cutter that remains flat
+						// before the corner radius starts.
+			- m_vertical_cutting_edge_angle = 0
+
+		For an end-mill we would have;
+			- m_corner_radius = 0;
+			- m_flat_radius = m_diameter / 2
+			- m_vertical_cutting_edge_angle = 0
+
+		For a chamfering bit we would have;
+			- m_corner_radius = 0;
+			- m_flat_radius = 0;	// sharp pointed end.  This may be larger if we can't use the centre point.
+			- m_vertical_cutting_edge_angle = 45	// degrees from centre line of tool
+	 */
+	double m_corner_radius;
+	double m_flat_radius;
+	double m_cutting_edge_angle;
+
+	eCuttingToolType	m_type;
 
 	void set_initial_values();
 	void write_values_to_config();
@@ -52,7 +93,7 @@ public:
 		} // End if - then
 		else
 		{
-			m_title = GetTypeString();
+			m_title = GenerateMeaningfulName();
 		} // End if - else
 	} // End constructor
 
@@ -72,11 +113,14 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	wxString GetIcon() { return theApp.GetResFolder() + _T("/icons/tool"); }
         const wxChar* GetShortString(void)const{return m_title.c_str();}
+	void glCommands(bool select, bool marked, bool no_color);
 
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
 
 	static int FindCuttingTool( const int tool_number );
+	wxString GenerateMeaningfulName() const;
+	wxString ResetTitle();
 
 }; // End CCuttingTool class definition.
 
