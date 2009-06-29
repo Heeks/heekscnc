@@ -8,7 +8,7 @@
 
 3. Rotate the view so that it is seen straight from the top and draw a sketch loosely around the pocket or the solid
 
-4. Select the big flat solid and the sketch and, if you made some, the solids on the big flat solid
+4. Select the big flat solid and the sketch and, if you made some, the solids on the big flat solid.  You can, optionally, also select a cutting tool object.
 
 5. Make an adaptive roughing operation, press
 
@@ -63,10 +63,10 @@ We don't know what this does
 We don't know what this does
 
 ===toolcornerrad===
-We don't know what this does
+We don't know what this does.  This value is taken from the referenced CuttingTool object if one was selected during the AdaptiveRoughing object creation.
 
 ===toolflatrad===
-We don't know what this does
+We don't know what this does.  This value is taken from the referenced CuttingTool object if one was selected during the AdaptiveRoughing object creation.
 
 ===samplestep===
 We don't know what this does
