@@ -13,12 +13,13 @@
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
+#include "CuttingTool.h"
 
 #include <sstream>
 
 int CAdaptive::number_for_stl_file = 1;
 
-void CAdaptiveParams::set_initial_values(const std::list<int> &solids)
+void CAdaptiveParams::set_initial_values(const std::list<int> &solids, const int cutting_tool_number)
 {
 	CNCConfig config;
 	config.Read(_T("m_leadoffdz"), &m_leadoffdz, 0.1);
@@ -51,6 +52,21 @@ void CAdaptiveParams::set_initial_values(const std::list<int> &solids)
 	config.Read(_T("m_boundary_x1"), &m_boundary_x1, 20);
 	config.Read(_T("m_boundary_y0"), &m_boundary_y0, -20);
 	config.Read(_T("m_boundary_y1"), &m_boundary_y1, 20);
+
+	// If the user has selected a cutting tool as part of this operation then use that tool's
+	// parameters to set these ones.  If no tool was selected then it's back to default
+	// behaviour for this module.
+
+	if ((cutting_tool_number > 0) && (CCuttingTool::FindCuttingTool( cutting_tool_number ) > 0))
+	{
+		CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( cutting_tool_number ) );
+		if (pCuttingTool != NULL)
+		{
+			m_toolcornerrad = pCuttingTool->m_params.m_corner_radius;
+			m_toolflatrad = pCuttingTool->m_params.m_flat_radius;
+		} // End if - then
+	} // End if - then
+
 }
 
 void CAdaptiveParams::write_values_to_config()
@@ -93,8 +109,35 @@ static void on_set_leadofflen(double value, HeeksObj* object){((CAdaptive*)objec
 static void on_set_leadoffrad(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_leadoffrad = value;}
 static void on_set_retractzheight(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_retractzheight = value;}
 static void on_set_leadoffsamplestep(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_leadoffsamplestep = value;}
-static void on_set_toolcornerrad(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_toolcornerrad = value;}
-static void on_set_toolflatrad(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_toolflatrad = value;}
+
+static void on_set_toolcornerrad(double value, HeeksObj* object)
+{
+	if ((((COp *)object)->m_cutting_tool_number > 0) &&
+	    (CCuttingTool::FindCuttingTool( ((COp *)object)->m_cutting_tool_number ) > 0))
+	{
+		wxMessageBox(_T("The corner radius will be taken from the cutting tool definition rather than this value.  Aborting change"));
+		return;
+	} // End if - then
+	else
+	{
+		((CAdaptive*)object)->m_params.m_toolcornerrad = value;
+	} // End if - else
+}
+
+static void on_set_toolflatrad(double value, HeeksObj* object)
+{
+	if ((((COp *)object)->m_cutting_tool_number > 0) &&
+	    (CCuttingTool::FindCuttingTool( ((COp *)object)->m_cutting_tool_number ) > 0))
+	{
+		wxMessageBox(_T("The corner radius will be taken from the cutting tool definition rather than this value.  Aborting change"));
+		return;
+	} // End if - then
+	else
+	{
+		((CAdaptive*)object)->m_params.m_toolflatrad = value;
+	} // End if - else
+}
+
 static void on_set_samplestep(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_samplestep = value;}
 static void on_set_stepdown(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_stepdown = value;}
 static void on_set_clearcuspheight(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_clearcuspheight = value;}
@@ -277,9 +320,26 @@ void CAdaptive::AppendTextToProgram()
 
 	ss << "actp.setleadoffsamplestep(" << m_params.m_leadoffsamplestep << ")\n";
 
-	ss << "actp.settoolcornerrad(" << m_params.m_toolcornerrad << ")\n";
+	if ((((COp *)this)->m_cutting_tool_number > 0) &&
+	    (CCuttingTool::FindCuttingTool( ((COp *)this)->m_cutting_tool_number ) > 0) )
+	{
+		// We have a cutting tool to refer to.  Get these values from there instead.
 
-	ss << "actp.settoolflatrad(" << m_params.m_toolflatrad << ")\n";
+		CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *)this)->m_cutting_tool_number );
+		if (pCuttingTool != NULL)
+		{
+			ss << "actp.settoolcornerrad(" << pCuttingTool->m_params.m_corner_radius << ")\n";
+			ss << "actp.settoolflatrad(" << pCuttingTool->m_params.m_flat_radius << ")\n";
+		} // End if - then
+	} // End if - then
+	else
+	{
+		// This object has values and/or we don't have a cutting tool number to refer to.
+		// Use these values instead.
+
+		ss << "actp.settoolcornerrad(" << m_params.m_toolcornerrad << ")\n";
+		ss << "actp.settoolflatrad(" << m_params.m_toolflatrad << ")\n";
+	} // End if - else
 
 	ss << "actp.setsamplestep(" << m_params.m_samplestep << ")\n";
 
