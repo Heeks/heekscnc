@@ -18,6 +18,8 @@
 #include "tinyxml/tinyxml.h"
 
 #include <sstream>
+#include <string>
+#include <algorithm>
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -28,8 +30,13 @@ void CCuttingToolParams::set_initial_values()
 	CNCConfig config;
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_x_offset"), &m_x_offset, 0);
-	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, 0);
+	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
 	config.Read(_T("m_orientation"), &m_orientation, 9);
+
+	config.Read(_T("m_type"), (int *) &m_type, eDrill);
+	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
+	config.Read(_T("m_corner_radius"), &m_corner_radius, 0);
+	config.Read(_T("m_cutting_edge_angle"), &m_cutting_edge_angle, 59);
 }
 
 void CCuttingToolParams::write_values_to_config()
@@ -43,19 +50,158 @@ void CCuttingToolParams::write_values_to_config()
 	config.Write(_T("m_x_offset"), m_x_offset);
 	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
 	config.Write(_T("m_orientation"), m_orientation);
+
+	config.Write(_T("m_type"), m_type);
+	config.Write(_T("m_flat_radius"), m_flat_radius);
+	config.Write(_T("m_corner_radius"), m_corner_radius);
+	config.Write(_T("m_cutting_edge_angle"), m_cutting_edge_angle);
 }
 
-static void on_set_diameter(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_diameter = value;}
+static void on_set_diameter(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_diameter = value;
+	((CCuttingTool*)object)->m_params.m_tool_length_offset = 10 * value;
+
+	std::wostringstream l_ossChange;
+
+	l_ossChange << "Resetting tool length to " << ((CCuttingTool*)object)->m_params.m_tool_length_offset << " as a result of the diameter change\n";
+
+	l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+
+	wxMessageBox( wxString( l_ossChange.str().c_str() ).c_str() );
+} // End on_set_diameter() routine
+
 static void on_set_x_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_x_offset = value;}
 static void on_set_tool_length_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_length_offset = value;}
 static void on_set_orientation(int value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_orientation = value;}
+
+static void on_set_type(int value, HeeksObj* object)
+{
+	std::wostringstream l_ossChange;
+
+	switch(value)
+	{
+		case CCuttingToolParams::eDrill:
+				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+
+				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_flat_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 59) l_ossChange << "Changing cutting edge angle to 59 degrees (for normal 118 degree cutting face)\n";
+				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 59;
+
+				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+				break;
+
+		case CCuttingToolParams::eEndmill:
+				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+
+				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_flat_radius != ( ((CCuttingTool*)object)->m_params.m_diameter / 2) )
+				{
+					l_ossChange << "Changing flat radius to " << ((CCuttingTool*)object)->m_params.m_diameter / 2 << "\n";
+					((CCuttingTool*)object)->m_params.m_flat_radius = ((CCuttingTool*)object)->m_params.m_diameter / 2;
+				} // End if - then
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
+				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
+
+				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+				break;
+
+		case CCuttingToolParams::eSlotCutter:
+				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+
+				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_flat_radius != (((CCuttingTool*)object)->m_params.m_diameter / 2)) 
+				{
+					l_ossChange << "Changing flat radius to " << ((CCuttingTool*)object)->m_params.m_diameter / 2 << "\n";
+					((CCuttingTool*)object)->m_params.m_flat_radius = ((CCuttingTool*)object)->m_params.m_diameter / 2;
+				} // End if- then
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
+				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
+
+				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+				break;
+
+		case CCuttingToolParams::eBallEndMill:
+				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+
+				if (((CCuttingTool*)object)->m_params.m_corner_radius != (((CCuttingTool*)object)->m_params.m_diameter / 2)) 
+				{
+					l_ossChange << "Changing corner radius to " << (((CCuttingTool*)object)->m_params.m_diameter / 2) << "\n";
+					((CCuttingTool*)object)->m_params.m_corner_radius = (((CCuttingTool*)object)->m_params.m_diameter / 2);
+				} // End if - then
+
+				if (((CCuttingTool*)object)->m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_flat_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
+				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
+
+				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+				break;
+
+		case CCuttingToolParams::eChamfer:
+				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+
+				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero (this may need to be reset)\n";
+				((CCuttingTool*)object)->m_params.m_flat_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 45) l_ossChange << "Changing cutting edge angle to 45 degrees\n";
+				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 45;
+
+				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+				break;
+
+		default:
+				wxMessageBox(_T("That is not a valid cutting tool type. Aborting value change."));
+				return;
+	} // End switch
+
+	if (l_ossChange.str().size() > 0)
+	{
+		wxMessageBox( wxString( l_ossChange.str().c_str() ).c_str() );
+	} // End if - then
+} // End on_set_type() method
+
+static void on_set_corner_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_corner_radius = value;}
+static void on_set_flat_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_flat_radius = value;}
+static void on_set_cutting_edge_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_cutting_edge_angle = value;}
+
 
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
 	list->push_back(new PropertyLength(_("x_offset"), m_x_offset, parent, on_set_x_offset));
-	list->push_back(new PropertyLength(_("tool_length_offset"), m_x_offset, parent, on_set_tool_length_offset));
+	list->push_back(new PropertyLength(_("tool_length_offset"), m_tool_length_offset, parent, on_set_tool_length_offset));
 	list->push_back(new PropertyInt(_("orientation"), m_orientation, parent, on_set_orientation));
+
+	{
+                std::list< wxString > choices;
+                choices.push_back(_("Drill bit"));
+                choices.push_back(_("End Mill"));
+                choices.push_back(_("Slot Cutter"));
+                choices.push_back(_("Ball End Mill"));
+                choices.push_back(_("Chamfering bit"));
+                int choice = int(m_type);
+                list->push_back(new PropertyChoice(_("type"), choices, choice, parent, on_set_type));
+        }
+
+	list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
+	list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
+	list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
 }
 
 void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
@@ -72,6 +218,13 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	std::ostringstream l_ossValue;
 	l_ossValue.str(""); l_ossValue << m_orientation;
 	element->SetAttribute("orientation", l_ossValue.str().c_str() );
+
+	l_ossValue.str(""); l_ossValue << int(m_type);
+	element->SetAttribute("type", l_ossValue.str().c_str() );
+
+	element->SetDoubleAttribute("corner_radius", m_corner_radius);
+	element->SetDoubleAttribute("flat_radius", m_flat_radius);
+	element->SetDoubleAttribute("cutting_edge_angle", m_cutting_edge_angle);
 }
 
 void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -80,6 +233,10 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("x_offset")) m_x_offset = atof(pElem->Attribute("x_offset"));
 	if (pElem->Attribute("tool_length_offset")) m_tool_length_offset = atof(pElem->Attribute("tool_length_offset"));
 	if (pElem->Attribute("orientation")) m_orientation = atoi(pElem->Attribute("orientation"));
+	if (pElem->Attribute("type")) m_type = CCuttingToolParams::eCuttingToolType(atoi(pElem->Attribute("type")));
+	if (pElem->Attribute("corner_radius")) m_corner_radius = atof(pElem->Attribute("corner_radius"));
+	if (pElem->Attribute("flat_radius")) m_flat_radius = atof(pElem->Attribute("flat_radius"));
+	if (pElem->Attribute("cutting_edge_angle")) m_cutting_edge_angle = atof(pElem->Attribute("cutting_edge_angle"));
 }
 
 /**
@@ -253,4 +410,137 @@ int CCuttingTool::FindCuttingTool( const int tool_number )
         return(-1);
 
 } // End FindCuttingTool() method
+
+
+wxString CCuttingTool::GenerateMeaningfulName() const
+{
+	std::wostringstream l_ossName;
+
+	switch (m_params.m_type)
+	{
+		case CCuttingToolParams::eDrill:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
+							l_ossName << "Drill Bit";
+							break;
+
+                case CCuttingToolParams::eEndmill:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
+							l_ossName << "End Mill";
+							break;
+
+                case CCuttingToolParams::eSlotCutter:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
+							l_ossName << "Slot Cutter";
+							break;
+
+                case CCuttingToolParams::eBallEndMill:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
+							l_ossName << "Ball End Mill";
+							break;
+
+                case CCuttingToolParams::eChamfer:	l_ossName << m_params.m_cutting_edge_angle << " degreee ";
+                					l_ossName << "Chamfering Bit";
+		default:				break;
+	} // End switch
+
+	return( l_ossName.str().c_str() );
+} // End GenerateMeaningfulName() method
+
+
+/**
+	Reset the m_title value with a meaningful name ONLY if it does not look like it was
+	automatically generated in the first place.  If someone has reset it manually then leave it alone.
+ */
+wxString CCuttingTool::ResetTitle()
+{
+	std::wostringstream l_ossUnits;
+	l_ossUnits << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
+
+	if ( (m_title == GetTypeString()) ||
+	     ((m_title.Find( _T("Drill Bit") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
+	     ((m_title.Find( _T("End Mill") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
+	     ((m_title.Find( _T("Slot Cutter") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
+	     ((m_title.Find( _T("Ball End Mill") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
+	     ((m_title.Find( _T("Chamfering Bit") ) != -1) && (m_title.Find(_T("degree")) != -1)) )
+	{
+		// It has the default title.  Give it a name that makes sense.
+		m_title = GenerateMeaningfulName();
+		heeksCAD->WasModified(this);
+
+		std::wostringstream l_ossChange;
+		l_ossChange << "Changing name to " << m_title.c_str() << "\n";
+		return( l_ossChange.str().c_str() );
+	} // End if - then
+
+	// Nothing changed, nothing to report
+	return(_T(""));
+} // End ResetTitle() method
+
+
+
+/**
+        This is the Graphics Library Commands (from the OpenGL set).  This method calls the OpenGL
+        routines to paint the cutting tool in the graphics window.  The graphics is transient.
+
+	We want to draw an outline of the cutting tool in 2 dimensions so that the operator
+	gets a feel for what the various cutting tool parameter values mean.
+ */
+void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
+{
+        if(marked && !no_color)
+        {
+                // Draw the outline of the bit.
+
+		double ShaftLength = m_params.m_tool_length_offset;
+
+		if (m_params.m_cutting_edge_angle > 0)
+		{
+			ShaftLength -= ((m_params.m_diameter / 2) * tan( 90 - m_params.m_cutting_edge_angle));
+		} // End if - then
+
+		glBegin(GL_LINE_STRIP);
+		glVertex3d( -1 * ( m_params.m_diameter / 2), -1 * ((m_params.m_tool_length_offset / 2) - ShaftLength), 0 );
+		glVertex3d( -1 * ( m_params.m_diameter / 2), +1 * (m_params.m_tool_length_offset / 2), 0 );
+		glVertex3d( +1 * ( m_params.m_diameter / 2), +1 * (m_params.m_tool_length_offset / 2), 0 );
+		glVertex3d( +1 * ( m_params.m_diameter / 2), -1 * ((m_params.m_tool_length_offset / 2) - ShaftLength), 0 );
+		glEnd();
+
+	/*
+		// Draw the cutting edge.
+		double x = 0;
+		double y = -1 * (m_params.m_tool_length_offset / 2);
+
+		if (m_params.m_flat_radius > 0)
+		{
+			glBegin(GL_LINE_STRIP)
+			glVertex3d( -1 * m_params.m_flat_radius, y, 0 );
+			glVertex3d( +1 * m_params.m_flat_radius, y, 0 );
+			glEnd();
+
+			x = m_params.m_flat_radius;
+		} // End if - then
+
+		if (m_params.m_cornder_radius)
+		{
+			// This is an arc from the current x position and up around 90 degrees
+			// We'll cheat for a moment.
+
+			glBegin(GL_LINE_STRIP)
+			glVertex3d( -1 * x, y, 0 );
+			glVertex3d( -1 * (m_params.m_diameter / 2)
+			glEnd();
+			
+		} // End if - then
+
+		double m_diameter;
+        double m_x_offset;
+        double m_tool_length_offset;
+        int m_orientation;
+        double m_corner_radius;
+        double m_flat_radius;
+        double m_cutting_edge_angle;
+
+        eCuttingToolType        m_type;
+	*/
+
+	} // End if - then
+
+} // End glCommands() method
+
 
