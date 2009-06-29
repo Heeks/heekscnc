@@ -31,7 +31,7 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_x_offset"), &m_x_offset, 0);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
-	config.Read(_T("m_orientation"), &m_orientation, 9);
+	config.Read(_T("m_orientation"), &m_orientation, 0);
 
 	config.Read(_T("m_type"), (int *) &m_type, eDrill);
 	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
@@ -73,7 +73,17 @@ static void on_set_diameter(double value, HeeksObj* object)
 
 static void on_set_x_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_x_offset = value;}
 static void on_set_tool_length_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_length_offset = value;}
-static void on_set_orientation(int value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_orientation = value;}
+static void on_set_orientation(int value, HeeksObj* object)
+{
+	if ((value >= 0) && (value <= 9))
+	{
+		((CCuttingTool*)object)->m_params.m_orientation = value;
+	} // End if - then
+	else
+	{
+		wxMessageBox(_T("Orientation values must be between 0 and 9 inclusive.  Aborting value change"));
+	} // End if - else
+}
 
 static void on_set_type(int value, HeeksObj* object)
 {
@@ -186,7 +196,22 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 	list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
 	list->push_back(new PropertyLength(_("x_offset"), m_x_offset, parent, on_set_x_offset));
 	list->push_back(new PropertyLength(_("tool_length_offset"), m_tool_length_offset, parent, on_set_tool_length_offset));
-	list->push_back(new PropertyInt(_("orientation"), m_orientation, parent, on_set_orientation));
+
+	{
+                std::list< wxString > choices;
+                choices.push_back(_("(0) Unused"));
+                choices.push_back(_("(1) Turning/Back Facing"));
+                choices.push_back(_("(2) Turning/Facing"));
+                choices.push_back(_("(3) Boring/Facing"));
+                choices.push_back(_("(4) Boring/Back Facing"));
+                choices.push_back(_("(5) Back Facing"));
+                choices.push_back(_("(6) Turning"));
+                choices.push_back(_("(7) Facing"));
+                choices.push_back(_("(8) Boring"));
+                choices.push_back(_("(9) Centre"));
+                int choice = int(m_orientation);
+                list->push_back(new PropertyChoice(_("orientation"), choices, choice, parent, on_set_orientation));
+        }
 
 	{
                 std::list< wxString > choices;
@@ -209,7 +234,6 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
-
 
 	element->SetDoubleAttribute("diameter", m_diameter);
 	element->SetDoubleAttribute("x_offset", m_x_offset);
