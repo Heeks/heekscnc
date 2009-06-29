@@ -197,6 +197,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> solids;
 	std::list<int> sketches;
+	int cutting_tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
@@ -204,6 +205,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		HeeksObj* object = *It;
 		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
 		if(object->GetType() == SketchType) sketches.push_back(object->m_id);
+		if(object->GetType() == CuttingToolType) cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
 	}
 
 	// if no selected solids, 
@@ -228,7 +230,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 #endif
-	CAdaptive *new_object = new CAdaptive(solids, sketches);
+	CAdaptive *new_object = new CAdaptive(solids, sketches, cutting_tool_number);
 	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
