@@ -47,6 +47,27 @@ This is the length of the cutting tool in the same units as for the rest of the 
 
 This provides an indication as to what angle the cutter makes with the workpiece.  Again, this is meant for lathe cutting tools.
 
+The options are;
+
+ - "(0) Unused"
+
+ - "(1) Turning/Back Facing"
+
+ - "(2) Turning/Facing"
+
+ - "(3) Boring/Facing"
+
+ - "(4) Boring/Back Facing"
+
+ - "(5) Back Facing"
+
+ - "(6) Turning"
+
+ - "(7) Facing"
+
+ - "(8) Boring"
+
+ - "(9) Centre"
 
 === Flat Radius ===
 
