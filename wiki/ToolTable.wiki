@@ -21,10 +21,15 @@ An operation's tool_number may not be updated to any value except zero unless a 
 The type property can be one of;
 
  - "Drill Bit"
+
  - "End Mill"
+
  - "Slot Cutter"
+
  - "Ball End Mill"
+
  - "Chamfering Bit"
+
 
 === Diameter ===
 
