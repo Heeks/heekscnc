@@ -361,14 +361,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\CorrelationTool.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\CorrelationTool.h"
-			>
-		</File>
-		<File
 			RelativePath=".\CounterBore.cpp"
 			>
 		</File>
