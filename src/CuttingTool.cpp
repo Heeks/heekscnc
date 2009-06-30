@@ -6,6 +6,7 @@
  */
 
 #include "stdafx.h"
+#include <math.h>
 #include "CuttingTool.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -64,7 +65,7 @@ static void on_set_diameter(double value, HeeksObj* object)
 
 	std::wostringstream l_ossChange;
 
-	l_ossChange << "Resetting tool length to " << ((CCuttingTool*)object)->m_params.m_tool_length_offset << " as a result of the diameter change\n";
+	l_ossChange << "Resetting tool length to " << (((CCuttingTool*)object)->m_params.m_tool_length_offset / theApp.m_program->m_units) << " as a result of the diameter change\n";
 
 	l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 
@@ -132,7 +133,7 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_flat_radius != (((CCuttingTool*)object)->m_params.m_diameter / 2)) 
 				{
-					l_ossChange << "Changing flat radius to " << ((CCuttingTool*)object)->m_params.m_diameter / 2 << "\n";
+					l_ossChange << "Changing flat radius to " << ((((CCuttingTool*)object)->m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
 					((CCuttingTool*)object)->m_params.m_flat_radius = ((CCuttingTool*)object)->m_params.m_diameter / 2;
 				} // End if- then
 
@@ -147,7 +148,7 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_corner_radius != (((CCuttingTool*)object)->m_params.m_diameter / 2)) 
 				{
-					l_ossChange << "Changing corner radius to " << (((CCuttingTool*)object)->m_params.m_diameter / 2) << "\n";
+					l_ossChange << "Changing corner radius to " << ((((CCuttingTool*)object)->m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
 					((CCuttingTool*)object)->m_params.m_corner_radius = (((CCuttingTool*)object)->m_params.m_diameter / 2);
 				} // End if - then
 
@@ -448,8 +449,9 @@ wxString CCuttingTool::FractionalRepresentation( const double original_value, co
 {
 	std::wostringstream l_ossValue;
 	double _value(original_value);
-	double near_enough = 1 / max_denominator;
-	
+	// double near_enough = double(double(1.0) / (2.0 * double(max_denominator)));
+	double near_enough = 0.00001;
+
 	if (floor(_value) > 0)
 	{
 		l_ossValue << floor(_value) << " ";
@@ -461,7 +463,10 @@ wxString CCuttingTool::FractionalRepresentation( const double original_value, co
 	{
 		for (int numerator = 1; numerator < denominator; numerator++)
 		{
-			if ((abs(_value - double( double(numerator) / double(denominator) ))) < near_enough)
+			double fraction = double( double(numerator) / double(denominator) );
+			if ( ((_value > fraction) && ((_value - fraction) < near_enough)) ||
+			     ((_value < fraction) && ((fraction - _value) < near_enough)) ||
+			     (_value == fraction) )
 			{
 				l_ossValue << numerator << "/" << denominator;
 				return(l_ossValue.str().c_str());
@@ -492,12 +497,12 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 	if (theApp.m_program->m_units == 1)
 	{
 		// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
-		l_ossName << m_params.m_diameter << " mm ";
+		l_ossName << m_params.m_diameter / theApp.m_program->m_units << " mm ";
 	} // End if - then
 	else
 	{	
 		// We're using inches.  Find a fractional representation if one matches.
-		l_ossName << FractionalRepresentation(m_params.m_diameter).c_str() << " inch ";
+		l_ossName << FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units).c_str() << " inch ";
 	} // End if - else
 
 	switch (m_params.m_type)
@@ -607,11 +612,11 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 				double alpha = 3.1415926 * 2 / numPoints;
 
 				glBegin(GL_LINE_STRIP);
-				unsigned int i = numPoints / 2;
+				unsigned int i = (numPoints / 2) - 1;
 				while( i++ < numPoints )
 				{
 					double theta = alpha * i;
-					glVertex3d( cos( theta ) * (m_params.m_diameter / 2), sin( theta ) * (m_params.m_diameter / 2), 0 );
+					glVertex3d( cos( theta ) * (m_params.m_diameter / 2), (sin( theta ) * (m_params.m_diameter / 2) - (ShaftLength / 2)), 0 );
 				} // End while
 				glEnd();
 			} // End if - then
