@@ -59,10 +59,17 @@ enum ProgramUserType{
 	ProgramUserTypeNC
 };
 
+class CMachine
+{
+public:
+	wxString file_name;
+	wxString description;
+};
+
 class CProgram:public ObjList
 {
 public:
-	wxString m_machine;
+	CMachine m_machine;
 	wxString m_output_file;
 	CNCCode* m_nc_code;
 	COperations* m_operations;
@@ -93,4 +100,7 @@ public:
 	void RewritePythonProgram();
 	ProgramUserType GetUserType();
 	void UpdateFromUserType();
+
+	static void GetMachines(std::vector<CMachine> &machines);
+	static CMachine GetMachine(const wxString& file_name);
 };
