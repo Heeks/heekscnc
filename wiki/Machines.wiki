@@ -22,17 +22,15 @@ import iso
 
 class CreatorIsoNoLineNumbers(iso.CreatorIso):
 
-    def __init__(self):
+    def init(self): 
 
-        iso.CreatorIso.__init__(self)
+        iso.CreatorIso.init(self) 
 
-    def write_blocknum(self):
+    def write_blocknum(self): 
 
-        pass
-
+        pass 
 
 nc.creator = CreatorIsoNoLineNumbers()
-
 
 
 This class is derived from the CreatorIso class in iso.py, but we have redefined write_blocknum to make it do nothing.
