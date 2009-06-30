@@ -19,7 +19,22 @@
 
 int CAdaptive::number_for_stl_file = 1;
 
-void CAdaptiveParams::set_initial_values(const std::list<int> &solids, const int cutting_tool_number)
+
+/**
+ * If the cutting_tool_number is positive and relates to an existing
+ * CuttingTool object then take the toolcornerrad and toolflatrad
+ * from the CuttingTool object's values.
+ *
+ * If the reference_object_type/id refers to either a point object
+ * or a Drilling object then use that object's location as this
+ * operation's starting point.  If they're negative or zero then
+ * use the existing default values.
+ */
+void CAdaptiveParams::set_initial_values(
+		const std::list<int> &solids, 
+		const int cutting_tool_number /* = 0 */,
+		const int reference_object_type, /* = -1 */ 
+		const unsigned int reference_object_id /* = -1 */ )
 {
 	CNCConfig config;
 	config.Read(_T("m_leadoffdz"), &m_leadoffdz, 0.1);
@@ -64,6 +79,43 @@ void CAdaptiveParams::set_initial_values(const std::list<int> &solids, const int
 		{
 			m_toolcornerrad = pCuttingTool->m_params.m_corner_radius;
 			m_toolflatrad = pCuttingTool->m_params.m_flat_radius;
+		} // End if - then
+	} // End if - then
+
+	// The operator has selected a reference object.  We can use that object
+	// to determine the starting point for this operation.  The user can always
+	// override this point by updating the properties later on.
+	if ((reference_object_type > 0) && (reference_object_id > 0))
+	{
+		HeeksObj *ref = heeksCAD->GetIDObject( reference_object_type, reference_object_id );
+		if (ref != NULL)
+		{
+			double start[3] = {0.0, 0.0, 0.0};
+			switch (reference_object_type)
+			{
+				case PointType:
+					if (ref->GetStartPoint( start ))
+					{
+						m_start_point_x = start[0];
+						m_start_point_y = start[1];
+					} // End if - then
+					break;
+
+				case DrillingType: {
+					std::set<CDrilling::Point3d> locations;
+					locations = ref->FindAllLocations();
+					if (locations.size() == 1)
+					{
+						// There must be only one (didn't someone else say that once?) for our purposes.
+						m_start_point_x = locations.begin()->x;
+						m_start_point_y = locations.begin()->y;
+					} // End if - then
+				   } // End DrillingType scope
+					break;
+
+				default:	// We only support a couple of types.
+					break;
+			} // End switch
 		} // End if - then
 	} // End if - then
 

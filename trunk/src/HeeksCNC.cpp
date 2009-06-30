@@ -198,6 +198,8 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 	std::list<int> solids;
 	std::list<int> sketches;
 	int cutting_tool_number = 0;
+	int reference_object_type = -1;
+	unsigned int reference_object_id = -1;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
@@ -206,6 +208,12 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
 		if(object->GetType() == SketchType) sketches.push_back(object->m_id);
 		if(object->GetType() == CuttingToolType) cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+		if((object->GetType() == PointType) ||
+		   (object->GetType() == DrillingType))
+		{
+			reference_object_type = object->GetType();
+			reference_object_id = object->m_id;
+		} // End if - then
 	}
 
 	// if no selected solids, 
@@ -230,7 +238,11 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 #endif
-	CAdaptive *new_object = new CAdaptive(solids, sketches, cutting_tool_number);
+	CAdaptive *new_object = new CAdaptive(	solids, 
+						sketches, 
+						cutting_tool_number, 
+						reference_object_type, 
+						reference_object_id);
 	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);

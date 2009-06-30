@@ -284,7 +284,7 @@ void CCuttingTool::AppendTextToProgram()
 	//
 	// The radius value must be expressed in MACHINE CONFIGURATION UNITS.  This may be different
 	// to this model's drawing units.  The value is interpreted, at lease for EMC2, in terms
-	// of the units setup for the machine's configuration (someting.ini in EMC2 parlence).  At
+	// of the units setup for the machine's configuration (something.ini in EMC2 parlence).  At
 	// the moment we don't have a MACHINE CONFIGURATION UNITS parameter so we've got a 50%
 	// chance of getting it right.
 
@@ -436,29 +436,86 @@ int CCuttingTool::FindCuttingTool( const int tool_number )
 } // End FindCuttingTool() method
 
 
+/**
+	Find a fraction that represents this floating point number.  We use this
+	purely for readability purposes.  It only looks accurate to the nearest 1/64th
+
+	eg: 0.125 -> "1/8"
+	    1.125 -> "1 1/8"
+	    0.109375 -> "7/64"
+ */
+wxString CCuttingTool::FractionalRepresentation( const double original_value, const int max_denominator /* = 64 */ ) const
+{
+	std::ostringstream l_ossValue;
+	double _value(original_value);
+	double near_enough = 1 / max_denominator;
+	
+	if (floor(_value) > 0)
+	{
+		l_ossValue << floor(_value) << " ";
+		_value -= floor(_value);
+	} // End if - then
+
+	// We only want even numbers between 2 and 64 for the denominator.  The others just look 'wierd'.
+	for (int denominator = 2; denominator <= max_denominator; denominator *= 2)
+	{
+		for (int numerator = 1; numerator < denominator; numerator++)
+		{
+			if ((abs(_value - double( double(numerator) / double(denominator) ))) < near_enough)
+			{
+				l_ossValue << numerator << "/" << denominator;
+				return(l_ossValue.str());
+			} // End if - then
+		} // End for
+	} // End for
+
+	l_ossValue.str("");	// Delete any floor(value) data we had before.
+	l_ossValue << original_value;
+	return(l_ossValue.str());
+} // End FractionalRepresentation() method
+
+
+/**
+ * This method uses the various attributes of the cutting tool to produce a meaningful name.
+ * eg: with diameter = 6, units = 1 (mm) and type = 'drill' the name would be '6mm Drill Bit".  The
+ * idea is to produce a m_title value that is representative of the cutting tool.  This will
+ * make selection in the program list easier.
+ *
+ * NOTE: The ResetTitle() method looks at the m_title value for strings that are likely to
+ * have come from this method.  If this method changes, the ResetTitle() method may also
+ * need to change.
+ */
 wxString CCuttingTool::GenerateMeaningfulName() const
 {
 	std::wostringstream l_ossName;
+	
+	if (theApp.m_program->m_units == 1)
+	{
+		// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
+		l_ossName << m_params.m_diameter << " mm ";
+	} // End if - then
+	else
+	{	
+		// We're using inches.  Find a fractional representation if one matches.
+		l_ossName << FractionalRepresentation(m_params.m_diameter).c_str() << " inch ";
+	} // End if - else
 
 	switch (m_params.m_type)
 	{
-		case CCuttingToolParams::eDrill:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
-							l_ossName << "Drill Bit";
+		case CCuttingToolParams::eDrill:	l_ossName << "Drill Bit";
 							break;
 
-                case CCuttingToolParams::eEndmill:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
-							l_ossName << "End Mill";
+                case CCuttingToolParams::eEndmill:	l_ossName << "End Mill";
 							break;
 
-                case CCuttingToolParams::eSlotCutter:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
-							l_ossName << "Slot Cutter";
+                case CCuttingToolParams::eSlotCutter:	l_ossName << "Slot Cutter";
 							break;
 
-                case CCuttingToolParams::eBallEndMill:	l_ossName << m_params.m_diameter << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
-							l_ossName << "Ball End Mill";
+                case CCuttingToolParams::eBallEndMill:	l_ossName << "Ball End Mill";
 							break;
 
-                case CCuttingToolParams::eChamfer:	l_ossName << m_params.m_cutting_edge_angle << " degreee ";
+                case CCuttingToolParams::eChamfer:	l_ossName.str("");	// Remove all that we've already prepared.
+							l_ossName << m_params.m_cutting_edge_angle << " degreee ";
                 					l_ossName << "Chamfering Bit";
 		default:				break;
 	} // End switch
@@ -470,6 +527,9 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 /**
 	Reset the m_title value with a meaningful name ONLY if it does not look like it was
 	automatically generated in the first place.  If someone has reset it manually then leave it alone.
+
+	Return a verbose description of what we've done (if anything) so that we can pop up a
+	warning message to the operator letting them know.
  */
 wxString CCuttingTool::ResetTitle()
 {
@@ -519,50 +579,52 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 		} // End if - then
 
 		glBegin(GL_LINE_STRIP);
-		glVertex3d( -1 * ( m_params.m_diameter / 2), -1 * ((m_params.m_tool_length_offset / 2) - ShaftLength), 0 );
-		glVertex3d( -1 * ( m_params.m_diameter / 2), +1 * (m_params.m_tool_length_offset / 2), 0 );
-		glVertex3d( +1 * ( m_params.m_diameter / 2), +1 * (m_params.m_tool_length_offset / 2), 0 );
-		glVertex3d( +1 * ( m_params.m_diameter / 2), -1 * ((m_params.m_tool_length_offset / 2) - ShaftLength), 0 );
+		glVertex3d( -1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
+		glVertex3d( -1 * ( m_params.m_diameter / 2), +1 * (ShaftLength / 2), 0 );
+		glVertex3d( +1 * ( m_params.m_diameter / 2), +1 * (ShaftLength / 2), 0 );
+		glVertex3d( +1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
 		glEnd();
 
-	/*
 		// Draw the cutting edge.
-		double x = 0;
-		double y = -1 * (m_params.m_tool_length_offset / 2);
-
-		if (m_params.m_flat_radius > 0)
+		if (m_params.cutting_edge_angle > 0)
 		{
-			glBegin(GL_LINE_STRIP)
-			glVertex3d( -1 * m_params.m_flat_radius, y, 0 );
-			glVertex3d( +1 * m_params.m_flat_radius, y, 0 );
-			glEnd();
-
-			x = m_params.m_flat_radius;
-		} // End if - then
-
-		if (m_params.m_cornder_radius)
-		{
-			// This is an arc from the current x position and up around 90 degrees
-			// We'll cheat for a moment.
-
-			glBegin(GL_LINE_STRIP)
-			glVertex3d( -1 * x, y, 0 );
-			glVertex3d( -1 * (m_params.m_diameter / 2)
-			glEnd();
+			// It has a taper at the bottom.
 			
+			glBegin(GL_LINE_STRIP)
+			glVertex3d( -1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
+			glVertex3d( 0, -1 * (m_params.m_tool_length_offset / 2), 0 );
+			glVertex3d( +1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
+			glEnd();
 		} // End if - then
+		else
+		{
+			// It's either a normal endmill or a ball-endmill.
+			if ((m_params.m_flat_radius == 0) && (m_params.m_corner_radius == m_params.m_diameter / 2 ))
+			{
+				// It's a ball-endmill.
 
-		double m_diameter;
-        double m_x_offset;
-        double m_tool_length_offset;
-        int m_orientation;
-        double m_corner_radius;
-        double m_flat_radius;
-        double m_cutting_edge_angle;
+				unsigned int numPoints = 10;	
+				double alpha = 3.1415926 * 2 / numPoints;
 
-        eCuttingToolType        m_type;
-	*/
-
+				glBegin(GL_LINE_STRIP)
+				unsigned int i = numPoints / 2;
+				while( i++ < numPoints )
+				{
+					double theta = alpha * i;
+					glVertex3d( cos( theta ) * (m_params.m_diameter / 2), sin( theta ) * (m_params.m_diameter / 2), 0 );
+				} // End while
+				glEnd();
+			} // End if - then
+			else
+			{
+				// it's a normal endmill.
+				
+				glBegin(GL_LINE_STRIP)
+				glVertex3d( -1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
+				glVertex3d( +1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
+				glEnd();
+			} // End if - else
+		} // End if - else
 	} // End if - then
 
 } // End glCommands() method

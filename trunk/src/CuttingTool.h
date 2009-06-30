@@ -121,6 +121,7 @@ public:
 	static int FindCuttingTool( const int tool_number );
 	wxString GenerateMeaningfulName() const;
 	wxString ResetTitle();
+	wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 ) const;
 
 }; // End CCuttingTool class definition.
 
