@@ -54,12 +54,13 @@ void CPyProcess::OnTerminate(int pid, int status)
 class CPyBackPlot : public CPyProcess
 {
 protected:
+	const CProgram* m_program;
 	wxString m_filename;
 
 	static CPyBackPlot* m_object;
 
 public:
-	CPyBackPlot(const wxChar* filename): m_filename(filename) { m_object = this; }
+	CPyBackPlot(const CProgram* program, const wxChar* filename): m_program(program), m_filename(filename) { m_object = this; }
 	~CPyBackPlot(void) { m_object = NULL; }
 
 	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
@@ -67,9 +68,9 @@ public:
 	void Do(void)
 	{
 #ifdef WIN32
-		Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" iso \"") + m_filename + _T("\""));
+		Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
 #else
-		Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/iso_read.py\" ")) + m_filename);
+		Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/") + m_program->m_machine.file_name + _T("_read.py\" ")) + m_filename);
 #endif
 	}
 	void ThenDo(void)
@@ -97,12 +98,13 @@ CPyBackPlot* CPyBackPlot::m_object = NULL;
 class CPyPostProcess : public CPyProcess
 {
 protected:
+	const CProgram* m_program;
 	wxString m_filename;
 
 	static CPyPostProcess* m_object;
 
 public:
-	CPyPostProcess(const wxChar* filename): m_filename(filename) { m_object = this; }
+	CPyPostProcess(const CProgram* program, const wxChar* filename): m_program(program), m_filename(filename) { m_object = this; }
 	~CPyPostProcess(void) { m_object = NULL; }
 
 	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
@@ -115,7 +117,7 @@ public:
 		Execute(wxString(_T("python ")) + wxString(_T("/tmp/heekscnc_post.py")));
 #endif
 	}
-	void ThenDo(void) { (new CPyBackPlot(m_filename))->Do(); }
+	void ThenDo(void) { (new CPyBackPlot(m_program, m_filename))->Do(); }
 };
 
 CPyPostProcess* CPyPostProcess::m_object = NULL;
@@ -132,7 +134,7 @@ static bool write_python_file(const wxString& python_file_path)
 	return true;
 }
 
-bool HeeksPyPostProcess(const wxString &filepath)
+bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath)
 {
 	try{
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
@@ -155,7 +157,7 @@ bool HeeksPyPostProcess(const wxString &filepath)
 			::wxSetWorkingDirectory(wxString(_T("/tmp")));
 #endif
 			// call the python file
-			(new CPyPostProcess(filepath))->Do();
+			(new CPyPostProcess(program, filepath))->Do();
 
 			return true;
 		}
@@ -167,7 +169,7 @@ bool HeeksPyPostProcess(const wxString &filepath)
 	return false;
 }
 
-bool HeeksPyBackplot(const wxString &filepath)
+bool HeeksPyBackplot(const CProgram* program, const wxString &filepath)
 {
 	return true;
 	try{
@@ -176,7 +178,7 @@ bool HeeksPyBackplot(const wxString &filepath)
 		::wxSetWorkingDirectory(theApp.GetDllFolder());
 
 		// call the python file
-		(new CPyBackPlot(filepath))->Do();
+		(new CPyBackPlot(program, filepath))->Do();
 
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
 		heeksCAD->GetMainFrame()->Raise();

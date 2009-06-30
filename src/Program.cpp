@@ -436,7 +436,7 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("output('") + m_output_file + _T("')\n"));
 
 	// begin program
-	//theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
+	theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
 	theApp.m_program_canvas->AppendText(_T("absolute()\n"));
 	if(m_units > 25.0)
 	{
