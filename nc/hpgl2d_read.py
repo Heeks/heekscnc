@@ -16,8 +16,6 @@ class ParserHgpl2d(nc.Parser):
     def get_number(self, line, length, n):
         number = ''
 
-        print "line, length, n ", line, length, n
-
         # skip spaces at start of number
         while(n < length):
             c = line[n]
