@@ -22,7 +22,7 @@ http://code.google.com/p/heekscnc/wiki/GeometryImport
 
 The program can be output for different machines.
 
-To change the machine that the NC code is to made for, select the program object in the "Objects" window and drop-down the "machine" property ( in "Properties" window ) to the desired machine.
+To change the machine that the NC code is to be made for, select the program object in the "Objects" window and drop-down the "machine" property ( in "Properties" window ) to the desired machine.
 
 To make a new machine, see here http://code.google.com/p/heekscnc/wiki/Machines
 
