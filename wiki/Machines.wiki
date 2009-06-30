@@ -12,9 +12,9 @@ For example, let's make a machine which produces the same NC code as the "iso" m
 
 We must make a python file, let's call it "HeeksCNC/nc/iso_no_line_numbers.py"
 
-We must add a line to HeeksCNC/nc/machines.txt, with the file name and description "iso_no_line_number ISO output with no line numbers"
+We must add a line to HeeksCNC/nc/machines.txt, with the file name and description "iso_no_line_numbers ISO output with no line numbers"
 
-Our python file shall contain the following code
+Our python file shall contain the following code ( sorry about the ?s, you will have to remove them if you copy and paste it )
 
 import nc
 
