@@ -407,7 +407,7 @@ static void PostProcessMenuCallback(wxCommandEvent &event)
 		wxFile f(backplot_path.c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
-	HeeksPyPostProcess(theApp.m_program->m_output_file);
+	HeeksPyPostProcess(theApp.m_program, theApp.m_program->m_output_file);
 }
 
 static void CancelMenuCallback(wxCommandEvent &event)
@@ -424,7 +424,7 @@ static void OpenNcFileMenuCallback(wxCommandEvent& event)
 
     if (dialog.ShowModal() == wxID_OK)
     {
-		HeeksPyBackplot(dialog.GetPath().c_str());
+		HeeksPyBackplot(theApp.m_program, dialog.GetPath().c_str());
 	}
 }
 
@@ -447,7 +447,7 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 
 			ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
 		}
-		HeeksPyBackplot(nc_file_str);
+		HeeksPyBackplot(theApp.m_program, nc_file_str);
 	}
 }
 

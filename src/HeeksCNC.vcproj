@@ -597,6 +597,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PythonStuff.h"
+			>
+		</File>
+		<File
 			RelativePath=".\stdafx.cpp"
 			>
 			<FileConfiguration
