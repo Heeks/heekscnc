@@ -446,7 +446,7 @@ int CCuttingTool::FindCuttingTool( const int tool_number )
  */
 wxString CCuttingTool::FractionalRepresentation( const double original_value, const int max_denominator /* = 64 */ ) const
 {
-	std::ostringstream l_ossValue;
+	std::wostringstream l_ossValue;
 	double _value(original_value);
 	double near_enough = 1 / max_denominator;
 	
@@ -464,14 +464,14 @@ wxString CCuttingTool::FractionalRepresentation( const double original_value, co
 			if ((abs(_value - double( double(numerator) / double(denominator) ))) < near_enough)
 			{
 				l_ossValue << numerator << "/" << denominator;
-				return(l_ossValue.str());
+				return(l_ossValue.str().c_str());
 			} // End if - then
 		} // End for
 	} // End for
 
-	l_ossValue.str("");	// Delete any floor(value) data we had before.
+	l_ossValue.str(_T(""));	// Delete any floor(value) data we had before.
 	l_ossValue << original_value;
-	return(l_ossValue.str());
+	return(l_ossValue.str().c_str());
 } // End FractionalRepresentation() method
 
 
@@ -514,7 +514,7 @@ wxString CCuttingTool::GenerateMeaningfulName() const
                 case CCuttingToolParams::eBallEndMill:	l_ossName << "Ball End Mill";
 							break;
 
-                case CCuttingToolParams::eChamfer:	l_ossName.str("");	// Remove all that we've already prepared.
+                case CCuttingToolParams::eChamfer:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
 							l_ossName << m_params.m_cutting_edge_angle << " degreee ";
                 					l_ossName << "Chamfering Bit";
 		default:				break;
@@ -586,11 +586,11 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 		glEnd();
 
 		// Draw the cutting edge.
-		if (m_params.cutting_edge_angle > 0)
+		if (m_params.m_cutting_edge_angle > 0)
 		{
 			// It has a taper at the bottom.
 			
-			glBegin(GL_LINE_STRIP)
+			glBegin(GL_LINE_STRIP);
 			glVertex3d( -1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
 			glVertex3d( 0, -1 * (m_params.m_tool_length_offset / 2), 0 );
 			glVertex3d( +1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
@@ -606,7 +606,7 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 				unsigned int numPoints = 10;	
 				double alpha = 3.1415926 * 2 / numPoints;
 
-				glBegin(GL_LINE_STRIP)
+				glBegin(GL_LINE_STRIP);
 				unsigned int i = numPoints / 2;
 				while( i++ < numPoints )
 				{
@@ -619,7 +619,7 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 			{
 				// it's a normal endmill.
 				
-				glBegin(GL_LINE_STRIP)
+				glBegin(GL_LINE_STRIP);
 				glVertex3d( -1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
 				glVertex3d( +1 * ( m_params.m_diameter / 2), -1 * (ShaftLength / 2), 0 );
 				glEnd();
