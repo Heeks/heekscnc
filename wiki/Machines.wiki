@@ -14,23 +14,9 @@ We must make a python file, let's call it "HeeksCNC/nc/iso_no_line_numbers.py"
 
 We must add a line to HeeksCNC/nc/machines.txt, with the file name and description "iso_no_line_numbers ISO output with no line numbers"
 
-Our python file shall contain the following code ( sorry about the ?s, you will have to remove them if you copy and paste it )
+Our python file shall contain the following code
 
-import nc
-
-import iso
-
-class CreatorIsoNoLineNumbers(iso.CreatorIso):
-
-    def init(self): 
-
-        iso.CreatorIso.init(self) 
-
-    def write_blocknum(self): 
-
-        pass 
-
-nc.creator = CreatorIsoNoLineNumbers()
+http://code.google.com/p/heekscnc/wiki/iso_no_line_numbers.py.txt
 
 
 This class is derived from the CreatorIso class in iso.py, but we have redefined write_blocknum to make it do nothing.
