@@ -16,7 +16,7 @@ We must add a line to HeeksCNC/nc/machines.txt, with the file name and descripti
 
 Our python file shall contain the following code
 
-http://code.google.com/p/heekscnc/wiki/iso_no_line_numbers.py.txt
+http://code.google.com/p/heekscnc/wiki/machines/iso_no_line_numbers.py.txt
 
 
 This class is derived from the CreatorIso class in iso.py, but we have redefined write_blocknum to make it do nothing.
