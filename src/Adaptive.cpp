@@ -14,6 +14,7 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
+#include "Drilling.h"
 
 #include <sstream>
 
@@ -96,19 +97,19 @@ void CAdaptiveParams::set_initial_values(
 				case PointType:
 					if (ref->GetStartPoint( start ))
 					{
-						m_start_point_x = start[0];
-						m_start_point_y = start[1];
+						m_startpoint_x = start[0];
+						m_startpoint_y = start[1];
 					} // End if - then
 					break;
 
 				case DrillingType: {
 					std::set<CDrilling::Point3d> locations;
-					locations = ref->FindAllLocations();
+					locations = ((CDrilling *)ref)->FindAllLocations();
 					if (locations.size() == 1)
 					{
 						// There must be only one (didn't someone else say that once?) for our purposes.
-						m_start_point_x = locations.begin()->x;
-						m_start_point_y = locations.begin()->y;
+						m_startpoint_x = locations.begin()->x;
+						m_startpoint_y = locations.begin()->y;
 					} // End if - then
 				   } // End DrillingType scope
 					break;
