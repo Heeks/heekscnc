@@ -12,6 +12,7 @@ class ParserHgpl2d(nc.Parser):
         self.down_z = 0
         self.up_z = 20
         self.up = True
+        self.units_to_mm = 0.01
 
     def get_number(self, line, length, n):
         number = ''
@@ -71,8 +72,8 @@ class ParserHgpl2d(nc.Parser):
                             word = ""
                             self.begin_path("rapid")
                             if self.up == False:
-                                self.add_line(old_x, old_y, self.up_z)
-                            self.add_line(self.x, self.y, self.up_z)
+                                self.add_line(old_x * self.units_to_mm, old_y * self.units_to_mm, self.up_z)
+                            self.add_line(self.x * self.units_to_mm, self.y * self.units_to_mm, self.up_z)
                             self.end_path()
                             self.up = True
                         if c1 == 'D': # PD
@@ -87,8 +88,8 @@ class ParserHgpl2d(nc.Parser):
                             word = ""
                             self.begin_path("feed")
                             if self.up == True:
-                                self.add_line(old_x, old_y, self.down_z)
-                            self.add_line(self.x, self.y, self.down_z)
+                                self.add_line(old_x * self.units_to_mm, old_y * self.units_to_mm, self.down_z)
+                            self.add_line(self.x * self.units_to_mm, self.y * self.units_to_mm, self.down_z)
                             self.end_path()
                             self.up = False
                 n = n + 1
