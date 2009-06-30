@@ -107,8 +107,6 @@ void CDrilling::AppendTextToProgram()
 	std::set<Point3d> locations = FindAllLocations( m_symbols );
 	for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
-
-
 		ss << "drill("
 			<< "x=" << l_itLocation->x/theApp.m_program->m_units << ", "
 			<< "y=" << l_itLocation->y/theApp.m_program->m_units << ", "
@@ -118,7 +116,6 @@ void CDrilling::AppendTextToProgram()
 			<< "dwell=" << m_params.m_dwell << ", "
 			<< "peck_depth=" << m_params.m_peck_depth/theApp.m_program->m_units // << ", "
 			<< ")\n";
-
 	} // End for
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -130,7 +127,10 @@ void CDrilling::AppendTextToProgram()
 	to generate data suitable for OpenGL calls to paint a circle.  This graphics is transient but will
 	help represent what the GCode will be doing when it's generated.
  */
-std::list< CDrilling::Point3d > CDrilling::PointsAround( const CDrilling::Point3d & origin, const double radius, const unsigned int numPoints ) const
+std::list< CDrilling::Point3d > CDrilling::PointsAround( 
+		const CDrilling::Point3d & origin, 
+		const double radius, 
+		const unsigned int numPoints ) const
 {
 	std::list<CDrilling::Point3d> results;
 

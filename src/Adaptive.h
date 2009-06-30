@@ -32,7 +32,7 @@ public:
 	double m_fcut;
 	double m_fretract;
 	double m_thintol;
-	double m_startpoint_x;
+	double m_startpoint_x;		// Initialised from reference object if selected by the operator.
 	double m_startpoint_y;
 	double m_startvel_x;
 	double m_startvel_y;
@@ -43,7 +43,10 @@ public:
 	double m_boundary_y0;
 	double m_boundary_y1;
 
-	void set_initial_values(const std::list<int> &solids, const int cutting_tool_number );
+	void set_initial_values(const std::list<int> &solids, 
+				const int cutting_tool_number,
+		       		const int reference_object_type,	// For possible starting point
+				const unsigned int reference_object_id	); // For possible starting point
 	void write_values_to_config();
 	void GetProperties(CAdaptive* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -58,7 +61,17 @@ public:
 	static int number_for_stl_file;
 
 	CAdaptive():COp(GetTypeString()){}
-	CAdaptive(const std::list<int> &solids, const std::list<int> &sketches, const int cutting_tool_number = 0):COp(GetTypeString(), cutting_tool_number), m_solids(solids), m_sketches(sketches){m_params.set_initial_values(solids, cutting_tool_number);}
+	CAdaptive(	const std::list<int> &solids, 
+			const std::list<int> &sketches, 
+			const int cutting_tool_number = 0,
+			const int reference_object_type = -1,	// For possible starting point
+			const int reference_object_id = -1 )	// For possible starting point
+		: COp(GetTypeString(), cutting_tool_number), 
+			m_solids(solids), 
+			m_sketches(sketches)
+	{
+		m_params.set_initial_values(solids, cutting_tool_number, reference_object_type, reference_object_id);
+	} // End constructor
 
 	// HeeksObj's virtual functions
 	int GetType()const{return AdaptiveType;}
