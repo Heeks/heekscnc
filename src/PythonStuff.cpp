@@ -171,7 +171,6 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath)
 
 bool HeeksPyBackplot(const CProgram* program, const wxString &filepath)
 {
-	return true;
 	try{
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
