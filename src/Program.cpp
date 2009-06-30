@@ -22,6 +22,8 @@
 
 #include <vector>
 #include <algorithm>
+#include <fstream>
+using namespace std;
 
 bool COperations::CanAdd(HeeksObj* object)
 {
@@ -122,7 +124,10 @@ HeeksObj* CTools::ReadFromXMLElement(TiXmlElement* pElem)
 CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_script_edited(false)
 {
 	CNCConfig config;
-	config.Read(_T("ProgramMachine"), &m_machine, _T("nc.iso"));
+	wxString machine_file_name;
+	config.Read(_T("ProgramMachine"), &machine_file_name, _T("iso"));
+	m_machine = CProgram::GetMachine(machine_file_name);
+
 #ifdef WIN32
 	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
 #else
@@ -141,11 +146,13 @@ void CProgram::CopyFrom(const HeeksObj* object)
 	operator=(*((CProgram*)object));
 }
 
-static void on_set_machine(const wxChar* value, HeeksObj* object)
+static void on_set_machine(int value, HeeksObj* object)
 {
-	((CProgram*)object)->m_machine = value;
+	std::vector<CMachine> machines;
+	CProgram::GetMachines(machines);
+	((CProgram*)object)->m_machine = machines[value];
 	CNCConfig config;
-	config.Write(_T("ProgramMachine"), ((CProgram*)object)->m_machine);
+	config.Write(_T("ProgramMachine"), ((CProgram*)object)->m_machine.file_name);
 }
 
 static void on_set_output_file(const wxChar* value, HeeksObj* object)
@@ -167,7 +174,21 @@ static void on_set_units(int value, HeeksObj* object)
 
 void CProgram::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyString(_("machine"), m_machine, this, on_set_machine));
+	{
+		std::vector<CMachine> machines;
+		GetMachines(machines);
+
+		std::list< wxString > choices;
+		int choice = 0;
+		for(unsigned int i = 0; i < machines.size(); i++)
+		{
+			CMachine& machine = machines[i];
+			choices.push_back(machine.description);
+			if(machine.file_name == m_machine.file_name)choice = i;
+		}
+		list->push_back ( new PropertyChoice ( _("machine"),  choices, choice, this, on_set_machine ) );
+	}
+
 	list->push_back(new PropertyString(_("output file"), m_output_file, this, on_set_output_file));
 	{
 		std::list< wxString > choices;
@@ -211,7 +232,7 @@ void CProgram::WriteXML(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "Program" );
 	root->LinkEndChild( element );  
-	element->SetAttribute("machine", Ttc(m_machine.c_str()));
+	element->SetAttribute("machine", Ttc(m_machine.file_name.c_str()));
 	element->SetAttribute("output_file", Ttc(m_output_file.c_str()));
 	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
 	element->SetDoubleAttribute("units", m_units);
@@ -258,7 +279,7 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
 	{
 		std::string name(a->Name());
-		if(name == "machine"){new_object->m_machine.assign(Ctt(a->Value()));}
+		if(name == "machine")new_object->m_machine = GetMachine(Ctt(a->Value()));
 		else if(name == "output_file"){new_object->m_output_file.assign(Ctt(a->Value()));}
 		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(Ctt(a->Value()));}
 		else if(name == "units"){new_object->m_units = a->DoubleValue();}
@@ -408,7 +429,7 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("from nc.nc import *\n"));
 
 	// specific machine
-	theApp.m_program_canvas->AppendText(_T("import ") + m_machine + _T("\n"));
+	theApp.m_program_canvas->AppendText(_T("import nc.") + m_machine.file_name + _T("\n"));
 	theApp.m_program_canvas->AppendText(_T("\n"));
 
 	// output file
@@ -511,4 +532,75 @@ void CProgram::UpdateFromUserType()
 
 	}
 #endif
+}
+
+// static 
+void CProgram::GetMachines(std::vector<CMachine> &machines)
+{
+	wxString machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
+	ifstream ifs(Ttc(machines_file.c_str()));
+	if(!ifs)return;
+
+	char str[1024] = "";
+
+	while(!(ifs.eof()))
+	{
+		bool space_found = false;
+		wxString name;
+		wxString description;
+
+		ifs.getline(str, 1024);
+
+		int len = strlen(str);
+
+		for(int i = 0; i<len; i++){
+			char c = str[i];
+			switch(c)
+			{
+			case ' ':
+				if(space_found)description.Append(c);
+				space_found = true;
+				break;
+
+			case '\n':
+			case '\r':
+				break;
+
+			default:
+				if(space_found)description.Append(c);
+				else name.Append(c);
+				break;
+			}
+		}
+
+		if(name.Length() > 0)
+		{
+			CMachine m;
+			m.file_name = name;
+			m.description = description;
+			machines.push_back(m);
+		}
+	}
+
+}
+
+// static
+CMachine CProgram::GetMachine(const wxString& file_name)
+{
+	std::vector<CMachine> machines;
+	GetMachines(machines);
+	for(unsigned int i = 0; i<machines.size(); i++)
+	{
+		if(machines[i].file_name == file_name)
+		{
+			return machines[i];
+		}
+	}
+
+	if(machines.size() > 0)return machines[0];
+
+	CMachine machine;
+	machine.file_name = _T("not found");
+	machine.description = _T("not found");
+	return machine;
 }
