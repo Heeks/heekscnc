@@ -57,16 +57,16 @@ We don't know what this does
 We don't know what this does
 
 ===retractzheight===
-We don't know what this does
+I believe this is the 'safe height' at which rapid movements are safe.  The library code sets this to be 5 more than the highest point in the STL model.  The HeeksCNC code allows the operator to set this value manually.  When the model is first created, and again when the Python script is generated, the HeeksCNC code sets this to 5 more than the highest point in the chosen solids.  If the operator has already set it to a value higher than this then it will not be reset lower by the solids checking code.
 
 ===leadoffsamplestep===
 We don't know what this does
 
 ===toolcornerrad===
-We don't know what this does.  This value is taken from the referenced CuttingTool object if one was selected during the AdaptiveRoughing object creation.
+This value is taken from the referenced CuttingTool object if one was selected during the AdaptiveRoughing object creation.  It represents the radius of the cutter from the bottom to the side.  A ball-endmill would have the corner radius as the same as the tool's radius.
 
 ===toolflatrad===
-We don't know what this does.  This value is taken from the referenced CuttingTool object if one was selected during the AdaptiveRoughing object creation.
+This value is taken from the referenced CuttingTool object if one was selected during the AdaptiveRoughing object creation.  It represents the radius of the circle at the bottom of the cutter before either the edge or the corner radius.  A normal endmill would have a flat radius that is the same as the radius of the whole tool.  It would therefore have a corner radius of zero.
 
 ===samplestep===
 We don't know what this does
@@ -96,22 +96,22 @@ We don't know what this does
 We don't know what this does
 
 ===sidecutdisplch===
-We don't know what this does
+We don't know what this does.  My best guess is that this represents a 'Side Cut Displacement Change'.  I would suggest a value greater than zero but less than 1.0.  The ACTP library code gets a tool path vector as well as another vector that is perpendicular to the tool path.  This sidecutdisplch value is multiplied by the perpendicular vector and the result added to the old tool path vector.  The result of this produces the new tool path vector.  i.e. how much should we steer sideways while moving through the material.  The larger this value, the more aggressively the cutter would drive into the material (sideways).  Don't forget, this is just my best guess at the moment.  Please update this page if someone disagrees with this.
 
 ===fcut===
-We don't know what this does
+This represents the feedrate to be used during a cut.  It is added as an 'F' argument in the ACTP library code.
 
 ===fretract===
-We don't know what this does
+This represents the feedrate during a retraction from a cut.
 
 ===thintol===
-We don't know what this does
+This value is set to 0.0001 by default by the ACTP library code.  It represents a tolerance that determines when the cutting tool should deviate sideways into the material.  i.e. is the thickness of the material next to the cutter too small to worry about or is it beyond this thickness in which case the cutter should remove some of it.
 
 ===startpoint_x===
-The start point x co-ordinate
+The start point x co-ordinate.  If either a point object or a drilling object is selected during the Adaptive object's creation, this value will be set based on its location.
 
 ===startpoint_y===
-The start point y co-ordinate
+The start point y co-ordinate. If either a point object or a drilling object is selected during the Adaptive object's creation, this value will be set based on its location.
 
 ===startvel_x===
 The start direction x
@@ -123,6 +123,4 @@ The start direction y
 We don't know what this does
 
 ===boundaryclear===
-The z height of the boundary. This should be a little above the solid.
-
-If there is a sketch selected when creating an Adaptive Roughing operation, 
+The z height of the boundary. This should be a little above the solid.  This value is set, initially, based on the maximum Z value in the bounding boxes for the selected sketches.  The operator may change it manually.  The value is compared with the sketch objects again when the Python code is generated.  If the value has been set higher than that of the sketches it is not reset lower.  If, on the other hand, the value in the parameters is lower than that found for the sketches, its value is raised up to the sketches automatically.
