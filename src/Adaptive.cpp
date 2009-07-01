@@ -84,7 +84,7 @@ void CAdaptiveParams::set_initial_values(
 		{
 			m_toolcornerrad = pCuttingTool->m_params.m_corner_radius;
 			m_toolflatrad = pCuttingTool->m_params.m_flat_radius;
-			m_stepdown = pCuttingTool->m_params.m_cutting_edge_height;	// Let's use the full edge of the cutting tool by default.
+			m_stepdown = pCuttingTool->m_params.m_cutting_edge_height / 4.0;
 			m_clearcuspheight = m_stepdown / 3.0;
 		} // End if - then
 	} // End if - then
