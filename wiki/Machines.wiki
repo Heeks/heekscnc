@@ -34,7 +34,7 @@ nc.creator = CreatorIsoNoLineNumbers()
 
 This class is derived from the CreatorIso class in iso.py, but we have redefined write_blocknum to make it do nothing.
 
-We must also define the python file that reads the corresponding GCode back into HeeksCNC.  This file's name will be of the form <machine_name>_read.py.  In our example this would be iso_no_line_numbers_read.py.
+We must also define the python file that reads the corresponding GCode back into HeeksCNC.  This file's name will be of the form MACHINE_NAME_read.py.  In our example this would be iso_no_line_numbers_read.py.
 
 An example content would be;
 
