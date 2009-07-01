@@ -51,7 +51,7 @@ void CAdaptiveParams::set_initial_values(
 	config.Read(_T("m_toolflatrad"), &m_toolflatrad, 0.0);
 	config.Read(_T("m_samplestep"), &m_samplestep, 0.4);
 	config.Read(_T("m_stepdown"), &m_stepdown, 5.0);
-	config.Read(_T("m_clearcuspheight"), &m_clearcuspheight, 1.67);
+	config.Read(_T("m_clearcuspheight"), &m_clearcuspheight, m_stepdown / 3.0);
 	config.Read(_T("m_triangleweaveres"), &m_triangleweaveres, 0.51);
 	config.Read(_T("m_flatradweaveres"), &m_flatradweaveres, 0.71);
 	config.Read(_T("m_dchangright"), &m_dchangright, 0.17);
@@ -84,6 +84,8 @@ void CAdaptiveParams::set_initial_values(
 		{
 			m_toolcornerrad = pCuttingTool->m_params.m_corner_radius;
 			m_toolflatrad = pCuttingTool->m_params.m_flat_radius;
+			m_stepdown = pCuttingTool->m_params.m_cutting_edge_height;	// Let's use the full edge of the cutting tool by default.
+			m_clearcuspheight = m_stepdown / 3.0;
 		} // End if - then
 	} // End if - then
 
@@ -204,7 +206,17 @@ static void on_set_toolflatrad(double value, HeeksObj* object)
 }
 
 static void on_set_samplestep(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_samplestep = value;}
-static void on_set_stepdown(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_stepdown = value;}
+static void on_set_stepdown(double value, HeeksObj* object)
+{
+	((CAdaptive*)object)->m_params.m_stepdown = value;
+	((CAdaptive*)object)->m_params.m_clearcuspheight = double(double(value) / 3.0);
+
+	std::wostringstream l_ossChange;
+
+	l_ossChange << "Changing clearcuspheight to " << value / 3.0;
+	wxMessageBox( l_ossChange.str().c_str() );
+}
+
 static void on_set_clearcuspheight(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_clearcuspheight = value;}
 static void on_set_triangleweaveres(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_triangleweaveres = value;}
 static void on_set_flatradweaveres(double value, HeeksObj* object){((CAdaptive*)object)->m_params.m_flatradweaveres = value;}
