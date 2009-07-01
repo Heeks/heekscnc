@@ -38,6 +38,7 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
 	config.Read(_T("m_corner_radius"), &m_corner_radius, 0);
 	config.Read(_T("m_cutting_edge_angle"), &m_cutting_edge_angle, 59);
+	config.Read(_T("m_cutting_edge_height"), &m_cutting_edge_angle, 4 * m_diameter);
 }
 
 void CCuttingToolParams::write_values_to_config()
@@ -56,6 +57,7 @@ void CCuttingToolParams::write_values_to_config()
 	config.Write(_T("m_flat_radius"), m_flat_radius);
 	config.Write(_T("m_corner_radius"), m_corner_radius);
 	config.Write(_T("m_cutting_edge_angle"), m_cutting_edge_angle);
+	config.Write(_T("m_cutting_edge_height"), m_cutting_edge_height);
 }
 
 static void on_set_diameter(double value, HeeksObj* object)
@@ -90,6 +92,7 @@ static void on_set_type(int value, HeeksObj* object)
 {
 	std::wostringstream l_ossChange;
 
+	double height;
 	switch(value)
 	{
 		case CCuttingToolParams::eDrill:
@@ -103,6 +106,12 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 59) l_ossChange << "Changing cutting edge angle to 59 degrees (for normal 118 degree cutting face)\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 59;
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 10.0)
+				{
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 10.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 10.0;
+				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 				break;
@@ -122,6 +131,12 @@ static void on_set_type(int value, HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
 
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 4.0)
+				{
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+				} // End if - then
+
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 				break;
 
@@ -139,6 +154,12 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 4.0)
+				{
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 				break;
@@ -158,6 +179,12 @@ static void on_set_type(int value, HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
 
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 4.0)
+				{
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+				} // End if - then
+
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 				break;
 
@@ -172,6 +199,13 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 45) l_ossChange << "Changing cutting edge angle to 45 degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 45;
+
+				height = (((CCuttingTool*)object)->m_params.m_diameter / 2.0) * tan( 90.0 - ((CCuttingTool*)object)->m_params.m_cutting_edge_angle);
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != height)
+				{
+					l_ossChange << "Changing cutting edge height to " << height;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = height;
+				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 				break;
@@ -190,6 +224,7 @@ static void on_set_type(int value, HeeksObj* object)
 static void on_set_corner_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_corner_radius = value;}
 static void on_set_flat_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_flat_radius = value;}
 static void on_set_cutting_edge_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_cutting_edge_angle = value;}
+static void on_set_cutting_edge_height(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_cutting_edge_height = value;}
 
 
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
@@ -228,6 +263,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 	list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
 	list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
 	list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
+	list->push_back(new PropertyDouble(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
 }
 
 void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
@@ -250,6 +286,7 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("corner_radius", m_corner_radius);
 	element->SetDoubleAttribute("flat_radius", m_flat_radius);
 	element->SetDoubleAttribute("cutting_edge_angle", m_cutting_edge_angle);
+	element->SetDoubleAttribute("cutting_edge_height", m_cutting_edge_height);
 }
 
 void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -262,6 +299,14 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("corner_radius")) m_corner_radius = atof(pElem->Attribute("corner_radius"));
 	if (pElem->Attribute("flat_radius")) m_flat_radius = atof(pElem->Attribute("flat_radius"));
 	if (pElem->Attribute("cutting_edge_angle")) m_cutting_edge_angle = atof(pElem->Attribute("cutting_edge_angle"));
+	if (pElem->Attribute("cutting_edge_height"))
+	{
+		m_cutting_edge_height = atof(pElem->Attribute("cutting_edge_height"));
+	} // End if - then
+	else
+	{
+		m_cutting_edge_height = m_diameter * 4.0;
+	} // End if - else
 }
 
 /**

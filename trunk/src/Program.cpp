@@ -429,8 +429,15 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("from nc.nc import *\n"));
 
 	// specific machine
-	theApp.m_program_canvas->AppendText(_T("import nc.") + m_machine.file_name + _T("\n"));
-	theApp.m_program_canvas->AppendText(_T("\n"));
+	if (m_machine.file_name == _T("not found"))
+	{
+		wxMessageBox(_T("Machine name (defined in Program Properties) not found"));
+	} // End if - then
+	else
+	{
+		theApp.m_program_canvas->AppendText(_T("import nc.") + m_machine.file_name + _T("\n"));
+		theApp.m_program_canvas->AppendText(_T("\n"));
+	} // End if - else
 
 	// output file
 	theApp.m_program_canvas->AppendText(_T("output('") + m_output_file + _T("')\n"));
@@ -539,7 +546,14 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 {
 	wxString machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
 	ifstream ifs(Ttc(machines_file.c_str()));
-	if(!ifs)return;
+	if(!ifs)
+	{
+		std::wostringstream l_ossMessage;
+
+		l_ossMessage << "Could not open '" << machines_file.c_str() << "' for reading";
+		wxMessageBox( l_ossMessage.str().c_str() );
+		return;
+	}
 
 	char str[1024] = "";
 

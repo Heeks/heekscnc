@@ -66,6 +66,7 @@ public:
 	double m_corner_radius;
 	double m_flat_radius;
 	double m_cutting_edge_angle;
+	double m_cutting_edge_height;	// How far, from the bottom of the cutter, do the flutes extend?
 
 	eCuttingToolType	m_type;
 

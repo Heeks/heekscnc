@@ -67,11 +67,18 @@ public:
 
 	void Do(void)
 	{
+		if (m_program->m_machine.file_name == _T("not found"))
+		{
+			wxMessageBox(_T("Machine name (defined in Program Properties) not found"));
+		} // End if - then
+		else
+		{
 #ifdef WIN32
-		Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
+			Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
 #else
-		Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/") + m_program->m_machine.file_name + _T("_read.py\" ")) + m_filename);
+			Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/") + m_program->m_machine.file_name + _T("_read.py\" ")) + m_filename);
 #endif
+		} // End if - else
 	}
 	void ThenDo(void)
 	{
