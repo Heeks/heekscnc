@@ -63,7 +63,7 @@ void CCuttingToolParams::write_values_to_config()
 static void on_set_diameter(double value, HeeksObj* object)
 {
 	((CCuttingTool*)object)->m_params.m_diameter = value;
-	((CCuttingTool*)object)->m_params.m_tool_length_offset = 10 * value;
+	((CCuttingTool*)object)->m_params.m_tool_length_offset = 3 * value;
 
 	std::wostringstream l_ossChange;
 
@@ -107,10 +107,10 @@ static void on_set_type(int value, HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 59) l_ossChange << "Changing cutting edge angle to 59 degrees (for normal 118 degree cutting face)\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 59;
 
-				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 10.0)
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 10.0;
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 10.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -131,10 +131,10 @@ static void on_set_type(int value, HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
 
-				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 4.0)
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -155,10 +155,10 @@ static void on_set_type(int value, HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
 
-				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 4.0)
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -179,10 +179,10 @@ static void on_set_type(int value, HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
 
-				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 4.0)
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 4.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
