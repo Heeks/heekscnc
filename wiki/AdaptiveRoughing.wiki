@@ -120,7 +120,17 @@ The start direction x
 The start direction y
 
 ===minz===
-We don't know what this does
+The minz parameter may be used to ensure that machining stops before the top of the solid's surface.  If this parameter is only used if its value is larger than 5 more (hardcoded) than the solid's surface.
+
+==== Determining machining levels ====
+The Adaptive Roughing algorithm will produce machining sequences at levels that are determined using the following sequence;
+ 
+ - first level will be half the stepdown distance from the top of the solid model (peak of the cones in the examples above)
+
+ - the system will repeat at stepdown intervals as long as the levels do not penetrate deeper than '5' above the surface high point.  (the surface of the solid block in the example above)
+
+If the user wants the machining to stop at some point higher than this '5 above surface' limit then they may set the minz parameter.
+
 
 ===boundaryclear===
 The z height of the boundary. This should be a little above the solid.  This value is set, initially, based on the maximum Z value in the bounding boxes for the selected sketches.  The operator may change it manually.  The value is compared with the sketch objects again when the Python code is generated.  If the value has been set higher than that of the sketches it is not reset lower.  If, on the other hand, the value in the parameters is lower than that found for the sketches, its value is raised up to the sketches automatically.
