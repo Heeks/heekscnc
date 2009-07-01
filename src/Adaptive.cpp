@@ -58,7 +58,7 @@ void CAdaptiveParams::set_initial_values(
 	config.Read(_T("m_dchangrightoncontour"), &m_dchangrightoncontour, 0.37);
 	config.Read(_T("m_dchangleft"), &m_dchangleft, -0.41);
 	config.Read(_T("m_dchangefreespace"), &m_dchangefreespace, -0.6);
-	config.Read(_T("m_sidecutdisplch"), &m_sidecutdisplch, 0.0);
+	config.Read(_T("m_sidecutdisplch"), &m_sidecutdisplch, 0.3);
 	config.Read(_T("m_fcut"), &m_fcut, 1000);
 	config.Read(_T("m_fretract"), &m_fretract, 5000);
 	config.Read(_T("m_thintol"), &m_thintol, 0.0001);
