@@ -30,12 +30,16 @@ int CAdaptive::number_for_stl_file = 1;
  * or a Drilling object then use that object's location as this
  * operation's starting point.  If they're negative or zero then
  * use the existing default values.
+ *
+ * Also check the heights of the solids and set the retractzheight
+ * parameter accordingly.
  */
 void CAdaptiveParams::set_initial_values(
 		const std::list<int> &solids, 
 		const int cutting_tool_number /* = 0 */,
 		const int reference_object_type, /* = -1 */ 
-		const unsigned int reference_object_id /* = -1 */ )
+		const unsigned int reference_object_id, /* = -1 */
+		const std::list<int> &sketches )
 {
 	CNCConfig config;
 	config.Read(_T("m_leadoffdz"), &m_leadoffdz, 0.1);
@@ -120,6 +124,14 @@ void CAdaptiveParams::set_initial_values(
 		} // End if - then
 	} // End if - then
 
+	// Look through the solids that make up the model and find a safe height.
+	double max_z = CAdaptive::GetMaxHeight( SolidType, solids );
+	if (m_retractzheight < max_z) m_retractzheight = max_z;
+
+	// Look at the sketches that make up the boundary and set the boundaryclear value to the
+	// highest Z value.
+	max_z = CAdaptive::GetMaxHeight( SketchType, sketches );
+	if (m_boundaryclear < max_z) m_boundaryclear = max_z;
 }
 
 void CAdaptiveParams::write_values_to_config()
@@ -328,6 +340,37 @@ void CAdaptiveParams::ReadFromXMLElement(TiXmlElement* pElem)
 	}
 }
 
+/**
+	Find out how high up all the objects are for this operation.   From this we
+	will determine how far to retract the cutting tool so as not to hit
+	them during rapid movements.
+ */
+double CAdaptive::GetMaxHeight( const int object_type, const std::list<int> & object_ids )
+{
+	// Look through the objects that make up the model and find a safe height.
+	bool l_bValueUnset = true;
+	double max_z = -999999;
+	for (std::list<int>::const_iterator l_itObjectID = object_ids.begin(); l_itObjectID != object_ids.end(); l_itObjectID++)
+	{
+		HeeksObj *ob = heeksCAD->GetIDObject( object_type, *l_itObjectID );
+		if (ob != NULL)
+		{
+			CBox bbox;
+			ob->GetBox( bbox );
+			{
+				if ((l_bValueUnset) || (bbox.MaxZ() > max_z))
+				{
+					max_z = bbox.MaxZ();
+					l_bValueUnset = false;
+				} // End if - then
+			} // End if - then
+		} // End if - then
+	} // End for
+
+	return(max_z);
+} // End GetMaxHeight() method
+
+
 void CAdaptive::AppendTextToProgram()
 {
 	COp::AppendTextToProgram();
@@ -339,6 +382,17 @@ void CAdaptive::AppendTextToProgram()
 		HeeksObj* object = heeksCAD->GetIDObject(SolidType, *It);
 		if(object)solids.push_back(object);
 	}
+
+	// Reconfirm that our retractzheight value is sufficient.
+	const double small_buffer = 5.0;	// Don't scrape the mountain tops.
+	double max_z = CAdaptive::GetMaxHeight( SolidType, m_solids );
+	if (m_params.m_retractzheight < (max_z + small_buffer)) 
+	{
+		m_params.m_retractzheight = max_z + small_buffer;
+	} // End if - then
+
+	max_z = CAdaptive::GetMaxHeight( SketchType, m_sketches );
+	if (m_params.m_boundaryclear < max_z) m_params.m_boundaryclear = max_z;
 
 
 #ifdef WIN32
@@ -522,7 +576,7 @@ void CAdaptive::WriteXML(TiXmlNode *root)
 		element->LinkEndChild( solid_element );  
 		solid_element->SetAttribute("id", solid);
 	}
-	// write sketch ids
+	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
