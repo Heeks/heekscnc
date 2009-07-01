@@ -15,7 +15,7 @@ public:
 	double m_leadoffdz;
 	double m_leadofflen;
 	double m_leadoffrad;
-	double m_retractzheight;
+	double m_retractzheight;	// This is the safe height at which travel in X and Y directions will not hit anything.  The library code initializes this to 5 more than the model's maximum Z value.
 	double m_leadoffsamplestep;
 	double m_toolcornerrad;		// Value taken from CuttingTool object if one is referenced (via COp::m_cutting_tool_number)
 	double m_toolflatrad;		// Value taken from CuttingTool object if one is referenced (via COp::m_cutting_tool_number)
@@ -28,25 +28,26 @@ public:
 	double m_dchangrightoncontour;
 	double m_dchangleft;
 	double m_dchangefreespace;
-	double m_sidecutdisplch;
-	double m_fcut;
-	double m_fretract;
-	double m_thintol;
-	double m_startpoint_x;		// Initialised from reference object if selected by the operator.
-	double m_startpoint_y;
-	double m_startvel_x;
-	double m_startvel_y;
-	double m_minz;
+	double m_sidecutdisplch;	// My guess is that this is represents a 'side cut displacement change'.
+	double m_fcut;			// I believe this is the feedrate during cutting.  It is added as an 'F' clause
+	double m_fretract;		// I believe this is the feedrate during retraction from a cut.
+	double m_thintol;		// I believe this is the distance tolerance between whether the cutter advances into the material of or keeps travelling along its path waiting to find a thicker section before changing direction.  The library code uses a value of 0.0001 for this.
+	double m_startpoint_x;		// Initialised from the reference object if it was selected by the operator.
+	double m_startpoint_y;		// Initialised from the reference object if it was selected by the operator.
+	double m_startvel_x;		// I can't find this in either the Python or libACTP source.
+	double m_startvel_y;		// I can't find this in either the Python or libACTP source.
+	double m_minz;			// I can't see where this is used in the code.  The library code gives it a default value of -10000000.0
 	double m_boundaryclear;
 	double m_boundary_x0;
 	double m_boundary_x1;
 	double m_boundary_y0;
 	double m_boundary_y1;
 
-	void set_initial_values(const std::list<int> &solids, 
+	void set_initial_values(const std::list<int> &solids, 		// To set retractzheight value
 				const int cutting_tool_number,
 		       		const int reference_object_type,	// For possible starting point
-				const unsigned int reference_object_id	); // For possible starting point
+				const unsigned int reference_object_id,	// For possible starting point
+				const std::list<int> &sketches );	// To set boundaryclear value
 	void write_values_to_config();
 	void GetProperties(CAdaptive* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -70,7 +71,7 @@ public:
 			m_solids(solids), 
 			m_sketches(sketches)
 	{
-		m_params.set_initial_values(solids, cutting_tool_number, reference_object_type, reference_object_id);
+		m_params.set_initial_values(solids, cutting_tool_number, reference_object_type, reference_object_id, sketches);
 	} // End constructor
 
 	// HeeksObj's virtual functions
@@ -87,4 +88,5 @@ public:
 	void AppendTextToProgram();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	static double GetMaxHeight( const int object_type, const std::list<int> & object_ids );
 };
