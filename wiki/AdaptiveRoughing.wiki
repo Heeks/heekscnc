@@ -75,7 +75,7 @@ We don't know what this does
 This is the interval between successive 'z' machining levels.  This value should not be larger than the cutting tool's edge length.  It should also be noted that this stepdown value is used to determine how many machining levels are generated and that these levels will stop no lower than '5' above the solid's surface.  This means that the lowest maching level will be no less than 5 above the solid's surface and no more than '5 + stepdown' above the solid's surface.  i.e. the larger this value, the more of the cutting tool is used but, at the same time, the further away from the final solid's surface we will end up.
 
 ===clearcuspheight===
-We don't know what this does
+We don't know what this does.  As per the Adaptive Roughing code, the HeeksCNC package forces this value to 1/3 of the tool stepdown distance.
 
 ===triangleweaveres===
 We don't know what this does
