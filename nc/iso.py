@@ -267,10 +267,11 @@ class CreatorIso(nc.Creator):
             
         return True
 
-    def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+    def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         if self.same_xyz(x, y, z): return
         self.write_blocknum()
-        self.write(iso.ARC_CW)
+        if cw: self.write(iso.ARC_CW)
+        else: self.write(iso.ARC_CCW)
         self.write_preps()
         if (x != None):
             self.write(iso.X + (self.fmt % x))
@@ -292,30 +293,11 @@ class CreatorIso(nc.Creator):
         self.write_misc()
         self.write('\n')
 
+    def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+        self.arc(True, x, y, z, i, j, k, r)
+
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        if self.same_xyz(x, y, z): return
-        self.write_blocknum()
-        self.write(iso.ARC_CCW)
-        self.write_preps()
-        if (x != None):
-            self.write(iso.X + (self.fmt % x))
-            self.x = x
-        if (y != None):
-            self.write(iso.Y + (self.fmt % y))
-            self.y = y
-        if (z != None):
-            self.write(iso.Z + (self.fmt % z))
-            self.z = z
-        if (i != None) : self.write(iso.CENTRE_X + (self.fmt % i))
-        if (j != None) : self.write(iso.CENTRE_Y + (self.fmt % j))
-        if (k != None) : self.write(iso.CENTRE_Z + (self.fmt % k))
-        if (r != None) : self.write(iso.RADIUS + (self.fmt % r))
-#       use horizontal feed rate
-        if (self.fhv) : self.calc_feedrate_hv(1, 0)
-        self.write_feedrate()
-        self.write_spindle()
-        self.write_misc()
-        self.write('\n')
+        self.arc(False, x, y, z, i, j, k, r)
 
     def dwell(self, t):
         self.write_blocknum()
@@ -399,7 +381,8 @@ class CreatorIso(nc.Creator):
             self.write(iso.Y + (self.fmt % y) + iso.SPACE)
             self.y = y
 
-	dz = (z + standoff) - self.z			# In the end, we will be standoff distance above the z value passed in.
+	dz = (z + standoff) - self.z
+			# In the end, we will be standoff distance above the z value passed in.
 	self.write(iso.Z + (self.fmt % (z - depth)) + iso.SPACE)	# This is the 'z' value for the bottom of the hole.
 	self.z = (z + standoff)				# We want to remember where z is at the end (at the top of the hole)
 	self.write(iso.RETRACT + (self.fmt % retract_height))
