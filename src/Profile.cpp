@@ -17,6 +17,9 @@
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
+#include "CuttingTool.h"
+
+#include "geometry.h"	// from the kurve directory.
 
 #include <sstream>
 #include <iomanip>
@@ -223,14 +226,97 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 	}
 }
 
-void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
+
+/**
+	This is the duplicate of the kurve_funcs.py->make_smaller() method.  It's the one we can
+	call from C++
+ */
+void CProfile::make_smaller( geoff_geometry::Kurve *pKurve, double *pStartx, double *pStarty, double *pFinishx, double *pFinishy ) const
 {
+	if (pStartx && pStarty)
+	{
+		int sp;
+		double sx, sy, ex, ey, cx, cy;
+		geoff_geometry::kurve_get_span(pKurve, 0, sp, sx, sy, ex, ey, cx, cy);
+
+		if (pStartx) *pStartx = sx;
+		if (pStarty) *pStarty = sy;
+
+		geoff_geometry::kurve_change_start(pKurve, *pStartx, *pStarty);
+	} // End if - then
+
+	if (pFinishx && pFinishy)
+	{
+		int sp;
+		double sx, sy, ex, ey, cx, cy;
+		geoff_geometry::kurve_get_span(pKurve, 0, sp, sx, sy, ex, ey, cx, cy);
+
+		if (pFinishx) *pFinishx = sx;
+		if (pFinishy) *pFinishy = sy;
+
+		geoff_geometry::kurve_change_start(pKurve, *pFinishx, *pFinishy);
+	} // End if - then
+
+} // End of make_smaller() method
+
+
+
+/**
+	This is the duplicate of the kurve_funcs.py->roll_on_point() method.  It's the one we can
+	call from C++
+ */
+bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, double *pRoll_on_x, double *pRoll_on_y) const
+{
+	*pRoll_on_x = double(0.0);
+	*pRoll_on_y = double(0.0);
+
+	double offset = tool_radius;
+	if (direction == _T("right")) offset = -offset;
+	Kurve *offset_k = geoff_geometry::kurve_new();
+
+	bool offset_success = geoff_geometry::kurve_offset(pKurve, offset_k, offset);
+	if (offset_success == false) 
+	{
+       		// raise "couldn't offset kurve %d" % (k)
+		return(false);
+	} // End if - then
+
+	int sp;
+	double sx, sy, ex, ey, cx, cy;
+	double vx, vy;
+	double off_vx, off_vy;
+
+	if (geoff_geometry::kurve_num_spans(offset_k) > 0)
+	{
+		geoff_geometry::kurve_get_span(offset_k, 0, sp, sx, sy, ex, ey, cx, cy);
+		geoff_geometry::kurve_get_span_dir(offset_k, 0, 0, vx, vy); // get start direction
+		off_vx = -vy;
+		off_vy = vx;
+
+		if (direction == _T("right"))
+		{
+			off_vx = -off_vx;
+			off_vy = -off_vy;
+		} // End if - then
+	
+	        *pRoll_on_x = sx + off_vx * 2 - vx * 2;
+        	*pRoll_on_y = sy + off_vy * 2 - vy * 2;
+	} // End if - then
+
+} // End roll_on_point() method
+
+
+
+wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve )
+{
+	std::wostringstream l_ossPythonCode;
+
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("comment('%s')\n"), wxString(sketch->GetShortString()).c_str()));
+		l_ossPythonCode << (wxString::Format(_T("comment('%s')\n"), wxString(sketch->GetShortString()).c_str())).c_str();
 	}
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
+	l_ossPythonCode << (wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id)).c_str();
 
 	bool started = false;
 	int sketch_id = (id_to_use > 0 ? id_to_use : sketch->m_id);
@@ -248,25 +334,37 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 				if(!started && type != CircleType)
 				{
 					span_object->GetStartPoint(s);
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(s[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(s[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", 0.0, 0.0)\n"));
+					l_ossPythonCode << _T("kurve.add_point(k");
+					l_ossPythonCode << sketch_id;
+					l_ossPythonCode << _T(", 0, ");
+					l_ossPythonCode << (s[0] / theApp.m_program->m_units);
+					l_ossPythonCode << _T(", ");
+					l_ossPythonCode << (s[1] / theApp.m_program->m_units);
+					l_ossPythonCode << _T(", 0.0, 0.0)\n");
 					started = true;
+
+					geoff_geometry::kurve_add_point(pKurve,
+									0, 
+									(s[0] / theApp.m_program->m_units),
+									 (s[1] / theApp.m_program->m_units),
+									0.0, 0.0);
 				}
 				span_object->GetEndPoint(e);
 				if(type == LineType)
 				{
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", 0.0, 0.0)\n"));
+					l_ossPythonCode << _T("kurve.add_point(k");
+					l_ossPythonCode << sketch_id;
+					l_ossPythonCode << _T(", 0, ");
+					l_ossPythonCode << (e[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (e[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", 0.0, 0.0)\n"));
+
+					geoff_geometry::kurve_add_point(pKurve,
+									0, 
+									(e[0] / theApp.m_program->m_units),
+									 (e[1] / theApp.m_program->m_units),
+									0.0, 0.0);
 				}
 				else if(type == ArcType)
 				{
@@ -274,67 +372,100 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(span_type);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
+					l_ossPythonCode << (_T("kurve.add_point(k"));
+					l_ossPythonCode << (sketch_id);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (span_type);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (e[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (e[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					geoff_geometry::kurve_add_point(pKurve,
+									span_type, 
+									(e[0] / theApp.m_program->m_units),
+									 (e[1] / theApp.m_program->m_units),
+									(c[0] / theApp.m_program->m_units),
+									 (c[1] / theApp.m_program->m_units) );
 				}
 				else if(type == CircleType)
 				{
 					span_object->GetCentrePoint(c);
 
 					double radius = heeksCAD->CircleGetRadius(span_object);
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText((c[0] + radius) / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 1, "));
-					theApp.m_program_canvas->AppendText((c[0] - radius) / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 1, "));
-					theApp.m_program_canvas->AppendText((c[0] + radius) / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
+					l_ossPythonCode << (_T("kurve.add_point(k"));
+					l_ossPythonCode << (sketch_id);
+					l_ossPythonCode << (_T(", 0, "));
+					l_ossPythonCode << ((c[0] + radius) / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					geoff_geometry::kurve_add_point(pKurve,
+									0, 
+									((c[0] + radius) / theApp.m_program->m_units),
+									 (c[1] / theApp.m_program->m_units),
+									(c[0] / theApp.m_program->m_units),
+									 (c[1] / theApp.m_program->m_units) );
+
+					l_ossPythonCode << (_T("kurve.add_point(k"));
+					l_ossPythonCode << (sketch_id);
+					l_ossPythonCode << (_T(", 1, "));
+					l_ossPythonCode << ((c[0] - radius) / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					geoff_geometry::kurve_add_point(pKurve,
+									1, 
+									((c[0] - radius) / theApp.m_program->m_units),
+									 (c[1] / theApp.m_program->m_units),
+									(c[0] / theApp.m_program->m_units),
+									 (c[1] / theApp.m_program->m_units) );
+
+					l_ossPythonCode << (_T("kurve.add_point(k"));
+					l_ossPythonCode << (sketch_id);
+					l_ossPythonCode << (_T(", 1, "));
+					l_ossPythonCode << ((c[0] + radius) / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					geoff_geometry::kurve_add_point(pKurve,
+									1, 
+									((c[0] + radius) / theApp.m_program->m_units),
+									 (c[1] / theApp.m_program->m_units),
+									(c[0] / theApp.m_program->m_units),
+									 (c[1] / theApp.m_program->m_units) );
+
 				}
 			}
 		}
 	}
 
-	theApp.m_program_canvas->AppendText(_T("\n"));
+	l_ossPythonCode << _T("\n");
 
 	if(m_sketches.size() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
 	{
+		double startx, starty, finishx, finishy;
+
 		wxString start_string;
 		if(m_profile_params.m_start_given)
 		{
@@ -343,8 +474,11 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 #else
 			std::ostringstream ss;
 #endif
+			startx = m_profile_params.m_start[0] / theApp.m_program->m_units;
+			starty = m_profile_params.m_start[1] / theApp.m_program->m_units;
+
 			ss<<std::setprecision(10);
-			ss << ", startx = " << m_profile_params.m_start[0] / theApp.m_program->m_units << ", starty = " << m_profile_params.m_start[1] / theApp.m_program->m_units;
+			ss << ", startx = " << startx << ", starty = " << starty;
 			start_string = ss.str().c_str();
 		}
 
@@ -356,20 +490,34 @@ void CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 #else
 			std::ostringstream ss;
 #endif
+
+			finishx = m_profile_params.m_end[0] / theApp.m_program->m_units;
+			finishy = m_profile_params.m_end[1] / theApp.m_program->m_units;
+
 			ss<<std::setprecision(10);
-			ss << ", finishx = " << m_profile_params.m_end[0] / theApp.m_program->m_units << ", finishy = " << m_profile_params.m_end[1] / theApp.m_program->m_units;
+			ss << ", finishx = " << finishx << ", finishy = " << finishy;
 			finish_string = ss.str().c_str();
 		}
 
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str()));
+		l_ossPythonCode << (wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str())).c_str();
+		make_smaller( 	pKurve, 
+				(m_profile_params.m_start_given)?&startx:NULL,
+				(m_profile_params.m_start_given)?&starty:NULL,
+				(m_profile_params.m_end_given)?&finishx:NULL,
+				(m_profile_params.m_end_given)?&finishy:NULL );
 	}
+
+	return(l_ossPythonCode.str().c_str());
 }
 
-void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
+wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPointX, double *pRollOnPointY)
 {
+	std::wostringstream l_ossPythonCode;
+
 	if(object)
 	{
-		WriteSketchDefn(object, sketch);
+		geoff_geometry::Kurve *pKurve = geoff_geometry::kurve_new();
+		l_ossPythonCode << WriteSketchDefn(object, sketch, pKurve).c_str();
 
 		double total_to_cut = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
 		int num_step_downs = (int)(total_to_cut / fabs(m_depth_op_params.m_step_down) + 1.0 - heeksCAD->GetTolerance());
@@ -397,7 +545,24 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 		{
 			if(m_profile_params.m_auto_roll_on || (m_sketches.size() > 1))
 			{
-				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));
+				l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
+
+				if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL))
+				{
+					double tool_diameter = m_depth_op_params.m_tool_diameter;
+
+					if (((COp*)this)->m_cutting_tool_number > 0)
+					{
+						HeeksObj *pCuttingTool = heeksCAD->GetIDObject( CuttingToolType, ((COp *)this)->m_cutting_tool_number );
+						if (pCuttingTool != NULL)
+						{
+							tool_diameter = ((CCuttingTool *) pCuttingTool)->m_params.m_diameter;
+						} // End if - then
+					} // End if - then
+
+					roll_on_point( pKurve, side_string.c_str(), tool_diameter/2, pRollOnPointX, pRollOnPointY);
+				} // End if - then
+
 				roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
 			}
 			else
@@ -415,22 +580,22 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 		}
 		else
 		{
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch));
+			l_ossPythonCode << wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch).c_str();
 			roll_on_string = _T("span1sx, span1sy");
 		}
 
 		// rapid across to it
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str()));
+		l_ossPythonCode << wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str()).c_str();
 
 		// rapid down to just above the material
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = rapid_down_to_height)\n")));
+		l_ossPythonCode << wxString(_T("rapid(z = rapid_down_to_height)\n")).c_str();
 
 		wxString roll_off_string;
 		if(m_profile_params.m_tool_on_side)
 		{
 			if(m_profile_params.m_auto_roll_off || (m_sketches.size() > 1))
 			{
-				theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()));			
+				l_ossPythonCode << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
 				roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
 			}
 			else
@@ -447,42 +612,45 @@ void CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch)
 		}
 		else
 		{
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch));
+			l_ossPythonCode << wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch).c_str();
 			roll_off_string = _T("ex, ey");
 		}
 
 		if(num_step_downs > 1)
 		{
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("for step in range(0, %d):\n"), num_step_downs));		
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T(" depth = start_depth + ( final_depth - start_depth ) * ( step + 1 ) / %d\n"), num_step_downs));
+			l_ossPythonCode << wxString::Format(_T("for step in range(0, %d):\n"), num_step_downs).c_str();
+			l_ossPythonCode << wxString::Format(_T(" depth = start_depth + ( final_depth - start_depth ) * ( step + 1 ) / %d\n"), num_step_downs).c_str();
 
 			// rapid across to roll on point
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T(" if step != 0: rapid(%s)\n"), roll_on_string.c_str()));
+			l_ossPythonCode << wxString::Format(_T(" if step != 0: rapid(%s)\n"), roll_on_string.c_str()).c_str();
 			// feed down to depth
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T(" feed(z = depth)\n")));			
+			l_ossPythonCode << wxString(_T(" feed(z = depth)\n")).c_str();
 
 			// profile the kurve
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T(" kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
+			l_ossPythonCode << wxString::Format(_T(" kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()).c_str();
 
 			// rapid back up to clearance plane
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T(" rapid(z = clearance)\n")));			
+			l_ossPythonCode << wxString(_T(" rapid(z = clearance)\n")).c_str();
 		}
 		else
 		{
 			// feed down to final depth
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("feed(z = final_depth)\n")));			
+			l_ossPythonCode << wxString(_T("feed(z = final_depth)\n")).c_str();
 
 			// profile the kurve
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()));
+			l_ossPythonCode << (wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, %s, %s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str()).c_str());
 
 			// rapid back up to clearance plane
-			theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("rapid(z = clearance)\n")));			
+			l_ossPythonCode << (wxString(_T("rapid(z = clearance)\n"))).c_str();
 		}
 	}
+
+	return(l_ossPythonCode.str().c_str());
 }
 
 void CProfile::AppendTextToProgram()
 {
+	std::wostringstream l_ossPythonCode;
 	CDepthOp::AppendTextToProgram();
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
@@ -502,6 +670,7 @@ void CProfile::AppendTextToProgram()
 			object = re_ordered_sketch;
 		}
 
+		double roll_on_point_x, roll_on_point_y;
 		if(sketch_order == SketchOrderTypeMultipleCurves || sketch_order == SketchOrderHasCircles)
 		{
 			std::list<HeeksObj*> new_separate_sketches;
@@ -509,13 +678,13 @@ void CProfile::AppendTextToProgram()
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				AppendTextForOneSketch(one_curve_sketch, sketch);
+				l_ossPythonCode << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y).c_str();
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			AppendTextForOneSketch(object, sketch);
+			l_ossPythonCode << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y).c_str();
 		}
 
 		if(re_ordered_sketch)
@@ -523,6 +692,7 @@ void CProfile::AppendTextToProgram()
 			delete re_ordered_sketch;
 		}
 	}
+	theApp.m_program_canvas->m_textCtrl->AppendText(l_ossPythonCode.str().c_str());
 }
 
 static unsigned char cross16[32] = {0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80, 0x01, 0x80, 0x02, 0x40, 0x04, 0x20, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01};

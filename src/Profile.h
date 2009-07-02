@@ -7,6 +7,7 @@
 
 #include "HeeksCNCTypes.h"
 #include "DepthOp.h"
+#include "geometry.h"
 
 class CProfile;
 
@@ -59,11 +60,16 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
-	void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0);
-	void AppendTextForOneSketch(HeeksObj* object, int sketch);
+	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve );
+	wxString AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY);
 	void AppendTextToProgram();
 	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
 	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+
+	void make_smaller( geoff_geometry::Kurve *pKurve, double *pStartx, double *pStarty, double *pFinishx, double *pFinishy ) const;
+	bool roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, double *pRoll_on_x, double *pRoll_on_y) const;
+
+
 };
