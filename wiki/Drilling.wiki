@@ -17,6 +17,8 @@ Drilling cycles will be located at an aggregation of;
 
  - the centre of any selected circles where those circles don't intersect any other selected object.
 
+ - the location of any other drilling operations (recursively).  The reason for having a drilling operation be based on another drilling operation's locations is to allow for a round of centre drilling prior to the proper drilling operation.
+
 = Workflow =
  - Add a Cutting Tool object and set its parameters (length/width)
 
