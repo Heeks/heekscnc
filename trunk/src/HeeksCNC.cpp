@@ -105,7 +105,7 @@ static void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
 	event.Check(aui_manager->GetPane(theApp.m_output_canvas).IsShown());
 }
 
-static bool GetSketches(std::list<int>& sketches, int *p_piCuttingToolNumber = NULL )
+static bool GetSketches(std::list<int>& sketches, std::list<int> &cutting_tools )
 {
 	// check for at least one sketch selected
 
@@ -118,9 +118,9 @@ static bool GetSketches(std::list<int>& sketches, int *p_piCuttingToolNumber = N
 			sketches.push_back(object->m_id);
 		} // End if - then
 
-		if ((object != NULL) && (object->GetType() == CuttingToolType) && (p_piCuttingToolNumber != NULL))
+		if ((object != NULL) && (object->GetType() == CuttingToolType))
 		{
-			*p_piCuttingToolNumber = ((CCuttingTool *) object)->m_tool_number;
+			cutting_tools.push_back( object->m_id );
 		} // End if - then
 	}
 
@@ -135,24 +135,72 @@ static bool GetSketches(std::list<int>& sketches, int *p_piCuttingToolNumber = N
 
 static void NewProfileOpMenuCallback(wxCommandEvent &event)
 {
-	int cutting_tool_number = -1;
+	std::list<int> drill_bits;
+	std::list<int> cutting_tools;
 	std::list<int> sketches;
-	if(GetSketches(sketches, &cutting_tool_number))
+	int milling_cutting_tool_number = -1;
+	if(GetSketches(sketches, cutting_tools))
 	{
-		CProfile *new_object = new CProfile(sketches, cutting_tool_number);
+		// Look through the cutting tools that have been selected.  If any of them
+		// are drill or centre bits then create Drilling cycle objects as well.
+		// If we find a milling bit then pass that through to the CProfile object.
+		std::list<int>::const_iterator l_itTool;
+		for (l_itTool = cutting_tools.begin(); l_itTool != cutting_tools.end(); l_itTool++)
+		{
+			HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, *l_itTool );
+			if (ob != NULL)
+			{
+				switch (((CCuttingTool *)ob)->m_params.m_type)
+				{
+					case CCuttingToolParams::eDrill:
+					case CCuttingToolParams::eCentreDrill:
+						// Keep a list for later.  We need to create the Profile object
+						// before we create Drilling objects that refer to it.
+						drill_bits.push_back( *l_itTool );
+						break;
+
+					case CCuttingToolParams::eEndmill:
+					case CCuttingToolParams::eSlotCutter:
+					case CCuttingToolParams::eBallEndMill:
+						// We only want one.  Just keep overwriting this variable.
+						milling_cutting_tool_number = ((CCuttingTool *)ob)->m_tool_number;
+						break;
+
+					default:
+						break;
+				} // End switch
+			} // End if - then
+		} // End for
+
+		CProfile *new_object = new CProfile(sketches, milling_cutting_tool_number);
 		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
+
+		CDrilling::Symbols_t profiles;
+		profiles.push_back( CDrilling::Symbol_t( new_object->GetType(), new_object->m_id ) );
+
+		for (l_itTool = drill_bits.begin(); l_itTool != drill_bits.end(); l_itTool++)
+		{
+			HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, *l_itTool );
+			if (ob != NULL)
+			{
+				CDrilling *new_object = new CDrilling( profiles, ((CCuttingTool *)ob)->m_tool_number, -1 );
+				heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+				heeksCAD->ClearMarkedList();
+				heeksCAD->Mark(new_object);
+			} // End if - then
+		} // End for
 	}
 }
 
 static void NewPocketOpMenuCallback(wxCommandEvent &event)
 {
-	int cutting_tool_number = -1;
+	std::list<int> cutting_tools;
 	std::list<int> sketches;
-	if(GetSketches(sketches, &cutting_tool_number))
+	if(GetSketches(sketches, cutting_tools))
 	{
-		CPocket *new_object = new CPocket(sketches, cutting_tool_number);
+		CPocket *new_object = new CPocket(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
 		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);

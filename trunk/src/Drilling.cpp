@@ -16,6 +16,7 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
+#include "Profile.h"
 
 #include <sstream>
 #include <iomanip>
@@ -387,11 +388,6 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 {
 	std::set<CDrilling::Point3d> locations;
 
-	// We want to avoid calling the (expensive) intersection code too often.  If we've
-	// already intersected objects a and b then we shouldn't worry about intersecting 'b' with 'a'
-	// the next time through the loop.
-	// std::set< std::pair< Symbol_t, Symbol_t > > alreadyChecked;
-
 	// Look to find all intersections between all selected objects.  At all these locations, create
         // a drilling cycle.
 
@@ -470,6 +466,32 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbo
 					double pos[3];
 					bounding_box.Centre(pos);
 					locations.insert( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+				} // End if - then
+			} // End if - then
+
+			if (lhs->first == ProfileType)
+			{
+                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
+				if (lhsPtr != NULL)
+				{
+					std::list<Point3d> starting_points;
+					((CProfile *)lhsPtr)->AppendTextToProgram( starting_points );
+
+					std::copy( starting_points.begin(), starting_points.end(),
+							std::inserter( locations, locations.end() ) );
+				} // End if - then
+			} // End if - then
+
+			if (lhs->first == DrillingType)
+			{
+                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
+				if (lhsPtr != NULL)
+				{
+					std::set<Point3d> starting_points;
+					starting_points = ((CDrilling *)lhsPtr)->FindAllLocations();
+
+					std::copy( starting_points.begin(), starting_points.end(),
+							std::inserter( locations, locations.end() ) );
 				} // End if - then
 			} // End if - then
 		} // End if - then

@@ -96,6 +96,7 @@ static void on_set_type(int value, HeeksObj* object)
 	switch(value)
 	{
 		case CCuttingToolParams::eDrill:
+		case CCuttingToolParams::eCentreDrill:
 				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
 
 				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
@@ -252,6 +253,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 	{
                 std::list< wxString > choices;
                 choices.push_back(_("Drill bit"));
+                choices.push_back(_("Centre Drill bit"));
                 choices.push_back(_("End Mill"));
                 choices.push_back(_("Slot Cutter"));
                 choices.push_back(_("Ball End Mill"));
@@ -553,6 +555,9 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 	switch (m_params.m_type)
 	{
 		case CCuttingToolParams::eDrill:	l_ossName << "Drill Bit";
+							break;
+
+		case CCuttingToolParams::eCentreDrill:	l_ossName << "Centre Drill Bit";
 							break;
 
                 case CCuttingToolParams::eEndmill:	l_ossName << "End Mill";
