@@ -10,6 +10,10 @@ Draw sketch, or import a dxf file.
 
 Select the sketch.
 
+Select Milling type cutting tools (optional)
+
+Select Drilling type cutting tools (optional)
+
 Press
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/opprofile.png
@@ -33,6 +37,8 @@ If you see the roll-on and -off cutting the sketch, then select the profile oper
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/pickstart.png
 
 Press "Py" and "G0" again.
+
+If a drilling type tool is selected during the profile's creation, it will be located at the profile's starting point.  The idea is to allow a hole to be drilled at the starting points of all the selected sketches.  This way, the profile could begin by plunging the milling bit into the hole already drilled before progressing sideways to machine out the profile's shape.  Indeed, if both a Drill bit and a Centre Drill bit are selected, the GCode will allow a centre drill mark to be made prior to drilling.
 
 
 = Properties =
