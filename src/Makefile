@@ -21,6 +21,9 @@ else
   heekspathmessage = 
 endif
 
+KURVE_DIR=../kurve
+KURVE_FLAGS=-DOPEN_SOURCE_GEOMETRY -I$(KURVE_DIR)/geometry -I$(KURVE_DIR)/messages
+
 #CCFLAGS=-Wall -fPIC -g -I "./" -I/home/dan/Desktop/wxGTK-2.8.9/buildgtk/l${HEEKSCADPATH}/include/gtk2-ansi-debug-2.8 -I/usr/include/wx-2.8 -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -D__WXDEBUG__ -DWXUSINGDLL
 
 #run-in-place, for people on linux who don't want to 'sudo make install':
@@ -30,9 +33,10 @@ else
   RIP= 
 endif
 
-CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL ${RIP}
+CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL ${RIP} ${KURVE_FLAGS}
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o 
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o Construction.o Finite.o kurve.o  Matrix.o offset.o KurvePythonStuff.o
+
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
 
@@ -339,6 +343,30 @@ CounterBore.o: CounterBore.cpp \
 		${HEEKSCADPATH}/tinyxml/tinyxml.h \
 		CuttingTool.h
 	$(CC) -c CounterBore.cpp ${CCFLAGS} -o $@
+
+Construction.o: $(KURVE_DIR)/geometry/Construction.cpp \
+		$(KURVE_DIR)/geometry/geometry.h
+	$(CC) -c $(KURVE_DIR)/geometry/Construction.cpp ${CCFLAGS} -o $@
+
+Finite.o: $(KURVE_DIR)/geometry/Finite.cpp \
+		$(KURVE_DIR)/geometry/geometry.h
+	$(CC) -c $(KURVE_DIR)/geometry/Finite.cpp ${CCFLAGS} -o $@
+
+kurve.o: $(KURVE_DIR)/geometry/kurve.cpp \
+		$(KURVE_DIR)/geometry/geometry.h
+	$(CC) -c $(KURVE_DIR)/geometry/kurve.cpp ${CCFLAGS} -o $@
+
+Matrix.o: $(KURVE_DIR)/geometry/Matrix.cpp \
+		$(KURVE_DIR)/geometry/geometry.h
+	$(CC) -c $(KURVE_DIR)/geometry/Matrix.cpp ${CCFLAGS} -o $@
+
+offset.o: $(KURVE_DIR)/geometry/offset.cpp \
+		$(KURVE_DIR)/geometry/geometry.h
+	$(CC) -c $(KURVE_DIR)/geometry/offset.cpp ${CCFLAGS} -o $@
+
+KurvePythonStuff.o: $(KURVE_DIR)/PythonStuff.cpp \
+		$(KURVE_DIR)/geometry/geometry.h
+	$(CC) -c $(KURVE_DIR)/PythonStuff.cpp ${CCFLAGS} -o $@
 
 clean:
 	-rm ${SHARED_LIBRARY} ${OBJECTS}
