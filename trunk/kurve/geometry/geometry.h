@@ -1207,8 +1207,17 @@ public:
 #include "./ioXML.h"
 #endif
 
-}
+#ifndef KURVE_PYTHON_INTERFACE
+	Kurve *kurve_new();
+	void kurve_add_point(Kurve *ik, int sp, double x, double y, double i, double j);
+	void kurve_get_span( Kurve *ik, int index, int &sp, double &sx, double &sy, double &ex, double &ey, double &cx, double &cy );
+	void kurve_change_start(Kurve *ik, double sx, double sy);
+	bool kurve_offset( Kurve *ik, Kurve *ik2, double left );
+	void kurve_get_span_dir(Kurve *ik, int index, double fraction, double & vx, double & vy );
+	int  kurve_num_spans(Kurve *ik );
+#endif // KURVE_PYTHON_INTERFACE
 
+} // End namespace geoff_geometry
 
 
 
