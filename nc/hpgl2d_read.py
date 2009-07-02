@@ -1,11 +1,11 @@
-import nc_read as nc
+import num_reader
 import sys
 import math
 
-class ParserHgpl2d(nc.Parser):
+class ParserHgpl2d(num_reader.NumReader):
 
     def __init__(self):
-        nc.Parser.__init__(self)
+        num_reader.NumReader.__init__(self)
         self.i = 0
         self.j = 0
         self.x = 0
@@ -14,33 +14,6 @@ class ParserHgpl2d(nc.Parser):
         self.up_z = 20
         self.up = True
         self.units_to_mm = 0.01
-
-    def get_number(self):
-        number = ''
-
-        # skip spaces and commas at start of number
-        while(self.line_index < self.line_length):
-            c = self.line[self.line_index]
-            if c == ' ' or c == ',':
-                self.parse_word += c
-            else:
-                break
-            self.line_index = self.line_index + 1
-
-        while(self.line_index < self.line_length):
-            c = self.line[self.line_index]
-            if c == '0' or c == '1' or c == '2' or c == '3' or c == '4' or c == '5' or c == '6' or c == '7' or c == '8' or c == '9' or c == '-':
-                number += c
-            else:
-                break
-            self.parse_word += c
-            self.line_index = self.line_index + 1
-
-        return number
-
-    def add_word(self, color):
-        self.add_text(self.parse_word, color)
-        self.parse_word = ""
 
     def ParsePuOrPd(self, up):
         self.line_index = self.line_index + 1
@@ -79,75 +52,41 @@ class ParserHgpl2d(nc.Parser):
                     sdx = self.x - int(cx)
                     sdy = self.y - int(cy)
 
-                    print "cx, cy", cx, cy
-
-                    print "a", a
-
-                    print "sdx, sdy", sdx, sdy
-                    
                     start_angle = math.atan2(sdy, sdx)
 
-                    print "start_angle", start_angle
                     end_angle = start_angle + int(a) * math.pi/180
 
-                    print "end_angle", end_angle
                     radius = math.sqrt(sdx*sdx + sdy*sdy)
 
-                    print "radius", radius
                     ex = int(cx) + radius * math.cos(end_angle)
                     ey = int(cy) + radius * math.sin(end_angle)
-
-                    print "ex, ey", ex, ey
-                    print
                     
                     if int(a) > 0: d = 1
                     else: d = -1
 
-                    print "d", d
                     self.add_arc(ex * self.units_to_mm, ey * self.units_to_mm, i = int(-sdx) * self.units_to_mm, j = int(-sdy) * self.units_to_mm, d = d)
                     self.end_path()
                     self.up = False
                     self.x = int(ex)
                     self.y = int(ey)
     
-    def Parse(self, name, oname=None):
-        self.files_open(name,oname)
-
-        while self.readline():
-            self.begin_ncblock()
-
-            self.parse_word = ""
-            self.line_index = 0
-            self.line_length = len(self.line)
-                    
-            while self.line_index < self.line_length:
-                c = self.line[self.line_index]
-                self.parse_word += c
-
-                if c == 'P':
-                    self.line_index = self.line_index + 1
-                    if self.line_index < self.line_length:
-                        c1 = self.line[self.line_index]
-                        self.parse_word += c1
-                        if c1 == 'U': # PU
-                            self.ParsePuOrPd(True)
-                        if c1 == 'D': # PD
-                            self.ParsePuOrPd(False)
-                elif c == 'A':
-                    self.line_index = self.line_index + 1
-                    if self.line_index < self.line_length:
-                        c1 = self.line[self.line_index]
-                        self.parse_word += c1
-                        if c1 == 'A': # AA, arc absolute
-                            self.ParseAA()
-                    
-                self.line_index = self.line_index + 1
- 
-            self.add_text(self.parse_word, None)
-
-            self.end_ncblock()
-
-        self.files_close()
+    def ParseFromFirstLetter(self, c):
+        if c == 'P':
+            self.line_index = self.line_index + 1
+            if self.line_index < self.line_length:
+                c1 = self.line[self.line_index]
+                self.parse_word += c1
+                if c1 == 'U': # PU
+                    self.ParsePuOrPd(True)
+                elif c1 == 'D': # PD
+                    self.ParsePuOrPd(False)
+        elif c == 'A':
+            self.line_index = self.line_index + 1
+            if self.line_index < self.line_length:
+                c1 = self.line[self.line_index]
+                self.parse_word += c1
+                if c1 == 'A': # AA, arc absolute
+                    self.ParseAA()
 
 ################################################################################
 
