@@ -293,8 +293,11 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 
 
 /**
-	Sort the NC operations by execution order first and then
-	by cutting tool number.
+	Sort the NC operations by;
+		- execution order
+		- centre drilling operations
+		- drilling operations
+		- all other operations (sorted by tool number to avoid unnecessary tool changes)
  */
 struct sort_operations : public std::binary_function< bool, COp *, COp * >
 {
@@ -302,6 +305,45 @@ struct sort_operations : public std::binary_function< bool, COp *, COp * >
 	{
 		if (lhs->m_execution_order < rhs->m_execution_order) return(true);
 		if (lhs->m_execution_order > rhs->m_execution_order) return(false);
+
+		// We want to run through all the centre drilling, then drilling, then milling.
+		if ((((HeeksObj *)lhs)->GetType() == DrillingType) && (((HeeksObj *)rhs)->GetType() != DrillingType)) return(true);
+		if ((((HeeksObj *)lhs)->GetType() != DrillingType) && (((HeeksObj *)rhs)->GetType() == DrillingType)) return(false);
+
+		if ((((HeeksObj *)lhs)->GetType() == DrillingType) && (((HeeksObj *)rhs)->GetType() == DrillingType))
+		{
+			// They're both drilling operations.  Select centre drilling over normal drilling.
+			int lhs_cutting_tool_id = CCuttingTool::FindCuttingTool( lhs->m_cutting_tool_number );
+			int rhs_cutting_tool_id = CCuttingTool::FindCuttingTool( rhs->m_cutting_tool_number );
+
+			CCuttingTool *lhsPtr = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, lhs_cutting_tool_id );
+			CCuttingTool *rhsPtr = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, rhs_cutting_tool_id );
+
+			if ((lhsPtr != NULL) && (rhsPtr != NULL))
+			{
+				if ((lhsPtr->m_params.m_type == CCuttingToolParams::eCentreDrill) &&
+				    (rhsPtr->m_params.m_type != CCuttingToolParams::eCentreDrill)) return(true);
+
+				if ((lhsPtr->m_params.m_type != CCuttingToolParams::eCentreDrill) &&
+				    (rhsPtr->m_params.m_type == CCuttingToolParams::eCentreDrill)) return(false);
+
+				// There is no preference for centre drill.  Neither tool is a centre drill.  Give preference
+				// to a normal drill bit over a milling bit now.
+
+				if ((lhsPtr->m_params.m_type == CCuttingToolParams::eDrill) &&
+				    (rhsPtr->m_params.m_type != CCuttingToolParams::eDrill)) return(true);
+			
+				if ((lhsPtr->m_params.m_type != CCuttingToolParams::eDrill) &&
+				    (rhsPtr->m_params.m_type == CCuttingToolParams::eDrill)) return(false);
+			
+				// Finally, give preference to a milling bit over a chamfer bit.	
+				if ((lhsPtr->m_params.m_type == CCuttingToolParams::eChamfer) &&
+				    (rhsPtr->m_params.m_type != CCuttingToolParams::eChamfer)) return(true);
+
+				if ((lhsPtr->m_params.m_type != CCuttingToolParams::eChamfer) &&
+				    (rhsPtr->m_params.m_type == CCuttingToolParams::eChamfer)) return(false);
+			} // End if - then
+		} // End if - then
 
 		// The execution orders are the same.  Let's group on tool number so as
 		// to avoid unnecessary tool change operations.
@@ -482,10 +524,17 @@ void CProgram::RewritePythonProgram()
 		if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
 		{
 			// Select the right tool.
-			std::ostringstream l_ossValue;
+			std::wostringstream l_ossValue;
+
+			CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
+			if (pCuttingTool != NULL)
+			{
+				l_ossValue << _T("comment( 'tool change to ") << pCuttingTool->m_title.c_str() << "')\n";
+			} // End if - then
+
 
 			l_ossValue << "tool_change( id=" << ((COp *) object)->m_cutting_tool_number << ")\n";
-			theApp.m_program_canvas->AppendText(Ctt(l_ossValue.str().c_str()));
+			theApp.m_program_canvas->AppendText(wxString(l_ossValue.str().c_str()).c_str());
 			current_tool = ((COp *) object)->m_cutting_tool_number;
 		} // End if - then
 

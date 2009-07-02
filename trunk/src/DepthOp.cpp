@@ -214,7 +214,7 @@ void CDepthOp::AppendTextToProgram()
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_vertical_feed_rate);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
 
-	if (m_depth_op_params.m_tool_number > 0)
+	if ((((COp *)this)->m_cutting_tool_number <= 0) && (m_depth_op_params.m_tool_number > 0))
 	{
 		theApp.m_program_canvas->AppendText(_T("tool_change("));
 		theApp.m_program_canvas->AppendText(m_depth_op_params.m_tool_number);
