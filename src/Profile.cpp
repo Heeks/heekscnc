@@ -650,8 +650,18 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 void CProfile::AppendTextToProgram()
 {
-	std::wostringstream l_ossPythonCode;
+	std::list<CDrilling::Point3d> starting_points;
+	wxString python_code = AppendTextToProgram( starting_points );
+
 	CDepthOp::AppendTextToProgram();
+	theApp.m_program_canvas->m_textCtrl->AppendText( python_code.c_str() );
+
+} // End AppendTextToProgram() method
+
+
+wxString CProfile::AppendTextToProgram( std::list<CDrilling::Point3d> & starting_points )
+{
+	std::wostringstream l_ossPythonCode;
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -680,11 +690,18 @@ void CProfile::AppendTextToProgram()
 				HeeksObj* one_curve_sketch = *It;
 				l_ossPythonCode << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y).c_str();
 				delete one_curve_sketch;
+
+				CBox bbox;
+				one_curve_sketch->GetBox(bbox);
+				starting_points.push_back( CDrilling::Point3d( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
 			}
 		}
 		else
 		{
 			l_ossPythonCode << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y).c_str();
+			CBox bbox;
+			object->GetBox(bbox);
+			starting_points.push_back( CDrilling::Point3d( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
 		}
 
 		if(re_ordered_sketch)
@@ -692,7 +709,8 @@ void CProfile::AppendTextToProgram()
 			delete re_ordered_sketch;
 		}
 	}
-	theApp.m_program_canvas->m_textCtrl->AppendText(l_ossPythonCode.str().c_str());
+	
+	return( l_ossPythonCode.str().c_str() );
 }
 
 static unsigned char cross16[32] = {0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80, 0x01, 0x80, 0x02, 0x40, 0x04, 0x20, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01};

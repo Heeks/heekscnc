@@ -21,6 +21,7 @@ public:
 
 	typedef enum {
 		eDrill = 0,
+		eCentreDrill,
 		eEndmill,
 		eSlotCutter,
 		eBallEndMill,
