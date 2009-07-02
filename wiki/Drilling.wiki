@@ -19,6 +19,8 @@ Drilling cycles will be located at an aggregation of;
 
  - the location of any other drilling operations (recursively).  The reason for having a drilling operation be based on another drilling operation's locations is to allow for a round of centre drilling prior to the proper drilling operation.
 
+ - the starting points of any selected profile operations.  The idea here being to allow a hole to be drilled at all of the profile's starting points before they are machined out using the milling bit.
+
 = Workflow =
  - Add a Cutting Tool object and set its parameters (length/width)
 
