@@ -27,6 +27,8 @@
 #include "CuttingTool.h"
 #include "CounterBore.h"
 
+#include <sstream>
+
 CHeeksCADInterface* heeksCAD = NULL;
 
 CHeeksCNCApp theApp;
@@ -357,6 +359,35 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+
+static void DesignRulesAdjustmentMenuCallback(wxCommandEvent &event)
+{
+	std::list<wxString> changes;
+
+	HeeksObj *obj;
+	for (obj = heeksCAD->GetFirstObject(); obj != NULL; obj = heeksCAD->GetNextObject())
+	{
+		if (COp::IsAnOperation( obj->GetType() ))
+		{
+			std::list<wxString> change = ((COp *)obj)->DesignRulesAdjustment();
+			std::copy( change.begin(), change.end(), std::inserter( changes, changes.end() ));
+		} // End if - then
+	} // End for
+
+	std::wostringstream l_ossChanges;
+	for (std::list<wxString>::const_iterator l_itChange = changes.begin(); l_itChange != changes.end(); l_itChange++)
+	{
+		l_ossChanges << l_itChange->c_str();
+	} // End for
+
+	if (l_ossChanges.str().size() > 0)
+	{
+		wxMessageBox( l_ossChanges.str().c_str() );
+	} // End if - then
+
+} // End DesignRulesAdjustmentMenuCallback() routine
+
+
 static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 {
 	std::set<CCounterBore::Point3d> intersections;
@@ -513,6 +544,7 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Drill"), ToolImage(_T("drilling")), _T("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("CounterBore"), ToolImage(_T("counterbore")), _T("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("tool")), _T("New Cutting Tool Definition..."), NewCuttingToolOpMenuCallback);
+	// heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Design Rules Adjustment"), ToolImage(_T("tool")), _T("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Python"), ToolImage(_T("python")), _T("Make Python Script"), MakeScriptMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _T("Post-Process"), PostProcessMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _T("Open NC File"), OpenNcFileMenuCallback);
@@ -564,6 +596,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("New Drilling Operation..."), ToolImage(_T("drilling")), NewDrillingOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New CounterBore Operation..."), ToolImage(_T("counterbore")), NewCounterBoreOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Cutting Tool Definition..."), ToolImage(_T("tool")), NewCuttingToolOpMenuCallback);
+	// heeksCAD->AddMenuItem(menuOperations, _("Design Rules Adjustment..."), ToolImage(_T("tool")), DesignRulesAdjustmentMenuCallback);
 
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;

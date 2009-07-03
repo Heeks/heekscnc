@@ -148,6 +148,7 @@ public:
 	static std::set<Point3d> FindAllLocations( const CDrilling::Symbols_t & symbols );
 	std::set<Point3d> FindAllLocations() const;
 
+	std::list<wxString> DesignRulesAdjustment();
 };
 
 
