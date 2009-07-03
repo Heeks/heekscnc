@@ -25,6 +25,7 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
+static void ResetParametersToReasonableValues(HeeksObj* object);
 
 void CCuttingToolParams::set_initial_values()
 {
@@ -63,15 +64,7 @@ void CCuttingToolParams::write_values_to_config()
 static void on_set_diameter(double value, HeeksObj* object)
 {
 	((CCuttingTool*)object)->m_params.m_diameter = value;
-	((CCuttingTool*)object)->m_params.m_tool_length_offset = 3 * value;
-
-	std::wostringstream l_ossChange;
-
-	l_ossChange << "Resetting tool length to " << (((CCuttingTool*)object)->m_params.m_tool_length_offset / theApp.m_program->m_units) << " as a result of the diameter change\n";
-
-	l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
-
-	wxMessageBox( wxString( l_ossChange.str().c_str() ).c_str() );
+	ResetParametersToReasonableValues(object);
 } // End on_set_diameter() routine
 
 static void on_set_x_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_x_offset = value;}
@@ -90,15 +83,25 @@ static void on_set_orientation(int value, HeeksObj* object)
 
 static void on_set_type(int value, HeeksObj* object)
 {
+	((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+	ResetParametersToReasonableValues(object);
+} // End on_set_type() routine
+
+
+static void ResetParametersToReasonableValues(HeeksObj* object)
+{
 	std::wostringstream l_ossChange;
 
+	if (((CCuttingTool*)object)->m_params.m_tool_length_offset != (5 * ((CCuttingTool*)object)->m_params.m_diameter))
+	{
+		((CCuttingTool*)object)->m_params.m_tool_length_offset = (5 * ((CCuttingTool*)object)->m_params.m_diameter);
+		l_ossChange << "Resetting tool length to " << (((CCuttingTool*)object)->m_params.m_tool_length_offset / theApp.m_program->m_units) << "\n";
+	} // End if - then
+
 	double height;
-	switch(value)
+	switch(((CCuttingTool*)object)->m_params.m_type)
 	{
 		case CCuttingToolParams::eDrill:
-		case CCuttingToolParams::eCentreDrill:
-				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
-
 				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
 
@@ -110,16 +113,33 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
 					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 				break;
 
-		case CCuttingToolParams::eEndmill:
-				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+		case CCuttingToolParams::eCentreDrill:
+				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
 
+				if (((CCuttingTool*)object)->m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero\n";
+				((CCuttingTool*)object)->m_params.m_flat_radius = 0;
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 59) l_ossChange << "Changing cutting edge angle to 59 degrees (for normal 118 degree cutting face)\n";
+				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 59;
+
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 1.0)
+				{
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 1.0 << "\n";
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 1.0;
+				} // End if - then
+
+				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+				break;
+
+		case CCuttingToolParams::eEndmill:
 				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
 
@@ -134,7 +154,7 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
 					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
@@ -142,8 +162,6 @@ static void on_set_type(int value, HeeksObj* object)
 				break;
 
 		case CCuttingToolParams::eSlotCutter:
-				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
-
 				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
 
@@ -158,7 +176,7 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
 					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
@@ -166,8 +184,6 @@ static void on_set_type(int value, HeeksObj* object)
 				break;
 
 		case CCuttingToolParams::eBallEndMill:
-				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
-
 				if (((CCuttingTool*)object)->m_params.m_corner_radius != (((CCuttingTool*)object)->m_params.m_diameter / 2)) 
 				{
 					l_ossChange << "Changing corner radius to " << ((((CCuttingTool*)object)->m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
@@ -182,7 +198,7 @@ static void on_set_type(int value, HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
-					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
+					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
 					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
@@ -190,8 +206,6 @@ static void on_set_type(int value, HeeksObj* object)
 				break;
 
 		case CCuttingToolParams::eChamfer:
-				((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
-
 				if (((CCuttingTool*)object)->m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				((CCuttingTool*)object)->m_params.m_corner_radius = 0;
 
@@ -204,7 +218,7 @@ static void on_set_type(int value, HeeksObj* object)
 				height = (((CCuttingTool*)object)->m_params.m_diameter / 2.0) * tan( 90.0 - ((CCuttingTool*)object)->m_params.m_cutting_edge_angle);
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != height)
 				{
-					l_ossChange << "Changing cutting edge height to " << height;
+					l_ossChange << "Changing cutting edge height to " << height / theApp.m_program->m_units << "\n";
 					((CCuttingTool*)object)->m_params.m_cutting_edge_height = height;
 				} // End if - then
 
