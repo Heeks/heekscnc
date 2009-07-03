@@ -14,6 +14,8 @@ The tool_number value may be assigned to any of the NC operation objects within 
 
 An operation's tool_number may not be updated to any value except zero unless a corresponding Cutting Tool object already exists for the tool number.  If an invalid tool number is entered, a warning dialog will appear and the change will not be made.
 
+When the GCode is generated, preference is given to drilling cycles that use a centre drill.  Next drill cycles that use a normal drill bit.  Next all NC operations that use any of the milling bits and finally all other NC operations that use a chamfering bit.
+
 = Properties =
 
 == Type ==
@@ -21,6 +23,8 @@ An operation's tool_number may not be updated to any value except zero unless a 
 The type property can be one of;
 
  - "Drill Bit"
+
+ - "Centre Drill Bit"
 
  - "End Mill"
 
