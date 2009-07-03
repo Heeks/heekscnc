@@ -10,7 +10,7 @@ LIBS    = -lstdc++ `python-config --libs`
 CFLAGS  = -Wall -I/usr/include `python-config --includes` -I./ -g -fPIC -DOPEN_SOURCE_GEOMETRY -DKURVE_PYTHON_INTERFACE
 
 LIBNAME	= kurve
-LIBOBJS	= Construction.o Finite.o kurve.o Matrix.o PythonStuff.o offset.o
+LIBOBJS	= Construction.o Finite.o kurve.o Matrix.o PythonInterface.o offset.o
 LIBDIR	= .libs/
 LIBOUT	= $(LIBDIR)$(LIBNAME).so
 
@@ -45,7 +45,7 @@ kurve.o: geometry/kurve.cpp
 Matrix.o: geometry/Matrix.cpp
 	$(CC) -c $? ${CFLAGS} -o $@
 
-PythonStuff.o: PythonStuff.cpp
+PythonInterface.o: PythonInterface.cpp
 	$(CC) -c $? ${CFLAGS} -o $@
 
 offset.o: geometry/offset.cpp
