@@ -303,6 +303,8 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
         	*pRoll_on_y = sy + off_vy * 2 - vy * 2;
 	} // End if - then
 
+	return(true);
+
 } // End roll_on_point() method
 
 

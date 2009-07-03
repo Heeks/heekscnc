@@ -33,6 +33,13 @@ public:
 	virtual void AppendTextToProgram();
 
 	static bool IsAnOperation(int object_type);
+
+	// The DesignRulesAdjustment() method is the opportunity for all Operations objects to
+	// adjust their parameters to values that 'make sense'.  eg: If a drilling cycle has a
+	// profile operation as a reference then it should not have a depth value that is deeper
+	// than the profile operation.
+	// The list of strings provides a description of what was changed.
+	virtual std::list<wxString> DesignRulesAdjustment() { std::list<wxString> empty; return(empty); }
 };
 
 #endif
