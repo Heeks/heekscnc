@@ -505,3 +505,63 @@ std::set<CDrilling::Point3d> CDrilling::FindAllLocations() const
 	return( FindAllLocations( m_symbols ) );
 } // End FindAllLocations() method
 
+/**
+	This method adjusts any parameters that don't make sense.  It should report a list
+	of changes in the list of strings.
+ */
+std::list<wxString> CDrilling::DesignRulesAdjustment()
+{
+	std::list<wxString> changes;
+
+	changes.push_back(_T("Here I am"));
+
+	if (m_cutting_tool_number > 0)
+	{
+		// Make sure the hole depth isn't greater than the tool's cutting depth.
+		CCuttingTool *pDrill = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( m_cutting_tool_number ) );
+		if (pDrill->m_params.m_cutting_edge_height < m_params.m_depth)
+		{
+			// The drill bit we've chosen can't cut as deep as we've setup to go.
+
+			std::wostringstream l_ossChange;
+
+			l_ossChange << "Adjusting depth of drill cycle id='" << m_id << "' from '" 
+				<< m_params.m_depth << " to "
+				<< pDrill->m_params.m_cutting_edge_height << "\n";
+			changes.push_back(l_ossChange.str().c_str());
+
+			m_params.m_depth = pDrill->m_params.m_cutting_edge_height;
+		} // End if - then
+	} // End if - then
+
+	// See if there is anything in the reference objects that may be in conflict with this object's current configuration.
+	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
+	{
+		switch (l_itSymbol->first)
+		{
+			case ProfileType:
+				{
+					CProfile *pProfile = (CProfile *) heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
+					if (((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth < m_params.m_depth)
+					{
+						std::wostringstream l_ossChange;
+
+						l_ossChange << "Adjusting depth of drill cycle id='" << m_id << "' from '" 
+							<< m_params.m_depth << " to "
+							<< ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth << "\n";
+						changes.push_back(l_ossChange.str().c_str());
+					} // End if - then
+				}
+				break;
+
+			default:
+				break;
+		} // End switch
+	} // End for
+
+	return(changes);
+
+} // End DesignRulesAdjustment() method
+
+
+
