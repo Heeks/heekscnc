@@ -470,24 +470,13 @@ void CCuttingTool::OnEditString(const wxChar* str){
  */
 int CCuttingTool::FindCuttingTool( const int tool_number )
 {
-        /* Can't make this work.  Need to figure out why */
-        for (HeeksObj *ob = heeksCAD->GetFirstObject(); ob != NULL; ob = heeksCAD->GetNextObject())
-        {
-                if (ob->GetType() != CuttingToolType) continue;
+	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
+	{
+                if (l_itSymbol->first != CuttingToolType) continue;
 
-                if (((CCuttingTool *) ob)->m_tool_number == tool_number)
-                {
-                        return(ob->m_id);
-                } // End if - then
-        } // End for
-
-        // This is a hack but it works.  As long as we don't get more than 100 tools in the holder.
-        for (int id=1; id<100; id++)
-        {
-                HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, id );
-                if (! ob) continue;
-
-                if (((CCuttingTool *) ob)->m_tool_number == tool_number)
+		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
+                if ((ob != NULL) && (((CCuttingTool *) ob)->m_tool_number == tool_number))
                 {
                         return(ob->m_id);
                 } // End if - then
