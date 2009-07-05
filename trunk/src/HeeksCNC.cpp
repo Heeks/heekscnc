@@ -364,13 +364,19 @@ static void DesignRulesAdjustmentMenuCallback(wxCommandEvent &event)
 {
 	std::list<wxString> changes;
 
-	HeeksObj *obj;
-	for (obj = heeksCAD->GetFirstObject(); obj != NULL; obj = heeksCAD->GetNextObject())
+	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+
+	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin();
+		l_itSymbol != all_symbols.end(); l_itSymbol++)
 	{
-		if (COp::IsAnOperation( obj->GetType() ))
+		if (COp::IsAnOperation( l_itSymbol->first ))
 		{
-			std::list<wxString> change = ((COp *)obj)->DesignRulesAdjustment();
-			std::copy( change.begin(), change.end(), std::inserter( changes, changes.end() ));
+			HeeksObj *obj = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
+			if (obj != NULL)
+			{
+				std::list<wxString> change = ((COp *)obj)->DesignRulesAdjustment();
+				std::copy( change.begin(), change.end(), std::inserter( changes, changes.end() ));
+			} // End if - then
 		} // End if - then
 	} // End for
 
@@ -710,6 +716,46 @@ wxString CHeeksCNCApp::GetResFolder()
 #endif
 }
 
+CHeeksCNCApp::Symbols_t CHeeksCNCApp::GetAllChildSymbols( const CHeeksCNCApp::Symbol_t & parent )
+{
+	Symbols_t results;
+
+	HeeksObj *obj = heeksCAD->GetIDObject( parent.first, parent.second );
+	if (obj != NULL)
+	{
+		results.push_back( Symbol_t(obj->GetType(), obj->m_id) );
+
+		if (obj->GetNumChildren() > 0)
+		{
+			for (HeeksObj *child = obj->GetFirstChild(); child != NULL; child = obj->GetNextChild())
+			{
+				Symbols_t children = GetAllChildSymbols( Symbol_t( child->GetType(), child->m_id ) );
+				std::copy( children.begin(), children.end(), std::inserter( results, results.end() ) );
+			} // End for
+		} // End if - then
+	} // End if - then
+
+	return(results);	
+
+} // End GetAllChildSymbols() method
+
+
+CHeeksCNCApp::Symbols_t CHeeksCNCApp::GetAllSymbols()
+{
+	Symbols_t results;
+
+	for (HeeksObj *obj = heeksCAD->GetFirstObject(); obj != NULL; obj = heeksCAD->GetNextObject())
+	{
+		Symbols_t children = GetAllChildSymbols( Symbol_t( obj->GetType(), obj->m_id ) );
+		std::copy( children.begin(), children.end(), std::inserter( results, results.end() ) );
+	} // End if - then
+
+	return(results);	
+
+} // End GetAllChildSymbols() method
+
+
+
 
 class MyApp : public wxApp
 {
@@ -727,6 +773,7 @@ class MyApp : public wxApp
    return true;
  
  }
+
 
  DECLARE_APP(MyApp)
  
