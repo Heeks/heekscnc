@@ -418,7 +418,8 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 	} // End for
 
 	CCounterBore::Symbols_t cuttingToolsThatMatchCircles;
-	intersections = CCounterBore::FindAllLocations( symbols, NULL );
+	CCounterBore counterbore( symbols, -1 );
+	intersections = counterbore.FindAllLocations( symbols, NULL );
 
 	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
 	{
