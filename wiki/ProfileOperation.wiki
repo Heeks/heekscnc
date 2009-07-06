@@ -72,5 +72,5 @@ If ticked "end point" can be specified.
 ===end point===
 This will cut the end of the sketch off, after the point on the sketch nearest this point.
 
-== Sort Sketches ==
+=== sort sketches ===
     If this is 'true', the list of locations at which profiles should be machined is sorted.  The sorting algorithm finds the nearest starting point to (0,0,0) and then, from there, the closest point to the previous profile's end point.
