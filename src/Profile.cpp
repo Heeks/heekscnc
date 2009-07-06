@@ -809,11 +809,10 @@ wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starti
 			{
 				HeeksObj* one_curve_sketch = *It;
 				l_ossPythonCode << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y).c_str();
-				delete one_curve_sketch;
-
 				CBox bbox;
 				one_curve_sketch->GetBox(bbox);
 				starting_points.push_back( CDrilling::Point3d( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
+				delete one_curve_sketch;
 			}
 		}
 		else
