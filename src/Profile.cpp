@@ -35,6 +35,7 @@ CProfileParams::CProfileParams()
 	m_end_given = false;
 	m_start[0] = m_start[1] = m_start[2] = 0.0;
 	m_end[0] = m_end[1] = m_end[2] = 0.0;
+	m_sort_sketches = 1;
 }
 
 void CProfileParams::set_initial_values()
@@ -71,6 +72,7 @@ static void on_set_start_given(bool value, HeeksObj* object){((CProfile*)object)
 static void on_set_start(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_start, vt, 3*sizeof(double));}
 static void on_set_end_given(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_given = value; heeksCAD->RefreshProperties();}
 static void on_set_end(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_end, vt, 3*sizeof(double));}
+static void on_set_sort_sketches(const int value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_sort_sketches = value;}
 
 void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
 {
@@ -95,7 +97,20 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		if(m_start_given)list->push_back(new PropertyVertex(_("start point"), m_start, parent, on_set_start));
 		list->push_back(new PropertyCheck(_("use end point"), m_end_given, parent, on_set_end_given));
 		if(m_end_given)list->push_back(new PropertyVertex(_("end point"), m_end, parent, on_set_end));
+
 	}
+	else
+	{
+		std::list< wxString > choices;
+
+		choices.push_back(_("Respect existing order"));	// Must be 'false' (0)
+		choices.push_back(_("True"));			// Must be 'true' (non-zero)
+
+		int choice = int(m_sort_sketches);
+		list->push_back(new PropertyChoice(_("sort_sketches"), choices, choice, parent, on_set_sort_sketches));
+	} // End if - else
+
+
 }
 
 void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
@@ -132,6 +147,10 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 		element->SetDoubleAttribute("endy", m_end[1]);
 		element->SetDoubleAttribute("endz", m_end[2]);
 	}
+
+	std::ostringstream l_ossValue;
+	l_ossValue << m_sort_sketches;
+	element->SetAttribute("sort_sketches", l_ossValue.str().c_str());
 }
 
 void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -155,6 +174,14 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("endx", &m_end[0]);
 	pElem->Attribute("endy", &m_end[1]);
 	pElem->Attribute("endz", &m_end[2]);
+	if (pElem->Attribute("sort_sketches"))
+	{
+		m_sort_sketches = atoi(pElem->Attribute("sort_sketches"));
+	} // End if - then
+	else
+	{
+		m_sort_sketches = 1;	// Default.
+	} // End if - else
 }
 
 #define AUTO_ROLL_ON_OFF_SIZE 2.0
@@ -661,11 +688,102 @@ void CProfile::AppendTextToProgram()
 } // End AppendTextToProgram() method
 
 
+
+struct sort_sketches : public std::binary_function< const int, const int, bool >
+{
+	CDrilling::Point3d m_reference_point;
+	CProfile *m_pThis;
+
+	sort_sketches( CProfile *pThis, const CDrilling::Point3d & reference_point )
+	{
+		m_reference_point = reference_point;
+		m_pThis = pThis;
+	} // End constructor
+
+	double distance( const CDrilling::Point3d & a, const CDrilling::Point3d & b ) const
+	{
+		double dx = a.x - b.x;
+		double dy = a.y - b.y;
+		double dz = a.z - b.z;
+
+		return( sqrt( (dx * dx) + (dy * dy) + (dz * dz) ) );			
+	} // End distance() method
+
+	// Return true if dist(lhs to ref) < dist(rhs to ref)
+	bool operator()( const int lhs, const int rhs ) const
+	{
+		HeeksObj *lhsPtr = heeksCAD->GetIDObject( SketchType, lhs );
+		HeeksObj *rhsPtr = heeksCAD->GetIDObject( SketchType, rhs );
+
+		if ((lhsPtr != NULL) && (rhsPtr != NULL))
+		{
+			double x,y;
+			m_pThis->GetRollOnPos(lhsPtr, x, y );
+			CDrilling::Point3d lhsPoint( x, y, 0.0 );
+
+			m_pThis->GetRollOnPos(rhsPtr, x, y );
+			CDrilling::Point3d rhsPoint( x, y, 0.0 );
+
+			return( distance( lhsPoint, m_reference_point ) < distance( rhsPoint, m_reference_point ) );
+		} // End if - then
+		else
+		{
+			return(false);
+		} // End if - else
+	} // End operator() method
+}; // End sort_sketches() method
+
+
+
 wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starting_points )
 {
 	std::wostringstream l_ossPythonCode;
 
-	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+	// Make a local copy so that we can either sort it or leave it alone.  We don't want
+	// to affect the member list itself.
+
+	std::list<int> sketches;
+	std::copy( m_sketches.begin(), m_sketches.end(), std::inserter( sketches, sketches.begin() ) );
+
+	if (m_profile_params.m_sort_sketches)
+	{
+		std::vector<int> sorted;
+		std::copy( m_sketches.begin(), m_sketches.end(), std::inserter( sorted, sorted.begin() ) );
+		for (std::vector<int>::iterator l_itSketch = sorted.begin(); l_itSketch != sorted.end(); l_itSketch++)
+		{
+			if (l_itSketch == sorted.begin())
+			{
+				HeeksObj *ref = heeksCAD->GetIDObject( SketchType, *l_itSketch );
+				if (ref != NULL)
+				{
+					sort_sketches compare( this, CDrilling::Point3d( 0.0, 0.0, 0.0 ) );
+					std::sort( l_itSketch, sorted.end(), compare );
+				} // End if - then
+			} // End if - then
+			else
+			{
+				std::vector<int>::iterator l_itNextSketch = l_itSketch;
+				l_itNextSketch++;
+
+				if (l_itNextSketch != sorted.end())
+				{
+					HeeksObj *ref = heeksCAD->GetIDObject( SketchType, *l_itSketch );
+					if (ref != NULL)
+					{
+						double x,y;
+						GetRollOffPos( ref, x, y );
+						sort_sketches compare( this, CDrilling::Point3d( x, y, 0.0 ) );
+						std::sort( l_itNextSketch, sorted.end(), compare );
+					} // End if - then
+				} // End if - then
+			} // End if - else
+		} // End for
+
+		sketches.erase( sketches.begin(), sketches.end() );
+		std::copy( sorted.begin(), sorted.end(), std::inserter( sketches, sketches.begin() ) );
+	} // End if - then
+
+	for(std::list<int>::iterator It = sketches.begin(); It != sketches.end(); It++)
 	{
 		int sketch = *It;
 

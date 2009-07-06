@@ -21,6 +21,7 @@ class CCounterBoreParams{
 	
 public:
 	double m_diameter;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
+	int m_sort_locations;		// '1' = sort location points prior to generating GCode (to optimize paths)
 
 	void set_initial_values( const int cutting_tool_number );
 	void write_values_to_config();
@@ -165,7 +166,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	static std::vector<Point3d> FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced );
+	std::vector<Point3d> FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced ) const;
 
 };
 

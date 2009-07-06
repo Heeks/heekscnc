@@ -30,6 +30,7 @@ void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
 	CNCConfig config;
 	
 	config.Read(_T("m_diameter"), &m_diameter, (25.4 / 10));	// One tenth of an inch
+	config.Read(_T("m_sort_locations"), &m_sort_locations, 1);
 
 	if ((cutting_tool_number > 0) && (CCuttingTool::FindCuttingTool( cutting_tool_number )))
 	{
@@ -48,15 +49,28 @@ void CCounterBoreParams::write_values_to_config()
 
 	CNCConfig config;
 	config.Write(_T("m_diameter"), m_diameter);
+	config.Write(_T("m_sort_locations"), m_sort_locations);
 }
 
 
 static void on_set_diameter(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_diameter = value;}
+static void on_set_sort_locations(int value, HeeksObj* object){((CCounterBore*)object)->m_params.m_sort_locations = value;}
 
 
 void CCounterBoreParams::GetProperties(CCounterBore* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
+
+	{ // Begin choice scope
+		std::list< wxString > choices;
+
+		choices.push_back(_("Respect existing order"));	// Must be 'false' (0)
+		choices.push_back(_("True"));			// Must be 'true' (non-zero)
+
+		int choice = int(m_sort_locations);
+		list->push_back(new PropertyChoice(_("sort_locations"), choices, choice, parent, on_set_sort_locations));
+	} // End choice scope
+
 }
 
 void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
@@ -65,11 +79,16 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
 	element->SetDoubleAttribute("diameter", m_diameter);
+
+	std::ostringstream l_ossValue;
+	l_ossValue.str(""); l_ossValue << m_sort_locations;
+	element->SetAttribute("sort_locations", l_ossValue.str().c_str());
 }
 
 void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
+	if (pElem->Attribute("sort_locations")) m_sort_locations = atoi(pElem->Attribute("sort_locations"));
 }
 
 /**
@@ -339,6 +358,34 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 }
 
 
+struct sort_points_by_distance : public std::binary_function< const CCounterBore::Point3d &, const CCounterBore::Point3d &, bool >
+{
+	sort_points_by_distance( const CCounterBore::Point3d & reference_point )
+	{
+		m_reference_point = reference_point;
+	} // End constructor
+
+	CCounterBore::Point3d m_reference_point;
+
+	double distance( const CCounterBore::Point3d & a, const CCounterBore::Point3d & b ) const
+	{
+		double dx = a.x - b.x;
+		double dy = a.y - b.y;
+		double dz = a.z - b.z;
+
+		return( sqrt( (dx * dx) + (dy * dy) + (dz * dz) ) );			
+	} // End distance() method
+
+	// Return true if dist(lhs to ref) < dist(rhs to ref)
+	bool operator()( const CCounterBore::Point3d & lhs, const CCounterBore::Point3d & rhs ) const
+	{
+		return( distance( lhs, m_reference_point ) < distance( rhs, m_reference_point ) );
+	} // End operator() overload
+}; // End sort_points_by_distance structure definition.
+
+
+
+
 /**
  * 	This method looks through the symbols in the list.  If they're PointType objects
  * 	then the object's location is added to the result set.  If it's a circle object
@@ -351,7 +398,7 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
  *	size holes were drilled so that we can make an intellegent selection for the
  *	socket head.
  */
-std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced )
+std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced ) const
 {
 	std::vector<CCounterBore::Point3d> locations;
 
@@ -463,6 +510,41 @@ std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounte
 			} // End if - then
 		} // End if - then
         } // End for
+
+	if (m_params.m_sort_locations)
+	{
+		// This counter bore object has the 'sort' option turned on.  Take the first point (because we don't know any better) and
+		// sort the points in order of distance from each preceding point.  It may not be the most efficient arrangement
+		// but it's better than random.  If we were really eager we would allow the starting point to be based on the
+		// previous NC operation's ending point.
+		//
+		for (std::vector<Point3d>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
+		{
+			if (l_itPoint == locations.begin())
+			{
+				// It's the first point.  Reference this to zero so that the order makes some sense.  It would
+				// be nice, eventually, to have this first reference point be the last point produced by the
+				// previous NC operation.  i.e. where the last operation left off, we should start drilling close
+				// by.
+
+				sort_points_by_distance compare( Point3d( 0.0, 0.0, 0.0 ) );
+				std::sort( locations.begin(), locations.end(), compare );
+			} // End if - then
+			else
+			{
+				// We've already begun.  Just sort based on the previous point's location.	
+				std::vector<Point3d>::iterator l_itNextPoint = l_itPoint;
+				l_itNextPoint++;
+
+				if (l_itNextPoint != locations.end())
+				{
+					sort_points_by_distance compare( *l_itPoint );
+					std::sort( l_itNextPoint, locations.end(), compare );
+				} // End if - then
+			} // End if - else
+		} // End for
+	} // End if - then
+
 
 	return(locations);
 } // End FindAllLocations() method
