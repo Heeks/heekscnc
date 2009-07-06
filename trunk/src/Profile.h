@@ -27,6 +27,7 @@ public:
 	bool m_end_given;
 	double m_start[3];
 	double m_end[3];
+	int m_sort_sketches;
 
 	CProfileParams();
 
