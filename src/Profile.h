@@ -10,6 +10,8 @@
 #include "geometry.h"
 #include "Drilling.h"
 
+#include <vector>
+
 class CProfile;
 
 class CProfileParams{
@@ -64,7 +66,7 @@ public:
 	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve );
 	wxString AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY);
 	void AppendTextToProgram();
-	wxString AppendTextToProgram( std::list<CDrilling::Point3d> & starting_points );
+	wxString AppendTextToProgram( std::vector<CDrilling::Point3d> & starting_points );
 	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
 	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 

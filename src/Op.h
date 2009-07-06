@@ -39,7 +39,7 @@ public:
 	// profile operation as a reference then it should not have a depth value that is deeper
 	// than the profile operation.
 	// The list of strings provides a description of what was changed.
-	virtual std::list<wxString> DesignRulesAdjustment() { std::list<wxString> empty; return(empty); }
+	virtual std::list<wxString> DesignRulesAdjustment(const bool apply_changes) { std::list<wxString> empty; return(empty); }
 };
 
 #endif

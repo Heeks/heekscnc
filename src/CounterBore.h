@@ -13,7 +13,7 @@
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
 #include <list>
-#include <set>
+#include <vector>
 
 class CCounterBore;
 
@@ -126,7 +126,7 @@ public:
 		m_params.set_initial_values( cutting_tool_number );
 
 		std::list<int> drillbits;
-		std::set<CCounterBore::Point3d> locations = FindAllLocations( symbols, &drillbits );
+		std::vector<CCounterBore::Point3d> locations = FindAllLocations( symbols, &drillbits );
 		if (drillbits.size() > 0)
 		{
 			// We found some drilling objects amongst the symbols. Use the diameter of
@@ -165,7 +165,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	static std::set<Point3d> FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced );
+	static std::vector<Point3d> FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced );
 
 };
 

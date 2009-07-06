@@ -109,7 +109,7 @@ void CAdaptiveParams::set_initial_values(
 					break;
 
 				case DrillingType: {
-					std::set<CDrilling::Point3d> locations;
+					std::vector<CDrilling::Point3d> locations;
 					locations = ((CDrilling *)ref)->FindAllLocations();
 					if (locations.size() == 1)
 					{

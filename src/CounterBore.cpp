@@ -19,6 +19,8 @@
 #include "Drilling.h"
 
 #include <sstream>
+#include <algorithm>
+#include <vector>
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -103,8 +105,8 @@ void CCounterBore::AppendTextToProgram()
 				return;
 			} // End if - then
 
-			std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
-			for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+			std::vector<Point3d> locations = FindAllLocations( m_symbols, NULL );
+			for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{   
                 
 				ss << "flush_nc()\ncircular_pocket( "
@@ -193,8 +195,8 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 		// For all coordinates that relate to these reference objects, draw the graphics that represents
 		// both a drilling hole and a counterbore.
 
-		std::set<Point3d> locations = FindAllLocations( m_symbols, NULL );
-		for (std::set<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+		std::vector<Point3d> locations = FindAllLocations( m_symbols, NULL );
+		for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
 			std::list< CCounterBore::Point3d > circle = PointsAround( *l_itLocation, m_params.m_diameter / 2, 10 );
 
@@ -342,17 +344,16 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
  * 	then the object's location is added to the result set.  If it's a circle object
  * 	that doesn't intersect any other element (selected) then add its centre to
  * 	the result set.  Finally, find the intersections of all of these elements and
- * 	add the intersection points to the result set.  We use std::set<Point3d> so that
- * 	we end up with no duplicate points.
+ * 	add the intersection points to the result set. 
  *
  *	If any of the selected objects are DrillingType objects then see if they refer
  *	to CuttingTool objects.  If so, remember which ones.  We may want to see what
  *	size holes were drilled so that we can make an intellegent selection for the
  *	socket head.
  */
-std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced )
+std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced )
 {
-	std::set<CCounterBore::Point3d> locations;
+	std::vector<CCounterBore::Point3d> locations;
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
         // a drilling cycle.
@@ -370,7 +371,10 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
 			{
 				double pos[3];
 				obj->GetStartPoint(pos);
-				locations.insert( CCounterBore::Point3d( pos[0], pos[1], pos[2] ) );
+				if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+				{
+					locations.push_back( Point3d( pos[0], pos[1], pos[2] ) );
+				} // End if - then
 				continue;	// No need to intersect a point with anything.
 			} // End if - then
 		} // End if - then		
@@ -389,11 +393,13 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
 					pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_cutting_tool_number );
 				} // End if - then
 
-				// std::set<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations( ((CDrilling *)lhsPtr)->m_symbols );
-				std::set<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
-				for (std::set<CDrilling::Point3d>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
+				std::vector<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
+				for (std::vector<CDrilling::Point3d>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
 				{
-					locations.insert( CCounterBore::Point3d( l_itHole->x, l_itHole->y, l_itHole->z ) );
+					if (std::find( locations.begin(), locations.end(), Point3d( l_itHole->x, l_itHole->y, l_itHole->z ) ) == locations.end())
+					{
+						locations.push_back( CCounterBore::Point3d( l_itHole->x, l_itHole->y, l_itHole->z ) );
+					} // End if - then
 				} // End for
 			} // End if - then
 		} // End if - then
@@ -427,7 +433,10 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
                                         intersection.z = *(results.begin());
                                         results.erase(results.begin());
 
-                                        locations.insert(intersection);
+					if (std::find( locations.begin(), locations.end(), intersection ) == locations.end())
+					{
+                                        	locations.push_back(intersection);
+					} // End if - then
                                 } // End while
                         } // End if - then
                 } // End for
@@ -445,7 +454,10 @@ std::set<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBo
 					double pos[3];
 					if (heeksCAD->GetArcCentre( lhsPtr, pos ))
 					{
-						locations.insert( CCounterBore::Point3d( pos[0], pos[1], pos[2] ) );
+						if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+						{
+							locations.push_back( Point3d( pos[0], pos[1], pos[2] ) );
+						} // End if - then
 					} // End if - then
 				} // End if - then
 			} // End if - then

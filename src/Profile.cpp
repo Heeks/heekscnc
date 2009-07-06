@@ -652,7 +652,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 void CProfile::AppendTextToProgram()
 {
-	std::list<CDrilling::Point3d> starting_points;
+	std::vector<CDrilling::Point3d> starting_points;
 	wxString python_code = AppendTextToProgram( starting_points );
 
 	CDepthOp::AppendTextToProgram();
@@ -661,7 +661,7 @@ void CProfile::AppendTextToProgram()
 } // End AppendTextToProgram() method
 
 
-wxString CProfile::AppendTextToProgram( std::list<CDrilling::Point3d> & starting_points )
+wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starting_points )
 {
 	std::wostringstream l_ossPythonCode;
 
