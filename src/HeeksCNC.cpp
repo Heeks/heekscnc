@@ -301,7 +301,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 {
-	std::set<CDrilling::Point3d> intersections;
+	std::vector<CDrilling::Point3d> intersections;
 	CDrilling::Symbols_t symbols;
 	CDrilling::Symbols_t cuttingTools;
 	int cutting_tool_number = 0;
@@ -323,8 +323,9 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 
 	double depth = -1;
 	CDrilling::Symbols_t cuttingToolsThatMatchCircles;
+	CDrilling drill( symbols, -1, -1 );
 
-	intersections = CDrilling::FindAllLocations( symbols );
+	intersections = drill.FindAllLocations( symbols );
 
 	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
 	{
@@ -374,7 +375,7 @@ static void DesignRulesAdjustmentMenuCallback(wxCommandEvent &event)
 			HeeksObj *obj = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
 			if (obj != NULL)
 			{
-				std::list<wxString> change = ((COp *)obj)->DesignRulesAdjustment();
+				std::list<wxString> change = ((COp *)obj)->DesignRulesAdjustment(false);
 				std::copy( change.begin(), change.end(), std::inserter( changes, changes.end() ));
 			} // End if - then
 		} // End if - then
@@ -396,7 +397,7 @@ static void DesignRulesAdjustmentMenuCallback(wxCommandEvent &event)
 
 static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 {
-	std::set<CCounterBore::Point3d> intersections;
+	std::vector<CCounterBore::Point3d> intersections;
 	CCounterBore::Symbols_t symbols;
 	CCounterBore::Symbols_t cuttingTools;
 	int cutting_tool_number = 0;

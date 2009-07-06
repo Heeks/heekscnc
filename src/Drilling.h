@@ -12,7 +12,7 @@
 #include "Op.h"
 #include "HeeksCNCTypes.h"
 #include <list>
-#include <set>
+#include <vector>
 
 class CDrilling;
 
@@ -23,6 +23,7 @@ public:
 	double m_dwell;			// If dwell_bottom is non-zero then we're using the G82 drill cycle rather than G83 peck drill cycle.  This is the 'P' word
 	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
 	double m_peck_depth;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
+	int    m_sort_drilling_locations;	// Perform a location-based sort before generating GCode?
 
 	// The following line is the prototype setup in the Python routines for the drill sequence.
 	// def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
@@ -113,6 +114,11 @@ public:
 
 public:
 	//	These are references to the CAD elements whose position indicate where the Drilling Cycle begins.
+	//	If the m_params.m_sort_drilling_locations is false then the order of symbols in this list should
+	//	be respected when generating GCode.  We will, eventually, allow a user to sort the sub-elements
+	//	visually from within the main user interface.  When this occurs, the change in order should be
+	//	reflected in the ordering of symbols in the m_symbols list.
+	
 	Symbols_t m_symbols;
 	CDrillingParams m_params;
 
@@ -145,10 +151,10 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	static std::set<Point3d> FindAllLocations( const CDrilling::Symbols_t & symbols );
-	std::set<Point3d> FindAllLocations() const;
+	std::vector<Point3d> FindAllLocations( const CDrilling::Symbols_t & symbols ) const;
+	std::vector<Point3d> FindAllLocations() const;
 
-	std::list<wxString> DesignRulesAdjustment();
+	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 };
 
 
