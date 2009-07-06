@@ -10,6 +10,11 @@ The idea behind this object comes from a python utility produced by John Thornto
 
 The CounterBore operation accepts all the same object selections as does a DrillingCycle operation.  i.e. it accepts locations based on selected point objects, selected standalone circle objects (standalone in that they must not intersect other selected objects) and other intersecting objects.  Finally, the CounterBore operation can reference a DrillingCycle object.
 
+= Parameters =
+
+== Sort Locations ==
+    If this is 'true', the list of locations at which counterbores should be machined is sorted.  The sorting algorithm finds the nearest point to (0,0,0) and then, from there, the closest point to the previous one.
+
 = Workflow =
 
 - Select or define a cutting tool object to represent the drill bit used to drill the holes.
