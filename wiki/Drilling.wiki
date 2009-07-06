@@ -47,3 +47,6 @@ Drilling cycles will be located at an aggregation of;
     The dwell is the time (in seconds) for which the drill should remain at the bottom of the hole to break all the 'stringers'.  If the 'peck_depth' value is zero and this dwell value is positive then the generted GCode will use the G82 (drill with dwell) cycle.
 
     If neither the peck depth or dwell values has a positive value then the generated GCode will include the G81 drilling command.
+
+== Sort Drill Locations ==
+    If this is 'true', the list of locations at which holes should be drilled is sorted.  The sorting algorithm finds the nearest point to (0,0,0) and then, from there, the closest point to the previous one.
