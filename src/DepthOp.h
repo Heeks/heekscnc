@@ -50,6 +50,8 @@ public:
 	void ReadBaseXML(TiXmlElement* element);
 
 	virtual void AppendTextToProgram();
+
+	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 };
 
 #endif
