@@ -657,17 +657,24 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 		{
 			// The drill bit we've chosen can't cut as deep as we've setup to go.
 
-			std::wostringstream l_ossChange;
-
-			l_ossChange << "Adjusting depth of drill cycle id='" << m_id << "' from '" 
-				<< m_params.m_depth << " to "
-				<< pDrill->m_params.m_cutting_edge_height << "\n";
-			changes.push_back(l_ossChange.str().c_str());
-
 			if (apply_changes)
 			{
+				std::wostringstream l_ossChange;
+
+				l_ossChange << "Adjusting depth of drill cycle id='" << m_id << "' from '" 
+					<< m_params.m_depth / theApp.m_program->m_units << " to "
+					<< pDrill->m_params.m_cutting_edge_height / theApp.m_program->m_units << "\n";
+				changes.push_back(l_ossChange.str().c_str());
+
 				m_params.m_depth = pDrill->m_params.m_cutting_edge_height;
 			} // End if - then
+			else
+			{
+				std::wostringstream l_ossChange;
+
+				l_ossChange << "WARNING: Drilling (id=" << m_id << ").  Can't drill hole " << m_params.m_depth / theApp.m_program->m_units << " when the drill bit's cutting length is only " << pDrill->m_params.m_cutting_edge_height << " long\n";
+				changes.push_back(l_ossChange.str().c_str());
+			} // End if - else
 		} // End if - then
 	} // End if - then
 
@@ -684,8 +691,8 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 						std::wostringstream l_ossChange;
 
 						l_ossChange << "Adjusting depth of drill cycle id='" << m_id << "' from '" 
-							<< m_params.m_depth << " to "
-							<< ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth << "\n";
+							<< m_params.m_depth / theApp.m_program->m_units << " to "
+							<< ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth  / theApp.m_program->m_units<< "\n";
 						changes.push_back(l_ossChange.str().c_str());
 
 						if (apply_changes)
