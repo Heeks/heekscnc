@@ -13,6 +13,9 @@
 #include "Op.h"
 #include "HeeksCNCTypes.h"
 
+#include <vector>
+#include <algorithm>
+
 class CCuttingTool;
 
 class CCuttingToolParams{
@@ -121,6 +124,7 @@ public:
         void OnEditString(const wxChar* str);
 
 	static int FindCuttingTool( const int tool_number );
+	static std::vector< std::pair< int, wxString > > FindAllCuttingTools();
 	wxString GenerateMeaningfulName() const;
 	wxString ResetTitle();
 	wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 ) const;

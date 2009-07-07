@@ -11,10 +11,14 @@
 #include "interface/PropertyInt.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyCheck.h"
+#include "interface/PropertyChoice.h"
 #include "interface/Tool.h"
 #include "tinyxml/tinyxml.h"
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
+
+#include <iterator>
+#include <vector>
 
 void COp::WriteBaseXML(TiXmlElement *element)
 {
@@ -45,11 +49,19 @@ void COp::ReadBaseXML(TiXmlElement* element)
 	{
 		m_execution_order = atoi(element->Attribute("execution_order"));
 	} // End if - then
+	else
+	{
+		m_execution_order = 0;
+	} // End if - else
 
 	if (element->Attribute("cutting_tool_number") != NULL)
 	{
 		m_cutting_tool_number = atoi(element->Attribute("cutting_tool_number"));
 	} // End if - then
+	else
+	{
+		m_cutting_tool_number = 0;
+	} // End if - else
 
 	HeeksObj::ReadBaseXML(element);
 }
@@ -60,31 +72,12 @@ static void on_set_execution_order(int value, HeeksObj* object){((COp*)object)->
 
 static void on_set_cutting_tool_number(int value, HeeksObj* object)
 {
-        // If they've set a negative or zero value then they must want to disassociate this
-        // from a tool.  This just means they won't get prompted to change tools in the GCode.
-        if (value <= 0)
-        {
-                ((COp *)object)->m_cutting_tool_number = value;
-		heeksCAD->WasModified(object);
-                return;
-        }
+	std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
 
-        // Look through all objects to find a CuttingTool object whose tool number
-        // matches this one.  If none are found then let the operator know.
-
-        int id = 0;
-        if ((id=CCuttingTool::FindCuttingTool( value )) > 0)
-        {
-                HeeksObj* ob = heeksCAD->GetIDObject( CuttingToolType, id );
-                if ((ob != NULL) && (ob->GetType() == CuttingToolType))
-                {
-                	((COp *)object)->m_cutting_tool_number = value;
-			heeksCAD->WasModified(object);
-                        return;
-                } // End if - then
-        } // End for
-
-        wxMessageBox(_T("This operation has not been assigned a cutting tool yet. Set the tool number to zero (0) if no tool table functionality is required for this operation. Otherwise, define a CuttingTool object with its own tool number before referring this operation to it."));
+	if ((value >= int(0)) && (value <= int(tools.size()-1)))
+	{
+                ((COp *)object)->m_cutting_tool_number = tools[value].first;	// Convert the choice offset to the tool number for that choice
+	} // End if - then
 } // End on_set_cutting_tool_number() routine
 
 
@@ -93,7 +86,26 @@ void COp::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyString(_("comment"), m_comment, this, on_set_comment));
 	list->push_back(new PropertyCheck(_("active"), m_active, this, on_set_active));
 	list->push_back(new PropertyInt(_("execution_order"), m_execution_order, this, on_set_execution_order));
-	list->push_back(new PropertyInt(_("cutting_tool_number"), m_cutting_tool_number, this, on_set_cutting_tool_number));
+
+	{
+		std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
+
+		printf("Got %d tools\n", tools.size());
+
+		int choice = 0;
+                std::list< wxString > choices;
+		for (std::vector< std::pair< int, wxString > >::size_type i=0; i<tools.size(); i++)
+		{
+                	choices.push_back(tools[i].second);
+
+			if (m_cutting_tool_number == tools[i].first)
+			{
+                		choice = int(i);
+			} // End if - then
+		} // End for
+
+                list->push_back(new PropertyChoice(_("cutting tool"), choices, choice, this, on_set_cutting_tool_number));
+        }
 
 	HeeksObj::GetProperties(list);
 }

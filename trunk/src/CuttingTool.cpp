@@ -393,7 +393,7 @@ void CCuttingTool::AppendTextToProgram()
 static void on_set_tool_number(const int value, HeeksObj* object){((CCuttingTool*)object)->m_tool_number = value;}
 
 /**
-	NOTE: The m_title member is a special case.  The HeeksObj code looks for a 'GetShortDesc()' method.  If found, it
+	NOTE: The m_title member is a special case.  The HeeksObj code looks for a 'GetShortString()' method.  If found, it
 	adds a Property called 'Object Title'.  If the value is changed, it tries to call the 'OnEditString()' method.
 	That's why the m_title value is not defined here
  */
@@ -485,6 +485,31 @@ int CCuttingTool::FindCuttingTool( const int tool_number )
         return(-1);
 
 } // End FindCuttingTool() method
+
+
+std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
+{
+	std::vector< std::pair< int, wxString > > tools;
+
+	// Always add a value of zero to allow for an absense of cutting tool use.
+	tools.push_back( std::make_pair(0, _T("No Cutting Tool") ) );
+	
+	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
+	{
+                if (l_itSymbol->first != CuttingToolType) continue;
+
+		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
+                if (ob != NULL)
+                {
+			tools.push_back( std::make_pair(((CCuttingTool *) ob)->m_tool_number, ((CCuttingTool*) ob)->GetShortString() ) );
+                } // End if - then
+        } // End for
+
+        return(tools);
+
+} // End FindCuttingTool() method
+
 
 
 /**
