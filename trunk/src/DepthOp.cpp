@@ -231,3 +231,35 @@ void CDepthOp::AppendTextToProgram()
 	theApp.m_program_canvas->AppendText(_T("flush_nc()\n"));
 }
 
+
+std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
+{
+
+	std::list<wxString> changes;
+
+	if (m_depth_op_params.m_start_depth <= m_depth_op_params.m_final_depth)
+	{
+		std::wostringstream l_ossChange;
+
+		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") has poor start and final depths.  Can't change this setting automatically\n";
+		changes.push_back(l_ossChange.str().c_str());
+	} // End if - then
+
+	if (m_depth_op_params.m_start_depth > m_depth_op_params.m_clearance_height)
+	{
+		std::wostringstream l_ossChange;
+
+		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ").  Clearance height is below start depth\n";
+		changes.push_back(l_ossChange.str().c_str());
+
+		if (apply_changes)
+		{
+			l_ossChange << "Depth Operation (id=" << m_id << ").  Raising clearance height up to start depth (+5 mm)\n";
+			m_depth_op_params.m_clearance_height = m_depth_op_params.m_start_depth + 5;
+		} // End if - then
+	} // End if - then
+
+	return(changes);
+
+} // End DesignRulesAdjustment() method
+

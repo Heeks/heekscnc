@@ -48,4 +48,7 @@ public:
 	void AppendTextToProgram();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+
+	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
+
 };
