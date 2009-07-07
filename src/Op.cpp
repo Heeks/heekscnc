@@ -90,8 +90,6 @@ void COp::GetProperties(std::list<Property *> *list)
 	{
 		std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
 
-		printf("Got %d tools\n", tools.size());
-
 		int choice = 0;
                 std::list< wxString > choices;
 		for (std::vector< std::pair< int, wxString > >::size_type i=0; i<tools.size(); i++)
