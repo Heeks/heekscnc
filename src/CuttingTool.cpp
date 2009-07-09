@@ -90,7 +90,11 @@ static void on_set_type(int value, HeeksObj* object)
 
 static void ResetParametersToReasonableValues(HeeksObj* object)
 {
+#ifdef UNICODE
 	std::wostringstream l_ossChange;
+#else
+    std::ostringstream l_ossChange;
+#endif
 
 	if (((CCuttingTool*)object)->m_params.m_tool_length_offset != (5 * ((CCuttingTool*)object)->m_params.m_diameter))
 	{
@@ -522,7 +526,12 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
  */
 wxString CCuttingTool::FractionalRepresentation( const double original_value, const int max_denominator /* = 64 */ ) const
 {
+#ifdef UNICODE
 	std::wostringstream l_ossValue;
+#else
+    std::ostringstream l_ossValue;
+#endif
+
 	double _value(original_value);
 	// double near_enough = double(double(1.0) / (2.0 * double(max_denominator)));
 	double near_enough = 0.00001;
@@ -567,7 +576,11 @@ wxString CCuttingTool::FractionalRepresentation( const double original_value, co
  */
 wxString CCuttingTool::GenerateMeaningfulName() const
 {
+#ifdef UNICODE
 	std::wostringstream l_ossName;
+#else
+    std::ostringstream l_ossName;
+#endif
 	
 	if (theApp.m_program->m_units == 1)
 	{
@@ -616,7 +629,12 @@ wxString CCuttingTool::GenerateMeaningfulName() const
  */
 wxString CCuttingTool::ResetTitle()
 {
+#ifdef UNICODE
 	std::wostringstream l_ossUnits;
+#else
+    std::ostringstream l_ossUnits;
+#endif
+
 	l_ossUnits << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
 
 	if ( (m_title == GetTypeString()) ||
@@ -630,7 +648,11 @@ wxString CCuttingTool::ResetTitle()
 		m_title = GenerateMeaningfulName();
 		heeksCAD->WasModified(this);
 
+#ifdef UNICODE
 		std::wostringstream l_ossChange;
+#else
+		std::ostringstream l_ossChange;
+#endif
 		l_ossChange << "Changing name to " << m_title.c_str() << "\n";
 		return( l_ossChange.str().c_str() );
 	} // End if - then
