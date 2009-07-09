@@ -126,6 +126,8 @@ bool COp::IsAnOperation(int object_type)
 		case ZigZagType:
 		case AdaptiveType:
 		case DrillingType:
+		case CounterBoreType:
+		case TurnRoughType:
 			return true;
 		default:
 			return false;		

@@ -1069,6 +1069,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\TurnRough.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\TurnRough.h"
+			>
+		</File>
+		<File
 			RelativePath=".\ZigZag.cpp"
 			>
 		</File>

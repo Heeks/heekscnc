@@ -35,7 +35,7 @@ endif
 
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL ${RIP} ${KURVE_FLAGS}
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o Construction.o Finite.o kurve.o  Matrix.o offset.o PythonInterface.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Construction.o Finite.o kurve.o  Matrix.o offset.o PythonInterface.o
 
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
@@ -344,6 +344,23 @@ CounterBore.o: CounterBore.cpp \
 		CuttingTool.h
 	$(CC) -c CounterBore.cpp ${CCFLAGS} -o $@
 
+TurnRough.o: TurnRough.cpp \
+		HeeksCNCTypes.h \
+		DepthOp.h \
+		TurnRough.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		Program.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/interface/PropertyVertex.h \
+		${HEEKSCADPATH}/interface/PropertyCheck.h \
+		${HEEKSCADPATH}/interface/PropertyString.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		${HEEKSCADPATH}/interface/Tool.h
+	$(CC) -c TurnRough.cpp ${CCFLAGS} -o $@
+		
 Construction.o: $(KURVE_DIR)/geometry/Construction.cpp \
 		$(KURVE_DIR)/geometry/geometry.h
 	$(CC) -c $(KURVE_DIR)/geometry/Construction.cpp ${CCFLAGS} -o $@
