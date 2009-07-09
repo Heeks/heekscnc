@@ -1,0 +1,60 @@
+#summary Rough Turning Operation
+
+
+This is a not ready to use yet.
+
+
+
+Select a 2D sketch representing the shape to be machined.
+
+Press
+
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/opprofile.png
+
+Edit the properties in the "properties" window ( see below for descriptions ).
+
+Press
+
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
+
+Look at the toolpath.
+
+
+To change parameters, select the rough turning operation, in the "objects" window and edit the properties in the "Properties" window.
+
+Then press again
+
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
+
+= Properties =
+A Rough Turning operation has all common operation properties, see here:
+http://code.google.com/p/heekscnc/wiki/Operations
+
+===cutter radius===
+The radius of the cutting part of the tool
+
+===driven point===
+This will allow you to choose where the driven point of the tool is defined. 9 different positions.
+
+===front angle===
+The angle at the front of the tool ( diagram needed here )
+
+===tool angle===
+The angle of the tip of the tool ( diagram needed here )
+
+===back angle===
+The angle behind the tool ( diagram needed here )
+
+===outside===
+Specify if the machining will be done on the outside or inside of the bar.
+
+===front===
+Specify if the machining will be done on the front or back of the bar.
+
+===face===
+Specify if the cuts will be in Z ( horizontal ) or in X ( vertical )
+
+===clearance===
+the distance around the bar that the tool must not rapid in; the moves must become feed moves at this distance before starting to cut into the bar.
+
+We will also need to specify the size or shape of the bar somewhere. In this operation? or maybe we need a Bar Definition operation.
