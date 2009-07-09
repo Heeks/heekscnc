@@ -9,7 +9,7 @@ Select a 2D sketch representing the shape to be machined.
 
 Press
 
-http://heekscnc.googlecode.com/svn/trunk/bitmaps/opprofile.png
+http://heekscnc.googlecode.com/svn/trunk/bitmaps/turnrough.png
 
 Edit the properties in the "properties" window ( see below for descriptions ).
 
