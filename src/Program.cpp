@@ -27,12 +27,7 @@ using namespace std;
 
 bool COperations::CanAdd(HeeksObj* object)
 {
-	return 	object->GetType() == ProfileType || 
-		object->GetType() == PocketType || 
-		object->GetType() == ZigZagType || 
-		object->GetType() == AdaptiveType || 
-		object->GetType() == DrillingType ||
-		object->GetType() == CounterBoreType;
+	return 	COp::IsAnOperation(object->GetType());
 }
 
 void COperations::WriteXML(TiXmlNode *root)
@@ -538,26 +533,9 @@ void CProgram::RewritePythonProgram()
 			current_tool = ((COp *) object)->m_cutting_tool_number;
 		} // End if - then
 
-		switch(object->GetType())
+		if(COp::IsAnOperation(object->GetType()))
 		{
-		case ProfileType:
-			if(((CProfile*)object)->m_active)((CProfile*)object)->AppendTextToProgram();
-			break;
-		case PocketType:
-			if(((CPocket*)object)->m_active)((CPocket*)object)->AppendTextToProgram();
-			break;
-		case ZigZagType:
-			if(((CZigZag*)object)->m_active)((CZigZag*)object)->AppendTextToProgram();
-			break;
-		case AdaptiveType:
-			if(((CAdaptive*)object)->m_active)((CAdaptive*)object)->AppendTextToProgram();
-			break;
-		case DrillingType:
-			if(((CDrilling*)object)->m_active)((CDrilling*)object)->AppendTextToProgram();
-			break;
-		case CounterBoreType:
-			if(((CCounterBore *)object)->m_active)((CCounterBore *)object)->AppendTextToProgram();
-			break;
+			((COp*)object)->AppendTextToProgram();
 		}
 	}
 	theApp.m_program_canvas->AppendText(_T("program_end()\n"));

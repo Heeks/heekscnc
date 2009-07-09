@@ -27,8 +27,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="159.68765"
-     inkscape:cy="891.8015"
+     inkscape:cx="189.0255"
+     inkscape:cy="800.29488"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -11117,5 +11117,32 @@
        style="fill:#0000ff;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="M 330,92.362183 L 360,92.362183 L 345,67.362183 L 330,92.362183 z"
        id="path4086" />
+    <g
+       id="g4920"
+       transform="matrix(0.5945502,0,0,0.5994701,50.285258,98.877893)"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\icons\roughturn.png"
+       inkscape:export-xdpi="46.633961"
+       inkscape:export-ydpi="46.633961">
+      <path
+         id="path4874"
+         d="M 175.14471,252.38833 L 125.07751,252.38833 L 130.64054,247.39478"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1.05411947px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path4876"
+         d="M 175.14471,257.38187 L 147.3296,257.38187 L 152.89262,252.38833"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1.05411947px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path4878"
+         d="M 175.14471,262.37541 L 152.89262,262.37541 L 158.45564,257.38187"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1.05411947px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path4880"
+         d="M 175.14471,267.36896 L 158.45564,267.36896 L 164.01867,262.37541"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:1.05411947px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path4910"
+         d="M 175.14471,272.3625 L 152.89262,272.3625 L 141.76658,257.38187 L 125.07751,257.38187 L 125.07751,297.33022 L 141.76658,297.33022 L 152.89262,282.34959 L 175.14471,282.34959 L 175.14471,272.3625 z"
+         style="fill:#916f6f;fill-rule:evenodd;stroke:#000000;stroke-width:2.10823894;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
   </g>
 </svg>
