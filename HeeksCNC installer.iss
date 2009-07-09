@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
 AppName=HeeksCNC
-AppVerName=HeeksCNC 0.8.0
+AppVerName=HeeksCNC 0.8.2
 AppPublisher=Heeks Software
 AppPublisherURL=http://code.google.com/p/heekscnc/
 AppSupportURL=http://code.google.com/p/heekscnc/
@@ -15,7 +15,7 @@ AppUpdatesURL=http://code.google.com/p/heekscnc/
 DefaultDirName={pf}\HeeksCAD
 DefaultGroupName=HeeksCAD
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.8.0
+OutputBaseFilename=HeeksCNC 0.8.2
 Compression=lzma
 SolidCompression=yes
 
@@ -44,7 +44,9 @@ Source: "C:\Users\Dan\HeeksCNC\area_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags:
 Source: "C:\Users\Dan\HeeksCNC\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\PyCamToHeeks.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\sample adaptive roughing2.heeks"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\circular_pocket.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\nc\*.py"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\nc\*.txt"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\HeeksCNC.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\bitmaps\*.png"; DestDir: "{app}\HeeksCNC\bitmaps"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\icons\*.png"; DestDir: "{app}\HeeksCNC\icons"; Flags: ignoreversion
