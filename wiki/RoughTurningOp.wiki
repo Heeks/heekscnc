@@ -58,6 +58,8 @@ Specify if the machining will be done on the front or back of the bar.
 ===face===
 Specify if the cuts will be in Z ( horizontal ) or in X ( vertical ).
 
+http://heekscnc.googlecode.com/svn/wiki/turning/modes.png
+
 ===clearance===
 the distance around the bar that the tool must not rapid in; the moves must become feed moves at this distance before starting to cut into the bar.
 
