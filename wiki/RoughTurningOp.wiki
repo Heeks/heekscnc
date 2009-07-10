@@ -1,7 +1,7 @@
 #summary Rough Turning Operation
 
 
-This is a not ready to use yet.
+This is not ready to use yet.
 
 
 
@@ -17,10 +17,10 @@ Press
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 
-Look at the toolpath.
+Look at the tool path.
 
 
-To change parameters, select the rough turning operation, in the "objects" window and edit the properties in the "Properties" window.
+To change parameters, select the rough turning operation, in the "Objects" window and edit the properties in the "Properties" window.
 
 Then press again
 
@@ -33,8 +33,8 @@ http://code.google.com/p/heekscnc/wiki/Operations
 ===cutter radius===
 The radius of the cutting part of the tool
 
-===driven point===
-This will allow you to choose where the driven point of the tool is defined. 9 different positions.
+===orientation===
+This will allow you to choose where the driven point of the tool is defined. 9 different positions ( picture coming soon )
 
 ===front angle===
 The angle at the front of the tool ( diagram needed here )
