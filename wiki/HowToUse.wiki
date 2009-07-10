@@ -50,7 +50,7 @@ http://code.google.com/p/heekscnc/wiki/Drilling
 
 == http://heekscnc.googlecode.com/svn/trunk/icons/turnrough.png Rough Turning ==
 
-http://code.google.com/p/heekscnc/wiki/turning/RoughTurningOp
+http://code.google.com/p/heekscnc/wiki/RoughTurningOp
 
 == Tool Table ==
 
