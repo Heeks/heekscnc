@@ -35,7 +35,7 @@ The radius of the cutting part of the tool
 
 ===orientation===
 This will allow you to choose where the driven point of the tool is defined. 9 different positions:
-http://code.google.com/p/heekscnc/wiki/turning/orientation.png
+http://heekscnc.googlecode.com/svn/wiki/turning/orientation.png
 
 ===front angle===
 The angle at the front of the tool ( diagram needed here )
