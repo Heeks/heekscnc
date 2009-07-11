@@ -18,6 +18,8 @@ When the GCode is generated, preference is given to drilling cycles that use a c
 
 = Properties =
 
+The list of properties changes based on the type of tool selected.
+
 == Type ==
 
 The type property can be one of;
@@ -34,20 +36,41 @@ The type property can be one of;
 
  - "Chamfering Bit"
 
+== Title ==
 
-=== Diameter ===
+All NC operation objects have a title.  The cutting tool's title may be set automatically by the CuttingTool module so that the name is representative of the various parameters chosen.  If the user changes the title to some value that is sufficiently different from the automatically generated name, that name will remain unchanged.
+
+
+=== Milling/Drilling tool parameters ===
+
+==== Diameter ====
 
 The diameter should be expressed in the same units as for the rest of the model.
 
-=== X Offset ===
-
-This is meant for lathe cutting tools.
-
-=== Tool Length Offset ===
+==== Tool Length Offset ====
 
 This is the length of the cutting tool in the same units as for the rest of the model.
 
-=== Orientation ===
+
+==== Flat Radius ====
+
+This represents the area directly beneath the end of a milling cutter that forms a flat surface.  An endmill would have a flat radius that is half the tool's diameter.  A ball-endmill would have a flat radius of zero.
+
+==== Corner Radius ====
+
+This represents the curve from the bottom of the cutting tool around to the edge.  An end-mill would have a corner radius of zero while a ball-endmill would have a corner radius that was half the diameter of the cutting tool.
+
+==== Vertical Cutting Edge Angle ====
+
+This is the angle between the tools centre line and that of the cutting surface.  For a normal endmill this would be zero.  i.e. the cutting surface is parallel with the tool's centre line.  For a chamfering bit, however, this might be something like 45 degrees representing the slanting cutting surface the tool makes.
+
+=== Turning Tool Parameters ===
+
+==== X Offset ====
+
+This is meant for lathe cutting tools.
+
+==== Orientation ====
 
 This provides an indication as to what angle the cutter makes with the workpiece.  Again, this is meant for lathe cutting tools.
 
@@ -73,18 +96,14 @@ The options are;
 
  - "(9) Centre"
 
-=== Flat Radius ===
+==== Front Angle ====
 
-This represents the area directly beneath the end of a milling cutter that forms a flat surface.  An endmill would have a flat radius that is half the tool's diameter.  A ball-endmill would have a flat radius of zero.
+I don't know what this is.
 
-=== Corner Radius ===
+==== Back Angle ====
 
-This represents the curve from the bottom of the cutting tool around to the edge.  An end-mill would have a corner radius of zero while a ball-endmill would have a corner radius that was half the diameter of the cutting tool.
+I don't know what this is.
 
-=== Vertical Cutting Edge Angle ===
+==== Tool Angle ====
 
-This is the angle between the tools centre line and that of the cutting surface.  For a normal endmill this would be zero.  i.e. the cutting surface is parallel with the tool's centre line.  For a chamfering bit, however, this might be something like 45 degrees representing the slanting cutting surface the tool makes.
-
-=== Title ===
-
-All NC operation objects have a title.  The cutting tool's title may be set automatically by the CuttingTool module so that the name is representative of the various parameters chosen.  If the user changes the title to some value that is sufficiently different from the automatically generated name, that name will remain unchanged.
+I don't know what this is.
