@@ -28,7 +28,8 @@ public:
 		eEndmill,
 		eSlotCutter,
 		eBallEndMill,
-		eChamfer
+		eChamfer,
+		eTurningTool
 	} eCuttingToolType;
 
 	// The G10 command can be used (within EMC2) to add a tool to the tool
@@ -36,8 +37,13 @@ public:
 	// G10 L1 P[tool number] R[radius] X[offset] Z[offset] Q[orientation]
 
 	double m_diameter;
-	double m_x_offset;
 	double m_tool_length_offset;
+
+	// The following are all for lathe tools.  They become relevant when the m_type = eTurningTool
+	double m_x_offset;
+	double m_front_angle;
+	double m_tool_angle;
+	double m_back_angle;
 	int m_orientation;
 
 	/**
@@ -123,6 +129,7 @@ public:
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
 
+	static CCuttingTool *Find( const int tool_number );
 	static int FindCuttingTool( const int tool_number );
 	static std::vector< std::pair< int, wxString > > FindAllCuttingTools();
 	wxString GenerateMeaningfulName() const;

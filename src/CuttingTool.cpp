@@ -31,15 +31,21 @@ void CCuttingToolParams::set_initial_values()
 {
 	CNCConfig config;
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
-	config.Read(_T("m_x_offset"), &m_x_offset, 0);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
-	config.Read(_T("m_orientation"), &m_orientation, 0);
 
 	config.Read(_T("m_type"), (int *) &m_type, eDrill);
 	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
 	config.Read(_T("m_corner_radius"), &m_corner_radius, 0);
 	config.Read(_T("m_cutting_edge_angle"), &m_cutting_edge_angle, 59);
-	config.Read(_T("m_cutting_edge_height"), &m_cutting_edge_angle, 4 * m_diameter);
+	config.Read(_T("m_cutting_edge_height"), &m_cutting_edge_height, 4 * m_diameter);
+
+	// The following are all turning tool parameters
+	config.Read(_T("m_orientation"), &m_orientation, 0);
+	config.Read(_T("m_x_offset"), &m_x_offset, 0);
+	config.Read(_T("m_front_angle"), &m_front_angle, 95);
+	config.Read(_T("m_tool_angle"), &m_tool_angle, 60);
+	config.Read(_T("m_back_angle"), &m_back_angle, 25);
+
 }
 
 void CCuttingToolParams::write_values_to_config()
@@ -59,6 +65,10 @@ void CCuttingToolParams::write_values_to_config()
 	config.Write(_T("m_corner_radius"), m_corner_radius);
 	config.Write(_T("m_cutting_edge_angle"), m_cutting_edge_angle);
 	config.Write(_T("m_cutting_edge_height"), m_cutting_edge_height);
+
+	config.Write(_T("m_front_angle"), m_front_angle);
+	config.Write(_T("m_tool_angle"), m_tool_angle);
+	config.Write(_T("m_back_angle"), m_back_angle);
 }
 
 static void on_set_diameter(double value, HeeksObj* object)
@@ -81,6 +91,10 @@ static void on_set_orientation(int value, HeeksObj* object)
 	} // End if - else
 }
 
+static void on_set_front_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_front_angle = value;}
+static void on_set_tool_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_angle = value;}
+static void on_set_back_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_back_angle = value;}
+
 static void on_set_type(int value, HeeksObj* object)
 {
 	((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
@@ -96,10 +110,13 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
     std::ostringstream l_ossChange;
 #endif
 
-	if (((CCuttingTool*)object)->m_params.m_tool_length_offset != (5 * ((CCuttingTool*)object)->m_params.m_diameter))
+	if (((CCuttingTool*)object)->m_params.m_type != CCuttingToolParams::eTurningTool)
 	{
-		((CCuttingTool*)object)->m_params.m_tool_length_offset = (5 * ((CCuttingTool*)object)->m_params.m_diameter);
-		l_ossChange << "Resetting tool length to " << (((CCuttingTool*)object)->m_params.m_tool_length_offset / theApp.m_program->m_units) << "\n";
+		if (((CCuttingTool*)object)->m_params.m_tool_length_offset != (5 * ((CCuttingTool*)object)->m_params.m_diameter))
+		{
+			((CCuttingTool*)object)->m_params.m_tool_length_offset = (5 * ((CCuttingTool*)object)->m_params.m_diameter);
+			l_ossChange << "Resetting tool length to " << (((CCuttingTool*)object)->m_params.m_tool_length_offset / theApp.m_program->m_units) << "\n";
+		} // End if - then
 	} // End if - then
 
 	double height;
@@ -229,6 +246,11 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
 				break;
 
+		case CCuttingToolParams::eTurningTool:
+				// No special constraints for this.
+				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
+				break;
+
 		default:
 				wxMessageBox(_T("That is not a valid cutting tool type. Aborting value change."));
 				return;
@@ -248,42 +270,58 @@ static void on_set_cutting_edge_height(double value, HeeksObj* object){((CCuttin
 
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
-	list->push_back(new PropertyLength(_("x_offset"), m_x_offset, parent, on_set_x_offset));
-	list->push_back(new PropertyLength(_("tool_length_offset"), m_tool_length_offset, parent, on_set_tool_length_offset));
-
 	{
-                std::list< wxString > choices;
-                choices.push_back(_("(0) Unused"));
-                choices.push_back(_("(1) Turning/Back Facing"));
-                choices.push_back(_("(2) Turning/Facing"));
-                choices.push_back(_("(3) Boring/Facing"));
-                choices.push_back(_("(4) Boring/Back Facing"));
-                choices.push_back(_("(5) Back Facing"));
-                choices.push_back(_("(6) Turning"));
-                choices.push_back(_("(7) Facing"));
-                choices.push_back(_("(8) Boring"));
-                choices.push_back(_("(9) Centre"));
-                int choice = int(m_orientation);
-                list->push_back(new PropertyChoice(_("orientation"), choices, choice, parent, on_set_orientation));
-        }
+		std::list< wxString > choices;
+		choices.push_back(_("Drill bit"));
+		choices.push_back(_("Centre Drill bit"));
+		choices.push_back(_("End Mill"));
+		choices.push_back(_("Slot Cutter"));
+		choices.push_back(_("Ball End Mill"));
+		choices.push_back(_("Chamfering bit"));
+		choices.push_back(_("Turning Tool"));
+		int choice = int(m_type);
+		list->push_back(new PropertyChoice(_("type"), choices, choice, parent, on_set_type));
+	}
 
+	if (m_type == eTurningTool)
 	{
-                std::list< wxString > choices;
-                choices.push_back(_("Drill bit"));
-                choices.push_back(_("Centre Drill bit"));
-                choices.push_back(_("End Mill"));
-                choices.push_back(_("Slot Cutter"));
-                choices.push_back(_("Ball End Mill"));
-                choices.push_back(_("Chamfering bit"));
-                int choice = int(m_type);
-                list->push_back(new PropertyChoice(_("type"), choices, choice, parent, on_set_type));
-        }
+		// We're using lathe (turning) tools
 
-	list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
-	list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
-	list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
-	list->push_back(new PropertyDouble(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
+		list->push_back(new PropertyLength(_("x_offset"), m_x_offset, parent, on_set_x_offset));
+		list->push_back(new PropertyDouble(_("front_angle"), m_front_angle, parent, on_set_front_angle));
+		list->push_back(new PropertyDouble(_("tool_angle"), m_tool_angle, parent, on_set_tool_angle));
+		list->push_back(new PropertyDouble(_("back_angle"), m_back_angle, parent, on_set_back_angle));
+
+		{
+			std::list< wxString > choices;
+			choices.push_back(_("(0) Unused"));
+			choices.push_back(_("(1) Turning/Back Facing"));
+			choices.push_back(_("(2) Turning/Facing"));
+			choices.push_back(_("(3) Boring/Facing"));
+			choices.push_back(_("(4) Boring/Back Facing"));
+			choices.push_back(_("(5) Back Facing"));
+			choices.push_back(_("(6) Turning"));
+			choices.push_back(_("(7) Facing"));
+			choices.push_back(_("(8) Boring"));
+			choices.push_back(_("(9) Centre"));
+			int choice = int(m_orientation);
+			list->push_back(new PropertyChoice(_("orientation"), choices, choice, parent, on_set_orientation));
+		}
+	} // End if - then
+	else
+	{
+		// We're using milling/drilling tools
+		list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
+		list->push_back(new PropertyLength(_("tool_length_offset"), m_tool_length_offset, parent, on_set_tool_length_offset));
+
+		list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
+		list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
+		list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
+		list->push_back(new PropertyDouble(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
+	} // End if - else
+
+	
+
 }
 
 void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
@@ -307,6 +345,10 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("flat_radius", m_flat_radius);
 	element->SetDoubleAttribute("cutting_edge_angle", m_cutting_edge_angle);
 	element->SetDoubleAttribute("cutting_edge_height", m_cutting_edge_height);
+
+	element->SetDoubleAttribute("front_angle", m_front_angle);
+	element->SetDoubleAttribute("tool_angle", m_tool_angle);
+	element->SetDoubleAttribute("back_angle", m_back_angle);
 }
 
 void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -327,6 +369,10 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	{
 		m_cutting_edge_height = m_diameter * 4.0;
 	} // End if - else
+
+	if (pElem->Attribute("front_angle")) m_front_angle = atof(pElem->Attribute("front_angle"));
+	if (pElem->Attribute("tool_angle")) m_tool_angle = atof(pElem->Attribute("tool_angle"));
+	if (pElem->Attribute("back_angle")) m_back_angle = atof(pElem->Attribute("back_angle"));
 }
 
 /**
@@ -469,6 +515,14 @@ void CCuttingTool::OnEditString(const wxChar* str){
 	heeksCAD->WasModified(this);
 }
 
+CCuttingTool *CCuttingTool::Find( const int tool_number )
+{
+	int id = FindCuttingTool( tool_number );
+	if (id <= 0) return(NULL);
+	return((CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, id ));
+} // End Find() method
+
+
 /**
  * Find the CuttingTool object whose tool number matches that passed in.
  */
@@ -512,7 +566,7 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
 
         return(tools);
 
-} // End FindCuttingTool() method
+} // End FindAllCuttingTools() method
 
 
 
@@ -581,17 +635,20 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 #else
     std::ostringstream l_ossName;
 #endif
-	
-	if (theApp.m_program->m_units == 1)
-	{
-		// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
-		l_ossName << m_params.m_diameter / theApp.m_program->m_units << " mm ";
-	} // End if - then
-	else
+
+	if (m_params.m_type != CCuttingToolParams::eTurningTool)
 	{	
-		// We're using inches.  Find a fractional representation if one matches.
-		l_ossName << FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units).c_str() << " inch ";
-	} // End if - else
+		if (theApp.m_program->m_units == 1)
+		{
+			// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
+			l_ossName << m_params.m_diameter / theApp.m_program->m_units << " mm ";
+		} // End if - then
+		else
+		{	
+			// We're using inches.  Find a fractional representation if one matches.
+			l_ossName << FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units).c_str() << " inch ";
+		} // End if - else
+	} // End if - then
 
 	switch (m_params.m_type)
 	{
@@ -613,6 +670,11 @@ wxString CCuttingTool::GenerateMeaningfulName() const
                 case CCuttingToolParams::eChamfer:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
 							l_ossName << m_params.m_cutting_edge_angle << " degreee ";
                 					l_ossName << "Chamfering Bit";
+							break;
+
+                case CCuttingToolParams::eTurningTool:	l_ossName << "Turning Tool";
+							break;
+
 		default:				break;
 	} // End switch
 
@@ -642,7 +704,8 @@ wxString CCuttingTool::ResetTitle()
 	     ((m_title.Find( _T("End Mill") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
 	     ((m_title.Find( _T("Slot Cutter") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
 	     ((m_title.Find( _T("Ball End Mill") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
-	     ((m_title.Find( _T("Chamfering Bit") ) != -1) && (m_title.Find(_T("degree")) != -1)) )
+	     ((m_title.Find( _T("Chamfering Bit") ) != -1) && (m_title.Find(_T("degree")) != -1)) ||
+	     ((m_title.Find( _T("Turning Tool") ) != -1)) )
 	{
 		// It has the default title.  Give it a name that makes sense.
 		m_title = GenerateMeaningfulName();

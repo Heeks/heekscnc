@@ -652,7 +652,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 	if (m_cutting_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CCuttingTool *pDrill = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( m_cutting_tool_number ) );
+		CCuttingTool *pDrill = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
 		if ((pDrill != NULL) && (pDrill->m_params.m_cutting_edge_height < m_params.m_depth))
 		{
 			// The drill bit we've chosen can't cut as deep as we've setup to go.
