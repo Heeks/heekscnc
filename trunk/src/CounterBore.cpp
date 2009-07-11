@@ -32,12 +32,12 @@ void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
 	config.Read(_T("m_diameter"), &m_diameter, (25.4 / 10));	// One tenth of an inch
 	config.Read(_T("m_sort_locations"), &m_sort_locations, 1);
 
-	if ((cutting_tool_number > 0) && (CCuttingTool::FindCuttingTool( cutting_tool_number )))
+	if (cutting_tool_number > 0)
 	{
-		HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( cutting_tool_number ) );
-		if (ob != NULL)
+		CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
+		if (pCuttingTool != NULL)
 		{
-			std::pair< double, double > depth_and_diameter = CCounterBore::SelectSizeForHead( ((CCuttingTool *)ob)->m_params.m_diameter );
+			std::pair< double, double > depth_and_diameter = CCounterBore::SelectSizeForHead( pCuttingTool->m_params.m_diameter );
 			m_diameter = depth_and_diameter.second;
 		} // End if - then
 	} // End if - then

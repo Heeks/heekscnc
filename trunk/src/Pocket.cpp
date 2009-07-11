@@ -326,7 +326,7 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 	if (m_cutting_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CCuttingTool *pCutter = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( m_cutting_tool_number ) );
+		CCuttingTool *pCutter = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
 		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
 		{
 			// The tool we've chosen can't cut as deep as we've setup to go.

@@ -308,11 +308,8 @@ struct sort_operations : public std::binary_function< bool, COp *, COp * >
 		if ((((HeeksObj *)lhs)->GetType() == DrillingType) && (((HeeksObj *)rhs)->GetType() == DrillingType))
 		{
 			// They're both drilling operations.  Select centre drilling over normal drilling.
-			int lhs_cutting_tool_id = CCuttingTool::FindCuttingTool( lhs->m_cutting_tool_number );
-			int rhs_cutting_tool_id = CCuttingTool::FindCuttingTool( rhs->m_cutting_tool_number );
-
-			CCuttingTool *lhsPtr = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, lhs_cutting_tool_id );
-			CCuttingTool *rhsPtr = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, rhs_cutting_tool_id );
+			CCuttingTool *lhsPtr = (CCuttingTool *) CCuttingTool::Find( lhs->m_cutting_tool_number );
+			CCuttingTool *rhsPtr = (CCuttingTool *) CCuttingTool::Find( rhs->m_cutting_tool_number );
 
 			if ((lhsPtr != NULL) && (rhsPtr != NULL))
 			{

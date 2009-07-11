@@ -79,7 +79,7 @@ void CAdaptiveParams::set_initial_values(
 
 	if ((cutting_tool_number > 0) && (CCuttingTool::FindCuttingTool( cutting_tool_number ) > 0))
 	{
-		CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( cutting_tool_number ) );
+		CCuttingTool *pCuttingTool = (CCuttingTool *) CCuttingTool::Find( cutting_tool_number );
 		if (pCuttingTool != NULL)
 		{
 			m_toolcornerrad = pCuttingTool->m_params.m_corner_radius;
@@ -444,7 +444,7 @@ void CAdaptive::AppendTextToProgram()
 	{
 		// We have a cutting tool to refer to.  Get these values from there instead.
 
-		CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *)this)->m_cutting_tool_number );
+		CCuttingTool *pCuttingTool = (CCuttingTool *) CCuttingTool::Find( ((COp *)this)->m_cutting_tool_number );
 		if (pCuttingTool != NULL)
 		{
 			ss << "actp.settoolcornerrad(" << pCuttingTool->m_params.m_corner_radius << ")\n";
