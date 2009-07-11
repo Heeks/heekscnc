@@ -36,6 +36,8 @@ The type property can be one of;
 
  - "Chamfering Bit"
 
+ - "Turning Tool"
+
 == Title ==
 
 All NC operation objects have a title.  The cutting tool's title may be set automatically by the CuttingTool module so that the name is representative of the various parameters chosen.  If the user changes the title to some value that is sufficiently different from the automatically generated name, that name will remain unchanged.
