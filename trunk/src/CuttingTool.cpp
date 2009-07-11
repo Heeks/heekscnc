@@ -99,6 +99,7 @@ static void on_set_type(int value, HeeksObj* object)
 {
 	((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
 	ResetParametersToReasonableValues(object);
+	heeksCAD->RefreshProperties();
 } // End on_set_type() routine
 
 
