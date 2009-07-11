@@ -53,13 +53,10 @@ void CDepthOpParams::set_initial_values( const int cutting_tool_number )
 	{
 		m_tool_number = cutting_tool_number;
 
-		if (CCuttingTool::FindCuttingTool( m_tool_number ) > 0)
+		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_tool_number );
+		if (pCuttingTool != NULL)
 		{
-			HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, CCuttingTool::FindCuttingTool( m_tool_number ) );
-			if (ob != NULL)
-			{
-				m_tool_diameter = ((CCuttingTool *) ob)->m_params.m_diameter;
-			} // End if - then
+			m_tool_diameter = pCuttingTool->m_params.m_diameter;
 		} // End if - then
 	} // End if - then
 }

@@ -18,7 +18,7 @@ class CDepthOpParams{
 public:
 	int m_workplane;
 	int m_tool_number;    		// Reference to CCuttingToolParams::m_tool_number - separate object.
-	double m_tool_diameter;	// I think this should be removed in preference for CCuttingToolParams::m_diameter
+	double m_tool_diameter;	// I think this should be removed in preference for CCuttingToolParams::m_diameter
 	double m_clearance_height;
 	double m_start_depth;
 	double m_step_down;
