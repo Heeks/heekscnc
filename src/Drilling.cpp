@@ -686,18 +686,19 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 			case ProfileType:
 				{
 					CProfile *pProfile = (CProfile *) heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-					if (((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth < m_params.m_depth)
+					double depthOp_depth = ((CDepthOp *) pProfile)->m_depth_op_params.m_start_depth  - ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth;
+					if (depthOp_depth != m_params.m_depth)
 					{
 						std::wostringstream l_ossChange;
 
-						l_ossChange << "Adjusting depth of drill cycle id='" << m_id << "' from '" 
+						l_ossChange << "Adjusting depth of drill cycle (id='" << m_id << "') from '" 
 							<< m_params.m_depth / theApp.m_program->m_units << " to "
-							<< ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth  / theApp.m_program->m_units<< "\n";
+							<< depthOp_depth  / theApp.m_program->m_units<< "\n";
 						changes.push_back(l_ossChange.str().c_str());
 
 						if (apply_changes)
 						{
-							m_params.m_depth = ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth;
+							m_params.m_depth = depthOp_depth;
 						} // End if - then
 					} // End if - then
 				}
