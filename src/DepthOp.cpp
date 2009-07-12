@@ -20,8 +20,6 @@
 
 CDepthOpParams::CDepthOpParams()
 {
-	m_tool_number = 0;    
-	m_tool_diameter = 0.0;
 	m_clearance_height = 0.0;
 	m_start_depth = 0.0;
 	m_step_down = 0.0;
@@ -35,9 +33,6 @@ CDepthOpParams::CDepthOpParams()
 void CDepthOpParams::set_initial_values( const int cutting_tool_number )
 {
 	CNCConfig config;
-    	config.Read(_T("DepthFixtureOffset"), &m_workplane,1);
-	config.Read(_T("DepthOpToolNumber"), &m_tool_number, 1);
-	config.Read(_T("DepthOpToolDiameter"), &m_tool_diameter, 3.0);
 	config.Read(_T("DepthOpClearanceHeight"), &m_clearance_height, 5.0);
 	config.Read(_T("DepthOpStartDepth"), &m_start_depth, 0.0);
 	config.Read(_T("DepthOpStepDown"), &m_step_down, 1.0);
@@ -46,27 +41,11 @@ void CDepthOpParams::set_initial_values( const int cutting_tool_number )
 	config.Read(_T("DepthOpHorizFeed"), &m_horizontal_feed_rate, 100.0);
 	config.Read(_T("DepthOpVertFeed"), &m_vertical_feed_rate, 100.0);
 	config.Read(_T("DepthOpSpindleSpeed"), &m_spindle_speed, 7000);
-
-	if ((m_workplane < 1) || (m_workplane > 9)) m_workplane = 1;	// Default to the G54 (first) coordinate system.
-
-	if (cutting_tool_number > 0)
-	{
-		m_tool_number = cutting_tool_number;
-
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_tool_number );
-		if (pCuttingTool != NULL)
-		{
-			m_tool_diameter = pCuttingTool->m_params.m_diameter;
-		} // End if - then
-	} // End if - then
 }
 
 void CDepthOpParams::write_values_to_config()
 {
 	CNCConfig config;
-	config.Write(_T("DepthFixtureOffset"), m_workplane);
-	config.Write(_T("DepthOpToolNumber"), m_tool_number);
-	config.Write(_T("DepthOpToolDiameter"), m_tool_diameter);
 	config.Write(_T("DepthOpClearanceHeight"), m_clearance_height);
 	config.Write(_T("DepthOpStartDepth"), m_start_depth);
 	config.Write(_T("DepthOpStepDown"), m_step_down);
@@ -77,19 +56,6 @@ void CDepthOpParams::write_values_to_config()
 	config.Write(_T("DepthOpSpindleSpeed"), m_spindle_speed);
 }
 
-static void on_set_workplane(int value, HeeksObj* object){
-	if ((value < 1) || (value > 9))
-	{
-		wxMessageBox( _T("Fixture offset must be between 1 and 9.  Aborting change") );
-		return;
-	} // End if - then
-
-	((CDepthOp*)object)->m_depth_op_params.m_workplane = value;
-} // End on_set_workplane() routine
-
-
-static void on_set_tool_number(int value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_tool_number = value;}
-static void on_set_tool_diameter(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_tool_diameter = value;}
 static void on_set_clearance_height(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_clearance_height = value;}
 static void on_set_step_down(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_step_down = value;}
 static void on_set_start_depth(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_start_depth = value;}
@@ -101,9 +67,6 @@ static void on_set_spindle_speed(double value, HeeksObj* object){((CDepthOp*)obj
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyInt(_("fixture offset"), m_workplane, parent, on_set_workplane));
-	list->push_back(new PropertyInt(_("tool number"), m_tool_number, parent, on_set_tool_number));
-	list->push_back(new PropertyLength(_("tool diameter"), m_tool_diameter, parent, on_set_tool_diameter));
 	list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
 	list->push_back(new PropertyLength(_("step down"), m_step_down, parent, on_set_step_down));
 	list->push_back(new PropertyLength(_("start depth"), m_start_depth, parent, on_set_start_depth));
@@ -118,9 +81,6 @@ void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 {
 	TiXmlElement * element = new TiXmlElement( "depthop" );
 	pElem->LinkEndChild( element ); 
-	element->SetAttribute("fixture_offset", m_workplane); 
-	element->SetAttribute("tooln", m_tool_number);
-	element->SetDoubleAttribute("toold", m_tool_diameter);
 	element->SetDoubleAttribute("clear", m_clearance_height);
 	element->SetDoubleAttribute("down", m_step_down);
 	element->SetDoubleAttribute("startdepth", m_start_depth);
@@ -137,9 +97,6 @@ void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 	if(depthop)
 	{
 
-		depthop->Attribute("fixture_offset", &m_workplane);
-		depthop->Attribute("tooln", &m_tool_number);
-		depthop->Attribute("toold", &m_tool_diameter);
 		depthop->Attribute("clear", &m_clearance_height);
 		depthop->Attribute("down", &m_step_down);
 		depthop->Attribute("startdepth", &m_start_depth);
@@ -193,9 +150,13 @@ void CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_final_depth / theApp.m_program->m_units);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
 
-	theApp.m_program_canvas->AppendText(_T("tool_diameter = float("));
-	theApp.m_program_canvas->AppendText(m_depth_op_params.m_tool_diameter / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
+	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+	if (pCuttingTool != NULL)
+	{
+		theApp.m_program_canvas->AppendText(_T("tool_diameter = float("));
+		theApp.m_program_canvas->AppendText( pCuttingTool->m_params.m_diameter / theApp.m_program->m_units);
+		theApp.m_program_canvas->AppendText(_T(")\n"));
+	} // End if - then
 
 	if (m_depth_op_params.m_spindle_speed != 0)
 	{
@@ -210,20 +171,6 @@ void CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_vertical_feed_rate);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
-
-	if ((((COp *)this)->m_cutting_tool_number <= 0) && (m_depth_op_params.m_tool_number > 0))
-	{
-		theApp.m_program_canvas->AppendText(_T("tool_change("));
-		theApp.m_program_canvas->AppendText(m_depth_op_params.m_tool_number);
-		theApp.m_program_canvas->AppendText(_T(")\n"));
-	} // End if - then
-
-	if (m_depth_op_params.m_workplane >= 1)
-	{
-		theApp.m_program_canvas->AppendText(_T("workplane("));
-		theApp.m_program_canvas->AppendText(m_depth_op_params.m_workplane);
-		theApp.m_program_canvas->AppendText(_T(")\n"));
-	} // End if - then
 
 	theApp.m_program_canvas->AppendText(_T("flush_nc()\n"));
 }

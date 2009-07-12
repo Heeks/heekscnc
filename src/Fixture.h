@@ -26,7 +26,7 @@ public:
 	double m_b_axis;	// i.e. rotation angle around y axis - in degrees
 	double m_c_axis;	// i.e. rotation angle around z axis - in degrees
 
-	gp_Pnt m_origin;	// Fixture's origin (to rotate around)
+	gp_Pnt m_pivot_point;	// Fixture's pivot point for rotation.
 
 	CFixtureParams()
 	{
@@ -34,7 +34,7 @@ public:
 		m_b_axis = 0.0;
 		m_c_axis = 0.0;
 
-		m_origin = gp_Pnt( 0.0, 0.0, 0.0 );
+		m_pivot_point = gp_Pnt( 0.0, 0.0, 0.0 );
 	} // End constructor.
 
 	void set_initial_values();
@@ -44,9 +44,28 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 };
 
+/**
+	The Fixture class represents a vice or similar on the physical milling machine.  It has
+	an origin in terms of a local coordinate system (G54, G55 etc.) and it is sometimes
+	bolted down crooked.  This class supports the definition of which coordinate system
+	the fixture is using as well as how crooked it is with respect to the three axes.  The
+	adjustment is made in the A, B and C axes.  These are defined as rotations around
+	X, Y and Z respectively.  To this end, the most common use of this class will be to
+	assign a rotation angle to the C axis.  This represents that, although the part is
+	nicely lined up with the Z axis, it has been rotated such that it doesn't lay along
+	the X and Y axes.
+
+	Eventually, I would like to add a pyVCP (Python Visual Control Panel) script that
+	helps to drive a touch probe.  The coordinates from the touch probe are stored in an
+	ASCII file.  I would like this class to read in this file in order to determine the
+	axis rotation values without the operator having to do the calculations themselves.  A
+	programmer can dream anyway.
+
+	It should be noted that this class does not produce any rotational axis GCode.  It
+	is really meant to align the GCode with a workpiece that is not straight.
+ */
 class CFixture: public HeeksObj {
 public:
-	//	These are references to the CAD elements whose position indicate where the Fixture Cycle begins.
 	CFixtureParams m_params;
         wxString m_title;
 
