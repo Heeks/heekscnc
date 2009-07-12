@@ -14,11 +14,7 @@ http://code.google.com/p/heekscnc/wiki/PocketOperation
 All operations have some common properties, see here:
 http://code.google.com/p/heekscnc/wiki/Operations
 
-===tool number===
-This is the station number of the tool. The NC code will use this to output T1, for example
-
-===tool diameter===
-The diameter of the tool
+NOTE: All depth operations must have a valid cutting tool assigned to them before GCode can be produced.
 
 ===clearance height===
 The absolute z height that the tool will go to, to rapid across between cuts
