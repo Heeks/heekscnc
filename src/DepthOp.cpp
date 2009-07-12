@@ -181,6 +181,26 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 
 	std::list<wxString> changes;
 
+	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+	if (pCuttingTool == NULL)
+	{
+		std::wostringstream l_ossChange;
+
+		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") does not have a cutting tool assigned.  It can not produce GCode without a cutting tool assignment.\n";
+		changes.push_back(l_ossChange.str().c_str());
+	} // End if - then
+	else
+	{
+		double cutting_depth = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
+		if (cutting_depth > pCuttingTool->m_params.m_cutting_edge_height)
+		{
+			std::wostringstream l_ossChange;
+
+			l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") is set to cut deeper than the assigned cutting tool will allow\n";
+			changes.push_back(l_ossChange.str().c_str());
+		} // End if - then
+	} // End if - else
+
 	if (m_depth_op_params.m_start_depth <= m_depth_op_params.m_final_depth)
 	{
 		std::wostringstream l_ossChange;

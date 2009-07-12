@@ -105,6 +105,8 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 			if(type == LineType || type == ArcType)
 			{
 				span_object->GetStartPoint(s);
+				pFixture->Adjustment(s);
+
 				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
 				{
 					theApp.m_program_canvas->AppendText(_T("area.start_new_curve(a"));
@@ -125,6 +127,8 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					started = true;
 				}
 				span_object->GetEndPoint(e);
+				pFixture->Adjustment(e);
+
 				if(type == LineType)
 				{
 					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
@@ -138,6 +142,8 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
+					pFixture->Adjustment(c);
+
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;

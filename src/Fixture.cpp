@@ -420,6 +420,47 @@ gp_Pnt CFixture::Adjustment( const gp_Pnt & point ) const
 {
 	gp_Pnt transformed_point(point);
 
+	gp_Trsf matrix = GetMatrix();
+
+	transformed_point.Transform( matrix );
+
+	return(transformed_point);
+} // End Adjustment() method
+
+void CFixture::Adjustment( double *point ) const
+{
+	gp_Pnt ref( point[0], point[1], point[2] );
+	ref = Adjustment( ref );
+	point[0] = ref.X();
+	point[1] = ref.Y();
+	point[2] = ref.Z();
+
+} // End Adjustment() method
+
+
+void CFixture::extract(const gp_Trsf& tr, double *m)
+{
+	m[0] = tr.Value(1, 1);
+	m[1] = tr.Value(1, 2);
+	m[2] = tr.Value(1, 3);
+	m[3] = tr.Value(1, 4);
+	m[4] = tr.Value(2, 1);
+	m[5] = tr.Value(2, 2);
+	m[6] = tr.Value(2, 3);
+	m[7] = tr.Value(2, 4);
+	m[8] = tr.Value(3, 1);
+	m[9] = tr.Value(3, 2);
+	m[10] = tr.Value(3, 3);
+	m[11] = tr.Value(3, 4);
+	m[12] = 0;
+	m[13] = 0;
+	m[14] = 0;
+	m[15] = 1;
+}
+
+
+gp_Trsf CFixture::GetMatrix() const
+{
 	gp_Dir x_direction( 1, 0, 0 );
 	gp_Dir y_direction( 0, 1, 0 );
 	gp_Dir z_direction( 0, 0, 1 );
@@ -437,23 +478,10 @@ gp_Pnt CFixture::Adjustment( const gp_Pnt & point ) const
 	gp_Trsf c_axis_rotation_matrix;
 	c_axis_rotation_matrix.SetRotation( gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), z_direction), c_axis_angle_in_radians );
 
-	transformed_point.Transform( a_axis_rotation_matrix );
-	transformed_point.Transform( b_axis_rotation_matrix );
-	transformed_point.Transform( c_axis_rotation_matrix );
+	gp_Trsf matrix = a_axis_rotation_matrix * b_axis_rotation_matrix * c_axis_rotation_matrix;
 
-	return(transformed_point);
-} // End Adjustment() method
-
-void CFixture::Adjustment( double *point ) const
-{
-	gp_Pnt ref( point[0], point[1], point[2] );
-	ref = Adjustment( ref );
-	point[0] = ref.X();
-	point[1] = ref.Y();
-	point[2] = ref.Z();
-
-} // End Adjustment() method
-
+	return(matrix);
+} // End GetMatrix() method
 
 
 

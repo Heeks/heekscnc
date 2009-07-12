@@ -392,7 +392,16 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
 	{
 		HeeksObj* object = heeksCAD->GetIDObject(SolidType, *It);
-		if(object)solids.push_back(object);
+		if(object) solids.push_back(object);
+
+		/*
+		// Need to rotate a copy of the solid by the fixture settings.
+		HeeksObj* copy = object->MakeACopy();
+		double m[16];
+		CFixture::extract( pFixture->GetMatrix(), m );
+		copy->ModifyByMatrix(m);
+		if(copy) solids.push_back(copy);
+		*/
 	}
 
 	// Reconfirm that our retractzheight value is sufficient.
