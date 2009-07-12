@@ -10,7 +10,7 @@ Draw sketch, or import a dxf file.
 
 Select the sketch.
 
-Select Milling type cutting tools (optional)
+Select Milling type cutting tools
 
 Select Drilling type cutting tools (optional)
 
