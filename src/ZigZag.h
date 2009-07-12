@@ -54,7 +54,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
-	void AppendTextToProgram();
+	void AppendTextToProgram(const CFixture *pFixture);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

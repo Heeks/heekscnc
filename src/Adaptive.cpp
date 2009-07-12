@@ -383,9 +383,9 @@ double CAdaptive::GetMaxHeight( const int object_type, const std::list<int> & ob
 } // End GetMaxHeight() method
 
 
-void CAdaptive::AppendTextToProgram()
+void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram();
+	COp::AppendTextToProgram(pFixture);
 
 	//write stl file
 	std::list<HeeksObj*> solids;

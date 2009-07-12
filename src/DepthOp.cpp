@@ -169,9 +169,9 @@ void CDepthOp::GetProperties(std::list<Property *> *list)
 	COp::GetProperties(list);
 }
 
-void CDepthOp::AppendTextToProgram()
+void CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram();
+	COp::AppendTextToProgram(pFixture);
 
 	theApp.m_program_canvas->AppendText(_T("clearance = float("));
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
