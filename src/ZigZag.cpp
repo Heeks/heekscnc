@@ -175,6 +175,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 #endif
     ss.imbue(std::locale("C"));
 
+
 	switch(m_params.m_tool_type){
 	case TT_SPHERICAL:
 		ss << "c = SphericalCutter(" << m_params.m_tool_diameter/2 << ", Point(0,0,7))\n";

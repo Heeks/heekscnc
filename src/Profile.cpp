@@ -1030,3 +1030,42 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 
 	return new_object;
 }
+
+
+/**
+	This method adjusts any parameters that don't make sense.  It should report a list
+	of changes in the list of strings.
+ */
+std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
+{
+	std::list<wxString> changes;
+
+	if (m_cutting_tool_number > 0)
+	{
+		// Make sure the hole depth isn't greater than the tool's cutting depth.
+		CCuttingTool *pCutter = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
+		{
+			// The tool we've chosen can't cut as deep as we've setup to go.
+
+			std::wostringstream l_ossChange;
+
+			l_ossChange << "Adjusting depth of profile id='" << m_id << "' from '" 
+				<< m_depth_op_params.m_final_depth << " to "
+				<< pCutter->m_params.m_cutting_edge_height << " due to cutting edge length of selected tool\n";
+			changes.push_back(l_ossChange.str().c_str());
+
+			if (apply_changes)
+			{
+				m_depth_op_params.m_final_depth = pCutter->m_params.m_cutting_edge_height;
+			} // End if - then
+		} // End if - then
+	} // End if - then
+
+	std::list<wxString> depth_op_changes = CDepthOp::DesignRulesAdjustment( apply_changes );
+	std::copy( depth_op_changes.begin(), depth_op_changes.end(), std::inserter( changes, changes.end() ) );
+
+	return(changes);
+
+} // End DesignRulesAdjustment() method
+
