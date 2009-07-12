@@ -127,6 +127,10 @@ public:
 	gp_Pnt Adjustment( const gp_Pnt & point ) const;
 	void Adjustment( double *point ) const;
 
+	static void extract(const gp_Trsf& tr, double *m);
+	gp_Trsf GetMatrix() const;
+
+
 }; // End CFixture class definition.
 
 

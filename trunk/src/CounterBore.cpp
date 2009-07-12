@@ -109,8 +109,7 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 
 	if (m_cutting_tool_number > 0)
 	{
-		HeeksObj *cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-		CCuttingTool *pCuttingTool = (CCuttingTool *)cuttingTool;
+		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 		if (pCuttingTool != NULL)
 		{
 			if (pCuttingTool->m_params.m_diameter >= m_params.m_diameter)
