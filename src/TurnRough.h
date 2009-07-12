@@ -56,9 +56,9 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
-	void WriteSketchDefn(HeeksObj* sketch, int id_to_use );
-	void AppendTextForOneSketch(HeeksObj* object, int sketch);
-	void AppendTextToProgram();
+	void WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture );
+	void AppendTextForOneSketch(HeeksObj* object, int sketch, const CFixture *pFixture);
+	void AppendTextToProgram(const CFixture *pFixture);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

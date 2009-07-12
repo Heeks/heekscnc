@@ -85,7 +85,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
-	void AppendTextToProgram();
+	void AppendTextToProgram(const CFixture *pFixture);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	static double GetMaxHeight( const int object_type, const std::list<int> & object_ids );

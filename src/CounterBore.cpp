@@ -96,9 +96,9 @@ void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CCounterBore::AppendTextToProgram()
+void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram();
+	COp::AppendTextToProgram(pFixture);
 
 #ifdef UNICODE
 	std::wostringstream ss;
@@ -127,15 +127,17 @@ void CCounterBore::AppendTextToProgram()
 			std::vector<Point3d> locations = FindAllLocations( m_symbols, NULL );
 			for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{   
+				gp_Pnt point( l_itLocation->x, l_itLocation->y, l_itLocation->z );
+				point = pFixture->Adjustment(point);
                 
 				ss << "flush_nc()\ncircular_pocket( "
-							<< "x=" << l_itLocation->x/ theApp.m_program->m_units << ", "
-							<< "y=" << l_itLocation->y/ theApp.m_program->m_units << ", "
+							<< "x=" << point.X()/ theApp.m_program->m_units << ", "
+							<< "y=" << point.Y()/ theApp.m_program->m_units << ", "
        		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter / theApp.m_program->m_units << ", "
        		                         		<< "HoleDiameter=" << m_params.m_diameter / theApp.m_program->m_units << ", "
        		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
        		                         		<< "StartHeight=" << (l_itLocation->z + m_depth_op_params.m_start_depth) / theApp.m_program->m_units << ", "
-       		                         		<< "MaterialTop=" << l_itLocation->z / theApp.m_program->m_units << ", "
+       		                         		<< "MaterialTop=" << point.Z() / theApp.m_program->m_units << ", "
        		                         		<< "FeedRate=" << m_depth_op_params.m_vertical_feed_rate << ", "
        		                         		<< "HoleDepth=" << m_depth_op_params.m_final_depth / theApp.m_program->m_units << ")\n";
 			} // End for

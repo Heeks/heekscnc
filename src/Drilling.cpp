@@ -17,6 +17,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "Profile.h"
+#include "Fixture.h"
 
 #include <sstream>
 #include <iomanip>
@@ -113,9 +114,9 @@ void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CDrilling::AppendTextToProgram()
+void CDrilling::AppendTextToProgram( const CFixture *pFixture )
 {
-	COp::AppendTextToProgram();
+	COp::AppendTextToProgram( pFixture );
 
 #ifdef UNICODE
 	std::wostringstream ss;
@@ -128,10 +129,12 @@ void CDrilling::AppendTextToProgram()
 	std::vector<Point3d> locations = FindAllLocations( m_symbols );
 	for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
+		gp_Pnt point = pFixture->Adjustment( gp_Pnt( l_itLocation->x, l_itLocation->y, l_itLocation->z ));
+
 		ss << "drill("
-			<< "x=" << l_itLocation->x/theApp.m_program->m_units << ", "
-			<< "y=" << l_itLocation->y/theApp.m_program->m_units << ", "
-			<< "z=" << l_itLocation->z/theApp.m_program->m_units << ", "
+			<< "x=" << point.X()/theApp.m_program->m_units << ", "
+			<< "y=" << point.Y()/theApp.m_program->m_units << ", "
+			<< "z=" << point.Z()/theApp.m_program->m_units << ", "
 			<< "depth=" << m_params.m_depth/theApp.m_program->m_units << ", "
 			<< "standoff=" << m_params.m_standoff/theApp.m_program->m_units << ", "
 			<< "dwell=" << m_params.m_dwell << ", "
@@ -560,7 +563,9 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 				if (lhsPtr != NULL)
 				{
 					std::vector<Point3d> starting_points;
-					((CProfile *)lhsPtr)->AppendTextToProgram( starting_points );
+					CFixture perfectly_aligned_fixture(NULL,CFixture::G54);
+
+					((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &perfectly_aligned_fixture );
 
 					// Copy the results in ONLY if each point doesn't already exist.
 					for (std::vector<Point3d>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)

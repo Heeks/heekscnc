@@ -19,10 +19,12 @@
 #include "Op.h"
 #include "CNCConfig.h"
 #include "CounterBore.h"
+#include "Fixture.h"
 
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <memory>
 using namespace std;
 
 bool COperations::CanAdd(HeeksObj* object)
@@ -97,7 +99,8 @@ void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 bool CTools::CanAdd(HeeksObj* object)
 {
-	return 	((object->GetType() == CuttingToolType));
+	return 	(((object->GetType() == CuttingToolType)) || 
+		 ((object->GetType() == FixtureType)));
 }
 
 void CTools::WriteXML(TiXmlNode *root)
@@ -506,35 +509,59 @@ void CProgram::RewritePythonProgram()
 	} // End if - then
 
 
-	// And then all the rest of the operations.
-	int current_tool = 0;
-	for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
-	{
-		HeeksObj *object = (HeeksObj *) *l_itOperation;
-		if (object == NULL) continue;
-		
-		if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
-		{
-			// Select the right tool.
-			std::wostringstream l_ossValue;
+	// Write all the operations once for each fixture.
+	std::list<CFixture *> fixtures;
+	std::auto_ptr<CFixture> default_fixture = std::auto_ptr<CFixture>(new CFixture( NULL, CFixture::G54 ) );
 
-			CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
-			if (pCuttingTool != NULL)
+	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
+	{
+		CFixture *pFixture = CFixture::Find( CFixture::eCoordinateSystemNumber_t( fixture ) );
+		if (pFixture)
+		{
+			fixtures.push_back( pFixture );
+		} // End if - then
+	} // End for
+
+	if (fixtures.size() == 0)
+	{
+		// We need at least one fixture definition to generate any GCode.  Generate one
+		// that provides no rotation at all.
+
+		fixtures.push_back( default_fixture.get() );
+	} // End if - then
+
+	for (std::list<CFixture *>::const_iterator l_itFixture = fixtures.begin(); l_itFixture != fixtures.end(); l_itFixture++)
+	{
+		// And then all the rest of the operations.
+		int current_tool = 0;
+		for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
+		{
+			HeeksObj *object = (HeeksObj *) *l_itOperation;
+			if (object == NULL) continue;
+			
+			if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
 			{
-				l_ossValue << _T("comment( 'tool change to ") << pCuttingTool->m_title.c_str() << "')\n";
+				// Select the right tool.
+				std::wostringstream l_ossValue;
+
+				CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
+				if (pCuttingTool != NULL)
+				{
+					l_ossValue << _T("comment( 'tool change to ") << pCuttingTool->m_title.c_str() << "')\n";
+				} // End if - then
+
+	
+				l_ossValue << "tool_change( id=" << ((COp *) object)->m_cutting_tool_number << ")\n";
+				theApp.m_program_canvas->AppendText(wxString(l_ossValue.str().c_str()).c_str());
+				current_tool = ((COp *) object)->m_cutting_tool_number;
 			} // End if - then
 
-
-			l_ossValue << "tool_change( id=" << ((COp *) object)->m_cutting_tool_number << ")\n";
-			theApp.m_program_canvas->AppendText(wxString(l_ossValue.str().c_str()).c_str());
-			current_tool = ((COp *) object)->m_cutting_tool_number;
-		} // End if - then
-
-		if(COp::IsAnOperation(object->GetType()))
-		{
-			((COp*)object)->AppendTextToProgram();
-		}
-	}
+			if(COp::IsAnOperation(object->GetType()))
+			{
+				((COp*)object)->AppendTextToProgram( *l_itFixture );
+			}
+		} // End for - operation
+	} // End for - fixture
 	theApp.m_program_canvas->AppendText(_T("program_end()\n"));
 }
 

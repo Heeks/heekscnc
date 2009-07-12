@@ -108,7 +108,7 @@ void COp::GetProperties(std::list<Property *> *list)
 	HeeksObj::GetProperties(list);
 }
 
-void COp::AppendTextToProgram()
+void COp::AppendTextToProgram(const CFixture *pFixture)
 {
 	if(m_comment.Len() > 0)
 	{

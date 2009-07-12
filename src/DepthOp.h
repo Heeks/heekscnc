@@ -49,7 +49,7 @@ public:
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
 
-	virtual void AppendTextToProgram();
+	virtual void AppendTextToProgram(const CFixture *pFixture);
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 };
