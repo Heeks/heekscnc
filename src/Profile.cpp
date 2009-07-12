@@ -210,8 +210,13 @@ void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 				{
 					double off_vec[3] = {-v[1], v[0], 0.0};
 					if(m_profile_params.m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
-					x = s[0] + off_vec[0] * (m_depth_op_params.m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[0] * AUTO_ROLL_ON_OFF_SIZE;
-					y = s[1] + off_vec[1] * (m_depth_op_params.m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[1] * AUTO_ROLL_ON_OFF_SIZE;
+
+					CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+					if (pCuttingTool != NULL)
+					{
+						x = s[0] + off_vec[0] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[0] * AUTO_ROLL_ON_OFF_SIZE;
+						y = s[1] + off_vec[1] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[1] * AUTO_ROLL_ON_OFF_SIZE;
+					} // End if - then
 				}
 			}
 		}
@@ -242,10 +247,14 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 					double v[3];
 					if(heeksCAD->GetSegmentVector(last_child, 0.0, v))
 					{
-						double off_vec[3] = {-v[1], v[0], 0.0};
-						if(m_profile_params.m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
-						x = e[0] + off_vec[0] * (m_depth_op_params.m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[0] * AUTO_ROLL_ON_OFF_SIZE;
-						y = e[1] + off_vec[1] * (m_depth_op_params.m_tool_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[1] * AUTO_ROLL_ON_OFF_SIZE;
+						CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+						if (pCuttingTool != NULL)
+						{
+							double off_vec[3] = {-v[1], v[0], 0.0};
+							if(m_profile_params.m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
+							x = e[0] + off_vec[0] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[0] * AUTO_ROLL_ON_OFF_SIZE;
+							y = e[1] + off_vec[1] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[1] * AUTO_ROLL_ON_OFF_SIZE;
+						} // End if - then
 					}
 				}
 			}
@@ -620,6 +629,8 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			break;
 		}
 
+		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+
 		// get roll on string
 		wxString roll_on_string;
 		if(m_profile_params.m_tool_on_side)
@@ -628,20 +639,9 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			{
 				l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
 
-				if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL))
+				if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
 				{
-					double tool_diameter = m_depth_op_params.m_tool_diameter;
-
-					if (((COp*)this)->m_cutting_tool_number > 0)
-					{
-						HeeksObj *pCuttingTool = heeksCAD->GetIDObject( CuttingToolType, ((COp *)this)->m_cutting_tool_number );
-						if (pCuttingTool != NULL)
-						{
-							tool_diameter = ((CCuttingTool *) pCuttingTool)->m_params.m_diameter;
-						} // End if - then
-					} // End if - then
-
-					roll_on_point( pKurve, side_string.c_str(), tool_diameter/2, pRollOnPointX, pRollOnPointY);
+					roll_on_point( pKurve, side_string.c_str(), pCuttingTool->m_params.m_diameter/2, pRollOnPointX, pRollOnPointY);
 				} // End if - then
 
 				roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
@@ -731,6 +731,13 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 void CProfile::AppendTextToProgram(const CFixture *pFixture)
 {
+	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+	if (pCuttingTool == NULL)
+	{
+		wxMessageBox(_T("Cannot generate GCode for profile without a cutting tool assigned"));
+		return;
+	} // End if - then
+
 	std::vector<CDrilling::Point3d> starting_points;
 	wxString python_code = AppendTextToProgram( starting_points, pFixture );
 
