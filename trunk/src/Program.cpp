@@ -516,7 +516,7 @@ void CProgram::RewritePythonProgram()
 	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
 	{
 		CFixture *pFixture = CFixture::Find( CFixture::eCoordinateSystemNumber_t( fixture ) );
-		if (pFixture)
+		if (pFixture != NULL)
 		{
 			fixtures.push_back( pFixture );
 		} // End if - then
@@ -532,6 +532,9 @@ void CProgram::RewritePythonProgram()
 
 	for (std::list<CFixture *>::const_iterator l_itFixture = fixtures.begin(); l_itFixture != fixtures.end(); l_itFixture++)
 	{
+
+		(*l_itFixture)->AppendTextToProgram();
+
 		// And then all the rest of the operations.
 		int current_tool = 0;
 		for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)

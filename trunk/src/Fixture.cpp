@@ -38,12 +38,12 @@ void CFixtureParams::set_initial_values()
 	config.Read(_T("m_b_axis"), &m_a_axis, 0.0);
 	config.Read(_T("m_c_axis"), &m_a_axis, 0.0);
 
-	double origin_x, origin_y, origin_z;
-	config.Read(_T("origin_x"), &origin_x, 0.0);
-	config.Read(_T("origin_y"), &origin_y, 0.0);
-	config.Read(_T("origin_z"), &origin_z, 0.0);
+	double pivot_point_x, pivot_point_y, pivot_point_z;
+	config.Read(_T("pivot_point_x"), &pivot_point_x, 0.0);
+	config.Read(_T("pivot_point_y"), &pivot_point_y, 0.0);
+	config.Read(_T("pivot_point_z"), &pivot_point_z, 0.0);
 
-	m_origin = gp_Pnt( origin_x, origin_y, origin_z );
+	m_pivot_point = gp_Pnt( pivot_point_x, pivot_point_y, pivot_point_z );
 }
 
 void CFixtureParams::write_values_to_config()
@@ -57,19 +57,19 @@ void CFixtureParams::write_values_to_config()
 	config.Write(_T("m_b_axis"), m_b_axis);
 	config.Write(_T("m_c_axis"), m_c_axis);
 
-	config.Write(_T("origin_x"), m_origin.X());
-	config.Write(_T("origin_y"), m_origin.Y());
-	config.Write(_T("origin_z"), m_origin.Z());
+	config.Write(_T("pivot_point_x"), m_pivot_point.X());
+	config.Write(_T("pivot_point_y"), m_pivot_point.Y());
+	config.Write(_T("pivot_point_z"), m_pivot_point.Z());
 }
 
 static void on_set_a_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_a_axis = value; ((CFixture*)object)->ResetTitle(); }
 static void on_set_b_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_b_axis = value; ((CFixture*)object)->ResetTitle(); }
 static void on_set_c_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_c_axis = value; ((CFixture*)object)->ResetTitle(); }
 
-static void on_set_origin(const double *vt, HeeksObj* object){
-	((CFixtureParams *)object)->m_origin.SetX( vt[0] );
-	((CFixtureParams *)object)->m_origin.SetY( vt[1] );
-	((CFixtureParams *)object)->m_origin.SetZ( vt[2] );
+static void on_set_pivot_point(const double *vt, HeeksObj* object){
+	((CFixtureParams *)object)->m_pivot_point.SetX( vt[0] );
+	((CFixtureParams *)object)->m_pivot_point.SetY( vt[1] );
+	((CFixtureParams *)object)->m_pivot_point.SetZ( vt[2] );
 }
 
 void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list)
@@ -80,12 +80,12 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
 	list->push_back(new PropertyDouble(_("B axis (around Y) rotation"), m_b_axis, parent, on_set_b_axis));
 	list->push_back(new PropertyDouble(_("C axis (around Z) rotation"), m_c_axis, parent, on_set_c_axis));
 
-	double origin[3];
-	origin[0] = m_origin.X();
-	origin[1] = m_origin.Y();
-	origin[2] = m_origin.Z();
+	double pivot_point[3];
+	pivot_point[0] = m_pivot_point.X();
+	pivot_point[1] = m_pivot_point.Y();
+	pivot_point[2] = m_pivot_point.Z();
 
-	list->push_back(new PropertyVertex(_("Origin"), origin, parent, on_set_origin));
+	list->push_back(new PropertyVertex(_("Origin"), pivot_point, parent, on_set_pivot_point));
 }
 
 void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
@@ -98,9 +98,9 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("b_axis", m_b_axis);
 	element->SetDoubleAttribute("c_axis", m_c_axis);
 
-	element->SetDoubleAttribute("origin_x", m_origin.X());
-	element->SetDoubleAttribute("origin_y", m_origin.Y());
-	element->SetDoubleAttribute("origin_z", m_origin.Z());
+	element->SetDoubleAttribute("pivot_point_x", m_pivot_point.X());
+	element->SetDoubleAttribute("pivot_point_y", m_pivot_point.Y());
+	element->SetDoubleAttribute("pivot_point_z", m_pivot_point.Z());
 }
 
 void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -111,9 +111,9 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("b_axis")) m_b_axis = atof(pElem->Attribute("b_axis"));
 	if (pElem->Attribute("c_axis")) m_c_axis = atof(pElem->Attribute("c_axis"));
 
-	if (pElem->Attribute("origin_x")) m_origin.SetX( atof(pElem->Attribute("origin_x")) );
-	if (pElem->Attribute("origin_y")) m_origin.SetY( atof(pElem->Attribute("origin_y")) );
-	if (pElem->Attribute("origin_z")) m_origin.SetZ( atof(pElem->Attribute("origin_z")) );
+	if (pElem->Attribute("pivot_point_x")) m_pivot_point.SetX( atof(pElem->Attribute("pivot_point_x")) );
+	if (pElem->Attribute("pivot_point_y")) m_pivot_point.SetY( atof(pElem->Attribute("pivot_point_y")) );
+	if (pElem->Attribute("pivot_point_z")) m_pivot_point.SetZ( atof(pElem->Attribute("pivot_point_z")) );
 
 }
 
@@ -121,6 +121,8 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	This method is called when the CAD operator presses the Python button.  This method generates
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
+
+	This class should just select the appropriate coordinate system.
  */
 void CFixture::AppendTextToProgram() const
 {
@@ -134,8 +136,10 @@ void CFixture::AppendTextToProgram() const
 
 	if (m_title.size() > 0)
 	{
-		ss << "#(" << m_title.c_str() << ")\n";
+		ss << "comment('" << m_title.c_str() << "')\n";
 	} // End if - then
+
+	ss << "workplane(" << m_coordinate_system_number << ")\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
@@ -404,6 +408,13 @@ void CFixture::glCommands(bool select, bool marked, bool no_color)
 
 } // End glCommands() method
 
+
+/**
+	The Adjustment() method is the workhorse of this class.  This is where the coordinate
+	data that's used to generate GCode is rotated to its new position based on the
+	fixture's settings.  All the NC Operations classes should use this method to rotate
+	their values immediately prior to generating GCode.
+ */
 
 gp_Pnt CFixture::Adjustment( const gp_Pnt & point ) const
 {
