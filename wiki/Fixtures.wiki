@@ -1,0 +1,39 @@
+#summary Fixtures allow local coordinate systems along with rotated parts
+
+= WARNING =
+
+This functionality has not been completed yet.  It has been added to Profile operations but none others yet.  If either no Fixture objects are defined or a single Fixture for G54 and no rotation is defined then the generated GCode should be alright.
+
+= Introduction =
+
+A fixture, in this context, is similar to a CoordinateSystem in HeeksCAD.  The difference is that a CoordinateSystem is a rotation matrix that is applied to graphics so as to affect the data model.  The Fixture, on the other hand, is a rotational matrix that is applied to the data model only while generating GCode.
+
+It allows the NC operation's GCode to be repeated for each local coordinate system (G54, G55 ... G59.3).  Each of these coordinate systems may have a rotation defined such that the generated GCode will also be rotated.  The idea is that a piece of material can be affixed to the milling machine and a probe used to measure how far off square the part is.  The user can then enter the part's rotation angle into the coordinate system object before re-generating the GCode.  The resultant GCode should align with the piece of material.
+
+If multiple pieces of material are affixed, they may be setup (manually) so that their origin is defined in separate coordinate systems (G54, G55 etc.).  Their rotation can then be entered into the data model's Fixture object before the GCode is re-generated.
+
+A separate set of GCode will be generated for each Fixture object defined.  This could also lend itself to the idea of duplicating machine operations with a separate starting point (NOTE: This part has not been tested yet).
+
+= Example Workflow =
+
+- Draw a sketch representing the tool path.
+
+- Define a milling bit to cut it out with.
+
+- Select both the sketch and the milling bit and create a Profile operation.
+
+- Place the raw material on the milling machine physically.
+
+- Use a touch probe (or similar) to measure the part's rotation from true X axis.
+
+- Touch off against the material (physically) so that the machine's current coordinate system's origin is set correctly.
+
+- Enter the material's rotation angle (found by probing) into the 'C Axis Rotation' for the corresponding Fixture's coordinate system (G54 for example).
+
+- Generate the GCode.
+
+- Download it to the mill.
+
+- Hold your hand over the Emergency Stop button just in case non of this stuff actually works.
+
+- Run the program.
