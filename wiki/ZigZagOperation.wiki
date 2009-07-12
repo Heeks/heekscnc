@@ -7,3 +7,29 @@
   # http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png Select machining->"make python script"
   # http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png Select machining->"Post-Process" to run the script and show the NC code
   * http://heekscnc.googlecode.com/svn/trunk/bitmaps/savenc.png Now you can save the NC code by clicking the save button on the machining tool bar 
+
+You need to add pycam, if you want to do zig zag machining, so the folders will need to be like this:
+
+HeeksCNC
+
+---bitmaps
+
+---icons
+
+---kurve
+
+---nc
+
+---PyCam
+
+------branches
+
+------tags
+
+------trunk
+
+---------pycam
+
+---------Samples
+
+---------Tests
