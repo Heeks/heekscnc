@@ -85,7 +85,7 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
 	pivot_point[1] = m_pivot_point.Y();
 	pivot_point[2] = m_pivot_point.Z();
 
-	list->push_back(new PropertyVertex(_("Origin"), pivot_point, parent, on_set_pivot_point));
+	list->push_back(new PropertyVertex(_("Pivot Point"), pivot_point, parent, on_set_pivot_point));
 }
 
 void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
