@@ -68,7 +68,7 @@ void CTurnRoughParams::ReadFromXMLElement(TiXmlElement* pElem)
 	//pElem->Attribute("side", &m_tool_on_side);
 }
 
-void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
+void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture)
 {
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
@@ -179,11 +179,11 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use)
 	theApp.m_program_canvas->AppendText(_T("\n"));
 }
 
-void CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch)
+void CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, const CFixture *pFixture)
 {
 	if(object)
 	{
-		WriteSketchDefn(object, sketch);
+		WriteSketchDefn(object, sketch, pFixture);
 
 		// add the machining command
 		theApp.m_program_canvas->AppendText(wxString::Format(_T("turning.rough(k%d, "), sketch));
@@ -195,9 +195,9 @@ void CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch)
 	}
 }
 
-void CTurnRough::AppendTextToProgram()
+void CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram();
+	COp::AppendTextToProgram(pFixture);
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -223,13 +223,13 @@ void CTurnRough::AppendTextToProgram()
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				AppendTextForOneSketch(one_curve_sketch, sketch);
+				AppendTextForOneSketch(one_curve_sketch, sketch, pFixture);
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			AppendTextForOneSketch(object, sketch);
+			AppendTextForOneSketch(object, sketch, pFixture);
 		}
 
 		if(re_ordered_sketch)

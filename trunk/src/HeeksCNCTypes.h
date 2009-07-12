@@ -16,5 +16,6 @@ enum{
 	ToolsType,
 	CounterBoreType,
 	TurnRoughType,
+	FixtureType,
 	HeeksCNCMaximumType
 };

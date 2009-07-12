@@ -148,9 +148,9 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 	}
 }
 
-void CZigZag::AppendTextToProgram()
+void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram();
+	COp::AppendTextToProgram(pFixture);
 
 	//write stl file
 	std::list<HeeksObj*> solids;

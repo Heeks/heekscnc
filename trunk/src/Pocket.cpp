@@ -86,7 +86,7 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("from_center", &m_starting_place);
 }
 
-static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
+static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_to_use = 0)
 {
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("a%d = area.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
 
@@ -163,9 +163,9 @@ static void WriteSketchDefn(HeeksObj* sketch, int id_to_use = 0)
 	theApp.m_program_canvas->AppendText(_T("\n"));
 }
 
-void CPocket::AppendTextToProgram()
+void CPocket::AppendTextToProgram(const CFixture *pFixture)
 {
-	CDepthOp::AppendTextToProgram();
+	CDepthOp::AppendTextToProgram(pFixture);
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -211,7 +211,7 @@ void CPocket::AppendTextToProgram()
 
 		if(object)
 		{
-			WriteSketchDefn(object, sketch);
+			WriteSketchDefn(object, pFixture, sketch);
 
 			// start - assume we are at a suitable clearance height
 

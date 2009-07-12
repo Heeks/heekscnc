@@ -1,0 +1,448 @@
+// Fixture.cpp
+/*
+ * Copyright (c) 2009, Dan Heeks, Perttu Ahola
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
+
+#include "stdafx.h"
+#include <math.h>
+#include "Fixture.h"
+#include "CNCConfig.h"
+#include "ProgramCanvas.h"
+#include "interface/HeeksObj.h"
+#include "interface/PropertyInt.h"
+#include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
+#include "interface/PropertyChoice.h"
+#include "interface/PropertyString.h"
+#include "interface/PropertyVertex.h"
+#include "tinyxml/tinyxml.h"
+#include "Op.h"
+
+#include <gp_Pnt.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Trsf.hxx>
+
+#include <sstream>
+#include <string>
+#include <algorithm>
+
+extern CHeeksCADInterface* heeksCAD;
+
+void CFixtureParams::set_initial_values()
+{
+	CNCConfig config;
+
+	config.Read(_T("m_a_axis"), &m_a_axis, 0.0);
+	config.Read(_T("m_b_axis"), &m_a_axis, 0.0);
+	config.Read(_T("m_c_axis"), &m_a_axis, 0.0);
+
+	double origin_x, origin_y, origin_z;
+	config.Read(_T("origin_x"), &origin_x, 0.0);
+	config.Read(_T("origin_y"), &origin_y, 0.0);
+	config.Read(_T("origin_z"), &origin_z, 0.0);
+
+	m_origin = gp_Pnt( origin_x, origin_y, origin_z );
+}
+
+void CFixtureParams::write_values_to_config()
+{
+	CNCConfig config;
+
+	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
+	// If we're now in inches then convert the values.
+	// We're in mm already.
+	config.Write(_T("m_a_axis"), m_a_axis);
+	config.Write(_T("m_b_axis"), m_b_axis);
+	config.Write(_T("m_c_axis"), m_c_axis);
+
+	config.Write(_T("origin_x"), m_origin.X());
+	config.Write(_T("origin_y"), m_origin.Y());
+	config.Write(_T("origin_z"), m_origin.Z());
+}
+
+static void on_set_a_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_a_axis = value; ((CFixture*)object)->ResetTitle(); }
+static void on_set_b_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_b_axis = value; ((CFixture*)object)->ResetTitle(); }
+static void on_set_c_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_c_axis = value; ((CFixture*)object)->ResetTitle(); }
+
+static void on_set_origin(const double *vt, HeeksObj* object){
+	((CFixtureParams *)object)->m_origin.SetX( vt[0] );
+	((CFixtureParams *)object)->m_origin.SetY( vt[1] );
+	((CFixtureParams *)object)->m_origin.SetZ( vt[2] );
+}
+
+void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list)
+{
+	list->push_back(new PropertyDouble(_("WARNING: This function is not yet complete"), m_a_axis, parent, on_set_a_axis));
+
+	list->push_back(new PropertyDouble(_("A axis (around X) rotation"), m_a_axis, parent, on_set_a_axis));
+	list->push_back(new PropertyDouble(_("B axis (around Y) rotation"), m_b_axis, parent, on_set_b_axis));
+	list->push_back(new PropertyDouble(_("C axis (around Z) rotation"), m_c_axis, parent, on_set_c_axis));
+
+	double origin[3];
+	origin[0] = m_origin.X();
+	origin[1] = m_origin.Y();
+	origin[2] = m_origin.Z();
+
+	list->push_back(new PropertyVertex(_("Origin"), origin, parent, on_set_origin));
+}
+
+void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "params" );
+	root->LinkEndChild( element );  
+
+	element->SetDoubleAttribute("a_axis", m_a_axis);
+	element->SetDoubleAttribute("b_axis", m_b_axis);
+	element->SetDoubleAttribute("c_axis", m_c_axis);
+
+	element->SetDoubleAttribute("origin_x", m_origin.X());
+	element->SetDoubleAttribute("origin_y", m_origin.Y());
+	element->SetDoubleAttribute("origin_z", m_origin.Z());
+}
+
+void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
+{
+	set_initial_values();
+
+	if (pElem->Attribute("a_axis")) m_a_axis = atof(pElem->Attribute("a_axis"));
+	if (pElem->Attribute("b_axis")) m_b_axis = atof(pElem->Attribute("b_axis"));
+	if (pElem->Attribute("c_axis")) m_c_axis = atof(pElem->Attribute("c_axis"));
+
+	if (pElem->Attribute("origin_x")) m_origin.SetX( atof(pElem->Attribute("origin_x")) );
+	if (pElem->Attribute("origin_y")) m_origin.SetY( atof(pElem->Attribute("origin_y")) );
+	if (pElem->Attribute("origin_z")) m_origin.SetZ( atof(pElem->Attribute("origin_z")) );
+
+}
+
+/**
+	This method is called when the CAD operator presses the Python button.  This method generates
+	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
+	the Python code can be configured to generate GCode suitable for various CNC interpreters.
+ */
+void CFixture::AppendTextToProgram() const
+{
+
+#ifdef UNICODE
+	std::wostringstream ss;
+#else
+    std::ostringstream ss;
+#endif
+    ss.imbue(std::locale("C"));
+
+	if (m_title.size() > 0)
+	{
+		ss << "#(" << m_title.c_str() << ")\n";
+	} // End if - then
+
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+}
+
+
+// 1 = G54, 2 = G55 etc.
+static void on_set_coordinate_system_number(const int value, HeeksObj* object)
+{
+	((CFixture*)object)->m_coordinate_system_number = CFixture::eCoordinateSystemNumber_t(value + 1);	// Change from zero-based to one-based offset
+	((CFixture*)object)->ResetTitle();
+} // End on_set_coordinate_system_number
+
+/**
+	NOTE: The m_title member is a special case.  The HeeksObj code looks for a 'GetShortString()' method.  If found, it
+	adds a Property called 'Object Title'.  If the value is changed, it tries to call the 'OnEditString()' method.
+	That's why the m_title value is not defined here
+ */
+void CFixture::GetProperties(std::list<Property *> *list)
+{
+	std::list< wxString > choices;
+
+	{
+		choices.push_back(_("G54"));
+		choices.push_back(_("G55"));
+		choices.push_back(_("G56"));
+		choices.push_back(_("G57"));
+		choices.push_back(_("G58"));
+		choices.push_back(_("G59"));
+		choices.push_back(_("G59.1"));
+		choices.push_back(_("G59.2"));
+		choices.push_back(_("G59.3"));
+	} // End for
+	list->push_back(new PropertyChoice(_("Coordinate System"), choices, int(m_coordinate_system_number) - 1, this, on_set_coordinate_system_number));
+
+	m_params.GetProperties(this, list);
+	HeeksObj::GetProperties(list);
+}
+
+
+HeeksObj *CFixture::MakeACopy(void)const
+{
+	return new CFixture(*this);
+}
+
+void CFixture::CopyFrom(const HeeksObj* object)
+{
+	operator=(*((CFixture*)object));
+}
+
+bool CFixture::CanAddTo(HeeksObj* owner)
+{
+	return owner->GetType() == ToolsType;
+}
+
+void CFixture::WriteXML(TiXmlNode *root)
+{
+	TiXmlElement * element = new TiXmlElement( "Fixture" );
+	root->LinkEndChild( element );  
+	element->SetAttribute("title", Ttc(m_title.c_str()));
+
+	std::ostringstream l_ossValue;
+	l_ossValue.str(""); l_ossValue << m_coordinate_system_number;
+	element->SetAttribute("coordinate_system_number", l_ossValue.str().c_str() );
+
+	m_params.WriteXMLAttributes(element);
+	WriteBaseXML(element);
+}
+
+// static member function
+HeeksObj* CFixture::ReadFromXMLElement(TiXmlElement* element)
+{
+	int coordinate_system_number = 1;
+	if (element->Attribute("coordinate_system_number")) coordinate_system_number = atoi(element->Attribute("coordinate_system_number"));
+
+	if (element->Attribute("title"))
+	{
+		wxString title(Ctt(element->Attribute("title")));
+		CFixture* new_object = new CFixture( title.c_str(), CFixture::eCoordinateSystemNumber_t(coordinate_system_number));
+
+		for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+		{
+			std::string name(pElem->Value());
+			if(name == "params"){
+				new_object->m_params.ReadParametersFromXMLElement(pElem);
+			}
+		}
+
+		new_object->ReadBaseXML(element);
+		return new_object;
+	} // End if - then
+
+	return(NULL);
+}
+
+
+void CFixture::OnEditString(const wxChar* str){
+        m_title.assign(str);
+	heeksCAD->WasModified(this);
+}
+
+CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_number )
+{
+	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
+	{
+                if (l_itSymbol->first != FixtureType) continue;
+
+		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
+                if (ob != NULL)
+                {
+			if (((CFixture *)ob)->m_coordinate_system_number == coordinate_system_number)
+			{
+				return( (CFixture *) ob );
+			} // End if - then
+                } // End if - then
+        } // End for
+
+	return(NULL);
+
+} // End Find() method
+
+int CFixture::GetNextFixture()
+{
+	std::set< int > existing_fixtures;
+
+	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
+	{
+                if (l_itSymbol->first != FixtureType) continue;
+
+		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
+                if (ob != NULL)
+                {
+			existing_fixtures.insert( int(((CFixture *)ob)->m_coordinate_system_number) );
+                } // End if - then
+        } // End for
+
+	// Now run through and find one that's not already used.
+	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
+	{
+		if (std::find( existing_fixtures.begin(), existing_fixtures.end(), fixture ) == existing_fixtures.end())
+		{
+			// This one is free.
+
+			return(fixture);
+		} // End if - then
+	} // End for
+
+	return(-1);	// None available.
+} // End GetNextFixture() method
+
+
+
+/**
+ * This method uses the various attributes of the cutting tool to produce a meaningful name.
+ * eg: with diameter = 6, units = 1 (mm) and type = 'drill' the name would be '6mm Drill Bit".  The
+ * idea is to produce a m_title value that is representative of the cutting tool.  This will
+ * make selection in the program list easier.
+ *
+ * NOTE: The ResetTitle() method looks at the m_title value for strings that are likely to
+ * have come from this method.  If this method changes, the ResetTitle() method may also
+ * need to change.
+ */
+wxString CFixture::GenerateMeaningfulName() const
+{
+#ifdef UNICODE
+	std::wostringstream l_ossName;
+#else
+    std::ostringstream l_ossName;
+#endif
+
+	switch (m_coordinate_system_number)
+	{
+		case CFixture::G54:		l_ossName << "G54";
+							break;
+
+		case CFixture::G55:		l_ossName << "G55";
+							break;
+
+		case CFixture::G56:		l_ossName << "G56";
+							break;
+
+		case CFixture::G57:		l_ossName << "G57";
+							break;
+
+		case CFixture::G58:		l_ossName << "G58";
+							break;
+
+		case CFixture::G59:		l_ossName << "G59";
+							break;
+
+		case CFixture::G59_1:		l_ossName << "G59.1";
+							break;
+
+		case CFixture::G59_2:		l_ossName << "G59.2";
+							break;
+
+		case CFixture::G59_3:		l_ossName << "G59.3";
+							break;
+
+		default:				break;
+	} // End switch
+
+	if (abs(m_params.m_a_axis) > 0.0000001)
+	{
+		l_ossName << " rotated " << m_params.m_a_axis << " degrees in YZ plane";
+	} // End if - then
+
+	if (abs(m_params.m_b_axis) > 0.0000001)
+	{
+		l_ossName << " rotated " << m_params.m_b_axis << " degrees in XZ plane";
+	} // End if - then
+
+	if (abs(m_params.m_c_axis) > 0.0000001)
+	{
+		l_ossName << " rotated " << m_params.m_c_axis << " degrees in XY plane";
+	} // End if - then
+
+	return( l_ossName.str().c_str() );
+} // End GenerateMeaningfulName() method
+
+
+/**
+	Reset the m_title value with a meaningful name ONLY if it does not look like it was
+	automatically generated in the first place.  If someone has reset it manually then leave it alone.
+
+	Return a verbose description of what we've done (if anything) so that we can pop up a
+	warning message to the operator letting them know.
+ */
+wxString CFixture::ResetTitle()
+{
+#ifdef UNICODE
+	std::wostringstream l_ossUnits;
+#else
+    std::ostringstream l_ossUnits;
+#endif
+
+	if ( (m_title == GetTypeString()) ||
+	     ((m_title.Find( _T("G5") ) != -1)))
+	{
+		// It has the default title.  Give it a name that makes sense.
+		m_title = GenerateMeaningfulName();
+		heeksCAD->WasModified(this);
+
+#ifdef UNICODE
+		std::wostringstream l_ossChange;
+#else
+		std::ostringstream l_ossChange;
+#endif
+		l_ossChange << "Changing name to " << m_title.c_str() << "\n";
+		return( l_ossChange.str().c_str() );
+	} // End if - then
+
+	// Nothing changed, nothing to report
+	return(_T(""));
+} // End ResetTitle() method
+
+
+
+/**
+        This is the Graphics Library Commands (from the OpenGL set).  This method calls the OpenGL
+        routines to paint the cutting tool in the graphics window.  The graphics is transient.
+ */
+void CFixture::glCommands(bool select, bool marked, bool no_color)
+{
+
+} // End glCommands() method
+
+
+gp_Pnt CFixture::Adjustment( const gp_Pnt & point ) const
+{
+	gp_Pnt transformed_point(point);
+
+	gp_Dir x_direction( 1, 0, 0 );
+	gp_Dir y_direction( 0, 1, 0 );
+	gp_Dir z_direction( 0, 0, 1 );
+
+	double a_axis_angle_in_radians = (m_params.m_a_axis / 360) * (2 * 3.1415926);	// degrees expressed in radians
+	double b_axis_angle_in_radians = (m_params.m_b_axis / 360) * (2 * 3.1415926);	// degrees expressed in radians
+	double c_axis_angle_in_radians = (m_params.m_c_axis / 360) * (2 * 3.1415926);	// degrees expressed in radians
+
+	gp_Trsf a_axis_rotation_matrix;
+	a_axis_rotation_matrix.SetRotation( gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), x_direction), a_axis_angle_in_radians );
+
+	gp_Trsf b_axis_rotation_matrix;
+	b_axis_rotation_matrix.SetRotation( gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), y_direction), b_axis_angle_in_radians );
+
+	gp_Trsf c_axis_rotation_matrix;
+	c_axis_rotation_matrix.SetRotation( gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), z_direction), c_axis_angle_in_radians );
+
+	transformed_point.Transform( a_axis_rotation_matrix );
+	transformed_point.Transform( b_axis_rotation_matrix );
+	transformed_point.Transform( c_axis_rotation_matrix );
+
+	return(transformed_point);
+} // End Adjustment() method
+
+void CFixture::Adjustment( double *point ) const
+{
+	gp_Pnt ref( point[0], point[1], point[2] );
+	ref = Adjustment( ref );
+	point[0] = ref.X();
+	point[1] = ref.Y();
+	point[2] = ref.Z();
+
+} // End Adjustment() method
+
+
+
+

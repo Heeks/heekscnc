@@ -146,7 +146,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	void AppendTextToProgram();
+	void AppendTextToProgram( const CFixture *pFixture );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

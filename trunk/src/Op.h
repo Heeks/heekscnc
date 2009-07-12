@@ -9,6 +9,9 @@
 #define OP_HEADER
 
 #include "interface/HeeksObj.h"
+#include "Fixture.h"
+
+class CFixture;	// Forward declaration.
 
 class COp : public HeeksObj
 {
@@ -30,7 +33,7 @@ public:
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wxChar* str);
 
-	virtual void AppendTextToProgram();
+	virtual void AppendTextToProgram( const CFixture *pFixture );
 
 	static bool IsAnOperation(int object_type);
 
