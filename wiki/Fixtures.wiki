@@ -1,18 +1,16 @@
 #summary Fixtures allow local coordinate systems along with rotated parts
 
-= WARNING =
-
-This functionality has not been completed yet.  It has been added to Profile operations but none others yet.  If either no Fixture objects are defined or a single Fixture for G54 and no rotation is defined then the generated GCode should be alright.
-
 = Introduction =
 
-A fixture, in this context, is similar to a CoordinateSystem in HeeksCAD.  The difference is that a CoordinateSystem is a rotation matrix that is applied to graphics so as to affect the data model.  The Fixture, on the other hand, is a rotational matrix that is applied to the data model only while generating GCode.
+The fixture object allows the generated GCode to be aligned with one or more fixtures (vices, clamps and the like).  It also allows the GCode to be repeated separately for each fixture defined.
+
+A fixture, in this context, is similar to a CoordinateSystem in HeeksCAD.  The difference is that a CoordinateSystem is a rotation matrix that is applied to graphics so as to affect the data model.  The Fixture, on the other hand, is a rotational matrix that is applied to the data model only while generating GCode.  By measuring the exact alignment of a physical fixture (vice) and entering this value into the Fixture object, the resultant GCode will be rotated to align itself with the fixture's rotation.
 
 It allows the NC operation's GCode to be repeated for each local coordinate system (G54, G55 ... G59.3).  Each of these coordinate systems may have a rotation defined such that the generated GCode will also be rotated.  The idea is that a piece of material can be affixed to the milling machine and a probe used to measure how far off square the part is.  The user can then enter the part's rotation angle into the coordinate system object before re-generating the GCode.  The resultant GCode should align with the piece of material.
 
 If multiple pieces of material are affixed, they may be setup (manually) so that their origin is defined in separate coordinate systems (G54, G55 etc.).  Their rotation can then be entered into the data model's Fixture object before the GCode is re-generated.
 
-A separate set of GCode will be generated for each Fixture object defined.  This could also lend itself to the idea of duplicating machine operations with a separate starting point (NOTE: This part has not been tested yet).
+A separate set of GCode will be generated for each Fixture object defined.  This could also lend itself to the idea of duplicating machine operations with a separate starting point.
 
 = Example Workflow =
 
