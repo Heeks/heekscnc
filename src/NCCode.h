@@ -44,8 +44,12 @@ public:
 class PathObject{
 public:
 	double m_x[3];
+	int m_cutting_tool_number;
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
 	virtual int GetType() = 0; // 0 - line, 1 - arc
+
+	void WriteBaseXML(TiXmlElement *element);
+
 	virtual void WriteXML(TiXmlNode *root) = 0;
 	virtual void ReadFromXMLElement(TiXmlElement* pElem) = 0;
 	virtual void glVertices(const PathObject* prev_po){}
@@ -99,6 +103,7 @@ public:
 	long m_from_pos, m_to_pos; // position of block in text ctrl
 	bool m_formatted;
 	static double multiplier;
+	static int cutting_tool_number;
 
 	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1), m_formatted(false) {}
 
