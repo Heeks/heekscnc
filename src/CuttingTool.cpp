@@ -871,12 +871,13 @@ TopoDS_Shape CCuttingTool::GetShape() const
 	gp_Dir orientation(0,0,1);	// This method always draws it up and down.  Leave it
 					// for other methods to rotate the resultant shape if
 					// they need to.
+	gp_Pnt tool_tip_location(0,0,0);	// Always from the origin in this method.
 
 	switch (m_params.m_type)
 	{
 		case CCuttingToolParams::eDrill:
 		{
-			/*
+			// First a cylinder to represent the shaft.
 			double tool_tip_length = (m_params.m_diameter / 2) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
 			double shaft_length = m_params.m_tool_length_offset - tool_tip_length;
 
@@ -885,16 +886,20 @@ TopoDS_Shape CCuttingTool::GetShape() const
 
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
-			BRepPrim_Cylinder shaft( shaft_position_and_orientation, m_params.m_diameter / 2, shaft_length );
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, m_params.m_diameter / 2, shaft_length );
 
-			// And the cone at the tip.
+			// And a cone for the tip.
 			double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (PI/2);
 			gp_Ax2 tip_position_and_orientation( tool_tip_location, orientation );
 
-			BRepPrim_Cone tool_tip( cutting_edge_angle_in_radians, 
+			BRepPrimAPI_MakeCone tool_tip( cutting_edge_angle_in_radians, 
 						tip_position_and_orientation,
 						m_params.m_cutting_edge_height,
 						m_params.m_flat_radius );
+
+			// The cone will be upside-down at the moment.  i.e. the large base at the bottom
+			// and the tip at the top.  We need to rotate it so that it points down and then
+			// translate (move) it up to match the bottom of the cylinder.
 
 			TopoDS_Compound cutting_tool_shape;
 			BRep_Builder aBuilder;
@@ -902,39 +907,6 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			aBuilder.Add (cutting_tool_shape, shaft.Shape());
 			aBuilder.Add (cutting_tool_shape, tool_tip.Shape());
 			return cutting_tool_shape;
-			*/
-
-			// Define Support Points
-			double tool_tip_length = (m_params.m_diameter / 2) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
-
-			gp_Pnt top_left( -1 * (m_params.m_diameter/2), 0.0, m_params.m_cutting_edge_height );
-			gp_Pnt top_middle( 0.0, 0.0, m_params.m_tool_length_offset );
-
-
-			gp_Pnt bottom_left( -1 * (m_params.m_diameter/2), 0.0, tool_tip_length );
-			gp_Pnt bottom_middle( 0.0, 0.0, 0.0 );
-
-			// Define the Geometry
-			Handle(Geom_TrimmedCurve) top = GC_MakeSegment(top_middle, top_left);
-			Handle(Geom_TrimmedCurve) left = GC_MakeSegment(top_left, bottom_left);
-			Handle(Geom_TrimmedCurve) cut = GC_MakeSegment(bottom_left, bottom_middle);
-
-			//Profile : Define the Topology
-			TopoDS_Edge top_edge = BRepBuilderAPI_MakeEdge(top);
-			TopoDS_Edge left_edge = BRepBuilderAPI_MakeEdge(left);
-			TopoDS_Edge cut_edge = BRepBuilderAPI_MakeEdge(cut);
-			TopoDS_Wire left_outline  = BRepBuilderAPI_MakeWire(top_edge, left_edge, cut_edge);
-
-			/*
-			gp_Ax1 zAxis = gp::OZ();
-			gp_Trsf rotation;
-			rotation.SetRotation(zAxis);
-			BRepBuilderAPI_Transform transformation(left_outline , rotation);
-			*/
-	
-			TopoDS_Shape rotated_shape = BRepPrimAPI_MakeRevolution(left_outline, 2*PI);
-			return(rotated_shape);
-			break;
 		}	
 
 		default:
