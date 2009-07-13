@@ -13,6 +13,10 @@
 #include "Op.h"
 #include "HeeksCNCTypes.h"
 
+#include <gp_Pnt.hxx>
+#include <gp_Dir.hxx>
+#include <TopoDS_Shape.hxx>
+
 #include <vector>
 #include <algorithm>
 
@@ -135,6 +139,8 @@ public:
 	wxString GenerateMeaningfulName() const;
 	wxString ResetTitle();
 	wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 ) const;
+
+	// TopoDS_Shape GetShape() const;
 
 }; // End CCuttingTool class definition.
 

@@ -22,6 +22,51 @@
 #include <string>
 #include <algorithm>
 
+#include <gp_Pnt.hxx>
+
+#include <TopoDS.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Compound.hxx>
+
+#include <TopExp_Explorer.hxx>
+
+#include <BRep_Tool.hxx>
+#include <BRepLib.hxx>
+
+#include <GCE2d_MakeSegment.hxx>
+
+#include <Handle_Geom_TrimmedCurve.hxx>
+#include <Handle_Geom_CylindricalSurface.hxx>
+#include <Handle_Geom2d_TrimmedCurve.hxx>
+#include <Handle_Geom2d_Ellipse.hxx>
+
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
+
+#include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeRevolution.hxx>
+
+#include <BRepPrim_Cylinder.hxx>
+#include <BRepPrim_Cone.hxx>
+
+#include <BRepFilletAPI_MakeFillet.hxx>
+
+#include <BRepOffsetAPI_MakeThickSolid.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
+
+#include <GC_MakeArcOfCircle.hxx>
+#include <GC_MakeSegment.hxx>
+
+#include <BRepAlgoAPI_Fuse.hxx>
+
+#include <Geom_Surface.hxx>
+#include <Geom_Plane.hxx>
+
 extern CHeeksCADInterface* heeksCAD;
 
 
@@ -799,3 +844,104 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 } // End glCommands() method
 
 
+#ifdef COMMENT_THIS_OUT_UNTIL_IT_IS_FINISHED
+
+/**
+	This method produces a "Topology Data Structure - Shape" based on the parameters
+	describing the tool's dimensions.  We will (probably) use this, along with the
+	NCCode paths to find out what devastation this tool will make when run through
+	the program.  We will then (again probably) intersect the resulting solid with
+	things like fixture solids to see if we're going to break anything.  We could
+	also intersect it with a solid that represents the raw material (i.e before it
+	has been machined).  This would give us an idea of what we'd end up with if
+	we ran the GCode program.
+
+	Finally, we might use this to 'apply' a GCode operation to existing geometry.  eg:
+	where a drilling cycle is defined, the result of drilling a hole from one
+	location for a certain depth will be a hole in that green solid down there.  We
+	may want to do this so as to use the edges (or other side-effects) to define
+	subsequent NC operations.  (just typing out loud)
+
+	NOTE: The shape is always drawn with the tool's tip at the origin.
+	It is always drawn along the Z axis.  The calling routine may move and rotate the drawn
+	shape if need be but this method returns a standard straight up and down version.
+ */
+TopoDS_Shape CCuttingTool::GetShape() const
+{
+	gp_Dir orientation(0,0,1);	// This method always draws it up and down.  Leave it
+					// for other methods to rotate the resultant shape if
+					// they need to.
+
+	switch (m_params.m_type)
+	{
+		case CCuttingToolParams::eDrill:
+		{
+			/*
+			double tool_tip_length = (m_params.m_diameter / 2) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
+			double shaft_length = m_params.m_tool_length_offset - tool_tip_length;
+
+			gp_Pnt shaft_start_location( tool_tip_location );
+			shaft_start_location.SetZ( tool_tip_location.Z() + tool_tip_length );
+
+			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
+
+			BRepPrim_Cylinder shaft( shaft_position_and_orientation, m_params.m_diameter / 2, shaft_length );
+
+			// And the cone at the tip.
+			double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (PI/2);
+			gp_Ax2 tip_position_and_orientation( tool_tip_location, orientation );
+
+			BRepPrim_Cone tool_tip( cutting_edge_angle_in_radians, 
+						tip_position_and_orientation,
+						m_params.m_cutting_edge_height,
+						m_params.m_flat_radius );
+
+			TopoDS_Compound cutting_tool_shape;
+			BRep_Builder aBuilder;
+			aBuilder.MakeCompound (cutting_tool_shape);
+			aBuilder.Add (cutting_tool_shape, shaft.Shape());
+			aBuilder.Add (cutting_tool_shape, tool_tip.Shape());
+			return cutting_tool_shape;
+			*/
+
+			// Define Support Points
+			double tool_tip_length = (m_params.m_diameter / 2) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
+
+			gp_Pnt top_left( -1 * (m_params.m_diameter/2), 0.0, m_params.m_cutting_edge_height );
+			gp_Pnt top_middle( 0.0, 0.0, m_params.m_tool_length_offset );
+
+
+			gp_Pnt bottom_left( -1 * (m_params.m_diameter/2), 0.0, tool_tip_length );
+			gp_Pnt bottom_middle( 0.0, 0.0, 0.0 );
+
+			// Define the Geometry
+			Handle(Geom_TrimmedCurve) top = GC_MakeSegment(top_middle, top_left);
+			Handle(Geom_TrimmedCurve) left = GC_MakeSegment(top_left, bottom_left);
+			Handle(Geom_TrimmedCurve) cut = GC_MakeSegment(bottom_left, bottom_middle);
+
+			//Profile : Define the Topology
+			TopoDS_Edge top_edge = BRepBuilderAPI_MakeEdge(top);
+			TopoDS_Edge left_edge = BRepBuilderAPI_MakeEdge(left);
+			TopoDS_Edge cut_edge = BRepBuilderAPI_MakeEdge(cut);
+			TopoDS_Wire left_outline  = BRepBuilderAPI_MakeWire(top_edge, left_edge, cut_edge);
+
+			/*
+			gp_Ax1 zAxis = gp::OZ();
+			gp_Trsf rotation;
+			rotation.SetRotation(zAxis);
+			BRepBuilderAPI_Transform transformation(left_outline , rotation);
+			*/
+	
+			TopoDS_Shape rotated_shape = BRepPrimAPI_MakeRevolution(left_outline, 2*PI);
+			return(rotated_shape);
+			break;
+		}	
+
+		default:
+			break;
+	} // End switch
+
+} // End GetShape() method
+
+
+#endif
