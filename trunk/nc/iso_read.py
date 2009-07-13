@@ -133,7 +133,9 @@ class ParserIso(nc.Parser):
                     col = "axis"
                     self.s = eval(word[1:])
                     move = True
-                elif (word[0] == 'T') : col = "tool"
+                elif (word[0] == 'T') :
+                    col = "tool"
+                    self.set_tool( eval(word[1:]) )
                 elif (word[0] == 'X' or word[0] == 'x'):
                     col = "axis"
                     self.x = eval(word[1:])
