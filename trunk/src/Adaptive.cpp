@@ -387,22 +387,38 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 {
 	COp::AppendTextToProgram(pFixture);
 
+	heeksCAD->StartHistory();
+
 	//write stl file
 	std::list<HeeksObj*> solids;
 	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
 	{
 		HeeksObj* object = heeksCAD->GetIDObject(SolidType, *It);
-		if(object) solids.push_back(object);
+		if (object != NULL)
+		{
+			// Need to rotate a COPY of the solid by the fixture settings.
+			HeeksObj* copy = object->MakeACopy();
+			if (copy != NULL)
+			{
+				double m[16];	// A different form of the transformation matrix.
+				CFixture::extract( pFixture->GetMatrix(), m );
 
-		/*
-		// Need to rotate a copy of the solid by the fixture settings.
-		HeeksObj* copy = object->MakeACopy();
-		double m[16];
-		CFixture::extract( pFixture->GetMatrix(), m );
-		copy->ModifyByMatrix(m);
-		if(copy) solids.push_back(copy);
-		*/
-	}
+				int type = copy->GetType();
+				unsigned int id = copy->m_id;
+
+				if (copy->ModifyByMatrix(m))
+				{
+					// The modification has resulted in a new HeeksObj that uses
+					// the same ID as the old one.  We just need to renew our
+					// HeeksObj pointer so that we use (and delete) the right one later on.
+
+					copy = heeksCAD->GetIDObject( type, id );
+				} // End if - then
+			} // End if - then
+
+			if(copy) solids.push_back(copy);
+		} // End if - then
+	} // End for
 
 	// Reconfirm that our retractzheight value is sufficient.
 	const double small_buffer = 5.0;	// Don't scrape the mountain tops.
@@ -428,6 +444,14 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
 
+	// We don't need the duplicate solids any more.  Delete them.
+	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
+	{
+		heeksCAD->DeleteUndoably( *l_itSolid );
+		heeksCAD->WasRemoved( *l_itSolid );
+	} // End for
+	heeksCAD->EndHistory();
+
 #ifdef UNICODE
 	std::wostringstream ss;
 #else
@@ -436,7 +460,9 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
     ss.imbue(std::locale("C"));
 
 	ss << "rapid(z=" << m_params.m_retractzheight << ")\n";
-	ss << "rapid(x=" << m_params.m_startpoint_x << ", y=" << m_params.m_startpoint_y << ")\n";
+
+	gp_Pnt start = pFixture->Adjustment( gp_Pnt( m_params.m_startpoint_x, m_params.m_startpoint_y, m_params.m_retractzheight ) );
+	ss << "rapid(x=" << start.X() << ", y=" << start.Y() << ")\n";
 
 	ss << "actp.setleadoffdz(" << m_params.m_leadoffdz << ")\n";
 
@@ -495,7 +521,7 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 
 	ss << "actp.setthintol(" << m_params.m_thintol << ")\n";
 
-	ss << "actp.setstartpoint(" << m_params.m_startpoint_x << ", " << m_params.m_startpoint_y << ", " << m_params.m_startvel_x << ", " << m_params.m_startvel_y << ")\n";
+	ss << "actp.setstartpoint(" << start.X() << ", " << start.Y() << ", " << m_params.m_startvel_x << ", " << m_params.m_startvel_y << ")\n";
 
 	ss << "actp.setminz(" << m_params.m_minz << ")\n";
 
@@ -518,7 +544,11 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 						if(type == LineType)
 						{
 							span_object->GetStartPoint(s);
+							pFixture->Adjustment(s);
+
 							span_object->GetEndPoint(e);
+							pFixture->Adjustment(e);
+
 							ss << "actp.boundaryadd(" << s[0] << ", " << s[1] << ")\n";
 							ss << "actp.boundaryadd(" << e[0] << ", " << e[1] << ")\n";
 						}
@@ -530,13 +560,17 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 	}
 	else
 	{
-		ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y0 << ")\n";
+		gp_Pnt boundary[2];
+		boundary[0] = pFixture->Adjustment( gp_Pnt( m_params.m_boundary_x0, m_params.m_boundary_y0, 0.0 ) );
+		boundary[1] = pFixture->Adjustment( gp_Pnt( m_params.m_boundary_x1, m_params.m_boundary_y1, 0.0 ) );
 
-		ss << "actp.boundaryadd(" << m_params.m_boundary_x0 << ", " << m_params.m_boundary_y1 << ")\n";
+		ss << "actp.boundaryadd(" << boundary[0].X() << ", " << boundary[0].Y() << ")\n";
 
-		ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y1 << ")\n";
+		ss << "actp.boundaryadd(" << boundary[0].X() << ", " << boundary[1].Y() << ")\n";
 
-		ss << "actp.boundaryadd(" << m_params.m_boundary_x1 << ", " << m_params.m_boundary_y0 << ")\n";
+		ss << "actp.boundaryadd(" << boundary[1].X() << ", " << boundary[1].Y() << ")\n";
+
+		ss << "actp.boundaryadd(" << boundary[1].X() << ", " << boundary[0].Y() << ")\n";
 
 		ss << "actp.boundarybreak()\n";
 
