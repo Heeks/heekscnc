@@ -240,7 +240,6 @@ void ColouredPath::ReadFromXMLElement(TiXmlElement* element)
 }
 
 double CNCCodeBlock::multiplier = 1.0;
-int CNCCodeBlock::cutting_tool_number = 0;
 
 HeeksObj *CNCCodeBlock::MakeACopy(void)const{return new CNCCodeBlock(*this);}
 
@@ -314,14 +313,6 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 		{
 			const char* units = pElem->Attribute("units");
 			if(units)pElem->Attribute("units", &CNCCodeBlock::multiplier);
-		}
-		else if(name == "tool")
-		{
-			const char* tool_number = pElem->Attribute("tool_number");
-			if(tool_number)
-			{
-				CNCCodeBlock::cutting_tool_number = atoi(pElem->Attribute("tool_number"));
-			} // End if - then
 		}
 	}
 

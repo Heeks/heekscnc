@@ -103,7 +103,6 @@ public:
 	long m_from_pos, m_to_pos; // position of block in text ctrl
 	bool m_formatted;
 	static double multiplier;
-	static int cutting_tool_number;
 
 	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1), m_formatted(false) {}
 
