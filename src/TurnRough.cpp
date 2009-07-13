@@ -93,6 +93,7 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 				if(!started && type != CircleType)
 				{
 					span_object->GetStartPoint(s);
+					pFixture->Adjustment(s);
 					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
 					theApp.m_program_canvas->AppendText(sketch_id);
 					theApp.m_program_canvas->AppendText(_T(", 0, "));
@@ -103,6 +104,7 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 					started = true;
 				}
 				span_object->GetEndPoint(e);
+				pFixture->Adjustment(e);
 				if(type == LineType)
 				{
 					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
@@ -116,6 +118,7 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
+					pFixture->Adjustment(c);
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
@@ -137,24 +140,29 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 				{
 					span_object->GetCentrePoint(c);
 
+					double centre_minus_radius[3];
+					double centre_plus_radius[3];
+
 					double radius = heeksCAD->CircleGetRadius(span_object);
+
+					centre_minus_radius[0] = c[0] - radius;
+					centre_minus_radius[1] = c[1];
+					centre_minus_radius[2] = c[2];
+
+					centre_plus_radius[0] = c[0] + radius;
+					centre_plus_radius[1] = c[1];
+					centre_plus_radius[2] = c[2];
+
+					pFixture->Adjustment(c);
+					pFixture->Adjustment(centre_plus_radius);
+					pFixture->Adjustment(centre_minus_radius);
+
 					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
 					theApp.m_program_canvas->AppendText(sketch_id);
 					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText((c[0] + radius) / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(centre_plus_radius[0] / theApp.m_program->m_units);
 					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 1, "));
-					theApp.m_program_canvas->AppendText((c[0] - radius) / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(centre_plus_radius[1] / theApp.m_program->m_units);
 					theApp.m_program_canvas->AppendText(_T(", "));
 					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
 					theApp.m_program_canvas->AppendText(_T(", "));
@@ -163,9 +171,20 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
 					theApp.m_program_canvas->AppendText(sketch_id);
 					theApp.m_program_canvas->AppendText(_T(", 1, "));
-					theApp.m_program_canvas->AppendText((c[0] + radius) / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(centre_minus_radius[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(centre_minus_radius[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
 					theApp.m_program_canvas->AppendText(_T(", "));
 					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(")\n"));
+					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
+					theApp.m_program_canvas->AppendText(sketch_id);
+					theApp.m_program_canvas->AppendText(_T(", 1, "));
+					theApp.m_program_canvas->AppendText(centre_plus_radius[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(_T(", "));
+					theApp.m_program_canvas->AppendText(centre_plus_radius[1] / theApp.m_program->m_units);
 					theApp.m_program_canvas->AppendText(_T(", "));
 					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
 					theApp.m_program_canvas->AppendText(_T(", "));
