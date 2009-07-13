@@ -1,4 +1,4 @@
-#summary Fixtures allow local coordinate systems along with rotated parts
+#summary Allow for multiple (rotated) vices and clamps
 
 = Introduction =
 
