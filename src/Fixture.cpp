@@ -74,8 +74,6 @@ static void on_set_pivot_point(const double *vt, HeeksObj* object){
 
 void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("WARNING: This function is not yet complete"), m_a_axis, parent, on_set_a_axis));
-
 	list->push_back(new PropertyDouble(_("A axis (around X) rotation"), m_a_axis, parent, on_set_a_axis));
 	list->push_back(new PropertyDouble(_("B axis (around Y) rotation"), m_b_axis, parent, on_set_b_axis));
 	list->push_back(new PropertyDouble(_("C axis (around Z) rotation"), m_c_axis, parent, on_set_c_axis));
