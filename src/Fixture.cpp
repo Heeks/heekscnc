@@ -67,9 +67,9 @@ static void on_set_b_axis(double value, HeeksObj* object){((CFixture*)object)->m
 static void on_set_c_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_c_axis = value; ((CFixture*)object)->ResetTitle(); }
 
 static void on_set_pivot_point(const double *vt, HeeksObj* object){
-	((CFixtureParams *)object)->m_pivot_point.SetX( vt[0] );
-	((CFixtureParams *)object)->m_pivot_point.SetY( vt[1] );
-	((CFixtureParams *)object)->m_pivot_point.SetZ( vt[2] );
+	((CFixture *)object)->m_params.m_pivot_point.SetX( vt[0] );
+	((CFixture *)object)->m_params.m_pivot_point.SetY( vt[1] );
+	((CFixture *)object)->m_params.m_pivot_point.SetZ( vt[2] );
 }
 
 void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list)
@@ -458,25 +458,32 @@ void CFixture::extract(const gp_Trsf& tr, double *m)
 	m[15] = 1;
 }
 
+#ifndef PI
+#define PI 3.14159265358979323846
+#endif
 
+/**
+	This is a single rotation matrix that allows transformations around the pivot point
+	about the x,y and z axes by the various angles of rotation.
+ */
 gp_Trsf CFixture::GetMatrix() const
 {
 	gp_Dir x_direction( 1, 0, 0 );
 	gp_Dir y_direction( 0, 1, 0 );
 	gp_Dir z_direction( 0, 0, 1 );
 
-	double a_axis_angle_in_radians = (m_params.m_a_axis / 360) * (2 * 3.1415926);	// degrees expressed in radians
-	double b_axis_angle_in_radians = (m_params.m_b_axis / 360) * (2 * 3.1415926);	// degrees expressed in radians
-	double c_axis_angle_in_radians = (m_params.m_c_axis / 360) * (2 * 3.1415926);	// degrees expressed in radians
+	double a_axis_angle_in_radians = (m_params.m_a_axis / 360) * (2 * PI);	// degrees expressed in radians
+	double b_axis_angle_in_radians = (m_params.m_b_axis / 360) * (2 * PI);	// degrees expressed in radians
+	double c_axis_angle_in_radians = (m_params.m_c_axis / 360) * (2 * PI);	// degrees expressed in radians
 
 	gp_Trsf a_axis_rotation_matrix;
-	a_axis_rotation_matrix.SetRotation( gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), x_direction), a_axis_angle_in_radians );
+	a_axis_rotation_matrix.SetRotation( gp_Ax1( m_params.m_pivot_point, x_direction), a_axis_angle_in_radians );
 
 	gp_Trsf b_axis_rotation_matrix;
-	b_axis_rotation_matrix.SetRotation( gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), y_direction), b_axis_angle_in_radians );
+	b_axis_rotation_matrix.SetRotation( gp_Ax1( m_params.m_pivot_point, y_direction), b_axis_angle_in_radians );
 
 	gp_Trsf c_axis_rotation_matrix;
-	c_axis_rotation_matrix.SetRotation( gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), z_direction), c_axis_angle_in_radians );
+	c_axis_rotation_matrix.SetRotation( gp_Ax1(m_params.m_pivot_point, z_direction), c_axis_angle_in_radians );
 
 	gp_Trsf matrix = a_axis_rotation_matrix * b_axis_rotation_matrix * c_axis_rotation_matrix;
 
