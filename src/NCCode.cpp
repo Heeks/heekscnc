@@ -38,17 +38,18 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 	if(text)m_str = wxString(Ctt(text));
 }
 
-void PathLine::WriteXML(TiXmlNode *root)
+void PathObject::WriteBaseXML(TiXmlElement *pElem)
 {
-	TiXmlElement * element;
-	element = new TiXmlElement( "line" );
-	root->LinkEndChild( element ); 
-	element->SetDoubleAttribute("x", m_x[0]);
-	element->SetDoubleAttribute("y", m_x[1]);
-	element->SetDoubleAttribute("z", m_x[2]);
-}
+	std::ostringstream l_ossValue; l_ossValue << m_cutting_tool_number;
+	pElem->SetAttribute("cutting_tool_number", l_ossValue.str().c_str());
 
-void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
+	pElem->SetDoubleAttribute("x", m_x[0] / CNCCodeBlock::multiplier);
+	pElem->SetDoubleAttribute("y", m_x[1] / CNCCodeBlock::multiplier);
+	pElem->SetDoubleAttribute("z", m_x[2] / CNCCodeBlock::multiplier);
+
+} // End WriteXML() method
+
+void PathObject::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	pElem->Attribute("x", &m_x[0]);
 	pElem->Attribute("y", &m_x[1]);
@@ -57,6 +58,29 @@ void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
 	m_x[0] *= CNCCodeBlock::multiplier;
 	m_x[1] *= CNCCodeBlock::multiplier;
 	m_x[2] *= CNCCodeBlock::multiplier;
+
+	if (pElem->Attribute("cutting_tool_number"))
+	{	
+		m_cutting_tool_number = atoi(pElem->Attribute("cutting_tool_number"));
+	} // End if - then
+	else
+	{
+		m_cutting_tool_number = 0;	// No tool selected.
+	} // End if - else
+}
+
+void PathLine::WriteXML(TiXmlNode *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "line" );
+	root->LinkEndChild( element ); 
+
+	PathObject::WriteBaseXML(element);
+}
+
+void PathLine::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	PathObject::ReadFromXMLElement(pElem);
 }
 
 void PathLine::glVertices(const PathObject* prev_po)
@@ -70,32 +94,27 @@ void PathArc::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = new TiXmlElement( "arc" );
 	root->LinkEndChild( element ); 
 
-	element->SetDoubleAttribute("x", m_x[0]);
-	element->SetDoubleAttribute("y", m_x[1]);
-	element->SetDoubleAttribute("z", m_x[2]);
-	element->SetDoubleAttribute("i", m_c[0]);
-	element->SetDoubleAttribute("j", m_c[1]);
-	element->SetDoubleAttribute("k", m_c[2]);
+	element->SetDoubleAttribute("i", m_c[0] / CNCCodeBlock::multiplier);
+	element->SetDoubleAttribute("j", m_c[1] / CNCCodeBlock::multiplier);
+	element->SetDoubleAttribute("k", m_c[2] / CNCCodeBlock::multiplier);
 	element->SetDoubleAttribute("d", m_dir);
+
+	PathObject::WriteBaseXML(element);
 }
 
 void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	// get the attributes
-	pElem->Attribute("x", &m_x[0]);
-	pElem->Attribute("y", &m_x[1]);
-	pElem->Attribute("z", &m_x[2]);
 	pElem->Attribute("i", &m_c[0]);
 	pElem->Attribute("j", &m_c[1]);
 	pElem->Attribute("k", &m_c[2]);
 	pElem->Attribute("d", &m_dir);
 
-	m_x[0] *= CNCCodeBlock::multiplier;
-	m_x[1] *= CNCCodeBlock::multiplier;
-	m_x[2] *= CNCCodeBlock::multiplier;
 	m_c[0] *= CNCCodeBlock::multiplier;
 	m_c[1] *= CNCCodeBlock::multiplier;
 	m_c[2] *= CNCCodeBlock::multiplier;
+
+	PathObject::ReadFromXMLElement(pElem);
 }
 
 void PathArc::glVertices(const PathObject* prev_po)
@@ -221,6 +240,7 @@ void ColouredPath::ReadFromXMLElement(TiXmlElement* element)
 }
 
 double CNCCodeBlock::multiplier = 1.0;
+int CNCCodeBlock::cutting_tool_number = 0;
 
 HeeksObj *CNCCodeBlock::MakeACopy(void)const{return new CNCCodeBlock(*this);}
 
@@ -294,6 +314,14 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 		{
 			const char* units = pElem->Attribute("units");
 			if(units)pElem->Attribute("units", &CNCCodeBlock::multiplier);
+		}
+		else if(name == "tool")
+		{
+			const char* tool_number = pElem->Attribute("tool_number");
+			if(tool_number)
+			{
+				CNCCodeBlock::cutting_tool_number = atoi(pElem->Attribute("tool_number"));
+			} // End if - then
 		}
 	}
 
