@@ -98,14 +98,18 @@ The options are;
 
  - "(9) Centre"
 
+http://heekscnc.googlecode.com/svn/wiki/turning/orientation.png
+
 ==== Front Angle ====
 
-I don't know what this is.
+The angle at the front of the tool.
 
 ==== Back Angle ====
 
-I don't know what this is.
+The angle behind the tool.
 
 ==== Tool Angle ====
 
-I don't know what this is.
+The angle of the tip of the tool.
+
+http://heekscnc.googlecode.com/svn/wiki/turning/angles.png
