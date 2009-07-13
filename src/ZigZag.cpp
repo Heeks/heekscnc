@@ -152,13 +152,38 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 {
 	COp::AppendTextToProgram(pFixture);
 
+	heeksCAD->StartHistory();	// We're going to create and delete some objects.
+
 	//write stl file
 	std::list<HeeksObj*> solids;
 	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
 	{
 		HeeksObj* object = heeksCAD->GetIDObject(SolidType, *It);
-		if(object)solids.push_back(object);
-	}
+		if (object != NULL)
+		{
+			// Need to rotate a COPY of the solid by the fixture settings.
+			HeeksObj* copy = object->MakeACopy();
+			if (copy != NULL)
+			{
+				double m[16];	// A different form of the transformation matrix.
+				CFixture::extract( pFixture->GetMatrix(), m );
+
+				int type = copy->GetType();
+				unsigned int id = copy->m_id;
+
+				if (copy->ModifyByMatrix(m))
+				{
+					// The modification has resulted in a new HeeksObj that uses
+					// the same ID as the old one.  We just need to renew our
+					// HeeksObj pointer so that we use (and delete) the right one later on.
+
+					copy = heeksCAD->GetIDObject( type, id );
+				} // End if - then
+			} // End if - then
+
+			if(copy) solids.push_back(copy);
+		} // End if - then
+	} // End for
 
 #ifdef WIN32
 	wxString filepath = wxString::Format(_T("zigzag%d.stl"), number_for_stl_file);
@@ -167,6 +192,14 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 #endif
 	number_for_stl_file++;
 	heeksCAD->SaveSTLFile(solids, filepath);
+
+	// We don't need the duplicate solids any more.  Delete them.
+	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
+	{
+		heeksCAD->DeleteUndoably( *l_itSolid );
+		heeksCAD->WasRemoved( *l_itSolid );
+	} // End for
+	heeksCAD->EndHistory();
 
 #ifdef UNICODE
 	std::wostringstream ss;
@@ -195,7 +228,12 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 
     ss << "pg = DropCutter(c, model)\n";
 
-    ss << "pathlist = pg.GenerateToolPath(" << m_params.m_box.m_x[0] << ", " << m_params.m_box.m_x[3] << ", " << m_params.m_box.m_x[1] << ", " << m_params.m_box.m_x[4] << ", " << m_params.m_box.m_x[2] << ", " << m_params.m_box.m_x[5] << ", " << m_params.m_dx << ", " << m_params.m_dy << "," <<m_params.m_direction<< ")\n";
+	// Rotate the coordinates to align with the fixture.
+	gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
+	gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
+
+	// def GenerateToolPath(self, minx, maxx, miny, maxy, z0, z1, dx, dy, direction):
+    ss << "pathlist = pg.GenerateToolPath(" << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << min.Z() << ", " << max.Z() << ", " << m_params.m_dx << ", " << m_params.m_dy << "," <<m_params.m_direction<< ")\n";
 
     ss << "h = HeeksCNCExporter(" << m_params.m_box.m_x[5] << ")\n";
 
