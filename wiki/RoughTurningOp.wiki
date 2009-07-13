@@ -30,25 +30,6 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 A Rough Turning operation has all common operation properties, see here:
 http://code.google.com/p/heekscnc/wiki/Operations
 
-===cutter radius===
-The radius of the cutting part of the tool.
-
-===orientation===
-This will allow you to choose where the driven point of the tool is defined. 9 different positions:
-
-http://heekscnc.googlecode.com/svn/wiki/turning/orientation.png
-
-===front angle===
-The angle at the front of the tool.
-
-===tool angle===
-The angle of the tip of the tool.
-
-===back angle===
-The angle behind the tool.
-
-http://heekscnc.googlecode.com/svn/wiki/turning/angles.png
-
 ===outside===
 Specify if the machining will be done on the outside or inside of the bar.
 
