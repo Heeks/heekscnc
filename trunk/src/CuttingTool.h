@@ -140,7 +140,7 @@ public:
 	wxString ResetTitle();
 	wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 ) const;
 
-	// TopoDS_Shape GetShape() const;
+	TopoDS_Shape GetShape() const;
 
 }; // End CCuttingTool class definition.
 
