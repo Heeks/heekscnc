@@ -781,44 +781,6 @@ wxString CHeeksCNCApp::GetResFolder()
 #endif
 }
 
-CHeeksCNCApp::Symbols_t CHeeksCNCApp::GetAllChildSymbols( const CHeeksCNCApp::Symbol_t & parent )
-{
-	Symbols_t results;
-
-	HeeksObj *obj = heeksCAD->GetIDObject( parent.first, parent.second );
-	if (obj != NULL)
-	{
-		results.push_back( Symbol_t(obj->GetType(), obj->m_id) );
-
-		if (obj->GetNumChildren() > 0)
-		{
-			for (HeeksObj *child = obj->GetFirstChild(); child != NULL; child = obj->GetNextChild())
-			{
-				Symbols_t children = GetAllChildSymbols( Symbol_t( child->GetType(), child->m_id ) );
-				std::copy( children.begin(), children.end(), std::inserter( results, results.end() ) );
-			} // End for
-		} // End if - then
-	} // End if - then
-
-	return(results);	
-
-} // End GetAllChildSymbols() method
-
-
-CHeeksCNCApp::Symbols_t CHeeksCNCApp::GetAllSymbols()
-{
-	// this function was very slow, when I had thousands of lines in the drawing, so I have removed it from everywhere and written other code in each case.
-	Symbols_t results;
-
-	for (HeeksObj *obj = heeksCAD->GetFirstObject(); obj != NULL; obj = heeksCAD->GetNextObject())
-	{
-		Symbols_t children = GetAllChildSymbols( Symbol_t( obj->GetType(), obj->m_id ) );
-		std::copy( children.begin(), children.end(), std::inserter( results, results.end() ) );
-	} // End if - then
-
-	return(results);	
-
-} // End GetAllChildSymbols() method
 
 
 

@@ -39,10 +39,6 @@ public:
 	typedef unsigned int SymbolId_t;
 	typedef std::pair< SymbolType_t, SymbolId_t > Symbol_t;
 	typedef std::list< Symbol_t > Symbols_t;
-
-	static Symbols_t GetAllChildSymbols( const Symbol_t & parent );
-	static Symbols_t GetAllSymbols();
-
 };
 
 extern CHeeksCNCApp theApp;
