@@ -542,6 +542,7 @@ void CProgram::RewritePythonProgram()
 		} // End for
 	} // End if - then
 
+	// this was too slow for me
 
 	// Write all the operations once for each fixture.
 	std::list<CFixture *> fixtures;
@@ -599,6 +600,7 @@ void CProgram::RewritePythonProgram()
 			}
 		} // End for - operation
 	} // End for - fixture
+
 	theApp.m_program_canvas->AppendText(_T("program_end()\n"));
 }
 

@@ -585,19 +585,18 @@ CCuttingTool *CCuttingTool::Find( const int tool_number )
  */
 int CCuttingTool::FindCuttingTool( const int tool_number )
 {
-	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
-	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
+	HeeksObj* tool_list = theApp.m_program->m_tools;
+
+	for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 	{
-                if (l_itSymbol->first != CuttingToolType) continue;
+		if (ob->GetType() != CuttingToolType) continue;
+		if ((ob != NULL) && (((CCuttingTool *) ob)->m_tool_number == tool_number))
+		{
+			return(ob->m_id);
+		} // End if - then
+	} // End for
 
-		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-                if ((ob != NULL) && (((CCuttingTool *) ob)->m_tool_number == tool_number))
-                {
-                        return(ob->m_id);
-                } // End if - then
-        } // End for
-
-        return(-1);
+	return(-1);
 
 } // End FindCuttingTool() method
 
@@ -608,20 +607,20 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
 
 	// Always add a value of zero to allow for an absense of cutting tool use.
 	tools.push_back( std::make_pair(0, _T("No Cutting Tool") ) );
-	
-	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
-	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
+
+	HeeksObj* tool_list = theApp.m_program->m_tools;
+
+	for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 	{
-                if (l_itSymbol->first != CuttingToolType) continue;
+		if (ob->GetType() != CuttingToolType) continue;
 
-		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-                if (ob != NULL)
-                {
+		if (ob != NULL)
+		{
 			tools.push_back( std::make_pair(((CCuttingTool *) ob)->m_tool_number, ((CCuttingTool*) ob)->GetShortString() ) );
-                } // End if - then
-        } // End for
+		} // End if - then
+	} // End for
 
-        return(tools);
+	return(tools);
 
 } // End FindAllCuttingTools() method
 

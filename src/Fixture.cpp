@@ -240,20 +240,23 @@ void CFixture::OnEditString(const wxChar* str){
 
 CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_number )
 {
-	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
-	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
-	{
-                if (l_itSymbol->first != FixtureType) continue;
+	//CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+	// the above line was very slow for me ( when I had thousands of lines in the drawing )
 
-		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-                if (ob != NULL)
-                {
+	HeeksObj* operations = theApp.m_program->m_operations;
+
+	for(HeeksObj* ob = operations->GetFirstChild(); ob; ob = operations->GetNextChild())
+	{
+		if (ob->GetType() != FixtureType) continue;
+
+		if (ob != NULL)
+		{
 			if (((CFixture *)ob)->m_coordinate_system_number == coordinate_system_number)
 			{
 				return( (CFixture *) ob );
 			} // End if - then
-                } // End if - then
-        } // End for
+		} // End if - then
+	} // End for
 
 	return(NULL);
 
@@ -263,17 +266,17 @@ int CFixture::GetNextFixture()
 {
 	std::set< int > existing_fixtures;
 
-	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
-	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin(); l_itSymbol != all_symbols.end(); l_itSymbol++)
-	{
-                if (l_itSymbol->first != FixtureType) continue;
+	HeeksObj* operations = theApp.m_program->m_operations;
 
-		HeeksObj *ob = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-                if (ob != NULL)
-                {
+	for(HeeksObj* ob = operations->GetFirstChild(); ob; ob = operations->GetNextChild())
+	{
+		if (ob->GetType() != FixtureType) continue;
+
+        if (ob != NULL)
+		{
 			existing_fixtures.insert( int(((CFixture *)ob)->m_coordinate_system_number) );
-                } // End if - then
-        } // End for
+		} // End if - then
+	} // End for
 
 	// Now run through and find one that's not already used.
 	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
