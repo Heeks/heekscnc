@@ -6,7 +6,7 @@
  */
 
 #include "HeeksCNCTypes.h"
-#include "Op.h"
+#include "SpeedOp.h"
 #include "geometry.h"
 #include "Drilling.h"
 
@@ -16,12 +16,10 @@ class CTurnRough;
 
 class CTurnRoughParams{
 public:
-	int m_tool_number;
-	double m_cutter_radius;
-	int m_driven_point;
-	double m_front_angle;	double m_tool_angle;	double m_back_angle;	bool m_outside;
+	bool m_outside;
 	bool m_front;
-	bool m_face;
+	bool m_facing;
+	double m_clearance;
 
 	CTurnRoughParams();
 
@@ -32,14 +30,14 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
-class CTurnRough: public COp{
+class CTurnRough: public CSpeedOp{
 public:
 	std::list<int> m_sketches;
 	CTurnRoughParams m_turn_rough_params;
 
-	CTurnRough():COp(GetTypeString()){}
+	CTurnRough():CSpeedOp(GetTypeString()){}
 	CTurnRough(const std::list<int> &sketches, const int cutting_tool_number )
-		: 	COp(GetTypeString(), cutting_tool_number), 
+		: 	CSpeedOp(GetTypeString(), cutting_tool_number), 
 			m_sketches(sketches)
 	{
 		m_turn_rough_params.set_initial_values();
@@ -49,7 +47,7 @@ public:
 	int GetType()const{return TurnRoughType;}
 	const wxChar* GetTypeString(void)const{return _T("Rough Turning");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/turnrough"); else return COp::GetIcon();}
+	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/turnrough"); else return CSpeedOp::GetIcon();}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

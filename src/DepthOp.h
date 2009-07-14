@@ -10,7 +10,7 @@
 #ifndef DEPTH_OP_HEADER
 #define DEPTH_OP_HEADER
 
-#include "Op.h"
+#include "SpeedOp.h"
 
 class CDepthOp;
 
@@ -34,12 +34,12 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 };
 
-class CDepthOp : public COp
+class CDepthOp : public CSpeedOp
 {
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(const wxString& title, const int cutting_tool_number = -1 ):COp(title, cutting_tool_number){m_depth_op_params.set_initial_values(cutting_tool_number);}
+	CDepthOp(const wxString& title, const int cutting_tool_number = -1 ):CSpeedOp(title, cutting_tool_number){m_depth_op_params.set_initial_values(cutting_tool_number);}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);

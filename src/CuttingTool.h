@@ -49,6 +49,8 @@ public:
 	double m_tool_angle;
 	double m_back_angle;
 	int m_orientation;
+	// also m_corner_radius, see below, is used for turning tools and milling tools
+
 
 	/**
 		The next three parameters describe the cutting surfaces of the bit.

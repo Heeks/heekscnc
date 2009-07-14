@@ -111,24 +111,24 @@ void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 void CDepthOp::WriteBaseXML(TiXmlElement *element)
 {
 	m_depth_op_params.WriteXMLAttributes(element);
-	COp::WriteBaseXML(element);
+	CSpeedOp::WriteBaseXML(element);
 }
 
 void CDepthOp::ReadBaseXML(TiXmlElement* element)
 {
 	m_depth_op_params.ReadFromXMLElement(element);
-	COp::ReadBaseXML(element);
+	CSpeedOp::ReadBaseXML(element);
 }
 
 void CDepthOp::GetProperties(std::list<Property *> *list)
 {
 	m_depth_op_params.GetProperties(this, list);
-	COp::GetProperties(list);
+	CSpeedOp::GetProperties(list);
 }
 
 void CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram(pFixture);
+	CSpeedOp::AppendTextToProgram(pFixture);
 
 	theApp.m_program_canvas->AppendText(_T("clearance = float("));
 	theApp.m_program_canvas->AppendText(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
