@@ -386,14 +386,12 @@ static void DesignRulesAdjustment(const bool apply_changes)
 {
 	std::list<wxString> changes;
 
-	CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+	HeeksObj* operations = theApp.m_program->m_operations;
 
-	for (CHeeksCNCApp::Symbols_t::const_iterator l_itSymbol = all_symbols.begin();
-		l_itSymbol != all_symbols.end(); l_itSymbol++)
+	for(HeeksObj* obj = operations->GetFirstChild(); obj; obj = operations->GetNextChild())
 	{
-		if (COp::IsAnOperation( l_itSymbol->first ))
+		if (COp::IsAnOperation( obj->GetType() ))
 		{
-			HeeksObj *obj = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
 			if (obj != NULL)
 			{
 				std::list<wxString> change = ((COp *)obj)->DesignRulesAdjustment(apply_changes);
@@ -809,6 +807,7 @@ CHeeksCNCApp::Symbols_t CHeeksCNCApp::GetAllChildSymbols( const CHeeksCNCApp::Sy
 
 CHeeksCNCApp::Symbols_t CHeeksCNCApp::GetAllSymbols()
 {
+	// this function was very slow, when I had thousands of lines in the drawing, so I have removed it from everywhere and written other code in each case.
 	Symbols_t results;
 
 	for (HeeksObj *obj = heeksCAD->GetFirstObject(); obj != NULL; obj = heeksCAD->GetNextObject())

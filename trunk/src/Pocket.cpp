@@ -189,7 +189,7 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 		if(order != SketchOrderTypeCloseCW && order != SketchOrderTypeCloseCCW && order != SketchOrderTypeMultipleCurves)
 		{
 			re_ordered_sketch = object->MakeACopy();
-			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
+			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder, false);
 			object = re_ordered_sketch;
 			order = heeksCAD->GetSketchOrder(object);
 			if(order != SketchOrderTypeCloseCW && order != SketchOrderTypeCloseCCW && order != SketchOrderTypeMultipleCurves)
