@@ -21,9 +21,6 @@ public:
 	double m_step_down;
 	double m_final_depth;
 	double m_rapid_down_to_height;
-	double m_horizontal_feed_rate;
-	double m_vertical_feed_rate;
-	double m_spindle_speed;
 
 	CDepthOpParams();
 
