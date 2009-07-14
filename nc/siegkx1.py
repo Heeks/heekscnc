@@ -15,11 +15,9 @@ class CreatorSieg(iso.CreatorIso):
     def __init__(self):
         iso.CreatorIso.__init__(self)
 
-    def write_spindle(self):
-        if self.s != '':
-            self.write(self.s)
-            self.s = ''
-            self.write('M3')
+    def tool_defn(self, id, name='', radius=None, length=None):
+        pass
+            
 ################################################################################
 
 nc.creator = CreatorSieg()
