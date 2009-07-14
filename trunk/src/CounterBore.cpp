@@ -137,7 +137,7 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
        		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
        		                         		<< "StartHeight=" << (l_itLocation->z + m_depth_op_params.m_start_depth) / theApp.m_program->m_units << ", "
        		                         		<< "MaterialTop=" << point.Z() / theApp.m_program->m_units << ", "
-       		                         		<< "FeedRate=" << m_depth_op_params.m_vertical_feed_rate << ", "
+       		                         		<< "FeedRate=" << m_speed_op_params.m_vertical_feed_rate << ", "
        		                         		<< "HoleDepth=" << m_depth_op_params.m_final_depth / theApp.m_program->m_units << ")\n";
 			} // End for
 
