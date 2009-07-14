@@ -376,7 +376,7 @@ TurnRough.o: TurnRough.cpp \
 	$(CC) -c TurnRough.cpp ${CCFLAGS} -o $@
 
 SpeedOp.o: SpeedOp.cpp \
-		Op.h \
+		Op.h
 	$(CC) -c SpeedOp.cpp ${CCFLAGS} -o $@
 		
 Construction.o: $(KURVE_DIR)/geometry/Construction.cpp \
@@ -422,6 +422,7 @@ install:
 	cp ../*_funcs.py $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../PyCamToHeeks.py $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../circular_pocket.py $(DESTDIR)$(LIBDIR)/heekscnc/
+	cp ../turning.py $(DESTDIR)$(LIBDIR)/heekscnc/
 
 uninstall:
 	-rm -f $(DESTDIR)$(LIBDIR)/heekscnc/$(SHARED_LIBRARY)
