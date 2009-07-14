@@ -152,6 +152,13 @@ static void on_set_type(int value, HeeksObj* object)
 } // End on_set_type() routine
 
 
+
+static double degrees_to_radians( const double degrees )
+{
+	return( (degrees / 360) * 2 * PI );
+} // End degrees_to_radians() routine
+
+
 static void ResetParametersToReasonableValues(HeeksObj* object)
 {
 #ifdef UNICODE
@@ -286,7 +293,7 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 45) l_ossChange << "Changing cutting edge angle to 45 degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 45;
 
-				height = (((CCuttingTool*)object)->m_params.m_diameter / 2.0) * tan( 90.0 - ((CCuttingTool*)object)->m_params.m_cutting_edge_angle);
+				height = (((CCuttingTool*)object)->m_params.m_diameter / 2.0) * tan( degrees_to_radians(90.0 - ((CCuttingTool*)object)->m_params.m_cutting_edge_angle));
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != height)
 				{
 					l_ossChange << "Changing cutting edge height to " << height / theApp.m_program->m_units << "\n";
@@ -829,20 +836,21 @@ TopoDS_Shape CCuttingTool::GetShape() const
 		case CCuttingToolParams::eCentreDrill:
 		{
 			// First a cylinder to represent the shaft.
-			double tool_tip_length = (m_params.m_diameter / 2) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
-			double shaft_length = m_params.m_tool_length_offset - tool_tip_length;
+			double tool_tip_length = (m_params.m_diameter / 2) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
+			double non_cutting_shaft_length = m_params.m_tool_length_offset - tool_tip_length - m_params.m_cutting_edge_height;
 
 			gp_Pnt shaft_start_location( tool_tip_location );
-			shaft_start_location.SetZ( tool_tip_location.Z() + tool_tip_length );
-
+			shaft_start_location.SetZ( tool_tip_location.Z() + tool_tip_length + m_params.m_cutting_edge_height );
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (m_params.m_diameter / 2) * 2.0, non_cutting_shaft_length );
 
-			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, m_params.m_diameter / 2, shaft_length );
+			gp_Pnt cutting_shaft_start_location( tool_tip_location );
+			cutting_shaft_start_location.SetZ( tool_tip_location.Z() + tool_tip_length );
+			gp_Ax2 cutting_shaft_position_and_orientation( cutting_shaft_start_location, orientation );
+			BRepPrimAPI_MakeCylinder cutting_shaft( cutting_shaft_position_and_orientation, m_params.m_diameter / 2, m_params.m_cutting_edge_height );
 
 			// And a cone for the tip.
-			// double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (2 * PI);
-			gp_Ax2 tip_position_and_orientation( shaft_start_location, gp_Dir(0,0,-1) );
-
+			gp_Ax2 tip_position_and_orientation( cutting_shaft_start_location, gp_Dir(0,0,-1) );
 			BRepPrimAPI_MakeCone tool_tip( tip_position_and_orientation,
 							m_params.m_diameter/2,
 							m_params.m_flat_radius,
@@ -852,6 +860,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			BRep_Builder aBuilder;
 			aBuilder.MakeCompound (cutting_tool_shape);
 			aBuilder.Add (cutting_tool_shape, shaft.Shape());
+			aBuilder.Add (cutting_tool_shape, cutting_shaft.Shape());
 			aBuilder.Add (cutting_tool_shape, tool_tip.Shape());
 			return cutting_tool_shape;
 		}
@@ -859,7 +868,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 		case CCuttingToolParams::eDrill:
 		{
 			// First a cylinder to represent the shaft.
-			double tool_tip_length = (m_params.m_diameter / 2) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
+			double tool_tip_length = (m_params.m_diameter / 2) * tan( degrees_to_radians(90 - m_params.m_cutting_edge_angle));
 			double shaft_length = m_params.m_tool_length_offset - tool_tip_length;
 
 			gp_Pnt shaft_start_location( tool_tip_location );
@@ -870,7 +879,6 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, m_params.m_diameter / 2, shaft_length );
 
 			// And a cone for the tip.
-			// double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (2 * PI);
 			gp_Ax2 tip_position_and_orientation( shaft_start_location, gp_Dir(0,0,-1) );
 
 			BRepPrimAPI_MakeCone tool_tip( tip_position_and_orientation,
@@ -886,16 +894,12 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			return cutting_tool_shape;
 		}
 
-		/*
 		case CCuttingToolParams::eChamfer:
 		{
 			// First a cylinder to represent the shaft.
-			double tool_tip_length_a = (m_params.m_diameter / 2) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
-			double tool_tip_length_b = (m_params.m_flat_radius) * tan( 90 - (m_params.m_cutting_edge_angle / 2));
+			double tool_tip_length_a = (m_params.m_diameter / 2) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
+			double tool_tip_length_b = (m_params.m_flat_radius)  * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
 			double tool_tip_length = tool_tip_length_a - tool_tip_length_b;
-
-			printf("cutting_edge_angle=%lf\n", m_params.m_cutting_edge_angle);
-			printf("a=%lf, b=%lf final=%lf\n", tool_tip_length_a, tool_tip_length_b, tool_tip_length );
 
 			double shaft_length = m_params.m_tool_length_offset - tool_tip_length;
 
@@ -904,7 +908,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
-			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, m_params.m_diameter / 2, shaft_length );
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (m_params.m_diameter / 2) * 0.5, shaft_length );
 
 			// And a cone for the tip.
 			// double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (2 * PI);
@@ -922,7 +926,6 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			aBuilder.Add (cutting_tool_shape, tool_tip.Shape());
 			return cutting_tool_shape;
 		}
-		*/
 
 		case CCuttingToolParams::eBallEndMill:
 		{
