@@ -356,12 +356,15 @@ void CProgram::RewritePythonProgram()
 	CZigZag::number_for_stl_file = 1;
 	CAdaptive::number_for_stl_file = 1;
 
+	bool kurve_module_needed = false;
+	bool area_module_needed = false;
 	bool profile_op_exists = false;
 	bool pocket_op_exists = false;
 	bool zigzag_op_exists = false;
 	bool adaptive_op_exists = false;
 	bool drilling_op_exists = false;
 	bool counterbore_op_exists = false;
+	bool rough_turning_op_exists = false;
 
 	typedef std::vector< COp * > OperationsMap_t;
 	OperationsMap_t operations;
@@ -379,11 +382,19 @@ void CProgram::RewritePythonProgram()
 
 		if(object->GetType() == ProfileType)
 		{
-			if(((CProfile*)object)->m_active)profile_op_exists = true;
+			if(((CProfile*)object)->m_active)
+			{
+				kurve_module_needed = true;
+				profile_op_exists = true;
+			}
 		}
 		else if(object->GetType() == PocketType)
 		{
-			if(((CPocket*)object)->m_active)pocket_op_exists = true;
+			if(((CPocket*)object)->m_active)
+			{
+				area_module_needed = true;
+				pocket_op_exists = true;
+			}
 		}
 		else if(object->GetType() == ZigZagType)
 		{
@@ -401,6 +412,15 @@ void CProgram::RewritePythonProgram()
 		{
 			counterbore_op_exists = true;
 		}
+		else if(object->GetType() == TurnRoughType)
+		{
+			if(((CProfile*)object)->m_active)
+			{
+				kurve_module_needed = true;
+				area_module_needed = true;
+				rough_turning_op_exists = true;
+			}
+		}
 	}
 
 	// Sort the operations in order of execution_order and then by cutting_tool_number
@@ -413,19 +433,27 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
 #endif
 	// kurve related things
-	if(profile_op_exists)
+	if(kurve_module_needed)
 	{
 		theApp.m_program_canvas->AppendText(_T("import kurve\n"));
+	}
+
+	if(profile_op_exists)
+	{
 		theApp.m_program_canvas->AppendText(_T("import kurve_funcs\n"));
 	}
 
 	// area related things
-	if(pocket_op_exists)
+	if(area_module_needed)
 	{
 		theApp.m_program_canvas->AppendText(_T("import area\n"));
 		theApp.m_program_canvas->AppendText(_T("area.set_units("));
 		theApp.m_program_canvas->AppendText(m_units);
 		theApp.m_program_canvas->AppendText(_T(")\n"));
+	}
+
+	if(pocket_op_exists)
+	{
 		theApp.m_program_canvas->AppendText(_T("import area_funcs\n"));
 	}
 
@@ -458,6 +486,12 @@ void CProgram::RewritePythonProgram()
 	if(counterbore_op_exists)
 	{
 		theApp.m_program_canvas->AppendText(_T("import circular_pocket as circular\n"));
+		theApp.m_program_canvas->AppendText(_T("\n"));
+	}
+
+	if(rough_turning_op_exists)
+	{
+		theApp.m_program_canvas->AppendText(_T("import turning\n"));
 		theApp.m_program_canvas->AppendText(_T("\n"));
 	}
 

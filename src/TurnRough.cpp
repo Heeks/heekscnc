@@ -11,9 +11,7 @@
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "interface/HeeksObj.h"
-#include "interface/PropertyDouble.h"
-#include "interface/PropertyChoice.h"
-#include "interface/PropertyVertex.h"
+#include "interface/PropertyLength.h"
 #include "interface/PropertyCheck.h"
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
@@ -25,34 +23,41 @@
 
 CTurnRoughParams::CTurnRoughParams()
 {
-	m_tool_number = 0;
-	m_cutter_radius = 1.0;
-	m_driven_point = 0;
-	m_front_angle = 95;
-	m_tool_angle = 60;
-	m_back_angle = 25;
 	m_outside = true;
 	m_front = true;
-	m_face = false;
+	m_facing = false;
+	m_clearance = 0.0;
 }
 
 void CTurnRoughParams::set_initial_values()
 {
 	CNCConfig config;
-	config.Read(_T("TurnRoughCutterRadius"), &m_cutter_radius, 1);
-	// to do, the other parameters
+	config.Read(_T("TurnRoughOutside"), &m_outside, true);
+	config.Read(_T("TurnRoughFront"), &m_front, true);
+	config.Read(_T("TurnRoughFacing"), &m_facing, false);
+	config.Read(_T("TurnRoughClearance"), &m_clearance, 2.0);
 }
 
 void CTurnRoughParams::write_values_to_config()
 {
 	CNCConfig config;
-	config.Write(_T("TurnRoughCutterRadius"), m_cutter_radius);
-	// to do, the other parameters
+	config.Write(_T("TurnRoughOutside"), m_outside);
+	config.Write(_T("TurnRoughFront"), m_front);
+	config.Write(_T("TurnRoughFacing"), m_facing);
+	config.Write(_T("TurnRoughClearance"), m_clearance);
 }
+
+static void on_set_outside(bool value, HeeksObj* object){((CTurnRough*)object)->m_turn_rough_params.m_outside = value;}
+static void on_set_front(bool value, HeeksObj* object){((CTurnRough*)object)->m_turn_rough_params.m_front = value;}
+static void on_set_facing(bool value, HeeksObj* object){((CTurnRough*)object)->m_turn_rough_params.m_facing = value;}
+static void on_set_clearance(double value, HeeksObj* object){((CTurnRough*)object)->m_turn_rough_params.m_clearance = value;}
 
 void CTurnRoughParams::GetProperties(CTurnRough* parent, std::list<Property *> *list)
 {
-
+	list->push_back(new PropertyCheck(_T("outside"), m_outside, parent, on_set_outside));
+	list->push_back(new PropertyCheck(_T("front"), m_front, parent, on_set_front));
+	list->push_back(new PropertyCheck(_T("facing"), m_facing, parent, on_set_facing));
+	list->push_back(new PropertyLength(_T("clearance"), m_clearance, parent, on_set_clearance));
 }
 
 void CTurnRoughParams::WriteXMLAttributes(TiXmlNode *root)
@@ -60,12 +65,19 @@ void CTurnRoughParams::WriteXMLAttributes(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
-	//element->SetDoubleAttribute("side", m_tool_on_side);
+	element->SetAttribute("outside", m_outside ? 1:0);
+	element->SetAttribute("front", m_front ? 1:0);
+	element->SetAttribute("facing", m_facing ? 1:0);
+	element->SetDoubleAttribute("clearance", m_clearance);
 }
 
 void CTurnRoughParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	//pElem->Attribute("side", &m_tool_on_side);
+	int int_for_bool;
+	pElem->Attribute("outside", &int_for_bool); m_outside = (int_for_bool != 0);
+	pElem->Attribute("front", &int_for_bool); m_front = (int_for_bool != 0);
+	pElem->Attribute("facing", &int_for_bool); m_facing = (int_for_bool != 0);
+	pElem->Attribute("clearance", &m_clearance);
 }
 
 void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture)
@@ -204,19 +216,33 @@ void CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, const CFix
 	{
 		WriteSketchDefn(object, sketch, pFixture);
 
+		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+
 		// add the machining command
 		theApp.m_program_canvas->AppendText(wxString::Format(_T("turning.rough(k%d, "), sketch));
-		theApp.m_program_canvas->AppendText(m_turn_rough_params.m_cutter_radius / theApp.m_program->m_units);
+		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_corner_radius / theApp.m_program->m_units);
 		theApp.m_program_canvas->AppendText(_T(", "));
-		theApp.m_program_canvas->AppendText(m_turn_rough_params.m_front_angle);
+		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_tool_angle);
+		theApp.m_program_canvas->AppendText(_T(", "));
+		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_front_angle);
+		theApp.m_program_canvas->AppendText(_T(", "));
+		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_back_angle);
+		theApp.m_program_canvas->AppendText(_T(", "));
+		theApp.m_program_canvas->AppendText(m_turn_rough_params.m_clearance);
 		theApp.m_program_canvas->AppendText(_T(")\n"));
-		// to do, the other parameters
 	}
 }
 
 void CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram(pFixture);
+	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+	if (pCuttingTool == NULL)
+	{
+		wxMessageBox(_T("Cannot generate GCode for profile without a cutting tool assigned"));
+		return;
+	} // End if - then
+
+	CSpeedOp::AppendTextToProgram(pFixture);
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -278,7 +304,7 @@ void CTurnRough::GetProperties(std::list<Property *> *list)
 
 	m_turn_rough_params.GetProperties(this, list);
 
-	COp::GetProperties(list);
+	CSpeedOp::GetProperties(list);
 }
 
 HeeksObj *CTurnRough::MakeACopy(void)const
