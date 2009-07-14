@@ -257,7 +257,7 @@ void CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 		if(sketch_order == SketchOrderTypeBad)
 		{
 			re_ordered_sketch = object->MakeACopy();
-			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
+			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder, false);
 			object = re_ordered_sketch;
 		}
 
