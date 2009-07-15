@@ -13,6 +13,13 @@
 #include "interface/PropertyColor.h"
 #include "interface/PropertyList.h"
 #include "CNCConfig.h"
+#include "CuttingTool.h"
+
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Compound.hxx>
+#include <BRep_Builder.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
+
 
 #include <sstream>
 
@@ -190,6 +197,7 @@ void ColouredPath::glCommands()
 		CNCCode::prev_po = po;
 	}
 	glEnd();
+
 }
 
 void ColouredPath::GetBox(CBox &box)
@@ -254,6 +262,7 @@ void CNCCodeBlock::glCommands(bool select, bool marked, bool no_color)
 	}
 
 	if(marked)glLineWidth(1);
+
 }
 
 void CNCCodeBlock::GetBox(CBox &box)
@@ -532,6 +541,16 @@ void CNCCode::glCommands(bool select, bool marked, bool no_color)
 
 		glEndList();
 	}
+
+	/* This is only here for debugging.
+	try {
+		TopoDS_Shape tool_shape = GetShape();
+		HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_shape), NULL, HeeksColor(234, 123, 89) );
+		pToolSolid->glCommands( true, false, true );
+		delete pToolSolid;
+	} catch(...) { }
+	*/
+
 }
 
 void CNCCode::GetBox(CBox &box)
@@ -711,3 +730,75 @@ void CNCCode::HighlightBlock(long pos)
 	}
 	DestroyGLLists();
 }
+
+/**
+	Use the CCuttingTool::GetShape() call to get a shape object that represents the cutting
+	tool and project it along the tool paths defined by this CNCCode class.  The result of
+	this will be a solid shape that represents what will be missing when this NC code
+	is executed.  We can use this to 'apply' the NC operations to the graphical solids
+	in the data model.
+
+	This version doesn't interpolate the tool's graphics between endpoints.  It just
+	draws a cutting tool at each endpoint in the GCode.
+ */
+TopoDS_Shape CNCCode::GetShape() const
+{
+	TopoDS_Compound tool_path_shape;
+	BRep_Builder builder;
+
+	builder.MakeCompound (tool_path_shape);
+
+	std::map<int, TopoDS_Shape> tools;
+
+	PathObject *pPreviousPoint = NULL;
+	for(std::list<CNCCodeBlock*>::const_iterator l_itCodeBlock = m_blocks.begin(); l_itCodeBlock != m_blocks.end(); l_itCodeBlock++)
+	{
+		for (std::list<ColouredPath>::const_iterator l_itColouredPath = (*l_itCodeBlock)->m_line_strips.begin();
+			l_itColouredPath != (*l_itCodeBlock)->m_line_strips.end(); l_itColouredPath++)
+		{
+			for (std::list< PathObject* >::const_iterator l_itPoint = l_itColouredPath->m_points.begin();
+				l_itPoint != l_itColouredPath->m_points.end(); l_itPoint++)
+			{
+				if (pPreviousPoint == NULL)
+				{
+					pPreviousPoint = *l_itPoint;
+				} // End if - then
+				else
+				{
+					// We've moved from the previous point to this one.  I would love to use the Sweep
+					// functionality in OpenCascade to interpolate but I can't figure it out.  I will
+					// approximate this by manually interpolating the tool's position between these
+					// two points and add the result to the tool_shape_path.
+
+					CCuttingTool *pCuttingTool = CCuttingTool::Find( (*l_itPoint)->m_cutting_tool_number );
+					if (pCuttingTool != NULL)
+					{
+						if (tools.find( (*l_itPoint)->m_cutting_tool_number ) == tools.end())
+						{
+							try {
+								tools.insert( std::make_pair( (*l_itPoint)->m_cutting_tool_number, pCuttingTool->GetShape() ) );
+							} catch(...) 
+							{ 
+								// There must be something wrong with the parameters that describe
+								// the cutting tool.  Just skip this one.
+								continue;
+							}
+						} // End if - then
+	
+						// Now move the tool to this point's location.
+						gp_Trsf move;
+						move.SetTranslation( gp_Pnt(0,0,0), gp_Pnt((*l_itPoint)->m_x[0], (*l_itPoint)->m_x[1], (*l_itPoint)->m_x[2]) );
+						TopoDS_Shape tool = BRepBuilderAPI_Transform( tools[ (*l_itPoint)->m_cutting_tool_number ], move, true );
+
+						builder.Add (tool_path_shape, tool);
+					} // End if - then
+				} // End if - else
+			} // End for
+		} // End for
+	} // End for
+
+	return(tool_path_shape);
+
+} // End GetToolSolid() method
+
+

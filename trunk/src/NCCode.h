@@ -175,4 +175,6 @@ public:
 	void SetTextCtrl(wxTextCtrl *textCtrl);
 	void FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1);
 	void HighlightBlock(long pos);
+
+	TopoDS_Shape GetShape() const;
 };
