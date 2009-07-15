@@ -15,6 +15,8 @@
 #include "interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
 
+#include <TopoDS_Shape.hxx>
+
 enum ColorEnum{
 	ColorDefaultType,
 	ColorBlockType,

@@ -12,6 +12,7 @@
 #include "interface/MarkedObject.h"
 #include "interface/PropertyColor.h"
 #include "interface/PropertyList.h"
+#include "interface/Tool.h"
 #include "CNCConfig.h"
 #include "CuttingTool.h"
 
@@ -572,8 +573,46 @@ void CNCCode::GetProperties(std::list<Property *> *list)
 	HeeksObj::GetProperties(list);
 }
 
+class ApplyNCCode: public Tool{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Apply NC Code to solids");}
+	void Run()
+	{
+		printf("ApplyNCCode::Run() called\n");
+
+		HeeksObj* operations = theApp.m_program->m_operations;
+
+		printf("Found NC code.\n");
+
+		TopoDS_Shape tool_path = theApp.m_program->m_nc_code->GetShape();
+		HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_path), _T("NC Tool Path"), HeeksColor(234, 123, 89) );
+
+		for(HeeksObj* object = operations->GetFirstChild(); object; object = operations->GetNextChild())
+		// 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
+		{
+			printf("Intersecting solid with tool path\n");
+
+			std::list<HeeksObj *> cutting_list;
+			cutting_list.push_back( pToolSolid );	// using this one.
+			cutting_list.push_back( object );	// Cut from this first one
+
+			HeeksObj *new_object = heeksCAD->Cut( cutting_list );
+			heeksCAD->AddUndoably( new_object, NULL );
+			heeksCAD->WasModified(object);
+		} // End if - then
+		// delete pToolSolid;
+
+		heeksCAD->Repaint();
+	}
+	wxString BitmapPath(){ return _T("setinactive");}
+};
+
+static ApplyNCCode apply_nc_code;
+
 void CNCCode::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
+	// t_list->push_back(&apply_nc_code);	// Comment this out.  It's not ready yet.
+
 	HeeksObj::GetTools(t_list, p);
 }
 
