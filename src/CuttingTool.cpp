@@ -89,7 +89,7 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_cutting_edge_height"), &m_cutting_edge_height, 4 * m_diameter);
 
 	// The following are all turning tool parameters
-	config.Read(_T("m_orientation"), &m_orientation, 0);
+	config.Read(_T("m_orientation"), &m_orientation, 6);
 	config.Read(_T("m_x_offset"), &m_x_offset, 0);
 	config.Read(_T("m_front_angle"), &m_front_angle, 95);
 	config.Read(_T("m_tool_angle"), &m_tool_angle, 60);
@@ -946,6 +946,128 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			aBuilder.Add (cutting_tool_shape, ball.Shape());
 			return cutting_tool_shape;
 		}
+
+		case CCuttingToolParams::eTurningTool:
+		{
+			// First draw the cutting tip.
+			double triangle_radius = 8.0;	// mm
+			double cutting_tip_thickness = 3.0;	// mm
+
+			gp_Trsf rotation;
+
+			gp_Pnt p1(0.0, triangle_radius, 0.0);
+			rotation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(0) );
+			p1.Transform(rotation);
+
+			rotation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(+1 * ((360 - m_params.m_tool_angle)/2)) );
+			gp_Pnt p2(p1);
+			p2.Transform(rotation);
+
+			rotation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(-1 * ((360 - m_params.m_tool_angle)/2)) );
+			gp_Pnt p3(p1);
+			p3.Transform(rotation);
+
+			Handle(Geom_TrimmedCurve) line1 = GC_MakeSegment(p1,p2);
+			Handle(Geom_TrimmedCurve) line2 = GC_MakeSegment(p2,p3);
+			Handle(Geom_TrimmedCurve) line3 = GC_MakeSegment(p3,p1);
+
+			TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge( line1 );
+			TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge( line2 );
+			TopoDS_Edge edge3 = BRepBuilderAPI_MakeEdge( line3 );
+
+			TopoDS_Wire wire = BRepBuilderAPI_MakeWire( edge1, edge2, edge3 );
+			TopoDS_Face face = BRepBuilderAPI_MakeFace( wire );
+			gp_Vec vec( 0,0, cutting_tip_thickness );
+			TopoDS_Shape cutting_tip = BRepPrimAPI_MakePrism( face, vec );
+
+			// Now make the supporting shaft
+			gp_Pnt p4(p3); p4.SetZ( p3.Z() + cutting_tip_thickness );
+			gp_Pnt p5(p2); p5.SetZ( p2.Z() + cutting_tip_thickness );
+
+			Handle(Geom_TrimmedCurve) shaft_line1 = GC_MakeSegment(p2,p3);
+			Handle(Geom_TrimmedCurve) shaft_line2 = GC_MakeSegment(p3,p4);
+			Handle(Geom_TrimmedCurve) shaft_line3 = GC_MakeSegment(p4,p5);
+			Handle(Geom_TrimmedCurve) shaft_line4 = GC_MakeSegment(p5,p2);
+
+			TopoDS_Edge shaft_edge1 = BRepBuilderAPI_MakeEdge( shaft_line1 );
+			TopoDS_Edge shaft_edge2 = BRepBuilderAPI_MakeEdge( shaft_line2 );
+			TopoDS_Edge shaft_edge3 = BRepBuilderAPI_MakeEdge( shaft_line3 );
+			TopoDS_Edge shaft_edge4 = BRepBuilderAPI_MakeEdge( shaft_line4 );
+
+			TopoDS_Wire shaft_wire = BRepBuilderAPI_MakeWire( shaft_edge1, shaft_edge2, shaft_edge3, shaft_edge4 );
+			TopoDS_Face shaft_face = BRepBuilderAPI_MakeFace( shaft_wire );
+			gp_Vec shaft_vec( 0, (-1 * m_params.m_tool_length_offset), 0 );
+			TopoDS_Shape shaft = BRepPrimAPI_MakePrism( shaft_face, shaft_vec );
+	
+			// Aggregate the shaft and cutting tip	
+			TopoDS_Compound cutting_tool_compound;
+			BRep_Builder aBuilder;
+			aBuilder.MakeCompound (cutting_tool_compound);
+			aBuilder.Add (cutting_tool_compound, cutting_tip);
+			aBuilder.Add (cutting_tool_compound, shaft);
+
+			// Now orient the tool as per its settings.
+			gp_Trsf tool_holder_orientation;
+			gp_Trsf orient_for_lathe_use;
+			TopoDS_Shape cutting_tool_shape = cutting_tool_compound;
+
+
+			switch (m_params.m_orientation)
+			{
+				case 1: // South East
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(45 - 90) );
+					break;
+
+				case 2: // South West
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(123 - 90) );
+					break;
+
+				case 3: // North West
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(225 - 90) );
+					break;
+
+				case 4: // North East
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(-45 - 90) );
+					break;
+
+				case 5: // East
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(0 - 90) );
+					break;
+
+				case 6: // South
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(+90 - 90) );
+					break;
+
+				case 7: // West
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(180 - 90) );
+					break;
+
+				case 8: // North
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(-90 - 90) );
+					break;
+
+				case 9: // Boring (straight along Y axis)
+				default:
+					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(1,0,0)), degrees_to_radians(90.0) );
+					break;
+
+			} // End switch
+
+			// Rotate from drawing orientation (for easy mathematics in this code) to tool holder orientation.
+			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_compound, tool_holder_orientation, false );
+
+			// Rotate to use axes typically used for lathe work.
+			orient_for_lathe_use.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,1,0) ), degrees_to_radians(-90.0) );
+			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_shape, orient_for_lathe_use, false );
+
+			orient_for_lathe_use.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1) ), degrees_to_radians(90.0) );
+			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_shape, orient_for_lathe_use, false );
+
+			return(cutting_tool_shape);
+
+		}
+
+		
 
 		case CCuttingToolParams::eEndmill:
 		case CCuttingToolParams::eSlotCutter:
