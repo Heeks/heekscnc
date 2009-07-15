@@ -171,6 +171,13 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 
 void CPocket::AppendTextToProgram(const CFixture *pFixture)
 {
+	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+	if (pCuttingTool == NULL)
+	{
+		wxMessageBox(_T("Cannot generate GCode for pocket without a cutting tool assigned"));
+		return;
+	} // End if - then
+
 	CDepthOp::AppendTextToProgram(pFixture);
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
