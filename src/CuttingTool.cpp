@@ -1026,7 +1026,6 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			gp_Trsf orient_for_lathe_use;
 			TopoDS_Shape cutting_tool_shape = cutting_tool_compound;
 
-
 			switch (m_params.m_orientation)
 			{
 				case 1: // South East
@@ -1072,6 +1071,8 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_compound, tool_holder_orientation, false );
 
 			// Rotate to use axes typically used for lathe work.
+			// i.e. z axis along the bed (from head stock to tail stock as z increases)
+			// and x across the bed.
 			orient_for_lathe_use.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,1,0) ), degrees_to_radians(-90.0) );
 			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_shape, orient_for_lathe_use, false );
 
@@ -1079,10 +1080,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_shape, orient_for_lathe_use, false );
 
 			return(cutting_tool_shape);
-
 		}
-
-		
 
 		case CCuttingToolParams::eEndmill:
 		case CCuttingToolParams::eSlotCutter:
@@ -1104,6 +1102,14 @@ TopoDS_Shape CCuttingTool::GetShape() const
 		}
 	} // End switch
    } // End try
+   // These are due to poor parameter settings resulting in negative lengths and the like.  I need
+   // to work through the various parameters to either ensure they're correct or don't try
+   // to construct a shape.
+   catch (Standard_ConstructionError)
+   {
+	printf("Construction error thrown while generating tool shape\n");
+	throw;	// Re-throw the exception.
+   } // End catch
    catch (Standard_DomainError)
    {
 	printf("Domain error thrown while generating tool shape\n");
