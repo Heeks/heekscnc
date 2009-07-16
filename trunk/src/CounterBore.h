@@ -122,7 +122,7 @@ public:
 	CCounterBore():CDepthOp(GetTypeString()){}
 	CCounterBore(	const Symbols_t &symbols, 
 			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
+		: CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_symbols(symbols)
 	{
 		m_params.set_initial_values( cutting_tool_number );
 

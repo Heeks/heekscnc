@@ -144,6 +144,8 @@ public:
 
 	TopoDS_Shape GetShape() const;
 
+	double CuttingRadius(const bool express_in_drawing_units = false) const;
+
 }; // End CCuttingTool class definition.
 
 

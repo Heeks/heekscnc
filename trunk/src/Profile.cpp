@@ -214,8 +214,8 @@ void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 					CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 					if (pCuttingTool != NULL)
 					{
-						x = s[0] + off_vec[0] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[0] * AUTO_ROLL_ON_OFF_SIZE;
-						y = s[1] + off_vec[1] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) - v[1] * AUTO_ROLL_ON_OFF_SIZE;
+						x = s[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) - v[0] * AUTO_ROLL_ON_OFF_SIZE;
+						y = s[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) - v[1] * AUTO_ROLL_ON_OFF_SIZE;
 					} // End if - then
 				}
 			}
@@ -252,8 +252,8 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 						{
 							double off_vec[3] = {-v[1], v[0], 0.0};
 							if(m_profile_params.m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
-							x = e[0] + off_vec[0] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[0] * AUTO_ROLL_ON_OFF_SIZE;
-							y = e[1] + off_vec[1] * (pCuttingTool->m_params.m_diameter/2 + AUTO_ROLL_ON_OFF_SIZE) + v[1] * AUTO_ROLL_ON_OFF_SIZE;
+							x = e[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) + v[0] * AUTO_ROLL_ON_OFF_SIZE;
+							y = e[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) + v[1] * AUTO_ROLL_ON_OFF_SIZE;
 						} // End if - then
 					}
 				}
@@ -541,7 +541,6 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 	{
 		double startx, starty, finishx, finishy;
 
-
 		wxString start_string;
 		if(m_profile_params.m_start_given)
 		{
@@ -641,7 +640,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 				if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
 				{
-					roll_on_point( pKurve, side_string.c_str(), pCuttingTool->m_params.m_diameter/2, pRollOnPointX, pRollOnPointY);
+					roll_on_point( pKurve, side_string.c_str(), pCuttingTool->CuttingRadius(), pRollOnPointX, pRollOnPointY);
 				} // End if - then
 
 				roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
