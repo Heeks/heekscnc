@@ -6,6 +6,7 @@
  */
 
 #include "stdafx.h"
+#include <math.h>
 #include "NCCode.h"
 #include "tinyxml/tinyxml.h"
 #include "OutputCanvas.h"
@@ -22,9 +23,6 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <Standard_Failure.hxx>
-#include <Handle_TColgp_HArray1OfPnt2d.hxx>
-#include <Geom2dAPI_Interpolate.hxx>
-#include <TColgp_HArray1OfPnt2d.hxx>
 
 #include <wx/progdlg.h>
 
@@ -627,13 +625,14 @@ class ApplyNCCode: public Tool{
 				cutting_list.push_back( pToolSolid );	// using this one.
 
 				heeksCAD->Cut( cutting_list );
-			} // End if - then
+			} // End for
 
 			// Cleanup the tool path solid.  We don't want it in the data model.
 			delete pToolSolid;
 
 			heeksCAD->Repaint();
 		} // End try
+		catch(Standard_ConstructionError) { }
 		catch(Standard_DomainError)
 		{
 			wxMessageBox(_T("Standard_DomainError thrown during shape operations\n"));
@@ -655,20 +654,32 @@ class AddToolPathSolid: public Tool{
 	const wxChar* GetTitle(){return _("Add solid representing tool path");}
 	void Run()
 	{
-		// This stuff takes a long time.  Give the user something to look at in the meantime.
-		int progress = 1;
-		wxProgressDialog progress_bar(wxString(_T("Applying NC operations to solid")), wxString(_T("Generating tool path solid")) );
+		try {
+			// This stuff takes a long time.  Give the user something to look at in the meantime.
+			int progress = 1;
+			wxProgressDialog progress_bar(wxString(_T("Applying NC operations to solid")), wxString(_T("Generating tool path solid")) );
 
-		// Get a solid that represents all the cutting tools moving through the
-		// paths defined in the GCode.
-		TopoDS_Shape tool_path = theApp.m_program->m_nc_code->GetShape();
+			// Get a solid that represents all the cutting tools moving through the
+			// paths defined in the GCode.
+			TopoDS_Shape tool_path = theApp.m_program->m_nc_code->GetShape();
 
-		// Create a solid object (temporarily) so that we can use the Cut() routine
-		// in the HeeksCAD project.
-		progress_bar.Update(++progress, wxString(_T("Converting tool path into solid object")));
-		HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_path), _T("NC Tool Path"), HeeksColor(234, 123, 89) );
-
-		heeksCAD->AddUndoably( pToolSolid, NULL );
+			// Create a solid object (temporarily) so that we can use the Cut() routine
+			// in the HeeksCAD project.
+			progress_bar.Update(++progress, wxString(_T("Converting tool path into solid object")));
+			HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_path), _T("NC Tool Path"), HeeksColor(234, 123, 89) );
+	
+			heeksCAD->AddUndoably( pToolSolid, NULL );
+		} // End try
+		catch(Standard_ConstructionError) { }
+		catch(Standard_DomainError)
+		{
+			wxMessageBox(_T("Standard_DomainError thrown during shape operations\n"));
+		}
+		catch(...)
+		{
+			// Let's not kill everything just because I can't write clean code.
+			wxMessageBox(_T("Unexpected exception thrown during shape operations\n"));
+		}
 	}
 	wxString BitmapPath(){ return _T("setinactive");}
 };
@@ -837,6 +848,80 @@ void CNCCode::HighlightBlock(long pos)
 	DestroyGLLists();
 }
 
+
+
+static double Distance( const gp_Pnt start, const gp_Pnt end )
+{
+	double x_squared = (start.X() - end.X()) * (start.X() - end.X());
+	double y_squared = (start.Y() - end.Y()) * (start.Y() - end.Y());
+	double z_squared = (start.Z() - end.Z()) * (start.Z() - end.Z());
+
+	return( sqrt( x_squared + y_squared + z_squared ) );
+} // End Distance() routine
+
+
+/**
+	Generate as many points as is necessary such that the tool turns to the next
+	cutting edge and, in that time (based on the spindle speed) advances at the
+	feed rate.  We want to calculate material removal rate on a per-cutting edge
+	basis.
+ */
+std::list<gp_Pnt> PathLine::Interpolate(
+	const gp_Pnt & start_point,
+	const gp_Pnt & end_point,
+	const double feed_rate, 
+	const double spindle_rpm, 
+	const unsigned int number_of_cutting_edges) const
+{
+	std::list<gp_Pnt> points;
+
+	double spindle_rps = spindle_rpm / 60.0;	// Revolutions Per Second.
+	double time_between_cutting_edges = (1 / spindle_rps) / number_of_cutting_edges;
+
+	double advance_distance = (feed_rate / 60.0) * time_between_cutting_edges;
+	double number_of_interpolated_points = Distance( start_point, end_point ) / advance_distance;
+
+	for ( int i=0; i < int(floor(number_of_interpolated_points)); i++)
+	{
+		double x = (((start_point.X() - end_point.X()) / number_of_interpolated_points) * i) + start_point.X();
+		double y = (((start_point.Y() - end_point.Y()) / number_of_interpolated_points) * i) + start_point.Y();
+		double z = (((start_point.Z() - end_point.Z()) / number_of_interpolated_points) * i) + start_point.Z();
+
+		points.push_back( gp_Pnt( x, y, z ) );
+	} // End for
+
+	points.push_back( end_point );
+
+	return(points);
+
+} // End Interpolate() method
+
+
+std::list<gp_Pnt> PathArc::Interpolate(
+	const gp_Pnt & start_point,
+	const gp_Pnt & end_point,
+	const double feed_rate, 
+	const double spindle_rpm, 
+	const unsigned int number_of_cutting_edges) const
+{
+	std::list<gp_Pnt> points;
+
+	/*
+	double spindle_rps = spindle_rpm / 60.0;	// Revolutions Per Second.
+	double time_between_cutting_edges = (1 / spindle_rps) / number_of_cutting_edges;
+	double advance_distance = (feed_rate / 60.0) * time_between_cutting_edges;
+	*/
+
+	points.push_back( start_point );
+	points.push_back( end_point );
+
+	return(points);
+
+} // End Interpolate() method
+
+
+
+
 /**
 	Use the CCuttingTool::GetShape() call to get a shape object that represents the cutting
 	tool and project it along the tool paths defined by this CNCCode class.  The result of
@@ -849,11 +934,11 @@ void CNCCode::HighlightBlock(long pos)
  */
 TopoDS_Shape CNCCode::GetShape() const
 {
-	// TopoDS_Compound tool_path_shape;
-	TopoDS_Shape tool_path_shape;
-	// BRep_Builder builder;
+	TopoDS_Compound tool_path_shape;
+	// TopoDS_Shape tool_path_shape;
+	BRep_Builder builder;
 
-	// builder.MakeCompound (tool_path_shape);
+	builder.MakeCompound (tool_path_shape);
 
 	std::map<int, TopoDS_Shape> tools;
 
@@ -900,42 +985,33 @@ TopoDS_Shape CNCCode::GetShape() const
 							}
 						} // End if - then
 
-					    gp_Pnt previous_point(pPreviousPoint->m_x[0], pPreviousPoint->m_x[1], pPreviousPoint->m_x[2] );
-					    gp_Pnt this_point((*l_itPoint)->m_x[0], (*l_itPoint)->m_x[1], (*l_itPoint)->m_x[2] );
+					    	gp_Pnt previous_point(pPreviousPoint->m_x[0], pPreviousPoint->m_x[1], pPreviousPoint->m_x[2] );
+					    	gp_Pnt this_point((*l_itPoint)->m_x[0], (*l_itPoint)->m_x[1], (*l_itPoint)->m_x[2] );
 
+						// Just put some values here for now.  The feed_rate and spindle_rpm will eventually come from
+						// the GCode.  The number_of_cutting_edges will come from the CCuttingTool class.
 
-					Handle(TColgp_HArray1OfPnt2d) harray = new TColgp_HArray1OfPnt2d (1,2); // sizing harray                
-					harray->SetValue(1,gp_Pnt2d ((pPreviousPoint)->m_x[0], (*l_itPoint)->m_x[1]));
-					harray->SetValue(2,gp_Pnt2d ((*l_itPoint)->m_x[0], (*l_itPoint)->m_x[1]));
-					Geom2dAPI_Interpolate anInterpolation(harray,Standard_False,0.01);   
-					anInterpolation.Perform(); 
-					if (anInterpolation.IsDone())
-					{
-						for( int i = harray->Lower();i<=harray->Upper();i++)
+						double feed_rate = 100.0;
+						double spindle_rpm = 50;
+						unsigned int number_of_cutting_edges = 2;
+
+						std::list<gp_Pnt> interpolated_points = (*l_itPoint)->Interpolate(previous_point, this_point, feed_rate, spindle_rpm, number_of_cutting_edges );
+						for (std::list<gp_Pnt>::const_iterator l_itPnt = interpolated_points.begin(); l_itPnt != interpolated_points.end(); l_itPnt++)
 						{
-							gp_Pnt2d P = harray->Value(i);
-							printf("point[%d] = %lf, %lf\n", i, P.X(), P.Y());
+							/*
+							printf("point %lf, %lf, %lf\n", l_itPnt->X(),
+							l_itPnt->Y(),
+							l_itPnt->Z() );
+							*/
+
+							progress_bar.Update( ++progress, wxString(_T("Generating tool path solid")) );
+							// Now move the tool to this point's location.
+							gp_Trsf move;
+							move.SetTranslation( gp_Pnt(0,0,0), *l_itPnt );
+							TopoDS_Shape tool = BRepBuilderAPI_Transform( tools[ (*l_itPoint)->m_cutting_tool_number ], move, true );
+
+							builder.Add (tool_path_shape, tool);
 						} // End for
-					} // End if - then
-	
-						progress_bar.Update( ++progress, wxString(_T("Generating tool path solid")) );
-						// Now move the tool to this point's location.
-						gp_Trsf move;
-						move.SetTranslation( gp_Pnt(0,0,0), gp_Pnt((*l_itPoint)->m_x[0], (*l_itPoint)->m_x[1], (*l_itPoint)->m_x[2]) );
-						TopoDS_Shape tool = BRepBuilderAPI_Transform( tools[ (*l_itPoint)->m_cutting_tool_number ], move, true );
-
-						// builder.Add (tool_path_shape, tool);
-						try {
-							TopoDS_Shape result = BRepAlgoAPI_Fuse(tool_path_shape, tool);
-							tool_path_shape = result;
-						} // End try
-						catch (Standard_Failure & error)
-						{
-							std::ostringstream l_ossError;
-							error.Print( l_ossError );
-
-							printf("Something went wrong. %s\n", l_ossError.str().c_str() );
-						} // End catch
 					} // End if - then
 				} // End if - else
 			} // End for
