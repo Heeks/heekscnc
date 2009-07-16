@@ -16,6 +16,7 @@
 #include "HeeksCNCTypes.h"
 
 #include <TopoDS_Shape.hxx>
+#include <gp_Pnt.hxx>
 
 enum ColorEnum{
 	ColorDefaultType,
@@ -56,6 +57,12 @@ public:
 	virtual void ReadFromXMLElement(TiXmlElement* pElem) = 0;
 	virtual void glVertices(const PathObject* prev_po){}
 	virtual PathObject *MakeACopy(void)const = 0;
+
+	virtual std::list<gp_Pnt> Interpolate( const gp_Pnt & start_point,
+					const gp_Pnt & end_point,
+					const double feed_rate, 
+					const double spindle_rpm, 
+					const unsigned int number_of_cutting_edges) const = 0;
 };
 
 class PathLine : public PathObject{
@@ -65,6 +72,13 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void glVertices(const PathObject* prev_po);
 	PathObject *MakeACopy(void)const{return new PathLine(*this);}
+
+	std::list<gp_Pnt> Interpolate( const gp_Pnt & start_point,
+					const gp_Pnt & end_point,
+					const double feed_rate, 
+					const double spindle_rpm, 
+					const unsigned int number_of_cutting_edges) const;
+
 };
 
 class PathArc : public PathObject{
@@ -77,6 +91,12 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void glVertices(const PathObject* prev_po);
 	PathObject *MakeACopy(void)const{return new PathArc(*this);}
+
+	std::list<gp_Pnt> Interpolate( const gp_Pnt & start_point,
+					const gp_Pnt & end_point,
+					const double feed_rate, 
+					const double spindle_rpm, 
+					const unsigned int number_of_cutting_edges) const;
 };
 
 class ColouredPath
