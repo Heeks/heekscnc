@@ -794,6 +794,7 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 {
         if(marked && !no_color)
         {
+		/*
 		try {
 			TopoDS_Shape tool_shape = GetShape();
 			HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_shape), NULL, HeeksColor(234, 123, 89) );
@@ -802,6 +803,7 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 		} // End try
 		catch(Standard_DomainError) { }
 		catch(...)  { }
+		*/
 	} // End if - then
 
 } // End glCommands() method
@@ -1116,5 +1118,59 @@ TopoDS_Shape CCuttingTool::GetShape() const
 	throw;	// Re-throw the exception.
    } // End catch
 } // End GetShape() method
+
+
+/**
+	The CuttingRadius is almost always the same as half the cutting tool's diameter.
+	The exception to this is if it's a chamfering bit.  In this case we
+	want to use the flat_radius plus a little bit.  i.e. if we're chamfering the edge
+	then we want to use the part of the cutting surface just a little way from
+	the flat radius.  If it has a flat radius of zero (i.e. it has a pointed end)
+	then it will be a small number.  If it is a carbide tipped bit then the
+	flat radius will allow for the area below the bit that doesn't cut.  In this
+	case we want to cut around the middle of the carbide tip.  In this case
+	the carbide tip should represent the full cutting edge height.  We can
+	use this method to make all these adjustments based on the cutting tool's
+	geometry and return a reasonable value.
+
+	If express_in_drawing_units is true then we need to divide by the drawing
+	units value.  We use metric (mm) internally and convert to inches only
+	if we need to and only as the last step in the process.  By default, return
+	the value in internal (metric) units.
+ */
+double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = false */ ) const
+{
+	double radius;
+
+	switch (m_params.m_type)
+	{
+		case CCuttingToolParams::eChamfer:
+			{
+				// We want to decide where, along the cutting edge, we want
+				// to machine.  Let's start with 1/3 of the way from the inside
+				// cutting edge so that, as we plunge it into the material, it
+				// cuts towards the outside.  We don't want to run right on
+				// the edge because we don't want to break the top off.
+
+				double proportion_near_centre = (1/3);	// one third from the centre-most point.
+				radius = (((m_params.m_diameter/2) - m_params.m_flat_radius) * proportion_near_centre) + m_params.m_flat_radius;
+			}
+			break;
+
+		case CCuttingToolParams::eDrill:
+		case CCuttingToolParams::eCentreDrill:
+		case CCuttingToolParams::eEndmill:
+		case CCuttingToolParams::eSlotCutter:
+		case CCuttingToolParams::eBallEndMill:
+		case CCuttingToolParams::eTurningTool:
+		default:
+			radius = m_params.m_diameter/2;
+	} // End switch
+
+	if (express_in_drawing_units) return(radius / theApp.m_program->m_units);
+	else return(radius);
+
+} // End CuttingRadius() method
+
 
 

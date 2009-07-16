@@ -11,6 +11,7 @@
 #define DEPTH_OP_HEADER
 
 #include "SpeedOp.h"
+#include <list>
 
 class CDepthOp;
 
@@ -24,7 +25,7 @@ public:
 
 	CDepthOpParams();
 
-	void set_initial_values(const int cutting_tool_number = -1);
+	void set_initial_values(const std::list<int> *sketches = NULL, const int cutting_tool_number = -1);
 	void write_values_to_config();
 	void GetProperties(CDepthOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -36,7 +37,11 @@ class CDepthOp : public CSpeedOp
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(const wxString& title, const int cutting_tool_number = -1 ):CSpeedOp(title, cutting_tool_number){m_depth_op_params.set_initial_values(cutting_tool_number);}
+	CDepthOp(const wxString& title, const std::list<int> *sketches = NULL, const int cutting_tool_number = -1 )
+		: CSpeedOp(title, cutting_tool_number)
+	{
+		m_depth_op_params.set_initial_values(sketches, cutting_tool_number);
+	}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);

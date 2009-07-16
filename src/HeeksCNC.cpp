@@ -163,6 +163,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 						drill_bits.push_back( *l_itTool );
 						break;
 
+					case CCuttingToolParams::eChamfer:
 					case CCuttingToolParams::eEndmill:
 					case CCuttingToolParams::eSlotCutter:
 					case CCuttingToolParams::eBallEndMill:

@@ -112,7 +112,7 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 		if (pCuttingTool != NULL)
 		{
-			if (pCuttingTool->m_params.m_diameter >= m_params.m_diameter)
+			if ((pCuttingTool->CuttingRadius() * 2.0) >= m_params.m_diameter)
 			{
 				std::ostringstream l_ossMsg;
 				l_ossMsg << "Error: Tool diameter (" << pCuttingTool->m_params.m_diameter << ") "
@@ -132,7 +132,7 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 				ss << "flush_nc()\ncircular_pocket( "
 							<< "x=" << point.X()/ theApp.m_program->m_units << ", "
 							<< "y=" << point.Y()/ theApp.m_program->m_units << ", "
-       		                         		<< "ToolDiameter=" << pCuttingTool->m_params.m_diameter / theApp.m_program->m_units << ", "
+       		                         		<< "ToolDiameter=" << (pCuttingTool->CuttingRadius(true) * 2.0) << ", "
        		                         		<< "HoleDiameter=" << m_params.m_diameter / theApp.m_program->m_units << ", "
        		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
        		                         		<< "StartHeight=" << (l_itLocation->z + m_depth_op_params.m_start_depth) / theApp.m_program->m_units << ", "
