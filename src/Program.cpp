@@ -577,26 +577,29 @@ void CProgram::RewritePythonProgram()
 			HeeksObj *object = (HeeksObj *) *l_itOperation;
 			if (object == NULL) continue;
 			
-			if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
-			{
-				// Select the right tool.
-				std::wostringstream l_ossValue;
-
-				CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
-				if (pCuttingTool != NULL)
-				{
-					l_ossValue << _T("comment( 'tool change to ") << pCuttingTool->m_title.c_str() << "')\n";
-				} // End if - then
-
-	
-				l_ossValue << "tool_change( id=" << ((COp *) object)->m_cutting_tool_number << ")\n";
-				theApp.m_program_canvas->AppendText(wxString(l_ossValue.str().c_str()).c_str());
-				current_tool = ((COp *) object)->m_cutting_tool_number;
-			} // End if - then
-
 			if(COp::IsAnOperation(object->GetType()))
 			{
-				((COp*)object)->AppendTextToProgram( *l_itFixture );
+				if(((COp*)object)->m_active)
+				{
+					if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
+					{
+						// Select the right tool.
+						std::wostringstream l_ossValue;
+
+						CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
+						if (pCuttingTool != NULL)
+						{
+							l_ossValue << _T("comment( 'tool change to ") << pCuttingTool->m_title.c_str() << "')\n";
+						} // End if - then
+
+
+						l_ossValue << "tool_change( id=" << ((COp *) object)->m_cutting_tool_number << ")\n";
+						theApp.m_program_canvas->AppendText(wxString(l_ossValue.str().c_str()).c_str());
+						current_tool = ((COp *) object)->m_cutting_tool_number;
+					} // End if - then
+
+					((COp*)object)->AppendTextToProgram( *l_itFixture );
+				}
 			}
 		} // End for - operation
 	} // End for - fixture
