@@ -573,36 +573,63 @@ void CNCCode::GetProperties(std::list<Property *> *list)
 	HeeksObj::GetProperties(list);
 }
 
+/**
+	Define an 'apply' button class so that we can apply a combination
+	of the cutting tools and the GCode paths into a solid and use it
+	to remove sections of the solids in the data model.
+ */
+
 class ApplyNCCode: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Apply NC Code to solids");}
 	void Run()
 	{
-		printf("ApplyNCCode::Run() called\n");
+		try {
+			// Get a solid that represents all the cutting tools moving through the
+			// paths defined in the GCode.
+			TopoDS_Shape tool_path = theApp.m_program->m_nc_code->GetShape();
 
-		HeeksObj* operations = theApp.m_program->m_operations;
+			// Create a solid object (temporarily) so that we can use the Cut() routine
+			// in the HeeksCAD project.
+			HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_path), _T("NC Tool Path"), HeeksColor(234, 123, 89) );
 
-		printf("Found NC code.\n");
+			// Aggregate a list of solid objects.  The Cut code re-arranges some of these
+			// objects so we don't want to traverse the same list we're changing.  Get our
+			// own list to traverse here first.
+			std::list<HeeksObj *> solids;
+			for(HeeksObj* object = heeksCAD->GetFirstObject(); object; object = heeksCAD->GetNextObject())
+			{
+				if (object->GetType() == SolidType) solids.push_back(object);
+			} // End for
 
-		TopoDS_Shape tool_path = theApp.m_program->m_nc_code->GetShape();
-		HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_path), _T("NC Tool Path"), HeeksColor(234, 123, 89) );
+			// And intersect the tool path object with every solid in the model.  Eventually, we
+			// may start looking at their names to see if they represent raw material or fixtures
+			// so that we can generate a collision warning.  That's for another day.
+			for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
+			{
+				if ((*l_itSolid)->GetType() != SolidType) continue;
 
-		for(HeeksObj* object = operations->GetFirstChild(); object; object = operations->GetNextChild())
-		// 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
+				std::list<HeeksObj *> cutting_list;
+				cutting_list.push_back( (*l_itSolid) );	// Cut from this first one
+				cutting_list.push_back( pToolSolid );	// using this one.
+
+				heeksCAD->Cut( cutting_list );
+			} // End if - then
+
+			// Cleanup the tool path solid.  We don't want it in the data model.
+			delete pToolSolid;
+
+			heeksCAD->Repaint();
+		} // End try
+		catch(Standard_DomainError)
 		{
-			printf("Intersecting solid with tool path\n");
-
-			std::list<HeeksObj *> cutting_list;
-			cutting_list.push_back( pToolSolid );	// using this one.
-			cutting_list.push_back( object );	// Cut from this first one
-
-			HeeksObj *new_object = heeksCAD->Cut( cutting_list );
-			heeksCAD->AddUndoably( new_object, NULL );
-			heeksCAD->WasModified(object);
-		} // End if - then
-		// delete pToolSolid;
-
-		heeksCAD->Repaint();
+			wxMessageBox(_T("Standard_DomainError thrown during shape operations\n"));
+		}
+		catch(...)
+		{
+			// Let's not kill everything just because I can't write clean code.
+			wxMessageBox(_T("Unexpected exception thrown during shape operations\n"));
+		}
 	}
 	wxString BitmapPath(){ return _T("setinactive");}
 };
@@ -611,7 +638,7 @@ static ApplyNCCode apply_nc_code;
 
 void CNCCode::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	// t_list->push_back(&apply_nc_code);	// Comment this out.  It's not ready yet.
+	// t_list->push_back(&apply_nc_code);	// It's not ready yet.
 
 	HeeksObj::GetTools(t_list, p);
 }
