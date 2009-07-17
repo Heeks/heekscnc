@@ -49,6 +49,12 @@ public:
 
 class PathObject{
 public:
+	typedef enum {
+		eLine = 0,
+		eArc
+	} eType_t;
+
+public:
 	double m_x[3];
 	int m_cutting_tool_number;
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
@@ -60,17 +66,11 @@ public:
 	virtual void ReadFromXMLElement(TiXmlElement* pElem) = 0;
 	virtual void glVertices(const PathObject* prev_po){}
 	virtual PathObject *MakeACopy(void)const = 0;
-
-	virtual std::list<gp_Pnt> Interpolate( const gp_Pnt & start_point,
-					const gp_Pnt & end_point,
-					const double feed_rate, 
-					const double spindle_rpm, 
-					const unsigned int number_of_cutting_edges) const = 0;
 };
 
 class PathLine : public PathObject{
 public:
-	int GetType(){return 0;}
+	int GetType(){return int(PathObject::eLine);}
 	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void glVertices(const PathObject* prev_po);
@@ -89,14 +89,15 @@ public:
 	double m_c[3]; // defined relative to previous point ( span start point )
 	int m_dir; // 1 - anti-clockwise, -1 - clockwise
 	PathArc(){m_c[0] = m_c[1] = m_c[2] = 0.0; m_dir = 1;}
-	int GetType(){return 1;}
+	int GetType(){return int(PathObject::eArc);}
 	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void glVertices(const PathObject* prev_po);
+	std::list<gp_Pnt> Interpolate( const PathObject *prev_po, const unsigned int number_of_points ) const;
+
 	PathObject *MakeACopy(void)const{return new PathArc(*this);}
 
-	std::list<gp_Pnt> Interpolate( const gp_Pnt & start_point,
-					const gp_Pnt & end_point,
+	std::list<gp_Pnt> Interpolate( const PathObject *previous_object,
 					const double feed_rate, 
 					const double spindle_rpm, 
 					const unsigned int number_of_cutting_edges) const;

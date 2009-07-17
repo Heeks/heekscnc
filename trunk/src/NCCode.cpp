@@ -18,12 +18,14 @@
 #include "CuttingTool.h"
 
 #include <TopoDS_Shape.hxx>
+#include <TopoDS_Solid.hxx>
 #include <TopoDS_Compound.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <Standard_Failure.hxx>
+#include <StdFail_NotDone.hxx>
 
 #include <wx/progdlg.h>
 
@@ -133,7 +135,19 @@ void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
 
 void PathArc::glVertices(const PathObject* prev_po)
 {
-	if(prev_po == NULL)return;
+	if (prev_po == NULL) return;
+
+	std::list<gp_Pnt> vertices = Interpolate( prev_po, 10 );
+	glVertex3dv(prev_po->m_x);
+	for (std::list<gp_Pnt>::const_iterator l_itVertex = vertices.begin(); l_itVertex != vertices.end(); l_itVertex++)
+	{
+		glVertex3d(l_itVertex->X(), l_itVertex->Y(), l_itVertex->Z());
+	} // End for
+}
+
+std::list<gp_Pnt> PathArc::Interpolate( const PathObject *prev_po, const unsigned int number_of_points ) const
+{
+	std::list<gp_Pnt> points;
 
 	double sx = -m_c[0];
 	double sy = -m_c[1];
@@ -153,17 +167,21 @@ void PathArc::glVertices(const PathObject* prev_po)
 		if(start_angle < end_angle)start_angle += 6.283185307179;
 	}
 
-	double angle_step = (end_angle - start_angle) / 10;
-	glVertex3dv(prev_po->m_x);
-	for(int i = 0; i< 10; i++)
+	double angle_step = (end_angle - start_angle) / number_of_points;
+	points.push_back( gp_Pnt( prev_po->m_x[0], prev_po->m_x[1], prev_po->m_x[2] ) );
+
+	for(unsigned int i = 0; i< number_of_points; i++)
 	{
 		double angle = start_angle + angle_step * (i + 1);
-		double r = rs + ((re - rs) * (i + 1)) /10;
+		double r = rs + ((re - rs) * (i + 1)) /number_of_points;
 		double x = prev_po->m_x[0] + m_c[0] + r * cos(angle);
 		double y = prev_po->m_x[1] + m_c[1] + r * sin(angle);
-		double z = prev_po->m_x[2] + ((m_x[2] - prev_po->m_x[2]) * (i+1))/10;
-		glVertex3d(x, y, z);
+		double z = prev_po->m_x[2] + ((m_x[2] - prev_po->m_x[2]) * (i+1))/number_of_points;
+	
+		points.push_back( gp_Pnt( x, y, z ) );
 	}
+
+	return(points);
 }
 
 ColouredPath::ColouredPath(const ColouredPath& c)
@@ -548,16 +566,6 @@ void CNCCode::glCommands(bool select, bool marked, bool no_color)
 
 		glEndList();
 	}
-
-	/* This is only here for debugging.
-	try {
-		TopoDS_Shape tool_shape = GetShape();
-		HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_shape), NULL, HeeksColor(234, 123, 89) );
-		pToolSolid->glCommands( true, false, true );
-		delete pToolSolid;
-	} catch(...) { }
-	*/
-
 }
 
 void CNCCode::GetBox(CBox &box)
@@ -643,6 +651,7 @@ class ApplyNCCode: public Tool{
 		
 					gp_Pnt previous_point(pPreviousPoint->m_x[0], pPreviousPoint->m_x[1], pPreviousPoint->m_x[2] );
 					gp_Pnt this_point(l_itPath->first->m_x[0], l_itPath->first->m_x[1], l_itPath->first->m_x[2] );
+					pPreviousPoint = l_itPath->first;
 		
 					// Just put some values here for now.  The feed_rate and spindle_rpm will eventually come from
 					// the GCode.  The number_of_cutting_edges will come from the CCuttingTool class.
@@ -650,24 +659,45 @@ class ApplyNCCode: public Tool{
 					double feed_rate = 100.0;
 					double spindle_rpm = 50;
 					unsigned int number_of_cutting_edges = 2;
-		
-					std::list<gp_Pnt> interpolated_points = l_itPath->first->Interpolate(previous_point, this_point, feed_rate, spindle_rpm, number_of_cutting_edges );
+
+					std::list<gp_Pnt> interpolated_points;
+					switch (l_itPath->first->GetType())
+					{	
+						case PathObject::eArc:
+							interpolated_points = ((PathArc *) l_itPath->first)->Interpolate(pPreviousPoint, feed_rate, spindle_rpm, number_of_cutting_edges );
+							break;
+
+						case PathObject::eLine:
+						default:
+							interpolated_points = ((PathLine *) l_itPath->first)->Interpolate(previous_point, this_point, feed_rate, spindle_rpm, number_of_cutting_edges );
+							break;
+
+					} // End switch
+
 					for (std::list<gp_Pnt>::const_iterator l_itPnt = interpolated_points.begin(); l_itPnt != interpolated_points.end(); l_itPnt++)
 					{
 						// Now move the tool to this point's location.
 						gp_Trsf move;
 						move.SetTranslation( gp_Pnt(0,0,0), *l_itPnt );
 						TopoDS_Shape tool = BRepBuilderAPI_Transform( tools[ l_itPath->first->m_cutting_tool_number ], move, true );
-	
+
 						Shapes_t::iterator l_itShape;
 						for (l_itShape = shapes.begin(); l_itShape != shapes.end(); l_itShape++)
 						{
-							l_itShape->second = BRepAlgoAPI_Cut(l_itShape->second, tool);
+							try {
+								l_itShape->second = BRepAlgoAPI_Cut(l_itShape->second, tool);
+							} // End try
+							catch(StdFail_NotDone) {
+								// There are exceptions that are thrown by the OpenCascade library when
+								// the two shape objects don't intersect.  We just want to ignore such
+								// problems.
+							} // End catch
 						} // End for
 					} // End for
 				} // End if - else
 			} // End for
 
+			printf("FInished intersecting shapes.  Applying solids to data model\n");
 			progress = 1;
 			pProgressBar = std::auto_ptr<wxProgressDialog>(new wxProgressDialog(	wxString(_T("Apply")), 
 							wxString(_T("Replacing solids in model")), 
@@ -679,13 +709,15 @@ class ApplyNCCode: public Tool{
 				pProgressBar->Update( ++progress );
 
 				std::wostringstream l_ossTitle;
-
 				l_ossTitle << "Machined " << solids[ l_itShape->first ]->GetShortString();
 				HeeksObj *pNewSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &(l_itShape->second)), l_ossTitle.str().c_str(), (*(solids[ l_itShape->first ]->GetColor())) );
-				heeksCAD->AddUndoably( pNewSolid, NULL );
-				heeksCAD->DeleteUndoably( solids[ l_itShape->first ] );
+				if (pNewSolid != NULL) 
+				{
+					heeksCAD->AddUndoably( pNewSolid, NULL );		// Add the machined solid
+					heeksCAD->DeleteUndoably( solids[ l_itShape->first ] );	// Delete the original.
+				} // End if - then
 			} // End for
-	
+
 			heeksCAD->Repaint();
 		} // End try
 		catch(Standard_ConstructionError) { }
@@ -899,6 +931,8 @@ std::list<gp_Pnt> PathLine::Interpolate(
 	double advance_distance = (feed_rate / 60.0) * time_between_cutting_edges;
 	double number_of_interpolated_points = Distance( start_point, end_point ) / advance_distance;
 
+	points.push_back( start_point );
+
 	for ( int i=0; i < int(floor(number_of_interpolated_points)); i++)
 	{
 		double x = (((start_point.X() - end_point.X()) / number_of_interpolated_points) * i) + start_point.X();
@@ -911,27 +945,28 @@ std::list<gp_Pnt> PathLine::Interpolate(
 	points.push_back( end_point );
 
 	return(points);
-
 } // End Interpolate() method
 
 
 std::list<gp_Pnt> PathArc::Interpolate(
-	const gp_Pnt & start_point,
-	const gp_Pnt & end_point,
+	const PathObject *previous_point,
 	const double feed_rate, 
 	const double spindle_rpm, 
 	const unsigned int number_of_cutting_edges) const
 {
 	std::list<gp_Pnt> points;
 
-	/*
 	double spindle_rps = spindle_rpm / 60.0;	// Revolutions Per Second.
 	double time_between_cutting_edges = (1 / spindle_rps) / number_of_cutting_edges;
-	double advance_distance = (feed_rate / 60.0) * time_between_cutting_edges;
-	*/
 
-	points.push_back( start_point );
-	points.push_back( end_point );
+	double advance_distance = (feed_rate / 60.0) * time_between_cutting_edges;
+
+	// This distance is wrong for arcs.  We're doing a straight line distance but we really want a distance
+	// around the arc.  TODO Fix this.
+	double number_of_interpolated_points = Distance( gp_Pnt( previous_point->m_x[0], previous_point->m_x[1], previous_point->m_x[2] ), 
+							gp_Pnt( m_x[0], m_x[1], m_x[2] ) ) / advance_distance;
+
+	points = Interpolate( previous_point, (unsigned int) (floor(number_of_interpolated_points)) );
 
 	return(points);
 
