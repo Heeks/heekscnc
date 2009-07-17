@@ -344,7 +344,11 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 		{
 			// The tool we've chosen can't cut as deep as we've setup to go.
 
+#ifdef UNICODE
 			std::wostringstream l_ossChange;
+#else
+			std::ostringstream l_ossChange;
+#endif
 
 			l_ossChange << "Adjusting depth of pocket id='" << m_id << "' from '" 
 				<< m_depth_op_params.m_final_depth << " to "

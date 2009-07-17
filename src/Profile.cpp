@@ -351,8 +351,11 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
 
 wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture )
 {
+#ifdef UNICODE
 	std::wostringstream l_ossPythonCode;
-
+#else
+	std::ostringstream l_ossPythonCode;
+#endif
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
 		l_ossPythonCode << (wxString::Format(_T("comment('%s')\n"), wxString(sketch->GetShortString()).c_str())).c_str(); }
@@ -601,7 +604,11 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 
 wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPointX, double *pRollOnPointY, const CFixture *pFixture)
 {
+#ifdef UNICODE
 	std::wostringstream l_ossPythonCode;
+#else
+	std::ostringstream l_ossPythonCode;
+#endif
 
 	if(object)
 	{

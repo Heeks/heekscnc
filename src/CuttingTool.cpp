@@ -1109,12 +1109,12 @@ TopoDS_Shape CCuttingTool::GetShape() const
    // to construct a shape.
    catch (Standard_ConstructionError)
    {
-	printf("Construction error thrown while generating tool shape\n");
+	// printf("Construction error thrown while generating tool shape\n");
 	throw;	// Re-throw the exception.
    } // End catch
    catch (Standard_DomainError)
    {
-	printf("Domain error thrown while generating tool shape\n");
+	// printf("Domain error thrown while generating tool shape\n");
 	throw;	// Re-throw the exception.
    } // End catch
 } // End GetShape() method
