@@ -214,7 +214,11 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool == NULL)
 	{
+#ifdef UNICODE
 		std::wostringstream l_ossChange;
+#else
+		std::ostringstream l_ossChange;
+#endif
 
 		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") does not have a cutting tool assigned.  It can not produce GCode without a cutting tool assignment.\n";
 		changes.push_back(l_ossChange.str().c_str());
@@ -224,7 +228,11 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 		double cutting_depth = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
 		if (cutting_depth > pCuttingTool->m_params.m_cutting_edge_height)
 		{
+#ifdef UNICODE
 			std::wostringstream l_ossChange;
+#else
+			std::ostringstream l_ossChange;
+#endif
 
 			l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") is set to cut deeper than the assigned cutting tool will allow\n";
 			changes.push_back(l_ossChange.str().c_str());
@@ -233,15 +241,22 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 
 	if (m_depth_op_params.m_start_depth <= m_depth_op_params.m_final_depth)
 	{
+#ifdef UNICODE
 		std::wostringstream l_ossChange;
-
+#else
+		std::ostringstream l_ossChange;
+#endif
 		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") has poor start and final depths.  Can't change this setting automatically\n";
 		changes.push_back(l_ossChange.str().c_str());
 	} // End if - then
 
 	if (m_depth_op_params.m_start_depth > m_depth_op_params.m_clearance_height)
 	{
+#ifdef UNICODE
 		std::wostringstream l_ossChange;
+#else
+		std::ostringstream l_ossChange;
+#endif
 
 		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ").  Clearance height is below start depth\n";
 		changes.push_back(l_ossChange.str().c_str());

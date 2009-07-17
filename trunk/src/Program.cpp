@@ -584,7 +584,11 @@ void CProgram::RewritePythonProgram()
 					if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
 					{
 						// Select the right tool.
+#ifdef UNICODE
 						std::wostringstream l_ossValue;
+#else
+						std::ostringstream l_ossValue;
+#endif
 
 						CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
 						if (pCuttingTool != NULL)
@@ -641,7 +645,11 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 	ifstream ifs(Ttc(machines_file.c_str()));
 	if(!ifs)
 	{
+#ifdef UNICODE
 		std::wostringstream l_ossMessage;
+#else
+		std::ostringstream l_ossMessage;
+#endif
 
 		l_ossMessage << "Could not open '" << machines_file.c_str() << "' for reading";
 		wxMessageBox( l_ossMessage.str().c_str() );

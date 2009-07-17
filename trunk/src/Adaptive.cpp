@@ -211,7 +211,11 @@ static void on_set_stepdown(double value, HeeksObj* object)
 	((CAdaptive*)object)->m_params.m_stepdown = value;
 	((CAdaptive*)object)->m_params.m_clearcuspheight = double(double(value) / 3.0);
 
+#ifdef UNICODE
 	std::wostringstream l_ossChange;
+#else
+	std::ostringstream l_ossChange;
+#endif
 
 	l_ossChange << "Changing clearcuspheight to " << value / 3.0;
 	wxMessageBox( l_ossChange.str().c_str() );
