@@ -708,7 +708,11 @@ class ApplyNCCode: public Tool{
 			{
 				pProgressBar->Update( ++progress );
 
+#ifdef UNICODE
 				std::wostringstream l_ossTitle;
+#else
+				std::ostringstream l_ossTitle;
+#endif
 				l_ossTitle << "Machined " << solids[ l_itShape->first ]->GetShortString();
 				HeeksObj *pNewSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &(l_itShape->second)), l_ossTitle.str().c_str(), (*(solids[ l_itShape->first ]->GetColor())) );
 				if (pNewSolid != NULL) 
