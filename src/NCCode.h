@@ -14,9 +14,12 @@
 #include "interface/HeeksObj.h"
 #include "interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
+#include "CuttingTool.h"
 
 #include <TopoDS_Shape.hxx>
 #include <gp_Pnt.hxx>
+
+#include <list>
 
 enum ColorEnum{
 	ColorDefaultType,
@@ -198,5 +201,5 @@ public:
 	void FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1);
 	void HighlightBlock(long pos);
 
-	TopoDS_Shape GetShape() const;
+	std::list< std::pair<PathObject *, CCuttingTool *> > GetPaths() const;
 };
