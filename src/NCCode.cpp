@@ -697,7 +697,6 @@ class ApplyNCCode: public Tool{
 				} // End if - else
 			} // End for
 
-			printf("FInished intersecting shapes.  Applying solids to data model\n");
 			progress = 1;
 			pProgressBar = std::auto_ptr<wxProgressDialog>(new wxProgressDialog(	wxString(_T("Apply")), 
 							wxString(_T("Replacing solids in model")), 
