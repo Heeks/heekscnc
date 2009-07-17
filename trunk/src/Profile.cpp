@@ -972,11 +972,31 @@ class PickEnd: public Tool{
 
 static PickEnd pick_end;
 
+class PickRollOn: public Tool{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Pick roll on point");}
+	void Run(){if(heeksCAD->PickPosition(_("Pick roll on point"), object_for_pick->m_profile_params.m_roll_on_point))object_for_pick->m_profile_params.m_auto_roll_on = false;}
+	wxString BitmapPath(){ return _T("rollon");}
+};
+
+static PickRollOn pick_roll_on;
+
+class PickRollOff: public Tool{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Pick roll off point");}
+	void Run(){if(heeksCAD->PickPosition(_("Pick roll off point"), object_for_pick->m_profile_params.m_roll_off_point))object_for_pick->m_profile_params.m_auto_roll_off = false;}
+	wxString BitmapPath(){ return _T("rolloff");}
+};
+
+static PickRollOff pick_roll_off;
+
 void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	object_for_pick = this;
 	t_list->push_back(&pick_start);
 	t_list->push_back(&pick_end);
+	t_list->push_back(&pick_roll_on);
+	t_list->push_back(&pick_roll_off);
 
 	HeeksObj::GetTools(t_list, p);
 }

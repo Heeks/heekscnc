@@ -11144,5 +11144,49 @@
          d="M 175.14471,272.3625 L 152.89262,272.3625 L 141.76658,257.38187 L 125.07751,257.38187 L 125.07751,297.33022 L 141.76658,297.33022 L 152.89262,282.34959 L 175.14471,282.34959 L 175.14471,272.3625 z"
          style="fill:#916f6f;fill-rule:evenodd;stroke:#000000;stroke-width:2.10823894;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
+    <g
+       id="g4902"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\rollon.png"
+       inkscape:export-xdpi="226.95653"
+       inkscape:export-ydpi="226.95653">
+      <path
+         id="path4094"
+         d="M 185,312.36218 L 200,312.36218 L 200,312.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4096"
+         d="M 200,307.36218 C 200,307.36218 195,307.36218 185,307.36218 C 175,307.36218 170,297.36218 170,297.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4098"
+         d="M 165,302.36218 L 175,292.36218 L 175,292.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4100"
+         d="M 165,292.36218 L 175,302.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+    </g>
+    <g
+       id="g4908"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\rolloff.png"
+       inkscape:export-xdpi="226.95653"
+       inkscape:export-ydpi="226.95653">
+      <path
+         id="path4102"
+         d="M 230,312.36218 L 215,312.36218 L 215,312.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4110"
+         d="M 215,307.36218 C 215,307.36218 220,307.36218 230,307.36218 C 240,307.36218 245,297.36218 245,297.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4116"
+         d="M 250,302.36218 L 240,292.36218 L 240,292.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         id="path4118"
+         d="M 250,292.36218 L 240,302.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+    </g>
   </g>
 </svg>
