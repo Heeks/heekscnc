@@ -9,3 +9,15 @@ The idea is to continually add data checks to these Design Rules methods so that
 At the moment these design rules only check for various obvious parameter conflicts such as start depth greater or equal to final depth etc.
 
 The Design Rules Check command simply presents a warning box showing all the errors it found.  The Design Rules Adjustment command goes ahead, where possible, and changes parameters within the various NC objects in an attempt to rectify these errors.
+
+== Chamfer Bit Size in Drilling Cycle ==
+
+When a chamfering bit it selected for a drilling cycle, the design rules check looks for other drilling cycles at the same location.  It gets the diameter of the drill bit used in the other drilling cycles and compares that against the flat_radius and the diameter of the chamfering bit.  The flat radius of a chamfering bit represents the smallest hole the chamfering bit can be plunged into.  The diameter represents the largest radius the chamfering bit can plunge into.  This design rules check confirms that the chamfering bit's size is within scope of the drilled hole.  NOTE: This check includes previous drilling cycle objects that use cutting tool types of Drill, Endmill, BallEndMill and SlotCutter.  Drilling cycles used with other centre drills (or any other type) are ignored.
+
+== Pre-Drilling for a profile ==
+
+When a drilling cycle is attached to a profile operation, it drills a hole at the profile's starting point.  The idea is to drill a relief hole into which an endmill may be plunged without damaging it.  This design rules check confirms that the depth of the drilling cycle is no deeper than the profile operation's depth.
+
+== Cutting Tool Edge Height Check ==
+
+This design rules check confirms that the NC operation's depth is not deeper than the cutting tool's cutting edge height.  This check is performed for Profile, Pocket and Drilling operations.
