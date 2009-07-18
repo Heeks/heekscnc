@@ -6,8 +6,6 @@ The Design Rules options are checks that are added to the various NC operation o
 
 The idea is to continually add data checks to these Design Rules methods so that errors in data modelling are observed before failures occur at the physical machine.
 
-At the moment these design rules only check for various obvious parameter conflicts such as start depth greater or equal to final depth etc.
-
 The Design Rules Check command simply presents a warning box showing all the errors it found.  The Design Rules Adjustment command goes ahead, where possible, and changes parameters within the various NC objects in an attempt to rectify these errors.
 
 == Chamfer Bit Size in Drilling Cycle ==
