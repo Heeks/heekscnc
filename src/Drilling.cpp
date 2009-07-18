@@ -653,6 +653,83 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 {
 	std::list<wxString> changes;
 
+	// Make some special checks if we're using a chamfering bit.
+	if (m_cutting_tool_number > 0)
+	{
+		CCuttingTool *pChamfer = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+		if (pChamfer != NULL)
+		{
+			std::vector<CDrilling::Point3d> these_locations = FindAllLocations();
+
+			if (pChamfer->m_params.m_type == CCuttingToolParams::eChamfer)
+			{
+				// We need to make sure that the diameter of the hole (that will
+				// have been drilled in a previous drilling operation) is between
+				// the chamfering bit's flat_radius (smallest) and diamter/2 (largest).
+
+				// First find ALL drilling cycles that created this hole.  Make sure
+				// to get them all as we may have used a centre drill before the
+				// main hole is drilled.
+
+				for (HeeksObj *obj = theApp.m_program->m_operations->GetFirstChild();
+					obj != NULL;
+					obj = theApp.m_program->m_operations->GetNextChild())
+				{
+					if (obj->GetType() == DrillingType)
+					{
+						// Make sure we're looking at a hole drilled with something
+						// more than a centre drill.
+						CCuttingToolParams::eCuttingToolType type = CCuttingTool::CutterType( ((COp *)obj)->m_cutting_tool_number );
+						if (	(type == CCuttingToolParams::eDrill) ||
+							(type == CCuttingToolParams::eEndmill) ||
+							(type == CCuttingToolParams::eSlotCutter) ||
+							(type == CCuttingToolParams::eBallEndMill))
+						{
+							// See if any of the other drilling locations line up
+							// with our drilling locations.  If so, we must be
+							// chamfering a previously drilled hole.
+
+							std::vector<CDrilling::Point3d> previous_locations = ((CDrilling *)obj)->FindAllLocations();
+							std::vector<CDrilling::Point3d> common_locations;
+							std::set_intersection( previous_locations.begin(), previous_locations.end(),
+										these_locations.begin(), these_locations.end(),
+										std::inserter( common_locations, common_locations.begin() ));
+							if (common_locations.size() > 0)
+							{
+								// We're here.  We must be chamfering a hole we've
+								// drilled previously.  Check the diameters.
+
+								CCuttingTool *pPreviousTool = CCuttingTool::Find( ((COp *)obj)->m_cutting_tool_number );
+								if (pPreviousTool->CuttingRadius() < pChamfer->m_params.m_flat_radius)
+								{
+#ifdef UNICODE
+									std::wostringstream l_ossChange;
+#else
+									std::ostringstream l_ossChange;
+#endif
+									l_ossChange << "Chamfering bit for drilling op (id=" << m_id << ") is too big for previously drilled hole (drilling id=" << obj->m_id << ")\n";
+									changes.push_back( l_ossChange.str().c_str() );
+								} // End if - then
+
+								if (pPreviousTool->CuttingRadius() > (pChamfer->m_params.m_diameter/2.0))
+								{
+#ifdef UNICODE
+									std::wostringstream l_ossChange;
+#else
+									std::ostringstream l_ossChange;
+#endif
+									l_ossChange << "Chamfering bit for drilling op (id=" << m_id << ") is too small for previously drilled hole (drilling id=" << obj->m_id << ")\n";
+									changes.push_back( l_ossChange.str().c_str() );
+								} // End if - then
+							} // End if - then
+
+						} // End if - then
+					} // End if - then
+				} // End for
+			} // End if - then
+		} // End if - then
+	} // End if - then
+
 	if (m_cutting_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.

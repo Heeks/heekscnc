@@ -33,7 +33,8 @@ public:
 		eSlotCutter,
 		eBallEndMill,
 		eChamfer,
-		eTurningTool
+		eTurningTool,
+		eUndefined,
 	} eCuttingToolType;
 
 	// The G10 command can be used (within EMC2) to add a tool to the tool
@@ -145,6 +146,7 @@ public:
 	TopoDS_Shape GetShape() const;
 
 	double CuttingRadius(const bool express_in_drawing_units = false) const;
+	static CCuttingToolParams::eCuttingToolType CutterType( const int tool_number );
 
 }; // End CCuttingTool class definition.
 
