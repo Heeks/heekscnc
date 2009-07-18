@@ -1152,7 +1152,8 @@ double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = fal
 				// cuts towards the outside.  We don't want to run right on
 				// the edge because we don't want to break the top off.
 
-				double proportion_near_centre = (1/3);	// one third from the centre-most point.
+				// one third from the centre-most point.
+				double proportion_near_centre = 0.3;
 				radius = (((m_params.m_diameter/2) - m_params.m_flat_radius) * proportion_near_centre) + m_params.m_flat_radius;
 			}
 			break;
@@ -1172,5 +1173,15 @@ double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = fal
 
 } // End CuttingRadius() method
 
+
+CCuttingToolParams::eCuttingToolType CCuttingTool::CutterType( const int tool_number )
+{
+	if (tool_number <= 0) return(CCuttingToolParams::eUndefined);
+
+	CCuttingTool *pCuttingTool = CCuttingTool::Find( tool_number );
+	if (pCuttingTool == NULL) return(CCuttingToolParams::eUndefined);
+	
+	return(pCuttingTool->m_params.m_type);
+} // End of CutterType() method
 
 
