@@ -386,7 +386,11 @@ class CreatorIso(nc.Creator):
 	self.write(iso.Z + (self.fmt % (z - depth)) + iso.SPACE)	# This is the 'z' value for the bottom of the hole.
 	self.z = (z + standoff)				# We want to remember where z is at the end (at the top of the hole)
 	self.write(iso.RETRACT + (self.fmt % retract_height))
+
+        if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
+        self.write_feedrate()
         self.write_spindle()
+
         self.write_misc()
         self.write('\n')
 
