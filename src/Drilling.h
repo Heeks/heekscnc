@@ -9,7 +9,7 @@
  * details.
  */
 
-#include "Op.h"
+#include "SpeedOp.h"
 #include "HeeksCNCTypes.h"
 #include <list>
 #include <vector>
@@ -51,7 +51,7 @@ public:
 	drill's depth and whose orientation describes the drill's orientation at machining time (i.e. rotate A, B and/or C axes)
  */
 
-class CDrilling: public COp {
+class CDrilling: public CSpeedOp {
 public:
 	/**
 		There are all types of 3d point classes around but most of them seem to be in the HeeksCAD code
@@ -123,11 +123,11 @@ public:
 	CDrillingParams m_params;
 
 	//	Constructors.
-	CDrilling():COp(GetTypeString(), 0){}
+	CDrilling():CSpeedOp(GetTypeString(), 0){}
 	CDrilling(	const Symbols_t &symbols, 
 			const int cutting_tool_number,
 			const double depth ) 
-		: COp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
+		: CSpeedOp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
 	{
 		m_params.set_initial_values(depth);
 	}

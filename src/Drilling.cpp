@@ -116,7 +116,7 @@ void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
  */
 void CDrilling::AppendTextToProgram( const CFixture *pFixture )
 {
-	COp::AppendTextToProgram( pFixture );
+	CSpeedOp::AppendTextToProgram( pFixture );
 
 #ifdef UNICODE
 	std::wostringstream ss;
@@ -330,7 +330,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 void CDrilling::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
-	COp::GetProperties(list);
+	CSpeedOp::GetProperties(list);
 }
 
 HeeksObj *CDrilling::MakeACopy(void)const
