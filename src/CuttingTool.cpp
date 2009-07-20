@@ -80,6 +80,7 @@ static void ResetParametersToReasonableValues(HeeksObj* object);
 void CCuttingToolParams::set_initial_values()
 {
 	CNCConfig config;
+	config.Read(_T("m_material"), &m_material, int(eCarbide));
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
 
@@ -105,6 +106,7 @@ void CCuttingToolParams::write_values_to_config()
 	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
 	// If we're now in inches then convert the values.
 	// We're in mm already.
+	config.Write(_T("m_material"), m_material);
 	config.Write(_T("m_diameter"), m_diameter);
 	config.Write(_T("m_x_offset"), m_x_offset);
 	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
@@ -138,6 +140,18 @@ static void on_set_orientation(int value, HeeksObj* object)
 	else
 	{
 		wxMessageBox(_T("Orientation values must be between 0 and 9 inclusive.  Aborting value change"));
+	} // End if - else
+}
+
+static void on_set_material(int value, HeeksObj* object)
+{
+	if ((value >= CCuttingToolParams::eHighSpeedSteel) && (value <= CCuttingToolParams::eCarbide))
+	{
+		((CCuttingTool*)object)->m_params.m_orientation = value;
+	} // End if - then
+	else
+	{
+		wxMessageBox(_T("Cutting Tool material must be between 0 and 1. Aborting value change"));
 	} // End if - else
 }
 
@@ -330,6 +344,14 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 {
 	{
 		std::list< wxString > choices;
+		choices.push_back(_("High Speed Steel"));
+		choices.push_back(_("Carbide"));
+		int choice = int(m_material);
+		list->push_back(new PropertyChoice(_("Material"), choices, choice, parent, on_set_material));
+	}
+
+	{
+		std::list< wxString > choices;
 		choices.push_back(_("Drill bit"));
 		choices.push_back(_("Centre Drill bit"));
 		choices.push_back(_("End Mill"));
@@ -391,8 +413,11 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("diameter", m_diameter);
 	element->SetDoubleAttribute("x_offset", m_x_offset);
 	element->SetDoubleAttribute("tool_length_offset", m_tool_length_offset);
-	
+
 	std::ostringstream l_ossValue;
+	l_ossValue.str(""); l_ossValue << m_material;
+	element->SetAttribute("material", l_ossValue.str().c_str() );
+
 	l_ossValue.str(""); l_ossValue << m_orientation;
 	element->SetAttribute("orientation", l_ossValue.str().c_str() );
 
@@ -414,6 +439,7 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
 	if (pElem->Attribute("x_offset")) m_x_offset = atof(pElem->Attribute("x_offset"));
 	if (pElem->Attribute("tool_length_offset")) m_tool_length_offset = atof(pElem->Attribute("tool_length_offset"));
+	if (pElem->Attribute("material")) m_material = atoi(pElem->Attribute("material"));
 	if (pElem->Attribute("orientation")) m_orientation = atoi(pElem->Attribute("orientation"));
 	if (pElem->Attribute("type")) m_type = CCuttingToolParams::eCuttingToolType(atoi(pElem->Attribute("type")));
 	if (pElem->Attribute("corner_radius")) m_corner_radius = atof(pElem->Attribute("corner_radius"));
@@ -706,6 +732,15 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 			l_ossName << FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units).c_str() << " inch ";
 		} // End if - else
 	} // End if - then
+
+	switch (m_params.m_material)
+	{
+		case CCuttingToolParams::eHighSpeedSteel: l_ossName << "HSS ";
+							  break;
+
+		case CCuttingToolParams::eCarbide:	l_ossName << "Carbide ";
+							break;
+	} // End switch
 
 	switch (m_params.m_type)
 	{
@@ -1176,12 +1211,23 @@ double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = fal
 
 CCuttingToolParams::eCuttingToolType CCuttingTool::CutterType( const int tool_number )
 {
-	if (tool_number <= 0) return(CCuttingToolParams::eUndefined);
+	if (tool_number <= 0) return(CCuttingToolParams::eUndefinedToolType);
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( tool_number );
-	if (pCuttingTool == NULL) return(CCuttingToolParams::eUndefined);
+	if (pCuttingTool == NULL) return(CCuttingToolParams::eUndefinedToolType);
 	
 	return(pCuttingTool->m_params.m_type);
+} // End of CutterType() method
+
+
+CCuttingToolParams::eMaterial_t CCuttingTool::CutterMaterial( const int tool_number )
+{
+	if (tool_number <= 0) return(CCuttingToolParams::eUndefinedMaterialType);
+
+	CCuttingTool *pCuttingTool = CCuttingTool::Find( tool_number );
+	if (pCuttingTool == NULL) return(CCuttingToolParams::eUndefinedMaterialType);
+	
+	return(CCuttingToolParams::eMaterial_t(pCuttingTool->m_params.m_material));
 } // End of CutterType() method
 
 
