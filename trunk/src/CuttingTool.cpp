@@ -147,7 +147,9 @@ static void on_set_material(int value, HeeksObj* object)
 {
 	if ((value >= CCuttingToolParams::eHighSpeedSteel) && (value <= CCuttingToolParams::eCarbide))
 	{
-		((CCuttingTool*)object)->m_params.m_orientation = value;
+		((CCuttingTool*)object)->m_params.m_material = value;
+		ResetParametersToReasonableValues(object);
+		heeksCAD->RefreshProperties();
 	} // End if - then
 	else
 	{
