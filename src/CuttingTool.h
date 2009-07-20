@@ -34,12 +34,20 @@ public:
 		eBallEndMill,
 		eChamfer,
 		eTurningTool,
-		eUndefined,
+		eUndefinedToolType
 	} eCuttingToolType;
+
+	typedef enum {
+		eHighSpeedSteel = 0,
+		eCarbide,
+		eUndefinedMaterialType
+	} eMaterial_t;
 
 	// The G10 command can be used (within EMC2) to add a tool to the tool
 	// table from within a program.
 	// G10 L1 P[tool number] R[radius] X[offset] Z[offset] Q[orientation]
+
+	int m_material;	// eMaterial_t - describes the cutting surface type.
 
 	double m_diameter;
 	double m_tool_length_offset;
@@ -147,6 +155,7 @@ public:
 
 	double CuttingRadius(const bool express_in_drawing_units = false) const;
 	static CCuttingToolParams::eCuttingToolType CutterType( const int tool_number );
+	static CCuttingToolParams::eMaterial_t CutterMaterial( const int tool_number );
 
 }; // End CCuttingTool class definition.
 

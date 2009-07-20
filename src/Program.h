@@ -8,6 +8,8 @@
 
 #include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
+#include "RawMaterial.h"
+#include "HeeksCNC.h"
 
 class CNCCode;
 
@@ -66,9 +68,11 @@ public:
 	wxString description;
 };
 
+
 class CProgram:public ObjList
 {
 public:
+	CRawMaterial m_raw_material;	// for material hardness - to determine feeds and speeds.
 	CMachine m_machine;
 	wxString m_output_file;
 	CNCCode* m_nc_code;

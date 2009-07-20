@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <wx/event.h>
+#include <wx/scrolwin.h>
+#include <wx/window.h>
+#include <wx/textctrl.h>
+
 class CProgramCanvas: public wxScrolledWindow
 {
 private:
