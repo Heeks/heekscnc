@@ -4,6 +4,8 @@
 
 // defines global variables and functions
 
+#pragma once
+
 #include "interface/HeeksCADInterface.h"
 
 extern CHeeksCADInterface* heeksCAD;

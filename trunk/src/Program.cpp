@@ -125,6 +125,7 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_scrip
 	wxString machine_file_name;
 	config.Read(_T("ProgramMachine"), &machine_file_name, _T("iso"));
 	m_machine = CProgram::GetMachine(machine_file_name);
+	m_raw_material.Set(_T("Aluminium"));
 
 #ifdef WIN32
 	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
@@ -196,6 +197,8 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		if(m_units > 25.0)choice = 1;
 		list->push_back ( new PropertyChoice ( _("units for nc output"),  choices, choice, this, on_set_units ) );
 	}
+
+	m_raw_material.GetProperties(this, list);
 	HeeksObj::GetProperties(list);
 }
 
@@ -235,6 +238,7 @@ void CProgram::WriteXML(TiXmlNode *root)
 	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
 	element->SetDoubleAttribute("units", m_units);
 
+	m_raw_material.WriteBaseXML(element);
 	WriteBaseXML(element);
 }
 
@@ -284,6 +288,7 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	}
 
 	new_object->ReadBaseXML(pElem);
+	new_object->m_raw_material.ReadBaseXML(pElem);
 	theApp.m_program = new_object;
 
 	return new_object;
@@ -526,6 +531,8 @@ void CProgram::RewritePythonProgram()
 	}
 	theApp.m_program_canvas->AppendText(_T("set_plane(0)\n"));
 	theApp.m_program_canvas->AppendText(_T("\n"));
+
+	m_raw_material.AppendTextToProgram();
 
 	// write the tools setup code.
 	if (m_tools != NULL)
