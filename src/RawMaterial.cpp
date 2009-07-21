@@ -125,7 +125,7 @@ void CRawMaterial::AppendTextToProgram()
 #endif
     ss.imbue(std::locale("C"));
 
-	ss << "comment(Feeds and Speeds set for machining " << m_material_name << ")\n";
+	ss << "comment('Feeds and Speeds set for machining " << m_material_name.c_str() << "')\n";
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 
 }
