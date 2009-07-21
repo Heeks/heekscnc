@@ -345,25 +345,34 @@ static void on_set_cutting_edge_height(double value, HeeksObj* object){((CCuttin
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
 {
 	{
+		CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
+
+		int choice = 0;
 		std::list< wxString > choices;
-		choices.push_back(_("High Speed Steel"));
-		choices.push_back(_("Carbide"));
-		int choice = int(m_material);
+		for (CCuttingToolParams::MaterialsList_t::size_type i=0; i<materials.size(); i++)
+		{
+			choices.push_back(materials[i].second);
+			if (m_material == materials[i].first) choice = int(i);
+			
+		} // End for
 		list->push_back(new PropertyChoice(_("Material"), choices, choice, parent, on_set_material));
 	}
 
+
 	{
+		CCuttingToolParams::CuttingToolTypesList_t cutting_tool_types = CCuttingToolParams::GetCuttingToolTypesList();
+
+		int choice = 0;
 		std::list< wxString > choices;
-		choices.push_back(_("Drill bit"));
-		choices.push_back(_("Centre Drill bit"));
-		choices.push_back(_("End Mill"));
-		choices.push_back(_("Slot Cutter"));
-		choices.push_back(_("Ball End Mill"));
-		choices.push_back(_("Chamfering bit"));
-		choices.push_back(_("Turning Tool"));
-		int choice = int(m_type);
-		list->push_back(new PropertyChoice(_("type"), choices, choice, parent, on_set_type));
+		for (CCuttingToolParams::CuttingToolTypesList_t::size_type i=0; i<cutting_tool_types.size(); i++)
+		{
+			choices.push_back(cutting_tool_types[i].second);
+			if (m_type == cutting_tool_types[i].first) choice = int(i);
+			
+		} // End for
+		list->push_back(new PropertyChoice(_("Type"), choices, choice, parent, on_set_type));
 	}
+
 
 	if (m_type == eTurningTool)
 	{
