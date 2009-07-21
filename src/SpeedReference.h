@@ -29,27 +29,21 @@ public:
 	int m_cutting_tool_material;	// HSS or carbide
 	wxString m_material_name;					// Aluminium
 	double m_brinell_hardness_of_raw_material;			// 15.0 for Al
-	double m_surface_feet_per_minute;				// tool/material speed difference
+	double m_surface_speed;				// tool/material speed in metres per minute
 
+	void ResetTitle();
 	//	Constructors.
         CSpeedReference(const wxChar *title, 
 			const wxChar *material_name,
 			const int cutting_tool_material,
 			const double brinell_hardness_of_raw_material,
-			const double surface_feet_per_minute ) :
+			const double surface_speed ) :
 		m_cutting_tool_material(cutting_tool_material),
 		m_material_name(material_name),
 		m_brinell_hardness_of_raw_material(brinell_hardness_of_raw_material),
-		m_surface_feet_per_minute(surface_feet_per_minute)
+		m_surface_speed(surface_speed)
 	{
-		if (title != NULL) 
-		{
-			m_title = title;
-		} // End if - then
-		else
-		{
-			m_title = GetTypeString();
-		} // End if - else
+		ResetTitle();
 	} // End constructor
 
 	 // HeeksObj's virtual functions
@@ -68,6 +62,7 @@ public:
 
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
+
 }; // End CSpeedReference class definition.
 
 
