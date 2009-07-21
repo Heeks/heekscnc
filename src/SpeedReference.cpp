@@ -29,12 +29,13 @@ extern CHeeksCADInterface* heeksCAD;
 static void on_set_cutting_tool_material(int value, HeeksObj* object)
 {
 		((CSpeedReference*)object)->m_cutting_tool_material = value;
+		((CSpeedReference*)object)->ResetTitle();
 		heeksCAD->RefreshProperties();
 }
 
-static void on_set_brinell_hardness_of_raw_material(double value, HeeksObj* object){((CSpeedReference*)object)->m_brinell_hardness_of_raw_material = value;}
-static void on_set_surface_feet_per_minute(double value, HeeksObj* object){((CSpeedReference*)object)->m_surface_feet_per_minute = value;}
-static void on_set_material_name(const wxChar *value, HeeksObj* object){((CSpeedReference*)object)->m_material_name = value;}
+static void on_set_brinell_hardness_of_raw_material(double value, HeeksObj* object){((CSpeedReference*)object)->m_brinell_hardness_of_raw_material = value; ((CSpeedReference*)object)->ResetTitle(); }
+static void on_set_surface_speed(double value, HeeksObj* object){((CSpeedReference*)object)->m_surface_speed = value; ((CSpeedReference*)object)->ResetTitle(); }
+static void on_set_material_name(const wxChar *value, HeeksObj* object){((CSpeedReference*)object)->m_material_name = value; ((CSpeedReference*)object)->ResetTitle(); }
 
 
 void CSpeedReference::GetProperties(std::list<Property *> *list)
@@ -54,7 +55,7 @@ void CSpeedReference::GetProperties(std::list<Property *> *list)
 	}
 
 	list->push_back(new PropertyDouble(_("Brinell hardness of raw material"), m_brinell_hardness_of_raw_material, this, on_set_brinell_hardness_of_raw_material));
-	list->push_back(new PropertyDouble(_("Surface Feet per Minute"), m_surface_feet_per_minute, this, on_set_surface_feet_per_minute));
+	list->push_back(new PropertyDouble(_("Surface Speed (m/min)"), m_surface_speed, this, on_set_surface_speed));
 	list->push_back(new PropertyString(_("Raw Material Name"), m_material_name, this, on_set_material_name));
 	HeeksObj::GetProperties(list);
 }
@@ -82,8 +83,8 @@ void CSpeedReference::WriteXML(TiXmlNode *root)
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 
 	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_surface_feet_per_minute;
-	element->SetAttribute("surface_feet_per_minute", l_ossValue.str().c_str() );
+	l_ossValue.str(""); l_ossValue << m_surface_speed;
+	element->SetAttribute("surface_speed", l_ossValue.str().c_str() );
 
 	l_ossValue.str(""); l_ossValue << int(m_cutting_tool_material);
 	element->SetAttribute("cutting_tool_material", l_ossValue.str().c_str() );
@@ -103,9 +104,9 @@ HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 	if (element->Attribute("brinell_hardness_of_raw_material")) 
 		brinell_hardness_of_raw_material = atof(element->Attribute("brinell_hardness_of_raw_material"));
 
-	double surface_feet_per_minute = 600.0;
-	if (element->Attribute("surface_feet_per_minute")) 
-		surface_feet_per_minute = atof(element->Attribute("surface_feet_per_minute"));
+	double surface_speed = 600.0;
+	if (element->Attribute("surface_speed")) 
+		surface_speed = atof(element->Attribute("surface_speed"));
 
 	wxString raw_material_name;
 	if (element->Attribute("raw_material_name")) 
@@ -120,7 +121,7 @@ HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 								raw_material_name.c_str(),
 								cutting_tool_material,
 								brinell_hardness_of_raw_material,
-								surface_feet_per_minute );
+								surface_speed );
 	new_object->ReadBaseXML(element);
 
 	return new_object;
@@ -131,6 +132,23 @@ void CSpeedReference::OnEditString(const wxChar* str){
         m_title.assign(str);
 	heeksCAD->WasModified(this);
 }
+
+void CSpeedReference::ResetTitle()
+{
+#ifdef UNICODE
+	std::wostringstream l_ossTitle;
+#else
+	std::ostringstream l_ossTitle;
+#endif
+
+	CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
+	std::map< int, wxString > materials_map;
+	std::copy( materials.begin(), materials.end(), std::inserter( materials_map, materials_map.begin() ) );
+
+	l_ossTitle << m_material_name.c_str() << " (" << m_brinell_hardness_of_raw_material << ") with " << materials_map[m_cutting_tool_material].c_str();
+
+	OnEditString(l_ossTitle.str().c_str());
+} // End ResetTitle() method
 
 
 
