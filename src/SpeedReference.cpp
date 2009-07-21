@@ -117,8 +117,7 @@ HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 		cutting_tool_material = atoi(element->Attribute("cutting_tool_material"));
 
 	wxString title(Ctt(element->Attribute("title")));
-	CSpeedReference* new_object = new CSpeedReference( title.c_str(), 
-								raw_material_name.c_str(),
+	CSpeedReference* new_object = new CSpeedReference( 	raw_material_name.c_str(),
 								cutting_tool_material,
 								brinell_hardness_of_raw_material,
 								surface_speed );

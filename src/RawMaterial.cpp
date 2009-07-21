@@ -19,14 +19,18 @@
 
 static void on_set_raw_material(int value, HeeksObj* object)
 {
+	printf("on_set_raw_material() selected option %d\n", value );
+
 	std::set<wxString> materials = CSpeedReferences::GetMaterials();
 	std::vector<wxString> copy;
 
 	std::copy( materials.begin(), materials.end(), std::inserter(copy,copy.end()));
 
-	if (value < int(copy.size()))
+	if (value <= int(copy.size()))
 	{
-		((CProgram *)object)->m_raw_material.m_material_name = copy[value];
+		printf("Option %d is '%s'\n", value, copy[value-1].c_str() );
+
+		((CProgram *)object)->m_raw_material.m_material_name = copy[value-1];
 		((CProgram *)object)->m_raw_material.m_brinell_hardness = 0.0;	// Now that they've selected a material, they need to reset the hardness
 	} // End if - then
 	heeksCAD->WasModified(object);
@@ -34,12 +38,14 @@ static void on_set_raw_material(int value, HeeksObj* object)
 
 static void on_set_brinell_hardness(int value, HeeksObj *object)
 {
+	printf("on_set_brinell_hardness() selected option %d\n", value );
+
 	std::set<double> choices = CSpeedReferences::GetHardnessForMaterial( ((CProgram *)object)->m_raw_material.m_material_name );
 	std::vector<double> choice_array;
 	std::copy( choices.begin(), choices.end(), std::inserter( choice_array, choice_array.begin() ) );
-	if (value < int(choice_array.size()))
+	if (value <= int(choice_array.size()))
 	{
-		((CProgram *)object)->m_raw_material.m_brinell_hardness = choice_array[value];
+		((CProgram *)object)->m_raw_material.m_brinell_hardness = choice_array[value-1];
 		heeksCAD->WasModified(object);
 	} // End if - then
 } // End on_set_brinell_hardness() routine
@@ -95,6 +101,8 @@ void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 			{
 				choice = int(std::distance( hardness_values.begin(), l_itChoice ));
 			} // End if - then
+
+			choices.push_back( l_ossChoice.str().c_str() );
 		} // End for
 
 		list->push_back(new PropertyChoice(_("Brinell Hardness of raw material"), choices, choice, parent, on_set_brinell_hardness));
