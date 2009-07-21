@@ -26,15 +26,17 @@ class CSpeedReference: public HeeksObj {
 public:
         wxString m_title;
 
+	// Inputs...
 	int m_cutting_tool_material;	// HSS or carbide
 	wxString m_material_name;					// Aluminium
 	double m_brinell_hardness_of_raw_material;			// 15.0 for Al
+
+	// Output
 	double m_surface_speed;				// tool/material speed in metres per minute
 
 	void ResetTitle();
 	//	Constructors.
-        CSpeedReference(const wxChar *title, 
-			const wxChar *material_name,
+        CSpeedReference( const wxChar *material_name,
 			const int cutting_tool_material,
 			const double brinell_hardness_of_raw_material,
 			const double surface_speed ) :

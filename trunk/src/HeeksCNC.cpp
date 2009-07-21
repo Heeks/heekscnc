@@ -487,7 +487,7 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 
 static void NewSpeedReferenceMenuCallback(wxCommandEvent &event)
 {
-	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), _T("Fill in material name"), int(CCuttingToolParams::eCarbide), 0.0, 0.0);
+	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), int(CCuttingToolParams::eCarbide), 0.0, 0.0);
 	heeksCAD->AddUndoably(new_object, theApp.m_program->m_speed_references);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);

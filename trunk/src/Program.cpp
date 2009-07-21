@@ -796,7 +796,10 @@ std::set< double > CSpeedReferences::GetHardnessForMaterial( const wxString & ma
 		material != NULL;
 		material = theApp.m_program->m_speed_references->GetNextChild())
 	{
-		hardness_values.insert( ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material );
+		if (material_name == ((CSpeedReference *) material)->m_material_name)
+		{
+			hardness_values.insert( ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material );
+		} // End if - then
 	} // End for
 
 	return(hardness_values);
