@@ -1,0 +1,74 @@
+
+// SpeedReference.h
+/*
+ * Copyright (c) 2009, Dan Heeks, Perttu Ahola
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
+
+#pragma once
+
+#include "Program.h"
+#include "HeeksCNCTypes.h"
+#include "CuttingTool.h"
+
+#include <vector>
+#include <algorithm>
+
+
+/**
+	The CSpeedReference class holds a single 'point on the scale' that associates
+	material name and hardness, cutting tool substance (HSS or carbide) and the
+	recommended cutting speed (surface feet per minute)
+ */
+
+class CSpeedReference: public HeeksObj {
+public:
+        wxString m_title;
+
+	int m_cutting_tool_material;	// HSS or carbide
+	wxString m_material_name;					// Aluminium
+	double m_brinell_hardness_of_raw_material;			// 15.0 for Al
+	double m_surface_feet_per_minute;				// tool/material speed difference
+
+	//	Constructors.
+        CSpeedReference(const wxChar *title, 
+			const wxChar *material_name,
+			const int cutting_tool_material,
+			const double brinell_hardness_of_raw_material,
+			const double surface_feet_per_minute ) :
+		m_cutting_tool_material(cutting_tool_material),
+		m_material_name(material_name),
+		m_brinell_hardness_of_raw_material(brinell_hardness_of_raw_material),
+		m_surface_feet_per_minute(surface_feet_per_minute)
+	{
+		if (title != NULL) 
+		{
+			m_title = title;
+		} // End if - then
+		else
+		{
+			m_title = GetTypeString();
+		} // End if - else
+	} // End constructor
+
+	 // HeeksObj's virtual functions
+        int GetType()const{return SpeedReferenceType;}
+	const wxChar* GetTypeString(void) const{ return _T("SpeedReference"); }
+        HeeksObj *MakeACopy(void)const;
+
+        void WriteXML(TiXmlNode *root);
+        static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+
+	void GetProperties(std::list<Property *> *list);
+	void CopyFrom(const HeeksObj* object);
+	bool CanAddTo(HeeksObj* owner);
+	wxString GetIcon() { return theApp.GetResFolder() + _T("/icons/tool"); }
+        const wxChar* GetShortString(void)const{return m_title.c_str();}
+
+        bool CanEditString(void)const{return true;}
+        void OnEditString(const wxChar* str);
+}; // End CSpeedReference class definition.
+
+
+

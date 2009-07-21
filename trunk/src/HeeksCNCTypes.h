@@ -17,5 +17,8 @@ enum{
 	CounterBoreType,
 	TurnRoughType,
 	FixtureType,
+	FixturesType,
+	SpeedReferenceType,
+	SpeedReferencesType,
 	HeeksCNCMaximumType
 };
