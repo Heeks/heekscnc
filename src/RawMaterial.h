@@ -1,5 +1,3 @@
-#ifndef HEEKS_CNC_RAW_MATERIAL_CLASS_DEFINITION
-#define HEEKS_CNC_RAW_MATERIAL_CLASS_DEFINITION
 
 #include "interface/HeeksObj.h"
 #include "interface/PropertyChoice.h"
@@ -10,6 +8,8 @@
 #include <sstream>
 #include <map>
 #include <list>
+
+#pragma once
 
 class CProgram;
 
@@ -22,22 +22,12 @@ class CProgram;
 class CRawMaterial
 {
 public:
-	#define HARDNESS_OF_ALUMINIUM 15.0
+	CRawMaterial();
 
-	typedef std::map< double, wxString > BrinellHardnessTable_t;
-
-	static BrinellHardnessTable_t	m_brinell_hardness_table;
-
-	CRawMaterial( const double brinell_hardness = HARDNESS_OF_ALUMINIUM );
-
+	wxString m_material_name;
 	double m_brinell_hardness;
 
 	double Hardness() const;
-	void Set( const double brinell_hardness );
-
-	wxString Name() const;
-	bool Set( const wxString &material_name );
-	bool Set( const int choice_offset );
 
 	void GetProperties(CProgram *parent, std::list<Property *> *list);
 
@@ -47,4 +37,3 @@ public:
 
 }; // End CRawMaterial class definition.
 
-#endif // HEEKS_CNC_RAW_MATERIAL_CLASS_DEFINITION

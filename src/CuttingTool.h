@@ -1,13 +1,12 @@
 
-#ifndef CUTTING_TOOL_CLASS_DEFINTION
-#define CUTTING_TOOL_CLASS_DEFINTION
-
 // CuttingTool.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
  * This program is released under the BSD license. See the file COPYING for
  * details.
  */
+
+#pragma once
 
 #include "Program.h"
 #include "Op.h"
@@ -37,11 +36,44 @@ public:
 		eUndefinedToolType
 	} eCuttingToolType;
 
+	typedef std::pair< eCuttingToolType, wxString > CuttingToolTypeDescription_t;
+	typedef std::vector<CuttingToolTypeDescription_t > CuttingToolTypesList_t;
+
+	static CuttingToolTypesList_t GetCuttingToolTypesList()
+	{
+		CuttingToolTypesList_t types_list;
+
+		types_list.push_back( CuttingToolTypeDescription_t( eDrill, wxString(_T("Drill Bit")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eCentreDrill, wxString(_T("Centre Drill Bit")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eEndmill, wxString(_T("End Mill")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eSlotCutter, wxString(_T("Slot Cutter")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eBallEndMill, wxString(_T("Ball End Mill")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eChamfer, wxString(_T("Chamfer")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eTurningTool, wxString(_T("Turning Tool")) ));
+
+		return(types_list);
+	} // End GetCuttingToolTypesList() method
+
+
+
 	typedef enum {
 		eHighSpeedSteel = 0,
 		eCarbide,
 		eUndefinedMaterialType
 	} eMaterial_t;
+
+	typedef std::pair< eMaterial_t, wxString > MaterialDescription_t;
+	typedef std::vector<MaterialDescription_t > MaterialsList_t;
+
+	static MaterialsList_t GetMaterialsList()
+	{
+		MaterialsList_t materials_list;
+
+		materials_list.push_back( MaterialDescription_t( eHighSpeedSteel, wxString(_T("High Speed Steel")) ));
+		materials_list.push_back( MaterialDescription_t( eCarbide, wxString(_T("Carbide")) ));
+
+		return(materials_list);
+	} // End Get() method
 
 	// The G10 command can be used (within EMC2) to add a tool to the tool
 	// table from within a program.
@@ -159,7 +191,3 @@ public:
 
 }; // End CCuttingTool class definition.
 
-
-
-
-#endif // CUTTING_TOOL_CLASS_DEFINTION

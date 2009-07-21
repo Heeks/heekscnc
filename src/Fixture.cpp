@@ -189,7 +189,7 @@ void CFixture::CopyFrom(const HeeksObj* object)
 
 bool CFixture::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == ToolsType;
+	return owner->GetType() == FixturesType;
 }
 
 void CFixture::WriteXML(TiXmlNode *root)
@@ -243,9 +243,9 @@ CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_numb
 	//CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
 	// the above line was very slow for me ( when I had thousands of lines in the drawing )
 
-	HeeksObj* operations = theApp.m_program->m_operations;
+	HeeksObj* fixtures = theApp.m_program->m_fixtures;
 
-	for(HeeksObj* ob = operations->GetFirstChild(); ob; ob = operations->GetNextChild())
+	for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
 	{
 		if (ob->GetType() != FixtureType) continue;
 
@@ -266,9 +266,9 @@ int CFixture::GetNextFixture()
 {
 	std::set< int > existing_fixtures;
 
-	HeeksObj* operations = theApp.m_program->m_operations;
+	HeeksObj* fixtures = theApp.m_program->m_fixtures;
 
-	for(HeeksObj* ob = operations->GetFirstChild(); ob; ob = operations->GetNextChild())
+	for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
 	{
 		if (ob->GetType() != FixtureType) continue;
 

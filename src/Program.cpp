@@ -119,13 +119,42 @@ HeeksObj* CTools::ReadFromXMLElement(TiXmlElement* pElem)
 	return new_object;
 }
 
-CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_script_edited(false)
+void CSpeedReferences::WriteXML(TiXmlNode *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "SpeedReferences" );
+	root->LinkEndChild( element );  
+	WriteBaseXML(element);
+}
+
+HeeksObj* CSpeedReferences::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	CSpeedReferences* new_object = new CSpeedReferences();
+	new_object->ReadBaseXML(pElem);
+	return new_object;
+}
+ 
+void CFixtures::WriteXML(TiXmlNode *root)
+{
+	TiXmlElement * element;
+	element = new TiXmlElement( "Fixtures" );
+	root->LinkEndChild( element );  
+	WriteBaseXML(element);
+}
+
+HeeksObj* CFixtures::ReadFromXMLElement(TiXmlElement* pElem)
+{
+	CFixtures* new_object = new CFixtures();
+	new_object->ReadBaseXML(pElem);
+	return new_object;
+}
+ 
+CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed_references(NULL), m_fixtures(NULL), m_script_edited(false)
 {
 	CNCConfig config;
 	wxString machine_file_name;
 	config.Read(_T("ProgramMachine"), &machine_file_name, _T("iso"));
 	m_machine = CProgram::GetMachine(machine_file_name);
-	m_raw_material.Set(_T("Aluminium"));
 
 #ifdef WIN32
 	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
@@ -204,7 +233,11 @@ void CProgram::GetProperties(std::list<Property *> *list)
 
 bool CProgram::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == NCCodeType || object->GetType() == OperationsType || object->GetType() == ToolsType;
+	return object->GetType() == NCCodeType || 
+		object->GetType() == OperationsType || 
+		object->GetType() == ToolsType || 
+		object->GetType() == SpeedReferencesType ||
+		object->GetType() == FixturesType;
 }
 
 bool CProgram::CanAddTo(HeeksObj* owner)
@@ -257,6 +290,14 @@ bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 	case ToolsType:
 		m_tools = (CTools*)object;
 		break;
+
+	case SpeedReferencesType:
+		m_speed_references = (CSpeedReferences*)object;
+		break;
+
+	case FixturesType:
+		m_fixtures = (CFixtures*)object;
+		break;
 	}
 
 	return ObjList::Add(object, prev_object);
@@ -268,6 +309,8 @@ void CProgram::Remove(HeeksObj* object)
 	if(object == m_nc_code)m_nc_code = NULL;
 	else if(object == m_operations)m_operations = NULL;
 	else if(object == m_tools)m_tools = NULL;
+	else if(object == m_speed_references)m_speed_references = NULL;
+	else if(object == m_fixtures)m_fixtures = NULL;
 
 	ObjList::Remove(object);
 }
@@ -726,3 +769,37 @@ CMachine CProgram::GetMachine(const wxString& file_name)
 	machine.description = _T("not found");
 	return machine;
 }
+
+/**
+	This method finds a distinct set of material names from the SpeedReferences list.
+ */
+std::set< wxString > CSpeedReferences::GetMaterials()
+{
+	std::set< wxString > materials;
+	for (HeeksObj *material = theApp.m_program->m_speed_references->GetFirstChild();
+		material != NULL;
+		material = theApp.m_program->m_speed_references->GetNextChild())
+	{
+		materials.insert( ((CSpeedReference *)material)->m_material_name );
+	} // End for
+
+	return(materials);
+} // End GetMaterials() method
+
+/**
+	Return a set of harndess values that are valid for the chosen material name.
+ */
+std::set< double > CSpeedReferences::GetHardnessForMaterial( const wxString & material_name )
+{
+	std::set< double > hardness_values;
+	for (HeeksObj *material = theApp.m_program->m_speed_references->GetFirstChild();
+		material != NULL;
+		material = theApp.m_program->m_speed_references->GetNextChild())
+	{
+		hardness_values.insert( ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material );
+	} // End for
+
+	return(hardness_values);
+
+} // End of GetHardnessForMaterial() method
+
