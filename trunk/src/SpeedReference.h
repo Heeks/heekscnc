@@ -36,7 +36,7 @@ public:
 
 	void ResetTitle();
 	//	Constructors.
-        CSpeedReference( const wxChar *material_name,
+        CSpeedReference( const wxString &material_name,
 			const int cutting_tool_material,
 			const double brinell_hardness_of_raw_material,
 			const double surface_speed ) :
@@ -64,6 +64,10 @@ public:
 
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
+
+	double GetSurfaceSpeed( const wxChar *material_name, 
+				const int cutting_tool_material, 
+				const double brinell_hardness_of_raw_material ) const;
 
 }; // End CSpeedReference class definition.
 

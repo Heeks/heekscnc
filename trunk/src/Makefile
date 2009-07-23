@@ -405,7 +405,8 @@ PythonInterface.o: $(KURVE_DIR)/PythonInterface.cpp \
 	$(CC) -c $(KURVE_DIR)/PythonInterface.cpp ${CCFLAGS} -o $@
 
 RawMaterial.o: RawMaterial.cpp \
-		RawMaterial.h
+		RawMaterial.h	\
+		Program.h
 	$(CC) -c RawMaterial.cpp ${CCFLAGS} -o $@
 
 SpeedReference.o: SpeedReference.cpp \
