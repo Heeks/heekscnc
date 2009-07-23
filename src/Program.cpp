@@ -170,6 +170,10 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed
 	config.Read(_T("ProgramMachine"), &machine_file_name, _T("iso"));
 	m_machine = CProgram::GetMachine(machine_file_name);
 
+	wxString localValue;
+	config.Read(_T("OutputFileNameFollowsDataFileName"), &localValue, _T("0"));
+	m_output_file_name_follows_data_file_name = (atoi( Ttc(localValue.c_str()) ) != 0);
+
 #ifdef WIN32
 	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
 #else
@@ -214,6 +218,14 @@ static void on_set_units(int value, HeeksObj* object)
 	heeksCAD->SetViewUnits(((CProgram*)object)->m_units, true);
 }
 
+static void on_set_output_file_name_follows_data_file_name(int zero_based_choice, HeeksObj *object)
+{
+	CProgram *pProgram = (CProgram *) object;
+	pProgram->m_output_file_name_follows_data_file_name = (zero_based_choice != 0);
+	heeksCAD->RefreshProperties();
+}
+
+
 void CProgram::GetProperties(std::list<Property *> *list)
 {
 	{
@@ -231,7 +243,20 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		list->push_back ( new PropertyChoice ( _("machine"),  choices, choice, this, on_set_machine ) );
 	}
 
-	list->push_back(new PropertyString(_("output file"), m_output_file, this, on_set_output_file));
+	{
+		std::list<wxString> choices;
+		int choice = int(m_output_file_name_follows_data_file_name?1:0);
+		choices.push_back(_T("False"));
+		choices.push_back(_T("True"));
+
+		list->push_back(new PropertyChoice(_("output file name follows data file name"), choices, choice, this, on_set_output_file_name_follows_data_file_name));
+	}
+
+	if (m_output_file_name_follows_data_file_name == false)
+	{
+		list->push_back(new PropertyString(_("output file"), m_output_file, this, on_set_output_file));
+	} // End if - then
+
 	{
 		std::list< wxString > choices;
 		choices.push_back ( wxString ( _("mm") ) );
@@ -310,6 +335,16 @@ void CProgram::WriteXML(TiXmlNode *root)
 	root->LinkEndChild( element );  
 	element->SetAttribute("machine", Ttc(m_machine.file_name.c_str()));
 	element->SetAttribute("output_file", Ttc(m_output_file.c_str()));
+
+#ifdef UNICODE
+	std::wostringstream l_ossValue;
+#else
+	std::ostringstream l_ossValue;
+#endif
+
+	l_ossValue << (m_output_file_name_follows_data_file_name?1:0);
+	element->SetAttribute("output_file_name_follows_data_file_name", Ttc(l_ossValue.str().c_str()));
+
 	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
 	element->SetDoubleAttribute("units", m_units);
 
@@ -368,6 +403,7 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 		std::string name(a->Name());
 		if(name == "machine")new_object->m_machine = GetMachine(Ctt(a->Value()));
 		else if(name == "output_file"){new_object->m_output_file.assign(Ctt(a->Value()));}
+		else if(name == "output_file_name_follows_data_file_name"){new_object->m_output_file_name_follows_data_file_name = (atoi(a->Value()) != 0); }
 		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(Ctt(a->Value()));}
 		else if(name == "units"){new_object->m_units = a->DoubleValue();}
 	}
@@ -601,7 +637,7 @@ void CProgram::RewritePythonProgram()
 	} // End if - else
 
 	// output file
-	theApp.m_program_canvas->AppendText(_T("output('") + m_output_file + _T("')\n"));
+	theApp.m_program_canvas->AppendText(_T("output('") + GetOutputFileName() + _T("')\n"));
 
 	// begin program
 	theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
@@ -880,3 +916,43 @@ double CSpeedReferences::GetSurfaceSpeed(
 } // End GetSurfaceSpeed() method
 
 
+/**
+	If the m_output_file_name_follows_data_file_name flag is true then
+	we don't want to use the temporary directory.
+ */
+wxString CProgram::GetOutputFileName() const
+{
+	if (m_output_file_name_follows_data_file_name)
+	{
+		if (heeksCAD->GetFileFullPath())
+		{
+#ifdef UNICODE
+			std::wostringstream l_ossPath;
+			std::wstring l_ssPath;
+			std::wstring::size_type i;
+#else
+			std::ostringstream l_ossPath;
+			std::string l_ssPath;
+			std::string::size_type i;
+#endif
+
+			l_ssPath.assign(heeksCAD->GetFileFullPath());
+			if ( (i=l_ssPath.find_last_of('.')) != l_ssPath.npos)
+			{
+				l_ssPath.erase(i);	// chop off the end.
+			} // End if - then
+
+			l_ossPath << l_ssPath.c_str() << _T(".tap");
+			return(l_ossPath.str().c_str());
+		} // End if - then
+		else
+		{
+			// The user hasn't assigned a filename yet.  Use the default.
+			return(m_output_file);
+		} // End if - else
+	} // End if - then
+	else
+	{
+		return(m_output_file);
+	} // End if - else
+} // End GetOutputFileName() method

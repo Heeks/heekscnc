@@ -119,7 +119,8 @@ class CProgram:public ObjList
 public:
 	CRawMaterial m_raw_material;	// for material hardness - to determine feeds and speeds.
 	CMachine m_machine;
-	wxString m_output_file;
+	wxString m_output_file;		// NOTE: Only relevant if the filename does NOT follow the data file's name.
+	bool m_output_file_name_follows_data_file_name;	// Just change the extension to determine the NC file name
 	CNCCode* m_nc_code;
 	COperations* m_operations;
 	CTools* m_tools;
@@ -129,6 +130,8 @@ public:
 	double m_units; // 1.0 for mm, 25.4 for inches
 
 	CProgram();
+
+	wxString GetOutputFileName() const;
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
