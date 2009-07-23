@@ -126,6 +126,12 @@ public:
 	double m_cutting_edge_height;	// How far, from the bottom of the cutter, do the flutes extend?
 
 	eCuttingToolType	m_type;
+	double m_max_advance_per_revolution;	// This is the maximum distance a tool should advance during a single
+						// revolution.  This value is often defined by the manufacturer in
+						// terms of an advance no a per-tooth basis.  This value, however,
+						// must be expressed on a per-revolution basis.  i.e. we don't want
+						// to maintain the number of cutting teeth so a per-revolution
+						// value is easier to use.
 
 	void set_initial_values();
 	void write_values_to_config();
