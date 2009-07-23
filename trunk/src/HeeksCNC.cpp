@@ -6,6 +6,8 @@
  */
 
 #include "stdafx.h"
+#include <errno.h>
+#include <dirent.h>
 
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
@@ -29,6 +31,7 @@
 #include "TurnRough.h"
 #include "Fixture.h"
 #include "SpeedReference.h"
+#include "interface/strconv.h"
 
 #include <sstream>
 
@@ -737,6 +740,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=4;pos=0;prop=100000;bestw=341;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=968;floaty=291;floatw=368;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=549;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=TransformBar;caption=Transformation Tools;state=2108159;dir=1;layer=10;row=2;pos=685;prop=100000;bestw=217;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=935;floaty=423;floatw=244;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MachiningBar;caption=Machining tools;state=2108156;dir=1;layer=10;row=4;pos=352;prop=100000;bestw=434;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=604;floaty=255;floatw=368;floath=71|name=Program;caption=Program;state=2099196;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Output;caption=Output;state=2099196;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=234|dock_size(3,0,0)=219|dock_size(1,10,0)=33|dock_size(1,10,4)=33|")));
 }
 
+
+
 void CHeeksCNCApp::OnNewOrOpen(bool open)
 {
 	// check for existance of a program
@@ -768,6 +773,67 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		theApp.m_program_canvas->Clear();
 		theApp.m_output_canvas->Clear();
 	}
+
+
+	// Read in any default speed reference or tool table data.
+	std::list<wxString> seed_file_names;
+	DIR *pdir = opendir(".");	// Look in the current directory for files
+					// whose names begin with "default."
+	if (pdir != NULL) 
+	{
+		struct dirent *pent = NULL;
+ 		while ((pent=readdir(pdir)))
+		{
+#ifdef UNICODE
+			std::wstring l_ssName;
+			std::wstring l_ssPrefix = _T("default");
+#else
+			std::string l_ssName;
+			std::string l_ssPrefix = _T("default");
+#endif
+
+			l_ssName = Ctt(pent->d_name);
+
+			if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
+			{
+				seed_file_names.push_back(l_ssName.c_str());
+			} // End if - then
+ 		} // End while
+ 		closedir(pdir);
+ 	} // End if - then
+
+	seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
+	for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
+	{
+
+		wxString lowercase_file_name( *l_itFile );
+		lowercase_file_name.MakeLower();
+
+		if (lowercase_file_name.Find(_T("speed")) != -1) 
+		{
+			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
+		} // End if - then
+		else if (lowercase_file_name.Find(_T("feed")) != -1) 
+		{
+			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
+		}
+		else if (lowercase_file_name.Find(_T("tool")) != -1) 
+		{
+			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_tools );
+		}
+		else if (lowercase_file_name.Find(_T("fixture")) != -1) 
+		{
+			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_fixtures );
+		}
+		else
+		{
+			printf("possible default filename does not contain either 'speed', 'feed' or 'tool' in its name.\n");
+		} // End if - else
+	} // End for
 }
 
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
