@@ -83,6 +83,7 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_material"), &m_material, int(eCarbide));
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
+	config.Read(_T("m_max_advance_per_revolution"), &m_max_advance_per_revolution, 0.12 );	// mm
 
 	config.Read(_T("m_type"), (int *) &m_type, eDrill);
 	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
@@ -96,6 +97,7 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_front_angle"), &m_front_angle, 95);
 	config.Read(_T("m_tool_angle"), &m_tool_angle, 60);
 	config.Read(_T("m_back_angle"), &m_back_angle, 25);
+
 
 }
 
@@ -111,6 +113,7 @@ void CCuttingToolParams::write_values_to_config()
 	config.Write(_T("m_x_offset"), m_x_offset);
 	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
 	config.Write(_T("m_orientation"), m_orientation);
+	config.Write(_T("m_max_advance_per_revolution"), m_max_advance_per_revolution );
 
 	config.Write(_T("m_type"), m_type);
 	config.Write(_T("m_flat_radius"), m_flat_radius);
@@ -129,6 +132,7 @@ static void on_set_diameter(double value, HeeksObj* object)
 	ResetParametersToReasonableValues(object);
 } // End on_set_diameter() routine
 
+static void on_set_max_advance_per_revolution(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_max_advance_per_revolution = value;}
 static void on_set_x_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_x_offset = value;}
 static void on_set_tool_length_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_length_offset = value;}
 static void on_set_orientation(int zero_based_choice, HeeksObj* object)
@@ -379,6 +383,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		list->push_back(new PropertyChoice(_("Type"), choices, choice, parent, on_set_type));
 	}
 
+	list->push_back(new PropertyLength(_("max_advance_per_revolution"), m_max_advance_per_revolution, parent, on_set_max_advance_per_revolution));
 
 	if (m_type == eTurningTool)
 	{
@@ -430,6 +435,7 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("diameter", m_diameter);
 	element->SetDoubleAttribute("x_offset", m_x_offset);
 	element->SetDoubleAttribute("tool_length_offset", m_tool_length_offset);
+	element->SetDoubleAttribute("max_advance_per_revolution", m_max_advance_per_revolution);
 
 	std::ostringstream l_ossValue;
 	l_ossValue.str(""); l_ossValue << m_material;
@@ -454,6 +460,7 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
+	if (pElem->Attribute("max_advance_per_revolution")) m_max_advance_per_revolution = atof(pElem->Attribute("max_advance_per_revolution"));
 	if (pElem->Attribute("x_offset")) m_x_offset = atof(pElem->Attribute("x_offset"));
 	if (pElem->Attribute("tool_length_offset")) m_tool_length_offset = atof(pElem->Attribute("tool_length_offset"));
 	if (pElem->Attribute("material")) m_material = atoi(pElem->Attribute("material"));

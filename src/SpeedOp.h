@@ -28,6 +28,7 @@ public:
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	void ResetSpeeds(const int cutting_tool_number);
+	void ResetFeeds(const int cutting_tool_number);
 };
 
 class CSpeedOp : public COp
