@@ -57,6 +57,8 @@ public:
 
 class CSpeedReferences: public ObjList{
 public:
+	static bool s_estimate_when_possible;	// flag to turn feeds and speeds estimation on and off.
+
 	// HeeksObj's virtual functions
 	bool OneOfAKind(){return true;}
 	int GetType()const{return SpeedReferencesType;}
@@ -68,11 +70,16 @@ public:
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return false;}
+	void GetProperties(std::list<Property *> *list);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	static std::set< wxString > GetMaterials();
 	static std::set< double > GetHardnessForMaterial( const wxString & material_name );
+
+	static double GetSurfaceSpeed( const wxString & material_name, 
+					const int cutting_tool_material, 
+					const double brinell_hardness_of_raw_material );
 };
 
 class CFixtures: public ObjList{
