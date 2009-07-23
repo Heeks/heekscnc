@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<HeeksCAD_Document>
+            <CuttingTool title="12.7 mm Carbide Drill Bit" tool_number="1" id="1">
+                <params diameter="12.7" x_offset="0" tool_length_offset="127" material="1" orientation="6" type="0" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" />
+            </CuttingTool>
+            <CuttingTool title="12.7 mm Carbide Centre Drill Bit" tool_number="2" id="2">
+                <params diameter="12.7" x_offset="0" tool_length_offset="63.5" material="1" orientation="6" type="1" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="12.7" front_angle="95" tool_angle="60" back_angle="25" />
+            </CuttingTool>
+            <CuttingTool title="12.7 mm Carbide End Mill" tool_number="3" id="3">
+                <params diameter="12.7" x_offset="0" tool_length_offset="63.5" material="1" orientation="6" type="2" corner_radius="0" flat_radius="6.35" cutting_edge_angle="0" cutting_edge_height="38.1" front_angle="95" tool_angle="60" back_angle="25" />
+            </CuttingTool>
+            <CuttingTool title="12.7 mm Carbide Slot Cutter" tool_number="4" id="4">
+                <params diameter="12.7" x_offset="0" tool_length_offset="63.5" material="1" orientation="6" type="3" corner_radius="0" flat_radius="6.35" cutting_edge_angle="0" cutting_edge_height="38.1" front_angle="95" tool_angle="60" back_angle="25" />
+            </CuttingTool>
+            <CuttingTool title="12.7 mm Carbide Ball End Mill" tool_number="5" id="5">
+                <params diameter="12.7" x_offset="0" tool_length_offset="63.5" material="1" orientation="6" type="4" corner_radius="6.35" flat_radius="0" cutting_edge_angle="0" cutting_edge_height="38.1" front_angle="95" tool_angle="60" back_angle="25" />
+            </CuttingTool>
+            <CuttingTool title="45 degreee Chamfering Bit" tool_number="6" id="6">
+                <params diameter="12.7" x_offset="0" tool_length_offset="63.5" material="1" orientation="6" type="5" corner_radius="0" flat_radius="0" cutting_edge_angle="45" cutting_edge_height="6.35" front_angle="95" tool_angle="60" back_angle="25" />
+            </CuttingTool>
+            <CuttingTool title="Carbide Turning Tool" tool_number="7" id="7">
+                <params diameter="12.7" x_offset="0" tool_length_offset="127" material="1" orientation="6" type="6" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" />
+            </CuttingTool>
+</HeeksCAD_Document>
