@@ -26,11 +26,15 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-static void on_set_cutting_tool_material(int value, HeeksObj* object)
+static void on_set_cutting_tool_material(int zero_based_choice, HeeksObj* object)
 {
-		((CSpeedReference*)object)->m_cutting_tool_material = value;
-		((CSpeedReference*)object)->ResetTitle();
-		heeksCAD->RefreshProperties();
+	if (zero_based_choice < 0) return;	// An error has occured.
+	
+	CSpeedReference *pSpeedReference = (CSpeedReference *) object;
+
+	pSpeedReference->m_cutting_tool_material = zero_based_choice;
+	pSpeedReference->ResetTitle();
+	heeksCAD->RefreshProperties();
 }
 
 static void on_set_brinell_hardness_of_raw_material(double value, HeeksObj* object){((CSpeedReference*)object)->m_brinell_hardness_of_raw_material = value; ((CSpeedReference*)object)->ResetTitle(); }
@@ -43,7 +47,7 @@ void CSpeedReference::GetProperties(std::list<Property *> *list)
 	{
 		CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
 
-		int choice = 0;
+		int choice = -1;
 		std::list< wxString > choices;
 		for (CCuttingToolParams::MaterialsList_t::size_type i=0; i<materials.size(); i++)
 		{
@@ -117,12 +121,11 @@ HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 		cutting_tool_material = atoi(element->Attribute("cutting_tool_material"));
 
 	wxString title(Ctt(element->Attribute("title")));
-	CSpeedReference* new_object = new CSpeedReference( 	raw_material_name.c_str(),
+	CSpeedReference* new_object = new CSpeedReference( 	raw_material_name,
 								cutting_tool_material,
 								brinell_hardness_of_raw_material,
 								surface_speed );
 	new_object->ReadBaseXML(element);
-
 	return new_object;
 }
 
@@ -148,6 +151,7 @@ void CSpeedReference::ResetTitle()
 
 	OnEditString(l_ossTitle.str().c_str());
 } // End ResetTitle() method
+
 
 
 

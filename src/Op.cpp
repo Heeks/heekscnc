@@ -70,13 +70,15 @@ static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)
 static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->WasModified(object);}
 static void on_set_execution_order(int value, HeeksObj* object){((COp*)object)->m_execution_order = value;heeksCAD->WasModified(object);}
 
-static void on_set_cutting_tool_number(int value, HeeksObj* object)
+static void on_set_cutting_tool_number(int zero_based_choice, HeeksObj* object)
 {
+	if (zero_based_choice < 0) return;	// An error has occured.
+
 	std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
 
-	if ((value >= int(0)) && (value <= int(tools.size()-1)))
+	if ((zero_based_choice >= int(0)) && (zero_based_choice <= int(tools.size()-1)))
 	{
-                ((COp *)object)->m_cutting_tool_number = tools[value].first;	// Convert the choice offset to the tool number for that choice
+                ((COp *)object)->m_cutting_tool_number = tools[zero_based_choice].first;	// Convert the choice offset to the tool number for that choice
 	} // End if - then
 } // End on_set_cutting_tool_number() routine
 
@@ -90,7 +92,7 @@ void COp::GetProperties(std::list<Property *> *list)
 	{
 		std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
 
-		int choice = 0;
+		int choice = -1;
                 std::list< wxString > choices;
 		for (std::vector< std::pair< int, wxString > >::size_type i=0; i<tools.size(); i++)
 		{

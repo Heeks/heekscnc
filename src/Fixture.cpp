@@ -144,10 +144,13 @@ void CFixture::AppendTextToProgram() const
 
 
 // 1 = G54, 2 = G55 etc.
-static void on_set_coordinate_system_number(const int value, HeeksObj* object)
+static void on_set_coordinate_system_number(const int zero_based_choice, HeeksObj* object)
 {
-	((CFixture*)object)->m_coordinate_system_number = CFixture::eCoordinateSystemNumber_t(value + 1);	// Change from zero-based to one-based offset
-	((CFixture*)object)->ResetTitle();
+	if (zero_based_choice < 0) return;	// An error has occured.
+	CFixture *pFixture = (CFixture *) object;
+
+	pFixture->m_coordinate_system_number = CFixture::eCoordinateSystemNumber_t(zero_based_choice + 1);	// Change from zero-based to one-based offset
+	pFixture->ResetTitle();
 } // End on_set_coordinate_system_number
 
 /**

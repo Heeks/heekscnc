@@ -131,11 +131,13 @@ static void on_set_diameter(double value, HeeksObj* object)
 
 static void on_set_x_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_x_offset = value;}
 static void on_set_tool_length_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_length_offset = value;}
-static void on_set_orientation(int value, HeeksObj* object)
+static void on_set_orientation(int zero_based_choice, HeeksObj* object)
 {
-	if ((value >= 0) && (value <= 9))
+	if (zero_based_choice < 0) return;	// An error has occured
+
+	if ((zero_based_choice >= 0) && (zero_based_choice <= 9))
 	{
-		((CCuttingTool*)object)->m_params.m_orientation = value;
+		((CCuttingTool*)object)->m_params.m_orientation = zero_based_choice;
 	} // End if - then
 	else
 	{
@@ -143,11 +145,13 @@ static void on_set_orientation(int value, HeeksObj* object)
 	} // End if - else
 }
 
-static void on_set_material(int value, HeeksObj* object)
+static void on_set_material(int zero_based_choice, HeeksObj* object)
 {
-	if ((value >= CCuttingToolParams::eHighSpeedSteel) && (value <= CCuttingToolParams::eCarbide))
+	if (zero_based_choice < 0) return;	// An error has occured.
+
+	if ((zero_based_choice >= CCuttingToolParams::eHighSpeedSteel) && (zero_based_choice <= CCuttingToolParams::eCarbide))
 	{
-		((CCuttingTool*)object)->m_params.m_material = value;
+		((CCuttingTool*)object)->m_params.m_material = zero_based_choice;
 		ResetParametersToReasonableValues(object);
 		heeksCAD->RefreshProperties();
 	} // End if - then
@@ -161,9 +165,11 @@ static void on_set_front_angle(double value, HeeksObj* object){((CCuttingTool*)o
 static void on_set_tool_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_angle = value;}
 static void on_set_back_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_back_angle = value;}
 
-static void on_set_type(int value, HeeksObj* object)
+static void on_set_type(int zero_based_choice, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(value);
+	if (zero_based_choice < 0) return;	// An error has occured.
+
+	((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(zero_based_choice);
 	ResetParametersToReasonableValues(object);
 	heeksCAD->RefreshProperties();
 } // End on_set_type() routine
@@ -347,7 +353,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 	{
 		CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
 
-		int choice = 0;
+		int choice = -1;
 		std::list< wxString > choices;
 		for (CCuttingToolParams::MaterialsList_t::size_type i=0; i<materials.size(); i++)
 		{
@@ -362,7 +368,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 	{
 		CCuttingToolParams::CuttingToolTypesList_t cutting_tool_types = CCuttingToolParams::GetCuttingToolTypesList();
 
-		int choice = 0;
+		int choice = -1;
 		std::list< wxString > choices;
 		for (CCuttingToolParams::CuttingToolTypesList_t::size_type i=0; i<cutting_tool_types.size(); i++)
 		{
@@ -623,16 +629,19 @@ CCuttingTool *CCuttingTool::Find( const int tool_number )
  */
 int CCuttingTool::FindCuttingTool( const int tool_number )
 {
-	HeeksObj* tool_list = theApp.m_program->m_tools;
-
-	for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
+	if ((theApp.m_program) && (theApp.m_program->m_tools))
 	{
-		if (ob->GetType() != CuttingToolType) continue;
-		if ((ob != NULL) && (((CCuttingTool *) ob)->m_tool_number == tool_number))
+		HeeksObj* tool_list = theApp.m_program->m_tools;
+
+		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
-			return(ob->m_id);
-		} // End if - then
-	} // End for
+			if (ob->GetType() != CuttingToolType) continue;
+			if ((ob != NULL) && (((CCuttingTool *) ob)->m_tool_number == tool_number))
+			{
+				return(ob->m_id);
+			} // End if - then
+		} // End for
+	} // End if - then
 
 	return(-1);
 
@@ -646,17 +655,21 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
 	// Always add a value of zero to allow for an absense of cutting tool use.
 	tools.push_back( std::make_pair(0, _T("No Cutting Tool") ) );
 
-	HeeksObj* tool_list = theApp.m_program->m_tools;
-
-	for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
+	if ((theApp.m_program) && (theApp.m_program->m_tools))
 	{
-		if (ob->GetType() != CuttingToolType) continue;
+		HeeksObj* tool_list = theApp.m_program->m_tools;
 
-		if (ob != NULL)
+		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
-			tools.push_back( std::make_pair(((CCuttingTool *) ob)->m_tool_number, ((CCuttingTool*) ob)->GetShortString() ) );
-		} // End if - then
-	} // End for
+			if (ob->GetType() != CuttingToolType) continue;
+
+			CCuttingTool *pCuttingTool = (CCuttingTool *)ob;
+			if (ob != NULL)
+			{
+				tools.push_back( std::make_pair( pCuttingTool->m_tool_number, pCuttingTool->GetShortString() ) );
+			} // End if - then
+		} // End for
+	} // End if - then
 
 	return(tools);
 

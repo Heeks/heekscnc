@@ -17,7 +17,6 @@
 #include "interface/Tool.h"
 #include "CuttingTool.h"
 
-
 CSpeedOpParams::CSpeedOpParams()
 {
 	m_horizontal_feed_rate = 0.0;
@@ -31,7 +30,40 @@ void CSpeedOpParams::set_initial_values( const int cutting_tool_number )
 	config.Read(_T("SpeedOpHorizFeed"), &m_horizontal_feed_rate, 100.0);
 	config.Read(_T("SpeedOpVertFeed"), &m_vertical_feed_rate, 100.0);
 	config.Read(_T("SpeedOpSpindleSpeed"), &m_spindle_speed, 7000);
+
+	ResetSpeeds(cutting_tool_number);
 }
+
+void CSpeedOpParams::ResetSpeeds(const int cutting_tool_number)
+{
+	if (CSpeedReferences::s_estimate_when_possible)
+	{
+
+		// Use the 'feeds and speeds' class along with the cutting tool properties to
+		// help set some logical values for the spindle speed.
+
+		if ((cutting_tool_number > 0) && (CCuttingTool::Find( cutting_tool_number ) != NULL))
+		{
+			wxString material_name = theApp.m_program->m_raw_material.m_material_name;
+			double hardness = theApp.m_program->m_raw_material.m_brinell_hardness;
+			double surface_speed = CSpeedReferences::GetSurfaceSpeed( material_name,
+										CCuttingTool::CutterMaterial( cutting_tool_number ),
+										hardness );
+			if (surface_speed > 0)
+			{
+				CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
+				if (pCuttingTool != NULL)
+				{
+					if (pCuttingTool->m_params.m_diameter > 0) 
+					{
+						m_spindle_speed = (surface_speed * 1000.0) / (PI * pCuttingTool->m_params.m_diameter);
+						m_spindle_speed = floor(m_spindle_speed);	// Round down to integer
+					} // End if - then
+				} // End if - then
+			} // End if - then
+		} // End if - then
+	} // End if - then
+} // End ResetSpeeds() method
 
 void CSpeedOpParams::write_values_to_config()
 {
