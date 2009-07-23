@@ -6,6 +6,8 @@ The Cutting Tool object defines a single tool in what will eventually become a t
 
 The various NC operations (Adaptive, Profile, Drilling etc.) objects also refer to these Cutting Tool objects and add a 'select tool' command immediately prior to that operation's GCode generation.
 
+A default tool table may be setup so that it is automatically loaded on a 'File'->'New' command.
+
 
 = Details =
 The Cutting Tool object has been added to define a single tool.  It's GCode produces a 'G10 L1' command to add a tool to the logical tool table from within the GCode program.  (from the EMC2 documentation).
@@ -113,3 +115,13 @@ The angle behind the tool. In degrees.
 The angle of the tip of the tool. In degrees.
 
 http://heekscnc.googlecode.com/svn/wiki/turning/angles.png
+
+==== Material ====
+
+This is the material that makes up the cutting edge of the cutter.  It may be set to either 'High Speed Steel' or 'Carbide'.  This value is used, along with the chosen workpiece material (the block you're machining) to determine a recommended spindle speed.  i.e. surface feet per minute between the cutting edge and the raw material being machined.
+
+== Default Tool Table ==
+
+A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process is slightly involved in that this file should be manually edited so that it contains the parent XML element <HeeksCNC_Document> as well as ONLY the <tool> element definitions.  All other XML elements should be removed.
+
+Each time a new file is created, the elements in the default.tooltable file will be pre-loaded.  The default.tooltable file must be located along with the HeeksCNC.so (or HeeksCNC.DLL) file.  i.e. the application looks in its 'current' directory.
