@@ -1,0 +1,21 @@
+#summary Properties page explanation for the Program object.
+
+= Introduction =
+
+There are various configuration items that affect the design and operation as a whole as opposed to being specific to a particular NC operation.  These 'global' settings are often configured in the Properties list of the Program object.
+
+== Machine ==
+
+The machine property determines which of the available NC post-processors will be used when generating the GCode.
+
+== Output Filename follows data filename ==
+
+This is a 'true/false' flag that determines whether a configurable filename will be used for the generated GCode or whether the GCode's filename will follow the main data model.  eg: If the data is saved to a filename of 'something.heeks' and this flag is 'true' then the generated GCode will be added to 'something.tap'.  The path to both the something.heeks and something.tap files will be the same.
+
+== Output File ==
+
+If the 'output filename follows data filename' is set to 'false' then this parameter determines where the generated GCode will be written.
+
+== Raw Material and Brinell Hardness of Raw Material ==
+
+These two parameters relate to the estimation of spindle speeds and feedrates.  They determine what type of raw material is being machined both by name and by its Brinell hardness rating.  This information will only be available if it has been pre-loaded into the "Feeds and Speeds" section of the data model.
