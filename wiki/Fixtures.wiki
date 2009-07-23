@@ -35,3 +35,9 @@ A separate set of GCode will be generated for each Fixture object defined.  This
 - Hold your hand over the Emergency Stop button just in case non of this stuff actually works.
 
 - Run the program.
+
+= Default Fixtures =
+
+If no fixtures are explicitly defined, the generated GCode will be added against a G54 coordinate system.
+
+The application also has the ability to load a series of fixture data automatically during a 'File'->'New' command.  This data comes from a file that must be manually setup and called 'default.fixtures'.  This file must contain the parent XML element name <HeeksCAD_Document> as well as <Fixture> elements but it should NOT contain any other elements.  The default.fixtures file must be located in the same directory as the HeeksCNC.so or HeeksCNC.DLL file.
