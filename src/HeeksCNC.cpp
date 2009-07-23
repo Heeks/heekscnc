@@ -536,16 +536,16 @@ static void RunPythonScript()
 {
 	{
 		// clear the output file
-		wxFile f(theApp.m_program->m_output_file.c_str(), wxFile::write);
+		wxFile f(theApp.m_program->GetOutputFileName().c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
 	{
 		// clear the backplot file
-		wxString backplot_path = theApp.m_program->m_output_file + _T(".nc.xml");
+		wxString backplot_path = theApp.m_program->GetOutputFileName() + _T(".nc.xml");
 		wxFile f(backplot_path.c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
-	HeeksPyPostProcess(theApp.m_program, theApp.m_program->m_output_file);
+	HeeksPyPostProcess(theApp.m_program, theApp.m_program->GetOutputFileName() );
 }
 
 static void RunScriptMenuCallback(wxCommandEvent &event)
