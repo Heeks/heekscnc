@@ -6,7 +6,7 @@ There are various configuration items that affect the design and operation as a 
 
 == Machine ==
 
-The machine property determines which of the available NC post-processors will be used when generating the GCode.
+The machine property determines which of the available NC post-processors will be used when generating the GCode.  See the PostProcessors and Machines wikis for more information.
 
 == Output Filename follows data filename ==
 
