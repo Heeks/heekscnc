@@ -38,7 +38,31 @@ static void on_set_cutting_tool_material(int zero_based_choice, HeeksObj* object
 }
 
 static void on_set_brinell_hardness_of_raw_material(double value, HeeksObj* object){((CSpeedReference*)object)->m_brinell_hardness_of_raw_material = value; ((CSpeedReference*)object)->ResetTitle(); }
-static void on_set_surface_speed(double value, HeeksObj* object){((CSpeedReference*)object)->m_surface_speed = value; ((CSpeedReference*)object)->ResetTitle(); }
+
+/**
+	This is either expressed in metres per minute (when m_units = 1) or feet per minute (when m_units = 25.4).  These
+	are not the normal conversion for the m_units parameter but these seem to be the two standards by which these
+	surface speeds are specified.
+ */
+static void on_set_surface_speed(double value, HeeksObj* object)
+{
+	if (theApp.m_program->m_units == 1.0)
+	{
+		// We're in metric already.  Leave it as they've entered it.
+		((CSpeedReference*)object)->m_surface_speed = value; 
+	} // End if - then
+	else
+	{
+		// We're using imperial measurements.  Convert from 'feet per minute' into
+		// 'metres per minute' for a consistent internal representation.
+
+		double metres_per_foot = (25.4 * 12.0) / 1000.0;
+		((CSpeedReference*)object)->m_surface_speed = double(value * metres_per_foot);
+	} // End if - else
+
+	((CSpeedReference*)object)->ResetTitle(); 
+}
+
 static void on_set_material_name(const wxChar *value, HeeksObj* object){((CSpeedReference*)object)->m_material_name = value; ((CSpeedReference*)object)->ResetTitle(); }
 
 
@@ -59,7 +83,19 @@ void CSpeedReference::GetProperties(std::list<Property *> *list)
 	}
 
 	list->push_back(new PropertyDouble(_("Brinell hardness of raw material"), m_brinell_hardness_of_raw_material, this, on_set_brinell_hardness_of_raw_material));
-	list->push_back(new PropertyDouble(_("Surface Speed (m/min)"), m_surface_speed, this, on_set_surface_speed));
+
+	if (theApp.m_program->m_units == 1.0)
+	{
+		// We're in metric.
+		list->push_back(new PropertyDouble(_("Surface Speed (m/min)"), m_surface_speed, this, on_set_surface_speed));
+	} // End if - then
+	else
+	{
+		// We're using imperial measurements.
+		double feet_per_metre = 1000 / (25.4 * 12.0);
+		list->push_back(new PropertyDouble(_("Surface Speed (ft/min)"), (m_surface_speed * feet_per_metre), this, on_set_surface_speed));
+	} // End if - else
+
 	list->push_back(new PropertyString(_("Raw Material Name"), m_material_name, this, on_set_material_name));
 	HeeksObj::GetProperties(list);
 }
