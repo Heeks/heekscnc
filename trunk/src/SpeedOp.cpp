@@ -31,8 +31,59 @@ void CSpeedOpParams::set_initial_values( const int cutting_tool_number )
 	config.Read(_T("SpeedOpVertFeed"), &m_vertical_feed_rate, 100.0);
 	config.Read(_T("SpeedOpSpindleSpeed"), &m_spindle_speed, 7000);
 
-	ResetSpeeds(cutting_tool_number);
+	ResetSpeeds(cutting_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
+	ResetFeeds(cutting_tool_number);
 }
+
+void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
+{
+	if (CSpeedReferences::s_estimate_when_possible)
+	{
+
+		// Use the 'feeds and speeds' class along with the cutting tool properties to
+		// help set some logical values for the spindle speed.
+
+		if ((cutting_tool_number > 0) && (CCuttingTool::Find( cutting_tool_number ) != NULL))
+		{
+			CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
+			if (pCuttingTool != NULL)
+			{
+				if (pCuttingTool->m_params.m_max_advance_per_revolution > 0) 
+				{
+					// Spindle speed is in revolutions per minute.
+					double advance_per_rev = pCuttingTool->m_params.m_max_advance_per_revolution;
+					double feed_rate_mm_per_minute = m_spindle_speed * advance_per_rev;
+
+					// Now we need to decide whether we assign this value to the vertical
+					// or horozontal (or both) feed rates.  Use the cutting tool type to
+					// decide on the typical usage.
+
+					switch (pCuttingTool->m_params.m_type)
+					{
+						case CCuttingToolParams::eDrill:
+						case CCuttingToolParams::eCentreDrill:
+							m_vertical_feed_rate = feed_rate_mm_per_minute;
+							break;
+				
+						case CCuttingToolParams::eChamfer:
+						case CCuttingToolParams::eTurningTool:
+							// Spread it across both horizontal and vertical
+							m_vertical_feed_rate = (1.0/sqrt(2.0)) * feed_rate_mm_per_minute;
+							m_horizontal_feed_rate = (1.0/sqrt(2.0)) * feed_rate_mm_per_minute;
+							break;
+				
+						case CCuttingToolParams::eEndmill:
+						case CCuttingToolParams::eBallEndMill:
+						case CCuttingToolParams::eSlotCutter:
+						default:
+							m_horizontal_feed_rate = feed_rate_mm_per_minute;
+							break;
+					} // End switch
+				} // End if - then
+			} // End if - then
+		} // End if - then
+	} // End if - then
+} // End ResetFeeds() method
 
 void CSpeedOpParams::ResetSpeeds(const int cutting_tool_number)
 {
@@ -79,8 +130,8 @@ static void on_set_spindle_speed(double value, HeeksObj* object){((CSpeedOp*)obj
 
 void CSpeedOpParams::GetProperties(CSpeedOp* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
-	list->push_back(new PropertyDouble(_("vertical feed rate"), m_vertical_feed_rate, parent, on_set_vertical_feed_rate));
+	list->push_back(new PropertyLength(_("horizontal feed rate"), m_horizontal_feed_rate, parent, on_set_horizontal_feed_rate));
+	list->push_back(new PropertyLength(_("vertical feed rate"), m_vertical_feed_rate, parent, on_set_vertical_feed_rate));
 	list->push_back(new PropertyDouble(_("spindle speed"), m_spindle_speed, parent, on_set_spindle_speed));
 }
 
@@ -134,10 +185,10 @@ void CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
 	} // End if - then
 
 	theApp.m_program_canvas->AppendText(_T("feedrate_hv("));
-	theApp.m_program_canvas->AppendText(m_speed_op_params.m_horizontal_feed_rate);
+	theApp.m_program_canvas->AppendText(m_speed_op_params.m_horizontal_feed_rate / theApp.m_program->m_units);
 	theApp.m_program_canvas->AppendText(_T(", "));
 
-	theApp.m_program_canvas->AppendText(m_speed_op_params.m_vertical_feed_rate);
+	theApp.m_program_canvas->AppendText(m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units);
 	theApp.m_program_canvas->AppendText(_T(")\n"));
 
 	theApp.m_program_canvas->AppendText(_T("flush_nc()\n"));
