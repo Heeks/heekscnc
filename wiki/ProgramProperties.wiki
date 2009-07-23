@@ -16,6 +16,6 @@ This is a 'true/false' flag that determines whether a configurable filename will
 
 If the 'output filename follows data filename' is set to 'false' then this parameter determines where the generated GCode will be written.
 
-== Raw Material and Brinell Hardness of Raw Material ==
+== Raw Material Name and Brinell Hardness Rating ==
 
 These two parameters relate to the estimation of spindle speeds and feedrates.  They determine what type of raw material is being machined both by name and by its Brinell hardness rating.  This information will only be available if it has been pre-loaded into the "Feeds and Speeds" section of the data model.
