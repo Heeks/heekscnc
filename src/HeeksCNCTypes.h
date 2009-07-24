@@ -20,5 +20,6 @@ enum{
 	FixturesType,
 	SpeedReferenceType,
 	SpeedReferencesType,
+	CuttingRateType,
 	HeeksCNCMaximumType
 };
