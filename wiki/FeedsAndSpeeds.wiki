@@ -8,11 +8,17 @@ Many of the NC operations support the configuration of separate spindle speed an
 
 The estimation of spindle speed and feedrates is based on a series of separately configured parameters.  Above all of them, however, is a true/false flag that may be set from the 'Feeds And Speeds' (parent) item's properties.  This has options for 'estimate when possible' and 'use default values'.  If the 'estimate when possible' option has been selected then any NC operations that are created will have spindle speed and feed rate values set based on calculations described below.
 
+http://heekscnc.googlecode.com/svn/wiki/FeedsAndSpeeds/FeedsAndSpeeds-Properties.png
+
 The first parameter used by the calculation relates to the raw material being machined.  The possible values are stored as sub-items beneath the FeedsAndSpeeds section.  The selection of which of these sub-items is currently active is made within the Program Properties.  Specifically it is the 'Material Name' and the 'Brinell Hardness of raw material'.  These two values are used, along with the cutting tool material, to select a single 'Speed Reference' element to determine the 'surface speed' that is most appropriate for machining.
+
+http://heekscnc.googlecode.com/svn/wiki/FeedsAndSpeeds/Program-Properties.png
 
 The second parameter is the material that makes up the cutting tool's edge.  This is configured along with each separate cutting tool.  It can have a value of either 'High Speed Steel' or 'Carbide'.
 
 The combination of material name, Brinell hardness and tool material are combined to retrieve a 'surface speed' value from one of the Speed Reference elements.  This surface speed represents the differential speed between the cutting edge and the raw material.  This surface speed is then converted into a spindle speed by combining it with the cutting tool's diameter.
+
+http://heekscnc.googlecode.com/svn/wiki/FeedsAndSpeeds/SpeedReferences.png
 
 At this stage the spindle speed is an 'ideal' speed.  This value is then compared with the currently configured machine's maximum spindle speed.  If the ideal speed exceeds the machine's maximum then the estimated spindle speed is reduced accordingly.
 
