@@ -12,10 +12,6 @@ The machine property determines which of the available NC post-processors will b
 
 This value is taken from the 'machines.txt' file that configures all machine parameters.  Its value is applied to limit a recommended spindle speed when the combination of raw material and cutting tool parameters would normally recommend a higher value.  The value is included in these parameters for reference only.  If the value needs to be changed, that change must occur in the 'machines.txt' file found in the 'nc' directory with the other HeeksCNC files.
 
-== Maximum Material Removal Rate ==
-
-This value represents a volume of material that this machine can comfortably remove.  It value limits any feed rates that are estimated.  As per the 'maximum spindle speed' parameter above, this value cannot be edited within this properties page. Instead, it must be edited within the 'machines.txt' file.  NOTE: This value's use has NOT been implemented yet.  i.e. it will have no effect yet.
-
 == Output Filename follows data filename ==
 
 This is a 'true/false' flag that determines whether a configurable filename will be used for the generated GCode or whether the GCode's filename will follow the main data model.  eg: If the data is saved to a filename of 'something.heeks' and this flag is 'true' then the generated GCode will be added to 'something.tap'.  The path to both the something.heeks and something.tap files will be the same.
