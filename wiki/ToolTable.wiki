@@ -120,12 +120,12 @@ http://heekscnc.googlecode.com/svn/wiki/turning/angles.png
 
 This is the material that makes up the cutting edge of the cutter.  It may be set to either 'High Speed Steel' or 'Carbide'.  This value is used, along with the chosen workpiece material (the block you're machining) to determine a recommended spindle speed.  i.e. surface feet per minute between the cutting edge and the raw material being machined.
 
+==== Maximum advance distance per revolution ====
+
+This is the maximum distance a tool should advance during a single revolution.  This value is often defined by the manufacturer in terms of an advance on a per-tooth basis.  This value, however, must be expressed on a per-revolution basis.  i.e. we don't want to maintain the number of cutting teeth so a per-revolution value is easier to use.  This value is used in the feedrate estimation.
+
 == Default Tool Table ==
 
 A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process is slightly involved in that this file should be manually edited so that it contains the parent XML element <HeeksCNC_Document> as well as ONLY the <tool> element definitions.  All other XML elements should be removed.
 
 Each time a new file is created, the elements in the default.tooltable file will be pre-loaded.  The default.tooltable file must be located along with the HeeksCNC.so (or HeeksCNC.DLL) file.  i.e. the application looks in its 'current' directory.
-
-== Maximum advance distance per revolution ==
-
-This is the maximum distance a tool should advance during a single revolution.  This value is often defined by the manufacturer in terms of an advance on a per-tooth basis.  This value, however, must be expressed on a per-revolution basis.  i.e. we don't want to maintain the number of cutting teeth so a per-revolution value is easier to use.  This value is used in the feedrate estimation.
