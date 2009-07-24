@@ -788,65 +788,69 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 	}
 
 
-	// Read in any default speed reference or tool table data.
-	std::list<wxString> seed_file_names;
-	DIR *pdir = opendir(".");	// Look in the current directory for files
+	if (! open)
+	{
+		// Must be a new file.
+		// Read in any default speed reference or tool table data.
+		std::list<wxString> seed_file_names;
+		DIR *pdir = opendir(".");	// Look in the current directory for files
 					// whose names begin with "default."
-	if (pdir != NULL) 
-	{
-		struct dirent *pent = NULL;
- 		while ((pent=readdir(pdir)))
+		if (pdir != NULL) 
 		{
-#ifdef UNICODE
-			std::wstring l_ssName;
-			std::wstring l_ssPrefix = _T("default");
-#else
-			std::string l_ssName;
-			std::string l_ssPrefix = _T("default");
-#endif
-
-			l_ssName = Ctt(pent->d_name);
-
-			if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
+			struct dirent *pent = NULL;
+ 			while ((pent=readdir(pdir)))
 			{
-				seed_file_names.push_back(l_ssName.c_str());
+#ifdef UNICODE
+				std::wstring l_ssName;
+				std::wstring l_ssPrefix = _T("default");
+#else
+				std::string l_ssName;
+				std::string l_ssPrefix = _T("default");
+#endif
+	
+				l_ssName = Ctt(pent->d_name);
+
+				if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
+				{
+					seed_file_names.push_back(l_ssName.c_str());
+				} // End if - then
+ 			} // End while
+ 			closedir(pdir);
+ 		} // End if - then
+
+		seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
+		for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
+		{
+		
+			wxString lowercase_file_name( *l_itFile );
+			lowercase_file_name.MakeLower();
+
+			if (lowercase_file_name.Find(_T("speed")) != -1) 
+			{
+				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
 			} // End if - then
- 		} // End while
- 		closedir(pdir);
- 	} // End if - then
-
-	seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
-	for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
-	{
-
-		wxString lowercase_file_name( *l_itFile );
-		lowercase_file_name.MakeLower();
-
-		if (lowercase_file_name.Find(_T("speed")) != -1) 
-		{
-			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
-		} // End if - then
-		else if (lowercase_file_name.Find(_T("feed")) != -1) 
-		{
-			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
-		}
-		else if (lowercase_file_name.Find(_T("tool")) != -1) 
-		{
-			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_tools );
-		}
-		else if (lowercase_file_name.Find(_T("fixture")) != -1) 
-		{
-			printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-			heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_fixtures );
-		}
-		else
-		{
-			printf("possible default filename does not contain either 'speed', 'feed' or 'tool' in its name.\n");
-		} // End if - else
-	} // End for
+			else if (lowercase_file_name.Find(_T("feed")) != -1) 
+			{
+				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
+			}
+			else if (lowercase_file_name.Find(_T("tool")) != -1) 
+			{
+				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_tools );
+			}
+			else if (lowercase_file_name.Find(_T("fixture")) != -1) 
+			{
+				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_fixtures );
+			}
+			else
+			{
+				printf("possible default filename does not contain either 'speed', 'feed' or 'tool' in its name.\n");
+			} // End if - else
+		} // End for
+	} // End if - then
 }
 
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
