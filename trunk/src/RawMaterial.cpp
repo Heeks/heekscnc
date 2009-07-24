@@ -107,7 +107,6 @@ void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 #else
 			std::ostringstream l_ossChoice;
 #endif
-
 			l_ossChoice << *l_itChoice;
 			if (m_brinell_hardness == *l_itChoice)
 			{
