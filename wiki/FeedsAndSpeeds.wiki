@@ -6,7 +6,7 @@ Many of the NC operations support the configuration of separate spindle speed an
 
 = Details =
 
-The estimation of spindle speed and feedrates is based on a series of separately configured parameters.  Above all of them, however, is a true/false flag that may be set from the 'Feeds And Speeds' (parent) item's properties.  This has options for 'estimate when possible' and 'use default values'.  If the 'estimate when possible' option has been selected then any NC operations that are created will have spindle speed and feed rate values set based on calculations described below.
+The estimation of spindle speed and feedrate is based on a series of separately configured parameters.  Above all of them, however, is a true/false flag that may be set from the 'Feeds And Speeds' (parent) item's properties.  This has options for 'estimate when possible' and 'use default values'.  If the 'estimate when possible' option has been selected then any NC operations that are created will have spindle speed and feed rate values set based on calculations described below.
 
 http://heekscnc.googlecode.com/svn/wiki/FeedsAndSpeeds/FeedsAndSpeeds-Properties.png
 
@@ -24,7 +24,9 @@ At this stage the spindle speed is an 'ideal' speed.  This value is then compare
 
 Once the spindle speed has been determined, the cutting tool's "maximum advance per revolution" parameter combines with it to produce an ideal feed rate.  The choice as to whether to assign this as a vertical, horizontal or combination feedrate is made by looking at the type of cutting tool being used.  i.e. drills will assign the feedrate as a vertical feedrate.  Milling bits will assign it as a horizontal feedrate.  A turning tool will assign a proportion (1/sqrt(2.0)) to both horizontal and vertical feedrates.
 
-Finally, (AND THIS PART HAS NOT BEEN IMPLEMENTED YET) the depth of cut is combined with the feedrate and tool dimensions to establish a material removal rate.  This ideal material removal rate will be compared with a maximum such setting configured for the chosen machine.  This material removal rate setting is the best place to allow for a machine's rigidity.  i.e. the smaller the number the lighter (or slower) the cuts will be made.
+Finally, (AND THIS PART HAS NOT BEEN IMPLEMENTED YET) the depth of cut is combined with the feedrate and tool dimensions to establish a material removal rate.  This ideal material removal rate will be compared with a maximum such setting configured for the hardness of the material being machined.  This material removal rate setting is the best place to allow for a machine's rigidity.  i.e. the smaller the number the lighter (or slower) the cuts will be made.  These material removal rates are configured for a particular Brinell hardness value.  These configurations can be seen within the FeedsAndSpeeds section of the data model.  These are the entries that would be most likely configured on a machine-by-machine basis.  i.e. once the user gets a feel for material removal rates that their machine is capable of, these values can be configured into these objects.  This will influence subsequent machining feedrate calculations.
+
+http://heekscnc.googlecode.com/svn/wiki/FeedsAndSpeeds/CuttingRate.png
 
 = Default Speed References =
 
