@@ -109,6 +109,17 @@ void CSpeedOpParams::ResetSpeeds(const int cutting_tool_number)
 					{
 						m_spindle_speed = (surface_speed * 1000.0) / (PI * pCuttingTool->m_params.m_diameter);
 						m_spindle_speed = floor(m_spindle_speed);	// Round down to integer
+
+						// Now wait one minute.  If the chosen machine can't turn the spindle that
+						// fast then we'd better reduce our speed to match its maximum.
+
+						if ((theApp.m_program != NULL) &&
+						    (theApp.m_program->m_machine.m_max_spindle_speed > 0.0) &&
+						    (theApp.m_program->m_machine.m_max_spindle_speed < m_spindle_speed))
+						{
+							// Reduce the speed to match the machine's maximum setting.
+						    	m_spindle_speed = theApp.m_program->m_machine.m_max_spindle_speed;
+						} // End if - then
 					} // End if - then
 				} // End if - then
 			} // End if - then
