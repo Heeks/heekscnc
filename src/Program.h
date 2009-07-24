@@ -67,7 +67,7 @@ public:
 	HeeksObj *MakeACopy(void)const{ return new CSpeedReferences(*this);}
 	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/speeds");}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
-	bool CanAdd(HeeksObj* object) {	return(object->GetType() == SpeedReferenceType); }
+	bool CanAdd(HeeksObj* object) {	return((object->GetType() == SpeedReferenceType) || (object->GetType() == CuttingRateType)); }
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return false;}
@@ -77,6 +77,7 @@ public:
 
 	static std::set< wxString > GetMaterials();
 	static std::set< double > GetHardnessForMaterial( const wxString & material_name );
+	static std::set< double > GetAllHardnessValues();
 
 	static double GetSurfaceSpeed( const wxString & material_name, 
 					const int cutting_tool_material, 
@@ -110,13 +111,12 @@ enum ProgramUserType{
 class CMachine
 {
 public:
-	CMachine() { m_max_spindle_speed = 0.0; m_max_material_removal_rate = 0.0; }
+	CMachine() { m_max_spindle_speed = 0.0; }
 
 	wxString configuration_file_name;
 	wxString file_name;
 	wxString description;
 	double m_max_spindle_speed;		// in revolutions per minute (RPM)
-	double m_max_material_removal_rate;	// in cubic mm per minute
 
 	void GetProperties(CProgram *parent, std::list<Property *> *list);
 };

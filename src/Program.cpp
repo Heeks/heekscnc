@@ -290,37 +290,9 @@ static void on_set_max_spindle_speed(double value, HeeksObj* object)
 	heeksCAD->RefreshProperties();
 }
 
-static void on_set_max_material_removal_rate(double value, HeeksObj* object)
-{
-#ifdef UNICODE
-	std::wostringstream l_ossMessage;
-#else
-	std::ostringstream l_ossMessage;
-#endif
-
-	l_ossMessage << _T("This value is read-only.  Settings must be adjusted in the corresponding machine definition file\n")
-			<< ((CProgram *)object)->m_machine.configuration_file_name.c_str();
-
-	wxMessageBox(l_ossMessage.str().c_str());
-	heeksCAD->RefreshProperties();
-}
-
 void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("Maximum Spindle Speed (RPM)"), m_max_spindle_speed, parent, on_set_max_spindle_speed));
-
-	if (theApp.m_program->m_units == 1.0)
-	{
-		// We're set to metric.  Just present the internal value.
-		list->push_back(new PropertyDouble(_("Maximum Material Removal Rate (mm^3/min)"), m_max_material_removal_rate, parent, on_set_max_material_removal_rate));
-	} // End if - then
-	else
-	{
-		// We're set to imperial.  Convert the internal (metric) value for presentation.
-
-		double cubic_mm_per_cubic_inch = 25.4 * 25.4 * 25.4;
-		list->push_back(new PropertyDouble(_("Maximum Material Removal Rate (inches^3/min)"), m_max_material_removal_rate / cubic_mm_per_cubic_inch, parent, on_set_max_material_removal_rate));
-	} // End if - else
 } // End GetProperties() method
 
 
@@ -852,21 +824,14 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 
 		std::vector<wxString> tokens = Tokens( Ctt(str), _T(" \t\n\r") );
 
+		// The first token is the machine name (post processor name)
 		if (tokens.size() > 0) {
 			m.file_name = tokens[0];
 			tokens.erase(tokens.begin());
 		} // End if - then
 
-		if (tokens.size() > 0)
-		{
-			// We may have a material rate value.
-			if (AllNumeric( *tokens.rbegin() ))
-			{
-				m.m_max_material_removal_rate = atof( Ttc(tokens.rbegin()->c_str()) );
-				tokens.erase( tokens.rbegin().base() );	// Remove last token.
-			} // End if - then
-		} // End if - then
-		
+		// If there are other tokens, check the last one to see if it could be a maximum
+		// spindle speed.
 		if (tokens.size() > 0)
 		{
 			// We may have a material rate value.
@@ -931,6 +896,8 @@ std::set< wxString > CSpeedReferences::GetMaterials()
 			material != NULL;
 			material = theApp.m_program->m_speed_references->GetNextChild())
 		{
+			if (material->GetType() != SpeedReferenceType) continue;
+
 			materials.insert( ((CSpeedReference *)material)->m_material_name );
 		} // End for
 	} // End if - then
@@ -950,6 +917,8 @@ std::set< double > CSpeedReferences::GetHardnessForMaterial( const wxString & ma
 			material != NULL;
 			material = theApp.m_program->m_speed_references->GetNextChild())
 		{
+			if (material->GetType() != SpeedReferenceType) continue;
+
 			if (material_name == ((CSpeedReference *) material)->m_material_name)
 			{
 				hardness_values.insert( ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material );
@@ -960,6 +929,27 @@ std::set< double > CSpeedReferences::GetHardnessForMaterial( const wxString & ma
 	return(hardness_values);
 
 } // End of GetHardnessForMaterial() method
+
+/**
+	Return a set of harndess values that have already been configured.
+ */
+std::set< double > CSpeedReferences::GetAllHardnessValues()
+{
+	std::set< double > hardness_values;
+	if ((theApp.m_program) && (theApp.m_program->m_speed_references))
+	{
+		for (HeeksObj *material = theApp.m_program->m_speed_references->GetFirstChild();
+			material != NULL;
+			material = theApp.m_program->m_speed_references->GetNextChild())
+		{
+			if (material->GetType() != SpeedReferenceType) continue;
+			hardness_values.insert( ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material );
+		} // End for
+	} // End if - then
+
+	return(hardness_values);
+
+} // End of GetAllHardnessValues() method
 
 double CSpeedReferences::GetSurfaceSpeed( 
 	const wxString & material_name, 
@@ -973,6 +963,7 @@ double CSpeedReferences::GetSurfaceSpeed(
 		material != NULL;
 		material = theApp.m_program->m_speed_references->GetNextChild())
 	{
+		if (material->GetType() != SpeedReferenceType) continue;
 		if ((material_name == ((CSpeedReference *) material)->m_material_name) &&
 		    (cutting_tool_material == ((CSpeedReference *) material)->m_cutting_tool_material) &&
 		    (brinell_hardness_of_raw_material == ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material))
