@@ -17,8 +17,12 @@
 
 
 /**
-	The CCuttingRate class holds a single 'point on the scale' that associates
-	material hardness and a rate of material removal for that hardness.
+	The CCuttingRate class holds the material hardness and a rate of 
+	material removal for that hardness.  This removal rate is the
+	best parameter to adjust to allow for a machine's rigidity.
+
+	Instances of this class will be listed beneath the 'FeedsAndSpeeds'
+	heading (SpeedReferences).
  */
 
 class CCuttingRate: public HeeksObj {
