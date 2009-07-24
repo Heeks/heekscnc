@@ -64,9 +64,3 @@ Try it. Make a HeeksCNC program, and see that the program's "machine" drop-down 
 === Maximum Spindle Speed ===
 
 If the second last word on the line in the 'machines.txt' configuration file represents a number then it is assumed to represent the maximum spindle speed for the machine.  This value is used during the estimation of spindle speed settings for all NC operations that are based on the SpeedOp class.  If no maximum is known (or wanted) then a value of 0.0 should be used.
-
-=== Maximum Material Removal Rate ===
-
-If the last word on the line in the 'machines.txt' configuration file represents a number then it is assumed to represent a material removal rate.  This is measured in cubic mm per minute and should provide a limiting feature for feedrate estimation that reflects the rigidity of the machine.  If the feedrates that are being estimated are too high for your machine, configure this to a lower value.
-
-NOTE: The material removal rate maximum setting is not being used in the feedrate estimation yet.
