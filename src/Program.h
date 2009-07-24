@@ -13,6 +13,7 @@
 #include "SpeedReference.h"
 
 class CNCCode;
+class CProgram;
 
 class OperationsList: public ObjList{
 public:
@@ -109,8 +110,15 @@ enum ProgramUserType{
 class CMachine
 {
 public:
+	CMachine() { m_max_spindle_speed = 0.0; m_max_material_removal_rate = 0.0; }
+
+	wxString configuration_file_name;
 	wxString file_name;
 	wxString description;
+	double m_max_spindle_speed;		// in revolutions per minute (RPM)
+	double m_max_material_removal_rate;	// in cubic mm per minute
+
+	void GetProperties(CProgram *parent, std::list<Property *> *list);
 };
 
 
@@ -132,7 +140,7 @@ public:
 	CProgram();
 
 	wxString GetOutputFileName() const;
-
+	
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("Program");}

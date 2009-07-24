@@ -9,6 +9,8 @@
 #include "interface/MarkedObject.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyChoice.h"
+#include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "interface/Tool.h"
 #include "Profile.h"
 #include "Pocket.h"
@@ -21,6 +23,7 @@
 #include "CounterBore.h"
 #include "Fixture.h"
 #include "SpeedOp.h"
+#include "interface/strconv.h"
 
 #include <vector>
 #include <algorithm>
@@ -199,6 +202,7 @@ static void on_set_machine(int value, HeeksObj* object)
 	((CProgram*)object)->m_machine = machines[value];
 	CNCConfig config;
 	config.Write(_T("ProgramMachine"), ((CProgram*)object)->m_machine.file_name);
+	heeksCAD->RefreshProperties();
 }
 
 static void on_set_output_file(const wxChar* value, HeeksObj* object)
@@ -266,9 +270,59 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		list->push_back ( new PropertyChoice ( _("units for nc output"),  choices, choice, this, on_set_units ) );
 	}
 
+	m_machine.GetProperties(this, list);
 	m_raw_material.GetProperties(this, list);
 	HeeksObj::GetProperties(list);
 }
+
+static void on_set_max_spindle_speed(double value, HeeksObj* object)
+{
+#ifdef UNICODE
+	std::wostringstream l_ossMessage;
+#else
+	std::ostringstream l_ossMessage;
+#endif
+
+	l_ossMessage << _T("This value is read-only.  Settings must be adjusted in the corresponding machine definition file\n")
+			<< ((CProgram *)object)->m_machine.configuration_file_name.c_str();
+
+	wxMessageBox(l_ossMessage.str().c_str());
+	heeksCAD->RefreshProperties();
+}
+
+static void on_set_max_material_removal_rate(double value, HeeksObj* object)
+{
+#ifdef UNICODE
+	std::wostringstream l_ossMessage;
+#else
+	std::ostringstream l_ossMessage;
+#endif
+
+	l_ossMessage << _T("This value is read-only.  Settings must be adjusted in the corresponding machine definition file\n")
+			<< ((CProgram *)object)->m_machine.configuration_file_name.c_str();
+
+	wxMessageBox(l_ossMessage.str().c_str());
+	heeksCAD->RefreshProperties();
+}
+
+void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
+{
+	list->push_back(new PropertyDouble(_("Maximum Spindle Speed (RPM)"), m_max_spindle_speed, parent, on_set_max_spindle_speed));
+
+	if (theApp.m_program->m_units == 1.0)
+	{
+		// We're set to metric.  Just present the internal value.
+		list->push_back(new PropertyDouble(_("Maximum Material Removal Rate (mm^3/min)"), m_max_material_removal_rate, parent, on_set_max_material_removal_rate));
+	} // End if - then
+	else
+	{
+		// We're set to imperial.  Convert the internal (metric) value for presentation.
+
+		double cubic_mm_per_cubic_inch = 25.4 * 25.4 * 25.4;
+		list->push_back(new PropertyDouble(_("Maximum Material Removal Rate (inches^3/min)"), m_max_material_removal_rate / cubic_mm_per_cubic_inch, parent, on_set_max_material_removal_rate));
+	} // End if - else
+} // End GetProperties() method
+
 
 static void on_set_estimate_when_possible(int value, HeeksObj* object)
 {
@@ -766,6 +820,8 @@ void CProgram::UpdateFromUserType()
 #endif
 }
 
+
+
 // static 
 void CProgram::GetMachines(std::vector<CMachine> &machines)
 {
@@ -788,39 +844,54 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 
 	while(!(ifs.eof()))
 	{
-		bool space_found = false;
-		wxString name;
-		wxString description;
+		CMachine m;
 
 		ifs.getline(str, 1024);
 
-		int len = strlen(str);
+		m.configuration_file_name = machines_file;
 
-		for(int i = 0; i<len; i++){
-			char c = str[i];
-			switch(c)
-			{
-			case ' ':
-				if(space_found)description.Append(c);
-				space_found = true;
-				break;
+		std::vector<wxString> tokens = Tokens( Ctt(str), _T(" \t\n\r") );
 
-			case '\n':
-			case '\r':
-				break;
+		if (tokens.size() > 0) {
+			m.file_name = tokens[0];
+			tokens.erase(tokens.begin());
+		} // End if - then
 
-			default:
-				if(space_found)description.Append(c);
-				else name.Append(c);
-				break;
-			}
-		}
-
-		if(name.Length() > 0)
+		if (tokens.size() > 0)
 		{
-			CMachine m;
-			m.file_name = name;
-			m.description = description;
+			// We may have a material rate value.
+			if (AllNumeric( *tokens.rbegin() ))
+			{
+				m.m_max_material_removal_rate = atof( Ttc(tokens.rbegin()->c_str()) );
+				tokens.erase( tokens.rbegin().base() );	// Remove last token.
+			} // End if - then
+		} // End if - then
+		
+		if (tokens.size() > 0)
+		{
+			// We may have a material rate value.
+			if (AllNumeric( *tokens.rbegin() ))
+			{
+				m.m_max_spindle_speed = atof( Ttc(tokens.rbegin()->c_str()) );
+				tokens.erase( tokens.rbegin().base() );	// Remove last token.
+			} // End if - then
+		} // End if - then
+	
+		// Everything else must be a description.
+#ifdef UNICODE
+		std::wostringstream l_ossDescription;
+#else
+		std::ostringstream l_ossDescription;
+#endif
+		for (std::vector<wxString>::const_iterator l_itToken = tokens.begin(); l_itToken != tokens.end(); l_itToken++)
+		{
+			if (l_itToken != tokens.begin()) l_ossDescription << _T(" ");
+			l_ossDescription << l_itToken->c_str();
+		} // End for
+		m.description = l_ossDescription.str().c_str();
+
+		if(m.file_name.Length() > 0)
+		{
 			machines.push_back(m);
 		}
 	}
