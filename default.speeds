@@ -1,11 +1,13 @@
 <?xml version="1.0" ?>
 <HeeksCAD_Document>
-            <SpeedReference title="Aluminium (15) with Carbide" surface_speed="182.88" cutting_tool_material="1" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="1" />
-            <SpeedReference title="Aluminium (15) with High Speed Steel" surface_speed="33.528" cutting_tool_material="0" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="2" />
-            <SpeedReference title="Mild Steel (150) with Carbide" surface_speed="182.88" cutting_tool_material="1" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="3" />
-            <SpeedReference title="Mild Steel (150) with High Speed Steel" surface_speed="59.436" cutting_tool_material="0" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="4" />
-            <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with Carbide" surface_speed="106.68" cutting_tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="5" />
-            <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with High Speed Steel" surface_speed="24.384" cutting_tool_material="0" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="6" />
-            <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with Carbide" surface_speed="99.06" cutting_tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="7" />
-            <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with High Speed Steel" surface_speed="24.384" cutting_tool_material="0" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="8" />
+    <SpeedReference title="Aluminium (15) with Carbide" surface_speed="182.88" cutting_tool_material="1" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="1" />
+    <SpeedReference title="Aluminium (15) with High Speed Steel" surface_speed="33.528" cutting_tool_material="0" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="2" />
+    <SpeedReference title="Mild Steel (150) with Carbide" surface_speed="182.88" cutting_tool_material="1" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="3" />
+    <SpeedReference title="Mild Steel (150) with High Speed Steel" surface_speed="59.436" cutting_tool_material="0" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="4" />
+    <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with Carbide" surface_speed="106.68" cutting_tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="5" />
+    <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with High Speed Steel" surface_speed="24.384" cutting_tool_material="0" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="6" />
+    <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with Carbide" surface_speed="99.06" cutting_tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="7" />
+    <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with High Speed Steel" surface_speed="24.384" cutting_tool_material="0" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="8" />
+    <CuttingRate title="Brinell (15) at 400 (mm^3/min)" brinell_hardness_of_raw_material="15" max_material_removal_rate="400" id="1" />
+    <CuttingRate title="Brinell (150) at 1600 (mm^3/min)" brinell_hardness_of_raw_material="150" max_material_removal_rate="1600" id="2" />
 </HeeksCAD_Document>
