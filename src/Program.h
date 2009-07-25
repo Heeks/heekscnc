@@ -54,6 +54,8 @@ public:
 	bool AutoExpand(){return true;}
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+
 };
 
 class CFixtures: public ObjList{
