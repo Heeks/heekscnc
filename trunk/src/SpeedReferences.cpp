@@ -27,6 +27,19 @@ class ExportSpeedReferences: public Tool{
 	const wxChar* GetTitle(){return _("Export");}
 	void Run()
 	{
+		if (previous_path.Length() == 0) previous_path = _T("default.speeds");
+
+		// Prompt the user to select a file to import.
+		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to export to"), _T("."), previous_path.c_str(),
+				wxString(_("Known Files")) + _T(" |*.heeks;*.HEEKS;")
+					+ _T("*.speed;*.SPEED;*.Speed;")
+					+ _T("*.feed;*.FEED;*.Feed;")
+					+ _T("*.feedsnspeeds;*.FEEDSNSPEEDS;"), 
+					wxSAVE | wxOVERWRITE_PROMPT );
+
+		fd.SetFilterIndex(1);
+		if (fd.ShowModal() == wxID_CANCEL) return;
+		previous_path = fd.GetPath().c_str();
 		std::list<HeeksObj *> speed_references;
 		for (HeeksObj *speed_reference = theApp.m_program->m_speed_references->GetFirstChild();
 			speed_reference != NULL;
@@ -35,9 +48,10 @@ class ExportSpeedReferences: public Tool{
 			speed_references.push_back( speed_reference );
 		} // End for
 
-		heeksCAD->SaveXMLFile( speed_references, _T("default.speeds"), false );
+		heeksCAD->SaveXMLFile( speed_references, previous_path.c_str(), false );
 	}
 	wxString BitmapPath(){ return _T("export");}
+	wxString previous_path;
 };
 
 static ExportSpeedReferences export_speed_references;
@@ -47,17 +61,50 @@ class ImportSpeedReferences: public Tool{
 	const wxChar* GetTitle(){return _("Import");}
 	void Run()
 	{
-		heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_speed_references );
+		if (previous_path.Length() == 0) previous_path = _T("default.speeds");
+
+		// Prompt the user to select a file to import.
+		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"), _T("."), previous_path.c_str(),
+				wxString(_("Known Files")) + _T(" |*.heeks;*.HEEKS;")
+					+ _T("*.speed;*.SPEED;*.Speed;")
+					+ _T("*.feed;*.FEED;*.Feed;")
+					+ _T("*.feedsnspeeds;*.FEEDSNSPEEDS;"), 
+					wxOPEN | wxFILE_MUST_EXIST );
+		fd.SetFilterIndex(1);
+		if (fd.ShowModal() == wxID_CANCEL) return;
+		previous_path = fd.GetPath().c_str();
+
+		// Delete the speed references that we've already got.  Otherwise we end
+		// up with duplicates.  Do this in two passes.  Otherwise we end up
+		// traversing the same list that we're modifying.
+
+		std::list<HeeksObj *> speed_references;
+		for (HeeksObj *speed_reference = theApp.m_program->m_speed_references->GetFirstChild();
+			speed_reference != NULL;
+			speed_reference = theApp.m_program->m_speed_references->GetNextChild() )
+		{
+			speed_references.push_back( speed_reference );
+		} // End for
+
+		for (std::list<HeeksObj *>::iterator l_itObject = speed_references.begin(); l_itObject != speed_references.end(); l_itObject++)
+		{
+			heeksCAD->DeleteUndoably( *l_itObject );
+		} // End for
+
+		// And read the default speed references.
+		// heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_speed_references );
+		heeksCAD->OpenXMLFile( previous_path.c_str(), true, theApp.m_program->m_speed_references );
 	}
 	wxString BitmapPath(){ return _T("import");}
+	wxString previous_path;
 };
 
 static ImportSpeedReferences import_speed_references;
 
 void CSpeedReferences::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	// t_list->push_back(&import_speed_references);
-	// t_list->push_back(&export_speed_references);
+	t_list->push_back(&import_speed_references);
+	t_list->push_back(&export_speed_references);
 
 	ObjList::GetTools(t_list, p);
 }
