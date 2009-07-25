@@ -126,6 +126,4 @@ This is the maximum distance a tool should advance during a single revolution.  
 
 == Default Tool Table ==
 
-A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process is slightly involved in that this file should be manually edited so that it contains the parent XML element <HeeksCNC_Document> as well as ONLY the <tool> element definitions.  All other XML elements should be removed.
-
-Each time a new file is created, the elements in the default.tooltable file will be pre-loaded.  The default.tooltable file must be located along with the HeeksCNC.so (or HeeksCNC.DLL) file.  i.e. the application looks in its 'current' directory.
+A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process involves adding cutting tools to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Tools icon.  This allows the tool definitions to be saved to a file.  If the file is called 'default.tooltable' and is located in the HeeksCNC directory (along with the HeeksCNC.so or HeeksCNC.DLL) then these tools will be automatically added to all new data files.
