@@ -342,7 +342,8 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 
 	if (l_ossChange.str().size() > 0)
 	{
-		wxMessageBox( wxString( l_ossChange.str().c_str() ).c_str() );
+		// Removed to preserve user sanity. (and maybe their nearby property)
+		// wxMessageBox( wxString( l_ossChange.str().c_str() ).c_str() );
 	} // End if - then
 } // End on_set_type() method
 
@@ -419,7 +420,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
 		list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
 		list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
-		list->push_back(new PropertyDouble(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
+		list->push_back(new PropertyLength(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
 	} // End if - else
 
 	
@@ -613,7 +614,7 @@ HeeksObj* CCuttingTool::ReadFromXMLElement(TiXmlElement* element)
 	}
 
 	new_object->ReadBaseXML(element);
-
+	new_object->ResetTitle();	// reset title to match design units.
 	return new_object;
 }
 
@@ -814,21 +815,13 @@ wxString CCuttingTool::GenerateMeaningfulName() const
  */
 wxString CCuttingTool::ResetTitle()
 {
-#ifdef UNICODE
-	std::wostringstream l_ossUnits;
-#else
-    std::ostringstream l_ossUnits;
-#endif
-
-	l_ossUnits << (char *) ((theApp.m_program->m_units == 1)?" mm ":" inch ");
-
 	if ( (m_title == GetTypeString()) ||
-	     ((m_title.Find( _T("Drill Bit") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
-	     ((m_title.Find( _T("End Mill") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
-	     ((m_title.Find( _T("Slot Cutter") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
-	     ((m_title.Find( _T("Ball End Mill") ) != -1) && (m_title.Find( l_ossUnits.str().c_str() ) != -1)) ||
-	     ((m_title.Find( _T("Chamfering Bit") ) != -1) && (m_title.Find(_T("degree")) != -1)) ||
-	     ((m_title.Find( _T("Turning Tool") ) != -1)) )
+	     (m_title.Find( _T("Drill Bit") ) != -1)  ||
+	     (m_title.Find( _T("End Mill") ) != -1)  ||
+	     (m_title.Find( _T("Slot Cutter") ) != -1) ||
+	     (m_title.Find( _T("Ball End Mill") ) != -1)  ||
+	     (m_title.Find( _T("Chamfering Bit") ) != -1) ||
+	     (m_title.Find( _T("Turning Tool") ) != -1)) 
 	{
 		// It has the default title.  Give it a name that makes sense.
 		m_title = GenerateMeaningfulName();
