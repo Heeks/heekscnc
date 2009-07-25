@@ -89,7 +89,7 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
 	config.Read(_T("m_corner_radius"), &m_corner_radius, 0);
 	config.Read(_T("m_cutting_edge_angle"), &m_cutting_edge_angle, 59);
-	config.Read(_T("m_cutting_edge_height"), &m_cutting_edge_height, 4 * m_diameter/ theApp.m_program->m_units);
+	config.Read(_T("m_cutting_edge_height"), &m_cutting_edge_height, 4 * m_diameter);
 
 	// The following are all turning tool parameters
 	config.Read(_T("m_orientation"), &m_orientation, 6);
@@ -216,10 +216,10 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 59) l_ossChange << "Changing cutting edge angle to 59 degrees (for normal 118 degree cutting face)\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 59;
 
-				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter/theApp.m_program->m_units * 3.0)
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
 					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter/ theApp.m_program->m_units * 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -238,7 +238,7 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 1.0)
 				{
 					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 1.0 << "\n";
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units* 1.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 1.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -250,17 +250,17 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 
 				if (((CCuttingTool*)object)->m_params.m_flat_radius != ( ((CCuttingTool*)object)->m_params.m_diameter / 2) )
 				{
-					l_ossChange << "Changing flat radius to " << ((CCuttingTool*)object)->m_params.m_diameter / 2 /theApp.m_program->m_units << "\n";
+					l_ossChange << "Changing flat radius to " << ((CCuttingTool*)object)->m_params.m_diameter / 2 << "\n";
 					((CCuttingTool*)object)->m_params.m_flat_radius = ((CCuttingTool*)object)->m_params.m_diameter / 2;
 				} // End if - then
 
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				((CCuttingTool*)object)->m_params.m_cutting_edge_angle = 0;
 
-				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter/ theApp.m_program->m_units * 3.0)
+				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
 					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter/ theApp.m_program->m_units * 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -282,7 +282,7 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
 					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units* 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -304,7 +304,7 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 				if (((CCuttingTool*)object)->m_params.m_cutting_edge_height != ((CCuttingTool*)object)->m_params.m_diameter * 3.0)
 				{
 					l_ossChange << "Changing cutting edge height to " << ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter / theApp.m_program->m_units* 3.0;
+					((CCuttingTool*)object)->m_params.m_cutting_edge_height = ((CCuttingTool*)object)->m_params.m_diameter * 3.0;
 				} // End if - then
 
 				l_ossChange << ((CCuttingTool*) object)->ResetTitle().c_str();
@@ -475,7 +475,7 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	} // End if - then
 	else
 	{
-		m_cutting_edge_height = m_diameter/ theApp.m_program->m_units * 4.0;
+		m_cutting_edge_height = m_diameter * 4.0;
 	} // End if - else
 
 	if (pElem->Attribute("front_angle")) m_front_angle = atof(pElem->Attribute("front_angle"));
@@ -911,7 +911,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 	if (tool_length_offset <  diameter) tool_length_offset = 10 * diameter;
 
 	double cutting_edge_height = m_params.m_cutting_edge_height;
-	if (cutting_edge_height < (2 * diameter)) cutting_edge_height = (2 * diameter)/ theApp.m_program->m_units;
+	if (cutting_edge_height < (2 * diameter)) cutting_edge_height = 2 * diameter;
 
 	switch (m_params.m_type)
 	{
@@ -919,17 +919,17 @@ TopoDS_Shape CCuttingTool::GetShape() const
 		{
 			// First a cylinder to represent the shaft.
 			double tool_tip_length = (diameter / 2) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
-			double non_cutting_shaft_length = tool_length_offset/ theApp.m_program->m_units - tool_tip_length/ theApp.m_program->m_units - cutting_edge_height/ theApp.m_program->m_units;
+			double non_cutting_shaft_length = tool_length_offset - tool_tip_length - cutting_edge_height;
 
 			gp_Pnt shaft_start_location( tool_tip_location );
-			shaft_start_location.SetZ( tool_tip_location.Z() + tool_tip_length/ theApp.m_program->m_units + cutting_edge_height/ theApp.m_program->m_units );
+			shaft_start_location.SetZ( tool_tip_location.Z() + tool_tip_length + cutting_edge_height );
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2) * 2.0, non_cutting_shaft_length );
 
 			gp_Pnt cutting_shaft_start_location( tool_tip_location );
 			cutting_shaft_start_location.SetZ( tool_tip_location.Z() + tool_tip_length );
 			gp_Ax2 cutting_shaft_position_and_orientation( cutting_shaft_start_location, orientation );
-			BRepPrimAPI_MakeCylinder cutting_shaft( cutting_shaft_position_and_orientation, diameter / 2, cutting_edge_height/ theApp.m_program->m_units );
+			BRepPrimAPI_MakeCylinder cutting_shaft( cutting_shaft_position_and_orientation, diameter / 2, cutting_edge_height );
 
 			// And a cone for the tip.
 			gp_Ax2 tip_position_and_orientation( cutting_shaft_start_location, gp_Dir(0,0,-1) );
