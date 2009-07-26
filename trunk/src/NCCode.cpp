@@ -742,7 +742,7 @@ static ApplyNCCode apply_nc_code;
 
 void CNCCode::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	// t_list->push_back(&apply_nc_code);	// It's not ready yet.
+	t_list->push_back(&apply_nc_code);	// It's not ready yet.
 
 	HeeksObj::GetTools(t_list, p);
 }

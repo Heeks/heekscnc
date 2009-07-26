@@ -931,12 +931,8 @@ TopoDS_Shape CCuttingTool::GetShape() const
 							m_params.m_flat_radius,
 							tool_tip_length);
 
-			TopoDS_Compound cutting_tool_shape;
-			BRep_Builder aBuilder;
-			aBuilder.MakeCompound (cutting_tool_shape);
-			aBuilder.Add (cutting_tool_shape, shaft.Shape());
-			aBuilder.Add (cutting_tool_shape, cutting_shaft.Shape());
-			aBuilder.Add (cutting_tool_shape, tool_tip.Shape());
+			TopoDS_Shape shafts = BRepAlgoAPI_Fuse(shaft.Shape() , cutting_shaft.Shape() );
+			TopoDS_Shape cutting_tool_shape = BRepAlgoAPI_Fuse(shafts , tool_tip.Shape() );
 			return cutting_tool_shape;
 		}
 
@@ -961,11 +957,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 							m_params.m_flat_radius,
 							tool_tip_length);
 
-			TopoDS_Compound cutting_tool_shape;
-			BRep_Builder aBuilder;
-			aBuilder.MakeCompound (cutting_tool_shape);
-			aBuilder.Add (cutting_tool_shape, shaft.Shape());
-			aBuilder.Add (cutting_tool_shape, tool_tip.Shape());
+			TopoDS_Shape cutting_tool_shape = BRepAlgoAPI_Fuse(shaft.Shape() , tool_tip.Shape() );
 			return cutting_tool_shape;
 		}
 
@@ -994,11 +986,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 							m_params.m_flat_radius,
 							tool_tip_length);
 
-			TopoDS_Compound cutting_tool_shape;
-			BRep_Builder aBuilder;
-			aBuilder.MakeCompound (cutting_tool_shape);
-			aBuilder.Add (cutting_tool_shape, shaft.Shape());
-			aBuilder.Add (cutting_tool_shape, tool_tip.Shape());
+			TopoDS_Shape cutting_tool_shape = BRepAlgoAPI_Fuse(shaft.Shape() , tool_tip.Shape() );
 			return cutting_tool_shape;
 		}
 
@@ -1015,11 +1003,9 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, diameter / 2, shaft_length );
 			BRepPrimAPI_MakeSphere ball( shaft_start_location, m_params.m_corner_radius );
 
-			TopoDS_Compound cutting_tool_shape;
-			BRep_Builder aBuilder;
-			aBuilder.MakeCompound (cutting_tool_shape);
-			aBuilder.Add (cutting_tool_shape, shaft.Shape());
-			aBuilder.Add (cutting_tool_shape, ball.Shape());
+			// TopoDS_Compound cutting_tool_shape;
+			TopoDS_Shape cutting_tool_shape;
+			cutting_tool_shape = BRepAlgoAPI_Fuse(shaft.Shape() , ball.Shape() );
 			return cutting_tool_shape;
 		}
 
@@ -1076,16 +1062,11 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			TopoDS_Shape shaft = BRepPrimAPI_MakePrism( shaft_face, shaft_vec );
 	
 			// Aggregate the shaft and cutting tip	
-			TopoDS_Compound cutting_tool_compound;
-			BRep_Builder aBuilder;
-			aBuilder.MakeCompound (cutting_tool_compound);
-			aBuilder.Add (cutting_tool_compound, cutting_tip);
-			aBuilder.Add (cutting_tool_compound, shaft);
+			TopoDS_Shape cutting_tool_shape = BRepAlgoAPI_Fuse(shaft , cutting_tip );
 
 			// Now orient the tool as per its settings.
 			gp_Trsf tool_holder_orientation;
 			gp_Trsf orient_for_lathe_use;
-			TopoDS_Shape cutting_tool_shape = cutting_tool_compound;
 
 			switch (m_params.m_orientation)
 			{
@@ -1129,7 +1110,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			} // End switch
 
 			// Rotate from drawing orientation (for easy mathematics in this code) to tool holder orientation.
-			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_compound, tool_holder_orientation, false );
+			cutting_tool_shape = BRepBuilderAPI_Transform( cutting_tool_shape, tool_holder_orientation, false );
 
 			// Rotate to use axes typically used for lathe work.
 			// i.e. z axis along the bed (from head stock to tail stock as z increases)
@@ -1156,10 +1137,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, diameter / 2, shaft_length );
 
 			TopoDS_Compound cutting_tool_shape;
-			BRep_Builder aBuilder;
-			aBuilder.MakeCompound (cutting_tool_shape);
-			aBuilder.Add (cutting_tool_shape, shaft.Shape());
-			return cutting_tool_shape;
+			return(shaft.Shape());
 		}
 	} // End switch
    } // End try
