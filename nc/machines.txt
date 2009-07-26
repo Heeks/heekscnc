@@ -5,3 +5,4 @@ hpgl2d 2.5D HPGL 0.01mm 0
 hpgl2dv 2.5D HPGL 0.25mm 0
 hpgl3d 3D HPGL 0.01mm 0
 hm50 Hafco HM-50 2400
+gantry_router Gantry Router without tool change or spindle control 0

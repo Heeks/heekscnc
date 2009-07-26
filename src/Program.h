@@ -35,12 +35,14 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	bool UsesID() const { return(false); }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
 
 class CTools: public ObjList{
 public:
+
 	// HeeksObj's virtual functions
 	bool OneOfAKind(){return true;}
 	int GetType()const{return ToolsType;}
@@ -52,6 +54,7 @@ public:
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
+	bool UsesID() const { return(false); }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
@@ -71,6 +74,7 @@ public:
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
+	bool UsesID() const { return(false); }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
