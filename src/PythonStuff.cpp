@@ -76,7 +76,7 @@ public:
 #ifdef WIN32
 			Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
 #else
-			Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/") + m_program->m_machine.file_name + _T("_read.py\" ")) + m_filename);
+			Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/") + m_program->m_machine.file_name + _T("_read.py\" ")) + wxString(_T("\"")) + m_filename + wxString(_T("\"")) );
 #endif
 		} // End if - else
 	}

@@ -336,6 +336,53 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 {
 	std::list<wxString> changes;
 
+	std::list<int> invalid_sketches;
+	for(std::list<int>::iterator l_itSketch = m_sketches.begin(); l_itSketch != m_sketches.end(); l_itSketch++)
+	{
+		HeeksObj *obj = heeksCAD->GetIDObject( SketchType, *l_itSketch );
+		if (obj == NULL)
+		{
+#ifdef UNICODE
+			std::wostringstream l_ossChange;
+#else
+			std::ostringstream l_ossChange;
+#endif
+
+			l_ossChange << "Invalid reference to sketch id='" << *l_itSketch << "' in pocket operations id='" << m_id << "'\n";
+			changes.push_back(l_ossChange.str().c_str());
+
+			if (apply_changes)
+			{
+				invalid_sketches.push_back( *l_itSketch );
+			} // End if - then
+		} // End if - then
+	} // End for
+
+	if (apply_changes)
+	{
+		for(std::list<int>::iterator l_itSketch = invalid_sketches.begin(); l_itSketch != invalid_sketches.end(); l_itSketch++)
+		{
+			std::list<int>::iterator l_itToRemove = std::find( m_sketches.begin(), m_sketches.end(), *l_itSketch );
+			if (l_itToRemove != m_sketches.end())
+			{
+				m_sketches.erase(l_itToRemove);
+			} // End while
+		} // End for
+	} // End if - then
+
+	if (m_sketches.size() == 0)
+	{
+#ifdef UNICODE
+			std::wostringstream l_ossChange;
+#else
+			std::ostringstream l_ossChange;
+#endif
+
+			l_ossChange << "No valid sketches upon which to act for pocket operations id='" << m_id << "'\n";
+			changes.push_back(l_ossChange.str().c_str());
+	} // End if - then
+
+
 	if (m_cutting_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.

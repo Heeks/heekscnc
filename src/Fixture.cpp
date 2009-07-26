@@ -243,23 +243,26 @@ void CFixture::OnEditString(const wxChar* str){
 
 CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_number )
 {
-	//CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
-	// the above line was very slow for me ( when I had thousands of lines in the drawing )
-
-	HeeksObj* fixtures = theApp.m_program->m_fixtures;
-
-	for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
+	if (theApp.m_program->m_fixtures)
 	{
-		if (ob->GetType() != FixtureType) continue;
+		//CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
+		// the above line was very slow for me ( when I had thousands of lines in the drawing )
 
-		if (ob != NULL)
+		HeeksObj* fixtures = theApp.m_program->m_fixtures;
+
+		for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
 		{
-			if (((CFixture *)ob)->m_coordinate_system_number == coordinate_system_number)
+			if (ob->GetType() != FixtureType) continue;
+
+			if (ob != NULL)
 			{
-				return( (CFixture *) ob );
+				if (((CFixture *)ob)->m_coordinate_system_number == coordinate_system_number)
+				{
+					return( (CFixture *) ob );
+				} // End if - then
 			} // End if - then
-		} // End if - then
-	} // End for
+		} // End for
+	} // End if - then
 
 	return(NULL);
 
@@ -269,28 +272,31 @@ int CFixture::GetNextFixture()
 {
 	std::set< int > existing_fixtures;
 
-	HeeksObj* fixtures = theApp.m_program->m_fixtures;
-
-	for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
+	if (theApp.m_program->m_fixtures != NULL)
 	{
-		if (ob->GetType() != FixtureType) continue;
+		HeeksObj* fixtures = theApp.m_program->m_fixtures;
 
-        if (ob != NULL)
+		for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
 		{
-			existing_fixtures.insert( int(((CFixture *)ob)->m_coordinate_system_number) );
-		} // End if - then
-	} // End for
+			if (ob->GetType() != FixtureType) continue;
+	
+			if (ob != NULL)
+			{
+				existing_fixtures.insert( int(((CFixture *)ob)->m_coordinate_system_number) );
+			} // End if - then
+		} // End for
 
-	// Now run through and find one that's not already used.
-	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
-	{
-		if (std::find( existing_fixtures.begin(), existing_fixtures.end(), fixture ) == existing_fixtures.end())
+		// Now run through and find one that's not already used.
+		for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
 		{
-			// This one is free.
+			if (std::find( existing_fixtures.begin(), existing_fixtures.end(), fixture ) == existing_fixtures.end())
+			{
+				// This one is free.
 
-			return(fixture);
-		} // End if - then
-	} // End for
+				return(fixture);
+			} // End if - then
+		} // End for
+	} // End if - then
 
 	return(-1);	// None available.
 } // End GetNextFixture() method
