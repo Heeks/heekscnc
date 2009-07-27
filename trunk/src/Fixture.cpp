@@ -243,12 +243,12 @@ void CFixture::OnEditString(const wxChar* str){
 
 CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_number )
 {
-	if (theApp.m_program->m_fixtures)
+	if (theApp.m_program->Fixtures())
 	{
 		//CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
 		// the above line was very slow for me ( when I had thousands of lines in the drawing )
 
-		HeeksObj* fixtures = theApp.m_program->m_fixtures;
+		HeeksObj* fixtures = theApp.m_program->Fixtures();
 
 		for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
 		{
@@ -272,9 +272,9 @@ int CFixture::GetNextFixture()
 {
 	std::set< int > existing_fixtures;
 
-	if (theApp.m_program->m_fixtures != NULL)
+	if (theApp.m_program->Fixtures() != NULL)
 	{
-		HeeksObj* fixtures = theApp.m_program->m_fixtures;
+		HeeksObj* fixtures = theApp.m_program->Fixtures();
 
 		for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
 		{
