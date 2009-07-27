@@ -82,7 +82,7 @@ void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 		int choice = -1;
 		std::set< wxString > materials = theApp.m_program->m_speed_references->GetMaterials();
 
-		for (std::set<wxString>::const_iterator l_itMaterial = materials.begin();
+		for (std::set<wxString>::iterator l_itMaterial = materials.begin();
 			l_itMaterial != materials.end(); l_itMaterial++)
 		{
 			choices.push_back(*l_itMaterial);
@@ -100,7 +100,7 @@ void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 		std::list<wxString> choices;
 
 		int choice = -1;
-		for (std::set<double>::const_iterator l_itChoice = hardness_values.begin(); l_itChoice != hardness_values.end(); l_itChoice++)
+		for (std::set<double>::iterator l_itChoice = hardness_values.begin(); l_itChoice != hardness_values.end(); l_itChoice++)
 		{
 #ifdef UNICODE
 			std::wostringstream l_ossChoice;

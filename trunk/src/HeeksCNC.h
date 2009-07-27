@@ -7,6 +7,8 @@
 #pragma once
 
 #include "interface/HeeksCADInterface.h"
+#include <list>
+#include <wx/string.h>
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -41,6 +43,8 @@ public:
 	typedef unsigned int SymbolId_t;
 	typedef std::pair< SymbolType_t, SymbolId_t > Symbol_t;
 	typedef std::list< Symbol_t > Symbols_t;
+
+	std::list<wxString> GetFileNames( const char *p_szRoot ) const;
 };
 
 extern CHeeksCNCApp theApp;
