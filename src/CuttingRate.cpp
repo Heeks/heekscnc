@@ -31,7 +31,7 @@ static void on_set_brinell_hardness_of_raw_material(int zero_based_choice, Heeks
 	if (zero_based_choice < 0) return;	// An error has occured.
 
 	std::set<double> all_values = CSpeedReferences::GetAllHardnessValues();
-	for (std::set<double>::const_iterator l_itHardness = all_values.begin(); l_itHardness != all_values.end(); l_itHardness++)
+	for (std::set<double>::iterator l_itHardness = all_values.begin(); l_itHardness != all_values.end(); l_itHardness++)
 	{
 		if (std::distance( all_values.begin(), l_itHardness) == zero_based_choice)
 		{
@@ -49,7 +49,7 @@ void CCuttingRate::GetProperties(std::list<Property *> *list)
 	int choice = -1;
 	std::list<wxString> choices;
 	std::set<double> all_values = CSpeedReferences::GetAllHardnessValues();
-	for (std::set<double>::const_iterator l_itHardness = all_values.begin(); l_itHardness != all_values.end(); l_itHardness++)
+	for (std::set<double>::iterator l_itHardness = all_values.begin(); l_itHardness != all_values.end(); l_itHardness++)
 	{
 		std::ostringstream l_ossValue;
 		l_ossValue << *l_itHardness;
