@@ -20,9 +20,9 @@ void COutputTextCtrl::OnMouse( wxMouseEvent& event )
 	if(event.LeftUp())
 	{
 		wxTextPos pos = GetInsertionPoint();
-		if(theApp.m_program && theApp.m_program->m_nc_code)
+		if(theApp.m_program && theApp.m_program->NCCode())
 		{
-			theApp.m_program->m_nc_code->HighlightBlock(pos);
+			theApp.m_program->NCCode()->HighlightBlock(pos);
 			heeksCAD->Repaint();
 		}
 	}
@@ -37,7 +37,7 @@ void COutputTextCtrl::OnPaint(wxPaintEvent& event)
 	// OnPaint doesn't seem to get called from Linux, though
 	wxPaintDC dc(this);
 
-	if (!painting && theApp.m_program && theApp.m_program->m_nc_code)
+	if (!painting && theApp.m_program && theApp.m_program->NCCode())
 	{
 		painting = true;
 
@@ -52,7 +52,7 @@ void COutputTextCtrl::OnPaint(wxPaintEvent& event)
 		int pos0 = XYToPosition(0, row0);
 		int pos1 = XYToPosition(1, row1);
 
-		theApp.m_program->m_nc_code->FormatBlocks(this, pos0, pos1);
+		theApp.m_program->NCCode()->FormatBlocks(this, pos0, pos1);
 
 		SetScrollPos(wxVERTICAL, scrollpos);
 
