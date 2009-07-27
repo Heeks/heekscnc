@@ -619,8 +619,9 @@ HeeksObj* CCuttingTool::ReadFromXMLElement(TiXmlElement* element)
 }
 
 
-void CCuttingTool::OnEditString(const wxChar* str){
-        m_title.assign(str);
+void CCuttingTool::OnEditString(const wxChar* str)
+{
+    m_title.assign(str);
 	heeksCAD->WasModified(this);
 }
 
@@ -637,9 +638,9 @@ CCuttingTool *CCuttingTool::Find( const int tool_number )
  */
 int CCuttingTool::FindCuttingTool( const int tool_number )
 {
-	if ((theApp.m_program) && (theApp.m_program->m_tools))
+	if ((theApp.m_program) && (theApp.m_program->Tools()))
 	{
-		HeeksObj* tool_list = theApp.m_program->m_tools;
+		HeeksObj* tool_list = theApp.m_program->Tools();
 
 		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
@@ -663,9 +664,9 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
 	// Always add a value of zero to allow for an absense of cutting tool use.
 	tools.push_back( std::make_pair(0, _T("No Cutting Tool") ) );
 
-	if ((theApp.m_program) && (theApp.m_program->m_tools))
+	if ((theApp.m_program) && (theApp.m_program->Tools()))
 	{
-		HeeksObj* tool_list = theApp.m_program->m_tools;
+		HeeksObj* tool_list = theApp.m_program->Tools();
 
 		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
@@ -702,7 +703,6 @@ wxString CCuttingTool::FractionalRepresentation( const double original_value, co
 #endif
 
 	double _value(original_value);
-	// double near_enough = double(double(1.0) / (2.0 * double(max_denominator)));
 	double near_enough = 0.00001;
 
 	if (floor(_value) > 0)
