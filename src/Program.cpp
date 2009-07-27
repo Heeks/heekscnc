@@ -893,9 +893,9 @@ class ExportCuttingTools: public Tool{
 		if (fd.ShowModal() == wxID_CANCEL) return;
 		previous_path = fd.GetPath().c_str();
 		std::list<HeeksObj *> cutting_tools;
-		for (HeeksObj *cutting_tool = theApp.m_program->m_tools->GetFirstChild();
+		for (HeeksObj *cutting_tool = theApp.m_program->Tools()->GetFirstChild();
 			cutting_tool != NULL;
-			cutting_tool = theApp.m_program->m_tools->GetNextChild() )
+			cutting_tool = theApp.m_program->Tools()->GetNextChild() )
 		{
 			cutting_tools.push_back( cutting_tool );
 		} // End for
@@ -931,9 +931,9 @@ class ImportCuttingTools: public Tool{
 		// traversing the same list that we're modifying.
 
 		std::list<HeeksObj *> cutting_tools;
-		for (HeeksObj *cutting_tool = theApp.m_program->m_tools->GetFirstChild();
+		for (HeeksObj *cutting_tool = theApp.m_program->Tools()->GetFirstChild();
 			cutting_tool != NULL;
-			cutting_tool = theApp.m_program->m_tools->GetNextChild() )
+			cutting_tool = theApp.m_program->Tools()->GetNextChild() )
 		{
 			cutting_tools.push_back( cutting_tool );
 		} // End for
@@ -945,7 +945,7 @@ class ImportCuttingTools: public Tool{
 
 		// And read the default speed references.
 		// heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_cutting_tools );
-		heeksCAD->OpenXMLFile( previous_path.c_str(), true, theApp.m_program->m_tools );
+		heeksCAD->OpenXMLFile( previous_path.c_str(), true, theApp.m_program->Tools() );
 	}
 	wxString BitmapPath(){ return _T("import");}
 	wxString previous_path;
@@ -960,4 +960,66 @@ void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	ObjList::GetTools(t_list, p);
 }
+
+CFixtures *CProgram::Fixtures()
+{
+	if (m_fixtures == NULL)
+	{
+		m_fixtures = new CFixtures;
+		Add( m_fixtures, NULL );
+		heeksCAD->WasAdded( m_fixtures );
+	} // End if - then
+
+	return(m_fixtures);
+} // End Fixtures() method
+
+
+CSpeedReferences *CProgram::SpeedReferences()
+{
+	if (m_speed_references == NULL)
+	{
+		m_speed_references = new CSpeedReferences;
+		Add( m_speed_references, NULL );
+		heeksCAD->WasAdded( m_speed_references );
+	} // End if - then
+
+	return(m_speed_references);
+} // End CSpeedReferences() method
+
+
+COperations *CProgram::Operations()
+{
+	if (m_operations == NULL)
+	{
+		m_operations = new COperations;
+		Add( m_operations, NULL );
+		heeksCAD->WasAdded( m_operations );
+	} // End if - then
+
+	return(m_operations);
+} // End COperations() method
+
+CNCCode *CProgram::NCCode()
+{
+	if (m_nc_code == NULL)
+	{
+		m_nc_code = new CNCCode;
+		Add( m_nc_code, NULL );
+		heeksCAD->WasAdded( m_nc_code );
+	} // End if - then
+
+	return(m_nc_code);
+} // End NCCode() method
+
+CTools *CProgram::Tools()
+{
+	if (m_tools == NULL)
+	{
+		m_tools = new CTools;
+		Add( m_tools, NULL );
+		heeksCAD->WasAdded( m_tools );
+	} // End if - then
+
+	return(m_tools);
+} // End CTools() method
 

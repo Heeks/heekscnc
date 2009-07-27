@@ -147,13 +147,6 @@ static bool GetSketches(std::list<int>& sketches, std::list<int> &cutting_tools 
 
 static void NewProfileOpMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add(operations, NULL);
-		heeksCAD->WasAdded(operations);
-	} // End if - then
-
 	std::list<int> drill_bits;
 	std::list<int> cutting_tools;
 	std::list<int> sketches;
@@ -193,7 +186,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 		} // End for
 
 		CProfile *new_object = new CProfile(sketches, milling_cutting_tool_number);
-		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
 
@@ -206,7 +199,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 			if (ob != NULL)
 			{
 				CDrilling *new_object = new CDrilling( profiles, ((CCuttingTool *)ob)->m_tool_number, -1 );
-				heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+				heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 				heeksCAD->ClearMarkedList();
 				heeksCAD->Mark(new_object);
 			} // End if - then
@@ -216,19 +209,12 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 
 static void NewPocketOpMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add(operations, NULL);
-		heeksCAD->WasAdded(operations);
-	} // End if - then
-
 	std::list<int> cutting_tools;
 	std::list<int> sketches;
 	if(GetSketches(sketches, cutting_tools))
 	{
 		CPocket *new_object = new CPocket(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
-		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
 	}
@@ -236,13 +222,6 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 
 static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add(operations, NULL);
-		heeksCAD->WasAdded(operations);
-	} // End if - then
-
 	// check for at least one solid selected
 	std::list<int> solids;
 
@@ -270,20 +249,13 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 	}
 
 	CZigZag *new_object = new CZigZag(solids);
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
 
 static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add(operations, NULL);
-		heeksCAD->WasAdded(operations);
-	} // End if - then
-
 	std::list<int> solids;
 	std::list<int> sketches;
 	int cutting_tool_number = 0;
@@ -332,7 +304,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 						cutting_tool_number, 
 						reference_object_type, 
 						reference_object_id);
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
@@ -340,14 +312,6 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 {
-
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add( operations, NULL );
-		heeksCAD->WasAdded( operations );
-	} // End if  - then
-
 	std::vector<CDrilling::Point3d> intersections;
 	CDrilling::Symbols_t symbols;
 	CDrilling::Symbols_t cuttingTools;
@@ -402,7 +366,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	}
 
 	CDrilling *new_object = new CDrilling( symbols, cutting_tool_number, depth );
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
@@ -410,20 +374,12 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 
 static void NewFixtureMenuCallback(wxCommandEvent &event)
 {
-
-	if ((theApp.m_program) && (theApp.m_program->m_fixtures == NULL))
-	{
-		CFixtures *pFixtures = new CFixtures;
-		theApp.m_program->Add(pFixtures, NULL);
-		heeksCAD->WasAdded(pFixtures);
-	} // End if - then
-
 	if (CFixture::GetNextFixture() > 0)
 	{
 		CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(CFixture::GetNextFixture());
 
 		CFixture *new_object = new CFixture( NULL, coordinate_system_number );
-		heeksCAD->AddUndoably(new_object, theApp.m_program->m_fixtures);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->Fixtures());
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
 	} // End if - then
@@ -436,16 +392,9 @@ static void NewFixtureMenuCallback(wxCommandEvent &event)
 
 static void DesignRulesAdjustment(const bool apply_changes)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add(operations, NULL);
-		heeksCAD->WasAdded(operations);
-	} // End if - then
-
 	std::list<wxString> changes;
 
-	HeeksObj* operations = theApp.m_program->m_operations;
+	HeeksObj* operations = theApp.m_program->Operations();
 
 	for(HeeksObj* obj = operations->GetFirstChild(); obj; obj = operations->GetNextChild())
 	{
@@ -485,13 +434,6 @@ static void DesignRulesCheckMenuCallback(wxCommandEvent &event)
 
 static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add(operations, NULL);
-		heeksCAD->WasAdded(operations);
-	} // End if - then
-
 	std::vector<CCounterBore::Point3d> intersections;
 	CCounterBore::Symbols_t symbols;
 	CCounterBore::Symbols_t cuttingTools;
@@ -544,56 +486,35 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 	}
 
 	CCounterBore *new_object = new CCounterBore( symbols, cutting_tool_number );
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
 
 static void NewSpeedReferenceMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_speed_references == NULL))
-	{
-		CSpeedReferences *pSpeedReferences = new CSpeedReferences;
-		theApp.m_program->Add( pSpeedReferences, NULL );
-		heeksCAD->WasAdded( pSpeedReferences );
-	} // End if - then
-
 	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), int(CCuttingToolParams::eCarbide), 0.0, 0.0);
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_speed_references);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->SpeedReferences());
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
 
 static void NewCuttingRateMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_speed_references == NULL))
-	{
-		CSpeedReferences *pSpeedReferences = new CSpeedReferences;
-		theApp.m_program->Add( pSpeedReferences, NULL );
-		heeksCAD->WasAdded( pSpeedReferences );
-	} // End if - then
-
 	CCuttingRate *new_object = new CCuttingRate(0.0, 0.0);
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_speed_references);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->SpeedReferences());
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
 
 static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_operations == NULL))
-	{
-		COperations *operations = new COperations;
-		theApp.m_program->Add(operations, NULL);
-		heeksCAD->WasAdded(operations);
-	} // End if - then
-
 	std::list<int> cutting_tools;
 	std::list<int> sketches;
 	if(GetSketches(sketches, cutting_tools))
 	{
 		CTurnRough *new_object = new CTurnRough(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
-		heeksCAD->AddUndoably(new_object, theApp.m_program->m_operations);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
 	}
@@ -601,13 +522,6 @@ static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
 
 static void NewCuttingToolOpMenuCallback(wxCommandEvent &event)
 {
-	if ((theApp.m_program) && (theApp.m_program->m_tools == NULL))
-	{
-		CTools *tools = new CTools;
-		theApp.m_program->Add(tools, NULL);
-		heeksCAD->WasAdded(tools);
-	} // End if - then
-
 	// Step through the tools we already have and allocate the next tool number.
 	int largest_tool_number = 0;
 	for (int id=1; id<100; id++)
@@ -622,7 +536,7 @@ static void NewCuttingToolOpMenuCallback(wxCommandEvent &event)
 	} // End for
 
 	CCuttingTool *new_object = new CCuttingTool(NULL, largest_tool_number+1);
-	heeksCAD->AddUndoably(new_object, theApp.m_program->m_tools);
+	heeksCAD->AddUndoably(new_object, theApp.m_program->Tools());
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
@@ -954,22 +868,22 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 			if (lowercase_file_name.Find(_T("speed")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->SpeedReferences() );
 			} // End if - then
 			else if (lowercase_file_name.Find(_T("feed")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_speed_references );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->SpeedReferences() );
 			}
 			else if (lowercase_file_name.Find(_T("tool")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_tools );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->Tools() );
 			}
 			else if (lowercase_file_name.Find(_T("fixture")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->m_fixtures );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->Fixtures() );
 			}
 			else
 			{

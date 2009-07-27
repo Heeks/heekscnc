@@ -102,16 +102,26 @@ public:
 
 class CProgram:public ObjList
 {
+private:
+	CFixtures *m_fixtures;					// Access via Fixtures() method
+	CSpeedReferences *m_speed_references;	// Access via SpeedReferences() method
+	COperations* m_operations;				// Access via Operations() method
+	CNCCode* m_nc_code;						// Access via NCCode() method
+	CTools* m_tools;						// Access via Tools() method
+
 public:
 	CRawMaterial m_raw_material;	// for material hardness - to determine feeds and speeds.
 	CMachine m_machine;
 	wxString m_output_file;		// NOTE: Only relevant if the filename does NOT follow the data file's name.
 	bool m_output_file_name_follows_data_file_name;	// Just change the extension to determine the NC file name
-	CNCCode* m_nc_code;
-	COperations* m_operations;
-	CTools* m_tools;
-	CSpeedReferences *m_speed_references;
-	CFixtures *m_fixtures;
+
+	// Data access methods.  These ensure the underlying objects exist before returning a pointer to them.
+	CNCCode* NCCode();
+	COperations* Operations();
+	CTools* Tools();
+	CSpeedReferences *SpeedReferences();
+	CFixtures *Fixtures();
+
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches
 

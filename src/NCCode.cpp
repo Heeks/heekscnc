@@ -616,7 +616,7 @@ class ApplyNCCode: public Tool{
 
 			std::map<int, TopoDS_Shape> tools;
 
-			std::list< std::pair<PathObject *, CCuttingTool *> > paths = theApp.m_program->m_nc_code->GetPaths();
+			std::list< std::pair<PathObject *, CCuttingTool *> > paths = theApp.m_program->NCCode()->GetPaths();
 			std::list< std::pair<PathObject *, CCuttingTool *> >::const_iterator l_itPath;
 
 			// This stuff takes a long time.  Give the user something to look at in the meantime.

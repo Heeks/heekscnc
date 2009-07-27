@@ -671,9 +671,9 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 				// to get them all as we may have used a centre drill before the
 				// main hole is drilled.
 
-				for (HeeksObj *obj = theApp.m_program->m_operations->GetFirstChild();
+				for (HeeksObj *obj = theApp.m_program->Operations()->GetFirstChild();
 					obj != NULL;
-					obj = theApp.m_program->m_operations->GetNextChild())
+					obj = theApp.m_program->Operations()->GetNextChild())
 				{
 					if (obj->GetType() == DrillingType)
 					{

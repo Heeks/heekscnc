@@ -41,9 +41,9 @@ class ExportSpeedReferences: public Tool{
 		if (fd.ShowModal() == wxID_CANCEL) return;
 		previous_path = fd.GetPath().c_str();
 		std::list<HeeksObj *> speed_references;
-		for (HeeksObj *speed_reference = theApp.m_program->m_speed_references->GetFirstChild();
+		for (HeeksObj *speed_reference = theApp.m_program->SpeedReferences()->GetFirstChild();
 			speed_reference != NULL;
-			speed_reference = theApp.m_program->m_speed_references->GetNextChild() )
+			speed_reference = theApp.m_program->SpeedReferences()->GetNextChild() )
 		{
 			speed_references.push_back( speed_reference );
 		} // End for
@@ -79,9 +79,9 @@ class ImportSpeedReferences: public Tool{
 		// traversing the same list that we're modifying.
 
 		std::list<HeeksObj *> speed_references;
-		for (HeeksObj *speed_reference = theApp.m_program->m_speed_references->GetFirstChild();
+		for (HeeksObj *speed_reference = theApp.m_program->SpeedReferences()->GetFirstChild();
 			speed_reference != NULL;
-			speed_reference = theApp.m_program->m_speed_references->GetNextChild() )
+			speed_reference = theApp.m_program->SpeedReferences()->GetNextChild() )
 		{
 			speed_references.push_back( speed_reference );
 		} // End for
@@ -93,7 +93,7 @@ class ImportSpeedReferences: public Tool{
 
 		// And read the default speed references.
 		// heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_speed_references );
-		heeksCAD->OpenXMLFile( previous_path.c_str(), true, theApp.m_program->m_speed_references );
+		heeksCAD->OpenXMLFile( previous_path.c_str(), true, theApp.m_program->SpeedReferences() );
 	}
 	wxString BitmapPath(){ return _T("import");}
 	wxString previous_path;
@@ -169,11 +169,11 @@ void CSpeedReferences::GetProperties(std::list<Property *> *list)
 std::set< wxString > CSpeedReferences::GetMaterials()
 {
 	std::set< wxString > materials;
-	if ((theApp.m_program) && (theApp.m_program->m_speed_references))
+	if ((theApp.m_program) && (theApp.m_program->SpeedReferences()))
 	{
-		for (HeeksObj *material = theApp.m_program->m_speed_references->GetFirstChild();
+		for (HeeksObj *material = theApp.m_program->SpeedReferences()->GetFirstChild();
 			material != NULL;
-			material = theApp.m_program->m_speed_references->GetNextChild())
+			material = theApp.m_program->SpeedReferences()->GetNextChild())
 		{
 			if (material->GetType() != SpeedReferenceType) continue;
 
@@ -190,11 +190,11 @@ std::set< wxString > CSpeedReferences::GetMaterials()
 std::set< double > CSpeedReferences::GetHardnessForMaterial( const wxString & material_name )
 {
 	std::set< double > hardness_values;
-	if ((theApp.m_program) && (theApp.m_program->m_speed_references))
+	if ((theApp.m_program) && (theApp.m_program->SpeedReferences()))
 	{
-		for (HeeksObj *material = theApp.m_program->m_speed_references->GetFirstChild();
+		for (HeeksObj *material = theApp.m_program->SpeedReferences()->GetFirstChild();
 			material != NULL;
-			material = theApp.m_program->m_speed_references->GetNextChild())
+			material = theApp.m_program->SpeedReferences()->GetNextChild())
 		{
 			if (material->GetType() != SpeedReferenceType) continue;
 
@@ -215,11 +215,11 @@ std::set< double > CSpeedReferences::GetHardnessForMaterial( const wxString & ma
 std::set< double > CSpeedReferences::GetAllHardnessValues()
 {
 	std::set< double > hardness_values;
-	if ((theApp.m_program) && (theApp.m_program->m_speed_references))
+	if ((theApp.m_program) && (theApp.m_program->SpeedReferences()))
 	{
-		for (HeeksObj *material = theApp.m_program->m_speed_references->GetFirstChild();
+		for (HeeksObj *material = theApp.m_program->SpeedReferences()->GetFirstChild();
 			material != NULL;
-			material = theApp.m_program->m_speed_references->GetNextChild())
+			material = theApp.m_program->SpeedReferences()->GetNextChild())
 		{
 			if (material->GetType() != SpeedReferenceType) continue;
 			hardness_values.insert( ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material );
@@ -236,11 +236,11 @@ double CSpeedReferences::GetSurfaceSpeed(
 	const double brinell_hardness_of_raw_material )
 {
 	if (theApp.m_program == NULL) return(-1.0);
-	if (theApp.m_program->m_speed_references == NULL) return(-1.0);
+	if (theApp.m_program->SpeedReferences() == NULL) return(-1.0);
 
-	for (HeeksObj *material = theApp.m_program->m_speed_references->GetFirstChild();
+	for (HeeksObj *material = theApp.m_program->SpeedReferences()->GetFirstChild();
 		material != NULL;
-		material = theApp.m_program->m_speed_references->GetNextChild())
+		material = theApp.m_program->SpeedReferences()->GetNextChild())
 	{
 		if (material->GetType() != SpeedReferenceType) continue;
 		if ((material_name == ((CSpeedReference *) material)->m_material_name) &&

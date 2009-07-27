@@ -76,11 +76,11 @@ double CRawMaterial::Hardness() const
 
 void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 {
-	if ((theApp.m_program != NULL) && (theApp.m_program->m_speed_references != NULL))
+	if ((theApp.m_program != NULL) && (theApp.m_program->SpeedReferences() != NULL))
 	{
 		std::list< wxString > choices;
 		int choice = -1;
-		std::set< wxString > materials = theApp.m_program->m_speed_references->GetMaterials();
+		std::set< wxString > materials = theApp.m_program->SpeedReferences()->GetMaterials();
 
 		for (std::set<wxString>::iterator l_itMaterial = materials.begin();
 			l_itMaterial != materials.end(); l_itMaterial++)
@@ -94,9 +94,9 @@ void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 		list->push_back(new PropertyChoice(_("Raw Material"), choices, choice, parent, on_set_raw_material));
 	} // End if - then
 
-	if ((theApp.m_program != NULL) && (theApp.m_program->m_speed_references != NULL))
+	if ((theApp.m_program != NULL) && (theApp.m_program->SpeedReferences() != NULL))
 	{
-		std::set<double> hardness_values = theApp.m_program->m_speed_references->GetHardnessForMaterial(m_material_name);
+		std::set<double> hardness_values = theApp.m_program->SpeedReferences()->GetHardnessForMaterial(m_material_name);
 		std::list<wxString> choices;
 
 		int choice = -1;
