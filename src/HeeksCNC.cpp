@@ -7,7 +7,10 @@
 
 #include "stdafx.h"
 #include <errno.h>
-#include <dirent.h>
+
+#ifndef WIN32
+	#include <dirent.h>
+#endif
 
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
@@ -838,6 +841,68 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=4;pos=0;prop=100000;bestw=341;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=968;floaty=291;floatw=368;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=549;prop=100000;bestw=248;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=TransformBar;caption=Transformation Tools;state=2108159;dir=1;layer=10;row=2;pos=685;prop=100000;bestw=217;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=935;floaty=423;floatw=244;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MachiningBar;caption=Machining tools;state=2108156;dir=1;layer=10;row=4;pos=352;prop=100000;bestw=434;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=604;floaty=255;floatw=368;floath=71|name=Program;caption=Program;state=2099196;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Output;caption=Output;state=2099196;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=234|dock_size(3,0,0)=219|dock_size(1,10,0)=33|dock_size(1,10,4)=33|")));
 }
 
+std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
+#ifdef WIN32
+{
+	std::list<wxString>	results;
+
+	WIN32_FIND_DATA file_data;
+	HANDLE hFind;
+
+	std::string pattern = std::string(p_szRoot) + "\\*";
+	hFind = FindFirstFile(pattern.c_str(), &file_data);
+
+	// Now recurse down until we find document files within 'current' directories.
+	if (hFind != INVALID_HANDLE_VALUE) 
+	{
+		do
+		{
+			if ((file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) continue;
+						
+			results.push_back( file_data.cFileName );
+		} while (FindNextFile( hFind, &file_data));
+
+		FindClose(hFind);
+	} // End if - then
+
+	return(results);
+} // End of GetFileNames() method.
+#else
+{
+	// We're in UNIX land now.
+
+	std::list<wxString>	results;
+
+	DIR *pdir = opendir(".");	// Look in the current directory for files
+				// whose names begin with "default."
+	if (pdir != NULL) 
+	{
+		struct dirent *pent = NULL;
+		while ((pent=readdir(pdir)))
+		{
+#ifdef UNICODE
+			std::wstring l_ssName;
+			std::wstring l_ssPrefix = _T("default");
+#else
+			std::string l_ssName;
+			std::string l_ssPrefix = _T("default");
+#endif
+
+			l_ssName = Ctt(pent->d_name);
+
+			if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
+			{
+				results.push_back(l_ssName.c_str());
+			} // End if - then
+		} // End while
+		closedir(pdir);
+	} // End if - then
+
+	return(results);
+} // End of GetFileNames() method
+#endif
+
+
 
 
 void CHeeksCNCApp::OnNewOrOpen(bool open)
@@ -877,31 +942,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 	{
 		// Must be a new file.
 		// Read in any default speed reference or tool table data.
-		std::list<wxString> seed_file_names;
-		DIR *pdir = opendir(".");	// Look in the current directory for files
-					// whose names begin with "default."
-		if (pdir != NULL) 
-		{
-			struct dirent *pent = NULL;
- 			while ((pent=readdir(pdir)))
-			{
-#ifdef UNICODE
-				std::wstring l_ssName;
-				std::wstring l_ssPrefix = _T("default");
-#else
-				std::string l_ssName;
-				std::string l_ssPrefix = _T("default");
-#endif
-	
-				l_ssName = Ctt(pent->d_name);
-
-				if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
-				{
-					seed_file_names.push_back(l_ssName.c_str());
-				} // End if - then
- 			} // End while
- 			closedir(pdir);
- 		} // End if - then
+		std::list<wxString> seed_file_names = GetFileNames( "." );
 
 		seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
 		for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
