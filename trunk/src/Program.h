@@ -103,11 +103,11 @@ public:
 class CProgram:public ObjList
 {
 private:
-	CFixtures *m_fixtures;					// Access via Fixtures() method
-	CSpeedReferences *m_speed_references;	// Access via SpeedReferences() method
-	COperations* m_operations;				// Access via Operations() method
 	CNCCode* m_nc_code;						// Access via NCCode() method
+	COperations* m_operations;				// Access via Operations() method
 	CTools* m_tools;						// Access via Tools() method
+	CSpeedReferences *m_speed_references;	// Access via SpeedReferences() method
+	CFixtures *m_fixtures;					// Access via Fixtures() method
 
 public:
 	CRawMaterial m_raw_material;	// for material hardness - to determine feeds and speeds.
