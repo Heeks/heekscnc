@@ -794,20 +794,7 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 		struct dirent *pent = NULL;
 		while ((pent=readdir(pdir)))
 		{
-#ifdef UNICODE
-			std::wstring l_ssName;
-			std::wstring l_ssPrefix = _T("default");
-#else
-			std::string l_ssName;
-			std::string l_ssPrefix = _T("default");
-#endif
-
-			l_ssName = Ctt(pent->d_name);
-
-			if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
-			{
-				results.push_back(l_ssName.c_str());
-			} // End if - then
+			results.push_back(Ctt(pent->d_name));
 		} // End while
 		closedir(pdir);
 	} // End if - then
@@ -856,7 +843,27 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 	{
 		// Must be a new file.
 		// Read in any default speed reference or tool table data.
-		std::list<wxString> seed_file_names = GetFileNames( "." );
+		std::list<wxString> all_file_names = GetFileNames( "." );
+		std::list<wxString> seed_file_names;
+
+		for (std::list<wxString>::iterator l_itFileName = all_file_names.begin();
+				l_itFileName != all_file_names.end(); l_itFileName++)
+		{
+#ifdef UNICODE
+			std::wstring l_ssName;
+			std::wstring l_ssPrefix = _T("default");
+#else
+			std::string l_ssName;
+			std::string l_ssPrefix = _T("default");
+#endif
+
+			l_ssName = l_itFileName->c_str();
+
+			if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
+			{
+				seed_file_names.push_back(l_ssName.c_str());
+			} // End if - then
+		} // End for
 
 		seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
 		for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
