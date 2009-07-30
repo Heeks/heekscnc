@@ -770,33 +770,33 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 		case CCuttingToolParams::eHighSpeedSteel: l_ossName << "HSS ";
 							  break;
 
-		case CCuttingToolParams::eCarbide:	l_ossName << "Carbide ";
+		case CCuttingToolParams::eCarbide:	l_ossName << (_("Carbide "));
 							break;
 	} // End switch
 
 	switch (m_params.m_type)
 	{
-		case CCuttingToolParams::eDrill:	l_ossName << "Drill Bit";
+		case CCuttingToolParams::eDrill:	l_ossName << (_("Drill Bit"));
 							break;
 
-		case CCuttingToolParams::eCentreDrill:	l_ossName << "Centre Drill Bit";
+		case CCuttingToolParams::eCentreDrill:	l_ossName << (_("Centre Drill Bit"));
 							break;
 
-                case CCuttingToolParams::eEndmill:	l_ossName << "End Mill";
+                case CCuttingToolParams::eEndmill:	l_ossName << (_("End Mill"));
 							break;
 
-                case CCuttingToolParams::eSlotCutter:	l_ossName << "Slot Cutter";
+                case CCuttingToolParams::eSlotCutter:	l_ossName << (_("Slot Cutter"));
 							break;
 
-                case CCuttingToolParams::eBallEndMill:	l_ossName << "Ball End Mill";
+                case CCuttingToolParams::eBallEndMill:	l_ossName << (_("Ball End Mill"));
 							break;
 
                 case CCuttingToolParams::eChamfer:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
-							l_ossName << m_params.m_cutting_edge_angle << " degreee ";
-                					l_ossName << "Chamfering Bit";
+							l_ossName << m_params.m_cutting_edge_angle << (_T(" degreee "));
+                					l_ossName << (_("Chamfering Bit"));
 							break;
 
-                case CCuttingToolParams::eTurningTool:	l_ossName << "Turning Tool";
+                case CCuttingToolParams::eTurningTool:	l_ossName << (_("Turning Tool"));
 							break;
 
 		default:				break;
