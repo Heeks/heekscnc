@@ -633,10 +633,10 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("CounterBore"), ToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("tool")), _("New Cutting Tool Definition..."), NewCuttingToolOpMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Fixture"), ToolImage(_T("tool")), _("New Fixture..."), NewFixtureMenuCallback);
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Design Rules Check"), ToolImage(_("design_rules_check")), _T("Design Rules Check..."), DesignRulesCheckMenuCallback);
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Design Rules Adjustment"), ToolImage(_("design_rules_adjustment")), _T("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Speed Reference"), ToolImage(_T("speed_reference")), _T("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Rate"), ToolImage(_T("cutting_rate")), _T("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Design Rules Check"), ToolImage(_("design_rules_check")), _("Design Rules Check..."), DesignRulesCheckMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Design Rules Adjustment"), ToolImage(_("design_rules_adjustment")), _("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Speed Reference"), ToolImage(_T("speed_reference")), _("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Rate"), ToolImage(_T("cutting_rate")), _("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
