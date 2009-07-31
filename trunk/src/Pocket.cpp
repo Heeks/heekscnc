@@ -175,112 +175,37 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					std::ostringstream l_ossPythonCode;
 #endif
 
+					std::list< std::pair<int, gp_Pnt > > points;
 					span_object->GetCentrePoint(c);
-					double north[3];
-					double south[3];
-					double east[3];
-					double west[3];
-
-					double radius = heeksCAD->CircleGetRadius(span_object);
-
-					north[0] = c[0];
-					north[1] = c[1] + radius;
-					north[2] = c[2];
-
-					south[0] = c[0];
-					south[1] = c[1] - radius;
-					south[2] = c[2];
-
-					east[0] = c[0] + radius;
-					east[1] = c[1];
-					east[2] = c[2];
-
-					west[0] = c[0] - radius;
-					west[1] = c[1];
-					west[2] = c[2];
-
-					pFixture->Adjustment(c);
-					pFixture->Adjustment(north);
-					pFixture->Adjustment(south);
-					pFixture->Adjustment(east);
-					pFixture->Adjustment(west);
-
-					// The kurve code can't handle an arc as the first element in
-					// a sketch.  Add a tiny straight line first.
 
 					double small_amount = 0.001;
+					double radius = heeksCAD->CircleGetRadius(span_object);
 
-					l_ossPythonCode << (_T("area.add_point(a"));
-					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-					l_ossPythonCode << _T(", ") << int(LINEAR) << _T(", ");
-					l_ossPythonCode << ((north[0] - small_amount) / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
+					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
 
-					l_ossPythonCode << (_T("area.add_point(a"));
-					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (north[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
+					pFixture->Adjustment(c);
 
-					l_ossPythonCode << (_T("area.add_point(a"));
-					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (west[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (west[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
+					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
+					{
+						gp_Pnt pnt = pFixture->Adjustment( l_itPoint->second );
 
-					l_ossPythonCode << (_T("area.add_point(a"));
-					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (south[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (south[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
-
-					l_ossPythonCode << (_T("area.add_point(a"));
-					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (east[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (east[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
-
-					l_ossPythonCode << (_T("area.add_point(a"));
-					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (north[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
+						l_ossPythonCode << (_T("area.add_point(a"));
+						l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+						l_ossPythonCode << _T(", ") << l_itPoint->first << _T(", ");
+						l_ossPythonCode << (pnt.X() / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(", "));
+						l_ossPythonCode << (pnt.Y() / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(", "));
+						l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(", "));
+						l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(")\n"));
+					} // End for
 
 					theApp.m_program_canvas->AppendText(l_ossPythonCode.str().c_str());
 				}

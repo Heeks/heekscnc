@@ -16,6 +16,12 @@ class CProfile;
 
 class CProfileParams{
 public:
+	enum {
+		eRight = -1,
+		eOn = 0,
+		eLeft = +1
+	};
+
 	int m_tool_on_side; // -1=right, 0=on, 1=left
 
 	// these are only used when m_sketches.size() == 1
