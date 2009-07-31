@@ -145,8 +145,8 @@ void CSpeedReferences::GetProperties(std::list<Property *> *list)
 	{
 		std::list< wxString > choices;
 		int choice = 0;
-		choices.push_back( _T("Estimate when possible") );		// true
-		choices.push_back( _T("Use default values") );		// false
+		choices.push_back( _("Estimate when possible") );		// true
+		choices.push_back( _("Use default values") );		// false
 
 		if (CSpeedReferences::s_estimate_when_possible) 
 		{
