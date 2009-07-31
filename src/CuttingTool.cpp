@@ -853,7 +853,6 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 {
         if(marked && !no_color)
         {
-		/*
 		try {
 			TopoDS_Shape tool_shape = GetShape();
 			HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_shape), NULL, HeeksColor(234, 123, 89) );
@@ -862,7 +861,6 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 		} // End try
 		catch(Standard_DomainError) { }
 		catch(...)  { }
-		*/
 	} // End if - then
 
 } // End glCommands() method

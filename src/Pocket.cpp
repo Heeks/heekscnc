@@ -19,6 +19,7 @@
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
+#include "geometry.h"
 
 #include <sstream>
 
@@ -102,6 +103,7 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 
 		if(span_object){
 			int type = span_object->GetType();
+
 			if(type == LineType || type == ArcType)
 			{
 				span_object->GetStartPoint(s);
@@ -162,7 +164,127 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					theApp.m_program_canvas->AppendText(_T(")\n"));
 				}
 				memcpy(prev_e, e, 3*sizeof(double));
-			}
+			} // End if - then
+			else
+			{
+				if (type == CircleType)
+				{
+#ifdef UNICODE
+					std::wostringstream l_ossPythonCode;
+#else
+					std::ostringstream l_ossPythonCode;
+#endif
+
+					span_object->GetCentrePoint(c);
+					double north[3];
+					double south[3];
+					double east[3];
+					double west[3];
+
+					double radius = heeksCAD->CircleGetRadius(span_object);
+
+					north[0] = c[0];
+					north[1] = c[1] + radius;
+					north[2] = c[2];
+
+					south[0] = c[0];
+					south[1] = c[1] - radius;
+					south[2] = c[2];
+
+					east[0] = c[0] + radius;
+					east[1] = c[1];
+					east[2] = c[2];
+
+					west[0] = c[0] - radius;
+					west[1] = c[1];
+					west[2] = c[2];
+
+					pFixture->Adjustment(c);
+					pFixture->Adjustment(north);
+					pFixture->Adjustment(south);
+					pFixture->Adjustment(east);
+					pFixture->Adjustment(west);
+
+					// The kurve code can't handle an arc as the first element in
+					// a sketch.  Add a tiny straight line first.
+
+					double small_amount = 0.001;
+
+					l_ossPythonCode << (_T("area.add_point(a"));
+					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+					l_ossPythonCode << _T(", ") << int(LINEAR) << _T(", ");
+					l_ossPythonCode << ((north[0] - small_amount) / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					l_ossPythonCode << (_T("area.add_point(a"));
+					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
+					l_ossPythonCode << (north[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					l_ossPythonCode << (_T("area.add_point(a"));
+					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
+					l_ossPythonCode << (west[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (west[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					l_ossPythonCode << (_T("area.add_point(a"));
+					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
+					l_ossPythonCode << (south[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (south[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					l_ossPythonCode << (_T("area.add_point(a"));
+					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
+					l_ossPythonCode << (east[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (east[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					l_ossPythonCode << (_T("area.add_point(a"));
+					l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
+					l_ossPythonCode << (north[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(", "));
+					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+					l_ossPythonCode << (_T(")\n"));
+
+					theApp.m_program_canvas->AppendText(l_ossPythonCode.str().c_str());
+				}
+			} // End if - else
 		}
 	}
 
@@ -193,13 +315,19 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 		HeeksObj* re_ordered_sketch = NULL;
 		SketchOrderType order = heeksCAD->GetSketchOrder(object);
-		if(order != SketchOrderTypeCloseCW && order != SketchOrderTypeCloseCCW && order != SketchOrderTypeMultipleCurves)
+		if( 	(order != SketchOrderTypeCloseCW) && 
+			(order != SketchOrderTypeCloseCCW) && 
+			(order != SketchOrderTypeMultipleCurves) &&
+			(order != SketchOrderHasCircles))
 		{
 			re_ordered_sketch = object->MakeACopy();
 			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder, false);
 			object = re_ordered_sketch;
 			order = heeksCAD->GetSketchOrder(object);
-			if(order != SketchOrderTypeCloseCW && order != SketchOrderTypeCloseCCW && order != SketchOrderTypeMultipleCurves)
+			if(	(order != SketchOrderTypeCloseCW) && 
+				(order != SketchOrderTypeCloseCCW) &&
+				(order != SketchOrderTypeMultipleCurves) &&
+				(order != SketchOrderHasCircles))
 			{
 				switch(heeksCAD->GetSketchOrder(object))
 				{
