@@ -58,13 +58,13 @@ static void on_set_tool_on_side(int value, HeeksObj* object){
 	switch(value)
 	{
 	case 0:
-		((CProfile*)object)->m_profile_params.m_tool_on_side = 1;
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eLeft;
 		break;
 	case 1:
-		((CProfile*)object)->m_profile_params.m_tool_on_side = -1;
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eRight;
 		break;
 	default:
-		((CProfile*)object)->m_profile_params.m_tool_on_side = 0;
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eOn;
 		break;
 	}
 }
@@ -85,9 +85,20 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		choices.push_back(_("Left"));
 		choices.push_back(_("Right"));
 		choices.push_back(_("On"));
-		int choice = 0;
-		if(m_tool_on_side == -1)choice = 1;
-		else if(m_tool_on_side == 0)choice = 2;
+
+		int choice = int(eOn);
+		switch (m_tool_on_side)
+		{
+			case eRight:	choice = 1;
+					break;
+
+			case eOn:	choice = 2;
+					break;
+
+			case eLeft:	choice = 0;
+					break;
+		} // End switch
+
 		list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
 	}
 
@@ -446,155 +457,47 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 				}
 				else if(type == CircleType)
 				{
+					std::list< std::pair<int, gp_Pnt > > points;
 					span_object->GetCentrePoint(c);
-					double north[3];
-					double south[3];
-					double east[3];
-					double west[3];
-
-					double radius = heeksCAD->CircleGetRadius(span_object);
-
-					north[0] = c[0];
-					north[1] = c[1] + radius;
-					north[2] = c[2];
-
-					south[0] = c[0];
-					south[1] = c[1] - radius;
-					south[2] = c[2];
-
-					east[0] = c[0] + radius;
-					east[1] = c[1];
-					east[2] = c[2];
-
-					west[0] = c[0] - radius;
-					west[1] = c[1];
-					west[2] = c[2];
-
-					pFixture->Adjustment(c);
-					pFixture->Adjustment(north);
-					pFixture->Adjustment(south);
-					pFixture->Adjustment(east);
-					pFixture->Adjustment(west);
 
 					// The kurve code can't handle an arc as the first element in
 					// a sketch.  Add a tiny straight line first.
 
 					double small_amount = 0.001;
+					double radius = heeksCAD->CircleGetRadius(span_object);
 
-					l_ossPythonCode << (_T("kurve.add_point(k"));
-					l_ossPythonCode << (sketch_id);
-					l_ossPythonCode << _T(", ") << int(LINEAR) << _T(", ");
-					l_ossPythonCode << ((north[0] - small_amount) / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
+					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
 
-					geoff_geometry::kurve_add_point(pKurve,
-									int(LINEAR), 
-									north[0] / theApp.m_program->m_units,
-									north[1] / theApp.m_program->m_units,
-									c[0] / theApp.m_program->m_units,
-									c[1] / theApp.m_program->m_units );
+					pFixture->Adjustment(c);
 
-					l_ossPythonCode << (_T("kurve.add_point(k"));
-					l_ossPythonCode << (sketch_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (north[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
+					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
+					{
+						gp_Pnt pnt = pFixture->Adjustment( l_itPoint->second );
 
-					geoff_geometry::kurve_add_point(pKurve,
-									int(ACW), 
-									north[0] / theApp.m_program->m_units,
-									north[1] / theApp.m_program->m_units,
-									c[0] / theApp.m_program->m_units,
-									c[1] / theApp.m_program->m_units );
+						l_ossPythonCode << (_T("kurve.add_point(k"));
+						l_ossPythonCode << (sketch_id);
+						l_ossPythonCode << _T(", ") << l_itPoint->first << _T(", ");
+						l_ossPythonCode << (pnt.X() / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(", "));
+						l_ossPythonCode << (pnt.Y() / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(", "));
+						l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(", "));
+						l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+						l_ossPythonCode << (_T(")\n"));
 
-					l_ossPythonCode << (_T("kurve.add_point(k"));
-					l_ossPythonCode << (sketch_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (west[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (west[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
-
-					geoff_geometry::kurve_add_point(pKurve,
-									int(ACW), 
-									west[0] / theApp.m_program->m_units,
-									west[1] / theApp.m_program->m_units,
-									c[0] / theApp.m_program->m_units,
-									c[1] / theApp.m_program->m_units );
-
-					l_ossPythonCode << (_T("kurve.add_point(k"));
-					l_ossPythonCode << (sketch_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (south[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (south[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
-
-					geoff_geometry::kurve_add_point(pKurve,
-									int(ACW), 
-									south[0] / theApp.m_program->m_units,
-									south[1] / theApp.m_program->m_units,
-									c[0] / theApp.m_program->m_units,
-									c[1] / theApp.m_program->m_units );
-
-					l_ossPythonCode << (_T("kurve.add_point(k"));
-					l_ossPythonCode << (sketch_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (east[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (east[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
-
-					geoff_geometry::kurve_add_point(pKurve,
-									int(ACW), 
-									east[0] / theApp.m_program->m_units,
-									east[1] / theApp.m_program->m_units,
-									c[0] / theApp.m_program->m_units,
-									c[1] / theApp.m_program->m_units );
-
-					l_ossPythonCode << (_T("kurve.add_point(k"));
-					l_ossPythonCode << (sketch_id);
-					l_ossPythonCode << _T(", ") << int(ACW) << _T(", ");
-					l_ossPythonCode << (north[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (north[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[0] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (c[1] / theApp.m_program->m_units);
-					l_ossPythonCode << (_T(")\n"));
-
-					geoff_geometry::kurve_add_point(pKurve,
-									int(ACW), 
-									north[0] / theApp.m_program->m_units,
-									north[1] / theApp.m_program->m_units,
-									c[0] / theApp.m_program->m_units,
-									c[1] / theApp.m_program->m_units );
-
+						geoff_geometry::kurve_add_point(pKurve,
+										l_itPoint->first,
+										pnt.X() / theApp.m_program->m_units,
+										pnt.Y() / theApp.m_program->m_units,
+										c[0] / theApp.m_program->m_units,
+										c[1] / theApp.m_program->m_units );
+					} // End for
 				}
 			}
 		}
