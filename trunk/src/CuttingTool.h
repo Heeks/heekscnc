@@ -159,6 +159,8 @@ public:
 		{
 			m_title = GenerateMeaningfulName();
 		} // End if - else
+
+		m_visible = false;
 	} // End constructor
 
 	 // HeeksObj's virtual functions
