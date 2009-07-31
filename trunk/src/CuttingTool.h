@@ -43,13 +43,13 @@ public:
 	{
 		CuttingToolTypesList_t types_list;
 
-		types_list.push_back( CuttingToolTypeDescription_t( eDrill, wxString(_T("Drill Bit")) ));
-		types_list.push_back( CuttingToolTypeDescription_t( eCentreDrill, wxString(_T("Centre Drill Bit")) ));
-		types_list.push_back( CuttingToolTypeDescription_t( eEndmill, wxString(_T("End Mill")) ));
-		types_list.push_back( CuttingToolTypeDescription_t( eSlotCutter, wxString(_T("Slot Cutter")) ));
-		types_list.push_back( CuttingToolTypeDescription_t( eBallEndMill, wxString(_T("Ball End Mill")) ));
-		types_list.push_back( CuttingToolTypeDescription_t( eChamfer, wxString(_T("Chamfer")) ));
-		types_list.push_back( CuttingToolTypeDescription_t( eTurningTool, wxString(_T("Turning Tool")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eDrill, wxString(_("Drill Bit")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eCentreDrill, wxString(_("Centre Drill Bit")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eEndmill, wxString(_("End Mill")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eSlotCutter, wxString(_("Slot Cutter")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eBallEndMill, wxString(_("Ball End Mill")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eChamfer, wxString(_("Chamfer")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eTurningTool, wxString(_("Turning Tool")) ));
 
 		return(types_list);
 	} // End GetCuttingToolTypesList() method
