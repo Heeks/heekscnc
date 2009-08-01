@@ -54,6 +54,9 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 	if(text)m_str = wxString(Ctt(text));
 }
 
+// static 
+double PathObject::m_current_x[3] = {0, 0, 0};
+
 void PathObject::WriteBaseXML(TiXmlElement *pElem)
 {
 	std::ostringstream l_ossValue; l_ossValue << m_cutting_tool_number;
@@ -67,9 +70,12 @@ void PathObject::WriteBaseXML(TiXmlElement *pElem)
 
 void PathObject::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	pElem->Attribute("x", &m_x[0]);
-	pElem->Attribute("y", &m_x[1]);
-	pElem->Attribute("z", &m_x[2]);
+	double x;
+	if(pElem->Attribute("x", &x))m_current_x[0] = x;
+	if(pElem->Attribute("y", &x))m_current_x[1] = x;
+	if(pElem->Attribute("z", &x))m_current_x[2] = x;
+
+	memcpy(m_x, m_current_x, 3*sizeof(double));
 
 	m_x[0] *= CNCCodeBlock::multiplier;
 	m_x[1] *= CNCCodeBlock::multiplier;
@@ -350,7 +356,7 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 		}
 	}
 
-	CNCCode::pos += 1;
+	if(new_object->m_text.size() > 0)CNCCode::pos++;
 
 	new_object->m_to_pos = CNCCode::pos;
 
@@ -359,21 +365,10 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
-void CNCCodeBlock::AppendTextCtrl(wxTextCtrl *textCtrl)
-{
-	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
-	{
-		ColouredText &text = *It;
-		HeeksColor &col = CNCCode::Color(text.m_color_type);
-		wxColour c(col.red, col.green, col.blue);
-		textCtrl->SetDefaultStyle(wxTextAttr(c));
-		textCtrl->AppendText(text.m_str);
-	}
-	textCtrl->AppendText(_T("\n"));
-}
-
 void CNCCodeBlock::AppendText(wxString& str)
 {
+	if(m_text.size() == 0)return;
+
 	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
 	{
 		ColouredText &text = *It;
@@ -809,6 +804,7 @@ HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 	pos = 0;
 
 	CNCCodeBlock::multiplier = 1.0;
+	PathObject::m_current_x[0] = PathObject::m_current_x[1] = PathObject::m_current_x[2]  = 0.0;
 
 	// loop through all the objects
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem;	pElem = pElem->NextSiblingElement())
