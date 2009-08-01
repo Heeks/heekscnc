@@ -144,11 +144,13 @@ class CCuttingTool: public HeeksObj {
 public:
 	//	These are references to the CAD elements whose position indicate where the CuttingTool Cycle begins.
 	CCuttingToolParams m_params;
-        wxString m_title;
+	wxString m_title;
 	int m_tool_number;
+	bool pToolSolid_created;
+	HeeksObj *m_pToolSolid;
 
 	//	Constructors.
-        CCuttingTool(const wxChar *title, const int tool_number) : m_tool_number(tool_number)
+	CCuttingTool(const wxChar *title, const int tool_number) : m_tool_number(tool_number), pToolSolid_created(false), m_pToolSolid(NULL)
 	{
 		m_params.set_initial_values(); 
 		if (title != NULL) 
@@ -162,6 +164,8 @@ public:
 
 		m_visible = false;
 	} // End constructor
+
+	~CCuttingTool();
 
 	 // HeeksObj's virtual functions
         int GetType()const{return CuttingToolType;}
