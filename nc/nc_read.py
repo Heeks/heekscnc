@@ -46,13 +46,15 @@ class Parser:
     def end_ncblock(self):
         self.file_out.write('\t</ncblock>\n')
 
-    def add_text(self, s, col=None):
+    def add_text(self, s, col=None, cdata=False):
         s.replace('&', '&amp;')
         s.replace('"', '&quot;')
         s.replace('<', '&lt;')
         s.replace('>', '&gt;')
-        if (col != None) : self.file_out.write('\t\t<text col="'+col+'">'+s+'</text>\n')
-        else : self.file_out.write('\t\t<text>'+s+'</text>\n')
+        if (cdata) : (cd1, cd2) = ('<![CDATA[', ']]>')
+        else : (cd1, cd2) = ('', '')
+        if (col != None) : self.file_out.write('\t\t<text col="'+col+'">'+cd1+s+cd2+'</text>\n')
+        else : self.file_out.write('\t\t<text>'+cd1+s+cd2+'</text>\n')
 
     def set_mode(self, units=None):
         self.file_out.write('\t\t<mode')
