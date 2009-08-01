@@ -9,7 +9,7 @@
 class Parser:
 
     def __init__(self):
-        self.tool=0
+        pass
 
     ############################################################################
     ##  Internals
@@ -64,8 +64,7 @@ class Parser:
     def set_tool(self, number=None):
         self.file_out.write('\t\t<tool')
         if (number != None) : 
-		self.tool=number
-		self.file_out.write(' number="'+str(self.tool)+'"')
+		self.file_out.write(' number="'+str(number)+'"')
         	self.file_out.write(' />\n')
 
     def begin_path(self, col=None):
@@ -75,17 +74,19 @@ class Parser:
     def end_path(self):
         self.file_out.write('\t\t</path>\n')
 
-    def add_line(self, x=None, y=None, z=None):
-        if (x == None and y == None and z == None) : return
+    def add_line(self, x=None, y=None, z=None, a=None, b=None, c=None):
+        if (x == None and y == None and z == None and a == None and b == None and c == None) : return
         self.file_out.write('\t\t\t<line')
         if (x != None) : self.file_out.write(' x="%.6f"' % x)
         if (y != None) : self.file_out.write(' y="%.6f"' % y)
         if (z != None) : self.file_out.write(' z="%.6f"' % z)
-	if (self.tool != None) : self.file_out.write(' cutting_tool_number="%d"' % self.tool)
+        if (a != None) : self.file_out.write(' a="%.6f"' % a)
+        if (b != None) : self.file_out.write(' b="%.6f"' % b)
+        if (c != None) : self.file_out.write(' c="%.6f"' % c)
         self.file_out.write(' />\n')
 
-    def add_arc(self, x=None, y=None, z=None, i=None, j=None, k=None, d=None):
-        if (x == None and y == None and z == None and i == None and j == None and k == None) : return
+    def add_arc(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None, d=None):
+        if (x == None and y == None and z == None and i == None and j == None and k == None and r == None and d == None) : return
         self.file_out.write('\t\t\t<arc')
         if (x != None) : self.file_out.write(' x="%.6f"' % x)
         if (y != None) : self.file_out.write(' y="%.6f"' % y)
@@ -93,6 +94,6 @@ class Parser:
         if (i != None) : self.file_out.write(' i="%.6f"' % i)
         if (j != None) : self.file_out.write(' j="%.6f"' % j)
         if (k != None) : self.file_out.write(' k="%.6f"' % k)
+        if (r != None) : self.file_out.write(' r="%.6f"' % r)
         if (d != None) : self.file_out.write(' d="%i"' % d)
-	if (self.tool != None) : self.file_out.write(' cutting_tool_number="%d"' % self.tool)
         self.file_out.write(' />\n')

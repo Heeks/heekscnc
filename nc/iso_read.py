@@ -17,25 +17,32 @@ class ParserIso(nc.Parser):
 
         self.pattern_main = re.compile('(\s+|\w(?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
 
-        self.a = 0
-        self.b = 0
-        self.c = 0
-        self.f = 0
-        self.i = 0
-        self.j = 0
-        self.k = 0
-        self.p = 0
-        self.q = 0
-        self.r = 0
-        self.s = 0
-        self.x = 0
-        self.y = 0
-        self.z = 500
-
     def Parse(self, name, oname=None):
         self.files_open(name,oname)
+        
+        self.begin_ncblock()
+        self.begin_path(None)
+        self.add_line(z=500)
+        self.end_path()
+        self.end_ncblock()
 
         while (self.readline()):
+            
+            a = None
+            b = None
+            c = None
+            f = None
+            i = None
+            j = None
+            k = None
+            p = None
+            q = None
+            r = None
+            s = None
+            x = None
+            y = None
+            z = None
+
             self.begin_ncblock()
 
             move = False
@@ -49,19 +56,19 @@ class ParserIso(nc.Parser):
                 cdata = False
                 if (word[0] == 'A' or word[0] == 'a'):
                     col = "axis"
-                    self.a = eval(word[1:])
+                    a = eval(word[1:])
                     move = True
                 elif (word[0] == 'B' or word[0] == 'b'):
                     col = "axis"
-                    self.b = eval(word[1:])
+                    b = eval(word[1:])
                     move = True
                 elif (word[0] == 'C' or word[0] == 'c'):
                     col = "axis"
-                    self.c = eval(word[1:])
+                    c = eval(word[1:])
                     move = True
                 elif (word[0] == 'F' or word[0] == 'f'):
                     col = "axis"
-                    self.f = eval(word[1:])
+                    f = eval(word[1:])
                     move = True
                 elif (word == 'G0' or word == 'G00' or word == 'g0' or word == 'g00'):
                     path_col = "rapid"
@@ -105,49 +112,49 @@ class ParserIso(nc.Parser):
                 elif (word[0] == 'G') : col = "prep"
                 elif (word[0] == 'I' or word[0] == 'i'):
                     col = "axis"
-                    self.i = eval(word[1:])
+                    i = eval(word[1:])
                     move = True
                 elif (word[0] == 'J' or word[0] == 'j'):
                     col = "axis"
-                    self.j = eval(word[1:])
+                    j = eval(word[1:])
                     move = True
                 elif (word[0] == 'K' or word[0] == 'k'):
                     col = "axis"
-                    self.k = eval(word[1:])
+                    k = eval(word[1:])
                     move = True
                 elif (word[0] == 'M') : col = "misc"
                 elif (word[0] == 'N') : col = "blocknum"
                 elif (word[0] == 'O') : col = "program"
                 elif (word[0] == 'P' or word[0] == 'p'):
                     col = "axis"
-                    self.p = eval(word[1:])
+                    p = eval(word[1:])
                     move = True
                 elif (word[0] == 'Q' or word[0] == 'q'):
                     col = "axis"
-                    self.q = eval(word[1:])
+                    q = eval(word[1:])
                     move = True
                 elif (word[0] == 'R' or word[0] == 'r'):
                     col = "axis"
-                    self.r = eval(word[1:])
+                    r = eval(word[1:])
                     move = True
                 elif (word[0] == 'S' or word[0] == 's'):
                     col = "axis"
-                    self.s = eval(word[1:])
+                    s = eval(word[1:])
                     move = True
                 elif (word[0] == 'T') :
                     col = "tool"
                     self.set_tool( eval(word[1:]) )
                 elif (word[0] == 'X' or word[0] == 'x'):
                     col = "axis"
-                    self.x = eval(word[1:])
+                    x = eval(word[1:])
                     move = True
                 elif (word[0] == 'Y' or word[0] == 'y'):
                     col = "axis"
-                    self.y = eval(word[1:])
+                    y = eval(word[1:])
                     move = True
                 elif (word[0] == 'Z' or word[0] == 'z'):
                     col = "axis"
-                    self.z = eval(word[1:])
+                    z = eval(word[1:])
                     move = True
                 elif (word[0] == '(') : (col, cdata) = ("comment", True)
                 elif (word[0] == '#') : col = "variable"
@@ -156,22 +163,22 @@ class ParserIso(nc.Parser):
 
             if (drill):
                 self.begin_path("rapid")
-                self.add_line(self.x, self.y, self.r)
+                self.add_line(x, y, r)
                 self.end_path()
 
                 self.begin_path("feed")
-                self.add_line(self.x, self.y, self.z)
+                self.add_line(x, y, z)
                 self.end_path()
 
                 self.begin_path("feed")
-                self.add_line(self.x, self.y, self.r)
+                self.add_line(x, y, r)
                 self.end_path()
             else:
-	            if (move):
-   	             self.begin_path(path_col)
-   	             if (arc) : self.add_arc(self.x, self.y, self.z, self.i, self.j, self.k, arc)
-   	             else     : self.add_line(self.x, self.y, self.z)
-   	             self.end_path()
+                if (move):
+                    self.begin_path(path_col)
+                    if (arc) : self.add_arc(x, y, z, i, j, k, r, arc)
+                    else     : self.add_line(x, y, z, a, b, c)
+   	            self.end_path()
 
             self.end_ncblock()
 
