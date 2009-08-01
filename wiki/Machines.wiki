@@ -23,7 +23,7 @@ import iso
 
 class CreatorIsoNoLineNumbers(iso.CreatorIso):
     def __init__(self): 
-        iso.CreatorIso.init(self) 
+        iso.CreatorIso.__init__(self) 
 
     def write_blocknum(self): 
         pass 
