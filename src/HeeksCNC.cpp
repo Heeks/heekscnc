@@ -764,7 +764,7 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 	HANDLE hFind;
 
 	std::string pattern = std::string(p_szRoot) + "\\*";
-	hFind = FindFirstFile(pattern.c_str(), &file_data);
+	hFind = FindFirstFile(Ctt(pattern.c_str()), &file_data);
 
 	// Now recurse down until we find document files within 'current' directories.
 	if (hFind != INVALID_HANDLE_VALUE) 
