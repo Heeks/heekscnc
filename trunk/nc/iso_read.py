@@ -38,14 +38,15 @@ class ParserIso(nc.Parser):
         while (self.readline()):
             self.begin_ncblock()
 
-            move = False;
-            arc = 0;
-            path_col = None;
-            drill = False;
+            move = False
+            arc = 0
+            path_col = None
+            drill = False
 
             words = self.pattern_main.findall(self.line)
             for word in words:
                 col = None
+                cdata = False
                 if (word[0] == 'A' or word[0] == 'a'):
                     col = "axis"
                     self.a = eval(word[1:])
@@ -148,9 +149,10 @@ class ParserIso(nc.Parser):
                     col = "axis"
                     self.z = eval(word[1:])
                     move = True
-                elif (word[0] == '(') : col = "comment"
+                elif (word[0] == '(') : (col, cdata) = ("comment", True)
                 elif (word[0] == '#') : col = "variable"
-                self.add_text(word, col)
+                elif (ord(word[0]) <= 32) : cdata = True
+                self.add_text(word, col, cdata)
 
             if (drill):
                 self.begin_path("rapid")
