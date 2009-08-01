@@ -484,6 +484,11 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("back_angle")) m_back_angle = atof(pElem->Attribute("back_angle"));
 }
 
+CCuttingTool::~CCuttingTool()
+{
+	if(m_pToolSolid)delete m_pToolSolid;
+}
+
 /**
 	This method is called when the CAD operator presses the Python button.  This method generates
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
@@ -851,19 +856,20 @@ wxString CCuttingTool::ResetTitle()
  */
 void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 {
-        if(marked && !no_color)
-        {
-		if (m_visible)
+	if(marked && !no_color)
+	{
+		if(!pToolSolid_created)
 		{
+			pToolSolid_created = true;
 			try {
 				TopoDS_Shape tool_shape = GetShape();
-				HeeksObj *pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_shape), NULL, HeeksColor(234, 123, 89) );
-				pToolSolid->glCommands( true, false, true );
-				delete pToolSolid;
+				m_pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_shape), NULL, HeeksColor(234, 123, 89) );
 			} // End try
 			catch(Standard_DomainError) { }
 			catch(...)  { }
-		} // End if - then
+		}
+
+		if(m_pToolSolid)m_pToolSolid->glCommands( true, false, true );
 	} // End if - then
 
 } // End glCommands() method
