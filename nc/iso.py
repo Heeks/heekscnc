@@ -78,6 +78,7 @@ class CreatorIso(nc.Creator):
         self.write(iso.PROGRAM_END + '\n')
 
     def flush_nc(self):
+        if len(self.g) == 0 and len(self.m) == 0: return
         self.write_blocknum()
         self.write_preps()
         self.write_misc()
