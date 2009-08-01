@@ -22,7 +22,7 @@ import nc
 import iso
 
 class CreatorIsoNoLineNumbers(iso.CreatorIso):
-    def init(self): 
+    def __init__(self): 
         iso.CreatorIso.init(self) 
 
     def write_blocknum(self): 
