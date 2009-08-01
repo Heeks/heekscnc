@@ -55,6 +55,7 @@ public:
 	} eType_t;
 
 public:
+	static double m_current_x[3];
 	double m_x[3];
 	int m_cutting_tool_number;
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
@@ -140,7 +141,6 @@ public:
 	void WriteXML(TiXmlNode *root);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-	void AppendTextCtrl(wxTextCtrl *textCtrl);
 	void AppendText(wxString& str);
 	void FormatText(wxTextCtrl *textCtrl);
 };
