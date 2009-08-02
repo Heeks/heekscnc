@@ -1,0 +1,9 @@
+#summary Locating points and pausing for a manual operation
+
+= Introduction =
+
+This operation is used to allow the NC code to position the workpiece beneath the spindle and to then pause for some manual operation.  The scenario being where a CNC knee mill has the knee controlled for the Z axis.  This leaves the quill available for manual drilling or perhaps the use of a tapping chuck.
+
+The Locating Operation accepts the same source of original objects as does a drilling operation.  i.e. points, circles, lines and sketches.  Stanalone (non-intersecting) objects will have their centroid location used.  Intersecting objects will have the intersections used.  In addition to this, a source of locations may be a drilling operation.
+
+The generated GCode will simply rapid to these locations one at a time and issue an M0 pause command.  The machine will position itself via the rapid movement and the NC operator can then use a tapping chuck or whatever manual operation at that location before pressing the cycle start button again.  The machine should then rapid to the next location and pause again.
