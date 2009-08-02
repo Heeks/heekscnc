@@ -1,0 +1,148 @@
+
+#ifndef LOCATING_CYCLE_CLASS_DEFINITION
+#define LOCATING_CYCLE_CLASS_DEFINITION
+
+// Locating.h
+/*
+ * Copyright (c) 2009, Dan Heeks, Perttu Ahola
+ * This program is released under the BSD license. See the file COPYING for
+ * details.
+ */
+
+#include "Op.h"
+#include "HeeksCNCTypes.h"
+#include <list>
+#include <vector>
+
+class CLocating;
+
+class CLocatingParams{
+	
+public:
+	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
+	int    m_sort_locations;	// Perform a location-based sort before generating GCode?
+
+	// The following line is the prototype setup in the Python routines for the drill sequence.
+	// def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
+
+	void set_initial_values();
+	void write_values_to_config();
+	void GetProperties(CLocating* parent, std::list<Property *> *list);
+	void WriteXMLAttributes(TiXmlNode* pElem);
+	void ReadParametersFromXMLElement(TiXmlElement* pElem);
+};
+
+/**
+	The CLocating class stores a list of symbols (by type/id pairs) of elements that represent some point
+	at which the user wants the to place the machine and then pause.  One scenario being where a previous
+	drilling operation drilled a series of holes and then a Locating operation moves the machine to
+	a position immediately above these holes and then pauses operations.  This allows a manual tapping
+	head to be used.  When the hole has been tapped, the user can then resume operations at which point
+	the machine will be located above the next hole ready for another manual operation.
+
+	It also accepts references to circle objects.  For this special case, the circle may not intersect any of
+	the other objects.  If this is the case then the circle's centre will be used as a hole location.
+
+	Finally the code tries to intersect all selected objects and places holes (Locating Cycles) at all
+	intersection points.
+ */
+
+class CLocating: public COp {
+public:
+	/**
+		There are all types of 3d point classes around but most of them seem to be in the HeeksCAD code
+		rather than in cod that's accessible by the plugin.  I suspect I'm missing something on this
+		but, just in case I'm not, here is a special one (just for this class)
+	 */
+	typedef struct Point3d {
+		double x;
+		double y;
+		double z;
+		Point3d( double a, double b, double c ) : x(a), y(b), z(c) { }
+		Point3d() : x(0), y(0), z(0) { }
+
+		bool operator==( const Point3d & rhs ) const
+		{
+			if (x != rhs.x) return(false);
+			if (y != rhs.y) return(false);
+			if (z != rhs.z) return(false);
+
+			return(true);
+		} // End equivalence operator
+
+		bool operator!=( const Point3d & rhs ) const
+		{
+			return(! (*this == rhs));
+		} // End not-equal operator
+
+		bool operator<( const Point3d & rhs ) const
+		{
+			if (x > rhs.x) return(false);
+			if (x < rhs.x) return(true);
+			if (y > rhs.y) return(false);
+			if (y < rhs.y) return(true);
+			if (z > rhs.z) return(false);
+			if (z < rhs.z) return(true);
+
+			return(false);	// They're equal
+		} // End equivalence operator
+	} Point3d;
+
+public:
+	/**
+		Define some data structures to hold references to CAD elements.  We store both the type and id because
+			a) the ID values are only relevant within the context of a type.
+			b) we don't want to limit this class to PointType elements alone.  We use these
+			   symbols to identify pairs of intersecting elements and place a drilling cycle
+			   at their intersection.
+ 	 */
+	typedef int SymbolType_t;
+	typedef unsigned int SymbolId_t;
+	typedef std::pair< SymbolType_t, SymbolId_t > Symbol_t;
+	typedef std::list< Symbol_t > Symbols_t;
+
+public:
+	//	These are references to the CAD elements whose position indicate where the Locating Operation occurs.
+	//	If the m_params.m_sort_locations is false then the order of symbols in this list should
+	//	be respected when generating GCode.  We will, eventually, allow a user to sort the sub-elements
+	//	visually from within the main user interface.  When this occurs, the change in order should be
+	//	reflected in the ordering of symbols in the m_symbols list.
+	
+	Symbols_t m_symbols;
+	CLocatingParams m_params;
+
+	//	Constructors.
+	CLocating():COp(GetTypeString(), 0){}
+	CLocating(	const Symbols_t &symbols ) 
+		: COp(GetTypeString(), 0), m_symbols(symbols)
+	{
+		m_params.set_initial_values();
+	}
+
+	// HeeksObj's virtual functions
+	int GetType()const{return LocatingType;}
+	const wxChar* GetTypeString(void)const{return _T("Locating");}
+	void glCommands(bool select, bool marked, bool no_color);
+
+	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/drilling"); else return COp::GetIcon();}
+	void GetProperties(std::list<Property *> *list);
+	HeeksObj *MakeACopy(void)const;
+	void CopyFrom(const HeeksObj* object);
+	void WriteXML(TiXmlNode *root);
+	bool CanAddTo(HeeksObj* owner);
+
+	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
+	// program whose job is to generate RS-274 GCode.
+	void AppendTextToProgram( const CFixture *pFixture );
+
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+
+	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
+	std::vector<Point3d> FindAllLocations( const CLocating::Symbols_t & symbols ) const;
+	std::vector<Point3d> FindAllLocations() const;
+
+	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
+};
+
+
+#endif // LOCATING_CYCLE_CLASS_DEFINITION
