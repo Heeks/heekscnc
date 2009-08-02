@@ -21,5 +21,6 @@ enum{
 	SpeedReferenceType,
 	SpeedReferencesType,
 	CuttingRateType,
+	LocatingType,
 	HeeksCNCMaximumType
 };

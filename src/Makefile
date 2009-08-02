@@ -37,7 +37,7 @@ endif
 
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL ${RIP} ${KURVE_FLAGS} -I "${OPENCASCADE_DIR}"
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Construction.o Finite.o kurve.o  Matrix.o offset.o PythonInterface.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o 
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Construction.o Finite.o kurve.o  Matrix.o offset.o PythonInterface.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o
 
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
@@ -308,6 +308,19 @@ Op.o: Op.cpp \
 		${HEEKSCADPATH}/tinyxml/tinyxml.h \
 		HeeksCNCTypes.h
 	$(CC) -c Op.cpp ${CCFLAGS} -o $@
+
+Locating.o: Locating.cpp \
+		Op.h \
+		HeeksCNCTypes.h \
+		Locating.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c Locating.cpp ${CCFLAGS} -o $@
 
 Drilling.o: Drilling.cpp \
 		Op.h \

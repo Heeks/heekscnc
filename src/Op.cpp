@@ -130,6 +130,7 @@ bool COp::IsAnOperation(int object_type)
 		case DrillingType:
 		case CounterBoreType:
 		case TurnRoughType:
+		case LocatingType:
 			return true;
 		default:
 			return false;		
