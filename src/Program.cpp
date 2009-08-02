@@ -276,6 +276,7 @@ bool CProgram::CanAdd(HeeksObj* object)
 		object->GetType() == OperationsType || 
 		object->GetType() == ToolsType || 
 		object->GetType() == SpeedReferencesType ||
+		object->GetType() == LocatingType ||
 		object->GetType() == FixturesType;
 }
 
