@@ -829,12 +829,12 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 wxString CCuttingTool::ResetTitle()
 {
 	if ( (m_title == GetTypeString()) ||
-	     (m_title.Find( _T("Drill Bit") ) != -1)  ||
-	     (m_title.Find( _T("End Mill") ) != -1)  ||
-	     (m_title.Find( _T("Slot Cutter") ) != -1) ||
-	     (m_title.Find( _T("Ball End Mill") ) != -1)  ||
-	     (m_title.Find( _T("Chamfering Bit") ) != -1) ||
-	     (m_title.Find( _T("Turning Tool") ) != -1)) 
+	     (m_title.Find( _("Drill Bit") ) != -1)  ||
+	     (m_title.Find( _("End Mill") ) != -1)  ||
+	     (m_title.Find( _("Slot Cutter") ) != -1) ||
+	     (m_title.Find( _("Ball End Mill") ) != -1)  ||
+	     (m_title.Find( _("Chamfering Bit") ) != -1) ||
+	     (m_title.Find( _("Turning Tool") ) != -1)) 
 	{
 		// It has the default title.  Give it a name that makes sense.
 		m_title = GenerateMeaningfulName();

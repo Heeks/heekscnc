@@ -69,8 +69,8 @@ public:
 	{
 		MaterialsList_t materials_list;
 
-		materials_list.push_back( MaterialDescription_t( eHighSpeedSteel, wxString(_T("High Speed Steel")) ));
-		materials_list.push_back( MaterialDescription_t( eCarbide, wxString(_T("Carbide")) ));
+		materials_list.push_back( MaterialDescription_t( eHighSpeedSteel, wxString(_("High Speed Steel")) ));
+		materials_list.push_back( MaterialDescription_t( eCarbide, wxString(_("Carbide")) ));
 
 		return(materials_list);
 	} // End Get() method
