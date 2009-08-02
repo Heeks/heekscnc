@@ -182,6 +182,7 @@ public:
 	wxString GetIcon() { return theApp.GetResFolder() + _T("/icons/tool"); }
         const wxChar* GetShortString(void)const{return m_title.c_str();}
 	void glCommands(bool select, bool marked, bool no_color);
+	void KillGLLists(void);
 
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
@@ -198,6 +199,8 @@ public:
 	double CuttingRadius(const bool express_in_drawing_units = false) const;
 	static CCuttingToolParams::eCuttingToolType CutterType( const int tool_number );
 	static CCuttingToolParams::eMaterial_t CutterMaterial( const int tool_number );
+private:
+	void DeleteSolid();
 
 }; // End CCuttingTool class definition.
 

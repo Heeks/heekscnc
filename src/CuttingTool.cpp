@@ -130,11 +130,13 @@ static void on_set_diameter(double value, HeeksObj* object)
 {
 	((CCuttingTool*)object)->m_params.m_diameter = value;
 	ResetParametersToReasonableValues(object);
+	object->KillGLLists();
+	heeksCAD->Repaint();
 } // End on_set_diameter() routine
 
-static void on_set_max_advance_per_revolution(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_max_advance_per_revolution = value;}
-static void on_set_x_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_x_offset = value;}
-static void on_set_tool_length_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_length_offset = value;}
+static void on_set_max_advance_per_revolution(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_max_advance_per_revolution = value; object->KillGLLists(); heeksCAD->Repaint();}
+static void on_set_x_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_x_offset = value; object->KillGLLists(); heeksCAD->Repaint();}
+static void on_set_tool_length_offset(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_length_offset = value; object->KillGLLists(); heeksCAD->Repaint();}
 static void on_set_orientation(int zero_based_choice, HeeksObj* object)
 {
 	if (zero_based_choice < 0) return;	// An error has occured
@@ -142,6 +144,8 @@ static void on_set_orientation(int zero_based_choice, HeeksObj* object)
 	if ((zero_based_choice >= 0) && (zero_based_choice <= 9))
 	{
 		((CCuttingTool*)object)->m_params.m_orientation = zero_based_choice;
+		object->KillGLLists();
+		heeksCAD->Repaint();
 	} // End if - then
 	else
 	{
@@ -158,6 +162,8 @@ static void on_set_material(int zero_based_choice, HeeksObj* object)
 		((CCuttingTool*)object)->m_params.m_material = zero_based_choice;
 		ResetParametersToReasonableValues(object);
 		heeksCAD->RefreshProperties();
+		object->KillGLLists();
+		heeksCAD->Repaint();
 	} // End if - then
 	else
 	{
@@ -165,9 +171,9 @@ static void on_set_material(int zero_based_choice, HeeksObj* object)
 	} // End if - else
 }
 
-static void on_set_front_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_front_angle = value;}
-static void on_set_tool_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_angle = value;}
-static void on_set_back_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_back_angle = value;}
+static void on_set_front_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_front_angle = value; object->KillGLLists(); heeksCAD->Repaint();}
+static void on_set_tool_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_tool_angle = value; object->KillGLLists(); heeksCAD->Repaint();}
+static void on_set_back_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_back_angle = value; object->KillGLLists(); heeksCAD->Repaint();}
 
 static void on_set_type(int zero_based_choice, HeeksObj* object)
 {
@@ -176,6 +182,8 @@ static void on_set_type(int zero_based_choice, HeeksObj* object)
 	((CCuttingTool*)object)->m_params.m_type = CCuttingToolParams::eCuttingToolType(zero_based_choice);
 	ResetParametersToReasonableValues(object);
 	heeksCAD->RefreshProperties();
+	object->KillGLLists();
+	heeksCAD->Repaint();
 } // End on_set_type() routine
 
 
@@ -347,10 +355,10 @@ static void ResetParametersToReasonableValues(HeeksObj* object)
 	} // End if - then
 } // End on_set_type() method
 
-static void on_set_corner_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_corner_radius = value;}
-static void on_set_flat_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_flat_radius = value;}
-static void on_set_cutting_edge_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_cutting_edge_angle = value;}
-static void on_set_cutting_edge_height(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_cutting_edge_height = value;}
+static void on_set_corner_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_corner_radius = value; object->KillGLLists(); heeksCAD->Repaint();}
+static void on_set_flat_radius(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_flat_radius = value; object->KillGLLists(); heeksCAD->Repaint();}
+static void on_set_cutting_edge_angle(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_cutting_edge_angle = value; object->KillGLLists(); heeksCAD->Repaint();}
+static void on_set_cutting_edge_height(double value, HeeksObj* object){((CCuttingTool*)object)->m_params.m_cutting_edge_height = value; object->KillGLLists(); heeksCAD->Repaint();}
 
 
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
@@ -486,7 +494,7 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 
 CCuttingTool::~CCuttingTool()
 {
-	if(m_pToolSolid)delete m_pToolSolid;
+	DeleteSolid();
 }
 
 /**
@@ -874,7 +882,17 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 
 } // End glCommands() method
 
+void CCuttingTool::KillGLLists(void)
+{
+	DeleteSolid();
+}
 
+void CCuttingTool::DeleteSolid()
+{
+	if(m_pToolSolid)delete m_pToolSolid;
+	m_pToolSolid = NULL;
+	pToolSolid_created = false;
+}
 
 /**
 	This method produces a "Topology Data Structure - Shape" based on the parameters
