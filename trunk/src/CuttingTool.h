@@ -133,6 +133,8 @@ public:
 						// to maintain the number of cutting teeth so a per-revolution
 						// value is easier to use.
 
+	int m_automatically_generate_title;	// Set to true by default but reset to false when the user edits the title.
+
 	void set_initial_values();
 	void write_values_to_config();
 	void GetProperties(CCuttingTool* parent, std::list<Property *> *list);
@@ -146,11 +148,10 @@ public:
 	CCuttingToolParams m_params;
 	wxString m_title;
 	int m_tool_number;
-	bool pToolSolid_created;
 	HeeksObj *m_pToolSolid;
 
 	//	Constructors.
-	CCuttingTool(const wxChar *title, const int tool_number) : m_tool_number(tool_number), pToolSolid_created(false), m_pToolSolid(NULL)
+	CCuttingTool(const wxChar *title, const int tool_number) : m_tool_number(tool_number), m_pToolSolid(NULL)
 	{
 		m_params.set_initial_values(); 
 		if (title != NULL) 
