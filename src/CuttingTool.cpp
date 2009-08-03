@@ -84,6 +84,7 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
 	config.Read(_T("m_max_advance_per_revolution"), &m_max_advance_per_revolution, 0.12 );	// mm
+	config.Read(_T("m_automatically_generate_title"), &m_automatically_generate_title, 1 );
 
 	config.Read(_T("m_type"), (int *) &m_type, eDrill);
 	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
@@ -114,6 +115,7 @@ void CCuttingToolParams::write_values_to_config()
 	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
 	config.Write(_T("m_orientation"), m_orientation);
 	config.Write(_T("m_max_advance_per_revolution"), m_max_advance_per_revolution );
+	config.Write(_T("m_automatically_generate_title"), m_automatically_generate_title );
 
 	config.Write(_T("m_type"), m_type);
 	config.Write(_T("m_flat_radius"), m_flat_radius);
@@ -184,6 +186,13 @@ static void on_set_type(int zero_based_choice, HeeksObj* object)
 	heeksCAD->RefreshProperties();
 	object->KillGLLists();
 	heeksCAD->Repaint();
+} // End on_set_type() routine
+
+static void on_set_automatically_generate_title(int zero_based_choice, HeeksObj* object)
+{
+	if (zero_based_choice < 0) return;	// An error has occured.
+
+	((CCuttingTool*)object)->m_params.m_automatically_generate_title = zero_based_choice;
 } // End on_set_type() routine
 
 
@@ -364,6 +373,15 @@ static void on_set_cutting_edge_height(double value, HeeksObj* object){((CCuttin
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
 {
 	{
+		int choice = m_automatically_generate_title;
+		std::list< wxString > choices;
+		choices.push_back( wxString(_("Leave manually assigned title")) );	// option 0 (false)
+		choices.push_back( wxString(_("Automatically generate title")) );	// option 1 (true)
+
+		list->push_back(new PropertyChoice(_("Automatic Title"), choices, choice, parent, on_set_automatically_generate_title));
+	}
+
+	{
 		CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
 
 		int choice = -1;
@@ -447,6 +465,9 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("max_advance_per_revolution", m_max_advance_per_revolution);
 
 	std::ostringstream l_ossValue;
+	l_ossValue.str(""); l_ossValue << m_automatically_generate_title;
+	element->SetAttribute("automatically_generate_title", l_ossValue.str().c_str() );
+
 	l_ossValue.str(""); l_ossValue << m_material;
 	element->SetAttribute("material", l_ossValue.str().c_str() );
 
@@ -470,6 +491,7 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
 	if (pElem->Attribute("max_advance_per_revolution")) m_max_advance_per_revolution = atof(pElem->Attribute("max_advance_per_revolution"));
+	if (pElem->Attribute("automatically_generate_title")) m_automatically_generate_title = atoi(pElem->Attribute("automatically_generate_title"));
 	if (pElem->Attribute("x_offset")) m_x_offset = atof(pElem->Attribute("x_offset"));
 	if (pElem->Attribute("tool_length_offset")) m_tool_length_offset = atof(pElem->Attribute("tool_length_offset"));
 	if (pElem->Attribute("material")) m_material = atoi(pElem->Attribute("material"));
@@ -635,6 +657,7 @@ HeeksObj* CCuttingTool::ReadFromXMLElement(TiXmlElement* element)
 void CCuttingTool::OnEditString(const wxChar* str)
 {
     m_title.assign(str);
+	m_params.m_automatically_generate_title = false;	// It's been manually edited.  Leave it alone now.
 	heeksCAD->WasModified(this);
 }
 
@@ -828,13 +851,7 @@ wxString CCuttingTool::GenerateMeaningfulName() const
  */
 wxString CCuttingTool::ResetTitle()
 {
-	if ( (m_title == GetTypeString()) ||
-	     (m_title.Find( _("Drill Bit") ) != -1)  ||
-	     (m_title.Find( _("End Mill") ) != -1)  ||
-	     (m_title.Find( _("Slot Cutter") ) != -1) ||
-	     (m_title.Find( _("Ball End Mill") ) != -1)  ||
-	     (m_title.Find( _("Chamfering Bit") ) != -1) ||
-	     (m_title.Find( _("Turning Tool") ) != -1)) 
+	if (m_params.m_automatically_generate_title)
 	{
 		// It has the default title.  Give it a name that makes sense.
 		m_title = GenerateMeaningfulName();
@@ -866,9 +883,8 @@ void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked && !no_color)
 	{
-		if(!pToolSolid_created)
+		if(!m_pToolSolid)
 		{
-			pToolSolid_created = true;
 			try {
 				TopoDS_Shape tool_shape = GetShape();
 				m_pToolSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &tool_shape), NULL, HeeksColor(234, 123, 89) );
@@ -891,7 +907,6 @@ void CCuttingTool::DeleteSolid()
 {
 	if(m_pToolSolid)delete m_pToolSolid;
 	m_pToolSolid = NULL;
-	pToolSolid_created = false;
 }
 
 /**
