@@ -124,6 +124,10 @@ This is the material that makes up the cutting edge of the cutter.  It may be se
 
 This is the maximum distance a tool should advance during a single revolution.  This value is often defined by the manufacturer in terms of an advance on a per-tooth basis.  This value, however, must be expressed on a per-revolution basis.  i.e. we don't want to maintain the number of cutting teeth so a per-revolution value is easier to use.  This value is used in the feedrate estimation.
 
+==== Automatic Title ====
+
+When the various parameters of the cutting tool are adjusted, the system attempts to find a more appropriate title for the cutting tool so that it is easily selected from the Tools list.  There are occasions, however, where the user may wish to manually assign a tool name.  This flag is set to 'true' by default so that the object's title is automatically changed to reflect the tool's parameters.  If the user manually edits the object title then this flag will implicitly be changed to 'false'.  i.e. from this point on, the manually assigned title will be used.  If, on the other hand, the user wishes to reinstate the automatic naming function, this parameter may be changed.
+
 == Default Tool Table ==
 
 A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process involves adding cutting tools to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Tools icon.  This allows the tool definitions to be saved to a file.  If the file is called 'default.tooltable' and is located in the HeeksCNC directory (along with the HeeksCNC.so or HeeksCNC.DLL) then these tools will be automatically added to all new data files.
