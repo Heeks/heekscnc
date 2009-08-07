@@ -573,6 +573,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Locating.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Locating.h"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\interface\MarkedObject.cpp"
 			>
 		</File>
