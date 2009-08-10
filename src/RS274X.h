@@ -141,6 +141,10 @@ class RS274X
 
 					m_i_term = 0.0;
 					m_j_term = 0.0;
+
+					m_clockwise = true;
+
+					m_tolerance = heeksCAD->GetTolerance();
 				}
 
 				~Trace() { }
@@ -161,17 +165,51 @@ class RS274X
 				double J() const { return(m_j_term); }
 				void J( const double & value ) { m_j_term = value; }
 
+				bool Clockwise() const { return(m_clockwise); }
+				void Clockwise( const bool direction ) { m_clockwise = direction; }
+
 				eInterpolation_t Interpolation() const { return(m_interpolation); }
 				void Interpolation( const eInterpolation_t value ) { m_interpolation = value; }
 
 				// Get gp_Circle for arc
 				gp_Circ GetCircle() const
 				{
-					gp_Pnt centre( Start() );
-					centre.SetX( Start().X() + m_i_term );
-					centre.SetY( Start().Y() + m_j_term );
+					gp_Pnt centre;
+					gp_Dir direction;
+					if (m_clockwise) direction = gp_Dir(0,0,1);
+					else	direction = gp_Dir(0,0,-1);
 
-					gp_Ax1 axis( centre, gp_Dir( 0,0,1 ) );
+					// The i and j parameters are unsigned in the RS274 standard as the
+					// sign can be inferred from the start and end position.  The radius
+					// will be the pythagorean distance of i (x axis component) and
+					// j (y axis component).  The sign of i and j can be determined based
+					// on the distance between the centre point and each of the start
+					// and end points.  i.e. both distances must be equal to the radius.
+
+					double radius = sqrt( ( m_i_term * m_i_term ) + ( m_j_term * m_j_term ) );
+
+					// There are four possible centre points based on the ± sign applied
+					// to each of the i and j terms.  The correct one will have a distance
+					// of radius between it and each of the two endpoints.
+
+					std::list<gp_Pnt> possible_centres;
+
+					possible_centres.push_back( gp_Pnt( m_start.X() - m_i_term, m_start.Y() - m_j_term, m_start.Z() ) );
+					possible_centres.push_back( gp_Pnt( m_start.X() + m_i_term, m_start.Y() - m_j_term, m_start.Z() ) );
+					possible_centres.push_back( gp_Pnt( m_start.X() - m_i_term, m_start.Y() + m_j_term, m_start.Z() ) );
+					possible_centres.push_back( gp_Pnt( m_start.X() + m_i_term, m_start.Y() + m_j_term, m_start.Z() ) );
+
+					for (std::list<gp_Pnt>::iterator l_itPoint = possible_centres.begin(); l_itPoint != possible_centres.end(); l_itPoint++)
+					{
+						if (((l_itPoint->Distance( m_start ) - radius) < m_tolerance) &&
+							((l_itPoint->Distance( m_end   ) - radius) < m_tolerance))
+						{
+							centre = *l_itPoint;
+							break;
+						}
+					} // End for
+
+					gp_Ax1 axis( centre, direction );
 
 					return gp_Circ(gp_Ax2(centre,axis.Direction()),Start().Distance(centre));
 				}
@@ -182,11 +220,23 @@ class RS274X
 					return(gp_Lin(m_start,direction));
 				}
 
+				bool Intersects( const gp_Pnt point ) const
+				{
+					gp_Vec v = GetLine().Direction();
+					double dpA = gp_Vec(m_start.XYZ()) * v;
+					double dpB = gp_Vec(m_end.XYZ()) * v;
+					double dp = gp_Vec(point.XYZ()) * v;
+					return dp >= dpA - m_tolerance && dp <= dpB + m_tolerance;
+				}
+
 
 				bool Intersects( const Trace & rhs ) const
 				{
 					gp_Pnt intersection_point;
 					std::list<gp_Pnt> intersection_points;
+
+					if (m_start.Distance( m_end ) < m_tolerance) return(false);
+					if (rhs.m_start.Distance( rhs.m_end ) < m_tolerance) return(false);
 
 					switch (m_interpolation)
 					{
@@ -197,20 +247,24 @@ class RS274X
 								case eLinear:
 								{
 									gp_Pnt	intersection_point;
-									if (heeksCAD->intersect( GetLine(), rhs.GetLine(), intersection_point ) )
+
+									if (heeksCAD->Intersect( GetLine(), rhs.GetLine(), intersection_point ) )
 									{
-										return(heeksCAD->intersect( intersection_point, GetLine() ));
+										return((heeksCAD->Intersect( intersection_point, GetLine() )) &&
+										       (heeksCAD->Intersect( intersection_point, rhs.GetLine() )) &&
+												(Intersects( intersection_point )) &&
+												(rhs.Intersects( intersection_point )));
 									}
 									return(false);
 								}
 
 								case eCircular:
 								{
-									heeksCAD->intersect( GetLine(), rhs.GetCircle(), intersection_points );
+									heeksCAD->Intersect( GetLine(), rhs.GetCircle(), intersection_points );
 									if (intersection_points.size() == 0) return(false);
 									for (std::list<gp_Pnt>::const_iterator l_itPoint = intersection_points.begin(); l_itPoint != intersection_points.end(); l_itPoint++)
 									{
-										if (heeksCAD->intersect( *l_itPoint, GetLine())) return(true);
+										if (heeksCAD->Intersect( *l_itPoint, GetLine())) return(true);
 									}
 									return(false);
 								}
@@ -224,18 +278,18 @@ class RS274X
 							{
 								case eLinear:
 								{
-									heeksCAD->intersect( rhs.GetLine(), GetCircle(), intersection_points );
+									heeksCAD->Intersect( rhs.GetLine(), GetCircle(), intersection_points );
 									if (intersection_points.size() == 0) return(false);
 									for (std::list<gp_Pnt>::const_iterator l_itPoint = intersection_points.begin(); l_itPoint != intersection_points.end(); l_itPoint++)
 									{
-										if (heeksCAD->intersect( *l_itPoint, rhs.GetLine())) return(true);
+										if (heeksCAD->Intersect( *l_itPoint, rhs.GetLine())) return(true);
 									}
 									return(false);
 								}
 
 								case eCircular:
 								{
-									heeksCAD->intersect( GetCircle(), rhs.GetCircle(), intersection_points );
+									heeksCAD->Intersect( GetCircle(), rhs.GetCircle(), intersection_points );
 									return(intersection_points.size() > 0);
 								}
 							} // End switch
@@ -261,6 +315,8 @@ class RS274X
 					if (I() != rhs.I()) return(false);
 					if (J() != rhs.J()) return(false);
 
+					if (Clockwise() != rhs.Clockwise()) return(false);
+
 					return(true);	// They're equal
 				} // End equivalence operator
 
@@ -271,6 +327,9 @@ class RS274X
 				double	m_i_term;
 				double	m_j_term;
 				eInterpolation_t m_interpolation;
+				bool	m_clockwise;
+
+				double	m_tolerance;
 		}; // End Trace class definition.
 
 
@@ -301,6 +360,7 @@ class RS274X
 		bool m_part_circular_interpolation;
 		bool m_cw_circular_interpolation;
 		bool m_area_fill;
+		bool m_mirror_image;
 
 		std::string m_LayerName;
 		int	m_active_aperture;
@@ -312,34 +372,19 @@ class RS274X
 		typedef std::list<Trace> Traces_t;
 		Traces_t	m_traces;
 
+		typedef std::list<Traces_t> Networks_t;
+
 		bool FindTraceInGroups( const Trace & trace, const std::list<Traces_t> & traces_list ) const;
 
-
-		/*
-		struct trace_intersection : public std::binary_function< const Trace &, const Trace &, bool>
+		struct traces_intersect : std::unary_function< const Trace, bool >
 		{
-			bool operator()( const Trace & lhs, const Trace & rhs )
-			{
-				if (lhs == rhs) return(false);	// They're the same element.
-				return(lhs.Intersects(rhs));
-			} // End operator()
-		}; // End trace_intersection structure defintion.
-		*/
+			traces_intersect( const Trace & trace ) : m_trace(trace) { }
 
-		struct find_in_group : public std::binary_function< const std::list<Traces_t> &, const Trace &, bool>
-		{
-			bool operator()( const std::list<Traces_t> & traces, const Trace & trace )
+			bool operator()( const Trace & rhs ) const
 			{
-				for (std::list<Traces_t>::const_iterator l_itTraceList = traces.begin();
-					l_itTraceList != traces.end(); l_itTraceList++)
-				{
-					for (std::list<Trace>::const_iterator l_itTrace = l_itTraceList->begin();
-						l_itTrace != l_itTraceList->end(); l_itTrace++)
-					{
-						if (*l_itTrace == trace ) return(true);
-					}
-				} // End for
-				return(false);
-			} // End operator()
-		}; // End find_in_group structure defintion.
+				return(m_trace.Intersects(rhs));
+			}
+
+			Trace m_trace;
+		};
 }; // End RS274X class definition.
