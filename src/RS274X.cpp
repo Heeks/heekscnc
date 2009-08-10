@@ -13,6 +13,11 @@
 #include <string>
 #include <stdexcept>
 #include <algorithm>
+#include <set>
+#include <list>
+#include <map>
+#include <vector>
+
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -41,6 +46,7 @@ RS274X::RS274X()
 	m_active_aperture = -1;	// None selected yet.
 
 	m_area_fill = false;
+	m_mirror_image = false;
 } // End constructor
 
 
@@ -139,28 +145,109 @@ bool RS274X::Read( const char *p_szFileName )
 
 		delete [] memblock;
 
-		for (Traces_t::const_iterator l_itTrace = m_traces.begin(); l_itTrace != m_traces.end(); l_itTrace++)
-		{
-			if (l_itTrace->Interpolation() == Trace::eLinear)
-			{
-				double start[3];
-				double end[3];
-
-				start[0] = l_itTrace->Start().X();
-				start[1] = l_itTrace->Start().Y();
-				start[2] = l_itTrace->Start().Z();
-
-				end[0] = l_itTrace->End().X();
-				end[1] = l_itTrace->End().Y();
-				end[2] = l_itTrace->End().Z();
-
-				HeeksObj *line = heeksCAD->NewLine( start, end );
-				heeksCAD->AddUndoably( line, NULL );
-			} // End if - then
-		} // End for
+		printf("Finished reading data into internal structures\n");
 
 		// Now aggregate the traces based on how they intersect each other.  We want all traces
 		// that touch to become one large object.
+
+		printf("Have %d traces to group\n", m_traces.size() );
+
+		Networks_t networks;
+	
+		for (Traces_t::iterator l_itTrace = m_traces.begin(); l_itTrace != m_traces.end(); l_itTrace++ )
+		{
+			std::list< Networks_t::iterator > intersecting_networks;
+
+			printf("Looking for trace amongst %d networks\n", networks.size() );
+
+			// We need to find which networks (if any) this trace intersects with.
+			for (Networks_t::iterator l_itNetwork = networks.begin(); l_itNetwork != networks.end(); l_itNetwork++)
+			{
+				if (std::find_if( l_itNetwork->begin(), l_itNetwork->end(), RS274X::traces_intersect( *l_itTrace )) != l_itNetwork->end())
+				{
+					printf("Found an intersection\n");
+					intersecting_networks.push_back( l_itNetwork );
+				} // End if - then
+			} // End for
+
+			printf("Found %d intersections\n", intersecting_networks.size());
+
+			switch(intersecting_networks.size())
+			{
+			case 0:	{
+						printf("Pushing single trace onto network\n");
+						Traces_t traces;
+						traces.push_back( *l_itTrace );
+						networks.push_back(traces);
+						printf("Finished Pushing single trace onto network\n");
+						break;
+					}
+
+			case 1: {
+						(*(intersecting_networks.begin()))->push_back( *l_itTrace );
+						break;
+					}
+
+			default:
+					// Need to combine networks for which this trace intersects.
+					printf("Need to combine %d networks\n", intersecting_networks.size() );
+
+					(*(intersecting_networks.begin()))->push_back( *l_itTrace );
+
+					for (std::list<Networks_t::iterator>::iterator l_itNetwork = intersecting_networks.begin();
+								l_itNetwork != intersecting_networks.end(); l_itNetwork++)
+					{
+						if (l_itNetwork == intersecting_networks.begin()) continue;	// merge into this one.
+
+						std::copy( (*l_itNetwork)->begin(), (*l_itNetwork)->end(),
+						std::inserter( *(intersecting_networks.front()), intersecting_networks.front()->end() ));
+
+						(*l_itNetwork)->clear();
+						networks.erase( *l_itNetwork );
+					} // End for
+
+
+					break;
+			} // End switch
+		} // End for
+
+		printf("Ended up with %d separate networks\n", networks.size() );
+
+		for (Networks_t::iterator l_itNetwork = networks.begin(); l_itNetwork != networks.end(); l_itNetwork++)
+		{
+			HeeksObj *sketch = heeksCAD->NewSketch();
+			heeksCAD->AddUndoably( sketch, NULL );
+
+			for (Traces_t::iterator l_itTrace = l_itNetwork->begin(); l_itTrace != l_itNetwork->end(); l_itTrace++)
+			{
+				switch (l_itTrace->Interpolation())
+				{
+					case Trace::eLinear:
+					{
+						double start[3];
+						double end[3];
+	
+						start[0] = l_itTrace->Start().X();
+						start[1] = l_itTrace->Start().Y();
+						start[2] = l_itTrace->Start().Z();
+
+						end[0] = l_itTrace->End().X();
+						end[1] = l_itTrace->End().Y();
+						end[2] = l_itTrace->End().Z();
+
+						HeeksObj *line = heeksCAD->NewLine( start, end );
+						heeksCAD->AddUndoably( line, sketch );
+						break;
+					}
+
+					case Trace::eCircular:
+					{
+						break;
+					}
+				} // End switch
+			} // End for
+		} // End for
+
 
 
 		return(true);
@@ -280,6 +367,13 @@ bool RS274X::ReadParameters( const std::string & parameters )
 		// %LN<character string>*%
 		_params.erase(0,2);	// Remove LN.
 		m_LayerName = _params;
+		return(true);
+	}
+	else if (_params.substr(0,2) == "MI")
+	{
+		// Mirror Image = on.
+		_params.erase(0,2);	// Remove MI
+		m_mirror_image = true;
 		return(true);
 	}
 	else if (_params.substr(0,2) == "FS")
@@ -564,6 +658,7 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 							m_YDigitsRightOfPoint, 
 							m_leadingZeroSuppression, 
 							m_trailingZeroSuppression ) );
+			if (m_mirror_image) position.SetX( position.X() * -1.0 ); // mirror about Y axis
 		}
 		else if (_data.substr(0,1) == "Y")
 		{
@@ -622,47 +717,24 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 				finish[1] = position.Y();
 				finish[2] = position.Z();
 
-				if (m_cw_circular_interpolation)
-				{
-					// Clockwise
+				Trace trace( m_aperture_table[m_active_aperture], Trace::eCircular );
+				trace.Start( m_current_position );
+				trace.End( position );
+				trace.Clockwise( m_cw_circular_interpolation );
+				trace.I( i_term );
+				trace.J( j_term );
 
-					double centre[3];
-
-				} // End if - then
-				else
-				{
-					// CounterClockWise
-
-				} // End if - else
-
-
-				HeeksObj *path = heeksCAD->NewLine( start, finish );
-				heeksCAD->AddUndoably( path, NULL );
+				m_traces.push_back( trace );
 
 				m_current_position = position;
 			} // End if - then
 			else
 			{
 				// linear interpolation.
-				double start[3], finish[3];
-
-				start[0] = m_current_position.X();
-				start[1] = m_current_position.Y();
-				start[2] = m_current_position.Z();
-
-				finish[0] = position.X();
-				finish[1] = position.Y();
-				finish[2] = position.Z();
-
 				Trace trace( m_aperture_table[m_active_aperture], Trace::eLinear );
 				trace.Start( m_current_position );
 				trace.End( position );
 				m_traces.push_back( trace );
-
-				/*	
-				HeeksObj *path = heeksCAD->NewLine( start, finish );
-				heeksCAD->AddUndoably( path, NULL );
-				*/
 
 				m_current_position = position;
 			} // End if - else
