@@ -164,6 +164,20 @@ class RS274X
 
 				gp_Pnt Centre() const
 				{
+					if ((Interpolation() == eCircular) && (m_i_term < m_tolerance) && (m_j_term < m_tolerance))
+					{
+						// It's a full circle.  Set the centre to the start/end points.
+						return(m_start);
+					} // End if - then
+
+					if (Interpolation() == eLinear)
+					{
+						return(gp_Pnt(  ((Start().X() - End().X())/2) + Start().X(),
+										((Start().Y() - End().Y())/2) + Start().Y(),
+										((Start().Z() - End().Z())/2) + Start().Z() ));
+					} // End if - then
+
+					// It must be an arc.
 					// The i and j parameters are unsigned in the RS274 standard as the
 					// sign can be inferred from the start and end position.  The radius
 					// will be the pythagorean distance of i (x axis component) and
@@ -247,9 +261,7 @@ class RS274X
 
 							case eCircular:
 							{
-								if ((Start().X() - End().X() < m_tolerance) &&
-								    (Start().Y() - End().Y() < m_tolerance) &&
-								    (Start().Z() - End().Z() < m_tolerance))
+								if ((m_i_term < m_tolerance) && (m_j_term < m_tolerance) && (Radius() > m_tolerance))
 								{
 									// It's a full circle.
 									double centre[3];

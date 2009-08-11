@@ -35,7 +35,6 @@ RS274X::RS274X()
 	m_YDigitsRightOfPoint = 4;
 
 	m_full_circular_interpolation = false;
-
 	m_part_circular_interpolation = false;
 	m_cw_circular_interpolation = false;	// this flag only makes sense if m_part_circular_interpolation is true.
 
@@ -198,7 +197,7 @@ bool RS274X::Read( const char *p_szFileName )
 			} // End switch
 		} // End for
 
-		printf("Ended up with %d separate networks\n", networks.size() );
+		printf("Found %d separate trace networks\n", networks.size() );
 
 		for (Networks_t::iterator l_itNetwork = networks.begin(); l_itNetwork != networks.end(); l_itNetwork++)
 		{
@@ -492,6 +491,10 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 	while ((offset = _data.find(' ')) != _data.npos) _data.erase(offset,1);
 	while ((offset = _data.find('\t')) != _data.npos) _data.erase(offset,1);
 
+	char buffer[1024];
+	memset(buffer,'\0', sizeof(buffer));
+	strcpy( buffer, data_block.c_str() );
+
 	double i_term = 0.0;
 	double j_term = 0.0;
 	gp_Pnt position( m_current_position );
@@ -522,42 +525,65 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 		{
 			_data.erase(0,1);
 			char *end = NULL;
+			std::string sign;
 
-			double multiplier = m_units;
 			if (_data[0] == '-')
 			{
-				multiplier = -1.0;
+				sign = "-";
 				_data.erase(0,1);
 			} // End if - then
 
 			if (_data[0] == '+')
 			{
-				multiplier = 1.0;
+				sign = "+";
 				_data.erase(0,1);
 			} // End if - then
 
-			i_term = (double) (double(strtoul( _data.c_str(), &end, 10 )) / 10.0) * multiplier;
+			strtoul( _data.c_str(), &end, 10 );
+			if ((end == NULL) || (end == _data.c_str()))
+			{
+				printf("Expected value for I parameter\n");
+				return(false);
+			} // End if - then
+			std::string i_param = sign + _data.substr(0, end - _data.c_str());
 			_data.erase(0, end - _data.c_str());
+			i_term = InterpretCoord( i_param.c_str(), 
+							m_YDigitsLeftOfPoint, 
+							m_YDigitsRightOfPoint, 
+							m_leadingZeroSuppression, 
+							m_trailingZeroSuppression );
 		}
 		else if (_data.substr(0,1) == "J")
 		{
 			_data.erase(0,1);
 			char *end = NULL;
+			std::string sign;
 
-			double multiplier = m_units;
 			if (_data[0] == '-')
 			{
-				multiplier = -1.0;
+				sign = "-";
 				_data.erase(0,1);
 			} // End if - then
 
 			if (_data[0] == '+')
 			{
-				multiplier = 1.0;
+				sign = "+";
 				_data.erase(0,1);
 			} // End if - then
-			j_term = (double) (double(strtoul( _data.c_str(), &end, 10 )) / 10.0) * multiplier;
+
+			strtoul( _data.c_str(), &end, 10 );
+			if ((end == NULL) || (end == _data.c_str()))
+			{
+				printf("Expected value for J parameter\n");
+				return(false);
+			} // End if - then
+			std::string j_param = sign + _data.substr(0, end - _data.c_str());
 			_data.erase(0, end - _data.c_str());
+			j_term = InterpretCoord( j_param.c_str(), 
+							m_YDigitsLeftOfPoint, 
+							m_YDigitsRightOfPoint, 
+							m_leadingZeroSuppression, 
+							m_trailingZeroSuppression );
 		}
 		else if (_data.substr(0,3) == "M00")
 		{
@@ -661,6 +687,9 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 		else if (_data.substr(0,3) == "D01")
 		{
 			_data.erase(0,3);
+
+			if (m_area_fill) return(true);	// Ignore polygon fill data. Not yet implemented properly.
+
 			// We're going from the current position to x,y in
 			// either a linear interpolated path or a circular
 			// interpolated path.  We end up resetting our current
@@ -669,20 +698,9 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 			// NOTE: If m_area_fill is true then don't expand these to become wide traces (sketches).  Leave
 			// them as normal lines to indicate where the area would have been.
 
-			if ((m_full_circular_interpolation) ||
-			    (m_part_circular_interpolation))
+			if (m_part_circular_interpolation)
 			{
 				// circular interpolation.
-				double start[3], finish[3];
-
-				start[0] = m_current_position.X();
-				start[1] = m_current_position.Y();
-				start[2] = m_current_position.Z();
-
-				finish[0] = position.X();
-				finish[1] = position.Y();
-				finish[2] = position.Z();
-
 				Trace trace( m_aperture_table[m_active_aperture], Trace::eCircular );
 				trace.Start( m_current_position );
 				trace.End( position );
@@ -694,6 +712,19 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 
 				m_current_position = position;
 			} // End if - then
+			else if (m_full_circular_interpolation)
+			{
+				// circular interpolation.
+				Trace trace( m_aperture_table[m_active_aperture], Trace::eCircular );
+				trace.Radius( sqrt((i_term * i_term) + (j_term * j_term)) );
+				trace.Start( position );
+				trace.End( position );
+				trace.Clockwise( m_cw_circular_interpolation );
+
+				m_traces.push_back( trace );
+
+				m_current_position = position;
+			}
 			else
 			{
 				// linear interpolation.
@@ -726,6 +757,7 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 			trace.End( position );
 			trace.Radius( aperture.OutsideDiameter() / 2 );
 			m_traces.push_back( trace );
+			if (aperture.OutsideDiameter() < 0.0001) printf("WARNING: D03 found without radius information\n");
 		}
 		else if (_data.substr(0,3) == "G54")
 		{
