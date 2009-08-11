@@ -1,3 +1,4 @@
+#include "stdafx.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -259,7 +260,7 @@ bool RS274X::ReadParameters( const std::string & parameters )
 		_params.erase(0,1);	// Remove aperture type character.
 		if (_params[0] == ',') _params.erase(0,1);	// Remove comma
 
-		double modifier = strtof( _params.c_str(), &end );
+		double modifier = strtod( _params.c_str(), &end );
 		if ((end == NULL) || (end == _params.c_str()))
 		{
 			printf("Expected modifier\n");
@@ -280,7 +281,7 @@ bool RS274X::ReadParameters( const std::string & parameters )
 				if ((_params.size() > 0) && (_params[0] == 'X'))
 				{
 					// It has a hole in it. (either circular or rectangular)
-					aperture.XAxisHoleDimension( double(strtof( _params.c_str(), &end )) * m_units );
+					aperture.XAxisHoleDimension( double(strtod( _params.c_str(), &end )) * m_units );
 					if ((end == NULL) || (end == _params.c_str()))
 					{
 						printf("Expected modifier\n");
@@ -292,7 +293,7 @@ bool RS274X::ReadParameters( const std::string & parameters )
 				if ((_params.size() > 0) && (_params[0] == 'X'))
 				{
 					// It has a rectangular hole in it.
-					aperture.YAxisHoleDimension( double(strtof( _params.c_str(), &end )) * m_units );
+					aperture.YAxisHoleDimension( double(strtod( _params.c_str(), &end )) * m_units );
 					if ((end == NULL) || (end == _params.c_str()))
 					{
 						printf("Expected modifier\n");
@@ -463,7 +464,7 @@ double RS274X::InterpretCoord(
 
 		// use the end of the string as the reference point.
 		result = atof( _coord.substr( 0, _coord.size() - digits_right_of_point ).c_str() );
-		result += (atof( _coord.substr( _coord.size() - digits_right_of_point ).c_str() ) / pow(10, digits_right_of_point));
+		result += (atof( _coord.substr( _coord.size() - digits_right_of_point ).c_str() ) / pow(10.0, digits_right_of_point));
 	} // End if - then
 	else
 	{
@@ -471,7 +472,7 @@ double RS274X::InterpretCoord(
 
 		// use the beginning of the string as the reference point.
 		result = atof( _coord.substr( 0, digits_left_of_point ).c_str() );
-		result += (atof( _coord.substr( digits_left_of_point ).c_str() ) / pow(10, (_coord.size() - digits_left_of_point)));
+		result += (atof( _coord.substr( digits_left_of_point ).c_str() ) / pow(10.0, (int)(_coord.size() - digits_left_of_point)));
 	} // End if - else
 
 	result *= multiplier;
