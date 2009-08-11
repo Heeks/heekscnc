@@ -145,12 +145,8 @@ bool RS274X::Read( const char *p_szFileName )
 
 		delete [] memblock;
 
-		printf("Finished reading data into internal structures\n");
-
 		// Now aggregate the traces based on how they intersect each other.  We want all traces
 		// that touch to become one large object.
-
-		printf("Have %d traces to group\n", m_traces.size() );
 
 		Networks_t networks;
 	
@@ -158,28 +154,21 @@ bool RS274X::Read( const char *p_szFileName )
 		{
 			std::list< Networks_t::iterator > intersecting_networks;
 
-			printf("Looking for trace amongst %d networks\n", networks.size() );
-
 			// We need to find which networks (if any) this trace intersects with.
 			for (Networks_t::iterator l_itNetwork = networks.begin(); l_itNetwork != networks.end(); l_itNetwork++)
 			{
 				if (std::find_if( l_itNetwork->begin(), l_itNetwork->end(), RS274X::traces_intersect( *l_itTrace )) != l_itNetwork->end())
 				{
-					printf("Found an intersection\n");
 					intersecting_networks.push_back( l_itNetwork );
 				} // End if - then
 			} // End for
 
-			printf("Found %d intersections\n", intersecting_networks.size());
-
 			switch(intersecting_networks.size())
 			{
 			case 0:	{
-						printf("Pushing single trace onto network\n");
 						Traces_t traces;
 						traces.push_back( *l_itTrace );
 						networks.push_back(traces);
-						printf("Finished Pushing single trace onto network\n");
 						break;
 					}
 
@@ -190,8 +179,6 @@ bool RS274X::Read( const char *p_szFileName )
 
 			default:
 					// Need to combine networks for which this trace intersects.
-					printf("Need to combine %d networks\n", intersecting_networks.size() );
-
 					(*(intersecting_networks.begin()))->push_back( *l_itTrace );
 
 					for (std::list<Networks_t::iterator>::iterator l_itNetwork = intersecting_networks.begin();
@@ -215,37 +202,16 @@ bool RS274X::Read( const char *p_szFileName )
 
 		for (Networks_t::iterator l_itNetwork = networks.begin(); l_itNetwork != networks.end(); l_itNetwork++)
 		{
-			HeeksObj *sketch = heeksCAD->NewSketch();
-			heeksCAD->AddUndoably( sketch, NULL );
-
-			for (Traces_t::iterator l_itTrace = l_itNetwork->begin(); l_itTrace != l_itNetwork->end(); l_itTrace++)
+			if (l_itNetwork->size() > 0)
 			{
-				switch (l_itTrace->Interpolation())
+				HeeksObj *sketch = heeksCAD->NewSketch();
+				heeksCAD->AddUndoably( sketch, NULL );
+
+				for (Traces_t::iterator l_itTrace = l_itNetwork->begin(); l_itTrace != l_itNetwork->end(); l_itTrace++)
 				{
-					case Trace::eLinear:
-					{
-						double start[3];
-						double end[3];
-	
-						start[0] = l_itTrace->Start().X();
-						start[1] = l_itTrace->Start().Y();
-						start[2] = l_itTrace->Start().Z();
-
-						end[0] = l_itTrace->End().X();
-						end[1] = l_itTrace->End().Y();
-						end[2] = l_itTrace->End().Z();
-
-						HeeksObj *line = heeksCAD->NewLine( start, end );
-						heeksCAD->AddUndoably( line, sketch );
-						break;
-					}
-
-					case Trace::eCircular:
-					{
-						break;
-					}
-				} // End switch
-			} // End for
+					heeksCAD->AddUndoably( l_itTrace->HeeksObject(), sketch );
+				} // End for
+			} // End if - then
 		} // End for
 
 
@@ -754,7 +720,12 @@ bool RS274X::ReadDataBlock( const std::string & data_block )
 				return(false);
 			} // End if - then
 
-			m_aperture_table[ m_active_aperture ].AddSketch( position );
+			Aperture aperture = m_aperture_table[ m_active_aperture ];
+			Trace trace( aperture, Trace::eCircular );
+			trace.Start( position );
+			trace.End( position );
+			trace.Radius( aperture.OutsideDiameter() / 2 );
+			m_traces.push_back( trace );
 		}
 		else if (_data.substr(0,3) == "G54")
 		{
