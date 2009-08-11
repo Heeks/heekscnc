@@ -77,30 +77,6 @@ class RS274X
 				void DegreeOfRotation( const double value ) { m_degree_of_rotation = value; }
 				double DegreeOfRotation() const { return(m_degree_of_rotation); }
 
-				void AddSketch( const gp_Pnt & location ) const
-				{
-					switch (m_type)
-					{
-						case eCircular:
-						{
-							HeeksObj *sketch = heeksCAD->NewSketch();
-							heeksCAD->AddUndoably( sketch, NULL );
-
-							double centre[3];
-							centre[0] = location.X();
-							centre[1] = location.Y();
-							centre[2] = location.Z();
-
-							HeeksObj *circle = heeksCAD->NewCircle( centre, m_outside_diameter/2 );
-							heeksCAD->AddUndoably( circle, sketch );
-						}
-							break;
-
-						default:
-							printf("Unsuported aperture type\n");
-							return;
-					} // End switch
-				} // End AddSketch() method
 
 			private:
 				eType_t m_type;
@@ -142,12 +118,16 @@ class RS274X
 					m_i_term = 0.0;
 					m_j_term = 0.0;
 
+					m_radius = 0.0;
+
 					m_clockwise = true;
 
 					m_tolerance = heeksCAD->GetTolerance();
+
+					m_pHeeksObject = NULL;
 				}
 
-				~Trace() { }
+				~Trace() { /* Don't delete the HeeksObj */ }
 
 			public:
 				Aperture aperture() const { return(m_aperture); }
@@ -170,15 +150,20 @@ class RS274X
 
 				eInterpolation_t Interpolation() const { return(m_interpolation); }
 				void Interpolation( const eInterpolation_t value ) { m_interpolation = value; }
-
-				// Get gp_Circle for arc
-				gp_Circ GetCircle() const
+	
+				double Radius() const
 				{
-					gp_Pnt centre;
-					gp_Dir direction;
-					if (m_clockwise) direction = gp_Dir(0,0,1);
-					else	direction = gp_Dir(0,0,-1);
+					if (m_radius < m_tolerance)
+					{
+						m_radius = sqrt( ( m_i_term * m_i_term ) + ( m_j_term * m_j_term ) );
+					}
 
+					return(m_radius);
+				}
+				void Radius( const double value ) { m_radius = value; }
+
+				gp_Pnt Centre() const
+				{
 					// The i and j parameters are unsigned in the RS274 standard as the
 					// sign can be inferred from the start and end position.  The radius
 					// will be the pythagorean distance of i (x axis component) and
@@ -186,7 +171,7 @@ class RS274X
 					// on the distance between the centre point and each of the start
 					// and end points.  i.e. both distances must be equal to the radius.
 
-					double radius = sqrt( ( m_i_term * m_i_term ) + ( m_j_term * m_j_term ) );
+					double radius = Radius();
 
 					// There are four possible centre points based on the ± sign applied
 					// to each of the i and j terms.  The correct one will have a distance
@@ -204,100 +189,124 @@ class RS274X
 						if (((l_itPoint->Distance( m_start ) - radius) < m_tolerance) &&
 							((l_itPoint->Distance( m_end   ) - radius) < m_tolerance))
 						{
-							centre = *l_itPoint;
-							break;
+							return( *l_itPoint );
 						}
 					} // End for
 
-					gp_Ax1 axis( centre, direction );
-
-					return gp_Circ(gp_Ax2(centre,axis.Direction()),Start().Distance(centre));
+					return(gp_Pnt(0,0,0));	// It shouldn't get here.
 				}
 
-				gp_Lin GetLine() const
+				gp_Dir Direction() const
 				{
-					gp_Dir direction( m_end.X() - m_start.X(), m_end.Y() - m_start.Y(), m_end.Z() - m_start.Z() );
-					return(gp_Lin(m_start,direction));
+					switch(Interpolation())
+					{
+						case eCircular:
+							if (m_clockwise) return(gp_Dir(0,0,-1));
+							else	return(gp_Dir(0,0,1));
+
+						case eLinear:
+							return( gp_Dir( m_end.X() - m_start.X(), m_end.Y() - m_start.Y(), m_end.Z() - m_start.Z() ));
+					}
 				}
 
-				bool Intersects( const gp_Pnt point ) const
+				// Get gp_Circle for arc
+				gp_Circ Circle() const
 				{
-					gp_Vec v = GetLine().Direction();
-					double dpA = gp_Vec(m_start.XYZ()) * v;
-					double dpB = gp_Vec(m_end.XYZ()) * v;
-					double dp = gp_Vec(point.XYZ()) * v;
-					return dp >= dpA - m_tolerance && dp <= dpB + m_tolerance;
+					gp_Ax1 axis( Centre(), Direction() );
+					return gp_Circ(gp_Ax2(Centre(),Direction()), Radius());
 				}
 
+				gp_Lin Line() const
+				{
+					return(gp_Lin(Start(),Direction()));
+				}
+
+
+				HeeksObj *HeeksObject() const
+				{
+					if (m_pHeeksObject == NULL)
+					{
+						switch (Interpolation())
+						{
+							case eLinear:
+							{
+								double start[3];
+								double end[3];
+	
+								start[0] = Start().X();
+								start[1] = Start().Y();
+								start[2] = Start().Z();
+
+								end[0] = End().X();
+								end[1] = End().Y();
+								end[2] = End().Z();
+
+								m_pHeeksObject = heeksCAD->NewLine( start, end );
+								break;
+							}
+
+							case eCircular:
+							{
+								if ((Start().X() - End().X() < m_tolerance) &&
+								    (Start().Y() - End().Y() < m_tolerance) &&
+								    (Start().Z() - End().Z() < m_tolerance))
+								{
+									// It's a full circle.
+									double centre[3];
+	
+									centre[0] = Centre().X();
+									centre[1] = Centre().Y();
+									centre[2] = Centre().Z();
+
+									m_pHeeksObject = heeksCAD->NewCircle( centre, Radius() );
+								}
+								else
+								{
+									// It's an arc
+									double start[3];
+									double end[3];
+									double centre[3];
+									double up[3];
+	
+									start[0] = Start().X();
+									start[1] = Start().Y();
+									start[2] = Start().Z();
+
+									end[0] = End().X();
+									end[1] = End().Y();
+									end[2] = End().Z();
+				
+									centre[0] = Centre().X();
+									centre[1] = Centre().Y();
+									centre[2] = Centre().Z();
+
+									if (Clockwise())
+									{
+										up[0] = 0;
+										up[1] = 0;
+										up[2] = -1;
+									}
+									else
+									{
+										up[0] = 0;
+										up[1] = 0;
+										up[2] = 1;
+									}
+								
+									m_pHeeksObject = heeksCAD->NewArc( start, end, centre, up);
+								}
+								break;
+							}
+						} // End switch
+					} // End if - then
+
+					return(m_pHeeksObject);
+				}
 
 				bool Intersects( const Trace & rhs ) const
 				{
-					gp_Pnt intersection_point;
-					std::list<gp_Pnt> intersection_points;
-
-					if (m_start.Distance( m_end ) < m_tolerance) return(false);
-					if (rhs.m_start.Distance( rhs.m_end ) < m_tolerance) return(false);
-
-					switch (m_interpolation)
-					{
-						case eLinear:
-						{
-							switch (rhs.Interpolation())
-							{
-								case eLinear:
-								{
-									gp_Pnt	intersection_point;
-
-									if (heeksCAD->Intersect( GetLine(), rhs.GetLine(), intersection_point ) )
-									{
-										return((heeksCAD->Intersect( intersection_point, GetLine() )) &&
-										       (heeksCAD->Intersect( intersection_point, rhs.GetLine() )) &&
-												(Intersects( intersection_point )) &&
-												(rhs.Intersects( intersection_point )));
-									}
-									return(false);
-								}
-
-								case eCircular:
-								{
-									heeksCAD->Intersect( GetLine(), rhs.GetCircle(), intersection_points );
-									if (intersection_points.size() == 0) return(false);
-									for (std::list<gp_Pnt>::const_iterator l_itPoint = intersection_points.begin(); l_itPoint != intersection_points.end(); l_itPoint++)
-									{
-										if (heeksCAD->Intersect( *l_itPoint, GetLine())) return(true);
-									}
-									return(false);
-								}
-							} // End switch
-						}
-						break;
-
-						case eCircular:
-						{
-							switch (rhs.Interpolation())
-							{
-								case eLinear:
-								{
-									heeksCAD->Intersect( rhs.GetLine(), GetCircle(), intersection_points );
-									if (intersection_points.size() == 0) return(false);
-									for (std::list<gp_Pnt>::const_iterator l_itPoint = intersection_points.begin(); l_itPoint != intersection_points.end(); l_itPoint++)
-									{
-										if (heeksCAD->Intersect( *l_itPoint, rhs.GetLine())) return(true);
-									}
-									return(false);
-								}
-
-								case eCircular:
-								{
-									heeksCAD->Intersect( GetCircle(), rhs.GetCircle(), intersection_points );
-									return(intersection_points.size() > 0);
-								}
-							} // End switch
-						}
-						break;
-					} // End switch
-
-					return(false);	// Should never get here.
+					std::list<double> points;
+					return( HeeksObject()->Intersects( rhs.HeeksObject(), &points ) > 0);
 				} // End Intersects() method
 
 
@@ -326,10 +335,12 @@ class RS274X
 				gp_Pnt	m_end;
 				double	m_i_term;
 				double	m_j_term;
+				mutable double	m_radius;
 				eInterpolation_t m_interpolation;
 				bool	m_clockwise;
 
 				double	m_tolerance;
+				mutable HeeksObj *m_pHeeksObject;
 		}; // End Trace class definition.
 
 
