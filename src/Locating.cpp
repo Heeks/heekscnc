@@ -48,8 +48,17 @@ void CLocatingParams::write_values_to_config()
 }
 
 
-static void on_set_standoff(double value, HeeksObj* object){((CLocating*)object)->m_params.m_standoff = value;}
-static void on_set_sort_locations(int value, HeeksObj* object){((CLocating*)object)->m_params.m_sort_locations = value;}
+static void on_set_standoff(double value, HeeksObj* object)
+{
+	((CLocating*)object)->m_params.m_standoff = value;
+	((CLocating*)object)->m_params.write_values_to_config();
+}
+
+static void on_set_sort_locations(int value, HeeksObj* object)
+{
+	((CLocating*)object)->m_params.m_sort_locations = value;
+	((CLocating*)object)->m_params.write_values_to_config();
+}
 
 
 void CLocatingParams::GetProperties(CLocating* parent, std::list<Property *> *list)
