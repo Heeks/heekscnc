@@ -91,6 +91,181 @@ void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("sort_locations")) m_sort_locations = atoi(pElem->Attribute("sort_locations"));
 }
 
+
+/**
+	Before we call this routine, we're sure that the tool's diameter is <= counterbore's diameter.  To
+	this end, we need to spiral down to each successive cutting depth and then spiral out to the
+	outside diameter.  Repeat these operations until we've cut the full depth and the full width.
+ */
+void CCounterBore::GenerateGCodeForOneLocation( const gp_Pnt & location, const CCuttingTool *pCuttingTool ) const
+{
+
+#ifdef UNICODE
+	std::wostringstream ss;
+#else
+    std::ostringstream ss;
+#endif
+    ss.imbue(std::locale("C"));
+
+	double width_offset = 0.0;
+	double cutting_depth = (location.Z() + m_depth_op_params.m_start_depth) / theApp.m_program->m_units;
+	double final_depth   = (location.Z() + m_depth_op_params.m_final_depth) / theApp.m_program->m_units;
+	gp_Pnt point( location.X() / theApp.m_program->m_units, location.Y() / theApp.m_program->m_units, location.Z() / theApp.m_program->m_units );
+	gp_Pnt centre( point );
+
+	// Rapid to above the starting point (up at clearance height)
+	point.SetZ( point.Z() + (m_depth_op_params.m_clearance_height / theApp.m_program->m_units) );
+	ss << "rapid( x=" << point.X() << ", y=" << point.Y() << ", z=" << point.Z() << ")\n";
+
+	// Feed (slowly) to the starting point at the centre of the material
+	point.SetZ( (location.Z() + m_depth_op_params.m_start_depth) / theApp.m_program->m_units);
+	ss << "feed( x=" << point.X() << ", y=" << point.Y() << ", z=" << point.Z() << ")\n";
+
+	double tolerance = 0.0001;
+	double max_radius_of_spiral = ((m_params.m_diameter / 2.0) / theApp.m_program->m_units) - pCuttingTool->CuttingRadius(true);
+
+	while ((cutting_depth - final_depth) > tolerance)
+	{
+		double step_down = m_depth_op_params.m_step_down / theApp.m_program->m_units;
+		if ((cutting_depth - step_down) < final_depth)
+		{
+			step_down = cutting_depth - final_depth;	// last pass
+		}
+
+		// We want to spiral down to the next cutting depth over a half circle distance.
+		// The width of the spiral will depend on the diameter of the tool and the diameter of
+		// the hole.  We don't want it to be more than the tool's radius but we also don't
+		// want it to be wider than the hole.
+
+		double radius_of_spiral = pCuttingTool->CuttingRadius(true) * 0.75;
+		if (radius_of_spiral > max_radius_of_spiral)
+		{
+			// Reduce the radius of the spiral so that we don't run outside the hole.
+
+			radius_of_spiral = max_radius_of_spiral;
+		} // End if - then
+
+		// Now spiral down using the width_of_spiral to the cutting_depth.
+		// Move to 12 O'Clock.
+		ss << "feed( x=" << centre.X() << ", "
+					"y=" << centre.Y() + radius_of_spiral << ", "
+					"z=" << cutting_depth << ")\n";
+		point.SetX( centre.X() );
+		point.SetY( centre.Y() + radius_of_spiral );
+
+		// First quadrant (12 O'Clock to 9 O'Clock)
+		ss << "arc_ccw( x=" << centre.X() - radius_of_spiral << ", " <<
+					"y=" << centre.Y() << ", " <<
+					"z=" << cutting_depth - (0.5 * step_down) << ", " <<
+					"i=" << centre.X() - point.X() << ", " <<
+					"j=" << centre.Y() - point.Y() << ")\n";
+		point.SetX( centre.X() - radius_of_spiral );
+		point.SetY( centre.Y() );
+					
+		// Second quadrant (9 O'Clock to 6 O'Clock)
+		ss << "arc_ccw( x=" << centre.X() << ", " <<
+					"y=" << centre.Y() - radius_of_spiral << ", " <<
+					"z=" << cutting_depth - (1.0 * step_down) << ", " <<	// full depth now
+					"i=" << centre.X() - point.X() << ", " <<
+					"j=" << centre.Y() - point.Y() << ")\n";
+		point.SetX( centre.X() );
+		point.SetY( centre.Y() - radius_of_spiral );
+
+		// Third quadrant (6 O'Clock to 3 O'Clock)
+		ss << "arc_ccw( x=" << centre.X() + radius_of_spiral << ", " <<
+					"y=" << centre.Y() << ", " <<
+					"z=" << cutting_depth - (1.0 * step_down) << ", " <<	// full depth now
+					"i=" << centre.X() - point.X() << ", " <<
+					"j=" << centre.Y() - point.Y() << ")\n";
+		point.SetX( centre.X() + radius_of_spiral );
+		point.SetY( centre.Y() );
+					
+		// Fourth quadrant (3 O'Clock to 12 O'Clock)
+		ss << "arc_ccw( x=" << centre.X() << ", " <<
+					"y=" << centre.Y() + radius_of_spiral << ", " <<
+					"z=" << cutting_depth - (1.0 * step_down) << ", " <<	// full depth now
+					"i=" << centre.X() - point.X() << ", " <<
+					"j=" << centre.Y() - point.Y() << ")\n";
+		point.SetX( centre.X() );
+		point.SetY( centre.Y() + radius_of_spiral );
+	
+		ss << "('Now spiral outwards to the counterbore perimeter')\n";
+
+		do {
+			radius_of_spiral += (pCuttingTool->CuttingRadius(true) * 0.75);
+			if (radius_of_spiral > max_radius_of_spiral)
+			{
+				// Reduce the radius of the spiral so that we don't run outside the hole.
+				radius_of_spiral = max_radius_of_spiral;
+			} // End if - then
+
+			// Move to 12 O'Clock.
+			ss << "feed( x=" << centre.X() << ", "
+						"y=" << centre.Y() + radius_of_spiral << ", "
+						"z=" << cutting_depth - (1.0 * step_down) << ")\n";
+			point.SetX( centre.X() );
+			point.SetY( centre.Y() + radius_of_spiral );
+
+			// First quadrant (12 O'Clock to 9 O'Clock)
+			ss << "arc_ccw( x=" << centre.X() - radius_of_spiral << ", " <<
+						"y=" << centre.Y() << ", " <<
+						"z=" << cutting_depth - (1.0 * step_down) << ", " <<	// full depth
+						"i=" << centre.X() - point.X() << ", " <<
+						"j=" << centre.Y() - point.Y() << ")\n";
+			point.SetX( centre.X() - radius_of_spiral );
+			point.SetY( centre.Y() );
+					
+			// Second quadrant (9 O'Clock to 6 O'Clock)
+			ss << "arc_ccw( x=" << centre.X() << ", " <<
+						"y=" << centre.Y() - radius_of_spiral << ", " <<
+						"z=" << cutting_depth - (1.0 * step_down) << ", " <<	// full depth now
+						"i=" << centre.X() - point.X() << ", " <<
+						"j=" << centre.Y() - point.Y() << ")\n";
+			point.SetX( centre.X() );
+			point.SetY( centre.Y() - radius_of_spiral );
+
+			// Third quadrant (6 O'Clock to 3 O'Clock)
+			ss << "arc_ccw( x=" << centre.X() + radius_of_spiral << ", " <<
+						"y=" << centre.Y() << ", " <<
+						"z=" << cutting_depth - (1.0 * step_down) << ", " <<	// full depth now
+						"i=" << centre.X() - point.X() << ", " <<
+						"j=" << centre.Y() - point.Y() << ")\n";
+			point.SetX( centre.X() + radius_of_spiral );
+			point.SetY( centre.Y() );
+					
+			// Fourth quadrant (3 O'Clock to 12 O'Clock)
+			ss << "arc_ccw( x=" << centre.X() << ", " <<
+						"y=" << centre.Y() + radius_of_spiral << ", " <<
+						"z=" << cutting_depth - (1.0 * step_down) << ", " <<	// full depth now
+						"i=" << centre.X() - point.X() << ", " <<
+						"j=" << centre.Y() - point.Y() << ")\n";
+			point.SetX( centre.X() );
+			point.SetY( centre.Y() + radius_of_spiral );
+		} while ((max_radius_of_spiral - radius_of_spiral) > tolerance);
+
+		if (((cutting_depth - final_depth) < step_down) && ((cutting_depth - final_depth) > tolerance))
+		{
+			// Last pass at this depth.
+			cutting_depth = final_depth;
+		} // End if - then
+		else
+		{
+			cutting_depth -= step_down;
+		} // End if - else
+	} // End while
+
+	// Rapid to above the starting point (up at clearance height)
+	ss << "rapid( x=" << centre.X() << ", y=" << centre.Y() << ", z=" << final_depth << ")\n";
+
+	point.SetZ( point.Z() + (m_depth_op_params.m_clearance_height / theApp.m_program->m_units) );
+	ss << "rapid( x=" << centre.X() << ", y=" << centre.Y() << ", z=" << point.Z() << ")\n";
+
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+
+} // End GenerateGCodeForOneLocation() method
+
+
+
 /**
 	This method is called when the CAD operator presses the Python button.  This method generates
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
@@ -129,16 +304,27 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 				gp_Pnt point( l_itLocation->x, l_itLocation->y, l_itLocation->z );
 				point = pFixture->Adjustment(point);
                 
+				GenerateGCodeForOneLocation( point, pCuttingTool );
+
+				/*
 				ss << "flush_nc()\ncircular_pocket( "
-							<< "x=" << point.X()/ theApp.m_program->m_units << ", "
-							<< "y=" << point.Y()/ theApp.m_program->m_units << ", "
-       		                         		<< "ToolDiameter=" << (pCuttingTool->CuttingRadius(true) * 2.0) << ", "
-       		                         		<< "HoleDiameter=" << m_params.m_diameter / theApp.m_program->m_units << ", "
-       		                         		<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
-       		                         		<< "StartHeight=" << (l_itLocation->z + m_depth_op_params.m_start_depth) / theApp.m_program->m_units << ", "
-       		                         		<< "MaterialTop=" << point.Z() / theApp.m_program->m_units << ", "
-       		                         		<< "FeedRate=" << m_speed_op_params.m_vertical_feed_rate << ", "
-       		                         		<< "HoleDepth=" << m_depth_op_params.m_final_depth / theApp.m_program->m_units << ")\n";
+					<< "x=" << point.X()/ theApp.m_program->m_units << ", "
+					<< "y=" << point.Y()/ theApp.m_program->m_units << ", "
+					<< "ToolDiameter=" << (pCuttingTool->CuttingRadius(true) * 2.0) << ", "
+					<< "HoleDiameter=" << m_params.m_diameter / theApp.m_program->m_units << ", "
+					<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
+					<< "StartHeight=" << (l_itLocation->z + m_depth_op_params.m_start_depth) / theApp.m_program->m_units << ", "
+					<< "MaterialTop=" << point.Z() / theApp.m_program->m_units << ", "
+					<< "FeedRate=" << m_speed_op_params.m_vertical_feed_rate << ", ";
+
+				if (m_speed_op_params.m_spindle_speed > 0.0)
+				{
+					ss << "SpindleRPM=" << m_speed_op_params.m_spindle_speed << ",";
+				} // End if - then
+
+				ss << "HoleDepth=" << (m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth) / theApp.m_program->m_units << ","
+       		                   << "DepthOfCut=" << (m_depth_op_params.m_step_down / theApp.m_program->m_units ) << ")\n";
+				*/
 			} // End for
 
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());

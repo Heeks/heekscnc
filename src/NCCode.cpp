@@ -127,10 +127,10 @@ void PathArc::WriteXML(TiXmlNode *root)
 void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	// get the attributes
-	pElem->Attribute("i", &m_c[0]);
-	pElem->Attribute("j", &m_c[1]);
-	pElem->Attribute("k", &m_c[2]);
-	pElem->Attribute("d", &m_dir);
+	if (pElem->Attribute("i")) pElem->Attribute("i", &m_c[0]);
+	if (pElem->Attribute("j")) pElem->Attribute("j", &m_c[1]);
+	if (pElem->Attribute("k")) pElem->Attribute("k", &m_c[2]);
+	if (pElem->Attribute("d")) pElem->Attribute("d", &m_dir);
 
 	m_c[0] *= CNCCodeBlock::multiplier;
 	m_c[1] *= CNCCodeBlock::multiplier;
@@ -143,7 +143,7 @@ void PathArc::glVertices(const PathObject* prev_po)
 {
 	if (prev_po == NULL) return;
 
-	std::list<gp_Pnt> vertices = Interpolate( prev_po, 10 );
+	std::list<gp_Pnt> vertices = Interpolate( prev_po, 20 );
 	glVertex3dv(prev_po->m_x);
 	for (std::list<gp_Pnt>::const_iterator l_itVertex = vertices.begin(); l_itVertex != vertices.end(); l_itVertex++)
 	{
@@ -173,7 +173,19 @@ std::list<gp_Pnt> PathArc::Interpolate( const PathObject *prev_po, const unsigne
 		if(start_angle < end_angle)start_angle += 6.283185307179;
 	}
 
-	double angle_step = (end_angle - start_angle) / number_of_points;
+	double angle_step = 0;
+
+	if (start_angle == end_angle)
+	{
+		// It's a full circle.
+		angle_step = (2 * PI) / number_of_points;
+	} // End if - then
+	else
+	{
+		// It's an arc.
+		angle_step = (end_angle - start_angle) / number_of_points;
+	} // End if - else
+
 	points.push_back( gp_Pnt( prev_po->m_x[0], prev_po->m_x[1], prev_po->m_x[2] ) );
 
 	for(unsigned int i = 0; i< number_of_points; i++)
