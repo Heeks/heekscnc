@@ -107,7 +107,6 @@ void CCounterBore::GenerateGCodeForOneLocation( const gp_Pnt & location, const C
 #endif
     ss.imbue(std::locale("C"));
 
-	double width_offset = 0.0;
 	double cutting_depth = (location.Z() + m_depth_op_params.m_start_depth) / theApp.m_program->m_units;
 	double final_depth   = (location.Z() + m_depth_op_params.m_final_depth) / theApp.m_program->m_units;
 	gp_Pnt point( location.X() / theApp.m_program->m_units, location.Y() / theApp.m_program->m_units, location.Z() / theApp.m_program->m_units );
@@ -121,11 +120,13 @@ void CCounterBore::GenerateGCodeForOneLocation( const gp_Pnt & location, const C
 	point.SetZ( (location.Z() + m_depth_op_params.m_start_depth) / theApp.m_program->m_units);
 	ss << "feed( x=" << point.X() << ", y=" << point.Y() << ", z=" << point.Z() << ")\n";
 
-	double tolerance = 0.0001;
+	double tolerance = heeksCAD->GetTolerance();
 	double max_radius_of_spiral = ((m_params.m_diameter / 2.0) / theApp.m_program->m_units) - pCuttingTool->CuttingRadius(true);
 
 	while ((cutting_depth - final_depth) > tolerance)
 	{
+		ss << "comment('Spiral down half a circle until we get to the cutting depth')\n";
+
 		double step_down = m_depth_op_params.m_step_down / theApp.m_program->m_units;
 		if ((cutting_depth - step_down) < final_depth)
 		{
@@ -189,7 +190,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const gp_Pnt & location, const C
 		point.SetX( centre.X() );
 		point.SetY( centre.Y() + radius_of_spiral );
 	
-		ss << "('Now spiral outwards to the counterbore perimeter')\n";
+		ss << "comment('Now spiral outwards to the counterbore perimeter')\n";
 
 		do {
 			radius_of_spiral += (pCuttingTool->CuttingRadius(true) * 0.75);
@@ -254,9 +255,11 @@ void CCounterBore::GenerateGCodeForOneLocation( const gp_Pnt & location, const C
 		} // End if - else
 	} // End while
 
-	// Rapid to above the starting point (up at clearance height)
+	// Rapid back to the centre of the hole (at the bottom) so we don't hit the
+	// sides on the way up.
 	ss << "rapid( x=" << centre.X() << ", y=" << centre.Y() << ", z=" << final_depth << ")\n";
 
+	// Rapid to above the starting point (up at clearance height)
 	point.SetZ( point.Z() + (m_depth_op_params.m_clearance_height / theApp.m_program->m_units) );
 	ss << "rapid( x=" << centre.X() << ", y=" << centre.Y() << ", z=" << point.Z() << ")\n";
 
