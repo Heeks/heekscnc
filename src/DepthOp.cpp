@@ -114,11 +114,35 @@ void CDepthOpParams::write_values_to_config()
 	config.Write(_T("DepthOpRapidDown"), m_rapid_down_to_height);
 }
 
-static void on_set_clearance_height(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_clearance_height = value;}
-static void on_set_step_down(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_step_down = value;}
-static void on_set_start_depth(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_start_depth = value;}
-static void on_set_final_depth(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_final_depth = value;}
-static void on_set_rapid_down_to_height(double value, HeeksObj* object){((CDepthOp*)object)->m_depth_op_params.m_rapid_down_to_height = value;}
+static void on_set_clearance_height(double value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_clearance_height = value;
+	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+}
+
+static void on_set_step_down(double value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_step_down = value;
+	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+}
+
+static void on_set_start_depth(double value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_start_depth = value;
+	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+}
+
+static void on_set_final_depth(double value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_final_depth = value;
+	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+}
+
+static void on_set_rapid_down_to_height(double value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_rapid_down_to_height = value;
+	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+}
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {

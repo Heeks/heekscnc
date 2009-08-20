@@ -135,9 +135,23 @@ void CSpeedOpParams::write_values_to_config()
 	config.Write(_T("SpeedOpSpindleSpeed"), m_spindle_speed);
 }
 
-static void on_set_horizontal_feed_rate(double value, HeeksObj* object){((CSpeedOp*)object)->m_speed_op_params.m_horizontal_feed_rate = value;}
-static void on_set_vertical_feed_rate(double value, HeeksObj* object){((CSpeedOp*)object)->m_speed_op_params.m_vertical_feed_rate = value;}
-static void on_set_spindle_speed(double value, HeeksObj* object){((CSpeedOp*)object)->m_speed_op_params.m_spindle_speed = value;}
+static void on_set_horizontal_feed_rate(double value, HeeksObj* object)
+{
+	((CSpeedOp*)object)->m_speed_op_params.m_horizontal_feed_rate = value;
+	((CSpeedOp*)object)->m_speed_op_params.write_values_to_config();
+}
+
+static void on_set_vertical_feed_rate(double value, HeeksObj* object)
+{
+	((CSpeedOp*)object)->m_speed_op_params.m_vertical_feed_rate = value;
+	((CSpeedOp*)object)->m_speed_op_params.write_values_to_config();
+}
+
+static void on_set_spindle_speed(double value, HeeksObj* object)
+{
+	((CSpeedOp*)object)->m_speed_op_params.m_spindle_speed = value;
+	((CSpeedOp*)object)->m_speed_op_params.write_values_to_config();
+}
 
 void CSpeedOpParams::GetProperties(CSpeedOp* parent, std::list<Property *> *list)
 {

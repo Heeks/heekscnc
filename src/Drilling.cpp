@@ -60,11 +60,35 @@ void CDrillingParams::write_values_to_config()
 }
 
 
-static void on_set_standoff(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_standoff = value;}
-static void on_set_dwell(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_dwell = value;}
-static void on_set_depth(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_depth = value;}
-static void on_set_peck_depth(double value, HeeksObj* object){((CDrilling*)object)->m_params.m_peck_depth = value;}
-static void on_set_sort_drilling_locations(int value, HeeksObj* object){((CDrilling*)object)->m_params.m_sort_drilling_locations = value;}
+static void on_set_standoff(double value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_standoff = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
+
+static void on_set_dwell(double value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_dwell = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
+
+static void on_set_depth(double value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_depth = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
+
+static void on_set_peck_depth(double value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_peck_depth = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
+
+static void on_set_sort_drilling_locations(int value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_sort_drilling_locations = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
 
 
 void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *list)
