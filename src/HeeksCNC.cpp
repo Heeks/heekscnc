@@ -36,6 +36,9 @@
 #include "Fixture.h"
 #include "SpeedReference.h"
 #include "CuttingRate.h"
+#include "Operations.h"
+#include "Fixtures.h"
+#include "Tools.h"
 #include "interface/strconv.h"
 
 #include <sstream>

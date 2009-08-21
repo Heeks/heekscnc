@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include <math.h>
 #include "Fixture.h"
+#include "Fixtures.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "interface/HeeksObj.h"
