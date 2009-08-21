@@ -72,6 +72,8 @@
 #include <Geom_Surface.hxx>
 #include <Geom_Plane.hxx>
 
+#include "Tools.h"
+
 extern CHeeksCADInterface* heeksCAD;
 
 

@@ -485,6 +485,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Fixtures.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Fixtures.h"
+			>
+		</File>
+		<File
 			RelativePath="..\kurve\geometry\geometry.h"
 			>
 		</File>
@@ -682,6 +690,14 @@
 		</File>
 		<File
 			RelativePath=".\Op.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Operations.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Operations.h"
 			>
 		</File>
 		<File
@@ -1138,6 +1154,14 @@
 		</File>
 		<File
 			RelativePath="$(HEEKSCADPATH)\interface\ToolImage.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Tools.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Tools.h"
 			>
 		</File>
 		<File
