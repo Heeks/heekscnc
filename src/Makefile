@@ -473,6 +473,8 @@ install:
 	cp ../PyCamToHeeks.py $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../circular_pocket.py $(DESTDIR)$(LIBDIR)/heekscnc/
 	cp ../turning.py $(DESTDIR)$(LIBDIR)/heekscnc/
+	cp ../default.tooltable $(DESTDIR)$(LIBDIR)/heekscnc/
+	cp ../default.speeds $(DESTDIR)$(LIBDIR)/heekscnc/
 
 uninstall:
 	-rm -f $(DESTDIR)$(LIBDIR)/heekscnc/$(SHARED_LIBRARY)
