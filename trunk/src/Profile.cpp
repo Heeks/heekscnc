@@ -30,7 +30,8 @@
 
 CProfileParams::CProfileParams()
 {
-	m_tool_on_side = 0;
+	m_tool_on_side = eOn;
+	m_cut_mode = eConventional;
 	m_auto_roll_on = true;
 	m_auto_roll_off = true;
 	m_roll_on_point[0] = m_roll_on_point[1] = m_roll_on_point[2] = 0.0;
@@ -45,29 +46,36 @@ CProfileParams::CProfileParams()
 void CProfileParams::set_initial_values()
 {
 	CNCConfig config;
-	config.Read(_T("ProfileToolOnSide"), &m_tool_on_side, 1);
+	int int_side = m_tool_on_side;
+	config.Read(_T("ProfileToolOnSide"), &int_side, eLeftOrOutside);
+	m_tool_on_side = (eSide)int_side;
+	int int_mode = m_cut_mode;
+	config.Read(_T("ProfileCutMode"), &int_mode, eConventional);
+	m_cut_mode = (eCutMode)int_mode;
 }
 
 void CProfileParams::write_values_to_config()
 {
 	CNCConfig config;
 	config.Write(_T("ProfileToolOnSide"), m_tool_on_side);
+	config.Write(_T("ProfileCutMode"), m_cut_mode);
 }
 
 static void on_set_tool_on_side(int value, HeeksObj* object){
 	switch(value)
 	{
 	case 0:
-		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eLeft;
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eLeftOrOutside;
 		break;
 	case 1:
-		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eRight;
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eRightOrInside;
 		break;
 	default:
 		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eOn;
 		break;
 	}
 }
+static void on_set_cut_mode(int value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_cut_mode = (CProfileParams::eCutMode)value;}
 static void on_set_auto_roll_on(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_auto_roll_on = value; heeksCAD->RefreshProperties();}
 static void on_set_roll_on_point(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_roll_on_point, vt, 3*sizeof(double));}
 static void on_set_auto_roll_off(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_auto_roll_off = value; heeksCAD->RefreshProperties();}
@@ -82,24 +90,59 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 {
 	{
 		std::list< wxString > choices;
-		choices.push_back(_("Left"));
-		choices.push_back(_("Right"));
+
+		SketchOrderType order = SketchOrderTypeUnknown;
+
+		if(parent->m_sketches.size() == 1)
+		{
+			HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, parent->m_sketches.front());
+			if(sketch)
+			{
+				order = heeksCAD->GetSketchOrder(sketch);
+			}
+		}
+
+		switch(order)
+		{
+		case SketchOrderTypeOpen:
+			choices.push_back(_("Left"));
+			choices.push_back(_("Right"));
+			break;
+
+		case SketchOrderTypeCloseCW:
+		case SketchOrderTypeCloseCCW:
+			choices.push_back(_("Outside"));
+			choices.push_back(_("Inside"));
+			break;
+
+		default:
+			choices.push_back(_("Outside or Left"));
+			choices.push_back(_("Inside or Right"));
+			break;
+		}
 		choices.push_back(_("On"));
 
 		int choice = int(eOn);
 		switch (m_tool_on_side)
 		{
-			case eRight:	choice = 1;
+			case eRightOrInside:	choice = 1;
 					break;
 
 			case eOn:	choice = 2;
 					break;
 
-			case eLeft:	choice = 0;
+			case eLeftOrOutside:	choice = 0;
 					break;
 		} // End switch
 
 		list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
+	}
+
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("Conventional"));
+		choices.push_back(_("Climb"));
+		list->push_back(new PropertyChoice(_("cut mode"), choices, m_cut_mode, parent, on_set_cut_mode));
 	}
 
 	if(parent->m_sketches.size() == 1) // multiple sketches must use auto roll on, and can not have start and end points specified
@@ -133,7 +176,8 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
-	element->SetDoubleAttribute("side", m_tool_on_side);
+	element->SetAttribute("side", m_tool_on_side);
+	element->SetAttribute("cut_mode", m_cut_mode);
 	element->SetAttribute("auto_roll_on", m_auto_roll_on ? 1:0);
 	if(!m_auto_roll_on)
 	{
@@ -171,8 +215,16 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	int int_for_bool;
+	int int_for_enum;;
 
-	pElem->Attribute("side", &m_tool_on_side);
+	int_for_enum = m_tool_on_side;
+	pElem->Attribute("side", &int_for_enum);
+	m_tool_on_side = (eSide)int_for_enum;
+
+	int_for_enum = m_cut_mode;
+	pElem->Attribute("cut_mode", &int_for_enum);
+	m_cut_mode = (eCutMode)int_for_enum;
+
 	pElem->Attribute("auto_roll_on", &int_for_bool); m_auto_roll_on = (int_for_bool != 0);
 	pElem->Attribute("roll_onx", &m_roll_on_point[0]);
 	pElem->Attribute("roll_ony", &m_roll_on_point[1]);
@@ -215,12 +267,12 @@ void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 				if(!(first_child->GetStartPoint(s)))return;
 				x = s[0];
 				y = s[1];
-				if(m_profile_params.m_tool_on_side == 0)return;
+				if(m_profile_params.m_tool_on_side == CProfileParams::eOn)return;
 				double v[3];
 				if(heeksCAD->GetSegmentVector(first_child, 0.0, v))
 				{
 					double off_vec[3] = {-v[1], v[0], 0.0};
-					if(m_profile_params.m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
+					if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
 
 					CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 					if (pCuttingTool != NULL)
@@ -254,7 +306,7 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 					if(!(last_child->GetEndPoint(e)))return;
 					x = e[0];
 					y = e[1];
-					if(m_profile_params.m_tool_on_side == 0)return;
+					if(m_profile_params.m_tool_on_side == CProfileParams::eOn)return;
 					double v[3];
 					if(heeksCAD->GetSegmentVector(last_child, 0.0, v))
 					{
@@ -262,7 +314,7 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 						if (pCuttingTool != NULL)
 						{
 							double off_vec[3] = {-v[1], v[0], 0.0};
-							if(m_profile_params.m_tool_on_side == -1){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
+							if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
 							x = e[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) + v[0] * AUTO_ROLL_ON_OFF_SIZE;
 							y = e[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) + v[1] * AUTO_ROLL_ON_OFF_SIZE;
 						} // End if - then
@@ -358,15 +410,16 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
 
 } // End roll_on_point() method
 
-
-
-wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture )
+wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed )
 {
+	// write the python code for the sketch
 #ifdef UNICODE
 	std::wostringstream l_ossPythonCode;
 #else
 	std::ostringstream l_ossPythonCode;
 #endif
+	l_ossPythonCode<<std::setprecision(10);
+
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
 		l_ossPythonCode << (wxString::Format(_T("comment('%s')\n"), wxString(sketch->GetShortString()).c_str())).c_str(); }
@@ -376,8 +429,17 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 	bool started = false;
 	int sketch_id = (id_to_use > 0 ? id_to_use : sketch->m_id);
 
+	std::list<HeeksObj*> spans;
+
 	for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
 	{
+		if(reversed)spans.push_front(span_object);
+		else spans.push_back(span_object);
+	}
+
+	for(std::list<HeeksObj*>::iterator It = spans.begin(); It != spans.end(); It++)
+	{
+		HeeksObj* span_object = *It;
 		double s[3] = {0, 0, 0};
 		double e[3] = {0, 0, 0};
 		double c[3] = {0, 0, 0};
@@ -389,7 +451,8 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 			{
 				if(!started && type != CircleType)
 				{
-					span_object->GetStartPoint(s);
+					if(reversed)span_object->GetEndPoint(s);
+					else span_object->GetStartPoint(s);
 					pFixture->Adjustment(s);
 
 					l_ossPythonCode << _T("kurve.add_point(k");
@@ -407,7 +470,8 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 									s[1]/theApp.m_program->m_units,
 									0.0, 0.0);
 				}
-				span_object->GetEndPoint(e);
+				if(reversed)span_object->GetStartPoint(e);
+				else span_object->GetEndPoint(e);
 				pFixture->Adjustment( e );
 
 				if(type == LineType)
@@ -433,7 +497,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
-					int span_type = (pos[2] >=0) ? ACW: CW;
+					int span_type = (pos[2] >=0 != reversed) ? ACW: CW;
 					l_ossPythonCode << (_T("kurve.add_point(k"));
 					l_ossPythonCode << (sketch_id);
 					l_ossPythonCode << (_T(", "));
@@ -460,18 +524,24 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					std::list< std::pair<int, gp_Pnt > > points;
 					span_object->GetCentrePoint(c);
 
-					// The kurve code can't handle an arc as the first element in
-					// a sketch.  Add a tiny straight line first.
-
-					double small_amount = 0.001;
 					double radius = heeksCAD->CircleGetRadius(span_object);
 
-					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
+					// The kurve code needs a start point first.
+					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					if(reversed)
+					{
+						points.push_back( std::make_pair(ACW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
+						points.push_back( std::make_pair(ACW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
+						points.push_back( std::make_pair(ACW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
+						points.push_back( std::make_pair(ACW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					}
+					else
+					{
+						points.push_back( std::make_pair(CW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
+						points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
+						points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
+						points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					}
 
 					pFixture->Adjustment(c);
 
@@ -577,23 +647,40 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 	if(object)
 	{
+		// decide if we need to reverse the kurve
+		bool reversed = false;
+		bool initially_ccw = false;
+		if(m_profile_params.m_tool_on_side != CProfileParams::eOn)
+		{
+			SketchOrderType order = SketchOrderTypeUnknown;
+			HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
+			if(object)order = heeksCAD->GetSketchOrder(object);
+			if(order == SketchOrderTypeCloseCCW)initially_ccw = true;
+			if(m_speed_op_params.m_spindle_speed<0)reversed = !reversed;
+			if(m_profile_params.m_cut_mode == CProfileParams::eConventional)reversed = !reversed;
+			if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside)reversed = !reversed;
+		}
+
+		// write the kurve definition
 		geoff_geometry::Kurve *pKurve = geoff_geometry::kurve_new();
-		l_ossPythonCode << WriteSketchDefn(object, sketch, pKurve, pFixture).c_str();
+		l_ossPythonCode << WriteSketchDefn(object, sketch, pKurve, pFixture, initially_ccw != reversed).c_str();
 
 		double total_to_cut = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
 		int num_step_downs = (int)(total_to_cut / fabs(m_depth_op_params.m_step_down) + 1.0 - heeksCAD->GetTolerance());
 
 		// start - assume we are at a suitable clearance height
 
-		// get offset side
+		// get offset side string
 		wxString side_string;
 		switch(m_profile_params.m_tool_on_side)
 		{
-		case 1:
-			side_string = _T("left");
+		case CProfileParams::eLeftOrOutside:
+			if(reversed)side_string = _T("right");
+			else side_string = _T("left");
 			break;
-		case -1:
-			side_string = _T("right");
+		case CProfileParams::eRightOrInside:
+			if(reversed)side_string = _T("left");
+			else side_string = _T("right");
 			break;
 		default:
 			side_string = _T("on");
@@ -604,36 +691,42 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 		// get roll on string
 		wxString roll_on_string;
-		if(m_profile_params.m_tool_on_side)
+		switch(m_profile_params.m_tool_on_side)
 		{
-			if(m_profile_params.m_auto_roll_on || (m_sketches.size() > 1))
+		case CProfileParams::eLeftOrOutside:
+		case CProfileParams::eRightOrInside:
 			{
-				l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
-
-				if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
+				if(m_profile_params.m_auto_roll_on || (m_sketches.size() > 1))
 				{
-					roll_on_point( pKurve, side_string.c_str(), pCuttingTool->CuttingRadius(), pRollOnPointX, pRollOnPointY);
-				} // End if - then
+					l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
 
-				roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
-			}
-			else
-			{
+					if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
+					{
+						roll_on_point( pKurve, side_string.c_str(), pCuttingTool->CuttingRadius(), pRollOnPointX, pRollOnPointY);
+					} // End if - then
+
+					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
+				}
+				else
+				{
 #ifdef UNICODE
-				std::wostringstream ss;
+					std::wostringstream ss;
 #else
-				std::ostringstream ss;
+					std::ostringstream ss;
 #endif
-				ss.imbue(std::locale("C"));
-				ss<<std::setprecision(10);
-				ss << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units;
-				roll_on_string = ss.str().c_str();
+					ss.imbue(std::locale("C"));
+					ss<<std::setprecision(10);
+					ss << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units;
+					roll_on_string = ss.str().c_str();
+				}
 			}
-		}
-		else
-		{
-			l_ossPythonCode << wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch).c_str();
-			roll_on_string = _T("span1sx, span1sy");
+			break;
+		default:
+			{
+				l_ossPythonCode << wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch).c_str();
+				roll_on_string = _T("span1sx, span1sy");
+			}
+			break;
 		}
 
 		// rapid across to it
@@ -643,8 +736,11 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 		l_ossPythonCode << wxString(_T("rapid(z = rapid_down_to_height)\n")).c_str();
 
 		wxString roll_off_string;
-		if(m_profile_params.m_tool_on_side)
+		switch(m_profile_params.m_tool_on_side)
 		{
+		case CProfileParams::eLeftOrOutside:
+		case CProfileParams::eRightOrInside:
+			{
 			if(m_profile_params.m_auto_roll_off || (m_sketches.size() > 1))
 			{
 				l_ossPythonCode << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
@@ -662,10 +758,12 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 				roll_off_string = ss.str().c_str();
 			}
 		}
-		else
+			break;
+		default:
 		{
 			l_ossPythonCode << wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch).c_str();
 			roll_off_string = _T("ex, ey");
+		}
 		}
 
 		if(num_step_downs > 1)
