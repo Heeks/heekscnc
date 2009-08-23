@@ -19,6 +19,7 @@
 #include "CuttingTool.h"
 #include "Profile.h"
 #include "Fixture.h"
+#include "CNCPoint.h"
 
 #include <sstream>
 #include <iomanip>
@@ -151,10 +152,10 @@ void CDrilling::AppendTextToProgram( const CFixture *pFixture )
     ss.imbue(std::locale("C"));
 	ss<<std::setprecision(10);
 
-	std::vector<Point3d> locations = FindAllLocations( m_symbols );
-	for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+	std::vector<CNCPoint> locations = FindAllLocations( m_symbols );
+	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
-		gp_Pnt point = pFixture->Adjustment( gp_Pnt( l_itLocation->x, l_itLocation->y, l_itLocation->z ));
+		gp_Pnt point = pFixture->Adjustment( *l_itLocation );
 
 		ss << "drill("
 			<< "x=" << point.X()/theApp.m_program->m_units << ", "
@@ -176,12 +177,12 @@ void CDrilling::AppendTextToProgram( const CFixture *pFixture )
 	to generate data suitable for OpenGL calls to paint a circle.  This graphics is transient but will
 	help represent what the GCode will be doing when it's generated.
  */
-std::list< CDrilling::Point3d > CDrilling::PointsAround( 
-		const CDrilling::Point3d & origin, 
+std::list< CNCPoint > CDrilling::PointsAround( 
+		const CNCPoint & origin, 
 		const double radius, 
 		const unsigned int numPoints ) const
 {
-	std::list<CDrilling::Point3d> results;
+	std::list<CNCPoint> results;
 
 	double alpha = 3.1415926 * 2 / numPoints;
 
@@ -189,12 +190,8 @@ std::list< CDrilling::Point3d > CDrilling::PointsAround(
 	while( i++ < numPoints )
 	{
 		double theta = alpha * i;
-		CDrilling::Point3d pointOnCircle( cos( theta ) * radius, sin( theta ) * radius, 0 );
-
-		pointOnCircle.x += origin.x;
-		pointOnCircle.y += origin.y;
-		pointOnCircle.z += origin.z;
-
+		CNCPoint pointOnCircle( cos( theta ) * radius, sin( theta ) * radius, 0 );
+		pointOnCircle += origin;
 		results.push_back(pointOnCircle);
 	} // End while
 
@@ -212,9 +209,9 @@ std::list< CDrilling::Point3d > CDrilling::PointsAround(
 	TODO: Handle drilling in any rotational angle. At the moment it only handles drilling 'down' along the 'z' axis
  */
 
-std::list< CDrilling::Point3d > CDrilling::DrillBitVertices( const CDrilling::Point3d & origin, const double radius, const double length ) const
+std::list< CNCPoint > CDrilling::DrillBitVertices( const CNCPoint & origin, const double radius, const double length ) const
 {
-	std::list<CDrilling::Point3d> top, spiral, bottom, countersink, result;
+	std::list<CNCPoint> top, spiral, bottom, countersink, result;
     
 	double flutePitch = 5.0;	// 5mm of depth per spiral of the drill bit's flute.
 	double countersinkDepth = -1 * radius * tan(31.0); // this is the depth of the countersink cone at the end of the drill bit. (for a typical 118 degree bevel)
@@ -238,14 +235,11 @@ std::list< CDrilling::Point3d > CDrilling::DrillBitVertices( const CDrilling::Po
 	while( i++ < l_iNumItterations )
 	{
 		double theta = alpha * i;
-		CDrilling::Point3d pointOnCircle( cos( theta ) * radius, sin( theta ) * radius, 0 );
-
-		pointOnCircle.x += origin.x;
-		pointOnCircle.y += origin.y;
-		pointOnCircle.z += origin.z;
+		CNCPoint pointOnCircle( cos( theta ) * radius, sin( theta ) * radius, 0 );
+		pointOnCircle += origin;
 		
 		// And spiral down as we go.
-		pointOnCircle.z -= (depthPerItteration * i);
+		pointOnCircle.SetZ( pointOnCircle.Z() - (depthPerItteration * i) );
 
 		spiral.push_back(pointOnCircle);
 	} // End while
@@ -255,19 +249,17 @@ std::list< CDrilling::Point3d > CDrilling::DrillBitVertices( const CDrilling::Po
 	while( i++ < numPoints )
 	{
 		double theta = alpha * i;
-		CDrilling::Point3d topEdge( cos( theta ) * radius, sin( theta ) * radius, 0 );
+		CNCPoint topEdge( cos( theta ) * radius, sin( theta ) * radius, 0 );
 
 		// This is at the top edge of the countersink
-		topEdge.x += origin.x;
-		topEdge.y += origin.y;
-		topEdge.z = origin.z - (length - countersinkDepth);
+		topEdge.SetX( topEdge.X() + origin.X() );
+		topEdge.SetY( topEdge.Y() + origin.Y() );
+		topEdge.SetZ( origin.Z() - (length - countersinkDepth) );
 		spiral.push_back(topEdge);
 
 		// And now at the very point of the countersink
-		CDrilling::Point3d veryTip( origin );
-		veryTip.x = origin.x;
-		veryTip.y = origin.y;
-		veryTip.z = (origin.z - length);
+		CNCPoint veryTip( origin );
+		veryTip.SetZ( (origin.Z() - length) );
 
 		spiral.push_back(veryTip);
 		spiral.push_back(topEdge);
@@ -304,7 +296,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			} // End if - then
 		} // End if - then
 
-		std::vector<Point3d> locations = FindAllLocations( m_symbols );
+		std::vector<CNCPoint> locations = FindAllLocations( m_symbols );
 
 		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 		{
@@ -314,17 +306,17 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			if(object)object->glCommands(false, true, false);
 		} // End for
 
-		for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
 			GLdouble start[3], end[3];
 
-			start[0] = l_itLocation->x;
-			start[1] = l_itLocation->y;
-			start[2] = l_itLocation->z;
+			start[0] = l_itLocation->X();
+			start[1] = l_itLocation->Y();
+			start[2] = l_itLocation->Z();
 
-			end[0] = l_itLocation->x;
-			end[1] = l_itLocation->y;
-			end[2] = l_itLocation->z;
+			end[0] = l_itLocation->X();
+			end[1] = l_itLocation->Y();
+			end[2] = l_itLocation->Z();
 
 			end[2] -= m_params.m_depth;
 				
@@ -333,18 +325,18 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			glVertex3dv( end );
 			glEnd();
 
-			std::list< CDrilling::Point3d > pointsAroundCircle = DrillBitVertices( 	*l_itLocation, 
+			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	*l_itLocation, 
 												l_dHoleDiameter / 2, 
 												m_params.m_depth);
 
 			glBegin(GL_LINE_STRIP);
-			CDrilling::Point3d previous = *(pointsAroundCircle.begin());
-			for (std::list< CDrilling::Point3d >::const_iterator l_itPoint = pointsAroundCircle.begin();
+			CNCPoint previous = *(pointsAroundCircle.begin());
+			for (std::list< CNCPoint >::const_iterator l_itPoint = pointsAroundCircle.begin();
 				l_itPoint != pointsAroundCircle.end();
 				l_itPoint++)
 			{
 				
-				glVertex3d( l_itPoint->x, l_itPoint->y, l_itPoint->z );
+				glVertex3d( l_itPoint->X(), l_itPoint->Y(), l_itPoint->Z() );
 			}
 			glEnd();
 		} // End for
@@ -424,64 +416,15 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 
 
 /**
-	By defining a structure that inherits from std::binary_function and has an operator() method, we
-	can use this class to sort lists or vectors of Point3d objects.  We will do this, initially, to
-	sort points of NC operations so as to minimize rapid travels.
-
-	The example code to call this would be;
-	    std::vector<Point3d> points;		// Some container of Point3d objects
-		points.push_back(Point3d(3,4,5));	// Populate it with good data
-		points.push_back(Point3d(6,7,8));
-
-		for (std::vector<Point3d>::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
-		{
-			std::vector<Point3d>::iterator l_itNextPoint = l_itPoint;
-			l_itNextPoint++;
-
-			if (l_itNextPoint != points.end())
-			{
-				sort_points_by_distance compare( *l_itPoint );
-				std::sort( l_itNextPoint, points.end(), compare );
-			} // End if - then
-		} // End for
- */
-struct sort_points_by_distance : public std::binary_function< const CDrilling::Point3d &, const CDrilling::Point3d &, bool >
-{
-	sort_points_by_distance( const CDrilling::Point3d & reference_point )
-	{
-		m_reference_point = reference_point;
-	} // End constructor
-
-	CDrilling::Point3d m_reference_point;
-
-	double distance( const CDrilling::Point3d & a, const CDrilling::Point3d & b ) const
-	{
-		double dx = a.x - b.x;
-		double dy = a.y - b.y;
-		double dz = a.z - b.z;
-
-		return( sqrt( (dx * dx) + (dy * dy) + (dz * dz) ) );			
-	} // End distance() method
-
-	// Return true if dist(lhs to ref) < dist(rhs to ref)
-	bool operator()( const CDrilling::Point3d & lhs, const CDrilling::Point3d & rhs ) const
-	{
-		return( distance( lhs, m_reference_point ) < distance( rhs, m_reference_point ) );
-	} // End operator() overload
-}; // End sort_points_by_distance structure definition.
-
-
-
-/**
  * 	This method looks through the symbols in the list.  If they're PointType objects
  * 	then the object's location is added to the result set.  If it's a circle object
  * 	that doesn't intersect any other element (selected) then add its centre to
  * 	the result set.  Finally, find the intersections of all of these elements and
  * 	add the intersection points to the result vector.
  */
-std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Symbols_t & symbols ) const
+std::vector<CNCPoint> CDrilling::FindAllLocations( const CDrilling::Symbols_t & symbols ) const
 {
-	std::vector<CDrilling::Point3d> locations;
+	std::vector<CNCPoint> locations;
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
         // a drilling cycle.
@@ -501,9 +444,9 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 				lhsPtr->GetStartPoint(pos);
 
 				// Copy the results in ONLY if each point doesn't already exist.
-				if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+				if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 				{
-					locations.push_back( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+					locations.push_back( CNCPoint( pos ) );
 				} // End if - then
 			} // End if - then
 
@@ -524,15 +467,15 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 				l_bIntersectionsFound = true;
                                 while (((results.size() % 3) == 0) && (results.size() > 0))
                                 {
-                                        CDrilling::Point3d intersection;
+                                        CNCPoint intersection;
 
-                                        intersection.x = *(results.begin());
+                                        intersection.SetX( *(results.begin()) );
                                         results.erase(results.begin());
 
-                                        intersection.y = *(results.begin());
+                                        intersection.SetY( *(results.begin()) );
                                         results.erase(results.begin());
 
-                                        intersection.z = *(results.begin());
+                                        intersection.SetZ( *(results.begin()) );
                                         results.erase(results.begin());
 
 					// Copy the results in ONLY if each point doesn't already exist.
@@ -556,9 +499,9 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 				if ((lhsPtr != NULL) && (heeksCAD->GetArcCentre( lhsPtr, pos )))
 				{
 					// Copy the results in ONLY if each point doesn't already exist.
-					if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 					{
-						locations.push_back( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+						locations.push_back( CNCPoint( pos ) );
 					} // End if - then
 				} // End if - then
 			} // End if - then
@@ -574,9 +517,9 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 					double pos[3];
 					bounding_box.Centre(pos);
 					// Copy the results in ONLY if each point doesn't already exist.
-					if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 					{
-						locations.push_back( CDrilling::Point3d( pos[0], pos[1], pos[2] ) );
+						locations.push_back( CNCPoint( pos ) );
 					} // End if - then
 				} // End if - then
 			} // End if - then
@@ -586,13 +529,13 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
                         	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
 				if (lhsPtr != NULL)
 				{
-					std::vector<Point3d> starting_points;
+					std::vector<CNCPoint> starting_points;
 					CFixture perfectly_aligned_fixture(NULL,CFixture::G54);
 
 					((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &perfectly_aligned_fixture );
 
 					// Copy the results in ONLY if each point doesn't already exist.
-					for (std::vector<Point3d>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
+					for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
 					{
 						if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
 						{
@@ -607,11 +550,11 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
                         	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
 				if (lhsPtr != NULL)
 				{
-					std::vector<Point3d> starting_points;
+					std::vector<CNCPoint> starting_points;
 					starting_points = ((CDrilling *)lhsPtr)->FindAllLocations();
 
 					// Copy the results in ONLY if each point doesn't already exist.
-					for (std::vector<Point3d>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
+					for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
 					{
 						if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
 						{
@@ -635,7 +578,7 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 		// in the menu.  When this is done, the operator's decision as to order should be respected.  Until then, we can
 		// use the 'sort' option in the drilling cycle's parameters.
 
-		for (std::vector<Point3d>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
+		for (std::vector<CNCPoint>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
 		{
 			if (l_itPoint == locations.begin())
 			{
@@ -644,13 +587,13 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 				// previous NC operation.  i.e. where the last operation left off, we should start drilling close
 				// by.
 
-				sort_points_by_distance compare( Point3d( 0.0, 0.0, 0.0 ) );
+				sort_points_by_distance compare( CNCPoint( 0.0, 0.0, 0.0 ) );
 				std::sort( locations.begin(), locations.end(), compare );
 			} // End if - then
 			else
 			{
 				// We've already begun.  Just sort based on the previous point's location.	
-				std::vector<Point3d>::iterator l_itNextPoint = l_itPoint;
+				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
 				l_itNextPoint++;
 
 				if (l_itNextPoint != locations.end())
@@ -665,7 +608,7 @@ std::vector<CDrilling::Point3d> CDrilling::FindAllLocations( const CDrilling::Sy
 	return(locations);
 } // End FindAllLocations() method
 
-std::vector<CDrilling::Point3d> CDrilling::FindAllLocations() const
+std::vector<CNCPoint> CDrilling::FindAllLocations() const
 {
 	return( FindAllLocations( m_symbols ) );
 } // End FindAllLocations() method
@@ -684,7 +627,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 		CCuttingTool *pChamfer = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
 		if (pChamfer != NULL)
 		{
-			std::vector<CDrilling::Point3d> these_locations = FindAllLocations();
+			std::vector<CNCPoint> these_locations = FindAllLocations();
 
 			if (pChamfer->m_params.m_type == CCuttingToolParams::eChamfer)
 			{
@@ -714,8 +657,8 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 							// with our drilling locations.  If so, we must be
 							// chamfering a previously drilled hole.
 
-							std::vector<CDrilling::Point3d> previous_locations = ((CDrilling *)obj)->FindAllLocations();
-							std::vector<CDrilling::Point3d> common_locations;
+							std::vector<CNCPoint> previous_locations = ((CDrilling *)obj)->FindAllLocations();
+							std::vector<CNCPoint> common_locations;
 							std::set_intersection( previous_locations.begin(), previous_locations.end(),
 										these_locations.begin(), these_locations.end(),
 										std::inserter( common_locations, common_locations.begin() ));
