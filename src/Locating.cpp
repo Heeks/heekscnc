@@ -111,10 +111,10 @@ void CLocating::AppendTextToProgram( const CFixture *pFixture )
     ss.imbue(std::locale("C"));
 	ss<<std::setprecision(10);
 
-	std::vector<Point3d> locations = FindAllLocations( m_symbols );
-	for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+	std::vector<CNCPoint> locations = FindAllLocations( m_symbols );
+	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
-		gp_Pnt point = pFixture->Adjustment( gp_Pnt( l_itLocation->x, l_itLocation->y, l_itLocation->z ));
+		gp_Pnt point = pFixture->Adjustment( *l_itLocation );
 
 		ss << "rapid("
 			<< "x=" << point.X()/theApp.m_program->m_units << ", "
@@ -139,7 +139,7 @@ void CLocating::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked && !no_color)
 	{
-		std::vector<Point3d> locations = FindAllLocations( m_symbols );
+		std::vector<CNCPoint> locations = FindAllLocations( m_symbols );
 
 		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 		{
@@ -150,7 +150,7 @@ void CLocating::glCommands(bool select, bool marked, bool no_color)
 		} // End for
 
 		/*
-		for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
 			GLdouble start[3], end[3];
 
@@ -167,13 +167,13 @@ void CLocating::glCommands(bool select, bool marked, bool no_color)
 			glVertex3dv( end );
 			glEnd();
 
-			std::list< CLocating::Point3d > pointsAroundCircle = DrillBitVertices( 	*l_itLocation, 
+			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	*l_itLocation, 
 												l_dHoleDiameter / 2, 
 												m_params.m_depth);
 
 			glBegin(GL_LINE_STRIP);
-			CLocating::Point3d previous = *(pointsAroundCircle.begin());
-			for (std::list< CLocating::Point3d >::const_iterator l_itPoint = pointsAroundCircle.begin();
+			CNCPoint previous = *(pointsAroundCircle.begin());
+			for (std::list< CNCPoint >::const_iterator l_itPoint = pointsAroundCircle.begin();
 				l_itPoint != pointsAroundCircle.end();
 				l_itPoint++)
 			{
@@ -259,64 +259,15 @@ HeeksObj* CLocating::ReadFromXMLElement(TiXmlElement* element)
 
 
 /**
-	By defining a structure that inherits from std::binary_function and has an operator() method, we
-	can use this class to sort lists or vectors of Point3d objects.  We will do this, initially, to
-	sort points of NC operations so as to minimize rapid travels.
-
-	The example code to call this would be;
-	    std::vector<Point3d> points;		// Some container of Point3d objects
-		points.push_back(Point3d(3,4,5));	// Populate it with good data
-		points.push_back(Point3d(6,7,8));
-
-		for (std::vector<Point3d>::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
-		{
-			std::vector<Point3d>::iterator l_itNextPoint = l_itPoint;
-			l_itNextPoint++;
-
-			if (l_itNextPoint != points.end())
-			{
-				sort_points_by_distance compare( *l_itPoint );
-				std::sort( l_itNextPoint, points.end(), compare );
-			} // End if - then
-		} // End for
- */
-struct sort_points_by_distance : public std::binary_function< const CLocating::Point3d &, const CLocating::Point3d &, bool >
-{
-	sort_points_by_distance( const CLocating::Point3d & reference_point )
-	{
-		m_reference_point = reference_point;
-	} // End constructor
-
-	CLocating::Point3d m_reference_point;
-
-	double distance( const CLocating::Point3d & a, const CLocating::Point3d & b ) const
-	{
-		double dx = a.x - b.x;
-		double dy = a.y - b.y;
-		double dz = a.z - b.z;
-
-		return( sqrt( (dx * dx) + (dy * dy) + (dz * dz) ) );			
-	} // End distance() method
-
-	// Return true if dist(lhs to ref) < dist(rhs to ref)
-	bool operator()( const CLocating::Point3d & lhs, const CLocating::Point3d & rhs ) const
-	{
-		return( distance( lhs, m_reference_point ) < distance( rhs, m_reference_point ) );
-	} // End operator() overload
-}; // End sort_points_by_distance structure definition.
-
-
-
-/**
  * 	This method looks through the symbols in the list.  If they're PointType objects
  * 	then the object's location is added to the result set.  If it's a circle object
  * 	that doesn't intersect any other element (selected) then add its centre to
  * 	the result set.  Finally, find the intersections of all of these elements and
  * 	add the intersection points to the result vector.
  */
-std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Symbols_t & symbols ) const
+std::vector<CNCPoint> CLocating::FindAllLocations( const CLocating::Symbols_t & symbols ) const
 {
-	std::vector<CLocating::Point3d> locations;
+	std::vector<CNCPoint> locations;
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
         // a locating cycle.
@@ -336,9 +287,9 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
 				lhsPtr->GetStartPoint(pos);
 
 				// Copy the results in ONLY if each point doesn't already exist.
-				if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+				if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 				{
-					locations.push_back( CLocating::Point3d( pos[0], pos[1], pos[2] ) );
+					locations.push_back( CNCPoint( pos ) );
 				} // End if - then
 			} // End if - then
 
@@ -359,15 +310,15 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
 				l_bIntersectionsFound = true;
                                 while (((results.size() % 3) == 0) && (results.size() > 0))
                                 {
-                                        CLocating::Point3d intersection;
+                                        CNCPoint intersection;
 
-                                        intersection.x = *(results.begin());
+                                        intersection.SetX( *(results.begin()) );
                                         results.erase(results.begin());
 
-                                        intersection.y = *(results.begin());
+                                        intersection.SetY( *(results.begin()) );
                                         results.erase(results.begin());
 
-                                        intersection.z = *(results.begin());
+                                        intersection.SetZ( *(results.begin()) );
                                         results.erase(results.begin());
 
 					// Copy the results in ONLY if each point doesn't already exist.
@@ -391,9 +342,9 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
 				if ((lhsPtr != NULL) && (heeksCAD->GetArcCentre( lhsPtr, pos )))
 				{
 					// Copy the results in ONLY if each point doesn't already exist.
-					if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 					{
-						locations.push_back( CLocating::Point3d( pos[0], pos[1], pos[2] ) );
+						locations.push_back( CNCPoint( pos ) );
 					} // End if - then
 				} // End if - then
 			} // End if - then
@@ -409,9 +360,9 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
 					double pos[3];
 					bounding_box.Centre(pos);
 					// Copy the results in ONLY if each point doesn't already exist.
-					if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 					{
-						locations.push_back( CLocating::Point3d( pos[0], pos[1], pos[2] ) );
+						locations.push_back( CNCPoint( pos ) );
 					} // End if - then
 				} // End if - then
 			} // End if - then
@@ -422,15 +373,15 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
                         	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
 				if (lhsPtr != NULL)
 				{
-					std::vector<CDrilling::Point3d> starting_points;
+					std::vector<CNCPoint> starting_points;
 					starting_points = ((CDrilling *)lhsPtr)->FindAllLocations();
 
 					// Copy the results in ONLY if each point doesn't already exist.
-					for (std::vector<CDrilling::Point3d>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
+					for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
 					{
-						if (std::find( locations.begin(), locations.end(), Point3d( l_itPoint->x, l_itPoint->y, l_itPoint->z ) ) == locations.end())
+						if (std::find( locations.begin(), locations.end(), CNCPoint( *l_itPoint ) ) == locations.end())
 						{
-							locations.push_back( Point3d( l_itPoint->x, l_itPoint->y, l_itPoint->z ) );
+							locations.push_back( *l_itPoint );
 						} // End if - then
 					} // End for
 				} // End if - then
@@ -450,7 +401,7 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
 		// in the menu.  When this is done, the operator's decision as to order should be respected.  Until then, we can
 		// use the 'sort' option in the locating cycle's parameters.
 
-		for (std::vector<Point3d>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
+		for (std::vector<CNCPoint>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
 		{
 			if (l_itPoint == locations.begin())
 			{
@@ -459,13 +410,13 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
 				// previous NC operation.  i.e. where the last operation left off, we should start locating close
 				// by.
 
-				sort_points_by_distance compare( Point3d( 0.0, 0.0, 0.0 ) );
+				sort_points_by_distance compare( CNCPoint( 0.0, 0.0, 0.0 ) );
 				std::sort( locations.begin(), locations.end(), compare );
 			} // End if - then
 			else
 			{
 				// We've already begun.  Just sort based on the previous point's location.	
-				std::vector<Point3d>::iterator l_itNextPoint = l_itPoint;
+				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
 				l_itNextPoint++;
 
 				if (l_itNextPoint != locations.end())
@@ -480,7 +431,7 @@ std::vector<CLocating::Point3d> CLocating::FindAllLocations( const CLocating::Sy
 	return(locations);
 } // End FindAllLocations() method
 
-std::vector<CLocating::Point3d> CLocating::FindAllLocations() const
+std::vector<CNCPoint> CLocating::FindAllLocations() const
 {
 	return( FindAllLocations( m_symbols ) );
 } // End FindAllLocations() method
