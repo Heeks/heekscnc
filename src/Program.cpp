@@ -265,6 +265,7 @@ void CProgram::Remove(HeeksObj* object)
 HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	CProgram* new_object = new CProgram;
+	theApp.m_program = new_object;
 
 	// get the attributes
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
@@ -279,7 +280,6 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 
 	new_object->ReadBaseXML(pElem);
 	new_object->m_raw_material.ReadBaseXML(pElem);
-	theApp.m_program = new_object;
 
 	return new_object;
 }

@@ -17,13 +17,19 @@ class CProfile;
 
 class CProfileParams{
 public:
-	enum {
-		eRight = -1,
+	typedef enum {
+		eRightOrInside = -1,
 		eOn = 0,
-		eLeft = +1
-	};
+		eLeftOrOutside = +1
+	}eSide;
+	eSide m_tool_on_side;
 
-	int m_tool_on_side; // -1=right, 0=on, 1=left
+	typedef enum {
+		eConventional,
+		eClimb
+	}eCutMode;
+	eCutMode m_cut_mode;
+
 
 	// these are only used when m_sketches.size() == 1
 	bool m_auto_roll_on;
@@ -43,6 +49,7 @@ public:
 	void GetProperties(CProfile* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
+
 };
 
 class CProfile: public CDepthOp{
@@ -71,7 +78,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
-	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture );
+	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed );
 	wxString AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, const CFixture *pFixture);
 	void AppendTextToProgram(const CFixture *pFixture);
 	wxString AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture );
