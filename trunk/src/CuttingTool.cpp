@@ -617,6 +617,28 @@ bool CCuttingTool::CanAddTo(HeeksObj* owner)
 	return owner->GetType() == ToolsType;
 }
 
+wxString CCuttingTool::GetIcon()
+{
+	switch(m_params.m_type){
+		case CCuttingToolParams::eDrill:
+			return theApp.GetResFolder() + _T("/icons/drill");
+		case CCuttingToolParams::eCentreDrill:
+			return theApp.GetResFolder() + _T("/icons/centredrill");
+		case CCuttingToolParams::eEndmill:
+			return theApp.GetResFolder() + _T("/icons/endmill");
+		case CCuttingToolParams::eSlotCutter:
+			return theApp.GetResFolder() + _T("/icons/slotdrill");
+		case CCuttingToolParams::eBallEndMill:
+			return theApp.GetResFolder() + _T("/icons/ballmill");
+		case CCuttingToolParams::eChamfer:
+			return theApp.GetResFolder() + _T("/icons/chamfmill");
+		case CCuttingToolParams::eTurningTool:
+			return theApp.GetResFolder() + _T("/icons/turntool");
+		default:
+			return theApp.GetResFolder() + _T("/icons/tool");
+	}
+}
+
 void CCuttingTool::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "CuttingTool" );
@@ -639,7 +661,7 @@ HeeksObj* CCuttingTool::ReadFromXMLElement(TiXmlElement* element)
 	if (element->Attribute("tool_number")) tool_number = atoi(element->Attribute("tool_number"));
 
 	wxString title(Ctt(element->Attribute("title")));
-	CCuttingTool* new_object = new CCuttingTool( title.c_str(), tool_number);
+	CCuttingTool* new_object = new CCuttingTool( title.c_str(), CCuttingToolParams::eDrill, tool_number);
 
 	// read point and circle ids
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
@@ -876,14 +898,15 @@ wxString CCuttingTool::ResetTitle()
 
 /**
         This is the Graphics Library Commands (from the OpenGL set).  This method calls the OpenGL
-        routines to paint the cutting tool in the graphics window.  The graphics is transient.
+        routines to paint the cutting tool in the graphics window.
 
 	We want to draw an outline of the cutting tool in 2 dimensions so that the operator
 	gets a feel for what the various cutting tool parameter values mean.
  */
 void CCuttingTool::glCommands(bool select, bool marked, bool no_color)
 {
-	if(marked && !no_color)
+	// draw this tool only if it is selected
+	if(heeksCAD->ObjectMarked(this) && !no_color)
 	{
 		if(!m_pToolSolid)
 		{

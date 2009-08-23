@@ -16,6 +16,7 @@ class Property;
 class CProgram;
 class CProgramCanvas;
 class COutputCanvas;
+class Tool;
 
 class CHeeksCNCApp{
 public:
@@ -45,6 +46,8 @@ public:
 	typedef std::list< Symbol_t > Symbols_t;
 
 	std::list<wxString> GetFileNames( const char *p_szRoot ) const;
+	static void GetNewCuttingToolTools(std::list<Tool*>* t_list);
+	static void GetNewOperationTools(std::list<Tool*>* t_list);
 };
 
 extern CHeeksCNCApp theApp;

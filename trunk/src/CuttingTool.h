@@ -151,9 +151,10 @@ public:
 	HeeksObj *m_pToolSolid;
 
 	//	Constructors.
-	CCuttingTool(const wxChar *title, const int tool_number) : m_tool_number(tool_number), m_pToolSolid(NULL)
+	CCuttingTool(const wxChar *title, CCuttingToolParams::eCuttingToolType type, const int tool_number) : m_tool_number(tool_number), m_pToolSolid(NULL)
 	{
 		m_params.set_initial_values(); 
+		m_params.m_type = type;
 		if (title != NULL) 
 		{
 			m_title = title;
@@ -180,8 +181,8 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-	wxString GetIcon() { return theApp.GetResFolder() + _T("/icons/tool"); }
-        const wxChar* GetShortString(void)const{return m_title.c_str();}
+	wxString GetIcon();
+    const wxChar* GetShortString(void)const{return m_title.c_str();}
 	void glCommands(bool select, bool marked, bool no_color);
 	void KillGLLists(void);
 
