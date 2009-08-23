@@ -16,7 +16,15 @@
 
 class CSpeedReferences: public ObjList{
 public:
-	static bool s_estimate_when_possible;	// flag to turn feeds and speeds estimation on and off.
+	bool m_estimate_when_possible;	// flag to turn feeds and speeds estimation on and off.
+
+	CSpeedReferences()
+	{
+		CNCConfig config;
+                int value;
+                config.Read(_T("SpeedReferences_m_estimate_when_possible"), &value, 1);
+                m_estimate_when_possible = (value != 0);
+	}
 
 	// HeeksObj's virtual functions
 	bool OneOfAKind(){return true;}

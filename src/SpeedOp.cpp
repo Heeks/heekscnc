@@ -37,7 +37,9 @@ void CSpeedOpParams::set_initial_values( const int cutting_tool_number )
 
 void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 {
-	if (CSpeedReferences::s_estimate_when_possible)
+	if ((theApp.m_program) &&
+	    (theApp.m_program->SpeedReferences()) &&
+	    (theApp.m_program->SpeedReferences()->m_estimate_when_possible))
 	{
 
 		// Use the 'feeds and speeds' class along with the cutting tool properties to
@@ -87,7 +89,9 @@ void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 
 void CSpeedOpParams::ResetSpeeds(const int cutting_tool_number)
 {
-	if (CSpeedReferences::s_estimate_when_possible)
+	if ((theApp.m_program) &&
+	    (theApp.m_program->SpeedReferences()) &&
+	    (theApp.m_program->SpeedReferences()->m_estimate_when_possible))
 	{
 
 		// Use the 'feeds and speeds' class along with the cutting tool properties to
