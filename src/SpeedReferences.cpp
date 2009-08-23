@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "tinyxml/tinyxml.h"
 #include "ProgramCanvas.h"
+#include "CNCConfig.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyDouble.h"
@@ -10,7 +11,6 @@
 #include "interface/Tool.h"
 #include "CuttingTool.h"
 #include "Op.h"
-#include "CNCConfig.h"
 #include "SpeedOp.h"
 #include "interface/strconv.h"
 
@@ -19,8 +19,6 @@
 #include <fstream>
 #include <memory>
 using namespace std;
-
-bool CSpeedReferences::s_estimate_when_possible = true;
 
 class ExportSpeedReferences: public Tool{
 	// Tool's virtual functions
@@ -114,7 +112,7 @@ void CSpeedReferences::WriteXML(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "SpeedReferences" );
 	root->LinkEndChild( element );
-	element->SetAttribute("estimate_when_possible", int(CSpeedReferences::s_estimate_when_possible?1:0) );
+	element->SetAttribute("estimate_when_possible", int(m_estimate_when_possible?1:0) );
 	WriteBaseXML(element);
 }
 
@@ -123,13 +121,11 @@ HeeksObj* CSpeedReferences::ReadFromXMLElement(TiXmlElement* pElem)
 	CSpeedReferences* new_object = new CSpeedReferences();
 	if (pElem->Attribute("estimate_when_possible"))
 	{
-		CSpeedReferences::s_estimate_when_possible = (atoi(pElem->Attribute("estimate_when_possible"))!=0);
+		new_object->m_estimate_when_possible = (atoi(pElem->Attribute("estimate_when_possible"))!=0);
 	} // End if - then
 	else
 	{
-		// It's not in the file.  Set to true by default.
-
-		CSpeedReferences::s_estimate_when_possible = true;
+		// It's not in the file.  The default value will have come from the config values anyway.
 	} // End if - else
 	new_object->ReadBaseXML(pElem);
 	return new_object;
@@ -137,7 +133,10 @@ HeeksObj* CSpeedReferences::ReadFromXMLElement(TiXmlElement* pElem)
  
 static void on_set_estimate_when_possible(int value, HeeksObj* object)
 {
-	CSpeedReferences::s_estimate_when_possible = (value == 0) ? true: false;
+	((CSpeedReferences *)object)->m_estimate_when_possible = (value == 0) ? true: false;
+
+	CNCConfig config;
+	config.Write(_T("SpeedReferences_m_estimate_when_possible"), int(((CSpeedReferences *)object)->m_estimate_when_possible?1:0));
 }
 
 void CSpeedReferences::GetProperties(std::list<Property *> *list)
@@ -148,7 +147,7 @@ void CSpeedReferences::GetProperties(std::list<Property *> *list)
 		choices.push_back( _("Estimate when possible") );		// true
 		choices.push_back( _("Use default values") );		// false
 
-		if (CSpeedReferences::s_estimate_when_possible) 
+		if (m_estimate_when_possible) 
 		{
 			choice = 0;
 		} // End if - then
