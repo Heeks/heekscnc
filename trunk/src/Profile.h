@@ -9,6 +9,7 @@
 #include "DepthOp.h"
 #include "geometry.h"
 #include "Drilling.h"
+#include "CNCPoint.h"
 
 #include <vector>
 
@@ -73,7 +74,7 @@ public:
 	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture );
 	wxString AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, const CFixture *pFixture);
 	void AppendTextToProgram(const CFixture *pFixture);
-	wxString AppendTextToProgram( std::vector<CDrilling::Point3d> & starting_points, const CFixture *pFixture );
+	wxString AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture );
 	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
 	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 

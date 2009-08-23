@@ -17,6 +17,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "Drilling.h"
+#include "CNCPoint.h"
 
 #include <sstream>
 #include <algorithm>
@@ -301,33 +302,11 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 				return;
 			} // End if - then
 
-			std::vector<Point3d> locations = FindAllLocations( m_symbols, NULL );
-			for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+			std::vector<CNCPoint> locations = FindAllLocations( m_symbols, NULL );
+			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{   
-				gp_Pnt point( l_itLocation->x, l_itLocation->y, l_itLocation->z );
-				point = pFixture->Adjustment(point);
-                
+				CNCPoint point( pFixture->Adjustment(*l_itLocation) );
 				GenerateGCodeForOneLocation( point, pCuttingTool );
-
-				/*
-				ss << "flush_nc()\ncircular_pocket( "
-					<< "x=" << point.X()/ theApp.m_program->m_units << ", "
-					<< "y=" << point.Y()/ theApp.m_program->m_units << ", "
-					<< "ToolDiameter=" << (pCuttingTool->CuttingRadius(true) * 2.0) << ", "
-					<< "HoleDiameter=" << m_params.m_diameter / theApp.m_program->m_units << ", "
-					<< "ClearanceHeight=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ", "
-					<< "StartHeight=" << (l_itLocation->z + m_depth_op_params.m_start_depth) / theApp.m_program->m_units << ", "
-					<< "MaterialTop=" << point.Z() / theApp.m_program->m_units << ", "
-					<< "FeedRate=" << m_speed_op_params.m_vertical_feed_rate << ", ";
-
-				if (m_speed_op_params.m_spindle_speed > 0.0)
-				{
-					ss << "SpindleRPM=" << m_speed_op_params.m_spindle_speed << ",";
-				} // End if - then
-
-				ss << "HoleDepth=" << (m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth) / theApp.m_program->m_units << ","
-       		                   << "DepthOfCut=" << (m_depth_op_params.m_step_down / theApp.m_program->m_units ) << ")\n";
-				*/
 			} // End for
 
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -357,9 +336,9 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 	to generate data suitable for OpenGL calls to paint a circle.  This graphics is transient but will
 	help represent what the GCode will be doing when it's generated.
  */
-std::list< CCounterBore::Point3d > CCounterBore::PointsAround( const CCounterBore::Point3d & origin, const double radius, const unsigned int numPoints ) const
+std::list< CNCPoint > CCounterBore::PointsAround( const CNCPoint & origin, const double radius, const unsigned int numPoints ) const
 {
-	std::list<CCounterBore::Point3d> results;
+	std::list<CNCPoint> results;
 
 	double alpha = 3.1415926 * 2 / numPoints;
 
@@ -367,11 +346,9 @@ std::list< CCounterBore::Point3d > CCounterBore::PointsAround( const CCounterBor
 	while( i++ < numPoints )
 	{
 		double theta = alpha * i;
-		CCounterBore::Point3d pointOnCircle( cos( theta ) * radius, sin( theta ) * radius, 0 );
+		CNCPoint pointOnCircle( cos( theta ) * radius, sin( theta ) * radius, 0 );
 
-		pointOnCircle.x += origin.x;
-		pointOnCircle.y += origin.y;
-		pointOnCircle.z += origin.z;
+		pointOnCircle += origin;
 
 		results.push_back(pointOnCircle);
 	} // End while
@@ -404,28 +381,28 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 		// For all coordinates that relate to these reference objects, draw the graphics that represents
 		// both a drilling hole and a counterbore.
 
-		std::vector<Point3d> locations = FindAllLocations( m_symbols, NULL );
-		for (std::vector<Point3d>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+		std::vector<CNCPoint> locations = FindAllLocations( m_symbols, NULL );
+		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
-			std::list< CCounterBore::Point3d > circle = PointsAround( *l_itLocation, m_params.m_diameter / 2, 10 );
+			std::list< CNCPoint > circle = PointsAround( *l_itLocation, m_params.m_diameter / 2, 10 );
 
 			glBegin(GL_LINE_STRIP);
 			// Once around the top circle.
-			for (std::list<CCounterBore::Point3d>::const_iterator l_itPoint = circle.begin(); l_itPoint != circle.end(); l_itPoint++)
+			for (std::list<CNCPoint>::const_iterator l_itPoint = circle.begin(); l_itPoint != circle.end(); l_itPoint++)
 			{
 				GLdouble start[3], end[3];
 
-				start[0] = l_itPoint->x;
-				start[1] = l_itPoint->y;
-				start[2] = l_itPoint->z;
+				start[0] = l_itPoint->X();
+				start[1] = l_itPoint->Y();
+				start[2] = l_itPoint->Z();
 
 				l_itPoint++;
 
 				if (l_itPoint != circle.end())
 				{
-					end[0] = l_itPoint->x;
-					end[1] = l_itPoint->y;
-					end[2] = l_itPoint->z;
+					end[0] = l_itPoint->X();
+					end[1] = l_itPoint->Y();
+					end[2] = l_itPoint->Z();
 				
 					glVertex3dv( start );
 					glVertex3dv( end );
@@ -433,21 +410,21 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 			} // End for
 
 			// Once around the bottom circle.
-			for (std::list<CCounterBore::Point3d>::const_iterator l_itPoint = circle.begin(); l_itPoint != circle.end(); l_itPoint++)
+			for (std::list<CNCPoint>::const_iterator l_itPoint = circle.begin(); l_itPoint != circle.end(); l_itPoint++)
 			{
 				GLdouble start[3], end[3];
 
-				start[0] = l_itPoint->x;
-				start[1] = l_itPoint->y;
-				start[2] = l_itPoint->z - m_depth_op_params.m_final_depth;
+				start[0] = l_itPoint->X();
+				start[1] = l_itPoint->Y();
+				start[2] = l_itPoint->Z() - m_depth_op_params.m_final_depth;
 
 				l_itPoint++;
 
 				if (l_itPoint != circle.end())
 				{
-					end[0] = l_itPoint->x;
-					end[1] = l_itPoint->y;
-					end[2] = l_itPoint->z - m_depth_op_params.m_final_depth;
+					end[0] = l_itPoint->X();
+					end[1] = l_itPoint->Y();
+					end[2] = l_itPoint->Z() - m_depth_op_params.m_final_depth;
 				
 					glVertex3dv( start );
 					glVertex3dv( end );
@@ -455,17 +432,17 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 			} // End for
 
 			// And once to join the two circles together.
-			for (std::list<CCounterBore::Point3d>::const_iterator l_itPoint = circle.begin(); l_itPoint != circle.end(); l_itPoint++)
+			for (std::list<CNCPoint>::const_iterator l_itPoint = circle.begin(); l_itPoint != circle.end(); l_itPoint++)
 			{
 				GLdouble start[3], end[3];
 
-				start[0] = l_itPoint->x;
-				start[1] = l_itPoint->y;
-				start[2] = l_itPoint->z;
+				start[0] = l_itPoint->X();
+				start[1] = l_itPoint->Y();
+				start[2] = l_itPoint->Z();
 
-				end[0] = l_itPoint->x;
-				end[1] = l_itPoint->y;
-				end[2] = l_itPoint->z - m_depth_op_params.m_final_depth;
+				end[0] = l_itPoint->X();
+				end[1] = l_itPoint->Y();
+				end[2] = l_itPoint->Z() - m_depth_op_params.m_final_depth;
 			
 				glVertex3dv( start );
 				glVertex3dv( end );
@@ -548,33 +525,6 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 }
 
 
-struct sort_points_by_distance : public std::binary_function< const CCounterBore::Point3d &, const CCounterBore::Point3d &, bool >
-{
-	sort_points_by_distance( const CCounterBore::Point3d & reference_point )
-	{
-		m_reference_point = reference_point;
-	} // End constructor
-
-	CCounterBore::Point3d m_reference_point;
-
-	double distance( const CCounterBore::Point3d & a, const CCounterBore::Point3d & b ) const
-	{
-		double dx = a.x - b.x;
-		double dy = a.y - b.y;
-		double dz = a.z - b.z;
-
-		return( sqrt( (dx * dx) + (dy * dy) + (dz * dz) ) );			
-	} // End distance() method
-
-	// Return true if dist(lhs to ref) < dist(rhs to ref)
-	bool operator()( const CCounterBore::Point3d & lhs, const CCounterBore::Point3d & rhs ) const
-	{
-		return( distance( lhs, m_reference_point ) < distance( rhs, m_reference_point ) );
-	} // End operator() overload
-}; // End sort_points_by_distance structure definition.
-
-
-
 
 /**
  * 	This method looks through the symbols in the list.  If they're PointType objects
@@ -588,9 +538,9 @@ struct sort_points_by_distance : public std::binary_function< const CCounterBore
  *	size holes were drilled so that we can make an intellegent selection for the
  *	socket head.
  */
-std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced ) const
+std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced ) const
 {
-	std::vector<CCounterBore::Point3d> locations;
+	std::vector<CNCPoint> locations;
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
         // a drilling cycle.
@@ -608,9 +558,9 @@ std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounte
 			{
 				double pos[3];
 				obj->GetStartPoint(pos);
-				if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+				if (std::find( locations.begin(), locations.end(), CNCPoint( pos[0], pos[1], pos[2] ) ) == locations.end())
 				{
-					locations.push_back( Point3d( pos[0], pos[1], pos[2] ) );
+					locations.push_back( CNCPoint( pos[0], pos[1], pos[2] ) );
 				} // End if - then
 				continue;	// No need to intersect a point with anything.
 			} // End if - then
@@ -630,12 +580,12 @@ std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounte
 					pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_cutting_tool_number );
 				} // End if - then
 
-				std::vector<CDrilling::Point3d> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
-				for (std::vector<CDrilling::Point3d>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
+				std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
+				for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
 				{
-					if (std::find( locations.begin(), locations.end(), Point3d( l_itHole->x, l_itHole->y, l_itHole->z ) ) == locations.end())
+					if (std::find( locations.begin(), locations.end(), CNCPoint( l_itHole->X(), l_itHole->Y(), l_itHole->Z() ) ) == locations.end())
 					{
-						locations.push_back( CCounterBore::Point3d( l_itHole->x, l_itHole->y, l_itHole->z ) );
+						locations.push_back( CNCPoint( l_itHole->X(), l_itHole->Y(), l_itHole->Z() ) );
 					} // End if - then
 				} // End for
 			} // End if - then
@@ -659,15 +609,15 @@ std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounte
 				l_bIntersectionsFound = true;
                                 while (((results.size() % 3) == 0) && (results.size() > 0))
                                 {
-                                        CCounterBore::Point3d intersection;
+                                        CNCPoint intersection;
 
-                                        intersection.x = *(results.begin());
+                                        intersection.SetX( *(results.begin()) );
                                         results.erase(results.begin());
 
-                                        intersection.y = *(results.begin());
+                                        intersection.SetY( *(results.begin()) );
                                         results.erase(results.begin());
 
-                                        intersection.z = *(results.begin());
+                                        intersection.SetZ( *(results.begin()) );
                                         results.erase(results.begin());
 
 					if (std::find( locations.begin(), locations.end(), intersection ) == locations.end())
@@ -691,9 +641,9 @@ std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounte
 					double pos[3];
 					if (heeksCAD->GetArcCentre( lhsPtr, pos ))
 					{
-						if (std::find( locations.begin(), locations.end(), Point3d( pos[0], pos[1], pos[2] ) ) == locations.end())
+						if (std::find( locations.begin(), locations.end(), CNCPoint( pos[0], pos[1], pos[2] ) ) == locations.end())
 						{
-							locations.push_back( Point3d( pos[0], pos[1], pos[2] ) );
+							locations.push_back( CNCPoint( pos[0], pos[1], pos[2] ) );
 						} // End if - then
 					} // End if - then
 				} // End if - then
@@ -708,7 +658,7 @@ std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounte
 		// but it's better than random.  If we were really eager we would allow the starting point to be based on the
 		// previous NC operation's ending point.
 		//
-		for (std::vector<Point3d>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
+		for (std::vector<CNCPoint>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
 		{
 			if (l_itPoint == locations.begin())
 			{
@@ -717,13 +667,13 @@ std::vector<CCounterBore::Point3d> CCounterBore::FindAllLocations( const CCounte
 				// previous NC operation.  i.e. where the last operation left off, we should start drilling close
 				// by.
 
-				sort_points_by_distance compare( Point3d( 0.0, 0.0, 0.0 ) );
+				sort_points_by_distance compare( CNCPoint( 0.0, 0.0, 0.0 ) );
 				std::sort( locations.begin(), locations.end(), compare );
 			} // End if - then
 			else
 			{
 				// We've already begun.  Just sort based on the previous point's location.	
-				std::vector<Point3d>::iterator l_itNextPoint = l_itPoint;
+				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
 				l_itNextPoint++;
 
 				if (l_itNextPoint != locations.end())

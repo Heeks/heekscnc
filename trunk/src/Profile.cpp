@@ -709,7 +709,7 @@ void CProfile::AppendTextToProgram(const CFixture *pFixture)
 		return;
 	} // End if - then
 
-	std::vector<CDrilling::Point3d> starting_points;
+	std::vector<CNCPoint> starting_points;
 	wxString python_code = AppendTextToProgram( starting_points, pFixture );
 
 	CDepthOp::AppendTextToProgram(pFixture);
@@ -721,23 +721,14 @@ void CProfile::AppendTextToProgram(const CFixture *pFixture)
 
 struct sort_sketches : public std::binary_function< const int, const int, bool >
 {
-	CDrilling::Point3d m_reference_point;
+	CNCPoint m_reference_point;
 	CProfile *m_pThis;
 
-	sort_sketches( CProfile *pThis, const CDrilling::Point3d & reference_point )
+	sort_sketches( CProfile *pThis, const CNCPoint & reference_point )
 	{
 		m_reference_point = reference_point;
 		m_pThis = pThis;
 	} // End constructor
-
-	double distance( const CDrilling::Point3d & a, const CDrilling::Point3d & b ) const
-	{
-		double dx = a.x - b.x;
-		double dy = a.y - b.y;
-		double dz = a.z - b.z;
-
-		return( sqrt( (dx * dx) + (dy * dy) + (dz * dz) ) );			
-	} // End distance() method
 
 	// Return true if dist(lhs to ref) < dist(rhs to ref)
 	bool operator()( const int lhs, const int rhs ) const
@@ -749,12 +740,12 @@ struct sort_sketches : public std::binary_function< const int, const int, bool >
 		{
 			double x,y;
 			m_pThis->GetRollOnPos(lhsPtr, x, y );
-			CDrilling::Point3d lhsPoint( x, y, 0.0 );
+			CNCPoint lhsPoint( x, y, 0.0 );
 
 			m_pThis->GetRollOnPos(rhsPtr, x, y );
-			CDrilling::Point3d rhsPoint( x, y, 0.0 );
+			CNCPoint rhsPoint( x, y, 0.0 );
 
-			return( distance( lhsPoint, m_reference_point ) < distance( rhsPoint, m_reference_point ) );
+			return( lhsPoint.Distance( m_reference_point ) < rhsPoint.Distance( m_reference_point ) );
 		} // End if - then
 		else
 		{
@@ -765,7 +756,7 @@ struct sort_sketches : public std::binary_function< const int, const int, bool >
 
 
 
-wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starting_points, const CFixture *pFixture )
+wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture )
 {
 	std::wostringstream l_ossPythonCode;
 
@@ -786,7 +777,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starti
 				HeeksObj *ref = heeksCAD->GetIDObject( SketchType, *l_itSketch );
 				if (ref != NULL)
 				{
-					sort_sketches compare( this, CDrilling::Point3d( 0.0, 0.0, 0.0 ) );
+					sort_sketches compare( this, CNCPoint( 0.0, 0.0, 0.0 ) );
 					std::sort( l_itSketch, sorted.end(), compare );
 				} // End if - then
 			} // End if - then
@@ -802,7 +793,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starti
 					{
 						double x,y;
 						GetRollOffPos( ref, x, y );
-						sort_sketches compare( this, CDrilling::Point3d( x, y, 0.0 ) );
+						sort_sketches compare( this, CNCPoint( x, y, 0.0 ) );
 						std::sort( l_itNextSketch, sorted.end(), compare );
 					} // End if - then
 				} // End if - then
@@ -841,7 +832,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starti
 				l_ossPythonCode << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
 				CBox bbox;
 				one_curve_sketch->GetBox(bbox);
-				starting_points.push_back( CDrilling::Point3d( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
+				starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
 				delete one_curve_sketch;
 			}
 		}
@@ -850,7 +841,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CDrilling::Point3d> & starti
 			l_ossPythonCode << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
 			CBox bbox;
 			object->GetBox(bbox);
-			starting_points.push_back( CDrilling::Point3d( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
+			starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
 		}
 
 		if(re_ordered_sketch)

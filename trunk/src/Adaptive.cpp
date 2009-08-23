@@ -15,7 +15,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "Drilling.h"
-
+#include "CNCPoint.h"
 #include <sstream>
 
 int CAdaptive::number_for_stl_file = 1;
@@ -109,13 +109,13 @@ void CAdaptiveParams::set_initial_values(
 					break;
 
 				case DrillingType: {
-					std::vector<CDrilling::Point3d> locations;
+					std::vector<CNCPoint> locations;
 					locations = ((CDrilling *)ref)->FindAllLocations();
 					if (locations.size() == 1)
 					{
 						// There must be only one (didn't someone else say that once?) for our purposes.
-						m_startpoint_x = locations.begin()->x;
-						m_startpoint_y = locations.begin()->y;
+						m_startpoint_x = locations.begin()->X();
+						m_startpoint_y = locations.begin()->Y();
 					} // End if - then
 				   } // End DrillingType scope
 					break;

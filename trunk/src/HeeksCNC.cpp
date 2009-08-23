@@ -41,6 +41,7 @@
 #include "Tools.h"
 #include "CuttingTool.h"
 #include "interface/strconv.h"
+#include "CNCPoint.h"
 
 #include <sstream>
 
@@ -317,7 +318,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 {
-	std::vector<CDrilling::Point3d> intersections;
+	std::vector<CNCPoint> intersections;
 	CDrilling::Symbols_t symbols;
 	CDrilling::Symbols_t cuttingTools;
 	int cutting_tool_number = 0;
@@ -378,7 +379,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 
 static void NewLocatingOpMenuCallback(wxCommandEvent &event)
 {
-	std::vector<CDrilling::Point3d> intersections;
+	std::vector<CNCPoint> intersections;
 	CDrilling::Symbols_t symbols;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
@@ -460,7 +461,7 @@ static void DesignRulesCheckMenuCallback(wxCommandEvent &event)
 
 static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 {
-	std::vector<CCounterBore::Point3d> intersections;
+	std::vector<CNCPoint> intersections;
 	CCounterBore::Symbols_t symbols;
 	CCounterBore::Symbols_t cuttingTools;
 	int cutting_tool_number = 0;

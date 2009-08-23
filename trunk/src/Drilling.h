@@ -13,6 +13,7 @@
 #include "HeeksCNCTypes.h"
 #include <list>
 #include <vector>
+#include "CNCPoint.h"
 
 class CDrilling;
 
@@ -54,50 +55,11 @@ public:
 class CDrilling: public CSpeedOp {
 public:
 	/**
-		There are all types of 3d point classes around but most of them seem to be in the HeeksCAD code
-		rather than in cod that's accessible by the plugin.  I suspect I'm missing something on this
-		but, just in case I'm not, here is a special one (just for this class)
-	 */
-	typedef struct Point3d {
-		double x;
-		double y;
-		double z;
-		Point3d( double a, double b, double c ) : x(a), y(b), z(c) { }
-		Point3d() : x(0), y(0), z(0) { }
-
-		bool operator==( const Point3d & rhs ) const
-		{
-			if (x != rhs.x) return(false);
-			if (y != rhs.y) return(false);
-			if (z != rhs.z) return(false);
-
-			return(true);
-		} // End equivalence operator
-
-		bool operator!=( const Point3d & rhs ) const
-		{
-			return(! (*this == rhs));
-		} // End not-equal operator
-
-		bool operator<( const Point3d & rhs ) const
-		{
-			if (x > rhs.x) return(false);
-			if (x < rhs.x) return(true);
-			if (y > rhs.y) return(false);
-			if (y < rhs.y) return(true);
-			if (z > rhs.z) return(false);
-			if (z < rhs.z) return(true);
-
-			return(false);	// They're equal
-		} // End equivalence operator
-	} Point3d;
-
-	/**
 		The following two methods are just to draw pretty lines on the screen to represent drilling
 		cycle activity when the operator selects the Drilling Cycle operation in the data list.
 	 */
-	std::list< Point3d > PointsAround( const Point3d & origin, const double radius, const unsigned int numPoints ) const;
-	std::list< Point3d > DrillBitVertices( const Point3d & origin, const double radius, const double length ) const;
+	std::list< CNCPoint > PointsAround( const CNCPoint & origin, const double radius, const unsigned int numPoints ) const;
+	std::list< CNCPoint > DrillBitVertices( const CNCPoint & origin, const double radius, const double length ) const;
 
 public:
 	/**
@@ -151,8 +113,8 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	std::vector<Point3d> FindAllLocations( const CDrilling::Symbols_t & symbols ) const;
-	std::vector<Point3d> FindAllLocations() const;
+	std::vector<CNCPoint> FindAllLocations( const CDrilling::Symbols_t & symbols ) const;
+	std::vector<CNCPoint> FindAllLocations() const;
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 };
