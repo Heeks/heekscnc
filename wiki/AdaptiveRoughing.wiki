@@ -16,12 +16,7 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/adapt.png
 
 6. At the options list, on the left (as default), set the starting point somewhere in the middle of the pocket or somewhere not on the solid you made on the flat surface.
 
-7. Make the Python script, press
-
-http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png
-
-
-8. Create the NC code and see the toolpath, press
+7. Create the NC code and see the toolpath, press
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 
