@@ -947,15 +947,8 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 	{
 		// add the program
 		m_program = new CProgram;
+		m_program->AddMissingChildren();
 		heeksCAD->GetMainObject()->Add(m_program, NULL);
-		COperations *operations = new COperations;
-		m_program->Add(operations, NULL);
-		CTools *tools = new CTools;
-		m_program->Add(tools, NULL);
-		CSpeedReferences *speed_references = new CSpeedReferences;
-		m_program->Add(speed_references,NULL);
-		CFixtures *fixtures = new CFixtures;
-		m_program->Add(fixtures, NULL);
 		heeksCAD->WasAdded(m_program);
 		theApp.m_program_canvas->Clear();
 		theApp.m_output_canvas->Clear();
