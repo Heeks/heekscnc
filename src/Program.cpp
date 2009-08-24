@@ -281,6 +281,8 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	new_object->ReadBaseXML(pElem);
 	new_object->m_raw_material.ReadBaseXML(pElem);
 
+	new_object->AddMissingChildren();
+
 	return new_object;
 }
 
@@ -765,67 +767,12 @@ wxString CProgram::GetOutputFileName() const
 	} // End if - else
 } // End GetOutputFileName() method
 
-
-
-CFixtures *CProgram::Fixtures()
+void CProgram::AddMissingChildren()
 {
-	if (m_fixtures == NULL)
-	{
-		m_fixtures = new CFixtures;
-		Add( m_fixtures, NULL );
-		heeksCAD->WasAdded( m_fixtures );
-	} // End if - then
-
-	return(m_fixtures);
-} // End Fixtures() method
-
-
-CSpeedReferences *CProgram::SpeedReferences()
-{
-	if (m_speed_references == NULL)
-	{
-		m_speed_references = new CSpeedReferences;
-		Add( m_speed_references, NULL );
-		heeksCAD->WasAdded( m_speed_references );
-	} // End if - then
-
-	return(m_speed_references);
-} // End CSpeedReferences() method
-
-
-COperations *CProgram::Operations()
-{
-	if (m_operations == NULL)
-	{
-		m_operations = new COperations;
-		Add( m_operations, NULL );
-		heeksCAD->WasAdded( m_operations );
-	} // End if - then
-
-	return(m_operations);
-} // End COperations() method
-
-CNCCode *CProgram::NCCode()
-{
-	if (m_nc_code == NULL)
-	{
-		m_nc_code = new CNCCode;
-		Add( m_nc_code, NULL );
-		heeksCAD->WasAdded( m_nc_code );
-	} // End if - then
-
-	return(m_nc_code);
-} // End NCCode() method
-
-CTools *CProgram::Tools()
-{
-	if (m_tools == NULL)
-	{
-		m_tools = new CTools;
-		Add( m_tools, NULL );
-		heeksCAD->WasAdded( m_tools );
-	} // End if - then
-
-	return(m_tools);
-} // End CTools() method
-
+	// make sure tools, operations, fixtures, etc. exist
+	if(m_tools == NULL){m_tools = new CTools; Add( m_tools, NULL );}
+	if(m_fixtures == NULL){m_fixtures = new CFixtures; Add( m_fixtures, NULL );}
+	if(m_operations == NULL){m_operations = new COperations; Add( m_operations, NULL );}
+	if(m_speed_references == NULL){m_speed_references = new CSpeedReferences; Add( m_speed_references, NULL );}
+	if(m_nc_code == NULL){m_nc_code = new CNCCode; Add( m_nc_code, NULL );}
+}
