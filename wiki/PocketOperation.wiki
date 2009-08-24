@@ -16,10 +16,6 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/pocket.png
 
 Edit the properties in the "properties" window.
 
-Press 
-
-http://heekscnc.googlecode.com/svn/trunk/bitmaps/python.png
-
 Press
 
 http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
