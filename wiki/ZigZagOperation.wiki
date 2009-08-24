@@ -33,3 +33,49 @@ HeeksCNC
 ---------Samples
 
 ---------Tests
+
+= Properties =
+All operations have some common properties, see here:
+http://code.google.com/p/heekscnc/wiki/Operations
+
+===tool diameter===
+The diameter of the tool
+
+===tool type===
+can be spherical, cylindrical, toroidal
+
+===minimum x===
+the left side of the machining
+
+===maximum x===
+the right hand side of the machining
+
+===minimum y===
+the bottom y of the machining
+
+===maximum y===
+the top y of the machining
+
+===z0===
+the minimum z height
+
+===z1===
+clearance height
+
+===dx===
+step over in x
+
+===dy===
+step over in y
+
+===horizontal feed rate===
+horizontal feed rate
+
+===vertical feed rate===
+vertical feed rate
+
+===spindle speed===
+spindle speed
+
+===direction===
+cut along x or along y
