@@ -54,12 +54,12 @@ public:
 	wxString m_output_file;		// NOTE: Only relevant if the filename does NOT follow the data file's name.
 	bool m_output_file_name_follows_data_file_name;	// Just change the extension to determine the NC file name
 
-	// Data access methods.  These ensure the underlying objects exist before returning a pointer to them.
-	CNCCode* NCCode();
-	COperations* Operations();
-	CTools* Tools();
-	CSpeedReferences *SpeedReferences();
-	CFixtures *Fixtures();
+	// Data access methods.
+	CNCCode* NCCode(){return m_nc_code;}
+	COperations* Operations(){return m_operations;}
+	CTools* Tools(){return m_tools;}
+	CSpeedReferences *SpeedReferences(){return m_speed_references;}
+	CFixtures *Fixtures(){return m_fixtures;}
 
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches
@@ -92,4 +92,5 @@ public:
 
 	static void GetMachines(std::vector<CMachine> &machines);
 	static CMachine GetMachine(const wxString& file_name);
+	void AddMissingChildren();
 };
