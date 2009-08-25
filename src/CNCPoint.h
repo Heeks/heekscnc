@@ -24,6 +24,24 @@ public:
 	CNCPoint( const double &x, const double &y, const double &z ) : gp_Pnt(x,y,z) { }
 	CNCPoint( const gp_Pnt & rhs ) : gp_Pnt(rhs) { }
 
+	double X(const bool in_drawing_units = false) const
+	{
+		if (in_drawing_units == false) return(gp_Pnt::X());
+		else return(gp_Pnt::X() / theApp.m_program->m_units);
+	}
+
+	double Y(const bool in_drawing_units = false) const
+	{
+		if (in_drawing_units == false) return(gp_Pnt::Y());
+		else return(gp_Pnt::Y() / theApp.m_program->m_units);
+	}
+
+	double Z(const bool in_drawing_units = false) const
+	{
+		if (in_drawing_units == false) return(gp_Pnt::Z());
+		else return(gp_Pnt::Z() / theApp.m_program->m_units);
+	}
+
 	CNCPoint & operator+= ( const CNCPoint & rhs )
 	{
 		SetX( X() + rhs.X() );
