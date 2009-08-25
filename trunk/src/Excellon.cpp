@@ -232,7 +232,6 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 
 	std::auto_ptr<gp_Pnt> pPosition;
 
-	unsigned int repetitions = 1;
 	bool m02_found = false;
 	bool swap_axis = false;
 	bool mirror_image_x_axis = false;
@@ -247,20 +246,39 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 			// End of program
 			_data.erase(0,3);
 		}
+		else if (_data.substr(0,1) == ";")
+		{
+			_data.erase(0,1);
+			return(true);	// Ignore all subsequent comments until the end of line.
+		}
 		else if (_data.substr(0,4) == "INCH")
 		{
 			_data.erase(0,4);
 			m_units = 25.4;	// Imperial
 		}
+		else if (_data.substr(0,6) == "METRIC")
+		{
+			_data.erase(0,6);
+			m_units = 1.0;	// mm
+		}
+		else if (_data.substr(0,2) == "MM")
+		{
+			_data.erase(0,2);
+			m_units = 1.0;	// mm
+		}
 		else if (_data.substr(0,2) == "TZ")
 		{
 			_data.erase(0,2);
-			m_trailingZeroSuppression = false;	// Opposite to RS274X meaning
+			// In Excellon files, the TZ means that trailing zeroes are INCLUDED
+			// while in RS274X format, it means they're OMITTED
+			m_trailingZeroSuppression = false;
 		}
 		else if (_data.substr(0,2) == "LZ")
 		{
 			_data.erase(0,2);
-			m_leadingZeroSuppression = false;	// Opposite to RS274X meaning
+			// In Excellon files, the LZ means that leading zeroes are INCLUDED
+			// while in RS274X format, it means they're OMITTED
+			m_leadingZeroSuppression = false;
 		}
 		else if (_data.substr(0,1) == "T")
 		{
@@ -298,9 +316,14 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		else if (_data.substr(0,1) == "R")
 		{
 			_data.erase(0,1);
+			printf("Pattern repetition is not yet supported\n");
+			return(false);
+
+			/*
 			char *end = NULL;
 			repetitions = strtoul( _data.c_str(), &end, 10 );
 			_data.erase(0, end - _data.c_str());
+			*/
 		}
 		else if (_data.substr(0,3) == "M70")
 		{
@@ -444,6 +467,7 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		{
 			_data.erase(0,3);
 			// Ignore 'Operator Message CRT Display'
+			return(true);	// Ignore the rest of the line.
 		}
 		else if (_data.substr(0,3) == "M71")
 		{
