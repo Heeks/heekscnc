@@ -147,7 +147,9 @@ public:
 	//	These are references to the CAD elements whose position indicate where the CuttingTool Cycle begins.
 	CCuttingToolParams m_params;
 	wxString m_title;
-	int m_tool_number;
+
+	typedef int ToolNumber_t;
+	ToolNumber_t m_tool_number;
 	HeeksObj *m_pToolSolid;
 
 	//	Constructors.
@@ -201,6 +203,10 @@ public:
 	double CuttingRadius(const bool express_in_drawing_units = false) const;
 	static CCuttingToolParams::eCuttingToolType CutterType( const int tool_number );
 	static CCuttingToolParams::eMaterial_t CutterMaterial( const int tool_number );
+
+	void SetDiameter( const double diameter );
+	void ResetParametersToReasonableValues();
+
 private:
 	void DeleteSolid();
 
