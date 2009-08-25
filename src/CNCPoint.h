@@ -58,6 +58,13 @@ public:
 
 		return(false);	// They're equal
 	} // End equivalence operator
+
+	void ToDoubleArray( double *pArrayOfThree ) const
+	{
+		pArrayOfThree[0] = X();
+		pArrayOfThree[1] = Y();
+		pArrayOfThree[2] = Z();
+	} // End ToDoubleArray() method
 }; // End CNCPoint class definition.
 
 
