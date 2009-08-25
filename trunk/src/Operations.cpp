@@ -6,6 +6,9 @@
 #include "Operations.h"
 #include "Op.h"
 #include "tinyxml/tinyxml.h"
+#include "Excellon.h"
+
+#include <wx/progdlg.h>
 
 bool COperations::CanAdd(HeeksObj* object)
 {
@@ -68,6 +71,27 @@ class SetAllInactive: public Tool{
 
 static SetAllInactive set_all_inactive;
 
+class ImportExcellonDrillFile: public Tool{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Import Excellon Drill File");}
+	void Run()
+	{
+		wxFileDialog dialog(heeksCAD->GetMainFrame(), _("Import Excellon Drill File"), 
+					wxEmptyString, wxEmptyString, 
+					wxString(_("Excellon Drill Files")) + _T(" |*.cnc;*.CNC;*.drill;*.DRILL;") );
+		dialog.CentreOnParent();
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			Excellon drill;
+			drill.Read( Ttc(dialog.GetPath().c_str()) );
+		}
+
+	}
+	wxString BitmapPath(){ return _T("drill");}
+};
+
+static ImportExcellonDrillFile import_excellon_drill_file;
+
 void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	object_for_tools = this;
@@ -76,6 +100,7 @@ void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	t_list->push_back(&set_all_active);
 	t_list->push_back(&set_all_inactive);
+	t_list->push_back(&import_excellon_drill_file);
 
 	ObjList::GetTools(t_list, p);
 }
