@@ -105,6 +105,15 @@ bool Excellon::Read( const char *p_szFileName )
 {
 	printf("Excellon::Read(%s)\n", p_szFileName );
 
+	// First read in existing PointType object locations so that we don't duplicate points.
+	for (HeeksObj *obj = heeksCAD->GetFirstObject(); obj != NULL; obj = heeksCAD->GetNextObject() )
+	{
+		if (obj->GetType() != PointType) continue;
+		double pos[3];
+		obj->GetStartPoint( pos );
+		m_existing_points.insert( std::make_pair( CNCPoint( pos ), CDrilling::Symbol_t( PointType, obj->m_id ) ) );
+	} // End for
+
 	std::ifstream input( p_szFileName, std::ios::in );
 	if (input.is_open())
 	{
