@@ -11,7 +11,7 @@
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "interface/HeeksObj.h"
-#include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyVertex.h"
 #include "interface/PropertyCheck.h"
@@ -32,6 +32,7 @@ CProfileParams::CProfileParams()
 {
 	m_tool_on_side = eOn;
 	m_cut_mode = eConventional;
+	m_auto_roll_radius = 2.0;
 	m_auto_roll_on = true;
 	m_auto_roll_off = true;
 	m_roll_on_point[0] = m_roll_on_point[1] = m_roll_on_point[2] = 0.0;
@@ -67,6 +68,7 @@ static void on_set_cut_mode(int value, HeeksObj* object)
 
 static void on_set_auto_roll_on(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_auto_roll_on = value; heeksCAD->RefreshProperties();}
 static void on_set_roll_on_point(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_roll_on_point, vt, 3*sizeof(double));}
+static void on_set_roll_radius(double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_auto_roll_radius = value; ((CProfile*)object)->WriteDefaultValues();}
 static void on_set_auto_roll_off(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_auto_roll_off = value; heeksCAD->RefreshProperties();}
 static void on_set_roll_off_point(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_roll_off_point, vt, 3*sizeof(double));}
 static void on_set_start_given(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_start_given = value; heeksCAD->RefreshProperties();}
@@ -145,6 +147,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		if(!m_auto_roll_on)list->push_back(new PropertyVertex(_("roll on point"), m_roll_on_point, parent, on_set_roll_on_point));
 		list->push_back(new PropertyCheck(_("auto roll off"), m_auto_roll_off, parent, on_set_auto_roll_off));
 		if(!m_auto_roll_off)list->push_back(new PropertyVertex(_("roll off point"), m_roll_off_point, parent, on_set_roll_off_point));
+		if(m_auto_roll_on || m_auto_roll_off)list->push_back(new PropertyLength(_("roll radius"), m_auto_roll_radius, parent, on_set_roll_radius));
 		list->push_back(new PropertyCheck(_("use start point"), m_start_given, parent, on_set_start_given));
 		if(m_start_given)list->push_back(new PropertyVertex(_("start point"), m_start, parent, on_set_start));
 		list->push_back(new PropertyCheck(_("use end point"), m_end_given, parent, on_set_end_given));
@@ -185,6 +188,10 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 		element->SetDoubleAttribute("roll_offx", m_roll_off_point[0]);
 		element->SetDoubleAttribute("roll_offy", m_roll_off_point[1]);
 		element->SetDoubleAttribute("roll_offz", m_roll_off_point[2]);
+	}
+	if(m_auto_roll_on || m_auto_roll_off)
+	{
+		element->SetDoubleAttribute("roll_radius", m_auto_roll_radius);
 	}
 	element->SetAttribute("start_given", m_start_given ? 1:0);
 	if(m_start_given)
@@ -227,6 +234,7 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("roll_offx", &m_roll_off_point[0]);
 	pElem->Attribute("roll_offy", &m_roll_off_point[1]);
 	pElem->Attribute("roll_offz", &m_roll_off_point[2]);
+	pElem->Attribute("roll_radius", &m_auto_roll_radius);
 	pElem->Attribute("start_given", &int_for_bool); m_start_given = (int_for_bool != 0);
 	pElem->Attribute("startx", &m_start[0]);
 	pElem->Attribute("starty", &m_start[1]);
@@ -244,8 +252,6 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 		m_sort_sketches = 1;	// Default.
 	} // End if - else
 }
-
-#define AUTO_ROLL_ON_OFF_SIZE 2.0
 
 void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 {
@@ -271,8 +277,8 @@ void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 					CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 					if (pCuttingTool != NULL)
 					{
-						x = s[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) - v[0] * AUTO_ROLL_ON_OFF_SIZE;
-						y = s[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) - v[1] * AUTO_ROLL_ON_OFF_SIZE;
+						x = s[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) - v[0] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
+						y = s[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) - v[1] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
 					} // End if - then
 				}
 			}
@@ -309,8 +315,8 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 						{
 							double off_vec[3] = {-v[1], v[0], 0.0};
 							if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
-							x = e[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) + v[0] * AUTO_ROLL_ON_OFF_SIZE;
-							y = e[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + AUTO_ROLL_ON_OFF_SIZE) + v[1] * AUTO_ROLL_ON_OFF_SIZE;
+							x = e[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) + v[0] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
+							y = e[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) + v[1] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
 						} // End if - then
 					}
 				}
@@ -692,7 +698,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			{
 				if(m_profile_params.m_auto_roll_on || (m_sketches.size() > 1))
 				{
-					l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
+					l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2, roll_radius)\n"), sketch, side_string.c_str()).c_str();
 
 					if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
 					{
@@ -737,7 +743,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			{
 			if(m_profile_params.m_auto_roll_off || (m_sketches.size() > 1))
 			{
-				l_ossPythonCode << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2)\n"), sketch, side_string.c_str()).c_str();
+				l_ossPythonCode << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2, roll_radius)\n"), sketch, side_string.c_str()).c_str();
 				roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
 			}
 			else
@@ -799,6 +805,7 @@ void CProfile::WriteDefaultValues()
 	CNCConfig config;
 	config.Write(wxString(GetTypeString()) + _T("ToolOnSide"), m_profile_params.m_tool_on_side);
 	config.Write(wxString(GetTypeString()) + _T("CutMode"), m_profile_params.m_cut_mode);
+	config.Write(wxString(GetTypeString()) + _T("RollRadius"), m_profile_params.m_auto_roll_radius);
 }
 
 void CProfile::ReadDefaultValues()
@@ -812,6 +819,7 @@ void CProfile::ReadDefaultValues()
 	int int_mode = m_profile_params.m_cut_mode;
 	config.Read(wxString(GetTypeString()) + _T("CutMode"), &int_mode, CProfileParams::eConventional);
 	m_profile_params.m_cut_mode = (CProfileParams::eCutMode)int_mode;
+	config.Read(wxString(GetTypeString()) + _T("RollRadius"), &m_profile_params.m_auto_roll_radius, 2.0);
 }
 
 void CProfile::AppendTextToProgram(const CFixture *pFixture)
@@ -870,6 +878,13 @@ struct sort_sketches : public std::binary_function< const int, const int, bool >
 
 wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture )
 {
+	if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
+	{
+		theApp.m_program_canvas->AppendText(_T("roll_radius = float("));
+		theApp.m_program_canvas->AppendText(m_profile_params.m_auto_roll_radius / theApp.m_program->m_units);
+		theApp.m_program_canvas->AppendText(_T(")\n"));
+	}
+
 	std::wostringstream l_ossPythonCode;
 
 	// Make a local copy so that we can either sort it or leave it alone.  We don't want

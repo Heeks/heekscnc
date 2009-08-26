@@ -93,7 +93,7 @@ def profile(k, direction = "on", radius = 1.0, rollstartx = None, rollstarty = N
     if offset_k != k:
         kurve.delete(offset_k)
 
-def roll_on_point(k, direction, radius):
+def roll_on_point(k, direction, radius, roll_radius):
     x = float(0)
     y = float(0)
 
@@ -113,12 +113,12 @@ def roll_on_point(k, direction, radius):
         if direction == 'right':
             off_vx = -off_vx
             off_vy = -off_vy
-        x = sx + off_vx * 2 - vx * 2
-        y = sy + off_vy * 2 - vy * 2
+        x = sx + off_vx * roll_radius - vx * roll_radius
+        y = sy + off_vy * roll_radius - vy * roll_radius
 
     return x, y
 
-def roll_off_point(k, direction, radius):
+def roll_off_point(k, direction, radius, roll_radius):
     x = float(0)
     y = float(0)
 
@@ -140,7 +140,7 @@ def roll_off_point(k, direction, radius):
         if direction == 'right':
             off_vx = -off_vx
             off_vy = -off_vy
-        x = ex + off_vx * 2 + vx * 2
-        y = ey + off_vy * 2 + vy * 2
+        x = ex + off_vx * roll_radius + vx * roll_radius
+        y = ey + off_vy * roll_radius + vy * roll_radius
 
     return x, y
