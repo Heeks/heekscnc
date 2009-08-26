@@ -441,6 +441,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Excellon.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Excellon.h"
+			>
+		</File>
+		<File
 			RelativePath="..\kurve\geometry\Finite.cpp"
 			>
 			<FileConfiguration
