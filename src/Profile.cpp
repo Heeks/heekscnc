@@ -369,7 +369,7 @@ void CProfile::make_smaller( geoff_geometry::Kurve *pKurve, double *pStartx, dou
 	This is the duplicate of the kurve_funcs.py->roll_on_point() method.  It's the one we can
 	call from C++
  */
-bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, double *pRoll_on_x, double *pRoll_on_y) const
+bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, const double roll_radius, double *pRoll_on_x, double *pRoll_on_y) const
 {
 	*pRoll_on_x = double(0.0);
 	*pRoll_on_y = double(0.0);
@@ -403,8 +403,8 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
 			off_vy = -off_vy;
 		} // End if - then
 	
-	        *pRoll_on_x = sx + off_vx * 2 - vx * 2;
-        	*pRoll_on_y = sy + off_vy * 2 - vy * 2;
+	        *pRoll_on_x = sx + off_vx * roll_radius - vx * roll_radius;
+        	*pRoll_on_y = sy + off_vy * roll_radius - vy * roll_radius;
 	} // End if - then
 
 	return(true);
@@ -708,7 +708,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 					if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
 					{
-						roll_on_point( pKurve, side_string.c_str(), pCuttingTool->CuttingRadius(), pRollOnPointX, pRollOnPointY);
+						roll_on_point( pKurve, side_string.c_str(), pCuttingTool->CuttingRadius(), m_profile_params.m_auto_roll_radius, pRollOnPointX, pRollOnPointY);
 					} // End if - then
 
 					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
@@ -724,6 +724,12 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 					ss<<std::setprecision(10);
 					ss << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units;
 					roll_on_string = ss.str().c_str();
+
+					if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL))
+					{
+						*pRollOnPointX = m_profile_params.m_roll_on_point[0];
+						*pRollOnPointY = m_profile_params.m_roll_on_point[1];
+					}
 				}
 			}
 			break;
