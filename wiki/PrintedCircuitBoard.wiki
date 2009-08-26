@@ -1,0 +1,19 @@
+#summary Utilities for CNC machining of Printed Circuit Boards
+
+= Introduction =
+
+HeeksCAD and HeeksCNC support the import of two Gerber file formats for use in generating both graphics and CNC machining operations.
+
+== Gerber (RS274X) file import ==
+
+The HeeksCAD application supports the import of Gerber (RS274X) format data into sketch elements representing the boundaries of each individual trace.  The idea is to allow PCB artwork production using an external application.  Use the PCB application to export the PCB production files in Gerber (RS274X and Excellon drill file) format.
+
+== Excellon Drill file import ==
+
+The HeeksCNC application supports the importing of Excellon drill files into a combination of ToolTable entries and Drilling Operations.  This feature is available beneath the right mouse click of the Operations icon.  When selected, the Import Excellon Drill File menu option prompts the user for a file while giving preference to files whose extension is "CNC".  
+
+Where the drill file specifies a tool definition (T1C0.050), the import utility will look for existing drill bits that are of the same diameter. If none can be found, new CuttingTool definitions are made.
+
+Similarly, the import utility aims to place Point objects at the starting locations of all drilling cycles. It looks for existing Point objects at each location so as to avoid adding duplicate Point objects.
+
+Finally, the import utility generates a Drilling operation using the appropriate drill bit (CuttingTool?) and its corresponding Point objects. 
