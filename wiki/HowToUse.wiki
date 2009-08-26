@@ -55,3 +55,15 @@ http://code.google.com/p/heekscnc/wiki/RoughTurningOp
 == Tool Table ==
 
 http://code.google.com/p/heekscnc/wiki/ToolTable
+
+== Counterbore ==
+
+http://code.google.com/p/heekscnc/wiki/CounterBore
+
+== Locating ==
+
+http://code.google.com/p/heekscnc/wiki/LocatingOperation
+
+== Fixtures (Vice alignment) ==
+
+http://code.google.com/p/heekscnc/wiki/Fixtures
