@@ -20,6 +20,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "geometry.h"
+#include "CNCPoint.h"
 
 #include <sstream>
 
@@ -108,7 +109,7 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 			if(type == LineType || type == ArcType)
 			{
 				span_object->GetStartPoint(s);
-				pFixture->Adjustment(s);
+				CNCPoint start(pFixture->Adjustment(s));
 
 				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
 				{
@@ -123,29 +124,29 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
 					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
 					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(s[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(start.X(true));
 					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(s[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(start.Y(true));
 					theApp.m_program_canvas->AppendText(_T(", 0, 0)\n"));
 					started = true;
 				}
 				span_object->GetEndPoint(e);
-				pFixture->Adjustment(e);
+				CNCPoint end(pFixture->Adjustment(e));
 
 				if(type == LineType)
 				{
 					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
 					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
 					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(end.X(true));
 					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(end.Y(true));
 					theApp.m_program_canvas->AppendText(_T(", 0, 0)\n"));
 				}
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
-					pFixture->Adjustment(c);
+					CNCPoint centre(pFixture->Adjustment(c));
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
@@ -155,13 +156,13 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					theApp.m_program_canvas->AppendText(_T(", "));
 					theApp.m_program_canvas->AppendText(span_type);
 					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(end.X(true));
 					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(end.Y(true));
 					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(centre.X(true));
 					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
+					theApp.m_program_canvas->AppendText(centre.Y(true));
 					theApp.m_program_canvas->AppendText(_T(")\n"));
 				}
 				memcpy(prev_e, e, 3*sizeof(double));
@@ -179,6 +180,8 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					std::list< std::pair<int, gp_Pnt > > points;
 					span_object->GetCentrePoint(c);
 
+					// Setup the four arcs that will make up the circle using UNadjusted
+					// coordinates first so that the offsets align with the X and Y axes.
 					double small_amount = 0.001;
 					double radius = heeksCAD->CircleGetRadius(span_object);
 
@@ -189,22 +192,22 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
 					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
 
-					pFixture->Adjustment(c);
+					CNCPoint centre(pFixture->Adjustment(c));
 
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
-						gp_Pnt pnt = pFixture->Adjustment( l_itPoint->second );
+						CNCPoint pnt = pFixture->Adjustment( l_itPoint->second );
 
 						l_ossPythonCode << (_T("area.add_point(a"));
 						l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
 						l_ossPythonCode << _T(", ") << l_itPoint->first << _T(", ");
-						l_ossPythonCode << (pnt.X() / theApp.m_program->m_units);
+						l_ossPythonCode << pnt.X(true);
 						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << (pnt.Y() / theApp.m_program->m_units);
+						l_ossPythonCode << pnt.Y(true);
 						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+						l_ossPythonCode << centre.X(true);
 						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+						l_ossPythonCode << centre.Y(true);
 						l_ossPythonCode << (_T(")\n"));
 					} // End for
 
