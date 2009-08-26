@@ -43,24 +43,6 @@ CProfileParams::CProfileParams()
 	m_sort_sketches = 1;
 }
 
-void CProfileParams::set_initial_values()
-{
-	CNCConfig config;
-	int int_side = m_tool_on_side;
-	config.Read(_T("ProfileToolOnSide"), &int_side, eLeftOrOutside);
-	m_tool_on_side = (eSide)int_side;
-	int int_mode = m_cut_mode;
-	config.Read(_T("ProfileCutMode"), &int_mode, eConventional);
-	m_cut_mode = (eCutMode)int_mode;
-}
-
-void CProfileParams::write_values_to_config()
-{
-	CNCConfig config;
-	config.Write(_T("ProfileToolOnSide"), m_tool_on_side);
-	config.Write(_T("ProfileCutMode"), m_cut_mode);
-}
-
 static void on_set_tool_on_side(int value, HeeksObj* object){
 	switch(value)
 	{
@@ -74,8 +56,15 @@ static void on_set_tool_on_side(int value, HeeksObj* object){
 		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eOn;
 		break;
 	}
+	((CProfile*)object)->WriteDefaultValues();
 }
-static void on_set_cut_mode(int value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_cut_mode = (CProfileParams::eCutMode)value;}
+
+static void on_set_cut_mode(int value, HeeksObj* object)
+{
+	((CProfile*)object)->m_profile_params.m_cut_mode = (CProfileParams::eCutMode)value;
+	((CProfile*)object)->WriteDefaultValues();
+}
+
 static void on_set_auto_roll_on(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_auto_roll_on = value; heeksCAD->RefreshProperties();}
 static void on_set_roll_on_point(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_roll_on_point, vt, 3*sizeof(double));}
 static void on_set_auto_roll_off(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_auto_roll_off = value; heeksCAD->RefreshProperties();}
@@ -84,7 +73,12 @@ static void on_set_start_given(bool value, HeeksObj* object){((CProfile*)object)
 static void on_set_start(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_start, vt, 3*sizeof(double));}
 static void on_set_end_given(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_given = value; heeksCAD->RefreshProperties();}
 static void on_set_end(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_end, vt, 3*sizeof(double));}
-static void on_set_sort_sketches(const int value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_sort_sketches = value;}
+
+static void on_set_sort_sketches(const int value, HeeksObj* object)
+{
+	((CProfile*)object)->m_profile_params.m_sort_sketches = value;
+	((CProfile*)object)->WriteDefaultValues();
+}
 
 void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
 {
@@ -798,6 +792,28 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 	return(l_ossPythonCode.str().c_str());
 }
 
+void CProfile::WriteDefaultValues()
+{
+	CDepthOp::WriteDefaultValues();
+
+	CNCConfig config;
+	config.Write(wxString(GetTypeString()) + _T("ToolOnSide"), m_profile_params.m_tool_on_side);
+	config.Write(wxString(GetTypeString()) + _T("CutMode"), m_profile_params.m_cut_mode);
+}
+
+void CProfile::ReadDefaultValues()
+{
+	CDepthOp::ReadDefaultValues();
+
+	CNCConfig config;
+	int int_side = m_profile_params.m_tool_on_side;
+	config.Read(wxString(GetTypeString()) + _T("ToolOnSide"), &int_side, CProfileParams::eLeftOrOutside);
+	m_profile_params.m_tool_on_side = (CProfileParams::eSide)int_side;
+	int int_mode = m_profile_params.m_cut_mode;
+	config.Read(wxString(GetTypeString()) + _T("CutMode"), &int_mode, CProfileParams::eConventional);
+	m_profile_params.m_cut_mode = (CProfileParams::eCutMode)int_mode;
+}
+
 void CProfile::AppendTextToProgram(const CFixture *pFixture)
 {
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
@@ -814,8 +830,6 @@ void CProfile::AppendTextToProgram(const CFixture *pFixture)
 	theApp.m_program_canvas->m_textCtrl->AppendText( python_code.c_str() );
 
 } // End AppendTextToProgram() method
-
-
 
 struct sort_sketches : public std::binary_function< const int, const int, bool >
 {

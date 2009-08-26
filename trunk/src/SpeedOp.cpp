@@ -13,6 +13,8 @@
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
+#include "interface/PropertyList.h"
+#include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 #include "CuttingTool.h"
@@ -22,17 +24,6 @@ CSpeedOpParams::CSpeedOpParams()
 	m_horizontal_feed_rate = 0.0;
 	m_vertical_feed_rate = 0.0;
 	m_spindle_speed = 0.0;
-}
-
-void CSpeedOpParams::set_initial_values( const int cutting_tool_number )
-{
-	CNCConfig config;
-	config.Read(_T("SpeedOpHorizFeed"), &m_horizontal_feed_rate, 100.0);
-	config.Read(_T("SpeedOpVertFeed"), &m_vertical_feed_rate, 100.0);
-	config.Read(_T("SpeedOpSpindleSpeed"), &m_spindle_speed, 7000);
-
-	ResetSpeeds(cutting_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
-	ResetFeeds(cutting_tool_number);
 }
 
 void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
@@ -131,30 +122,22 @@ void CSpeedOpParams::ResetSpeeds(const int cutting_tool_number)
 	} // End if - then
 } // End ResetSpeeds() method
 
-void CSpeedOpParams::write_values_to_config()
-{
-	CNCConfig config;
-	config.Write(_T("SpeedOpHorizFeed"), m_horizontal_feed_rate);
-	config.Write(_T("SpeedOpVertFeed"), m_vertical_feed_rate);
-	config.Write(_T("SpeedOpSpindleSpeed"), m_spindle_speed);
-}
-
 static void on_set_horizontal_feed_rate(double value, HeeksObj* object)
 {
 	((CSpeedOp*)object)->m_speed_op_params.m_horizontal_feed_rate = value;
-	((CSpeedOp*)object)->m_speed_op_params.write_values_to_config();
+	((CSpeedOp*)object)->WriteDefaultValues();
 }
 
 static void on_set_vertical_feed_rate(double value, HeeksObj* object)
 {
 	((CSpeedOp*)object)->m_speed_op_params.m_vertical_feed_rate = value;
-	((CSpeedOp*)object)->m_speed_op_params.write_values_to_config();
+	((CSpeedOp*)object)->WriteDefaultValues();
 }
 
 static void on_set_spindle_speed(double value, HeeksObj* object)
 {
 	((CSpeedOp*)object)->m_speed_op_params.m_spindle_speed = value;
-	((CSpeedOp*)object)->m_speed_op_params.write_values_to_config();
+	((CSpeedOp*)object)->WriteDefaultValues();
 }
 
 void CSpeedOpParams::GetProperties(CSpeedOp* parent, std::list<Property *> *list)
@@ -184,6 +167,9 @@ void CSpeedOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 	}
 }
 
+// static
+bool CSpeedOp::m_auto_set_speeds_feeds = false;
+
 void CSpeedOp::WriteBaseXML(TiXmlElement *element)
 {
 	m_speed_op_params.WriteXMLAttributes(element);
@@ -194,6 +180,32 @@ void CSpeedOp::ReadBaseXML(TiXmlElement* element)
 {
 	m_speed_op_params.ReadFromXMLElement(element);
 	COp::ReadBaseXML(element);
+}
+
+void CSpeedOp::WriteDefaultValues()
+{
+	COp::WriteDefaultValues();
+
+	CNCConfig config;
+	config.Write(_T("SpeedOpHorizFeed"), m_speed_op_params.m_horizontal_feed_rate);
+	config.Write(_T("SpeedOpVertFeed"), m_speed_op_params.m_vertical_feed_rate);
+	config.Write(_T("SpeedOpSpindleSpeed"), m_speed_op_params.m_spindle_speed);
+}
+
+void CSpeedOp::ReadDefaultValues()
+{
+	COp::ReadDefaultValues();
+
+	CNCConfig config;
+	config.Read(_T("SpeedOpHorizFeed"), &m_speed_op_params.m_horizontal_feed_rate, 100.0);
+	config.Read(_T("SpeedOpVertFeed"), &m_speed_op_params.m_vertical_feed_rate, 100.0);
+	config.Read(_T("SpeedOpSpindleSpeed"), &m_speed_op_params.m_spindle_speed, 7000);
+
+	if(m_auto_set_speeds_feeds)
+	{
+		m_speed_op_params.ResetSpeeds(m_cutting_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
+		m_speed_op_params.ResetFeeds(m_cutting_tool_number);
+	}
 }
 
 void CSpeedOp::GetProperties(std::list<Property *> *list)
@@ -223,3 +235,26 @@ void CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
 	theApp.m_program_canvas->AppendText(_T("flush_nc()\n"));
 }
 
+static void on_set_auto_speeds(bool value, HeeksObj* object){CSpeedOp::m_auto_set_speeds_feeds = value;}
+
+// static
+void CSpeedOp::GetOptions(std::list<Property *> *list)
+{
+	PropertyList* speeds_options = new PropertyList(_("speeds"));
+	speeds_options->m_list.push_back ( new PropertyCheck ( _("auto set speeds for new operation"), m_auto_set_speeds_feeds, NULL, on_set_auto_speeds ) );
+	list->push_back(speeds_options);
+}
+
+// static
+void CSpeedOp::ReadFromConfig()
+{
+	CNCConfig config;
+	config.Read(_T("SpeedOpAutoSetSpeeds"), &m_auto_set_speeds_feeds,true);
+}
+
+// static
+void CSpeedOp::WriteToConfig()
+{
+	CNCConfig config;
+	config.Write(_T("SpeedOpAutoSetSpeeds"), m_auto_set_speeds_feeds);
+}

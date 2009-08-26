@@ -22,7 +22,7 @@ public:
 	int m_execution_order;	// Order by which the GCode sequences are generated.
 	int m_cutting_tool_number;	// joins the m_tool_number in one of the CCuttingTool objects in the tools list.
 
-	COp(const wxString& title, const int cutting_tool_number = 0):m_active(true), m_title(title), m_execution_order(0), m_cutting_tool_number(cutting_tool_number) {}
+	COp(const wxString& title, const int cutting_tool_number = 0):m_active(true), m_title(title), m_execution_order(0), m_cutting_tool_number(cutting_tool_number) {ReadDefaultValues();}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
@@ -33,6 +33,8 @@ public:
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wxChar* str);
 
+	virtual void WriteDefaultValues();
+	virtual void ReadDefaultValues();
 	virtual void AppendTextToProgram( const CFixture *pFixture );
 
 	static bool IsAnOperation(int object_type);
