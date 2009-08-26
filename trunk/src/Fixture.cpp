@@ -438,14 +438,14 @@ gp_Pnt CFixture::Adjustment( const gp_Pnt & point ) const
 	return(transformed_point);
 } // End Adjustment() method
 
-void CFixture::Adjustment( double *point ) const
+gp_Pnt CFixture::Adjustment( double *point ) const
 {
 	gp_Pnt ref( point[0], point[1], point[2] );
 	ref = Adjustment( ref );
 	point[0] = ref.X();
 	point[1] = ref.Y();
 	point[2] = ref.Z();
-
+	return(ref);
 } // End Adjustment() method
 
 

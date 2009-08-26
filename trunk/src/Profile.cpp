@@ -18,6 +18,7 @@
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 #include "CuttingTool.h"
+#include "CNCPoint.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -277,8 +278,8 @@ void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 					CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 					if (pCuttingTool != NULL)
 					{
-						x = s[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) - v[0] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
-						y = s[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) - v[1] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
+						x = s[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) - v[0] * m_profile_params.m_auto_roll_radius;
+						y = s[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) - v[1] * m_profile_params.m_auto_roll_radius;
 					} // End if - then
 				}
 			}
@@ -315,8 +316,8 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 						{
 							double off_vec[3] = {-v[1], v[0], 0.0};
 							if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
-							x = e[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) + v[0] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
-							y = e[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius / theApp.m_program->m_units) + v[1] * m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
+							x = e[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) + v[0] * m_profile_params.m_auto_roll_radius;
+							y = e[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) + v[1] * m_profile_params.m_auto_roll_radius;
 						} // End if - then
 					}
 				}
@@ -453,71 +454,71 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 				{
 					if(reversed)span_object->GetEndPoint(s);
 					else span_object->GetStartPoint(s);
-					pFixture->Adjustment(s);
+					CNCPoint start(pFixture->Adjustment(s));
 
 					l_ossPythonCode << _T("kurve.add_point(k");
 					l_ossPythonCode << sketch_id;
 					l_ossPythonCode << _T(", " << LINEAR << ", ");
-					l_ossPythonCode << s[0] / theApp.m_program->m_units;
+					l_ossPythonCode << start.X(true);
 					l_ossPythonCode << _T(", ");
-					l_ossPythonCode << s[1]/theApp.m_program->m_units;
+					l_ossPythonCode << start.Y(true);
 					l_ossPythonCode << _T(", 0.0, 0.0)\n");
 					started = true;
 
 					geoff_geometry::kurve_add_point(pKurve,
 									0, 
-									s[0]/theApp.m_program->m_units,
-									s[1]/theApp.m_program->m_units,
+									start.X(true),
+									start.Y(true),
 									0.0, 0.0);
 				}
 				if(reversed)span_object->GetStartPoint(e);
 				else span_object->GetEndPoint(e);
-				pFixture->Adjustment( e );
+				CNCPoint end(pFixture->Adjustment( e ));
 
 				if(type == LineType)
 				{
 					l_ossPythonCode << _T("kurve.add_point(k");
 					l_ossPythonCode << sketch_id;
 					l_ossPythonCode << _T(", " << LINEAR << ", ");
-					l_ossPythonCode << e[0] / theApp.m_program->m_units;
+					l_ossPythonCode << end.X(true);
 					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << e[1] / theApp.m_program->m_units;
+					l_ossPythonCode << end.Y(true);
 					l_ossPythonCode << (_T(", 0.0, 0.0)\n"));
 
 					geoff_geometry::kurve_add_point(pKurve,
 									0, 
-									e[0]/theApp.m_program->m_units,
-									e[1]/theApp.m_program->m_units,
+									end.X(true),
+									end.Y(true),
 									0.0, 0.0);
 				}
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
-					pFixture->Adjustment(c);
+					CNCPoint centre(pFixture->Adjustment(c));
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
-					int span_type = (pos[2] >=0 != reversed) ? ACW: CW;
+					int span_type = ((pos[2] >=0) != reversed) ? ACW: CW;
 					l_ossPythonCode << (_T("kurve.add_point(k"));
 					l_ossPythonCode << (sketch_id);
 					l_ossPythonCode << (_T(", "));
 					l_ossPythonCode << (span_type);
 					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << e[0] / theApp.m_program->m_units;
+					l_ossPythonCode << end.X(true);
 					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << e[1] / theApp.m_program->m_units;
+					l_ossPythonCode << end.Y(true);
 					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << c[0] / theApp.m_program->m_units;
+					l_ossPythonCode << centre.X(true);
 					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << c[1] / theApp.m_program->m_units;
+					l_ossPythonCode << centre.Y(true);
 					l_ossPythonCode << (_T(")\n"));
 
 					geoff_geometry::kurve_add_point(pKurve,
 									span_type, 
-									e[0] / theApp.m_program->m_units,
-									e[1] / theApp.m_program->m_units,
-									c[0] / theApp.m_program->m_units,
-									c[1] / theApp.m_program->m_units );
+									end.X(true),
+									end.Y(true),
+									centre.X(true),
+									centre.Y(true) );
 				}
 				else if(type == CircleType)
 				{
@@ -525,6 +526,10 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					span_object->GetCentrePoint(c);
 
 					double radius = heeksCAD->CircleGetRadius(span_object);
+
+					// Setup the four arcs to make up the full circle using UNadjusted
+					// coordinates.  We do this so that the offsets are expressed along the
+					// X and Y axes.  We will adjust the resultant points later.
 
 					// The kurve code needs a start point first.
 					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
@@ -544,29 +549,30 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					}
 
 					pFixture->Adjustment(c);
+					CNCPoint centre(c);
 
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
-						gp_Pnt pnt = pFixture->Adjustment( l_itPoint->second );
+						CNCPoint pnt = pFixture->Adjustment( l_itPoint->second );
 
 						l_ossPythonCode << (_T("kurve.add_point(k"));
 						l_ossPythonCode << (sketch_id);
 						l_ossPythonCode << _T(", ") << l_itPoint->first << _T(", ");
-						l_ossPythonCode << (pnt.X() / theApp.m_program->m_units);
+						l_ossPythonCode << pnt.X(true);
 						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << (pnt.Y() / theApp.m_program->m_units);
+						l_ossPythonCode << pnt.Y(true);
 						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << (c[0] / theApp.m_program->m_units);
+						l_ossPythonCode << centre.X(true);
 						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << (c[1] / theApp.m_program->m_units);
+						l_ossPythonCode << centre.Y(true);
 						l_ossPythonCode << (_T(")\n"));
 
 						geoff_geometry::kurve_add_point(pKurve,
 										l_itPoint->first,
-										pnt.X() / theApp.m_program->m_units,
-										pnt.Y() / theApp.m_program->m_units,
-										c[0] / theApp.m_program->m_units,
-										c[1] / theApp.m_program->m_units );
+										pnt.X(true),
+										pnt.Y(true),
+										centre.X(true),
+										centre.Y(true) );
 					} // End for
 				}
 			}
