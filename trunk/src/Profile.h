@@ -91,7 +91,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void make_smaller( geoff_geometry::Kurve *pKurve, double *pStartx, double *pStarty, double *pFinishx, double *pFinishy ) const;
-	bool roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, double *pRoll_on_x, double *pRoll_on_y) const;
+	bool roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, const double roll_radius, double *pRoll_on_x, double *pRoll_on_y) const;
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
