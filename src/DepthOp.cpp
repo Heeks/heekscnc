@@ -39,109 +39,34 @@ static double degrees_to_radians( const double degrees )
 	that a 1 mm chamfer is applied.  These are only starting points but
 	we should make them as convenient as possible.
  */
-void CDepthOpParams::set_initial_values( const std::list<int> *sketches, const int cutting_tool_number )
-{
-	CNCConfig config;
-	config.Read(_T("DepthOpClearanceHeight"), &m_clearance_height, 5.0);
-	config.Read(_T("DepthOpStartDepth"), &m_start_depth, 0.0);
-	config.Read(_T("DepthOpStepDown"), &m_step_down, 1.0);
-	config.Read(_T("DepthOpFinalDepth"), &m_final_depth, -1.0);
-	config.Read(_T("DepthOpRapidDown"), &m_rapid_down_to_height, 2.0);
-
-	if (sketches != NULL)
-	{
-		for (std::list<int>::const_iterator l_itSketch = sketches->begin(); l_itSketch != sketches->end(); l_itSketch++)
-		{
-			double default_depth = 1.0;	// mm
-			HeeksObj *pSketch = heeksCAD->GetIDObject( SketchType, *l_itSketch );
-			if (pSketch != NULL)
-			{
-				CBox bounding_box;
-				pSketch->GetBox( bounding_box );
-
-				if (l_itSketch == sketches->begin())
-				{
-					// This is the first cab off the rank.
-
-					m_start_depth = bounding_box.MaxZ();
-					m_final_depth = m_start_depth - default_depth;
-				} // End if - then
-				else
-				{
-					// We've seen some before.  If this one is higher up then use
-					// that instead.
-
-					if (m_start_depth < bounding_box.MaxZ())
-					{
-						m_start_depth = bounding_box.MaxZ();
-					} // End if - then
-
-					if (m_final_depth > bounding_box.MinZ())
-					{
-						m_final_depth = bounding_box.MinZ() - default_depth;
-					} // End if - then
-				} // End if - else
-			} // End if - then
-		} // End for
-	} // End if - then
-
-	// If we've chosen a chamfering bit, calculate the depth required to give a 1 mm wide
-	// chamfer.  It's as good as any width to start with.  If it's not a chamfering bit
-	// then we can't even guess as to what the operator wants.
-
-	const double default_chamfer_width = 1.0;	// mm
-	if (cutting_tool_number > 0)
-	{
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
-		if (pCuttingTool != NULL)
-		{
-			if ((pCuttingTool->m_params.m_type == CCuttingToolParams::eChamfer) &&
-			    (pCuttingTool->m_params.m_cutting_edge_angle > 0))
-			{
-				m_final_depth = m_start_depth - (default_chamfer_width * tan( degrees_to_radians( 90.0 - pCuttingTool->m_params.m_cutting_edge_angle ) ));
-			} // End if - then
-		} // End if - then
-	} // End if - then
-}
-
-void CDepthOpParams::write_values_to_config()
-{
-	CNCConfig config;
-	config.Write(_T("DepthOpClearanceHeight"), m_clearance_height);
-	config.Write(_T("DepthOpStartDepth"), m_start_depth);
-	config.Write(_T("DepthOpStepDown"), m_step_down);
-	config.Write(_T("DepthOpFinalDepth"), m_final_depth);
-	config.Write(_T("DepthOpRapidDown"), m_rapid_down_to_height);
-}
-
 static void on_set_clearance_height(double value, HeeksObj* object)
 {
 	((CDepthOp*)object)->m_depth_op_params.m_clearance_height = value;
-	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+	((CDepthOp*)object)->WriteDefaultValues();
 }
 
 static void on_set_step_down(double value, HeeksObj* object)
 {
 	((CDepthOp*)object)->m_depth_op_params.m_step_down = value;
-	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+	((CDepthOp*)object)->WriteDefaultValues();
 }
 
 static void on_set_start_depth(double value, HeeksObj* object)
 {
 	((CDepthOp*)object)->m_depth_op_params.m_start_depth = value;
-	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+	((CDepthOp*)object)->WriteDefaultValues();
 }
 
 static void on_set_final_depth(double value, HeeksObj* object)
 {
 	((CDepthOp*)object)->m_depth_op_params.m_final_depth = value;
-	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+	((CDepthOp*)object)->WriteDefaultValues();
 }
 
 static void on_set_rapid_down_to_height(double value, HeeksObj* object)
 {
 	((CDepthOp*)object)->m_depth_op_params.m_rapid_down_to_height = value;
-	((CDepthOp*)object)->m_depth_op_params.write_values_to_config();
+	((CDepthOp*)object)->WriteDefaultValues();
 }
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
@@ -194,6 +119,88 @@ void CDepthOp::GetProperties(std::list<Property *> *list)
 {
 	m_depth_op_params.GetProperties(this, list);
 	CSpeedOp::GetProperties(list);
+}
+
+void CDepthOp::WriteDefaultValues()
+{
+	CSpeedOp::WriteDefaultValues();
+
+	CNCConfig config;
+	config.Write(wxString(GetTypeString()) + _T("ClearanceHeight"), m_depth_op_params.m_clearance_height);
+	config.Write(wxString(GetTypeString()) + _T("StartDepth"), m_depth_op_params.m_start_depth);
+	config.Write(wxString(GetTypeString()) + _T("StepDown"), m_depth_op_params.m_step_down);
+	config.Write(wxString(GetTypeString()) + _T("FinalDepth"), m_depth_op_params.m_final_depth);
+	config.Write(wxString(GetTypeString()) + _T("RapidDown"), m_depth_op_params.m_rapid_down_to_height);
+}
+
+void CDepthOp::ReadDefaultValues()
+{
+	CSpeedOp::ReadDefaultValues();
+
+	CNCConfig config;
+	config.Read(wxString(GetTypeString()) + _T("ClearanceHeight"), &m_depth_op_params.m_clearance_height, 5.0);
+	config.Read(wxString(GetTypeString()) + _T("StartDepth"), &m_depth_op_params.m_start_depth, 0.0);
+	config.Read(wxString(GetTypeString()) + _T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
+	config.Read(wxString(GetTypeString()) + _T("FinalDepth"), &m_depth_op_params.m_final_depth, -1.0);
+	config.Read(wxString(GetTypeString()) + _T("RapidDown"), &m_depth_op_params.m_rapid_down_to_height, 2.0);
+}
+
+void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
+{
+	if (sketches != NULL)
+	{
+		for (std::list<int>::const_iterator l_itSketch = sketches->begin(); l_itSketch != sketches->end(); l_itSketch++)
+		{
+			double default_depth = 1.0;	// mm
+			HeeksObj *pSketch = heeksCAD->GetIDObject( SketchType, *l_itSketch );
+			if (pSketch != NULL)
+			{
+				CBox bounding_box;
+				pSketch->GetBox( bounding_box );
+
+				if (l_itSketch == sketches->begin())
+				{
+					// This is the first cab off the rank.
+
+					m_depth_op_params.m_start_depth = bounding_box.MaxZ();
+					m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - default_depth;
+				} // End if - then
+				else
+				{
+					// We've seen some before.  If this one is higher up then use
+					// that instead.
+
+					if (m_depth_op_params.m_start_depth < bounding_box.MaxZ())
+					{
+						m_depth_op_params.m_start_depth = bounding_box.MaxZ();
+					} // End if - then
+
+					if (m_depth_op_params.m_final_depth > bounding_box.MinZ())
+					{
+						m_depth_op_params.m_final_depth = bounding_box.MinZ() - default_depth;
+					} // End if - then
+				} // End if - else
+			} // End if - then
+		} // End for
+	} // End if - then
+
+	// If we've chosen a chamfering bit, calculate the depth required to give a 1 mm wide
+	// chamfer.  It's as good as any width to start with.  If it's not a chamfering bit
+	// then we can't even guess as to what the operator wants.
+
+	const double default_chamfer_width = 1.0;	// mm
+	if (m_cutting_tool_number > 0)
+	{
+		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+		if (pCuttingTool != NULL)
+		{
+			if ((pCuttingTool->m_params.m_type == CCuttingToolParams::eChamfer) &&
+			    (pCuttingTool->m_params.m_cutting_edge_angle > 0))
+			{
+				m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - (default_chamfer_width * tan( degrees_to_radians( 90.0 - pCuttingTool->m_params.m_cutting_edge_angle ) ));
+			} // End if - then
+		} // End if - then
+	} // End if - then
 }
 
 void CDepthOp::AppendTextToProgram(const CFixture *pFixture)

@@ -19,8 +19,6 @@ public:
 
 	CPocketParams();
 
-	void set_initial_values();
-	void write_values_to_config();
 	void GetProperties(CPocket* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -32,7 +30,7 @@ public:
 	CPocketParams m_pocket_params;
 
 	CPocket():CDepthOp(GetTypeString()){}
-	CPocket(const std::list<int> &sketches, const int cutting_tool_number ):CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches){m_pocket_params.set_initial_values();}
+	CPocket(const std::list<int> &sketches, const int cutting_tool_number ):CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches){ReadDefaultValues();}
 
 	// HeeksObj's virtual functions
 	int GetType()const{return PocketType;}
@@ -45,7 +43,10 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 
+	// COp's virtual functions
 	void AppendTextToProgram(const CFixture *pFixture);
+	void WriteDefaultValues();
+	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

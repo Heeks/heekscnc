@@ -40,7 +40,8 @@ public:
 	CDepthOp(const wxString& title, const std::list<int> *sketches = NULL, const int cutting_tool_number = -1 )
 		: CSpeedOp(title, cutting_tool_number)
 	{
-		m_depth_op_params.set_initial_values(sketches, cutting_tool_number);
+		ReadDefaultValues();
+		SetDepthsFromSketchesAndTool(sketches);
 	}
 
 	// HeeksObj's virtual functions
@@ -48,8 +49,12 @@ public:
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
 
-	virtual void AppendTextToProgram(const CFixture *pFixture);
+	// COp's virtual functions
+	void WriteDefaultValues();
+	void ReadDefaultValues();
+	void AppendTextToProgram(const CFixture *pFixture);
 
+	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 };
 
