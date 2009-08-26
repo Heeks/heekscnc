@@ -44,8 +44,6 @@ public:
 
 	CProfileParams();
 
-	void set_initial_values();
-	void write_values_to_config();
 	void GetProperties(CProfile* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -62,7 +60,7 @@ public:
 		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number), 
 			m_sketches(sketches)
 	{
-		m_profile_params.set_initial_values();
+		ReadDefaultValues();
 	} // End constructor
 
 
@@ -80,10 +78,14 @@ public:
 
 	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed );
 	wxString AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, const CFixture *pFixture);
-	void AppendTextToProgram(const CFixture *pFixture);
 	wxString AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture );
 	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
 	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
+
+	// COp's virtual functions
+	void AppendTextToProgram(const CFixture *pFixture);
+	void WriteDefaultValues();
+	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

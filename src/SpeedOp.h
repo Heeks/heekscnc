@@ -22,8 +22,6 @@ public:
 
 	CSpeedOpParams();
 
-	void set_initial_values(const int cutting_tool_number = -1);
-	void write_values_to_config();
 	void GetProperties(CSpeedOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -36,14 +34,23 @@ class CSpeedOp : public COp
 public:
 	CSpeedOpParams m_speed_op_params;
 
-	CSpeedOp(const wxString& title, const int cutting_tool_number = -1 ):COp(title, cutting_tool_number){m_speed_op_params.set_initial_values(cutting_tool_number);}
+	static bool m_auto_set_speeds_feeds;
+
+	CSpeedOp(const wxString& title, const int cutting_tool_number = -1 ):COp(title, cutting_tool_number){ReadDefaultValues();}
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
 
-	virtual void AppendTextToProgram(const CFixture *pFixture);
+	// COp's virtual functions
+	void WriteDefaultValues();
+	void ReadDefaultValues();
+	void AppendTextToProgram(const CFixture *pFixture);
+
+	static void GetOptions(std::list<Property *> *list);
+	static void ReadFromConfig();
+	static void WriteToConfig();
 };
 
 #endif

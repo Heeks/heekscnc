@@ -31,28 +31,29 @@ CPocketParams::CPocketParams()
 	m_starting_place = true;
 }
 
-void CPocketParams::set_initial_values()
+static void on_set_step_over(double value, HeeksObj* object)
 {
-	CNCConfig config;
-	config.Read(_T("PocketStepOver"), &m_step_over, 1.0);
-	config.Read(_T("PocketMaterialAllowance"), &m_material_allowance, 0.2);
-	config.Read(_T("PocketRoundCornerFactor"), &m_round_corner_factor, 1.5);
-	config.Read(_T("FromCenter"), &m_starting_place, 1);
+	((CPocket*)object)->m_pocket_params.m_step_over = value;
+	((CPocket*)object)->WriteDefaultValues();
 }
 
-void CPocketParams::write_values_to_config()
+static void on_set_material_allowance(double value, HeeksObj* object)
 {
-	CNCConfig config;
-	config.Write(_T("PocketStepOver"), m_step_over);
-	config.Write(_T("PocketMaterialAllowance"), m_material_allowance);
-	config.Write(_T("PocketRoundCornerFactor"), m_round_corner_factor);
-	config.Write(_T("FromCenter"), m_starting_place);
+	((CPocket*)object)->m_pocket_params.m_material_allowance = value;
+	((CPocket*)object)->WriteDefaultValues();
 }
 
-static void on_set_step_over(double value, HeeksObj* object){((CPocket*)object)->m_pocket_params.m_step_over = value;}
-static void on_set_material_allowance(double value, HeeksObj* object){((CPocket*)object)->m_pocket_params.m_material_allowance = value;}
-static void on_set_round_corner_factor(double value, HeeksObj* object){((CPocket*)object)->m_pocket_params.m_round_corner_factor = value;}
-static void on_set_starting_place(int value, HeeksObj* object){((CPocket*)object)->m_pocket_params.m_starting_place = value;}
+static void on_set_round_corner_factor(double value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_round_corner_factor = value;
+	((CPocket*)object)->WriteDefaultValues();
+}
+
+static void on_set_starting_place(int value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_starting_place = value;
+	((CPocket*)object)->WriteDefaultValues();
+}
 
 void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
@@ -303,6 +304,27 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 			delete re_ordered_sketch;
 		}
 	}
+}
+void CPocket::WriteDefaultValues()
+{
+	CDepthOp::WriteDefaultValues();
+
+	CNCConfig config;
+	config.Write(wxString(GetTypeString()) + _T("StepOver"), m_pocket_params.m_step_over);
+	config.Write(wxString(GetTypeString()) + _T("MaterialAllowance"), m_pocket_params.m_material_allowance);
+	config.Write(wxString(GetTypeString()) + _T("RoundCornerFactor"), m_pocket_params.m_round_corner_factor);
+	config.Write(wxString(GetTypeString()) + _T("FromCenter"), m_pocket_params.m_starting_place);
+}
+
+void CPocket::ReadDefaultValues()
+{
+	CDepthOp::ReadDefaultValues();
+
+	CNCConfig config;
+	config.Read(wxString(GetTypeString()) + _T("StepOver"), &m_pocket_params.m_step_over, 1.0);
+	config.Read(wxString(GetTypeString()) + _T("MaterialAllowance"), &m_pocket_params.m_material_allowance, 0.2);
+	config.Read(wxString(GetTypeString()) + _T("RoundCornerFactor"), &m_pocket_params.m_round_corner_factor, 1.5);
+	config.Read(wxString(GetTypeString()) + _T("FromCenter"), &m_pocket_params.m_starting_place, 1);
 }
 
 void CPocket::glCommands(bool select, bool marked, bool no_color)

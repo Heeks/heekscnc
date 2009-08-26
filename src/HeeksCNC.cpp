@@ -843,6 +843,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	// Read NC Code colors
 	CNCCode::ReadColorsFromConfig();
 
+	// read auto speed set
+	CSpeedOp::ReadFromConfig();
+
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
 
@@ -1018,6 +1021,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	CNCCode::GetOptions(list);
+	CSpeedOp::GetOptions(list);
 }
 
 void CHeeksCNCApp::OnFrameDelete()
@@ -1029,6 +1033,7 @@ void CHeeksCNCApp::OnFrameDelete()
 	config.Write(_T("MachiningBarVisible"), aui_manager->GetPane(m_machiningBar).IsShown());
 
 	CNCCode::WriteColorsToConfig();
+	CSpeedOp::WriteToConfig();
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
