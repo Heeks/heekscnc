@@ -12,3 +12,9 @@ If you use the ZigZag operation, it creates script which expects the pycam stuff
 When post.py is run, it should create the nc file ( test.tap for example ).
 
 When post.py has been run from the "G0" button in HeeksCNC's program window, it then calls nc/iso_read.py to make an xml file ( test.tap.nc.xml for example ) which contains a list of NC code blocks and their associated toolpath. This is then imported into HeeksCNC so that it can display the NC code and the toolpath.
+
+== Working Units (mm/inch) ==
+
+The HeeksCAD and HeeksCNC applications support the use of either millimeters (mm) or inch working units.  The settings are available as properties of the Program icon.  All values held both in memory and in the XML data files are ALWAYS stored in millimeters.  If inches are required in the Program properties, the conversion is made at the 'last minute' before presentation to the operator.  i.e. when displaying values in the various Properties pages as well as in any generated GCode.
+
+In the case of a Property, the PropertyLength class makes this function more convenient.  i.e. it converts into whatever working units are appropriate when presenting values to the operator.  Similarly, it automatically converts any modified values back into millimeters before passing the value back to any internal memory structures.
