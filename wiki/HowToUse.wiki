@@ -67,3 +67,7 @@ http://code.google.com/p/heekscnc/wiki/LocatingOperation
 == Fixtures (Vice alignment) ==
 
 http://code.google.com/p/heekscnc/wiki/Fixtures
+
+== Printed Circuit Board machining utilities ==
+
+http://code.google.com/p/heekscnc/wiki/PrintedCircuitBoard
