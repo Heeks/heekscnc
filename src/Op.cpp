@@ -121,42 +121,48 @@ void COp::WriteDefaultValues()
 
 void COp::ReadDefaultValues()
 {
-	CNCConfig config;
-
-	// assume that default.tooltable contains tools with IDs:
-	// 1 drill
-	// 2 centre drill
-	// 3 end mill
-	// 4 slot drill
-	// 5 ball end mill
-	// 6 chamfering bit
-	// 7 turn tool
-
-	int default_tool = 0;
-	switch(GetType())
+	if (m_cutting_tool_number <= 0)
 	{
-	case DrillingType:
-		default_tool = 1;
-		break;
-	case AdaptiveType:
-		default_tool = 3;
-		break;
-	case ProfileType:
-	case PocketType:
-	case CounterBoreType:
-		default_tool = 4;
-		break;
-	case ZigZagType:
-		default_tool = 5;
-		break;
-	case TurnRoughType:
-		default_tool = 7;
-		break;
-	default:
-		default_tool = 4;
-		break;
-	}
-	config.Read(wxString(GetTypeString()) + _T("CuttingTool"), &m_cutting_tool_number, default_tool);
+		// The cutting tool number hasn't been assigned from above.  Set some reasonable
+		// defaults.
+
+		CNCConfig config;
+
+		// assume that default.tooltable contains tools with IDs:
+		// 1 drill
+		// 2 centre drill
+		// 3 end mill
+		// 4 slot drill
+		// 5 ball end mill
+		// 6 chamfering bit
+		// 7 turn tool
+
+		int default_tool = 0;
+		switch(GetType())
+		{
+		case DrillingType:
+			default_tool = 1;
+			break;
+		case AdaptiveType:
+			default_tool = 3;
+			break;
+		case ProfileType:
+		case PocketType:
+		case CounterBoreType:
+			default_tool = 4;
+			break;
+		case ZigZagType:
+			default_tool = 5;
+			break;
+		case TurnRoughType:
+			default_tool = 7;
+			break;
+		default:
+			default_tool = 4;
+			break;
+		}
+		config.Read(wxString(GetTypeString()) + _T("CuttingTool"), &m_cutting_tool_number, default_tool);
+	} // End if - then
 }
 
 void COp::AppendTextToProgram(const CFixture *pFixture)
