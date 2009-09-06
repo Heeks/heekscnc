@@ -571,9 +571,9 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		heeksCAD->AddUndoably( tool, theApp.m_program->Tools() );
 
 		// Keep a map of the tool numbers found in the Excellon file to those in our tool table.
-		m_tool_table_map.insert( std::make_pair( excellon_tool_number, tool->m_id ));
+		m_tool_table_map.insert( std::make_pair( excellon_tool_number, tool->m_tool_number ));
 
-		m_active_cutting_tool_number = tool->m_id;	// Use our internal tool number
+		m_active_cutting_tool_number = tool->m_tool_number;	// Use our internal tool number
 	} // End if - then
 
 	if (excellon_tool_number > 0)
