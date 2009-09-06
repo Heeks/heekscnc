@@ -94,5 +94,6 @@ public:
 	bool roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, const double roll_radius, double *pRoll_on_x, double *pRoll_on_y) const;
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
+	std::list<wxString> ConfirmAutoRollRadius(const bool apply_changes);
 
 };

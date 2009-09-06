@@ -832,7 +832,14 @@ void CProfile::ReadDefaultValues()
 	config.Read(wxString(GetTypeString()) + _T("CutMode"), &int_mode, CProfileParams::eConventional);
 	m_profile_params.m_cut_mode = (CProfileParams::eCutMode)int_mode;
 	config.Read(wxString(GetTypeString()) + _T("RollRadius"), &m_profile_params.m_auto_roll_radius, 2.0);
+
+	ConfirmAutoRollRadius(true);
+
 }
+
+
+
+
 
 void CProfile::AppendTextToProgram(const CFixture *pFixture)
 {
@@ -1152,6 +1159,50 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
+std::list<wxString> CProfile::ConfirmAutoRollRadius(const bool apply_changes)
+{
+#ifdef UNICODE
+			std::wostringstream l_ossChange;
+#else
+			std::ostringstream l_ossChange;
+#endif
+
+	std::list<wxString> changes;
+
+	// Look at the dimensions of the sketches as well as the diameter of the cutting bit to decide if
+	// our existing m_auto_roll_radius is too big for this profile.  If so, reduce it now.
+	CCuttingTool *pCuttingTool = NULL;
+	if ((m_cutting_tool_number > 0) && ((pCuttingTool = CCuttingTool::Find(m_cutting_tool_number)) != NULL))
+	{
+		for (std::list<int>::iterator l_itSketchId = m_sketches.begin(); l_itSketchId != m_sketches.end(); l_itSketchId++)
+		{
+			HeeksObj *sketch = heeksCAD->GetIDObject( SketchType, *l_itSketchId );
+			if (sketch != NULL)
+			{
+				CBox bounding_box;
+				sketch->GetBox( bounding_box );
+
+				double min_distance_across = (bounding_box.Height() < bounding_box.Width())?bounding_box.Height():bounding_box.Width();
+				double max_roll_radius = (min_distance_across - (pCuttingTool->CuttingRadius() * 2.0)) / 2.0;
+
+				if (max_roll_radius < m_profile_params.m_auto_roll_radius)
+				{
+					l_ossChange << "Need to adjust auto_roll_radius for profile id=" << m_id << " from " 
+							<< m_profile_params.m_auto_roll_radius << " to " << max_roll_radius << "\n";
+					changes.push_back(l_ossChange.str().c_str());
+				
+					if (apply_changes)
+					{	
+						m_profile_params.m_auto_roll_radius = max_roll_radius;
+					} // End if - then
+				}
+			} // End if - then
+		} // End for
+	} // End if - then
+
+	return(changes);
+
+} // End ConfirmAutoRollRadius() method
 
 /**
 	This method adjusts any parameters that don't make sense.  It should report a list
@@ -1229,6 +1280,9 @@ std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
 			} // End if - then
 		} // End if - then
 	} // End if - then
+
+	std::list<wxString> roll_radius_changes = ConfirmAutoRollRadius(apply_changes);
+	std::copy( roll_radius_changes.begin(), roll_radius_changes.end(), std::inserter( changes, changes.end() ) );
 
 	std::list<wxString> depth_op_changes = CDepthOp::DesignRulesAdjustment( apply_changes );
 	std::copy( depth_op_changes.begin(), depth_op_changes.end(), std::inserter( changes, changes.end() ) );
