@@ -1159,6 +1159,11 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
+/**
+	If it's an 'inside' profile then we need to make sure the auto_roll_radius is not so large
+	that it's going to gouge the part outside the sketch's area.  This routine only
+	reduces the auto_roll_radius.  Its value is not changed unless a gouge scenario is detected.
+ */
 std::list<wxString> CProfile::ConfirmAutoRollRadius(const bool apply_changes)
 {
 #ifdef UNICODE
@@ -1169,35 +1174,38 @@ std::list<wxString> CProfile::ConfirmAutoRollRadius(const bool apply_changes)
 
 	std::list<wxString> changes;
 
-	// Look at the dimensions of the sketches as well as the diameter of the cutting bit to decide if
-	// our existing m_auto_roll_radius is too big for this profile.  If so, reduce it now.
-	CCuttingTool *pCuttingTool = NULL;
-	if ((m_cutting_tool_number > 0) && ((pCuttingTool = CCuttingTool::Find(m_cutting_tool_number)) != NULL))
+	if (m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside)
 	{
-		for (std::list<int>::iterator l_itSketchId = m_sketches.begin(); l_itSketchId != m_sketches.end(); l_itSketchId++)
+		// Look at the dimensions of the sketches as well as the diameter of the cutting bit to decide if
+		// our existing m_auto_roll_radius is too big for this profile.  If so, reduce it now.
+		CCuttingTool *pCuttingTool = NULL;
+		if ((m_cutting_tool_number > 0) && ((pCuttingTool = CCuttingTool::Find(m_cutting_tool_number)) != NULL))
 		{
-			HeeksObj *sketch = heeksCAD->GetIDObject( SketchType, *l_itSketchId );
-			if (sketch != NULL)
+			for (std::list<int>::iterator l_itSketchId = m_sketches.begin(); l_itSketchId != m_sketches.end(); l_itSketchId++)
 			{
-				CBox bounding_box;
-				sketch->GetBox( bounding_box );
-
-				double min_distance_across = (bounding_box.Height() < bounding_box.Width())?bounding_box.Height():bounding_box.Width();
-				double max_roll_radius = (min_distance_across - (pCuttingTool->CuttingRadius() * 2.0)) / 2.0;
-
-				if (max_roll_radius < m_profile_params.m_auto_roll_radius)
+				HeeksObj *sketch = heeksCAD->GetIDObject( SketchType, *l_itSketchId );
+				if (sketch != NULL)
 				{
-					l_ossChange << "Need to adjust auto_roll_radius for profile id=" << m_id << " from " 
-							<< m_profile_params.m_auto_roll_radius << " to " << max_roll_radius << "\n";
-					changes.push_back(l_ossChange.str().c_str());
-				
-					if (apply_changes)
-					{	
-						m_profile_params.m_auto_roll_radius = max_roll_radius;
-					} // End if - then
-				}
-			} // End if - then
-		} // End for
+					CBox bounding_box;
+					sketch->GetBox( bounding_box );
+	
+					double min_distance_across = (bounding_box.Height() < bounding_box.Width())?bounding_box.Height():bounding_box.Width();
+					double max_roll_radius = (min_distance_across - (pCuttingTool->CuttingRadius() * 2.0)) / 2.0;
+
+					if (max_roll_radius < m_profile_params.m_auto_roll_radius)
+					{
+						l_ossChange << "Need to adjust auto_roll_radius for profile id=" << m_id << " from " 
+								<< m_profile_params.m_auto_roll_radius << " to " << max_roll_radius << "\n";
+						changes.push_back(l_ossChange.str().c_str());
+					
+						if (apply_changes)
+						{	
+							m_profile_params.m_auto_roll_radius = max_roll_radius;
+						} // End if - then
+					}
+				} // End if - then
+			} // End for
+		} // End if - then
 	} // End if - then
 
 	return(changes);
