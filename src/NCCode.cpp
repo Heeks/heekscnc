@@ -13,6 +13,7 @@
 #include "interface/MarkedObject.h"
 #include "interface/PropertyColor.h"
 #include "interface/PropertyList.h"
+#include "interface/PropertyInt.h"
 #include "interface/Tool.h"
 #include "CNCConfig.h"
 #include "CuttingTool.h"
@@ -31,6 +32,8 @@
 
 #include <memory>
 #include <sstream>
+
+int CNCCode::s_arc_interpolation_count = 20;
 
 void ColouredText::WriteXML(TiXmlNode *root)
 {
@@ -143,7 +146,7 @@ void PathArc::glVertices(const PathObject* prev_po)
 {
 	if (prev_po == NULL) return;
 
-	std::list<gp_Pnt> vertices = Interpolate( prev_po, 20 );
+	std::list<gp_Pnt> vertices = Interpolate( prev_po, CNCCode::s_arc_interpolation_count );
 	glVertex3dv(prev_po->m_x);
 	for (std::list<gp_Pnt>::const_iterator l_itVertex = vertices.begin(); l_itVertex != vertices.end(); l_itVertex++)
 	{
@@ -518,7 +521,11 @@ void CNCCode::GetOptions(std::list<Property *> *list)
 	list->push_back(nc_options);
 }
 
-CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL), m_user_edited(false){}
+CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL), m_user_edited(false)
+{
+	CNCConfig config;
+	config.Read(_T("CNCCode_ArcInterpolationCount"), &CNCCode::s_arc_interpolation_count, 20);
+}
 
 CNCCode::~CNCCode()
 {
@@ -589,8 +596,16 @@ void CNCCode::GetBox(CBox &box)
 	box.Insert(m_box);
 }
 
+void on_set_arc_interpolation_count(int value, HeeksObj*object)
+{
+	CNCCode::s_arc_interpolation_count = value;
+	CNCConfig config;
+	config.Write(_T("CNCCode_ArcInterpolationCount"), CNCCode::s_arc_interpolation_count);
+}
+
 void CNCCode::GetProperties(std::list<Property *> *list)
 {
+	list->push_back( new PropertyInt(_("Arc Interpolation Count"), CNCCode::s_arc_interpolation_count, this, on_set_arc_interpolation_count) );
 	HeeksObj::GetProperties(list);
 }
 

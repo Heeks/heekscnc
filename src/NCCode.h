@@ -168,6 +168,7 @@ public:
 	CNCCodeBlock* m_highlighted_block;
 	bool m_user_edited; // set, if the user has edited the nc code
 	static PathObject* prev_po;
+	static int s_arc_interpolation_count;	// How many lines to represent an arc for the glCommands() method?
 
 	CNCCode();
 	CNCCode(const CNCCode &p):m_gl_list(0), m_highlighted_block(NULL){operator=(p);}
