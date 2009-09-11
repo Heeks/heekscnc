@@ -28,13 +28,17 @@ static void on_set_raw_material(int zero_based_choice, HeeksObj* object)
 
 	std::copy( materials.begin(), materials.end(), std::inserter(copy,copy.end()));
 
+	CNCConfig config;
 	if (zero_based_choice <= int(copy.size()-1))
 	{
 		pProgram->m_raw_material.m_material_name = copy[zero_based_choice];
+		config.Write(_T("RawMaterial_MaterialName"), pProgram->m_raw_material.m_material_name );
+
 		std::set<double> choices = CSpeedReferences::GetHardnessForMaterial( copy[zero_based_choice] );
 		if (choices.size() > 0)
 		{
 			pProgram->m_raw_material.m_brinell_hardness = *(choices.begin());
+			config.Write(_T("RawMaterial_BrinellHardness"), pProgram->m_raw_material.m_brinell_hardness );
 		} // End if - then
 	} // End if - then
 	heeksCAD->WasModified(object);
@@ -53,6 +57,9 @@ static void on_set_brinell_hardness(int zero_based_choice, HeeksObj *object)
 		pProgram->m_raw_material.m_brinell_hardness = choice_array[zero_based_choice];
 		heeksCAD->WasModified(object);
 	} // End if - then
+
+	CNCConfig config;
+	config.Write(_T("RawMaterial_BrinellHardness"), pProgram->m_raw_material.m_brinell_hardness );
 } // End on_set_brinell_hardness() routine
 
 
@@ -64,8 +71,9 @@ static void on_set_brinell_hardness(int zero_based_choice, HeeksObj *object)
  */
 CRawMaterial::CRawMaterial()
 {
-	m_brinell_hardness = 0.0;
-	m_material_name = _T("Please select a material to machine");
+	CNCConfig config;
+	config.Read(_T("RawMaterial_BrinellHardness"), &m_brinell_hardness, 0.0);
+	config.Read(_T("RawMaterial_MaterialName"), &m_material_name, _T("Please select a material to machine"));
 }
 
 double CRawMaterial::Hardness() const
