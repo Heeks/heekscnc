@@ -4,8 +4,6 @@
 
 HeeksCAD and HeeksCNC support the import of two Gerber file formats for use in generating both graphics and CNC machining operations.
 
-It should be noted that this functionality is still under development.
-
 == Gerber (RS274X) file import ==
 
 The HeeksCAD application supports the import of Gerber (RS274X) format data into sketch elements representing the boundaries of each individual trace.  The idea is to allow PCB artwork production using an external application.  Use the PCB application to export the PCB production files in Gerber (RS274X and Excellon drill file) format.  Use the Import function of HeeksCAD to select the RS274X format files.  These are identified by HeeksCAD by their extension of (.GBR).  The import utility makes use of both the aperture and trace information when producing sketch objects representing the boundaries of each trace.
