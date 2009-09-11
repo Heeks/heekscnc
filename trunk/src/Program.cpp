@@ -97,6 +97,9 @@ static void on_set_output_file_name_follows_data_file_name(int zero_based_choice
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_output_file_name_follows_data_file_name = (zero_based_choice != 0);
 	heeksCAD->RefreshProperties();
+
+	CNCConfig config;
+	config.Write(_T("OutputFileNameFollowsDataFileName"), pProgram->m_output_file_name_follows_data_file_name );
 }
 
 
