@@ -29,7 +29,7 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-void CDrillingParams::set_initial_values( const double depth )
+void CDrillingParams::set_initial_values( const double depth, const int cutting_tool_number )
 {
 	CNCConfig config;
 
@@ -44,6 +44,24 @@ void CDrillingParams::set_initial_values( const double depth )
 		// We've found the depth we want used.  Assign it now.
 		m_depth = depth;
 	} // End if - then
+
+	// The following is taken from the 'rule of thumb' document that Stanley Dornfeld put
+	// together for drilling feeds and speeds.  It includes a statement something like;
+	// "We most always peck every one half drill diameter in depth after the first peck of
+	// three diameters".  From this, we will take his advice and set a default peck depth
+	// that is half the drill's diameter.
+	//
+	// NOTE: If the peck depth is zero (or less) then the operator may have manually chosen
+	// to not peck.  In this case, don't add a positive peck depth - which would force
+	// a pecking cycle rather than another drilling cycle.
+	if ((cutting_tool_number > 0) && (m_peck_depth > 0.0))
+	{
+		CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
+		if (pCuttingTool != NULL)
+		{
+			m_peck_depth = pCuttingTool->m_params.m_diameter / 2.0;
+		}
+	}
 
 }
 

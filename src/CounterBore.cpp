@@ -113,18 +113,18 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 #endif
     ss.imbue(std::locale("C"));
 
-	double cutting_depth = location.Z() + m_depth_op_params.m_start_depth;
-	double final_depth   = location.Z() + m_depth_op_params.m_final_depth;
+	double cutting_depth = m_depth_op_params.m_start_depth;
+	double final_depth   = m_depth_op_params.m_final_depth;
 
 	CNCPoint point( location );
 	CNCPoint centre( point );
 
 	// Rapid to above the starting point (up at clearance height)
-	point.SetZ( point.Z() + m_depth_op_params.m_clearance_height );
+	point.SetZ( m_depth_op_params.m_clearance_height );
 	ss << "rapid( x=" << point.X(true) << ", y=" << point.Y(true) << ", z=" << point.Z(true) << ")\n";
 
 	// Feed (slowly) to the starting point at the centre of the material
-	point.SetZ(location.Z() + m_depth_op_params.m_start_depth);
+	point.SetZ(m_depth_op_params.m_start_depth);
 	ss << "feed( x=" << point.X(true) << ", y=" << point.Y(true) << ", z=" << point.Z(true) << ")\n";
 
 	double tolerance = heeksCAD->GetTolerance();
@@ -267,7 +267,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 	ss << "rapid( x=" << centre.X(true) << ", y=" << centre.Y(true) << ", z=" << drawing_units(final_depth) << ")\n";
 
 	// Rapid to above the starting point (up at clearance height)
-	point.SetZ( point.Z(false) + m_depth_op_params.m_clearance_height );
+	point.SetZ( m_depth_op_params.m_clearance_height );
 	ss << "rapid( x=" << centre.X(true) << ", y=" << centre.Y(true) << ", z=" << point.Z(true) << ")\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -400,7 +400,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 
 				start[0] = l_itPoint->X();
 				start[1] = l_itPoint->Y();
-				start[2] = l_itPoint->Z();
+				start[2] = m_depth_op_params.m_start_depth;
 
 				l_itPoint++;
 
@@ -408,7 +408,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 				{
 					end[0] = l_itPoint->X();
 					end[1] = l_itPoint->Y();
-					end[2] = l_itPoint->Z();
+					end[2] = m_depth_op_params.m_start_depth;
 				
 					glVertex3dv( start );
 					glVertex3dv( end );
@@ -422,7 +422,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 
 				start[0] = l_itPoint->X();
 				start[1] = l_itPoint->Y();
-				start[2] = l_itPoint->Z() - m_depth_op_params.m_final_depth;
+				start[2] = m_depth_op_params.m_final_depth;
 
 				l_itPoint++;
 
@@ -430,7 +430,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 				{
 					end[0] = l_itPoint->X();
 					end[1] = l_itPoint->Y();
-					end[2] = l_itPoint->Z() - m_depth_op_params.m_final_depth;
+					end[2] = m_depth_op_params.m_final_depth;
 				
 					glVertex3dv( start );
 					glVertex3dv( end );
@@ -444,11 +444,11 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 
 				start[0] = l_itPoint->X();
 				start[1] = l_itPoint->Y();
-				start[2] = l_itPoint->Z();
+				start[2] = m_depth_op_params.m_start_depth;
 
 				end[0] = l_itPoint->X();
 				end[1] = l_itPoint->Y();
-				end[2] = l_itPoint->Z() - m_depth_op_params.m_final_depth;
+				end[2] = m_depth_op_params.m_final_depth;
 			
 				glVertex3dv( start );
 				glVertex3dv( end );
@@ -589,9 +589,9 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbol
 				std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
 				for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
 				{
-					if (std::find( locations.begin(), locations.end(), CNCPoint( l_itHole->X(), l_itHole->Y(), l_itHole->Z() ) ) == locations.end())
+					if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
 					{
-						locations.push_back( CNCPoint( l_itHole->X(), l_itHole->Y(), l_itHole->Z() ) );
+						locations.push_back( *l_itHole );
 					} // End if - then
 				} // End for
 			} // End if - then
@@ -647,9 +647,9 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbol
 					double pos[3];
 					if (heeksCAD->GetArcCentre( lhsPtr, pos ))
 					{
-						if (std::find( locations.begin(), locations.end(), CNCPoint( pos[0], pos[1], pos[2] ) ) == locations.end())
+						if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 						{
-							locations.push_back( CNCPoint( pos[0], pos[1], pos[2] ) );
+							locations.push_back( CNCPoint( pos ) );
 						} // End if - then
 					} // End if - then
 				} // End if - then

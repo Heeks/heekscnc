@@ -114,12 +114,18 @@ void CLocating::AppendTextToProgram( const CFixture *pFixture )
 	std::vector<CNCPoint> locations = FindAllLocations( m_symbols );
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
-		gp_Pnt point = pFixture->Adjustment( *l_itLocation );
+		CNCPoint location( *l_itLocation );
+
+		// Move the Z location up above the workpiece.
+		location.SetZ( location.Z() + m_params.m_standoff );
+
+		// Rotate the point to align it with the fixture
+		CNCPoint point( pFixture->Adjustment( location ) );
 
 		ss << "rapid("
-			<< "x=" << point.X()/theApp.m_program->m_units << ", "
-			<< "y=" << point.Y()/theApp.m_program->m_units << ", "
-			<< "z=" << (point.Z() + m_params.m_standoff) /theApp.m_program->m_units << ")\n";
+			<< "x=" << point.X(true) << ", "
+			<< "y=" << point.Y(true) << ", "
+			<< "z=" << point.Z(true) << ")\n";
 		ss << "program_stop(optional=False)\n";
 	} // End for
 
@@ -148,41 +154,6 @@ void CLocating::glCommands(bool select, bool marked, bool no_color)
 			// If we found something, ask its CAD code to draw itself highlighted.
 			if(object)object->glCommands(false, true, false);
 		} // End for
-
-		/*
-		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
-		{
-			GLdouble start[3], end[3];
-
-			start[0] = l_itLocation->x;
-			start[1] = l_itLocation->y;
-			start[2] = l_itLocation->z;
-
-			end[0] = l_itLocation->x;
-			end[1] = l_itLocation->y;
-			end[2] = l_itLocation->z;
-				
-			glBegin(GL_LINE_STRIP);
-			glVertex3dv( start );
-			glVertex3dv( end );
-			glEnd();
-
-			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	*l_itLocation, 
-												l_dHoleDiameter / 2, 
-												m_params.m_depth);
-
-			glBegin(GL_LINE_STRIP);
-			CNCPoint previous = *(pointsAroundCircle.begin());
-			for (std::list< CNCPoint >::const_iterator l_itPoint = pointsAroundCircle.begin();
-				l_itPoint != pointsAroundCircle.end();
-				l_itPoint++)
-			{
-				
-				glVertex3d( l_itPoint->x, l_itPoint->y, l_itPoint->z );
-			}
-			glEnd();
-		} // End for
-		*/
 	} // End if - then
 }
 

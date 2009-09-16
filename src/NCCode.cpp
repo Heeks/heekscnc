@@ -617,7 +617,7 @@ void CNCCode::GetProperties(std::list<Property *> *list)
 
 class ApplyNCCode: public Tool{
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Apply NC Code to solids. NOTE: This not ready yet.");}
+	const wxChar* GetTitle(){return _("Apply NC Code to solids. NOTE: This is not ready yet.");}
 	void Run()
 	{
 		try {
