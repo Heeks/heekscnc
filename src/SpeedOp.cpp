@@ -41,7 +41,35 @@ void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 			CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
 			if (pCuttingTool != NULL)
 			{
-				if (pCuttingTool->m_params.m_max_advance_per_revolution > 0) 
+				if ((pCuttingTool->m_params.m_type == CCuttingToolParams::eDrill) ||
+				    (pCuttingTool->m_params.m_type == CCuttingToolParams::eCentreDrill))
+				{
+					// There is a 'rule of thumb' that Stanley Dornfeld put forward in
+					// an EMC2 reference.  It states that;
+					// "...feed rate one hundred times the drill's decimal diameter
+					// at three thousand RPM".
+					// The diameter is expressed in inches.  eg: a 1/8 inch (0.125 inches)
+					// drill bit could be fed at 12.5 inches per minute using an RPM of
+					// 3000.  OR since 300 is one tenth of 3000 the feed would be 1.2 inches
+					// per minute.
+					//
+					// We will use this rule of thumb in preference to the material removal
+					// rate as the material removal rate is really for milling operations
+					// moving sideways through the material.
+
+					// Let the spindle speed be used (as it has already been determined
+					// based on the raw material, the cutting tool's material and the
+					// tool's diameter.)  We just need to compare this spindle speed with
+					// the magic '3000' value to find out what proportion of the 'rule of thumb'
+					// we're using.
+
+					double proportion = m_spindle_speed / 3000.0;
+					double drill_diameter_in_inches = pCuttingTool->m_params.m_diameter / 25.4;
+					double feed_rate_inches_per_minute = 100.0 * drill_diameter_in_inches * proportion;
+					m_vertical_feed_rate = feed_rate_inches_per_minute * 25.4;	// mm per minute
+					m_horizontal_feed_rate = 0.0;	// We're going straight down with a drill bit.
+				} // End if - then
+				else if (pCuttingTool->m_params.m_max_advance_per_revolution > 0) 
 				{
 					// Spindle speed is in revolutions per minute.
 					double advance_per_rev = pCuttingTool->m_params.m_max_advance_per_revolution;
@@ -56,6 +84,7 @@ void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 						case CCuttingToolParams::eDrill:
 						case CCuttingToolParams::eCentreDrill:
 							m_vertical_feed_rate = feed_rate_mm_per_minute;
+							m_horizontal_feed_rate = 0.0;	// We're going straight down with a drill bit.
 							break;
 				
 						case CCuttingToolParams::eChamfer:

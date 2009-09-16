@@ -568,7 +568,6 @@ void CProgram::RewritePythonProgram()
 
 	for (std::list<CFixture *>::const_iterator l_itFixture = fixtures.begin(); l_itFixture != fixtures.end(); l_itFixture++)
 	{
-
 		(*l_itFixture)->AppendTextToProgram();
 
 		// And then all the rest of the operations.
