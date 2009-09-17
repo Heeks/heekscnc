@@ -676,6 +676,7 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 
 		// If there are other tokens, check the last one to see if it could be a maximum
 		// spindle speed.
+#ifndef WIN32
 		if (tokens.size() > 0)
 		{
 			// We may have a material rate value.
@@ -685,6 +686,7 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 				tokens.erase( tokens.rbegin().base() );	// Remove last token.
 			} // End if - then
 		} // End if - then
+#endif
 	
 		// Everything else must be a description.
 #ifdef UNICODE
