@@ -881,22 +881,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\RS274X.cpp"
-			>
-			<FileConfiguration
-				Name="Unicode Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\RS274X.h"
-			>
-		</File>
-		<File
 			RelativePath=".\SpeedOp.cpp"
 			>
 		</File>
