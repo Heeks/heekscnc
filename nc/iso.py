@@ -210,7 +210,7 @@ class CreatorIso(nc.Creator):
 
     def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
         self.write_blocknum()
-        self.write(iso.RAPID)
+        self.write(iso.codes.RAPID())
         self.write_preps()
         if (x != None):
             dx = x - self.x
@@ -224,9 +224,9 @@ class CreatorIso(nc.Creator):
             dz = z - self.z
             self.write(iso.codes.Z() + (self.fmt % z))
             self.z = z
-        if (a != None) : self.write(iso.A + (iso.codes.FORMAT_ANG() % a))
-        if (b != None) : self.write(iso.B + (iso.codes.FORMAT_ANG() % b))
-        if (c != None) : self.write(iso.C + (iso.codes.FORMAT_ANG() % c))
+        if (a != None) : self.write(iso.codes.A() + (iso.codes.FORMAT_ANG() % a))
+        if (b != None) : self.write(iso.codes.B() + (iso.codes.FORMAT_ANG() % b))
+        if (c != None) : self.write(iso.codes.C() + (iso.codes.FORMAT_ANG() % c))
         self.write_spindle()
         self.write_misc()
         self.write('\n')
@@ -303,7 +303,7 @@ class CreatorIso(nc.Creator):
     def dwell(self, t):
         self.write_blocknum()
         self.write_preps()
-        self.write(iso.DWELL + (iso.TIME % t))
+        self.write(iso.codes.DWELL() + (iso.codes.TIME() % t))
         self.write_misc()
         self.write('\n')
 
