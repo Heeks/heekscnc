@@ -1,9 +1,9 @@
 import nc
-import iso
+import emc2
 
-class CreatorGantryRouter(iso.CreatorIso):
+class CreatorGantryRouter(emc2.CreatorEMC2):
     def init(self): 
-        iso.CreatorIso.init(self) 
+        emc2.CreatorEMC2.init(self) 
 
     def program_begin(self, id, comment):
 	self.write( ('(' + comment + ')' + '\n') )
@@ -15,3 +15,4 @@ class CreatorGantryRouter(iso.CreatorIso):
 	pass
 
 nc.creator = CreatorGantryRouter()
+
