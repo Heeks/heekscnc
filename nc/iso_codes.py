@@ -1,70 +1,74 @@
-SPACE = ''
-FORMAT_IN = '%.5f'
-FORMAT_MM = '%.3f'
-FORMAT_ANG = '%.1f'
-FORMAT_TIME = '%.2f'
-FORMAT_DWELL = 'P%f'
+class Codes():
+	def SPACE(self): return('')
 
-BLOCK = 'N%i' + SPACE
-COMMENT = '(%s)'
-VARIABLE = '#%i'
-VARIABLE_SET = '=%.3f'
+	def FORMAT_IN(self): return('%.5f')
+	def FORMAT_MM(self): return('%.3f')
+	def FORMAT_ANG(self): return('%.1f')
+	def FORMAT_TIME(self): return('%.2f')
+	def FORMAT_DWELL(self): return('P%f')
 
-PROGRAM = 'O%i'
-PROGRAM_END = 'M02'
+	def BLOCK(self): return('N%i' + self.SPACE())
+	def COMMENT(self,comment): return( ('(%s)' % comment ) )
+	def VARIABLE(self): return( '#%i')
+	def VARIABLE_SET(self): return( '=%.3f')
 
-SUBPROG_CALL = 'M98' + SPACE + 'P%i'
-SUBPROG_END = 'M99'
+	def PROGRAM(self): return( 'O%i')
+	def PROGRAM_END(self): return( 'M02')
 
-STOP_OPTIONAL = 'M01'
-STOP = 'M00'
+	def SUBPROG_CALL(self): return( 'M98' + self.SPACE() + 'P%i')
+	def SUBPROG_END(self): return( 'M99')
 
-IMPERIAL = SPACE + 'G20'
-METRIC = SPACE + 'G21'
-ABSOLUTE = SPACE + 'G90'
-INCREMENTAL = SPACE + 'G91'
-POLAR_ON = SPACE + 'G16'
-POLAR_OFF = SPACE + 'G15'
-PLANE_XY = SPACE + 'G17'
-PLANE_XZ = SPACE + 'G18'
-PLANE_YZ = SPACE + 'G19'
+	def STOP_OPTIONAL(self): return('M01')
+	def STOP(self): return('M00')
 
-TOOL = 'T%i' + SPACE + 'M06'
-TOOL_DEFINITION = 'G10' + SPACE + 'L1' + SPACE
+	def IMPERIAL(self): return(self.SPACE() + 'G20')
+	def METRIC(self): return(self.SPACE() + 'G21')
+	def ABSOLUTE(self): return(self.SPACE() + 'G90')
+	def INCREMENTAL(self): return(self.SPACE() + 'G91')
+	def POLAR_ON(self): return(self.SPACE() + 'G16')
+	def POLAR_OFF(self): return(self.SPACE() + 'G15')
+	def PLANE_XY(self): return(self.SPACE() + 'G17')
+	def PLANE_XZ(self): return(self.SPACE() + 'G18')
+	def PLANE_YZ(self): return(self.SPACE() + 'G19')
 
-WORKPLANE = 'G%i'
-WORKPLANE_BASE = 53
+	def TOOL(self): return('T%i' + self.SPACE() + 'M06')
+	def TOOL_DEFINITION(self): return('G10' + self.SPACE() + 'L1' + self.SPACE())
 
-FEEDRATE = SPACE + 'F'
-SPINDLE = SPACE + 'S' + FORMAT_ANG
-SPINDLE_CW = SPACE + 'M03'
-SPINDLE_CCW = SPACE + 'M04'
-COOLANT_OFF = SPACE + 'M09'
-COOLANT_MIST = SPACE + 'M07'
-COOLANT_FLOOD = SPACE + 'M08'
-GEAR_OFF = SPACE + '?'
-GEAR = 'M%i'
-GEAR_BASE = 37
+	def WORKPLANE(self): return('G%i')
+	def WORKPLANE_BASE(self): return(53)
 
-RAPID = 'G00'
-FEED = 'G01'
-ARC_CW = 'G02'
-ARC_CCW = 'G03'
-DWELL = 'G04'
-DRILL = SPACE + 'G81'
-DRILL_WITH_DWELL = SPACE + 'G82'
-PECK_DRILL = SPACE + 'G83'
-PECK_DEPTH = SPACE + 'Q'
-RETRACT = SPACE + 'R'
+	def FEEDRATE(self): return(self.SPACE() + 'F')
+	def SPINDLE(self, format, speed): return(self.SPACE() + 'S' + (format % speed))
+	def SPINDLE_CW(self): return(self.SPACE() + 'M03')
+	def SPINDLE_CCW(self): return(self.SPACE() + 'M04')
+	def COOLANT_OFF(self): return(self.SPACE() + 'M09')
+	def COOLANT_MIST(self): return(self.SPACE() + 'M07')
+	def COOLANT_FLOOD(self): return(self.SPACE() + 'M08')
+	def GEAR_OFF(self): return(self.SPACE() + '?')
+	def GEAR(self): return('M%i')
+	def GEAR_BASE(self): return(37)
 
-X = SPACE + 'X'
-Y = SPACE + 'Y'
-Z = SPACE + 'Z'
-A = SPACE + 'A'
-B = SPACE + 'B'
-C = SPACE + 'C'
-CENTRE_X = SPACE + 'I'
-CENTRE_Y = SPACE + 'J'
-CENTRE_Z = SPACE + 'K'
-RADIUS = SPACE + 'R'
-TIME = SPACE + 'P'
+	def RAPID(self): return('G00')
+	def FEED(self): return('G01')
+	def ARC_CW(self): return('G02')
+	def ARC_CCW(self): return('G03')
+	def DWELL(self): return('G04')
+	def DRILL(self): return(self.SPACE() + 'G81')
+	def DRILL_WITH_DWELL(self, format, dwell): return(self.SPACE() + 'G82' + (format % dwell))
+	def PECK_DRILL(self): return(self.SPACE() + 'G83')
+	def PECK_DEPTH(self, format, depth): return(self.SPACE() + 'Q' + (format % depth))
+	def RETRACT(self, format, height): return(self.SPACE() + 'R' + (format % height))
+
+	def X(self): return(self.SPACE() + 'X')
+	def Y(self): return(self.SPACE() + 'Y')
+	def Z(self): return(self.SPACE() + 'Z')
+	def A(self): return(self.SPACE() + 'A')
+	def B(self): return(self.SPACE() + 'B')
+	def C(self): return(self.SPACE() + 'C')
+	def CENTRE_X(self): return(self.SPACE() + 'I')
+	def CENTRE_Y(self): return(self.SPACE() + 'J')
+	def CENTRE_Z(self): return(self.SPACE() + 'K')
+	def RADIUS(self): return(self.SPACE() + 'R')
+	def TIME(self): return(self.SPACE() + 'P')
+
+codes = Codes()
