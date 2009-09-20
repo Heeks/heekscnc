@@ -1,11 +1,9 @@
 import nc
-import iso
-import iso_codes
+import emc2
 
-class CreatorHM50(iso.CreatorIso):
+class CreatorHM50(emc2.CreatorEMC2):
     def init(self): 
-        iso.CreatorIso.init(self) 
-        iso_codes.SPACE = ' '
+        iso.CreatorEMC2.init(self) 
 	
     def program_begin(self, id, comment):
 	self.write( ('(' + comment + ')' + '\n') )
