@@ -685,7 +685,7 @@ void CCuttingTool::OnEditString(const wxChar* str)
 {
     m_title.assign(str);
 	m_params.m_automatically_generate_title = false;	// It's been manually edited.  Leave it alone now.
-	heeksCAD->WasModified(this);
+	heeksCAD->Changed();
 }
 
 CCuttingTool *CCuttingTool::Find( const int tool_number )
@@ -882,7 +882,7 @@ wxString CCuttingTool::ResetTitle()
 	{
 		// It has the default title.  Give it a name that makes sense.
 		m_title = GenerateMeaningfulName();
-		heeksCAD->WasModified(this);
+		heeksCAD->Changed();
 
 #ifdef UNICODE
 		std::wostringstream l_ossChange;

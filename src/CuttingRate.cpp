@@ -129,7 +129,7 @@ HeeksObj* CCuttingRate::ReadFromXMLElement(TiXmlElement* element)
 
 void CCuttingRate::OnEditString(const wxChar* str){
         m_title.assign(str);
-	heeksCAD->WasModified(this);
+	heeksCAD->Changed();
 }
 
 void CCuttingRate::ResetTitle()
