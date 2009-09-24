@@ -1157,11 +1157,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\TransientObject.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\TransientObject.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\TransientObject.h"
+			RelativePath="$(HEEKSCADPATH)\interface\TransientObject.h"
 			>
 		</File>
 		<File
