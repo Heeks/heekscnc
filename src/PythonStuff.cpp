@@ -92,7 +92,7 @@ public:
 		}
 
 		// read the xml file, just like paste, into the program
-		heeksCAD->OpenXMLFile(xml_file_str, true, theApp.m_program);
+		heeksCAD->OpenXMLFile(xml_file_str, theApp.m_program);
 		heeksCAD->Repaint();
 
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
