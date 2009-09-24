@@ -192,7 +192,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 		} // End for
 
 		CProfile *new_object = new CProfile(sketches, milling_cutting_tool_number);
-		heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
+		theApp.m_program->Operations()->Add(new_object,NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
 
@@ -994,22 +994,22 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 			if (lowercase_file_name.Find(_T("speed")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->SpeedReferences() );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
 			} // End if - then
 			else if (lowercase_file_name.Find(_T("feed")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->SpeedReferences() );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
 			}
 			else if (lowercase_file_name.Find(_T("tool")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->Tools() );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Tools() );
 			}
 			else if (lowercase_file_name.Find(_T("fixture")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), true, theApp.m_program->Fixtures() );
+				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Fixtures() );
 			}
 			else
 			{
