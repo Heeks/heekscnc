@@ -168,7 +168,7 @@ HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 
 void CSpeedReference::OnEditString(const wxChar* str){
         m_title.assign(str);
-	heeksCAD->WasModified(this);
+	heeksCAD->Changed();
 }
 
 void CSpeedReference::ResetTitle()

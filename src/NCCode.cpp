@@ -738,8 +738,8 @@ class ApplyNCCode: public Tool{
 				HeeksObj *pNewSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &(l_itShape->second)), l_ossTitle.str().c_str(), (*(solids[ l_itShape->first ]->GetColor())) );
 				if (pNewSolid != NULL) 
 				{
-					heeksCAD->AddUndoably( pNewSolid, NULL );		// Add the machined solid
-					heeksCAD->DeleteUndoably( solids[ l_itShape->first ] );	// Delete the original.
+					heeksCAD->Add( pNewSolid, NULL );		// Add the machined solid
+					heeksCAD->Remove( solids[ l_itShape->first ] );	// Delete the original.
 				} // End if - then
 			} // End for
 

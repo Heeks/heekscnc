@@ -1157,6 +1157,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\HeeksCAD\interface\TransientObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCAD\interface\TransientObject.h"
+			>
+		</File>
+		<File
 			RelativePath=".\TurnRough.cpp"
 			>
 		</File>

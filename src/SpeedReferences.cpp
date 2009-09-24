@@ -86,12 +86,12 @@ class ImportSpeedReferences: public Tool{
 
 		for (std::list<HeeksObj *>::iterator l_itObject = speed_references.begin(); l_itObject != speed_references.end(); l_itObject++)
 		{
-			heeksCAD->DeleteUndoably( *l_itObject );
+			heeksCAD->Remove( *l_itObject );
 		} // End for
 
 		// And read the default speed references.
 		// heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_speed_references );
-		heeksCAD->OpenXMLFile( previous_path.c_str(), true, theApp.m_program->SpeedReferences() );
+		heeksCAD->OpenXMLFile( previous_path.c_str(), theApp.m_program->SpeedReferences() );
 	}
 	wxString BitmapPath(){ return _T("import");}
 	wxString previous_path;

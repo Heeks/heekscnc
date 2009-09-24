@@ -67,8 +67,8 @@ void COp::ReadBaseXML(TiXmlElement* element)
 }
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
-static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->WasModified(object);}
-static void on_set_execution_order(int value, HeeksObj* object){((COp*)object)->m_execution_order = value;heeksCAD->WasModified(object);}
+static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->Changed();}
+static void on_set_execution_order(int value, HeeksObj* object){((COp*)object)->m_execution_order = value;heeksCAD->Changed();}
 
 static void on_set_cutting_tool_number(int zero_based_choice, HeeksObj* object)
 {
@@ -194,5 +194,5 @@ bool COp::IsAnOperation(int object_type)
 
 void COp::OnEditString(const wxChar* str){
 	m_title.assign(str);
-	heeksCAD->WasModified(this);
+	heeksCAD->Changed();
 }
