@@ -41,7 +41,7 @@ static void on_set_raw_material(int zero_based_choice, HeeksObj* object)
 			config.Write(_T("RawMaterial_BrinellHardness"), pProgram->m_raw_material.m_brinell_hardness );
 		} // End if - then
 	} // End if - then
-	heeksCAD->WasModified(object);
+	heeksCAD->Changed();
 }
 
 static void on_set_brinell_hardness(int zero_based_choice, HeeksObj *object)
@@ -55,7 +55,7 @@ static void on_set_brinell_hardness(int zero_based_choice, HeeksObj *object)
 	if (zero_based_choice <= int(choice_array.size()))
 	{
 		pProgram->m_raw_material.m_brinell_hardness = choice_array[zero_based_choice];
-		heeksCAD->WasModified(object);
+		heeksCAD->Changed();
 	} // End if - then
 
 	CNCConfig config;

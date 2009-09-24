@@ -152,7 +152,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 {
 	COp::AppendTextToProgram(pFixture);
 
-	heeksCAD->StartHistory();	// We're going to create and delete some objects.
+	heeksCAD->CreateUndoPoint();
 
 	//write stl file
 	std::list<HeeksObj*> solids;
@@ -196,10 +196,9 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
 	{
-		heeksCAD->DeleteUndoably( *l_itSolid );
-		heeksCAD->WasRemoved( *l_itSolid );
+		heeksCAD->Remove( *l_itSolid );
 	} // End for
-	heeksCAD->EndHistory();
+	heeksCAD->Changed();
 
 #ifdef UNICODE
 	std::wostringstream ss;

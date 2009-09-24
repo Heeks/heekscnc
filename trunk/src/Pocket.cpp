@@ -250,7 +250,7 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 			(order != SketchOrderHasCircles))
 		{
 			re_ordered_sketch = object->MakeACopy();
-			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder, false);
+			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
 			object = re_ordered_sketch;
 			order = heeksCAD->GetSketchOrder(object);
 			if(	(order != SketchOrderTypeCloseCW) && 

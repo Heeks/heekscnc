@@ -43,7 +43,7 @@ class SetAllActive: public Tool{
 			if(COp::IsAnOperation(object->GetType()))
 			{
 				((COp*)object)->m_active = true;
-				heeksCAD->WasModified(object);
+				heeksCAD->Changed();
 			}
 		}
 	}
@@ -62,7 +62,7 @@ class SetAllInactive: public Tool{
 			if(COp::IsAnOperation(object->GetType()))
 			{
 				((COp*)object)->m_active = false;
-				heeksCAD->WasModified(object);
+				heeksCAD->Changed();
 			}
 		}
 	}

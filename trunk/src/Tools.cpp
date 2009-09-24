@@ -97,12 +97,12 @@ class ImportCuttingTools: public Tool{
 
 		for (std::list<HeeksObj *>::iterator l_itObject = cutting_tools.begin(); l_itObject != cutting_tools.end(); l_itObject++)
 		{
-			heeksCAD->DeleteUndoably( *l_itObject );
+			heeksCAD->Remove( *l_itObject );
 		} // End for
 
 		// And read the default speed references.
 		// heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_cutting_tools );
-		heeksCAD->OpenXMLFile( previous_path.c_str(), true, theApp.m_program->Tools() );
+		heeksCAD->OpenXMLFile( previous_path.c_str(), theApp.m_program->Tools() );
 	}
 	wxString BitmapPath(){ return _T("import");}
 	wxString previous_path;
