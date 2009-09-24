@@ -239,7 +239,7 @@ HeeksObj* CFixture::ReadFromXMLElement(TiXmlElement* element)
 
 void CFixture::OnEditString(const wxChar* str){
         m_title.assign(str);
-	heeksCAD->WasModified(this);
+	heeksCAD->Changed();
 }
 
 CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_number )
@@ -393,7 +393,7 @@ wxString CFixture::ResetTitle()
 	{
 		// It has the default title.  Give it a name that makes sense.
 		m_title = GenerateMeaningfulName();
-		heeksCAD->WasModified(this);
+		heeksCAD->Changed();
 
 #ifdef UNICODE
 		std::wostringstream l_ossChange;

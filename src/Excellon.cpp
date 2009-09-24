@@ -150,7 +150,7 @@ bool Excellon::Read( const char *p_szFileName )
 			new_object->m_params.m_dwell = 0.0;		// Don't wait around to clear stringers either.
 			new_object->m_params.m_standoff = 2.0;		// Printed Circuit Boards a quite flat
 
-			heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
+			theApp.m_program->Operations()->Add(new_object,NULL);
 		} // End for
 
 		return(true);	// Success
@@ -519,7 +519,7 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 				double location[3];
 				CNCPoint( *(pPosition.get()) ).ToDoubleArray( location );
 				HeeksObj *point = heeksCAD->NewPoint( location );
-				heeksCAD->AddUndoably( point, NULL );
+				heeksCAD->Add( point, NULL );
 				CDrilling::Symbol_t symbol( point->GetType(), point->m_id );
 				m_existing_points.insert( std::make_pair( CNCPoint( *(pPosition.get()) ), symbol ));
 			} // End if - then
@@ -568,7 +568,7 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		// We didn't find an existing tool with the right diameter.  Add one now.
 		CCuttingTool *tool = new CCuttingTool(NULL, CCuttingToolParams::eDrill, heeksCAD->GetNextID(CuttingToolType));
 		tool->SetDiameter( tool_diameter * m_units );
-		heeksCAD->AddUndoably( tool, theApp.m_program->Tools() );
+		theApp.m_program->Tools()->Add( tool, NULL );
 
 		// Keep a map of the tool numbers found in the Excellon file to those in our tool table.
 		m_tool_table_map.insert( std::make_pair( excellon_tool_number, tool->m_tool_number ));
