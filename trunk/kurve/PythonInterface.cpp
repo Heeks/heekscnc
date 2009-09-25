@@ -69,6 +69,7 @@ void FAILURE(const wchar_t* str){throw(str);}
 void FAILURE(const std::wstring& str){throw(str);}
 }
 
+#ifdef KURVE_PYTHON_INTERFACE
 static void print_kurve(const Kurve &k)
 {
 	int nspans = k.nSpans();
@@ -82,6 +83,7 @@ static void print_kurve(const Kurve &k)
 		printf("\n");
 	}
 }
+#endif
 
 std::set<Kurve*> valid_kurves;
 
