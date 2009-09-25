@@ -534,6 +534,7 @@ CNCCode::~CNCCode()
 
 const CNCCode &CNCCode::operator=(const CNCCode &rhs)
 {
+	HeeksObj::operator =(rhs);
 	Clear();
 	for(std::list<CNCCodeBlock*>::const_iterator It = rhs.m_blocks.begin(); It != rhs.m_blocks.end(); It++)
 	{
