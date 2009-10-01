@@ -954,6 +954,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		heeksCAD->GetMainObject()->Add(m_program, NULL);
 		theApp.m_program_canvas->Clear();
 		theApp.m_output_canvas->Clear();
+		heeksCAD->Changed();
 	}
 
 
@@ -986,7 +987,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
 		for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
 		{
-		
+
 			wxString lowercase_file_name( *l_itFile );
 			lowercase_file_name.MakeLower();
 
@@ -994,21 +995,25 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
 				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
+				heeksCAD->Changed();
 			} // End if - then
 			else if (lowercase_file_name.Find(_T("feed")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
 				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
+				heeksCAD->Changed();
 			}
 			else if (lowercase_file_name.Find(_T("tool")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
 				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Tools() );
+				heeksCAD->Changed();
 			}
 			else if (lowercase_file_name.Find(_T("fixture")) != -1) 
 			{
 				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
 				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Fixtures() );
+				heeksCAD->Changed();
 			}
 			else
 			{
