@@ -55,12 +55,13 @@ class CPyBackPlot : public CPyProcess
 {
 protected:
 	const CProgram* m_program;
+	HeeksObj* m_into;
 	wxString m_filename;
 
 	static CPyBackPlot* m_object;
 
 public:
-	CPyBackPlot(const CProgram* program, const wxChar* filename): m_program(program), m_filename(filename) { m_object = this; }
+	CPyBackPlot(const CProgram* program, HeeksObj* into, const wxChar* filename): m_program(program), m_into(into),m_filename(filename) { m_object = this; }
 	~CPyBackPlot(void) { m_object = NULL; }
 
 	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
@@ -92,7 +93,7 @@ public:
 		}
 
 		// read the xml file, just like paste, into the program
-		heeksCAD->OpenXMLFile(xml_file_str, theApp.m_program);
+		heeksCAD->OpenXMLFile(xml_file_str, m_into);
 		heeksCAD->Repaint();
 
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
@@ -124,7 +125,7 @@ public:
 		Execute(wxString(_T("python ")) + wxString(_T("/tmp/heekscnc_post.py")));
 #endif
 	}
-	void ThenDo(void) { (new CPyBackPlot(m_program, m_filename))->Do(); }
+	void ThenDo(void) { (new CPyBackPlot(m_program, (HeeksObj*)m_program, m_filename))->Do(); }
 };
 
 CPyPostProcess* CPyPostProcess::m_object = NULL;
@@ -176,7 +177,7 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath)
 	return false;
 }
 
-bool HeeksPyBackplot(const CProgram* program, const wxString &filepath)
+bool HeeksPyBackplot(const CProgram* program, HeeksObj* into, const wxString &filepath)
 {
 	try{
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
@@ -184,7 +185,7 @@ bool HeeksPyBackplot(const CProgram* program, const wxString &filepath)
 		::wxSetWorkingDirectory(theApp.GetDllFolder());
 
 		// call the python file
-		(new CPyBackPlot(program, filepath))->Do();
+		(new CPyBackPlot(program, into, filepath))->Do();
 
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
 		heeksCAD->GetMainFrame()->Raise();

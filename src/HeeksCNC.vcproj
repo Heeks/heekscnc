@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;;&quot;$(HEEKSCADPATH)&quot;;../kurve/geometry;../kurve/messages;&quot;$(WXWIN)\lib\vc_dll\mswd&quot;"
+				AdditionalIncludeDirectories="&quot;$(HEEKSCADPATH)&quot;;&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;;../kurve/geometry;../kurve/messages;&quot;$(WXWIN)\lib\vc_dll\mswd&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH;WNT;_CRT_SECURE_NO_WARNINGS; WXUSINGDLL;HEEKSCNC;OPEN_SOURCE_GEOMETRY"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,7 +64,7 @@
 				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib rpcrt4.lib TKVrml.lib TKStl.lib TKBRep.lib TKIGES.lib TKShHealing.lib TKSTEP.lib TKSTEP209.lib TKSTEPAttr.lib TKSTEPBase.lib TKXSBase.lib TKShapeSchema.lib FWOSPlugin.lib PTKernel.lib TKBool.lib TKCAF.lib TKCDF.lib TKDraw.lib TKernel.lib TKFeat.lib TKFillet.lib TKG2d.lib TKG3d.lib TKGeomAlgo.lib TKGeomBase.lib TKHLR.lib TKMath.lib TKOffset.lib TKPCAF.lib TKPrim.lib TKPShape.lib TKService.lib TKTopAlgo.lib TKV2d.lib TKV3d.lib TKMesh.lib TKAdvTools.lib TKCPPExt.lib TKBO.lib TKXDESTEP.lib TKXCAF.lib TKXCAFSchema.lib TKDCAF.lib TKLCAF.lib TKPLCAF.lib wxmsw28d_core.lib wxmsw28d_aui.lib wxmsw28d_gl.lib wxbase28d.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(HEEKSCADPATH)&quot;;&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -354,6 +354,14 @@
 		</File>
 		<File
 			RelativePath=".\Adaptive.h"
+			>
+		</File>
+		<File
+			RelativePath=".\BOM.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\BOM.h"
 			>
 		</File>
 		<File
@@ -793,7 +801,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyLength.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\PropertyLength.cpp"
 			>
 		</File>
 		<File
@@ -1162,6 +1170,14 @@
 		</File>
 		<File
 			RelativePath="$(HEEKSCADPATH)\interface\TransientObject.h"
+			>
+		</File>
+		<File
+			RelativePath=".\TrsfNCCode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\TrsfNCCode.h"
 			>
 		</File>
 		<File

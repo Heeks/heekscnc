@@ -1,0 +1,56 @@
+// BOM.h
+// Copyright (c) 2009, Dan Heeks
+// This program is released under the BSD license. See the file COPYING for details.
+
+#pragma once
+
+#include "interface/ObjList.h"
+#include "HeeksCNCTypes.h"
+#include "HeeksCNC.h"
+
+class CNCCode;
+
+class NCRect
+{
+public:
+	int m_x,m_y,m_width,m_height;
+	CNCCode* m_code;
+	NCRect(int x, int y, int width, int height, CNCCode* code){m_x=x;m_y=y;m_width=width;m_height=height;m_code=code;}
+
+	bool IntersectsWith(NCRect &other)
+	{
+		if(other.m_x >= m_x && other.m_x <= m_x+m_width && other.m_y >= m_y && other.m_y <= m_y + m_height)
+			return true;
+		return false;
+	}
+};
+
+
+class CBOM:public ObjList
+{
+public:
+	std::vector<NCRect> rects;
+	int m_max_levels;
+
+	CBOM(wxString path);
+	~CBOM();
+
+	void Load(wxString path);
+	void Pack(double width, double height);
+	void FillBoundedArea(int x_min, int x_max, int y_min, int y_max,
+						int &num_unpositioned, std::vector<NCRect>&best_rects, bool *is_positioned, int level);
+	double SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
+            int xmin2, int xmax2, int ymin2, int ymax2,
+			std::vector<NCRect>&rects, bool* is_positioned);
+	// HeeksObj's virtual functions
+	int GetType()const{return ProgramType;}
+	const wxChar* GetTypeString(void)const{return _T("BOM");}
+	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/program");}
+	HeeksObj *MakeACopy(void)const;
+	void GetProperties(std::list<Property *> *list);
+	void WriteXML(TiXmlNode *root);
+	bool AutoExpand(){return true;}
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void glCommands(bool select, bool marked, bool no_color);
+};
