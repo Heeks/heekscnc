@@ -88,7 +88,13 @@ HeeksObj* CBOM::ReadFromXMLElement(TiXmlElement* pElem)
 
 struct ByHeight
 {
-     bool operator()(const NCRect &pStart, const NCRect& pEnd)
+ /*    bool operator()(const NCRect &pStart, const NCRect& pEnd)
+     {
+		 if( pStart.m_height == pEnd.m_height)
+			 return pStart.m_width < pEnd.m_width;
+		 return pStart.m_height < pEnd.m_height;
+     }*/
+	 bool operator()(const NCRect &pEnd, const NCRect& pStart)
      {
 		 if( pStart.m_height == pEnd.m_height)
 			 return pStart.m_width < pEnd.m_width;

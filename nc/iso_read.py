@@ -23,11 +23,11 @@ class ParserIso(nc.Parser):
     def Parse(self, name, oname=None):
         self.files_open(name,oname)
         
-        self.begin_ncblock()
-        self.begin_path(None)
-        self.add_line(z=500)
-        self.end_path()
-        self.end_ncblock()
+        #self.begin_ncblock()
+        #self.begin_path(None)
+        #self.add_line(z=500)
+        #self.end_path()
+        #self.end_ncblock()
 
         while (self.readline()):
             
