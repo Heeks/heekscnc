@@ -18,7 +18,7 @@
 
 using namespace std;
 
-CBOM::CBOM(wxString path):m_max_levels(3)
+CBOM::CBOM(wxString path):m_max_levels(2)
 {
 	Load(path);
 }
@@ -121,12 +121,12 @@ double CBOM::SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
 
 
 void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
-						int &num_unpositioned, std::vector<NCRect>&rects, bool *is_positioned, int level)
+						int &num_unpositioned, std::vector<NCRect>&rects, bool *is_positioned, int level, bool test)
 {
 	// See if every rectangle has been positioned.
     if (num_unpositioned <= 0) return;
 	
-	if(level > m_max_levels)
+	if(level > m_max_levels && test)
 		return;
 
     // Save a copy of the solution so far.
@@ -137,6 +137,10 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 
     // Currently we have no solution for this area.
     double best_density = 0;
+
+	bool used_test2=false;
+	bool used_test1=false;
+	int best_index=0;
 
     // Some rectangles have not been positioned.
     // Loop through the available rectangles.
@@ -161,10 +165,10 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 
             // Fill the area on the right.
             FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymin + rects[i].m_height,
-                        test1_num_unpositioned, test1_rects, test1_is_positioned,level+1);
+                        test1_num_unpositioned, test1_rects, test1_is_positioned,level+1, true);
             // Fill the area on the bottom.
             FillBoundedArea(xmin, xmax, ymin + rects[i].m_height, ymax,
-                        test1_num_unpositioned, test1_rects, test1_is_positioned,level+1);
+                        test1_num_unpositioned, test1_rects, test1_is_positioned,level+1, true);
 
             // Learn about the test solution.
             double test1_density =
@@ -181,6 +185,10 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
                 best_rects = test1_rects;
                 best_is_positioned = test1_is_positioned;
                 best_num_unpositioned = test1_num_unpositioned;
+
+				used_test2 = false;
+				used_test1 = true;
+				best_index = i;
             }
 
             // **************************************************
@@ -196,10 +204,10 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 
             // Fill the area on the right.
             FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymax,
-                        test2_num_unpositioned, test2_rects, test2_is_positioned,level+1);
+                        test2_num_unpositioned, test2_rects, test2_is_positioned,level+1, true);
             // Fill the area on the bottom.
             FillBoundedArea(xmin, xmin + rects[i].m_width, ymin + rects[i].m_height, ymax,
-                        test2_num_unpositioned, test2_rects, test2_is_positioned,level+1);
+                        test2_num_unpositioned, test2_rects, test2_is_positioned,level+1, true);
 
             // Learn about the test solution.
             double test2_density =
@@ -216,9 +224,65 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
                 best_rects = test2_rects;
                 best_is_positioned = test2_is_positioned;
                 best_num_unpositioned = test2_num_unpositioned;
+
+				best_index = i;
+				used_test2 = true;
              }
 		} // End trying this rectangle.
 	} // End looping through the rectangles.
+
+	//Really calculate the best position we found
+	if(!test)
+	{
+		if(used_test2)
+		{
+			int i=best_index;
+            int test2_num_unpositioned = num_unpositioned - 1;
+			std::vector<NCRect> test2_rects = rects;
+ 			bool *test2_is_positioned = new bool[rects.size()];
+			memcpy(test2_is_positioned,is_positioned,sizeof(bool) * rects.size());
+
+			test2_rects[i].m_x = xmin;
+            test2_rects[i].m_y = ymin;
+            test2_is_positioned[i] = true;
+
+            // Fill the area on the right.
+            FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymax,
+                        test2_num_unpositioned, test2_rects, test2_is_positioned,level+1, false);
+            // Fill the area on the bottom.
+            FillBoundedArea(xmin, xmin + rects[i].m_width, ymin + rects[i].m_height, ymax,
+                        test2_num_unpositioned, test2_rects, test2_is_positioned,level+1, false);
+
+
+            best_rects = test2_rects;
+            best_is_positioned = test2_is_positioned;
+            best_num_unpositioned = test2_num_unpositioned;
+		}
+		else if(used_test1)
+		{
+			int i=best_index;
+			int test1_num_unpositioned = num_unpositioned - 1;
+            std::vector<NCRect> test1_rects = rects;
+			bool *test1_is_positioned = new bool[rects.size()];
+			memcpy(test1_is_positioned,is_positioned,sizeof(bool) * rects.size());
+
+            test1_rects[i].m_x = xmin;
+            test1_rects[i].m_y = ymin;
+            test1_is_positioned[i] = true;
+
+            // Fill the area on the right.
+            FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymin + rects[i].m_height,
+                        test1_num_unpositioned, test1_rects, test1_is_positioned,level+1, false);
+            // Fill the area on the bottom.
+            FillBoundedArea(xmin, xmax, ymin + rects[i].m_height, ymax,
+                        test1_num_unpositioned, test1_rects, test1_is_positioned,level+1, false);
+
+            best_rects = test1_rects;
+            best_is_positioned = test1_is_positioned;
+            best_num_unpositioned = test1_num_unpositioned;
+
+		}
+	}
 
     // Return the best solution we found.
 	memcpy(is_positioned,best_is_positioned,sizeof(bool)*rects.size());
@@ -233,7 +297,7 @@ void CBOM::Pack(double bin_width, double height)
 	HeeksObj* child = GetFirstChild();
 	while(child)
 	{
-		CNCCode* code = (CNCCode*)child;
+		CTrsfNCCode* code = (CTrsfNCCode*)child;
 		CBox box;
 		code->GetBox(box);
 		//Figure out how to translate later
@@ -269,7 +333,7 @@ void CBOM::Pack(double bin_width, double height)
 			FillBoundedArea(
                         best_rects[i].m_width, bin_width, max_y,
                         max_y + best_rects[i].m_height,
-                        num_unpositioned, best_rects, is_positioned,0);
+                        num_unpositioned, best_rects, is_positioned,0, false);
 
             if (num_unpositioned == 0) break;
 				max_y += best_rects[i].m_height;
@@ -279,6 +343,15 @@ void CBOM::Pack(double bin_width, double height)
      // Save the best solution.
      rects = best_rects;
      
+	 //Apply to the NCCODE
+	 for(int i=0; i < rects.size(); i++)
+	 {
+		CTrsfNCCode *code = rects[i].m_code;
+	 	CBox box;
+		code->GetBox(box);
+		code->m_x = rects[i].m_x - box.MinX();
+		code->m_y = rects[i].m_y - box.MinY();
+	 }
 }
 
 CBOM* BOMForTool = NULL;

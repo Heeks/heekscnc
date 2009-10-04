@@ -8,14 +8,14 @@
 #include "HeeksCNCTypes.h"
 #include "HeeksCNC.h"
 
-class CNCCode;
+class CTrsfNCCode;
 
 class NCRect
 {
 public:
 	int m_x,m_y,m_width,m_height;
-	CNCCode* m_code;
-	NCRect(int x, int y, int width, int height, CNCCode* code){m_x=x;m_y=y;m_width=width;m_height=height;m_code=code;}
+	CTrsfNCCode* m_code;
+	NCRect(int x, int y, int width, int height, CTrsfNCCode* code){m_x=x;m_y=y;m_width=width;m_height=height;m_code=code;}
 
 	bool IntersectsWith(NCRect &other)
 	{
@@ -38,7 +38,7 @@ public:
 	void Load(wxString path);
 	void Pack(double width, double height);
 	void FillBoundedArea(int x_min, int x_max, int y_min, int y_max,
-						int &num_unpositioned, std::vector<NCRect>&best_rects, bool *is_positioned, int level);
+						int &num_unpositioned, std::vector<NCRect>&best_rects, bool *is_positioned, int level, bool test);
 	double SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
             int xmin2, int xmax2, int ymin2, int ymax2,
 			std::vector<NCRect>&rects, bool* is_positioned);

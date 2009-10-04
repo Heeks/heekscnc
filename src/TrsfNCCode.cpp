@@ -10,7 +10,7 @@
 
 using namespace std;
 
-CTrsfNCCode::CTrsfNCCode()
+CTrsfNCCode::CTrsfNCCode():m_x(0),m_y(0)
 {
 	Add(new CNCCode(),NULL);
 }
@@ -41,3 +41,12 @@ HeeksObj* CTrsfNCCode::ReadFromXMLElement(TiXmlElement* pElem)
 	return NULL;
 }
 
+void CTrsfNCCode::glCommands(bool select, bool marked, bool no_color)
+{
+	glPushMatrix();
+	
+	glTranslated(m_x,m_y,0);
+	ObjList::glCommands(select,marked,no_color);
+
+	glPopMatrix();
+}
