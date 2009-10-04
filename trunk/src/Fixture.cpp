@@ -354,17 +354,17 @@ wxString CFixture::GenerateMeaningfulName() const
 		default:				break;
 	} // End switch
 
-	if (abs(m_params.m_a_axis) > 0.0000001)
+	if (fabs(m_params.m_a_axis) > 0.0000001)
 	{
 		l_ossName << " rotated " << m_params.m_a_axis << " degrees in YZ plane";
 	} // End if - then
 
-	if (abs(m_params.m_b_axis) > 0.0000001)
+	if (fabs(m_params.m_b_axis) > 0.0000001)
 	{
 		l_ossName << " rotated " << m_params.m_b_axis << " degrees in XZ plane";
 	} // End if - then
 
-	if (abs(m_params.m_c_axis) > 0.0000001)
+	if (fabs(m_params.m_c_axis) > 0.0000001)
 	{
 		l_ossName << " rotated " << m_params.m_c_axis << " degrees in XY plane";
 	} // End if - then
