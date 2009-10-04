@@ -42,6 +42,7 @@
 #include "CuttingTool.h"
 #include "interface/strconv.h"
 #include "CNCPoint.h"
+#include "BOM.h"
 
 #include <sstream>
 
@@ -641,9 +642,23 @@ static void OpenNcFileMenuCallback(wxCommandEvent& event)
 
     if (dialog.ShowModal() == wxID_OK)
     {
-		HeeksPyBackplot(theApp.m_program, dialog.GetPath().c_str());
+		HeeksPyBackplot(theApp.m_program, theApp.m_program, dialog.GetPath().c_str());
 	}
 }
+
+static void OpenBOMFileMenuCallback(wxCommandEvent& event)
+{
+	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
+	wxString wildcard_string = wxString(_("BOM files")) + _T(" |") + ext_str;
+    wxFileDialog dialog(theApp.m_output_canvas, _("Open BOM file"), wxEmptyString, wxEmptyString, wildcard_string);
+    dialog.CentreOnParent();
+
+    if (dialog.ShowModal() == wxID_OK)
+    {
+		theApp.m_program->Owner()->Add(new CBOM(dialog.GetPath()),NULL);
+	}
+}
+
 
 static void SaveNcFileMenuCallback(wxCommandEvent& event)
 {
@@ -664,7 +679,7 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 
 			ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
 		}
-		HeeksPyBackplot(theApp.m_program, nc_file_str);
+		HeeksPyBackplot(theApp.m_program, theApp.m_program, nc_file_str);
 	}
 }
 
@@ -824,6 +839,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), ToolImage(_T("postprocess")), PostProcessMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Open NC File"), ToolImage(_T("opennc")), OpenNcFileMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Save NC File"), ToolImage(_T("savenc")), SaveNcFileMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Open BOM File"), ToolImage(_T("opennc")), OpenBOMFileMenuCallback);
 	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
 
 	// add the program canvas
