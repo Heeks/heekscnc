@@ -11,6 +11,9 @@
 class CTrsfNCCode:public ObjList
 {
 public:
+	double m_x;
+	double m_y;
+
 	CTrsfNCCode();
 	~CTrsfNCCode();
 
@@ -24,4 +27,5 @@ public:
 	bool AutoExpand(){return true;}
 	bool OneOfAKind(){return true;}
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void glCommands(bool select, bool marked, bool no_color);
 };
