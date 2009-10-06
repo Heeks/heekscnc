@@ -1,0 +1,42 @@
+#summary How to use the bill of materials NC code packer
+
+= Introduction =
+
+HeeksCNC includes an automated packer for NC code files. The purpose of which is too fit as many files as possible onto a piece of stock. It outputs a single NC file so that you can cut however many parts at one time without operator intervention. 
+
+The packing algorithm is still in the works, if you generate a packing that is really bad please report it so it can be worked on. Even if it was working perfectly, it is not the greatest system in the world. Bin packing is a very difficult problem and computers can not often give reasonable answers in reasonable time. 
+
+The HeeksCNC bin packer can only pack rectangular shapes. It gets these by loading your NC file and creating a bounding box. So if you have things like large L shapes or such things, you will likely get bad results. It also won't rotate the rectangles, so your results may very depending on the orientation of your nc files. 
+
+Currently the bin packer only constrains the width of the bin, and optimizes the height. So if you put too many items in the BOM, your height might get too big. 
+
+This code relies on the ability of HeeksCNC to import your nc files. You can test this by just using the "Open NC File" menu item. Files created with HeeksCNC or any other iso standard mill post processor should work. If your files don't work. Please report it in bug tracker. 
+
+There is some stuff foobar with inches/millimeters. Imported NC files must be in inches, or it won't work right. 
+
+If you do have lots of rectangles, lots of small parts and comparatively large stock, this may save you a ton of labor. Best of luck. 
+
+
+= Creating the BOM =
+
+Before packing your BOM, you must create it. The BOM is just a text file, so open up your favorite text editor and create some lines like this.
+
+c:\heekscad\test.tap.txt,10
+c:\heekscad\test2.tap,10
+c:\heekscad\test3.tap.tap,10
+c:\heekscad\test5.tap,10
+
+That is, the full path of your NC file, a comma, and the number of items you want. 
+
+
+= Loading and packing the BOM =
+
+In HeeksCAD go to the machining menu and select "Open BOM File", browse to your BOM and hit OK. 
+
+The BOM will now show up in the objects tree. Right click on it, and hit Pack. You will now be prompted for the width that you would like the bin constrained to. Followed by the spacing you want in between items. One is in inches and the other in millimeters, so watch out. 
+
+After hitting pack, be prepared to wait. On my computer it takes about a minute to pack 80 items. The complexity formula is complicated, so more or less items may take longer.
+
+= Exporting the toolpath =
+
+After packing, if you are satisfied with the results. Right click on the BOM and select "Output NC", this will write a file named "output.nc" to the current directory. If this file exists, it will be overwritten. 
