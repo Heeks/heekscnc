@@ -15,7 +15,7 @@ class ParserIso(nc.Parser):
     def __init__(self):
         nc.Parser.__init__(self)
 
-        self.pattern_main = re.compile('(!.*|\s+|\w(?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
+        self.pattern_main = re.compile('(!.*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
 
         #if(at least one space or a letter followed by some character or not followed by a +/- followed by decimal, with a possible decimal point
          #  followed by a possible deimcal, or a letter followed by # with a decimal . deimcal
@@ -28,13 +28,17 @@ class ParserIso(nc.Parser):
         #self.add_line(z=500)
         #self.end_path()
         #self.end_ncblock()
+        
+        path_col = None
+        f = None
+        arc = 0
 
         while (self.readline()):
             
             a = None
             b = None
             c = None
-            f = None
+            #f = None
             i = None
             j = None
             k = None
@@ -49,8 +53,8 @@ class ParserIso(nc.Parser):
             self.begin_ncblock()
 
             move = False
-            arc = 0
-            path_col = None
+            #arc = 0
+            #path_col = None
             drill = False
 
             words = self.pattern_main.findall(self.line)
@@ -76,9 +80,11 @@ class ParserIso(nc.Parser):
                 elif (word == 'G0' or word == 'G00' or word == 'g0' or word == 'g00'):
                     path_col = "rapid"
                     col = "rapid"
+                    arc = 0
                 elif (word == 'G1' or word == 'G01' or word == 'g1' or word == 'g01'):
                     path_col = "feed"
                     col = "feed"
+                    arc = 0
                 elif (word == 'G2' or word == 'G02' or word == 'g2' or word == 'g02' or word == 'G12' or word == 'g12'):
                     path_col = "feed"
                     col = "feed"
@@ -162,6 +168,7 @@ class ParserIso(nc.Parser):
                 elif (word[0] == '(') : (col, cdata) = ("comment", True)
                 elif (word[0] == '!') : (col, cdata) = ("comment", True)
                 elif (word[0] == '#') : col = "variable"
+                elif (word[0] == ':') : col = "blocknum"
                 elif (ord(word[0]) <= 32) : cdata = True
                 self.add_text(word, col, cdata)
 

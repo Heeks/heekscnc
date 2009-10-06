@@ -14,7 +14,6 @@
 #include "interface/PropertyLength.h"
 #include "interface/Tool.h"
 #include "TrsfNCCode.h"
-#include "PythonStuff.h"
 
 using namespace std;
 
@@ -126,14 +125,16 @@ double CBOM::SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
         }
 
 
-void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
+int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 						int &num_unpositioned, std::vector<NCRect>&rects, bool *is_positioned, int level, bool test)
 {
 	// See if every rectangle has been positioned.
-    if (num_unpositioned <= 0) return;
+    if (num_unpositioned <= 0) return xmin;
 	
 	if(level > m_max_levels && test)
-		return;
+		return xmin;
+
+	int xmaxret=xmin;
 
     // Save a copy of the solution so far.
     int best_num_unpositioned = num_unpositioned;
@@ -170,18 +171,25 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
             test1_is_positioned[i] = true;
 
             // Fill the area on the right.
-            FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymin + rects[i].m_height,
+            int test1_xmax1 = FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymin + rects[i].m_height,
                         test1_num_unpositioned, test1_rects, test1_is_positioned,level+1, true);
             // Fill the area on the bottom.
-            FillBoundedArea(xmin, xmax, ymin + rects[i].m_height, ymax,
+            int test1_xmax2 = FillBoundedArea(xmin, xmax, ymin + rects[i].m_height, ymax,
                         test1_num_unpositioned, test1_rects, test1_is_positioned,level+1, true);
 
             // Learn about the test solution.
+    /*       double test1_density =
+                        SolutionDensity(
+                            xmin + rects[i].m_width, max(test1_xmax1,test1_xmax2), ymin, ymin + rects[i].m_height,
+                            xmin, max(test1_xmax1,test1_xmax2), ymin + rects[i].m_height, ymax,
+                            test1_rects, test1_is_positioned); */
+
             double test1_density =
                         SolutionDensity(
-                            xmin + rects[i].m_width, xmax, ymin, ymin + rects[i].m_height,
-                            xmin, xmax, ymin + rects[i].m_height, ymax,
+                            xmin, max(test1_xmax1,test1_xmax2), ymin, ymax,
+                            xmin, max(test1_xmax1,test1_xmax2), ymin, ymax,
                             test1_rects, test1_is_positioned);
+
 
             // See if this is better than the current best solution.
             if (test1_density >= best_density)
@@ -191,6 +199,7 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
                 best_rects = test1_rects;
                 best_is_positioned = test1_is_positioned;
                 best_num_unpositioned = test1_num_unpositioned;
+				xmaxret = max(test1_xmax1,test1_xmax2);
 
 				used_test2 = false;
 				used_test1 = true;
@@ -209,17 +218,22 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
             test2_is_positioned[i] = true;
 
             // Fill the area on the right.
-            FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymax,
+            int test2_xmax1 = FillBoundedArea(xmin + rects[i].m_width, xmax, ymin, ymax,
                         test2_num_unpositioned, test2_rects, test2_is_positioned,level+1, true);
             // Fill the area on the bottom.
-            FillBoundedArea(xmin, xmin + rects[i].m_width, ymin + rects[i].m_height, ymax,
+            int test2_xmax2 = FillBoundedArea(xmin, xmin + rects[i].m_width, ymin + rects[i].m_height, ymax,
                         test2_num_unpositioned, test2_rects, test2_is_positioned,level+1, true);
 
             // Learn about the test solution.
-            double test2_density =
+/*            double test2_density =
                         SolutionDensity(
-                            xmin + rects[i].m_width, xmax, ymin, ymax,
-                            xmin, xmin + rects[i].m_width, ymin + rects[i].m_height, ymax,
+                            xmin + rects[i].m_width, max(test2_xmax1,test2_xmax2), ymin, ymax,
+                            xmin, max(test2_xmax1,test2_xmax2), ymin + rects[i].m_height, ymax,
+                            test2_rects, test2_is_positioned);*/
+			double test2_density =
+                        SolutionDensity(
+                            xmin, max(test2_xmax1,test2_xmax2), ymin, ymax,
+                            xmin, max(test2_xmax1,test2_xmax2), ymin, ymax,
                             test2_rects, test2_is_positioned);
 
             // See if this is better than the current best solution.
@@ -230,6 +244,7 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
                 best_rects = test2_rects;
                 best_is_positioned = test2_is_positioned;
                 best_num_unpositioned = test2_num_unpositioned;
+				xmaxret = max(test2_xmax1,test2_xmax2);
 
 				best_index = i;
 				used_test2 = true;
@@ -294,6 +309,8 @@ void CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 	memcpy(is_positioned,best_is_positioned,sizeof(bool)*rects.size());
     num_unpositioned = best_num_unpositioned;
     rects = best_rects;
+
+	return xmaxret;
 }
 
 void CBOM::Pack(double bin_width, double height)
@@ -360,6 +377,81 @@ void CBOM::Pack(double bin_width, double height)
 	 }
 }
 
+void CBOM::Regurgitate()
+{
+//Options
+	bool remove_tool_changes = true;
+	bool remove_unknown_nc_codes = true;
+
+	//First sorts the rects by nearest neighbor. Don't have a TSP solver yet.
+	
+	//storage for the ordered rects
+	std::vector<NCRect> ordered_rects;
+
+	bool *is_ordered = new bool[rects.size()];
+	for(int i=0; i < rects.size(); i++)
+		is_ordered[i]=false;
+
+	int lastx=0;
+	int lasty=0;
+	int num_unordered = rects.size()-1;
+	//find the rect at 0,0
+	for(int i=0; i < rects.size(); i++)
+	{
+		if(rects[i].m_x == 0 && rects[i].m_y == 0)
+		{
+			ordered_rects.push_back(rects[i]);
+			is_ordered[i] = true;
+		}
+	}
+
+	//find the closest rect to the last
+	double bestd = -1;
+	int besti = 0;
+	while(num_unordered)
+	{
+		for(int i=0; i < rects.size(); i++)
+		{
+			if(is_ordered[i])
+				continue;
+
+			double dx = rects[i].m_x - lastx;
+			double dy = rects[i].m_y - lasty;
+			double d = sqrt(dx*dx+dy*dy);
+
+			if(bestd < 0 || d < bestd)
+			{
+				bestd = d;
+				besti = i;
+			}
+		}
+
+		bestd=-1;
+		is_ordered[besti]=true;
+		lastx = rects[besti].m_x;
+		lasty = rects[besti].m_y;
+		ordered_rects.push_back(rects[besti]);
+		num_unordered--;
+	}
+
+	wxTextFile f(_("c:\\output.nc"));
+	if(f.Exists())
+	{
+		f.Open();
+		f.Clear();
+	}
+	else
+		f.Create();
+	//Now go through and write out the nc code one at a time
+	for(int i=0; i < ordered_rects.size(); i++)
+	{
+		ordered_rects[i].m_code->WriteCode(f);
+	}
+
+	f.Write();
+	f.Close();
+}
+
 CBOM* BOMForTool = NULL;
 
 class PackTool: public Tool{
@@ -372,12 +464,24 @@ class PackTool: public Tool{
 	wxString BitmapPath(){ return _T("setinactive");}
 };
 
+class RegurgitateTool: public Tool{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Output NC");}
+	void Run()
+	{
+		BOMForTool->Regurgitate();
+	}
+	wxString BitmapPath(){ return _T("setinactive");}
+};
+
 static PackTool pack_tool;
+static RegurgitateTool regurgitate_tool;
 
 void CBOM::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	BOMForTool = this;
 	t_list->push_back(&pack_tool);
+	t_list->push_back(&regurgitate_tool);
 
 	HeeksObj::GetTools(t_list, p);
 }
