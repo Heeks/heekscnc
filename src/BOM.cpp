@@ -16,8 +16,9 @@
 #include "TrsfNCCode.h"
 
 using namespace std;
+extern CHeeksCADInterface* heeksCAD;
 
-CBOM::CBOM(wxString path):m_max_levels(2)
+CBOM::CBOM(wxString path):m_max_levels(2),m_gap(0)
 {
 	Load(path);
 }
@@ -313,8 +314,9 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 	return xmaxret;
 }
 
-void CBOM::Pack(double bin_width, double height)
+void CBOM::Pack(double bin_width, double height, int gap)
 {
+	m_gap = gap;
 	std::vector<NCRect> best_rects;
 	rects.clear();
 	HeeksObj* child = GetFirstChild();
@@ -324,7 +326,7 @@ void CBOM::Pack(double bin_width, double height)
 		CBox box;
 		code->GetBox(box);
 		//Figure out how to translate later
-		NCRect ncrect(0,0,box.Width(),box.Height(),code);
+		NCRect ncrect(0,0,box.Width()+gap,box.Height()+gap,code);
 		best_rects.push_back(ncrect);
 		rects.push_back(ncrect);
 		child = GetNextChild();
@@ -434,7 +436,7 @@ void CBOM::Regurgitate()
 		num_unordered--;
 	}
 
-	wxTextFile f(_("c:\\output.nc"));
+	wxTextFile f(_("output.nc"));
 	if(f.Exists())
 	{
 		f.Open();
@@ -459,7 +461,11 @@ class PackTool: public Tool{
 	const wxChar* GetTitle(){return _("Pack BOM");}
 	void Run()
 	{
-		BOMForTool->Pack(24*25.4,24*25.4);
+		double width=24;
+		double gap = 2;
+		heeksCAD->InputDouble(_("Enter width of panel in inches"),_("width"),width);
+		heeksCAD->InputDouble(_("Enter gap in millimeters"),_("gap"),gap);
+		BOMForTool->Pack(width*25.4,width*25.4,(int)gap);
 	}
 	wxString BitmapPath(){ return _T("setinactive");}
 };

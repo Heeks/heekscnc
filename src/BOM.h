@@ -31,12 +31,13 @@ class CBOM:public ObjList
 public:
 	std::vector<NCRect> rects;
 	int m_max_levels;
+	int m_gap;
 
 	CBOM(wxString path);
 	~CBOM();
 
 	void Load(wxString path);
-	void Pack(double width, double height);
+	void Pack(double width, double height, int gap);
 	void Regurgitate();
 	int FillBoundedArea(int x_min, int x_max, int y_min, int y_max,
 						int &num_unpositioned, std::vector<NCRect>&best_rects, bool *is_positioned, int level, bool test);
