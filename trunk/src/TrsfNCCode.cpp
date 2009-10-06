@@ -3,10 +3,11 @@
 // This program is released under the BSD license. See the file COPYING for details.
 
 #include "stdafx.h"
-#include "TrsfNCCode.h"
 #include "PythonStuff.h"
 #include "tinyxml/tinyxml.h"
 #include "NCCode.h"
+#include "TrsfNCCode.h"
+
 
 using namespace std;
 
@@ -49,4 +50,16 @@ void CTrsfNCCode::glCommands(bool select, bool marked, bool no_color)
 	ObjList::glCommands(select,marked,no_color);
 
 	glPopMatrix();
+}
+
+void CTrsfNCCode::WriteCode(wxTextFile &f)
+{
+	CNCCode* code = (CNCCode*)GetFirstChild();
+
+	std::list<CNCCodeBlock*>::iterator it;
+	for(it = code->m_blocks.begin(); it != code->m_blocks.end(); it++)
+	{
+		CNCCodeBlock* block = *it;
+		block->WriteNCCode(f,m_x,m_y);
+	}
 }

@@ -17,6 +17,8 @@ public:
 	CTrsfNCCode();
 	~CTrsfNCCode();
 
+	void WriteCode(wxTextFile &f);
+
 	// HeeksObj's virtual functions
 	int GetType()const{return TrsfNCCodeType;}
 	const wxChar* GetTypeString(void)const{return _T("Transformable NC Code");}
