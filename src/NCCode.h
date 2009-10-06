@@ -60,6 +60,7 @@ public:
 	int m_cutting_tool_number;
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
 	virtual int GetType() = 0; // 0 - line, 1 - arc
+	virtual void GetBox(CBox &box,const PathObject* prev_po){box.Insert(m_x);}
 
 	void WriteBaseXML(TiXmlElement *element);
 
@@ -88,6 +89,7 @@ public:
 class PathArc : public PathObject{
 public:
 	double m_c[3]; // defined relative to previous point ( span start point )
+	double m_radius;
 	int m_dir; // 1 - anti-clockwise, -1 - clockwise
 	PathArc(){m_c[0] = m_c[1] = m_c[2] = 0.0; m_dir = 1;}
 	int GetType(){return int(PathObject::eArc);}
@@ -97,6 +99,9 @@ public:
 	std::list<gp_Pnt> Interpolate( const PathObject *prev_po, const unsigned int number_of_points ) const;
 
 	PathObject *MakeACopy(void)const{return new PathArc(*this);}
+
+	void GetBox(CBox &box,const PathObject* prev_po);
+	bool IsIncluded(gp_Pnt pnt,const PathObject* prev_po);
 
 	std::list<gp_Pnt> Interpolate( const PathObject *previous_object,
 					const double feed_rate, 
@@ -132,6 +137,8 @@ public:
 	static double multiplier;
 
 	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1), m_formatted(false) {}
+
+	void WriteNCCode(wxTextFile &f, double ox, double oy);
 
 	// HeeksObj's virtual functions
 	int GetType()const{return NCCodeBlockType;}

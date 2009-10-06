@@ -37,11 +37,13 @@ public:
 
 	void Load(wxString path);
 	void Pack(double width, double height);
-	void FillBoundedArea(int x_min, int x_max, int y_min, int y_max,
+	void Regurgitate();
+	int FillBoundedArea(int x_min, int x_max, int y_min, int y_max,
 						int &num_unpositioned, std::vector<NCRect>&best_rects, bool *is_positioned, int level, bool test);
 	double SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
             int xmin2, int xmax2, int ymin2, int ymax2,
 			std::vector<NCRect>&rects, bool* is_positioned);
+
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("BOM");}

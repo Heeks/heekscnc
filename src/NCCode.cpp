@@ -114,6 +114,53 @@ void PathLine::glVertices(const PathObject* prev_po)
 	glVertex3dv(m_x);
 }
 
+void PathArc::GetBox(CBox &box,const PathObject* prev_po)
+{
+	PathObject::GetBox(box,prev_po);
+
+	if(IsIncluded(gp_Pnt(0,1,0),prev_po))
+		box.Insert(prev_po->m_x[0]+m_c[0],prev_po->m_x[1]+m_c[1]+m_radius,0);
+	if(IsIncluded(gp_Pnt(0,-1,0),prev_po))
+		box.Insert(prev_po->m_x[0]+m_c[0],prev_po->m_x[1]+m_c[1]-m_radius,0);
+	if(IsIncluded(gp_Pnt(1,0,0),prev_po))
+		box.Insert(prev_po->m_x[0]+m_c[0]+m_radius,prev_po->m_x[1]+m_c[1],0);
+	if(IsIncluded(gp_Pnt(-1,0,0),prev_po))
+		box.Insert(prev_po->m_x[0]+m_c[0]-m_radius,prev_po->m_x[1]+m_c[1],0);
+
+}
+
+bool PathArc::IsIncluded(gp_Pnt pnt,const PathObject* prev_po)
+{
+	double sx = -m_c[0];
+	double sy = -m_c[1];
+	// e = cs + se = -c + e - s
+	double ex = -m_c[0] + m_x[0] - prev_po->m_x[0];
+	double ey = -m_c[1] + m_x[1] - prev_po->m_x[1];
+	double rs = sqrt(sx * sx + sy * sy);
+	double re = sqrt(ex * ex + ey * ey);
+	m_radius = rs;
+
+	double start_angle = atan2(sy, sx);
+	double end_angle = atan2(ey, ex);
+
+	if(m_dir == 1){
+		if(end_angle < start_angle)end_angle += 6.283185307179;
+	}
+	else{
+		if(start_angle < end_angle)start_angle += 6.283185307179;
+	}
+
+	double angle_step = 0;
+
+	if (start_angle == end_angle)
+		// It's a full circle.
+		return true;
+
+	double the_angle = atan2(pnt.Y(),pnt.X());
+	double the_angle2 = the_angle + 2*PI;
+	return (the_angle >= start_angle && the_angle <= end_angle) || (the_angle2 >= start_angle && the_angle2 <= end_angle);
+}
+
 void PathArc::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "arc" );
@@ -251,7 +298,8 @@ void ColouredPath::GetBox(CBox &box)
 	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
 		PathObject* po= *It;
-		box.Insert(po->m_x);
+		po->GetBox(box,CNCCode::prev_po);
+		CNCCode::prev_po = po;
 	}
 }
 
@@ -296,6 +344,50 @@ void ColouredPath::ReadFromXMLElement(TiXmlElement* element)
 double CNCCodeBlock::multiplier = 1.0;
 
 HeeksObj *CNCCodeBlock::MakeACopy(void)const{return new CNCCodeBlock(*this);}
+
+void CNCCodeBlock::WriteNCCode(wxTextFile &f, double ox, double oy)
+{
+	//TODO: offset is always in millimeters, but this gcode block could be in anything
+	//I used inches, so I hacked it into working. 
+	wxString movement;
+	std::list<ColouredText>::iterator it;
+	for(it = m_text.begin(); it != m_text.end(); it++)
+	{
+		ColouredText ct = *it;
+		switch(ct.m_color_type)
+		{
+			case ColorPrepType:
+				f.AddLine(ct.m_str);
+				break;
+			case ColorRapidType:
+			case ColorFeedType:
+				movement = ct.m_str;
+				break;
+			case ColorAxisType:
+				{
+					wxString str = ct.m_str;
+					wxChar axis = ct.m_str[0];
+					double pos=0;
+					ct.m_str.SubString(1,ct.m_str.size()-1).ToDouble(&pos);
+					if(axis == 'X' || axis == 'x')
+					{
+						str = wxString::Format(_("%c%f"),axis,pos+ox/25.4);
+					}
+					if(axis == 'Y' || axis == 'y')
+					{
+						str = wxString::Format(_("%c%f"),axis,pos+oy/25.4);
+					}
+					movement.append(str);
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	if(movement.size())
+		f.AddLine(movement);
+}
 
 void CNCCodeBlock::glCommands(bool select, bool marked, bool no_color)
 {
