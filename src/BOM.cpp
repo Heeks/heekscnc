@@ -33,6 +33,7 @@ void CBOM::Load(wxString path)
 	wxTextFile f(path);
 	f.Open();
 	wxString str;
+
 	for ( str = f.GetFirstLine(); !f.Eof(); str = f.GetNextLine() )
 	{
 		int comma = str.find(',');
@@ -122,7 +123,9 @@ double CBOM::SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
             double denom = rect1.m_width * rect1.m_height + rect2.m_width * rect2.m_height;
             if (fabs(denom) < 0.001) return 0;
 
-            return area_covered / denom;
+            double density = area_covered / denom;
+			//return density;
+			return density * density * area_covered;
         }
 
 
