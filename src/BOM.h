@@ -19,7 +19,7 @@ public:
 
 	bool IntersectsWith(NCRect &other)
 	{
-		if(other.m_x >= m_x && other.m_x <= m_x+m_width && other.m_y >= m_y && other.m_y <= m_y + m_height)
+		if(other.m_x >= m_x && other.m_x < m_x+m_width && other.m_y >= m_y && other.m_y <= m_y + m_height)
 			return true;
 		return false;
 	}
