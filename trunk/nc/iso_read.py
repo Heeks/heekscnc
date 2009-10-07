@@ -97,10 +97,10 @@ class ParserIso(nc.Parser):
 		    move = False
                 elif (word == 'L1' or word == 'l1'):
 		    move = False
-                elif (word == 'G20'):
+                elif (word == 'G20' or word == 'G70'):
                     col = "prep"
                     self.set_mode(units=25.4)
-                elif (word == 'G21'):
+                elif (word == 'G21' or word == 'G71'):
                     col = "prep"
                     self.set_mode(units=1.0)
                 elif (word == 'G81' or word == 'g81'):
