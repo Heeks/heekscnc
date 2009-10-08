@@ -52,6 +52,23 @@ void CTrsfNCCode::glCommands(bool select, bool marked, bool no_color)
 	glPopMatrix();
 }
 
+gp_Trsf make_matrix(const double* m)
+{
+	gp_Trsf tr;
+	tr.SetValues(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], 0.0001, 0.00000001);
+	return tr;
+}
+
+bool CTrsfNCCode::ModifyByMatrix(const double *m)
+{
+	gp_Trsf mat = make_matrix(m);
+	gp_Pnt pos(m_x,m_y,0);
+	pos.Transform(mat);
+	m_x = pos.X();
+	m_y = pos.Y();
+	return false;
+}
+
 void CTrsfNCCode::WriteCode(wxTextFile &f)
 {
 	CNCCode* code = (CNCCode*)GetFirstChild();

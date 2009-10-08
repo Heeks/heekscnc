@@ -19,6 +19,7 @@ public:
 
 	bool IntersectsWith(NCRect &other)
 	{
+		//This makes it ignore the rectangle just to left, which was already selected by its density
 		if(other.m_x >= m_x && other.m_x < m_x+m_width && other.m_y >= m_y && other.m_y <= m_y + m_height)
 			return true;
 		return false;
@@ -47,6 +48,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
+	long GetMarkingMask()const{return 0;}
 	const wxChar* GetTypeString(void)const{return _T("BOM");}
 	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/program");}
 	HeeksObj *MakeACopy(void)const;
