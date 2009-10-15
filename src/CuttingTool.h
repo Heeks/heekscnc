@@ -33,6 +33,8 @@ public:
 		eBallEndMill,
 		eChamfer,
 		eTurningTool,
+		eTouchProbe,
+		eToolLengthSwitch,
 		eUndefinedToolType
 	} eCuttingToolType;
 
@@ -50,6 +52,8 @@ public:
 		types_list.push_back( CuttingToolTypeDescription_t( eBallEndMill, wxString(_("Ball End Mill")) ));
 		types_list.push_back( CuttingToolTypeDescription_t( eChamfer, wxString(_("Chamfer")) ));
 		types_list.push_back( CuttingToolTypeDescription_t( eTurningTool, wxString(_("Turning Tool")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eTouchProbe, wxString(_("Touch Probe")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eToolLengthSwitch, wxString(_("Tool Length Switch")) ));
 
 		return(types_list);
 	} // End GetCuttingToolTypesList() method
