@@ -197,6 +197,7 @@ public:
 
 	static CCuttingTool *Find( const int tool_number );
 	static int FindCuttingTool( const int tool_number );
+	static ToolNumber_t FindFirstByType( const CCuttingToolParams::eCuttingToolType type );
 	static std::vector< std::pair< int, wxString > > FindAllCuttingTools();
 	wxString GenerateMeaningfulName() const;
 	wxString ResetTitle();

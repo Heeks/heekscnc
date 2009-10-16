@@ -723,6 +723,10 @@ wxString CCuttingTool::GetIcon()
 			return theApp.GetResFolder() + _T("/icons/chamfmill");
 		case CCuttingToolParams::eTurningTool:
 			return theApp.GetResFolder() + _T("/icons/turntool");
+		case CCuttingToolParams::eTouchProbe:
+			return theApp.GetResFolder() + _T("/icons/probe");
+		case CCuttingToolParams::eToolLengthSwitch:
+			return theApp.GetResFolder() + _T("/icons/probe");
 		default:
 			return theApp.GetResFolder() + _T("/icons/tool");
 	}
@@ -780,6 +784,25 @@ CCuttingTool *CCuttingTool::Find( const int tool_number )
 	if (id <= 0) return(NULL);
 	return((CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, id ));
 } // End Find() method
+
+CCuttingTool::ToolNumber_t CCuttingTool::FindFirstByType( const CCuttingToolParams::eCuttingToolType type )
+{
+	if ((theApp.m_program) && (theApp.m_program->Tools()))
+	{
+		HeeksObj* tool_list = theApp.m_program->Tools();
+
+		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
+		{
+			if (ob->GetType() != CuttingToolType) continue;
+			if ((ob != NULL) && (((CCuttingTool *) ob)->m_params.m_type == type))
+			{
+				return(((CCuttingTool *)ob)->m_tool_number);
+			} // End if - then
+		} // End for
+	} // End if - then
+
+	return(-1);
+}
 
 
 /**

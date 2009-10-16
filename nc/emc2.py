@@ -37,7 +37,7 @@ class CreatorEMC2(iso.CreatorIso):
 
 	def incremental(self):
 		self.write_blocknum()
-		self.write( iso_codes.INCREMENTAL() + '\t (Incremental Coordinates)\n' )
+		self.write( iso_codes.codes.INCREMENTAL() + '\t (Incremental Coordinates)\n' )
 
 	def polar(self, on=True):
 		if (on) :
@@ -71,6 +71,10 @@ class CreatorEMC2(iso.CreatorIso):
 		if ((id >= 7) and (id <= 9)):
 			self.write_blocknum()
 			self.write( ((iso_codes.codes.WORKPLANE() % (6 + iso_codes.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6))) + '\t (Select Relative Coordinate System)\n')
+
+	def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None):
+		self.rapid(x1,y1)
+		self.rapid(0.0, 0.0, depth)
 
 
 nc.creator = CreatorEMC2()
