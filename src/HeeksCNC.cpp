@@ -43,6 +43,7 @@
 #include "interface/strconv.h"
 #include "CNCPoint.h"
 #include "BOM.h"
+#include "Probing.h"
 
 #include <sstream>
 
@@ -399,6 +400,26 @@ static void NewLocatingOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+static void NewProbe_LinearCentre_Outside_MenuCallback(wxCommandEvent &event)
+{
+	CCuttingTool::ToolNumber_t cutting_tool_number = 0;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if ((object != NULL) && (object->GetType() == CuttingToolType))
+		{
+			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+		} // End if - then
+	} // End for
+
+	CProbe_LinearCentre_Outside *new_object = new CProbe_LinearCentre_Outside( cutting_tool_number );
+	theApp.m_program->Operations()->Add(new_object, NULL);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
 
 static void NewFixtureMenuCallback(wxCommandEvent &event)
 {
@@ -592,6 +613,16 @@ static void NewTurningToolMenuCallback(wxCommandEvent &event)
 	AddNewCuttingTool(CCuttingToolParams::eTurningTool);
 }
 
+static void NewTouchProbeMenuCallback(wxCommandEvent &event)
+{
+	AddNewCuttingTool(CCuttingToolParams::eTouchProbe);
+}
+
+static void NewToolLengthSwitchMenuCallback(wxCommandEvent &event)
+{
+	AddNewCuttingTool(CCuttingToolParams::eToolLengthSwitch);
+}
+
 static void MakeScriptMenuCallback(wxCommandEvent &event)
 {
 	// create the Python program
@@ -611,7 +642,7 @@ static void RunPythonScript()
 		wxFile f(backplot_path.c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
-	HeeksPyPostProcess(theApp.m_program, theApp.m_program->GetOutputFileName() );
+	HeeksPyPostProcess(theApp.m_program, theApp.m_program->GetOutputFileName(), true );
 }
 
 static void RunScriptMenuCallback(wxCommandEvent &event)
@@ -708,6 +739,8 @@ static CCallbackTool new_slotdrill_tool(_("New Slot Drill..."), _T("slotdrill"),
 static CCallbackTool new_ball_end_mill_tool(_("New Ball End Mill..."), _T("ballmill"), NewBallEndMillMenuCallback);
 static CCallbackTool new_chamfer_mill_tool(_("New Chamfer Mill..."), _T("chamfmill"), NewChamferMenuCallback);
 static CCallbackTool new_turn_tool(_("New Turning Tool..."), _T("turntool"), NewTurningToolMenuCallback);
+static CCallbackTool new_touch_probe(_("New Touch Probe..."), _T("probe"), NewTouchProbeMenuCallback);
+static CCallbackTool new_tool_length_switch(_("New Tool Length Switch..."), _T("probe"), NewToolLengthSwitchMenuCallback);
 
 void CHeeksCNCApp::GetNewCuttingToolTools(std::list<Tool*>* t_list)
 {
@@ -718,6 +751,8 @@ void CHeeksCNCApp::GetNewCuttingToolTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_ball_end_mill_tool);
 	t_list->push_back(&new_chamfer_mill_tool);
 	t_list->push_back(&new_turn_tool);
+	t_list->push_back(&new_touch_probe);
+	t_list->push_back(&new_tool_length_switch);
 }
 
 static CCallbackTool new_profile_operation(_("New Profile Operation..."), _T("opprofile"), NewProfileOpMenuCallback);
@@ -759,6 +794,7 @@ static void AddToolBars()
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Speed Reference"), ToolImage(_T("speed_reference")), _("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Rate"), ToolImage(_T("cutting_rate")), _("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
+	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Probing"), ToolImage(_T("probe")), _("New Probe Linear Centre Outside Operation..."), NewProbe_LinearCentre_Outside_MenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
@@ -814,6 +850,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("New Speed Reference..."), ToolImage(_T("speed_reference")), NewSpeedReferenceMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Cutting Rate Reference..."), ToolImage(_T("cutting_rate")), NewCuttingRateMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Locating Operation..."), ToolImage(_T("locating")), NewLocatingOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Probe Linear Centre Outside Operation..."), ToolImage(_T("probe")), NewProbe_LinearCentre_Outside_MenuCallback);
 
 	// Tools menu
 	wxMenu *menuTools = new wxMenu;
@@ -824,6 +861,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuTools, _("New Ball End Mill..."), ToolImage(_T("ballmill")), NewBallEndMillMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("New Chamfer Mill..."), ToolImage(_T("chamfmill")), NewChamferMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("New Turning Tool..."), ToolImage(_T("turntool")), NewTurningToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("New Touch Probe..."), ToolImage(_T("probe")), NewTouchProbeMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("New Tool Length Switch..."), ToolImage(_T("probe")), NewToolLengthSwitchMenuCallback);
 
 	// Fixtures menu
 	wxMenu *menuFixtures = new wxMenu;
@@ -885,6 +924,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Locating", CLocating::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Probe_LinearCentre_Outside", CProbe_LinearCentre_Outside::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CounterBore", CCounterBore::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingTool", CCuttingTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixture", CFixture::ReadFromXMLElement);

@@ -114,7 +114,7 @@ class CreatorIso(nc.Creator):
         self.g += iso.codes.ABSOLUTE()
 
     def incremental(self):
-        self.g += iso.INCREMENTAL
+        self.g += iso.codes.INCREMENTAL()
 
     def polar(self, on=True):
         if (on) : self.g += iso.codes.POLAR_ON()
@@ -372,7 +372,6 @@ class CreatorIso(nc.Creator):
 
 	# Set the retraction point to the 'standoff' distance above the starting z height.
 	retract_height = z + standoff
-	#self.write(iso.RETRACT + (self.fmt % retract_height))
         if (x != None):
             dx = x - self.x
             self.write(iso.codes.X() + (self.fmt % x))
@@ -414,6 +413,9 @@ class CreatorIso(nc.Creator):
     def variable_set(self, id, value):
         self.write_blocknum()
         self.write((iso.codes.VARIABLE() % id) + (iso.codes.VARIABLE_SET() % value) + '\n')
+
+    def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None):
+        pass
 
 ################################################################################
 

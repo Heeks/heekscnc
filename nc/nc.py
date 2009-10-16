@@ -232,6 +232,9 @@ class Creator:
         """Set a variable"""
         pass
 
+    def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None):
+	pass
+
 ################################################################################
 
 creator = Creator()
@@ -403,3 +406,7 @@ def variable(id):
 
 def variable_set(id, value):
     creator.variable_set(id, value)
+
+def probe_linear_centre_outside(x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None):
+    creator.probe_linear_centre_outside(x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None)
+

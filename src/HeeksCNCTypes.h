@@ -24,5 +24,6 @@ enum{
 	LocatingType,
 	HeeksCNCMaximumType,
 	BOMType,
-	TrsfNCCodeType
+	TrsfNCCodeType,
+	ProbeLinearCentreOutsideType
 };

@@ -141,24 +141,37 @@ void COp::ReadDefaultValues()
 		switch(GetType())
 		{
 		case DrillingType:
-			default_tool = 1;
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eDrill );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eCentreDrill );
 			break;
 		case AdaptiveType:
-			default_tool = 3;
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
 			break;
 		case ProfileType:
 		case PocketType:
 		case CounterBoreType:
-			default_tool = 4;
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
 			break;
 		case ZigZagType:
-			default_tool = 5;
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
 			break;
 		case TurnRoughType:
-			default_tool = 7;
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTurningTool );
+			break;
+		case ProbeLinearCentreOutsideType:
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
 			break;
 		default:
-			default_tool = 4;
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
+			if (default_tool <= 0) default_tool = 4;
 			break;
 		}
 		config.Read(wxString(GetTypeString()) + _T("CuttingTool"), &m_cutting_tool_number, default_tool);
@@ -186,6 +199,7 @@ bool COp::IsAnOperation(int object_type)
 		case CounterBoreType:
 		case TurnRoughType:
 		case LocatingType:
+		case ProbeLinearCentreOutsideType:
 			return true;
 		default:
 			return false;		
