@@ -108,11 +108,19 @@ class CPyPostProcess : public CPyProcess
 protected:
 	const CProgram* m_program;
 	wxString m_filename;
+	bool m_include_backplot_processing;
 
 	static CPyPostProcess* m_object;
 
 public:
-	CPyPostProcess(const CProgram* program, const wxChar* filename): m_program(program), m_filename(filename) { m_object = this; }
+	CPyPostProcess(const CProgram* program, 
+			const wxChar* filename,
+			const bool include_backplot_processing = true ) : 
+		m_program(program), m_filename(filename), m_include_backplot_processing(include_backplot_processing)
+	{
+		m_object = this; 
+	}
+
 	~CPyPostProcess(void) { m_object = NULL; }
 
 	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
@@ -125,7 +133,13 @@ public:
 		Execute(wxString(_T("python ")) + wxString(_T("/tmp/heekscnc_post.py")));
 #endif
 	}
-	void ThenDo(void) { (new CPyBackPlot(m_program, (HeeksObj*)m_program, m_filename))->Do(); }
+	void ThenDo(void) 
+	{
+		if (m_include_backplot_processing)
+		{
+			(new CPyBackPlot(m_program, (HeeksObj*)m_program, m_filename))->Do(); 
+		}
+	}
 };
 
 CPyPostProcess* CPyPostProcess::m_object = NULL;
@@ -142,7 +156,7 @@ static bool write_python_file(const wxString& python_file_path)
 	return true;
 }
 
-bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath)
+bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath, const bool include_backplot_processing)
 {
 	try{
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
@@ -165,7 +179,7 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath)
 			::wxSetWorkingDirectory(wxString(_T("/tmp")));
 #endif
 			// call the python file
-			(new CPyPostProcess(program, filepath))->Do();
+			(new CPyPostProcess(program, filepath, include_backplot_processing))->Do();
 
 			return true;
 		}

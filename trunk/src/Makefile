@@ -37,7 +37,7 @@ endif
 
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DHAVE_LIMITS ${RIP} ${KURVE_FLAGS} -I "${OPENCASCADE_DIR}"
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Construction.o Finite.o kurve.o  Matrix.o offset.o PythonInterface.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Construction.o Finite.o kurve.o  Matrix.o offset.o PythonInterface.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o
 
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
@@ -68,6 +68,7 @@ HeeksCNC.o: HeeksCNC.cpp \
 		Fixture.h \
 		CuttingRate.h \
 		SpeedReference.h \
+		Probing.h \
 		CuttingTool.h
 	$(CC) -c HeeksCNC.cpp ${CCFLAGS} -o $@
 
@@ -439,6 +440,10 @@ SpeedReference.o: SpeedReference.cpp \
 CuttingRate.o: CuttingRate.cpp \
 		CuttingRate.h
 	$(CC) -c CuttingRate.cpp ${CCFLAGS} -o $@
+
+Probing.o: Probing.cpp \
+		Probing.h
+	$(CC) -c Probing.cpp ${CCFLAGS} -o $@
 
 Operations.o: Operations.cpp \
 		Operations.h \
