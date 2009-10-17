@@ -73,9 +73,34 @@ class CreatorEMC2(iso.CreatorIso):
 			self.write( ((iso_codes.codes.WORKPLANE() % (6 + iso_codes.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6))) + '\t (Select Relative Coordinate System)\n')
 
 	def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None):
+		self.write_blocknum()
+		self.write((iso_codes.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
 		self.rapid(x1,y1)
-		self.rapid(0.0, 0.0, depth)
+		self.rapid(z=depth)
 
+		self.write_blocknum()
+		self.write((iso_codes.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X 0 Y 0') + ('\t(Probe back towards our starting point)\n')))
+		self.comment('Store the probed location somewhere we can get it again later')
+		self.write_blocknum()
+		self.write(('#<x1>=#5061\n'))
+		self.write_blocknum()
+		self.write(('#<y1>=#5062\n'))
+		self.rapid(z=0)
+		self.rapid(x=x2,y=y2)
+		self.write_blocknum()
+		self.write((iso_codes.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X 0 Y 0') + ('\t(Probe back towards our starting point)\n')))
+		self.comment('Store the probed location somewhere we can get it again later')
+		self.write_blocknum()
+		self.write(('#<x2>=#5061\n'))
+		self.write_blocknum()
+		self.write(('#<y2>=#5062\n'))
+
+		self.comment('Now move back to the centre location')
+		self.rapid(z=0)
+		self.write_blocknum()
+		self.write(('G0 X [[[#<x2> - #<x1>] / 2.0] + #<x1>] Y [[[#<y2> - #<y1>] / 2.0] + #<y1>]\n'))
+		self.write_blocknum()
+		self.write((iso_codes.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
 nc.creator = CreatorEMC2()
 

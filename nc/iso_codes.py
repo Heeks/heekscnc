@@ -25,6 +25,8 @@ class Codes():
 	def METRIC(self): return(self.SPACE() + 'G21')
 	def ABSOLUTE(self): return(self.SPACE() + 'G90')
 	def INCREMENTAL(self): return(self.SPACE() + 'G91')
+	def SET_TEMPORARY_COORDINATE_SYSTEM(self): return(self.SPACE() + "G92")
+	def REMOVE_TEMPORARY_COORDINATE_SYSTEM(self): return(self.SPACE() + "G92.1")
 	def POLAR_ON(self): return(self.SPACE() + 'G16')
 	def POLAR_OFF(self): return(self.SPACE() + 'G15')
 	def PLANE_XY(self): return(self.SPACE() + 'G17')
@@ -70,5 +72,10 @@ class Codes():
 	def CENTRE_Z(self): return(self.SPACE() + 'K')
 	def RADIUS(self): return(self.SPACE() + 'R')
 	def TIME(self): return(self.SPACE() + 'P')
+
+	def PROBE_TOWARDS_WITH_SIGNAL(self): return(self.SPACE() + 'G38.2')
+	def PROBE_TOWARDS_WITHOUT_SIGNAL(self): return(self.SPACE() + 'G38.3')
+	def PROBE_AWAY_WITH_SIGNAL(self): return(self.SPACE() + 'G38.4')
+	def PROBE_AWAY_WITHOUT_SIGNAL(self): return(self.SPACE() + 'G38.5')
 
 codes = Codes()

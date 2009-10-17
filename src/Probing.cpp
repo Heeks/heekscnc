@@ -72,15 +72,30 @@ void CProbe_LinearCentre_Outside::AppendTextToProgram( const CFixture *pFixture 
 	ss << "comment('protrusion.')\n";
 
 	CNCPoint first(m_starting_distance,0,0);
+	CNCPoint second(m_starting_distance,0,0);
+
 	gp_Dir x_direction(1,0,0);
 
-	double angle_in_radians = (m_starting_angle / 360) * (2 * PI);	// degrees expressed in radians
+	double first_angle_in_radians = (m_starting_angle / 360) * (2 * PI);	// degrees expressed in radians
+	while (first_angle_in_radians < 0) first_angle_in_radians += (2 * PI);
+	gp_Trsf first_rotation_matrix;
+	first_rotation_matrix.SetRotation( gp_Ax1( gp_Pnt(0,0,0), x_direction), first_angle_in_radians );
+	first.Transform(first_rotation_matrix);
 
-	gp_Trsf rotation_matrix;
-	rotation_matrix.SetRotation( gp_Ax1( gp_Pnt(0,0,0), x_direction), angle_in_radians );
-	first.Transform(rotation_matrix);
+	double second_angle_in_radians = first_angle_in_radians + PI;	// half a circle around.
+	while (second_angle_in_radians < 0) second_angle_in_radians += (2 * PI);
+	gp_Trsf second_rotation_matrix;
+	second_rotation_matrix.SetRotation( gp_Ax1( gp_Pnt(0,0,0), x_direction), second_angle_in_radians );
+	second.Transform(second_rotation_matrix);
 
-	ss << "probe_linear_centre_outside(x1=" << first.X(true) << ", y1=" << first.Y(true) << ")\n";
+	ss << "probe_linear_centre_outside("
+		<< "x1=" << first.X(true) << ", "
+		<< "y1=" << first.Y(true) << ", "
+		<< "depth=" << m_depth / theApp.m_program->m_units << ", "
+		<< "x2=" << second.X(true) << ", "
+		<< "y2=" << second.Y(true) << ", "
+		<< "xml_file_name='" << this->GetOutputFileName(wxString(_(".xml"))).c_str() << "'"
+		<< ")\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
@@ -145,9 +160,27 @@ HeeksObj* CProbe_LinearCentre_Outside::ReadFromXMLElement(TiXmlElement* element)
 
 void CProbe_LinearCentre_Outside::glCommands(bool select, bool marked, bool no_color)
 {
-
 }
 
+
+wxString CProbe_LinearCentre_Outside::GetOutputFileName(const wxString extension)
+{
+
+	wxString file_name = theApp.m_program->GetOutputFileName();
+
+	// Remove the extension.
+	int offset = 0;
+	if ((offset = file_name.Find(_("."))) != -1)
+	{
+		file_name.Remove(offset);
+	}
+
+	file_name << _("_Probe_Linear_Centre_Outside_id_");
+	file_name << m_id;
+	file_name << extension;
+
+	return(file_name);
+}
 
 
 class Probe_LinearCentre_Outside_GenerateGCode: public Tool 
@@ -191,7 +224,7 @@ public:
 		} // End if - else
 
 		// output file
-		theApp.m_program_canvas->AppendText(_T("output('") + theApp.m_program->GetOutputFileName() + _T("')\n"));
+		theApp.m_program_canvas->AppendText(_T("output('") + m_pThis->GetOutputFileName(_(".tap")) + _T("')\n"));
 
 		// begin program
 		theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
@@ -214,11 +247,11 @@ public:
 
 		{
 			// clear the output file
-			wxFile f(theApp.m_program->GetOutputFileName().c_str(), wxFile::write);
+			wxFile f(m_pThis->GetOutputFileName(_(".tap")).c_str(), wxFile::write);
 			if(f.IsOpened())f.Write(_T("\n"));
 		}
 
-		HeeksPyPostProcess(theApp.m_program, theApp.m_program->GetOutputFileName(), false );
+		HeeksPyPostProcess(theApp.m_program, m_pThis->GetOutputFileName(_(".tap")), false );
 	}
 	wxString BitmapPath(){ return _T("export");}
 	wxString previous_path;

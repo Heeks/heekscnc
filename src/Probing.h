@@ -46,7 +46,11 @@ class CProbing;
 class CProbing: public CSpeedOp {
 public:
 	//	Constructors.
-	CProbing( const int cutting_tool_number = 0 ):CSpeedOp(GetTypeString(), cutting_tool_number){}
+	CProbing( const int cutting_tool_number = 0 ):CSpeedOp(GetTypeString(), cutting_tool_number)
+	{
+		m_speed_op_params.m_spindle_speed = 0;	// We don't want the spindle to move while we're probing.
+		m_active = 0;	// We don't want the normal GCode generation routines to include us.
+	}
 	void GetProperties(std::list<Property *> *list);
 };
 
@@ -87,6 +91,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
+	wxString GetOutputFileName(const wxString extension);
 
 public:
 	double m_starting_angle;		// Direction to move before dropping down and probing back.  We should not
