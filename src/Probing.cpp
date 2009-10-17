@@ -228,7 +228,8 @@ public:
 
 		// begin program
 		theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
-		theApp.m_program_canvas->AppendText(_T("incremental()\n"));	// Assume machinist has jogged to approx position first
+		theApp.m_program_canvas->AppendText(_T("absolute()\n"));
+
 		if(theApp.m_program->m_units > 25.0)
 		{
 			theApp.m_program_canvas->AppendText(_T("imperial()\n"));
