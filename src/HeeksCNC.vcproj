@@ -733,6 +733,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Probing.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Probing.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Profile.cpp"
 			>
 		</File>
