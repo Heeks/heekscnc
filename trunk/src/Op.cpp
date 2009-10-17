@@ -165,9 +165,7 @@ void COp::ReadDefaultValues()
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTurningTool );
 			break;
 		case ProbeLinearCentreOutsideType:
-			printf("Looking for a touch probe tool\n");
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
-			printf("got %d\n", default_tool);
 			break;
 		default:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
