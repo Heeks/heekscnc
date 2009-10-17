@@ -54,7 +54,7 @@ void CBOM::glCommands(bool select, bool marked, bool no_color)
 {
 	ObjList::glCommands(select,marked,no_color);
 
-	for(int i=0; i<rects.size(); i++)
+	for(unsigned int i=0; i<rects.size(); i++)
 	{
 		glBegin(GL_LINE_STRIP);
 		glVertex3d(rects[i].m_x,rects[i].m_y,0);
@@ -110,7 +110,7 @@ double CBOM::SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
             NCRect rect1(xmin1, ymin1, xmax1 - xmin1, ymax1 - ymin1,NULL);
             NCRect rect2(xmin2, ymin2, xmax2 - xmin2, ymax2 - ymin2,NULL);
             int area_covered = 0;
-            for (int i = 0; i <= rects.size() - 1; i++)
+            for (unsigned int i = 0; i <= rects.size() - 1; i++)
             {
                 if (is_positioned[i] &&
                     (rects[i].IntersectsWith(rect1) ||
@@ -155,7 +155,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 
     // Some rectangles have not been positioned.
     // Loop through the available rectangles.
-    for (int i = 0; i <= rects.size() - 1; i++)
+    for (unsigned int i = 0; i <= rects.size() - 1; i++)
     {
     // See if this rectangle is not position and will fit.
 		if ((!is_positioned[i]) &&
@@ -342,12 +342,12 @@ void CBOM::Pack(double bin_width, double height, int gap)
 
 	// Make variables to track and record the best solution.
 	bool* is_positioned = new bool[best_rects.size()];
-	for(int i=0; i < best_rects.size(); i++)
+	for(unsigned int i=0; i < best_rects.size(); i++)
 		is_positioned[i] = false;
 	int num_unpositioned = rects.size();
 	// Fill by stripes.
 	int max_y = 0;
-    for (int i = 0; i <= rects.size() - 1; i++)
+    for (unsigned int i = 0; i <= rects.size() - 1; i++)
 	{
 		// See if this rectangle is positioned.
 		if (!is_positioned[i])
@@ -372,7 +372,7 @@ void CBOM::Pack(double bin_width, double height, int gap)
      rects = best_rects;
      
 	 //Apply to the NCCODE
-	 for(int i=0; i < rects.size(); i++)
+	 for(unsigned int i=0; i < rects.size(); i++)
 	 {
 		CTrsfNCCode *code = rects[i].m_code;
 	 	CBox box;
