@@ -46,12 +46,25 @@ class CProbing;
 class CProbing: public CSpeedOp {
 public:
 	//	Constructors.
-	CProbing( const int cutting_tool_number = 0 ):CSpeedOp(GetTypeString(), cutting_tool_number)
+	CProbing( const wxString title, const int cutting_tool_number):CSpeedOp(title, cutting_tool_number)
 	{
 		m_speed_op_params.m_spindle_speed = 0;	// We don't want the spindle to move while we're probing.
 		m_active = 0;	// We don't want the normal GCode generation routines to include us.
+		m_depth = 10.0;	// mm
+
+		// If the cutting tool number has been defined as a probe already, use half the probe's length
+		// as the depth to plunge (by default)
+		CCuttingTool *pCuttingTool = CCuttingTool::Find(cutting_tool_number);
+		if ((pCuttingTool != NULL) && (pCuttingTool->m_params.m_type == CCuttingToolParams::eTouchProbe))
+		{
+			m_depth = pCuttingTool->m_params.m_tool_length_offset / 2.0;
+		}
 	}
 	void GetProperties(std::list<Property *> *list);
+	void WriteBaseXML(TiXmlElement *element);
+	void ReadBaseXML(TiXmlElement* element);
+
+	double m_depth;			// How far to drop down from the current position before starting to probe inwards.
 };
 
 
@@ -63,12 +76,10 @@ public:
 class CProbe_LinearCentre_Outside: public CProbing {
 public:
 	//	Constructors.
-	CProbe_LinearCentre_Outside(const int cutting_tool_number = 0) : CProbing(cutting_tool_number)
+	CProbe_LinearCentre_Outside(const int cutting_tool_number = 0) : CProbing(_("Probe Linear Centre Outside"), cutting_tool_number )
 	{
 		m_starting_angle = 0.0;	// degrees
 		m_starting_distance = 50.0;	// mm
-		m_depth = 10.0;	// mm
-		m_title = _("Probe Linear Centre Outside");
 	}
 
 	// HeeksObj's virtual functions
@@ -82,7 +93,6 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-	const wxChar* GetShortString(void)const{return m_title.c_str();}
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
@@ -91,7 +101,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
-	wxString GetOutputFileName(const wxString extension);
+	wxString GetOutputFileName(const wxString extension, const bool filename_only);
 
 public:
 	double m_starting_angle;		// Direction to move before dropping down and probing back.  We should not
@@ -99,10 +109,8 @@ public:
 					// a rectangular object oriented differently to the axes.
 
 	double m_starting_distance;	// Distance from starting point outwards before dropping down and probing in.
-	double m_depth;			// How far to drop down from the current position before starting to probe inwards.
 	// The probing feed rate will be taken from CSpeedOp::m_speed_op_params.m_horozontal_feed_rate
 
-	wxString m_title;
 
 };
 
