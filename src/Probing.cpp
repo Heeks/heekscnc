@@ -95,9 +95,7 @@ void CProbe_LinearCentre_Outside::AppendTextToProgram( const CFixture *pFixture 
 		<< "y1=" << first.Y(true) << ", "
 		<< "depth=" << relative_depth / theApp.m_program->m_units << ", "
 		<< "x2=" << second.X(true) << ", "
-		<< "y2=" << second.Y(true) << ", "
-		<< "xml_file_name='" << this->GetOutputFileName(wxString(_(".xml")), true).c_str() << "'"
-		<< ")\n";
+		<< "y2=" << second.Y(true) << ")\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
