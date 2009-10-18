@@ -72,7 +72,7 @@ class CreatorEMC2(iso.CreatorIso):
 			self.write_blocknum()
 			self.write( ((iso_codes.codes.WORKPLANE() % (6 + iso_codes.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6))) + '\t (Select Relative Coordinate System)\n')
 
-	def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None):
+	def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None):
 		self.write_blocknum()
 		self.write((iso_codes.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
 		if (self.fhv) : self.calc_feedrate_hv(1, 0)

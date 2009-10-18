@@ -414,8 +414,42 @@ class CreatorIso(nc.Creator):
         self.write_blocknum()
         self.write((iso.codes.VARIABLE() % id) + (iso.codes.VARIABLE_SET() % value) + '\n')
 
-    def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None, xml_file_name=None):
-        pass
+    def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None ):
+	self.write_blocknum()
+	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+	if (self.fhv) : self.calc_feedrate_hv(1, 0)
+	self.write_blocknum()
+	self.write_feedrate()
+	self.write('\t(Set the feed rate for probing)\n')
+
+	self.rapid(x1,y1)
+	self.rapid(z=depth)
+
+	self.write_blocknum()
+	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X 0 Y 0') + ('\t(Probe back towards our starting point)\n')))
+	self.comment('Store the probed location somewhere we can get it again later')
+	self.write_blocknum()
+	self.write(('#1001=#5061\n'))
+	self.write_blocknum()
+	self.write(('#1002=#5062\n'))
+	self.rapid(z=0)
+	self.rapid(x=x2,y=y2)
+	self.rapid(z=depth)
+	self.write_blocknum()
+	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X 0 Y 0') + ('\t(Probe back towards our starting point)\n')))
+	self.comment('Store the probed location somewhere we can get it again later')
+	self.write_blocknum()
+	self.write(('#1003=#5061\n'))
+	self.write_blocknum()
+	self.write(('#1004=#5062\n'))
+
+	self.comment('Now move back to the centre location')
+	self.rapid(z=0)
+	self.write_blocknum()
+	self.write(('G00 X [[[#1003 - #1001] / 2.0] + #1001] Y [[[#1004 - #1002] / 2.0] + #1002]\n'))
+	self.write_blocknum()
+	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
+
 
 ################################################################################
 
