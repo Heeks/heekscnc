@@ -94,12 +94,11 @@ public:
 	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/probe"); else return COp::GetIcon();}
 	bool CanAddTo(HeeksObj* owner);
 
-	void AppendTextForSingleProbeOperation(	const CFixture *pFixture,
-						const double setup_direction,	// angle of initial setup movement.
-						const double setup_distance,
-						const double retract_distance,	// NOTE: The retract_direction will implicitly be 180 degrees around from the probe_direction.
-						const double probe_direction,	// angle of probing movement.
+	void AppendTextForSingleProbeOperation( const CFixture *pFixture,
+						const CNCPoint setup_point,
+						const CNCPoint retract_point,
 						const double depth,
+						const CNCPoint probe_point,
 						const wxString &intersection_variable_x,
 						const wxString &intersection_variable_y ) const;
 
