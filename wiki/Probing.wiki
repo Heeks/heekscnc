@@ -8,8 +8,11 @@ HeeksCNC supports the generation of GCode suitable for both edge and centre-poin
 
 The suite of GCode routines available include;
  - Move to the centre of a protrusion by probing from the 'outside-inwards' at two locations.
+
  - Move to the centre of a hole by probing from the 'inside-outwards' at either two or four locations.
+
  - Measure the rotation of an axis by measuring a single edge via two probed points.  This edge may be top, bottom, left or right.  The GCode program will generate an XML file describing the probed point locations.  This XML file may be read in to a Fixture object so as to set the fixture's rotation.  This ensures that subsequently generated GCode will align with the probed edge.
+
  - Move to the corner of two probed edges.  This operation probes two perpendicular edges based on one of the four corner designations.  The probed points will be stored in an XML file that may be read into a Fixture object so as to set its rotation attributes.  When finished, the machine's position will be left immediately above the intersection of the two probed edges.  (NOTE: This has not yet been implemented)
 
 
