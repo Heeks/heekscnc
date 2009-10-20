@@ -98,6 +98,14 @@ class Creator:
         """Set plane"""
         pass
 
+    def set_temporary_origin(self, x=None, y=None, z=None, a=None, b=None, c=None):
+	"""Set temporary origin G92"""
+	pass
+
+    def remove_temporary_origin(self):
+	"""Remote temporary origin G92.1"""
+	pass
+ 
     ############################################################################
     ##  Tools
     
@@ -235,6 +243,15 @@ class Creator:
     def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None ):
 	pass
 
+    def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None):
+        pass
+
+    def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, xml_file_name=None ):
+        pass
+
+    def rapid_to_midpoint(self, x1, y1, z1, x2, y2, z2):
+	pass
+
 ################################################################################
 
 creator = Creator()
@@ -293,6 +310,12 @@ def polar(on=True):
 def set_plane(plane):
     creator.set_plane(plane)
 
+def set_temporary_origin(x=None, y=None, z=None, a=None, b=None, c=None):
+    creator.set_temporary_origin(x,y,z,a,b,c)
+
+def remove_temporary_origin():
+    creator.remove_temporary_origin()
+ 
 ############################################################################
 ##  Tools
 
@@ -409,4 +432,13 @@ def variable_set(id, value):
 
 def probe_linear_centre_outside(x1=None, y1=None, depth=None, x2=None, y2=None ):
     creator.probe_linear_centre_outside(x1, y1, depth, x2, y2)
+
+def probe_single_point(point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None):
+    creator.probe_single_point(point_along_edge_x, point_along_edge_y, depth, retracted_point_x, retracted_point_y, destination_point_x, destination_point_y, intersection_variable_x, intersection_variable_y)
+
+def report_probe_results(x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, xml_file_name=None ):
+    creator.report_probe_results(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, xml_file_name)
+
+def rapid_to_midpoint(x1, y1, z1, x2, y2, z2):
+    creator.rapid_to_midpoint(x1, y1, z1, x2, y2, z2)
 
