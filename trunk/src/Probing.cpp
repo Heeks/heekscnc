@@ -71,8 +71,18 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_(""));
 
-		AppendTextForSingleProbeOperation( pFixture, gp_Pnt(m_distance,0,0), gp_Pnt(m_distance,0,0), m_depth, gp_Pnt(0,0,0), _("1001"), _("1002") );
-		AppendTextForSingleProbeOperation( pFixture, gp_Pnt(-1.0 * m_distance,0,0), gp_Pnt(-1.0 * m_distance,0,0), m_depth, gp_Pnt(0,0,0), _("1003"), _("1004") );
+		switch (m_alignment)
+		{
+		case eXAxis:
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(m_distance,0,0), gp_Pnt(m_distance,0,0), m_depth, gp_Pnt(0,0,0), _("1001"), _("1002") );
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(-1.0 * m_distance,0,0), gp_Pnt(-1.0 * m_distance,0,0), m_depth, gp_Pnt(0,0,0), _("1003"), _("1004") );
+			break;
+
+		case eYAxis:
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,m_distance,0), gp_Pnt(0,m_distance,0), m_depth, gp_Pnt(0,0,0), _("1001"), _("1002") );
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,-1.0 * m_distance,0), gp_Pnt(0,-1.0 * m_distance,0), m_depth, gp_Pnt(0,0,0), _("1003"), _("1004") );
+			break;
+		} // End switch
 	} // End if - then
 	else
 	{
@@ -84,8 +94,18 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_(""));
 
-		AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,0,0), gp_Pnt(0,0,0), m_depth, gp_Pnt(+1.0 * m_distance,0,0), _("1001"), _("1002") );
-		AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,0,0), gp_Pnt(0,0,0), m_depth, gp_Pnt(-1.0 * m_distance,0,0), _("1003"), _("1004") );
+		switch (m_alignment)
+		{
+		case eXAxis:
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,0,0), gp_Pnt(0,0,0), m_depth, gp_Pnt(+1.0 * m_distance,0,0), _("1001"), _("1002") );
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,0,0), gp_Pnt(0,0,0), m_depth, gp_Pnt(-1.0 * m_distance,0,0), _("1003"), _("1004") );
+			break;
+
+		case eYAxis:
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,0,0), gp_Pnt(0,0,0), m_depth, gp_Pnt(0, +1.0 * m_distance,0), _("1001"), _("1002") );
+			AppendTextForSingleProbeOperation( pFixture, gp_Pnt(0,0,0), gp_Pnt(0,0,0), m_depth, gp_Pnt(0, -1.0 * m_distance,0), _("1003"), _("1004") );
+			break;
+		} // End switch
 	} // End if - else
 
 	// Now move to the centre of these two intersection points.
@@ -344,6 +364,11 @@ static void on_set_direction(int zero_based_choice, HeeksObj* object)
 	((CProbe_Centre*)object)->m_direction = CProbing::eProbeDirection_t(zero_based_choice);
 }
 
+static void on_set_alignment(int zero_based_choice, HeeksObj* object)
+{
+	((CProbe_Centre*)object)->m_alignment = CProbing::eAlignment_t(zero_based_choice);
+}
+
 void CProbe_Centre::GetProperties(std::list<Property *> *list)
 {
 	{ // Begin choice scope
@@ -374,6 +399,24 @@ void CProbe_Centre::GetProperties(std::list<Property *> *list)
 		} // End for
 
 		list->push_back(new PropertyChoice(_("Direction"), choices, choice, this, on_set_direction));
+	} // End choice scope
+
+	if (m_number_of_points == 2)
+	{ // Begin choice scope
+		std::list< wxString > choices;
+		int choice = 0;
+
+		// We're probing a single edge.
+		for (eAlignment_t alignment = eXAxis; alignment <= eYAxis; alignment = eAlignment_t(int(alignment) + 1))
+		{
+			if (alignment == m_alignment) choice = choices.size();
+
+			wxString option;
+			option << alignment;
+			choices.push_back( option );
+		} // End for
+
+		list->push_back(new PropertyChoice(_("Alignment"), choices, choice, this, on_set_alignment));
 	} // End choice scope
 
 	CProbing::GetProperties(list);
@@ -514,6 +557,7 @@ void CProbe_Centre::WriteXML(TiXmlNode *root)
 
 	element->SetAttribute("direction", m_direction);
 	element->SetAttribute("number_of_points", m_number_of_points);
+	element->SetAttribute("alignment", m_alignment);
 
 	WriteBaseXML(element);
 }
@@ -525,6 +569,8 @@ HeeksObj* CProbe_Centre::ReadFromXMLElement(TiXmlElement* element)
 
 	if (element->Attribute("direction")) new_object->m_direction = atoi(element->Attribute("direction"));
 	if (element->Attribute("number_of_points")) new_object->m_number_of_points = atoi(element->Attribute("number_of_points"));
+	if (element->Attribute("alignment")) new_object->m_alignment = atoi(element->Attribute("alignment"));
+
 	new_object->ReadBaseXML(element);
 
 	return new_object;

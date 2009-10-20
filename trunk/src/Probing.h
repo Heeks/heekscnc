@@ -70,6 +70,12 @@ public:
 		eOutside		// From outside towards inside
 	} eProbeDirection_t;
 
+	typedef enum
+	{
+		eXAxis = 0,
+		eYAxis = 1
+	} eAlignment_t;
+
 public:
 	//	Constructors.
 	CProbing( const wxString title, const int cutting_tool_number):CSpeedOp(title, cutting_tool_number)
@@ -211,6 +217,35 @@ public:
 		return(ss);
 	}
 
+
+#ifdef UNICODE
+	friend std::wostringstream & operator << ( std::wostringstream & ss, const eAlignment_t & alignment )
+#else
+	friend std::ostringstream & operator << ( std::ostringstream & ss, const eAlignment_t & alignment )
+#endif
+	{
+		wxString wxstr;
+		wxstr << alignment;	// Call the other implementation
+		ss << wxstr.c_str();
+		return(ss);
+	}
+
+	friend wxString & operator << (wxString & ss, const eAlignment_t & alignment)
+	{
+		switch (alignment)
+		{
+		case eXAxis:
+			ss << _("X Axis");
+			break;
+
+		case eYAxis:
+			ss << _("Y Axis");
+			break;
+		} // End switch
+
+		return(ss);
+	}
+
 };
 
 
@@ -230,6 +265,7 @@ public:
 	{
 		m_direction = int(eOutside);
 		m_number_of_points = 2;
+		m_alignment = int(eXAxis);
 	}
 
 	// HeeksObj's virtual functions
@@ -251,6 +287,7 @@ public:
 public:
 	int m_direction;	// Really eProbeDirection_t.  i.e. eInside or eOutside
 	int m_number_of_points;	// Can be either 2 or 4 ONLY
+	int m_alignment;	// really eAlignment_t.  i.e. eXAxis or xYAxis
 };
 
 /**
