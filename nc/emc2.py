@@ -108,5 +108,102 @@ class CreatorEMC2(iso.CreatorIso):
 		self.write_blocknum()
 		self.write((iso_codes.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
+	def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, xml_file_name=None ):
+		self.comment('Generate an XML document describing the probed coordinates found');
+		self.write_blocknum()
+		self.write('(LOGOPEN,')
+		self.write(xml_file_name)
+		self.write(')\n')
+
+		self.write_blocknum()
+		self.write('(LOG,<POINTS>)\n')
+
+		if ((x1 != None) or (y1 != None) or (z1 != None)):
+			self.write_blocknum()
+			self.write('(LOG,<POINT>)\n')
+
+		if (x1 != None):
+			self.write_blocknum()
+			self.write('(LOG,<X>' + x1 + '</X>)\n')
+
+		if (y1 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Y>' + y1 + '</Y>)\n')
+
+		if (z1 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Z>' + z1 + '</Z>)\n')
+
+		if ((x1 != None) or (y1 != None) or (z1 != None)):
+			self.write_blocknum()
+			self.write('(LOG,</POINT>)\n')
+
+		if ((x2 != None) or (y2 != None) or (z2 != None)):
+			self.write_blocknum()
+			self.write('(LOG,<POINT>)\n')
+
+		if (x2 != None):
+			self.write_blocknum()
+			self.write('(LOG,<X>' + x2 + '</X>)\n')
+
+		if (y2 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Y>' + y2 + '</Y>)\n')
+
+		if (z2 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Z>' + z2 + '</Z>)\n')
+
+		if ((x2 != None) or (y2 != None) or (z2 != None)):
+			self.write_blocknum()
+			self.write('(LOG,</POINT>)\n')
+
+		if ((x3 != None) or (y3 != None) or (z3 != None)):
+			self.write_blocknum()
+			self.write('(LOG,<POINT>)\n')
+
+		if (x3 != None):
+			self.write_blocknum()
+			self.write('(LOG,<X>' + x3 + '</X>)\n')
+
+		if (y3 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Y>' + y3 + '</Y>)\n')
+
+		if (z3 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Z>' + z3 + '</Z>)\n')
+
+		if ((x3 != None) or (y3 != None) or (z3 != None)):
+			self.write_blocknum()
+			self.write('(LOG,</POINT>)\n')
+
+		if ((x4 != None) or (y4 != None) or (z4 != None)):
+			self.write_blocknum()
+			self.write('(LOG,<POINT>)\n')
+
+		if (x4 != None):
+			self.write_blocknum()
+			self.write('(LOG,<X>' + x4 + '</X>)\n')
+
+		if (y4 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Y>' + y4 + '</Y>)\n')
+
+		if (z4 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Z>' + z4 + '</Z>)\n')
+
+		if ((x4 != None) or (y4 != None) or (z4 != None)):
+			self.write_blocknum()
+			self.write('(LOG,</POINT>)\n')
+
+		self.write_blocknum()
+		self.write('(LOG,</POINTS>)\n')
+		self.write_blocknum()
+		self.write('(LOGCLOSE)\n')
+			
+
+
 nc.creator = CreatorEMC2()
 

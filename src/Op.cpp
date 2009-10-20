@@ -164,7 +164,8 @@ void COp::ReadDefaultValues()
 		case TurnRoughType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTurningTool );
 			break;
-		case ProbeLinearCentreOutsideType:
+		case ProbeCentreType:
+		case ProbeEdgeType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
 			break;
 		default:
@@ -199,7 +200,8 @@ bool COp::IsAnOperation(int object_type)
 		case CounterBoreType:
 		case TurnRoughType:
 		case LocatingType:
-		case ProbeLinearCentreOutsideType:
+		case ProbeCentreType:
+		case ProbeEdgeType:
 			return true;
 		default:
 			return false;		

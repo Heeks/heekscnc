@@ -125,6 +125,22 @@ class CreatorIso(nc.Creator):
         elif (plane == 1) : self.g += iso.codes.PLANE_XZ()
         elif (plane == 2) : self.g += iso.codes.PLANE_YZ()
 
+    def set_temporary_origin(self, x=None, y=None, z=None, a=None, b=None, c=None):
+	self.write_blocknum()
+	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM()))
+	if (x != None): self.write( iso.codes.SPACE() + 'X ' + (self.fmt % x) )
+	if (y != None): self.write( iso.codes.SPACE() + 'Y ' + (self.fmt % y) )
+	if (z != None): self.write( iso.codes.SPACE() + 'Z ' + (self.fmt % z) )
+	if (a != None): self.write( iso.codes.SPACE() + 'A ' + (self.fmt % a) )
+	if (b != None): self.write( iso.codes.SPACE() + 'B ' + (self.fmt % b) )
+	if (c != None): self.write( iso.codes.SPACE() + 'C ' + (self.fmt % c) )
+	self.write('\n')
+
+    def remove_temporary_origin(self):
+	self.write_blocknum()
+	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM()))
+	self.write('\n')
+
     ############################################################################
     ##  Tools
 
@@ -450,6 +466,48 @@ class CreatorIso(nc.Creator):
 	self.write_blocknum()
 	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
+    def probe_single_point(self, point_along_edge_x=None, \
+				point_along_edge_y=None, \
+				depth=None, retracted_point_x=None, \
+				retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None):
+	self.write_blocknum()
+	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+	if (self.fhv) : self.calc_feedrate_hv(1, 0)
+	self.write_blocknum()
+	self.write_feedrate()
+	self.write('\t(Set the feed rate for probing)\n')
+
+	self.rapid(point_along_edge_x,point_along_edge_y)
+	self.rapid(retracted_point_x,retracted_point_y)
+	self.rapid(z=depth)
+
+	self.write_blocknum()
+	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+
+	self.comment('Store the probed location somewhere we can get it again later')
+	self.write_blocknum()
+	self.write(('#' + intersection_variable_x + '=#5061\n'))
+	self.write_blocknum()
+	self.write(('#' + intersection_variable_y + '=#5062\n'))
+
+	self.comment('Now move back to the original location')
+	self.rapid(retracted_point_x,retracted_point_y)
+	self.rapid(z=0)
+	self.rapid(x=0, y=0)
+
+	self.write_blocknum()
+	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
+
+    def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, xml_file_name=None ):
+	pass
+
+    def rapid_to_midpoint(self, x1, y1, z1, x2, y2, z2):
+	self.write_blocknum()
+	self.write(iso.codes.RAPID())
+	self.write((' X ' + '[[[' + x1 + '-' + x2 + '] / 2.0] + ' + x2 + ']'))
+	self.write((' Y ' + '[[[' + y1 + '-' + y2 + '] / 2.0] + ' + y2 + ']'))
+	self.write((' Z ' + '[[[' + z1 + '-' + z2 + '] / 2.0] + ' + z2 + ']'))
+	self.write('\n')
 
 ################################################################################
 
