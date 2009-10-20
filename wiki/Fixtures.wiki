@@ -4,7 +4,7 @@
 
 The fixture object allows the generated GCode to be aligned with one or more fixtures (vices, clamps and the like).  It also allows the GCode to be repeated separately for each fixture defined.
 
-A fixture, in this context, is similar to a CoordinateSystem in HeeksCAD.  The difference is that a CoordinateSystem is a rotation matrix that is applied to graphics so as to affect the data model.  The Fixture, on the other hand, is a rotational matrix that is applied to the data model only while generating GCode.  By measuring the exact alignment of a physical fixture (vice) and entering this value into the Fixture object, the resultant GCode will be rotated to align itself with the fixture's rotation.
+By measuring the exact alignment of a physical fixture (vice) and entering this value into the Fixture object, the resultant GCode will be rotated to align itself with the fixture's rotation.
 
 It allows the NC operation's GCode to be repeated for each local coordinate system (G54, G55 ... G59.3).  Each of these coordinate systems may have a rotation defined such that the generated GCode will also be rotated.  The idea is that a piece of material can be affixed to the milling machine and a probe used to measure how far off square the part is.  The user can then enter the part's rotation angle into the coordinate system object before re-generating the GCode.  The resultant GCode should align with the piece of material.
 
@@ -12,21 +12,45 @@ If multiple pieces of material are affixed, they may be setup (manually) so that
 
 A separate set of GCode will be generated for each Fixture object defined.  This could also lend itself to the idea of duplicating machine operations with a separate starting point.
 
-= Example Workflow =
+The HeeksCNC Probing operations also support (for EMC2-based machines) the generation of an XML data file representing coordinate pairs of probed 'edges'.  These XML data files may be imported into a Fixture object from the 'Import Probe Data' menu item beneath the right mouse button.  This import sets the axis rotations based on the probed point locations.
 
-- Draw a sketch representing the tool path.
 
-- Define a milling bit to cut it out with.
+= Example Workflow - without importing XML data =
 
-- Select both the sketch and the milling bit and create a Profile operation.
-
-- Place the raw material on the milling machine physically.
-
-- Use a touch probe (or similar) to measure the part's rotation from true X axis.
+- Generate a data model with NC operations added as necessary.
 
 - Touch off against the material (physically) so that the machine's current coordinate system's origin is set correctly.
 
 - Enter the material's rotation angle (found by probing) into the 'C Axis Rotation' for the corresponding Fixture's coordinate system (G54 for example).
+
+- Generate the GCode.
+
+- Download it to the mill.
+
+- Hold your hand over the Emergency Stop button just in case non of this stuff actually works.
+
+- Run the program.
+
+
+= Example Workflow - using a touch probe =
+
+- Add an Edge Probing operation and set its various parameters.
+
+- Use the right mouse button above the Edge Probing operation and select the 'Generate GCode' option.
+
+- Move the GCode to the machine's controller.
+
+- Place the raw material on the milling machine physically.
+
+- Jog the touch probe's location to approximately above the edge to be probed.
+
+- Execute the touch probe GCode program.
+
+- Copy the resultant XML data file back to the HeeksCNC machine.
+
+- Touch off against the material (physically) so that the machine's current coordinate system's origin is set correctly.
+
+- Use the right mouse button above the Fixture object and select the 'Import Probe Data' option.  This sets the fixture's rotation based on the probed point locations.
 
 - Generate the GCode.
 
