@@ -20,6 +20,7 @@
 #include "interface/PropertyVertex.h"
 #include "tinyxml/tinyxml.h"
 #include "Op.h"
+#include "CNCPoint.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -35,9 +36,9 @@ void CFixtureParams::set_initial_values()
 {
 	CNCConfig config;
 
-	config.Read(_T("m_a_axis"), &m_a_axis, 0.0);
-	config.Read(_T("m_b_axis"), &m_a_axis, 0.0);
-	config.Read(_T("m_c_axis"), &m_a_axis, 0.0);
+	config.Read(_T("m_yz_plane"), &m_yz_plane, 0.0);
+	config.Read(_T("m_xz_plane"), &m_xz_plane, 0.0);
+	config.Read(_T("m_xy_plane"), &m_xy_plane, 0.0);
 
 	double pivot_point_x, pivot_point_y, pivot_point_z;
 	config.Read(_T("pivot_point_x"), &pivot_point_x, 0.0);
@@ -54,18 +55,32 @@ void CFixtureParams::write_values_to_config()
 	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
 	// If we're now in inches then convert the values.
 	// We're in mm already.
-	config.Write(_T("m_a_axis"), m_a_axis);
-	config.Write(_T("m_b_axis"), m_b_axis);
-	config.Write(_T("m_c_axis"), m_c_axis);
+	config.Write(_T("m_yz_plane"), m_yz_plane);
+	config.Write(_T("m_xz_plane"), m_xz_plane);
+	config.Write(_T("m_xy_plane"), m_xy_plane);
 
 	config.Write(_T("pivot_point_x"), m_pivot_point.X());
 	config.Write(_T("pivot_point_y"), m_pivot_point.Y());
 	config.Write(_T("pivot_point_z"), m_pivot_point.Z());
 }
 
-static void on_set_a_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_a_axis = value; ((CFixture*)object)->ResetTitle(); }
-static void on_set_b_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_b_axis = value; ((CFixture*)object)->ResetTitle(); }
-static void on_set_c_axis(double value, HeeksObj* object){((CFixture*)object)->m_params.m_c_axis = value; ((CFixture*)object)->ResetTitle(); }
+static void on_set_yz_plane(double value, HeeksObj* object)
+{
+	((CFixture*)object)->m_params.m_yz_plane = value;
+	 ((CFixture*)object)->ResetTitle(); 
+}
+
+static void on_set_xz_plane(double value, HeeksObj* object)
+{
+	((CFixture*)object)->m_params.m_xz_plane = value; 
+	((CFixture*)object)->ResetTitle(); 
+}
+
+static void on_set_xy_plane(double value, HeeksObj* object)
+{
+	((CFixture*)object)->m_params.m_xy_plane = value; 
+	((CFixture*)object)->ResetTitle(); 
+}
 
 static void on_set_pivot_point(const double *vt, HeeksObj* object){
 	((CFixture *)object)->m_params.m_pivot_point.SetX( vt[0] );
@@ -75,9 +90,9 @@ static void on_set_pivot_point(const double *vt, HeeksObj* object){
 
 void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("A axis (around X) rotation"), m_a_axis, parent, on_set_a_axis));
-	list->push_back(new PropertyDouble(_("B axis (around Y) rotation"), m_b_axis, parent, on_set_b_axis));
-	list->push_back(new PropertyDouble(_("C axis (around Z) rotation"), m_c_axis, parent, on_set_c_axis));
+	list->push_back(new PropertyDouble(_("YZ plane (around X) rotation"), m_yz_plane, parent, on_set_yz_plane));
+	list->push_back(new PropertyDouble(_("XZ plane (around Y) rotation"), m_xz_plane, parent, on_set_xz_plane));
+	list->push_back(new PropertyDouble(_("XY plane (around Z) rotation"), m_xy_plane, parent, on_set_xy_plane));
 
 	double pivot_point[3];
 	pivot_point[0] = m_pivot_point.X();
@@ -93,9 +108,9 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );  
 
-	element->SetDoubleAttribute("a_axis", m_a_axis);
-	element->SetDoubleAttribute("b_axis", m_b_axis);
-	element->SetDoubleAttribute("c_axis", m_c_axis);
+	element->SetDoubleAttribute("yz_plane", m_yz_plane);
+	element->SetDoubleAttribute("xz_plane", m_xz_plane);
+	element->SetDoubleAttribute("xy_plane", m_xy_plane);
 
 	element->SetDoubleAttribute("pivot_point_x", m_pivot_point.X());
 	element->SetDoubleAttribute("pivot_point_y", m_pivot_point.Y());
@@ -106,9 +121,9 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	set_initial_values();
 
-	if (pElem->Attribute("a_axis")) m_a_axis = atof(pElem->Attribute("a_axis"));
-	if (pElem->Attribute("b_axis")) m_b_axis = atof(pElem->Attribute("b_axis"));
-	if (pElem->Attribute("c_axis")) m_c_axis = atof(pElem->Attribute("c_axis"));
+	if (pElem->Attribute("yz_plane")) m_yz_plane = atof(pElem->Attribute("yz_plane"));
+	if (pElem->Attribute("xz_plane")) m_xz_plane = atof(pElem->Attribute("xz_plane"));
+	if (pElem->Attribute("xy_plane")) m_xy_plane = atof(pElem->Attribute("xy_plane"));
 
 	if (pElem->Attribute("pivot_point_x")) m_pivot_point.SetX( atof(pElem->Attribute("pivot_point_x")) );
 	if (pElem->Attribute("pivot_point_y")) m_pivot_point.SetY( atof(pElem->Attribute("pivot_point_y")) );
@@ -354,19 +369,19 @@ wxString CFixture::GenerateMeaningfulName() const
 		default:				break;
 	} // End switch
 
-	if (fabs(m_params.m_a_axis) > 0.0000001)
+	if (fabs(m_params.m_yz_plane) > 0.0000001)
 	{
-		l_ossName << " rotated " << m_params.m_a_axis << " degrees in YZ plane";
+		l_ossName << " rotated " << m_params.m_yz_plane << " degrees in YZ plane";
 	} // End if - then
 
-	if (fabs(m_params.m_b_axis) > 0.0000001)
+	if (fabs(m_params.m_xz_plane) > 0.0000001)
 	{
-		l_ossName << " rotated " << m_params.m_b_axis << " degrees in XZ plane";
+		l_ossName << " rotated " << m_params.m_xz_plane << " degrees in XZ plane";
 	} // End if - then
 
-	if (fabs(m_params.m_c_axis) > 0.0000001)
+	if (fabs(m_params.m_xy_plane) > 0.0000001)
 	{
-		l_ossName << " rotated " << m_params.m_c_axis << " degrees in XY plane";
+		l_ossName << " rotated " << m_params.m_xy_plane << " degrees in XY plane";
 	} // End if - then
 
 	return( l_ossName.str().c_str() );
@@ -483,23 +498,226 @@ gp_Trsf CFixture::GetMatrix() const
 	gp_Dir y_direction( 0, 1, 0 );
 	gp_Dir z_direction( 0, 0, 1 );
 
-	double a_axis_angle_in_radians = (m_params.m_a_axis / 360) * (2 * PI);	// degrees expressed in radians
-	double b_axis_angle_in_radians = (m_params.m_b_axis / 360) * (2 * PI);	// degrees expressed in radians
-	double c_axis_angle_in_radians = (m_params.m_c_axis / 360) * (2 * PI);	// degrees expressed in radians
+	double yz_plane_angle_in_radians = (m_params.m_yz_plane / 360) * (2 * PI);	// degrees expressed in radians
+	double xz_plane_angle_in_radians = (m_params.m_xz_plane / 360) * (2 * PI);	// degrees expressed in radians
+	double xy_plane_angle_in_radians = (m_params.m_xy_plane / 360) * (2 * PI);	// degrees expressed in radians
 
-	gp_Trsf a_axis_rotation_matrix;
-	a_axis_rotation_matrix.SetRotation( gp_Ax1( m_params.m_pivot_point, x_direction), a_axis_angle_in_radians );
+	gp_Trsf yz_plane_rotation_matrix;
+	yz_plane_rotation_matrix.SetRotation( gp_Ax1( m_params.m_pivot_point, x_direction), yz_plane_angle_in_radians );
 
-	gp_Trsf b_axis_rotation_matrix;
-	b_axis_rotation_matrix.SetRotation( gp_Ax1( m_params.m_pivot_point, y_direction), b_axis_angle_in_radians );
+	gp_Trsf xz_plane_rotation_matrix;
+	xz_plane_rotation_matrix.SetRotation( gp_Ax1( m_params.m_pivot_point, y_direction), xz_plane_angle_in_radians );
 
-	gp_Trsf c_axis_rotation_matrix;
-	c_axis_rotation_matrix.SetRotation( gp_Ax1(m_params.m_pivot_point, z_direction), c_axis_angle_in_radians );
+	gp_Trsf xy_plane_rotation_matrix;
+	xy_plane_rotation_matrix.SetRotation( gp_Ax1(m_params.m_pivot_point, z_direction), xy_plane_angle_in_radians );
 
-	gp_Trsf matrix = a_axis_rotation_matrix * b_axis_rotation_matrix * c_axis_rotation_matrix;
+	gp_Trsf matrix = yz_plane_rotation_matrix * xz_plane_rotation_matrix * xy_plane_rotation_matrix;
 
 	return(matrix);
 } // End GetMatrix() method
+
+
+/**
+	This class compares the angles between the vector formed by connecting the two points with the
+	second vector passed in.  It returns the smallest angle by joining the two points in both orders.
+ */
+double CFixture::AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec & pivot, const gp_Vec & axis ) const
+{
+	gp_Pnt lhs(one);
+	gp_Pnt rhs(two);
+
+	if (pivot.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1) ) ) < 0.0001)
+	{
+		// We're pivoting around the Z axis
+	
+		if (axis.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0) ) ) < 0.0001)
+		{
+			// We're comparing it with the X axis.
+			if (lhs.X() > rhs.X())
+			{
+				gp_Pnt temp(lhs);
+				lhs = rhs;
+				rhs = temp;
+			}
+
+			double angle = axis.Angle( gp_Vec( lhs, rhs ) );
+			if (lhs.Y() > rhs.Y()) angle *= -1.0;
+			return((angle / (2 * PI)) * 360.0);
+		}
+		else if (axis.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0) ) ) < 0.0001)
+		{
+			// We're comparing it with the Y axis.
+			if (lhs.Y() > rhs.Y())
+			{
+				gp_Pnt temp(lhs);
+				lhs = rhs;
+				rhs = temp;
+			}
+
+			double angle = axis.Angle( gp_Vec( lhs, rhs ) );
+			if (lhs.X() < rhs.X()) angle *= -1.0;
+			return((angle / (2 * PI)) * 360.0);
+		}
+	} // End if - then
+	else if (pivot.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0) ) ) < 0.0001)
+	{
+		// We're pivoting around the Y axis
+	
+		if (axis.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0) ) ) < 0.0001)
+		{
+			// We're comparing it with the X axis.
+			if (lhs.X() > rhs.X())
+			{
+				gp_Pnt temp(lhs);
+				lhs = rhs;
+				rhs = temp;
+			}
+				
+			double angle = axis.Angle( gp_Vec( lhs, rhs ) );
+			if (lhs.Z() > rhs.Z()) angle *= -1.0;
+			return((angle / (2 * PI)) * 360.0);
+		}
+		else if (axis.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1) ) ) < 0.0001)
+		{
+			// We're comparing it with the Z axis.
+			if (lhs.Y() > rhs.Y())
+			{
+				gp_Pnt temp(lhs);
+				lhs = rhs;
+				rhs = temp;
+			}
+
+			double angle = axis.Angle( gp_Vec( lhs, rhs ) );
+			if (lhs.X() < rhs.X()) angle *= -1.0;
+			return((angle / (2 * PI)) * 360.0);
+		}
+	} // End if - then
+
+	return(-1);
+}
+
+void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_file_name )
+{
+
+	TiXmlDocument xml;
+	if (! xml.LoadFile( Ttc(probed_points_xml_file_name.c_str()) ))
+	{
+		printf("Failed to load XML file '%s'\n", Ttc(probed_points_xml_file_name.c_str()) );
+	} // End if - then
+	else
+	{
+		TiXmlElement *root = xml.RootElement();
+		if (root != NULL)
+		{
+			std::vector<CNCPoint> points;
+
+			for(TiXmlElement* pElem = TiXmlHandle(root).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+			{
+				CNCPoint point(0,0,0);
+				for(TiXmlElement* pPoint = TiXmlHandle(pElem).FirstChildElement().Element(); pPoint; pPoint = pPoint->NextSiblingElement())
+				{
+					std::string name(pPoint->Value());
+
+					if (name == "X") point.SetX( atof(pPoint->GetText()) );
+					if (name == "Y") point.SetY( atof(pPoint->GetText()) );
+					if (name == "Z") point.SetZ( atof(pPoint->GetText()) );
+				} // End for
+
+				points.push_back(point);
+			} // End for
+
+			if (points.size() >= 2)
+			{
+				double tolerance = heeksCAD->GetTolerance();
+				if (abs(points[0].X() - points[1].X()) < tolerance)
+				{
+					// Both points were found at the same X value.  This means
+					// that we're rotating around the X axis by some value.  Determine
+					// which by aligning the points with both the Y and Z axes to figure
+					// out which is closer.  We assume the closer one is what we
+					// were after.
+
+					gp_Vec pivot( gp_Pnt(0,0,0), gp_Pnt(1,0,0) );
+					double y_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0)));
+					double z_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1)));
+
+					if (abs(y_axis_offset) < abs(z_axis_offset)) m_params.m_yz_plane = y_axis_offset;
+					else m_params.m_yz_plane = z_axis_offset;
+				}
+
+				if (abs(points[0].Y() - points[1].Y()) < tolerance)
+				{
+					// Both points were found at the same Y value.  This means
+					// that we're rotating around the Y axis by some value.  Determine
+					// which by aligning the points with both the X and Z axes to figure
+					// out which is closer.  We assume the closer one is what we
+					// were after.
+
+					gp_Vec pivot( gp_Pnt(0,0,0), gp_Pnt(0,1,0) );
+					double x_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0)));
+					double z_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1)));
+
+					if (abs(x_axis_offset) < abs(z_axis_offset)) m_params.m_xz_plane = x_axis_offset;
+					else m_params.m_xz_plane = z_axis_offset;
+				}
+
+				if (abs(points[0].Z() - points[1].Z()) < tolerance)
+				{
+					// Both points were found at the same Z value.  This means
+					// that we're rotating around the Z axis by some value.  Determine
+					// which by aligning the points with both the X and Y axes to figure
+					// out which is closer.  We assume the closer one is what we
+					// were after.
+
+					gp_Vec pivot( gp_Pnt(0,0,0), gp_Pnt(0,0,1) );
+					double x_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0)));
+					double y_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0)));
+
+					if (abs(x_axis_offset) < abs(y_axis_offset)) m_params.m_xy_plane = x_axis_offset;
+					else m_params.m_xy_plane = y_axis_offset;
+				}
+			} // End if - then
+		} // End if - then
+	} // End if - else
+} // End SetRotationsFromProbedPoints() method
+
+
+class Fixture_ImportProbeData: public Tool 
+{
+
+CFixture *m_pThis;
+
+public:
+	Fixture_ImportProbeData() { m_pThis = NULL; }
+
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Import probe data");}
+
+	void Run()
+	{
+		// Prompt the user to select a file to import.
+		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"), _T("."), _T(""),
+				wxString(_("Known Files")) + _T(" |*.xml;*.XML;")
+					+ _T("*.Xml;"),
+					wxOPEN | wxFILE_MUST_EXIST );
+		fd.SetFilterIndex(1);
+		if (fd.ShowModal() == wxID_CANCEL) return;
+		m_pThis->SetRotationsFromProbedPoints( fd.GetPath().c_str() );
+	}
+	wxString BitmapPath(){ return _T("import");}
+	wxString previous_path;
+	void Set( CFixture *pThis ) { m_pThis = pThis; }
+};
+
+static Fixture_ImportProbeData import_probe_data;
+
+void CFixture::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+
+	import_probe_data.Set( this );
+
+	t_list->push_back( &import_probe_data );
+}
 
 
 

@@ -947,8 +947,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Locating", CLocating::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("Probe_Centre", CProbe_Centre::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("Probe_Edge", CProbe_Edge::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("ProbeCentre", CProbe_Centre::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("ProbeEdge", CProbe_Edge::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CounterBore", CCounterBore::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingTool", CCuttingTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixture", CFixture::ReadFromXMLElement);
