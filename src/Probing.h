@@ -159,7 +159,7 @@ public:
 		return(ss);
 	}
 
-	friend wxString & operator << (wxString & ss, eEdges_t & edge)
+	friend wxString & operator << (wxString & ss, const eEdges_t & edge)
 	{
 		switch (edge)
 		{
@@ -196,7 +196,7 @@ public:
 		return(ss);
 	}
 
-	friend wxString & operator << (wxString & ss, eProbeDirection_t & direction)
+	friend wxString & operator << (wxString & ss, const eProbeDirection_t & direction)
 	{
 		switch (direction)
 		{
@@ -236,7 +236,7 @@ public:
 	// HeeksObj's virtual functions
 	int GetType()const{return ProbeCentreType;}
 	void WriteXML(TiXmlNode *root);
-	const wxChar* GetTypeString(void)const{return _T("Probe Centre");}
+	const wxChar* GetTypeString(void)const{return _T("ProbeCentre");}
 
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
@@ -283,7 +283,7 @@ public:
 	// HeeksObj's virtual functions
 	int GetType()const{return ProbeEdgeType;}
 	void WriteXML(TiXmlNode *root);
-	const wxChar* GetTypeString(void)const{return _T("Probe Edge");}
+	const wxChar* GetTypeString(void)const{return _T("ProbeEdge");}
 	
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;

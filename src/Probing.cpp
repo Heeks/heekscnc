@@ -207,7 +207,16 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 	ss << "comment('This program assumes that the machine operator has jogged')\n";
 	ss << "comment('the machine to approximatedly the correct location')\n";
 	ss << "comment('immediately above the ";
-	ss << eCorners_t(m_corner) << " corner of the workpiece.')\n";
+
+	if (m_number_of_edges == 1)
+	{
+		ss << eEdges_t(m_edge) << " edge of the workpiece.')\n";
+	}
+	else
+	{
+		ss << eCorners_t(m_corner) << " corner of the workpiece.')\n";
+	}
+
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 	ss.str(_(""));
 
@@ -474,7 +483,7 @@ bool CProbing::CanAddTo(HeeksObj* owner)
 
 void CProbe_Edge::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "CProbe_Edge" );
+	TiXmlElement * element = new TiXmlElement( Ttc(GetTypeString()) );
 	root->LinkEndChild( element );  
 
 	element->SetDoubleAttribute("retract", m_retract);
@@ -499,7 +508,7 @@ HeeksObj* CProbe_Edge::ReadFromXMLElement(TiXmlElement* element)
 
 void CProbe_Centre::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Probe_Centre" );
+	TiXmlElement * element = new TiXmlElement( Ttc(GetTypeString()) );
 	root->LinkEndChild( element );  
 
 	element->SetAttribute("direction", m_direction);

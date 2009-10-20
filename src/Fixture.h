@@ -22,17 +22,17 @@ class CFixture;
 class CFixtureParams{
 	
 public:
-	double m_a_axis;	// i.e. rotation angle around x axis - in degrees
-	double m_b_axis;	// i.e. rotation angle around y axis - in degrees
-	double m_c_axis;	// i.e. rotation angle around z axis - in degrees
+	double m_yz_plane;	// i.e. rotation angle around x axis - in degrees
+	double m_xz_plane;	// i.e. rotation angle around y axis - in degrees
+	double m_xy_plane;	// i.e. rotation angle around z axis - in degrees
 
 	gp_Pnt m_pivot_point;	// Fixture's pivot point for rotation.
 
 	CFixtureParams()
 	{
-		m_a_axis = 0.0;
-		m_b_axis = 0.0;
-		m_c_axis = 0.0;
+		m_yz_plane = 0.0;
+		m_xz_plane = 0.0;
+		m_xy_plane = 0.0;
 
 		m_pivot_point = gp_Pnt( 0.0, 0.0, 0.0 );
 	} // End constructor.
@@ -130,6 +130,9 @@ public:
 	static void extract(const gp_Trsf& tr, double *m);
 	gp_Trsf GetMatrix() const;
 
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void SetRotationsFromProbedPoints( const wxString & probed_points_xml_file_name );
+	double AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec & pivot, const gp_Vec & axis ) const;
 
 }; // End CFixture class definition.
 
