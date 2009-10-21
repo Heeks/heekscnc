@@ -629,7 +629,7 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 			if (points.size() >= 2)
 			{
 				double tolerance = heeksCAD->GetTolerance();
-				if (abs(points[0].X() - points[1].X()) < tolerance)
+				if (fabs(points[0].X() - points[1].X()) < tolerance)
 				{
 					// Both points were found at the same X value.  This means
 					// that we're rotating around the X axis by some value.  Determine
@@ -641,11 +641,11 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 					double y_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0)));
 					double z_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1)));
 
-					if (abs(y_axis_offset) < abs(z_axis_offset)) m_params.m_yz_plane = y_axis_offset;
+					if (fabs(y_axis_offset) < fabs(z_axis_offset)) m_params.m_yz_plane = y_axis_offset;
 					else m_params.m_yz_plane = z_axis_offset;
 				}
 
-				if (abs(points[0].Y() - points[1].Y()) < tolerance)
+				if (fabs(points[0].Y() - points[1].Y()) < tolerance)
 				{
 					// Both points were found at the same Y value.  This means
 					// that we're rotating around the Y axis by some value.  Determine
@@ -657,11 +657,11 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 					double x_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0)));
 					double z_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1)));
 
-					if (abs(x_axis_offset) < abs(z_axis_offset)) m_params.m_xz_plane = x_axis_offset;
+					if (fabs(x_axis_offset) < fabs(z_axis_offset)) m_params.m_xz_plane = x_axis_offset;
 					else m_params.m_xz_plane = z_axis_offset;
 				}
 
-				if (abs(points[0].Z() - points[1].Z()) < tolerance)
+				if (fabs(points[0].Z() - points[1].Z()) < tolerance)
 				{
 					// Both points were found at the same Z value.  This means
 					// that we're rotating around the Z axis by some value.  Determine
@@ -673,7 +673,7 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 					double x_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0)));
 					double y_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0)));
 
-					if (abs(x_axis_offset) < abs(y_axis_offset)) m_params.m_xy_plane = x_axis_offset;
+					if (fabs(x_axis_offset) < fabs(y_axis_offset)) m_params.m_xy_plane = x_axis_offset;
 					else m_params.m_xy_plane = y_axis_offset;
 				}
 			} // End if - then
