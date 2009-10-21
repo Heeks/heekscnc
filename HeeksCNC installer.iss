@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
 AppName=HeeksCNC
-AppVerName=HeeksCNC 0.8.2
+AppVerName=HeeksCNC 0.10.0
 AppPublisher=Heeks Software
 AppPublisherURL=http://code.google.com/p/heekscnc/
 AppSupportURL=http://code.google.com/p/heekscnc/
@@ -15,7 +15,7 @@ AppUpdatesURL=http://code.google.com/p/heekscnc/
 DefaultDirName={pf}\HeeksCAD
 DefaultGroupName=HeeksCAD
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.8.2
+OutputBaseFilename=HeeksCNC 0.10.0
 Compression=lzma
 SolidCompression=yes
 
@@ -28,10 +28,12 @@ Source: "C:\Users\Dan\HeeksCAD\bitmaps\*.png"; DestDir: "{app}\bitmaps"; Flags: 
 Source: "C:\Users\Dan\HeeksCAD\bitmaps\font.glf"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\icons\*.png"; DestDir: "{app}\icons"; Flags: ignoreversion
 Source: "C:\Users\Dan\OCC dlls for HeeksCAD\*"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\wxWidgets-2.8.9\lib\vc_dll\wxmsw28_gl_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\wxWidgets-2.8.9\lib\vc_dll\wxmsw28_core_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\wxWidgets-2.8.9\lib\vc_dll\wxmsw28_aui_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\wxWidgets-2.8.9\lib\vc_dll\wxbase28_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\de\*"; DestDir: "{app}\de"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\it\*"; DestDir: "{app}\de"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\wxmsw28u_gl_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\wxmsw28u_core_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\wxmsw28u_aui_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\wxbase28u_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\post.bat"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\nc_read.bat"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
@@ -45,6 +47,8 @@ Source: "C:\Users\Dan\HeeksCNC\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: igno
 Source: "C:\Users\Dan\HeeksCNC\PyCamToHeeks.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\sample adaptive roughing2.heeks"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\circular_pocket.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\*.speeds"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\*.tooltable"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\nc\*.py"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\nc\*.txt"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\HeeksCNC.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
