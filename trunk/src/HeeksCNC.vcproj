@@ -286,7 +286,7 @@
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;;$(HEEKSCADPATH);../kurve/geometry;../kurve/messages"
+				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)&quot;;&quot;$(WXWIN)\lib\vc_dll\mswu&quot;;&quot;$(WXWIN)\include\msvc&quot;;$(HEEKSCADPATH);../kurve/geometry;../kurve/messages"
 				PreprocessorDefinitions="WIN32;__WXMSW__;_WINDOWS;NOPCH;WNT;_CRT_SECURE_NO_WARNINGS;WXUSINGDLL;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;_SECURE_ATL =0;HEEKSCNC;OPEN_SOURCE_GEOMETRY"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -311,7 +311,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib rpcrt4.lib wxmsw28u_core.lib wxmsw28u_aui.lib wxmsw28u_gl.lib wxbase28u.lib"
+				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib rpcrt4.lib wxmsw28u_core.lib wxmsw28u_aui.lib wxmsw28u_gl.lib wxbase28u.lib TKVrml.lib TKStl.lib TKBRep.lib TKIGES.lib TKShHealing.lib TKSTEP.lib TKSTEP209.lib TKSTEPAttr.lib TKSTEPBase.lib TKXSBase.lib TKShapeSchema.lib FWOSPlugin.lib PTKernel.lib TKBool.lib TKCAF.lib TKCDF.lib TKDraw.lib TKernel.lib TKFeat.lib TKFillet.lib TKG2d.lib TKG3d.lib TKGeomAlgo.lib TKGeomBase.lib TKHLR.lib TKMath.lib TKOffset.lib TKPCAF.lib TKPrim.lib TKPShape.lib TKService.lib TKTopAlgo.lib TKV2d.lib TKV3d.lib TKMesh.lib TKAdvTools.lib TKCPPExt.lib TKBO.lib TKXDESTEP.lib TKXCAF.lib TKXCAFSchema.lib TKDCAF.lib TKLCAF.lib TKPLCAF.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\lib&quot;"
