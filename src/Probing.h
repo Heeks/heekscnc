@@ -106,7 +106,9 @@ public:
 						const double depth,
 						const CNCPoint probe_point,
 						const wxString &intersection_variable_x,
-						const wxString &intersection_variable_y ) const;
+						const wxString &intersection_variable_y,
+						const double probe_radius_x_component,
+						const double probe_radius_y_component	 ) const;
 
 	wxString GetOutputFileName(const wxString extension, const bool filename_only);
 	void GeneratePythonPreamble();
