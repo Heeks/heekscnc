@@ -430,46 +430,16 @@ class CreatorIso(nc.Creator):
         self.write_blocknum()
         self.write((iso.codes.VARIABLE() % id) + (iso.codes.VARIABLE_SET() % value) + '\n')
 
-    def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None ):
-	self.write_blocknum()
-	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
-	if (self.fhv) : self.calc_feedrate_hv(1, 0)
-	self.write_blocknum()
-	self.write_feedrate()
-	self.write('\t(Set the feed rate for probing)\n')
-
-	self.rapid(x1,y1)
-	self.rapid(z=depth)
-
-	self.write_blocknum()
-	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X 0 Y 0') + ('\t(Probe back towards our starting point)\n')))
-	self.comment('Store the probed location somewhere we can get it again later')
-	self.write_blocknum()
-	self.write(('#1001=#5061\n'))
-	self.write_blocknum()
-	self.write(('#1002=#5062\n'))
-	self.rapid(z=0)
-	self.rapid(x=x2,y=y2)
-	self.rapid(z=depth)
-	self.write_blocknum()
-	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X 0 Y 0') + ('\t(Probe back towards our starting point)\n')))
-	self.comment('Store the probed location somewhere we can get it again later')
-	self.write_blocknum()
-	self.write(('#1003=#5061\n'))
-	self.write_blocknum()
-	self.write(('#1004=#5062\n'))
-
-	self.comment('Now move back to the centre location')
-	self.rapid(z=0)
-	self.write_blocknum()
-	self.write(('G00 X [[[#1003 - #1001] / 2.0] + #1001] Y [[[#1004 - #1002] / 2.0] + #1002]\n'))
-	self.write_blocknum()
-	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
-
-    def probe_single_point(self, point_along_edge_x=None, \
-				point_along_edge_y=None, \
-				depth=None, retracted_point_x=None, \
-				retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None):
+    # This routine uses the G92 coordinate system offsets to establish a temporary coordinate
+    # system at the machine's current position.  It can then use absolute coordinates relative
+    # to this position which makes coding easy.  It then moves to the 'point along edge' which
+    # should be above the workpiece but still on one edge.  It then backs off from the edge
+    # to the 'retracted point'.  It then plunges down by the depth value specified.  It then
+    # probes back towards the 'destination point'.  The probed X,Y location are stored
+    # into the 'intersection variable' variables.  Finally the machine moves back to the
+    # original location.  This is important so that the results of multiple calls to this
+    # routine may be compared meaningfully.
+    def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_radius_x_component=None, probe_radius_y_component=None ):
 	self.write_blocknum()
 	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
 	if (self.fhv) : self.calc_feedrate_hv(1, 0)
@@ -486,9 +456,13 @@ class CreatorIso(nc.Creator):
 
 	self.comment('Store the probed location somewhere we can get it again later')
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '=#5061\n'))
+	self.write(('#' + intersection_variable_x + '=' + probe_radius_x_component + '\n'))
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '=#5062\n'))
+	self.write(('#' + intersection_variable_x + '=[#' + intersection_variable_x + ' + #5061]\n'))
+	self.write_blocknum()
+	self.write(('#' + intersection_variable_y + '=' + probe_radius_y_component + '\n'))
+	self.write_blocknum()
+	self.write(('#' + intersection_variable_y + '=[#' + intersection_variable_y + ' + #5062]\n'))
 
 	self.comment('Now move back to the original location')
 	self.rapid(retracted_point_x,retracted_point_y)
@@ -501,6 +475,10 @@ class CreatorIso(nc.Creator):
     def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, xml_file_name=None ):
 	pass
 
+    # Rapid movement to the midpoint between the two points specified.
+    # NOTE: The points are specified either as strings representing numbers or as strings
+    # representing variable names.  This allows the HeeksCNC module to determine which
+    # variable names are used in these various routines.
     def rapid_to_midpoint(self, x1, y1, z1, x2, y2, z2):
 	self.write_blocknum()
 	self.write(iso.codes.RAPID())
@@ -508,6 +486,50 @@ class CreatorIso(nc.Creator):
 	self.write((' Y ' + '[[[' + y1 + '-' + y2 + '] / 2.0] + ' + y2 + ']'))
 	self.write((' Z ' + '[[[' + z1 + '-' + z2 + '] / 2.0] + ' + z2 + ']'))
 	self.write('\n')
+
+    # Rapid movement to the intersection of two lines (in the XY plane only). This routine
+    # is based on information found in http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
+    # written by Paul Bourke.  The ua_numerator, ua_denominator, ua and ub parameters
+    # represent variable names (with the preceding '#' included in them) for use as temporary
+    # variables.  They're specified here simply so that HeeksCNC can manage which variables
+    # are used in which GCode calculations.
+    #
+    # As per the notes on the web page, the ua_denominator and ub_denominator formulae are
+    # the same so we don't repeat this.  If the two lines are coincident or parallel then
+    # no movement occurs.
+    #
+    # NOTE: The points are specified either as strings representing numbers or as strings
+    # representing variable names.  This allows the HeeksCNC module to determine which
+    # variable names are used in these various routines.
+    def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
+	self.comment('Find the intersection of the two lines made up by the four probed points')
+    	self.write_blocknum();
+	self.write(ua_numerator + '=[[[' + x4 + '-' + x3 + '] * [' + y1 + '-' + y3 + ']] - [[' + y4 + '-' + y3 + '] * [' + x1 + '-' + x3 + ']]]\n')
+    	self.write_blocknum();
+	self.write(ua_denominator + '=[[[' + y4 + '-' + y3 + '] * [' + x2 + '-' + x1 + ']] - [[' + x4 + '-' + x3 + '] * [' + y2 + '-' + y1 + ']]]\n')
+    	self.write_blocknum();
+	self.write(ub_numerator + '=[[[' + x2 + '-' + x1 + '] * [' + y1 + '-' + y3 + ']] - [[' + y2 + '-' + y1 + '] * [' + x1 + '-' + x3 + ']]]\n')
+
+	self.comment('If they are not parallel')
+	self.write('O900 IF [' + ua_denominator + ' NE 0]\n')
+	self.comment('And if they are not coincident')
+	self.write('O901    IF [' + ua_numerator + ' NE 0 ]\n')
+
+    	self.write_blocknum();
+	self.write('       ' + ua + '=[' + ua_numerator + ' / ' + ua_denominator + ']\n')
+    	self.write_blocknum();
+	self.write('       ' + ub + '=[' + ub_numerator + ' / ' + ua_denominator + ']\n') # NOTE: ub denominator is the same as ua denominator
+    	self.write_blocknum();
+	self.write('       ' + intersection_x + '=[' + x1 + ' + [[' + ua + ' * [' + x2 + ' - ' + x1 + ']]]]\n')
+    	self.write_blocknum();
+	self.write('       ' + intersection_y + '=[' + y1 + ' + [[' + ua + ' * [' + y2 + ' - ' + y1 + ']]]]\n')
+    	self.write_blocknum();
+	self.write('       ' + iso.codes.RAPID())
+	self.write(' X ' + intersection_x + ' Y ' + intersection_y + '\n')
+
+	self.write('O901    ENDIF\n')
+	self.write('O900 ENDIF\n')
+
 
 ################################################################################
 
