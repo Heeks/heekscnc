@@ -414,6 +414,11 @@ static void NewProbe_Centre_MenuCallback(wxCommandEvent &event)
 		} // End if - then
 	} // End for
 
+	if (cutting_tool_number == 0)
+	{
+		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+	} // End if - then
+
 	CProbe_Centre *new_object = new CProbe_Centre( cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
@@ -434,6 +439,11 @@ static void NewProbe_Edge_MenuCallback(wxCommandEvent &event)
 			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
 		} // End if - then
 	} // End for
+
+	if (cutting_tool_number == 0)
+	{
+		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+	} // End if - then
 
 	CProbe_Edge *new_object = new CProbe_Edge( cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);

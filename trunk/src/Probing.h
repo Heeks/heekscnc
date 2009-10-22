@@ -15,6 +15,7 @@
 #include <vector>
 #include "CNCPoint.h"
 #include "interface/Tool.h"
+#include "CuttingTool.h"
 
 class CProbing;
 
@@ -265,6 +266,7 @@ public:
 	//	Constructors.
 	CProbe_Centre(const int cutting_tool_number = 0) : CProbing(_("Probe Centre"), cutting_tool_number ) 
 	{
+
 		m_direction = int(eOutside);
 		m_number_of_points = 2;
 		m_alignment = int(eXAxis);
@@ -308,7 +310,7 @@ class CProbe_Edge: public CProbing {
 
 public:
 	//	Constructors.
-	CProbe_Edge(const int cutting_tool_number = 0) : 
+	CProbe_Edge(const int cutting_tool_number = 0) :
 		CProbing(_("Probe Edge"), cutting_tool_number )
 	{
 		m_retract = 5.0;	// mm.  This is how far to retract from the edge before probing back in.
