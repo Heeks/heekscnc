@@ -2,7 +2,7 @@
 
 = Introduction =
 
-NOTE: Not all of this functionality has been implemented yet.
+NOTE: All of this functionality has been implemented but it has not all been tested.  Use it with one hand over the Emergency Stop button.
 
 HeeksCNC supports the generation of GCode suitable for both edge and centre-point detection via a touch probe.  In the case of edge detection routines, the generated GCode includes a feature whereby the GCode stores the probed point locations into an XML file.  This XML file may be read into a Fixture object so that the edge's rotation from its nearest axis can be determined.
 
@@ -13,7 +13,7 @@ The suite of GCode routines available include;
 
  - Measure the rotation of an axis by measuring a single edge via two probed points.  This edge may be top, bottom, left or right.  The GCode program will generate an XML file describing the probed point locations.  This XML file may be read in to a Fixture object so as to set the fixture's rotation.  This ensures that subsequently generated GCode will align with the probed edge.
 
- - Move to the corner of two probed edges.  This operation probes two perpendicular edges based on one of the four corner designations.  The probed points will be stored in an XML file that may be read into a Fixture object so as to set its rotation attributes.  When finished, the machine's position will be left immediately above the intersection of the two probed edges.  (NOTE: This has not yet been implemented)
+ - Move to the corner of two probed edges.  This operation probes two perpendicular edges based on one of the four corner designations.  The probed points will be stored in an XML file that may be read into a Fixture object so as to set its rotation attributes.  When finished, the machine's position will be left immediately above the intersection of the two probed edges.
 
 
 = Details =
