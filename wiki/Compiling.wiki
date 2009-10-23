@@ -9,12 +9,17 @@ For Ubuntu build see http://code.google.com/p/heekscnc/wiki/UbuntuBuild
 
 You need HeeksCAD ( see http://code.google.com/p/heekscad/ ), because HeeksCNC is an add-in for HeeksCAD.
 
-Check-out all the HeeksCNC files to a folder called "HeeksCNC" ( it has to have this name at the moment ) under the HeeksCAD folder that you checked-out the heekscad project to.
+Check-out all the HeeksCNC files to a folder, for example "HeeksCNC".
 
-Open "HeeksCNC.sln"
+Open "HeeksCNC.sln" with Visual Studio 2008 ( Express version is OK too ).
 
 Press "Build Solution"
 
 Install the latest verion of Python, ( HeeksCNC uses Python scripts extensively )
 
-Run HeeksCAD.exe and it should load up HeeksCNC.dll and add the extra windows and menu items. You will have to go to the "View" menu and tick them to make them visible.
+Run HeeksCAD.exe.
+On the file menu, choose "Plugins".
+Add a new plugin called "HeeksCNC", and use the button to fill the box with the path to your HeeksCNC.dll that was built to your "HeeksCNC" folder.
+Close HeeksCAD.
+Run HeeksCAD.exe.
+It should load up HeeksCNC.dll and add the extra windows and menu items. You will have to go to the "View" menu and tick them to make them visible.
