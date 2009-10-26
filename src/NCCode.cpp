@@ -371,11 +371,11 @@ void CNCCodeBlock::WriteNCCode(wxTextFile &f, double ox, double oy)
 					ct.m_str.SubString(1,ct.m_str.size()-1).ToDouble(&pos);
 					if(axis == 'X' || axis == 'x')
 					{
-						str = wxString::Format(_("%c%f"),axis,pos+ox/25.4);
+						str = wxString::Format(_T("%c%f"),axis,pos+ox/25.4);
 					}
 					if(axis == 'Y' || axis == 'y')
 					{
-						str = wxString::Format(_("%c%f"),axis,pos+oy/25.4);
+						str = wxString::Format(_T("%c%f"),axis,pos+oy/25.4);
 					}
 					movement.append(str);
 				}
