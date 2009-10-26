@@ -80,7 +80,7 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		ss << "comment('before probing back towards the centre point looking for the')\n";
 		ss << "comment('protrusion.')\n";
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_(""));
+		ss.str(_T(""));
 
 		switch (m_alignment)
 		{
@@ -88,22 +88,22 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0,0), 
 									gp_Pnt(m_distance,0,0), m_depth, 
 									gp_Pnt(0,0,0), 
-									_("1001"), _("1002"), -1.0 * probe_radius, 0 );
+									_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-1.0 * m_distance,0,0), 
 									gp_Pnt(-1.0 * m_distance,0,0), m_depth, 
 									gp_Pnt(0,0,0), 
-									_("1003"), _("1004"), +1.0 * probe_radius, 0 );
+									_T("1003"), _T("1004"), +1.0 * probe_radius, 0 );
 			break;
 
 		case eYAxis:
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,m_distance,0), 
 									gp_Pnt(0,m_distance,0), m_depth, 
 									gp_Pnt(0,0,0), 
-									_("1001"), _("1002"), 0, -1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,-1.0 * m_distance,0), 
 									gp_Pnt(0,-1.0 * m_distance,0), m_depth, 
 									gp_Pnt(0,0,0), 
-									_("1003"), _("1004"), 0, +1.0 * probe_radius );
+									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 			break;
 		} // End switch
 	} // End if - then
@@ -115,7 +115,7 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		ss << "comment('This program then jogs down and probes out in two opposite directions')\n";
 		ss << "comment('looking for the workpiece')\n";
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_(""));
+		ss.str(_T(""));
 
 		switch (m_alignment)
 		{
@@ -123,22 +123,22 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
 									gp_Pnt(0,0,0), m_depth, 
 									gp_Pnt(+1.0 * m_distance,0,0), 
-									_("1001"), _("1002"), +1.0 * probe_radius, 0 );
+									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
 									gp_Pnt(0,0,0), m_depth, 
 									gp_Pnt(-1.0 * m_distance,0,0), 
-									_("1003"), _("1004"), -1.0 * probe_radius, 0 );
+									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 			break;
 
 		case eYAxis:
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
 									gp_Pnt(0,0,0), m_depth, 
 									gp_Pnt(0, +1.0 * m_distance,0), 
-									_("1001"), _("1002"), 0, +1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
 									gp_Pnt(0,0,0), m_depth, 
 									gp_Pnt(0, -1.0 * m_distance,0), 
-									_("1003"), _("1004"), 0, -1.0 * probe_radius  );
+									_T("1003"), _T("1004"), 0, -1.0 * probe_radius  );
 			break;
 		} // End switch
 	} // End if - else
@@ -147,11 +147,11 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	ss << "comment('Move back to the intersection points')\n";
 	ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
 	ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-	ss << "rapid_to_midpoint( '" << _("#1001") << "','" << _("#1002") << "', '0', '" << _("#1003") << "','" << _("#1004") << "', '0' )\n";
+	ss << "rapid_to_midpoint( '" << _T("#1001") << "','" << _T("#1002") << "', '0', '" << _T("#1003") << "','" << _T("#1004") << "', '0' )\n";
 	ss << "remove_temporary_origin()\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_(""));
+	ss.str(_T(""));
 
 	if (m_number_of_points == 4)
 	{
@@ -164,15 +164,15 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			ss << "comment('before probing back towards the centre point looking for the')\n";
 			ss << "comment('protrusion.')\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-			ss.str(_(""));
+			ss.str(_T(""));
 
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,m_distance,0), 
 									gp_Pnt(0,m_distance,0), m_depth, 
 									gp_Pnt(0,0,0), 
-									_("1001"), _("1002"), 0, -1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,-1.0 * m_distance,0), 
 									gp_Pnt(0,-1.0 * m_distance,0), m_depth, 
-									gp_Pnt(0,0,0), _("1003"), _("1004"), 0, +1.0 * probe_radius );
+									gp_Pnt(0,0,0), _T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 		} // End if - then
 		else
 		{
@@ -182,27 +182,27 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			ss << "comment('This program then jogs down and probes out in two opposite directions')\n";
 			ss << "comment('looking for the workpiece')\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-			ss.str(_(""));
+			ss.str(_T(""));
 
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
 									gp_Pnt(0,0,0), m_depth, 
 									gp_Pnt(0,+1.0 * m_distance,0), 
-									_("1001"), _("1002"), +1.0 * probe_radius, 0 );
+									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
 									gp_Pnt(0,0,0), m_depth, 
 									gp_Pnt(0,-1.0 * m_distance,0), 
-									_("1003"), _("1004"), -1.0 * probe_radius, 0 );
+									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 		} // End if - else
 
 		// Now move to the centre of these two intersection points.
 		ss << "comment('Move back to the intersection points')\n";
 		ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
 		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-		ss << "rapid_to_midpoint( '" << _("#1001") << "','" << _("#1002") << "', '0', '" << _("#1003") << "','" << _("#1004") << "', '0' )\n";
+		ss << "rapid_to_midpoint( '" << _T("#1001") << "','" << _T("#1002") << "', '0', '" << _T("#1003") << "','" << _T("#1004") << "', '0' )\n";
 		ss << "remove_temporary_origin()\n";
 
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_(""));
+		ss.str(_T(""));
 	} // End if - then
 }
 
@@ -293,7 +293,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 	} // End if - then
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_(""));
+	ss.str(_T(""));
 
 	gp_Dir z_direction(0,0,1);
 
@@ -305,44 +305,44 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,                0, 0), 
 									gp_Pnt(m_distance, -1.0 * m_retract, 0), m_depth, 
 									gp_Pnt(m_distance, +1.0 * m_retract, 0),
-								       	_("1001"), _("1002"), 0, +1.0 * probe_radius );
+								       	_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance, 0,0), 
 									gp_Pnt(2.0 * m_distance,-1.0 * m_retract,0), m_depth, 
 									gp_Pnt(2.0 * m_distance, +1.0 * m_retract, 0), 
-									_("1003"), _("1004"), 0, +1.0 * probe_radius );
+									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 			break;
 
 		case eTop:
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0,0), 
 									gp_Pnt(m_distance, +1.0 * m_retract,0), m_depth, 
 									gp_Pnt(m_distance, -1.0 * m_retract, 0), 
-									_("1001"), _("1002"), 0, -1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance,0,0), 
 									gp_Pnt(2.0 * m_distance, +1.0 * m_retract,0), m_depth, 
 									gp_Pnt(2.0 * m_distance, -1.0 * m_retract, 0), 
-									_("1003"), _("1004"), 0, -1.0 * probe_radius );
+									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 			break;
 
 		case eLeft:
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,m_distance,0), 
 									gp_Pnt(-1.0 * m_retract, m_distance, 0), m_depth, 
 									gp_Pnt(+1.0 * m_retract, m_distance,0), 
-									_("1001"), _("1002"), +1.0 * probe_radius, 0 );
+									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,2.0 * m_distance,0), 
 									gp_Pnt(-1.0 * m_retract, 2.0 * m_distance, 0), m_depth, 
 									gp_Pnt(+1.0 * m_retract, 2.0 * m_distance,0), 
-									_("1003"), _("1004"), +1.0 * probe_radius,0 );
+									_T("1003"), _T("1004"), +1.0 * probe_radius,0 );
 			break;
 
 		case eRight:
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance, 0), 
 									gp_Pnt(m_retract, m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
-									_("1001"), _("1002"), -1.0 * probe_radius, 0 );
+									_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance, 0), 
 									gp_Pnt(m_retract, 2.0 * m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, 2.0 * m_distance, 0), 
-									_("1003"), _("1004"), -1.0 * probe_radius, 0 );
+									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 			break;
 		} // End switch
 
@@ -352,9 +352,9 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				<< "y1='#1002', "
 				<< "x2='#1003', "
 				<< "y2='#1004', "
-				<< "xml_file_name='" << this->GetOutputFileName( _(".xml"), true ).c_str() << "')\n";
+				<< "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_(""));
+		ss.str(_T(""));
 	} // End if - then
 	else
 	{
@@ -367,21 +367,21 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0, 0), 
 									gp_Pnt(m_distance, -1.0 * m_retract, 0), m_depth, 
 									gp_Pnt(m_distance, +1.0 * m_retract, 0), 
-									_("1001"), _("1002"), 0, +1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance, 0,0), 
 									gp_Pnt(2.0 * m_distance,-1.0 * m_retract,0), m_depth, 
 									gp_Pnt(2.0 * m_distance, +1.0 * m_retract, 0), 
-									_("1003"), _("1004"), 0, +1.0 * probe_radius );
+									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
 			// Left
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance,0), 
 									gp_Pnt(-1.0 * m_retract, m_distance, 0), m_depth, 
 									gp_Pnt( +1.0 * m_retract, m_distance, 0), 
-									_("1005"), _("1006"), +1.0 * probe_radius, 0 );
+									_T("1005"), _T("1006"), +1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance,0), 
 									gp_Pnt(-1.0 * m_retract,2.0 * m_distance, 0), m_depth, 
 									gp_Pnt( +1.0 * m_retract, 2.0 * m_distance, 0), 
-									_("1007"), _("1008"), +1.0 * probe_radius, 0 );
+									_T("1007"), _T("1008"), +1.0 * probe_radius, 0 );
 			break;
 
 		case eBottomRight:
@@ -389,21 +389,21 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-1.0 * m_distance, 0, 0), 
 									gp_Pnt(-1.0 * m_distance, -1.0 * m_retract, 0), m_depth, 
 									gp_Pnt(-1.0 * m_distance, +1.0 * m_retract, 0), 
-									_("1001"), _("1002"), 0, +1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-2.0 * m_distance, 0,0), 
 									gp_Pnt(-2.0 * m_distance,-1.0 * m_retract,0), m_depth, 
 									gp_Pnt(-2.0 * m_distance, +1.0 * m_retract, 0), 
-									_("1003"), _("1004"), 0, +1.0 * probe_radius );
+									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
 			// Right
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance, 0), 
 									gp_Pnt(m_retract, m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
-									_("1005"), _("1006"), -1.0 * probe_radius, 0 );
+									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance, 0), 
 									gp_Pnt(m_retract, 2.0 * m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, 2.0 * m_distance, 0), 
-									_("1007"), _("1008"), -1.0 * probe_radius, 0 );
+									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 
 			
 			break;
@@ -413,21 +413,21 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0,0), 
 									gp_Pnt(m_distance, +1.0 * m_retract,0), m_depth, 
 									gp_Pnt(m_distance, -1.0 * m_retract, 0), 
-									_("1001"), _("1002"), 0, -1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance,0,0), 
 									gp_Pnt(2.0 * m_distance, +1.0 * m_retract,0), m_depth, 
 									gp_Pnt(2.0 * m_distance, -1.0 * m_retract, 0), 
-									_("1003"), _("1004"), 0, -1.0 * probe_radius );
+									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 
 			// Left
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance,0), 
 									gp_Pnt(1.0 * m_retract, m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
-									_("1005"), _("1006"), -1.0 * probe_radius, 0 );
+									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance,0), 
 									gp_Pnt(1.0 * m_retract, 2.0 * m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
-									_("1007"), _("1008"), -1.0 * probe_radius, 0 );
+									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			break;
 
 		case eTopRight:
@@ -435,21 +435,21 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-1.0 * m_distance,0,0), 
 									gp_Pnt(-1.0 * m_distance, 1.0 * m_retract, 0), m_depth, 
 									gp_Pnt( -1.0 * m_distance, -1.0 * m_retract, 0), 
-									_("1001"), _("1002"), 0, -1.0 * probe_radius );
+									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-2.0 * m_distance,0,0), 
 									gp_Pnt(-2.0 * m_distance, 1.0 * m_retract, 0), m_depth, 
 									gp_Pnt( -2.0 * m_distance, -1.0 * m_retract, 0), 
-									_("1003"), _("1004"), 0, -1.0 * probe_radius );
+									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 
 			// Right
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, -1.0 * m_distance, 0), 
 									gp_Pnt(m_retract, -1.0 * m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, -1.0 * m_distance, 0), 
-									_("1005"), _("1006"), -1.0 * probe_radius, 0 );
+									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
 			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, -2.0 * m_distance, 0), 
 									gp_Pnt(m_retract, -2.0 * m_distance, 0), m_depth, 
 									gp_Pnt(-1.0 * m_retract, -2.0 * m_distance, 0), 
-									_("1007"), _("1008"), -1.0 * probe_radius, 0 );
+									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			break;
 		} // End switch
 
@@ -463,7 +463,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				<< "y3='#1006', "
 				<< "x4='#1007', "
 				<< "y4='#1008', "
-				<< "xml_file_name='" << this->GetOutputFileName( _(".xml"), true ).c_str() << "')\n";
+				<< "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
 
 		// And position the cutting tool at the intersection of the two lines.
 		// This should be safe as the 'probe_single_point() call made in the AppendTextForSingleOperation() routine returns
@@ -750,20 +750,20 @@ wxString CProbing::GetOutputFileName(const wxString extension, const bool filena
 
 	// Remove the extension.
 	int offset = 0;
-	if ((offset = file_name.Find(_("."))) != -1)
+	if ((offset = file_name.Find(_T("."))) != -1)
 	{
 		file_name.Remove(offset);
 	}
 
-	file_name << _("_");
+	file_name << _T("_");
 	file_name << m_title;
-	file_name << _("_id_");
+	file_name << _T("_id_");
 	file_name << m_id;
 	file_name << extension;
 
 	if (filename_only)
 	{
-		std::vector<wxString> tokens = Tokens( file_name, wxString(_("/\\")) );
+		std::vector<wxString> tokens = Tokens( file_name, wxString(_T("/\\")) );
 		if (tokens.size() > 0)
 		{
 			file_name = tokens[tokens.size()-1];
@@ -804,7 +804,7 @@ void CProbing::GeneratePythonPreamble()
 		} // End if - else
 
 		// output file
-		theApp.m_program_canvas->AppendText(_T("output('") + this->GetOutputFileName(_(".tap"), false) + _T("')\n"));
+		theApp.m_program_canvas->AppendText(_T("output('") + this->GetOutputFileName(_T(".tap"), false) + _T("')\n"));
 
 		// begin program
 		theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
@@ -850,11 +850,11 @@ public:
 
 		{
 			// clear the output file
-			wxFile f(m_pThis->GetOutputFileName(_(".tap"), false).c_str(), wxFile::write);
+			wxFile f(m_pThis->GetOutputFileName(_T(".tap"), false).c_str(), wxFile::write);
 			if(f.IsOpened())f.Write(_T("\n"));
 		}
 
-		HeeksPyPostProcess(theApp.m_program, m_pThis->GetOutputFileName(_(".tap"), false), false );
+		HeeksPyPostProcess(theApp.m_program, m_pThis->GetOutputFileName(_T(".tap"), false), false );
 	}
 	wxString BitmapPath(){ return _T("export");}
 	wxString previous_path;
@@ -902,11 +902,11 @@ public:
 
 		{
 			// clear the output file
-			wxFile f(m_pThis->GetOutputFileName(_(".tap"), false).c_str(), wxFile::write);
+			wxFile f(m_pThis->GetOutputFileName(_T(".tap"), false).c_str(), wxFile::write);
 			if(f.IsOpened())f.Write(_T("\n"));
 		}
 
-		HeeksPyPostProcess(theApp.m_program, m_pThis->GetOutputFileName(_(".tap"), false), false );
+		HeeksPyPostProcess(theApp.m_program, m_pThis->GetOutputFileName(_T(".tap"), false), false );
 	}
 	wxString BitmapPath(){ return _T("export");}
 	wxString previous_path;

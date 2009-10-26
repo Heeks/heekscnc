@@ -179,15 +179,15 @@ void CFixture::GetProperties(std::list<Property *> *list)
 	std::list< wxString > choices;
 
 	{
-		choices.push_back(_("G54"));
-		choices.push_back(_("G55"));
-		choices.push_back(_("G56"));
-		choices.push_back(_("G57"));
-		choices.push_back(_("G58"));
-		choices.push_back(_("G59"));
-		choices.push_back(_("G59.1"));
-		choices.push_back(_("G59.2"));
-		choices.push_back(_("G59.3"));
+		choices.push_back(_T("G54"));
+		choices.push_back(_T("G55"));
+		choices.push_back(_T("G56"));
+		choices.push_back(_T("G57"));
+		choices.push_back(_T("G58"));
+		choices.push_back(_T("G59"));
+		choices.push_back(_T("G59.1"));
+		choices.push_back(_T("G59.2"));
+		choices.push_back(_T("G59.3"));
 	} // End for
 	list->push_back(new PropertyChoice(_("Coordinate System"), choices, int(m_coordinate_system_number) - 1, this, on_set_coordinate_system_number));
 
