@@ -848,7 +848,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// About box, stuff
 	heeksCAD->AddToAboutBox(wxString(_T("\n\n")) + _("HeeksCNC is the free machining add-on to HeeksCAD")
-		+ _T("\n") + _("          http://code.google.com/p/heekscnc/")
+		+ _T("\n") + _T("          http://code.google.com/p/heekscnc/")
 		+ _T("\n") + _("Written by Dan Heeks, Hirutso Enni, Perttu Ahola, David Nicholls")
 		+ _T("\n") + _("With help from archivist, crotchet1, DanielFalck, fenn, Sliptonic")
 		+ _T("\n\n") + _("geometry code, donated by Geoff Hawkesford, Camtek GmbH http://www.peps.de/")
