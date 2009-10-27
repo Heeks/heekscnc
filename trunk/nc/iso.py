@@ -456,11 +456,11 @@ class CreatorIso(nc.Creator):
 
 	self.comment('Store the probed location somewhere we can get it again later')
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '=' + probe_radius_x_component + '\n'))
+	self.write(('#' + intersection_variable_x + '=' + probe_radius_x_component + ' (Portion of probe radius that contributes to the X coordinate)\n'))
 	self.write_blocknum()
 	self.write(('#' + intersection_variable_x + '=[#' + intersection_variable_x + ' + #5061]\n'))
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '=' + probe_radius_y_component + '\n'))
+	self.write(('#' + intersection_variable_y + '=' + probe_radius_y_component + ' (Portion of probe radius that contributes to the Y coordinate)\n'))
 	self.write_blocknum()
 	self.write(('#' + intersection_variable_y + '=[#' + intersection_variable_y + ' + #5062]\n'))
 
