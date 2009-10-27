@@ -16,6 +16,7 @@
 #include "CNCPoint.h"
 #include "interface/Tool.h"
 #include "CuttingTool.h"
+#include "NCCode.h"
 
 class CProbing;
 
@@ -93,6 +94,8 @@ public:
 		{
 			m_depth = pCuttingTool->m_params.m_tool_length_offset / 2.0;
 		}
+
+		CNCCode::ReadColorsFromConfig();	// We're going to need them in the glCommands() methods
 	}
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
@@ -116,6 +119,45 @@ public:
 
 	double m_depth;			// How far to drop down from the current position before starting to probe inwards.
 	double m_distance;	// Distance from starting point outwards before dropping down and probing in.
+
+	typedef enum
+	{
+		eRapid = 0,
+		eProbe,
+		eEndOfData
+	} eMovement_t;
+
+	typedef std::vector< std::pair< eMovement_t, CNCPoint > > PointsList_t;
+
+#ifdef UNICODE
+	friend std::wostringstream & operator << ( std::wostringstream & ss, const eMovement_t & movement )
+#else
+	friend std::ostringstream & operator << ( std::ostringstream & ss, const eMovement_t & movement )
+#endif
+	{
+		wxString wxstr;
+		wxstr << movement;	// Call the other implementation
+		ss << wxstr.c_str();
+		return(ss);
+	}
+
+	friend wxString & operator << ( wxString & ss, const eMovement_t & movement )
+	{
+		switch (movement)
+		{
+		case eRapid:	ss << _("Rapid");
+			break;
+
+		case eProbe:	ss << _("Probe");
+			break;
+
+		case eEndOfData: ss << _("End Of Data");
+			break;
+		} // End switch()
+
+		return(ss);
+	}
+
 
 #ifdef UNICODE
 	friend std::wostringstream & operator << ( std::wostringstream & ss, const eCorners_t & corner )
@@ -285,8 +327,12 @@ public:
 	// program whose job is to generate RS-274 GCode.
 	void AppendTextToProgram( const CFixture *pFixture );
 
+	void glCommands(bool select, bool marked, bool no_color);
+
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+
+	CProbing::PointsList_t GetPoints() const;
 
 public:
 	int m_direction;	// Really eProbeDirection_t.  i.e. eInside or eOutside
@@ -329,12 +375,16 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 
+	void glCommands(bool select, bool marked, bool no_color);
+
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
 	void AppendTextToProgram( const CFixture *pFixture );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+
+	PointsList_t GetPoints() const;
 
 public:
 	// The probing feed rate will be taken from CSpeedOp::m_speed_op_params.m_horozontal_feed_rate
