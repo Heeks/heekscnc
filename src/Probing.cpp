@@ -24,6 +24,8 @@
 #include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "CuttingTool.h"
+#include "interface/HeeksColor.h"
+#include "NCCode.h"
 
 #include <sstream>
 #include <iomanip>
@@ -39,11 +41,13 @@ extern CHeeksCADInterface* heeksCAD;
 static void on_set_distance(double value, HeeksObj* object)
 {
 	((CProbing*)object)->m_distance = value;
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_depth(double value, HeeksObj* object)
 {
 	((CProbing*)object)->m_depth = value;
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
@@ -71,6 +75,8 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate centre point.
 
+	CProbing::PointsList_t points = GetPoints();
+
 	if (m_direction == eOutside)
 	{
 		ss << "comment('This program assumes that the machine operator has jogged')\n";
@@ -85,24 +91,16 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		switch (m_alignment)
 		{
 		case eXAxis:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0,0), 
-									gp_Pnt(m_distance,0,0), m_depth, 
-									gp_Pnt(0,0,0), 
-									_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-1.0 * m_distance,0,0), 
-									gp_Pnt(-1.0 * m_distance,0,0), m_depth, 
-									gp_Pnt(0,0,0), 
-									_T("1003"), _T("1004"), +1.0 * probe_radius, 0 );
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, m_depth, points[3].second,
+								       	_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
+			AppendTextForSingleProbeOperation( pFixture, points[4].second, points[5].second, m_depth, points[7].second, 
+										_T("1003"), _T("1004"), +1.0 * probe_radius, 0 );
 			break;
 
 		case eYAxis:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,m_distance,0), 
-									gp_Pnt(0,m_distance,0), m_depth, 
-									gp_Pnt(0,0,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,-1.0 * m_distance,0), 
-									gp_Pnt(0,-1.0 * m_distance,0), m_depth, 
-									gp_Pnt(0,0,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 			break;
 		} // End switch
@@ -120,24 +118,16 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		switch (m_alignment)
 		{
 		case eXAxis:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
-									gp_Pnt(0,0,0), m_depth, 
-									gp_Pnt(+1.0 * m_distance,0,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
-									gp_Pnt(0,0,0), m_depth, 
-									gp_Pnt(-1.0 * m_distance,0,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 			break;
 
 		case eYAxis:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
-									gp_Pnt(0,0,0), m_depth, 
-									gp_Pnt(0, +1.0 * m_distance,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
-									gp_Pnt(0,0,0), m_depth, 
-									gp_Pnt(0, -1.0 * m_distance,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius  );
 			break;
 		} // End switch
@@ -166,13 +156,10 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,m_distance,0), 
-									gp_Pnt(0,m_distance,0), m_depth, 
-									gp_Pnt(0,0,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,-1.0 * m_distance,0), 
-									gp_Pnt(0,-1.0 * m_distance,0), m_depth, 
-									gp_Pnt(0,0,0), _T("1003"), _T("1004"), 0, +1.0 * probe_radius );
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 		} // End if - then
 		else
 		{
@@ -184,13 +171,9 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
-									gp_Pnt(0,0,0), m_depth, 
-									gp_Pnt(0,+1.0 * m_distance,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,0,0), 
-									gp_Pnt(0,0,0), m_depth, 
-									gp_Pnt(0,-1.0 * m_distance,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 		} // End if - else
 
@@ -297,51 +280,37 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 
 	gp_Dir z_direction(0,0,1);
 
+	CProbing::PointsList_t points = GetPoints();
+
 	if (m_number_of_edges == 1)
 	{
 		switch(m_edge)
 		{
 		case eBottom:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,                0, 0), 
-									gp_Pnt(m_distance, -1.0 * m_retract, 0), m_depth, 
-									gp_Pnt(m_distance, +1.0 * m_retract, 0),
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, m_depth, points[3].second,
 								       	_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance, 0,0), 
-									gp_Pnt(2.0 * m_distance,-1.0 * m_retract,0), m_depth, 
-									gp_Pnt(2.0 * m_distance, +1.0 * m_retract, 0), 
-									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
+			AppendTextForSingleProbeOperation( pFixture, points[4].second, points[5].second, m_depth, points[7].second, 
+										_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 			break;
 
 		case eTop:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0,0), 
-									gp_Pnt(m_distance, +1.0 * m_retract,0), m_depth, 
-									gp_Pnt(m_distance, -1.0 * m_retract, 0), 
-									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance,0,0), 
-									gp_Pnt(2.0 * m_distance, +1.0 * m_retract,0), m_depth, 
-									gp_Pnt(2.0 * m_distance, -1.0 * m_retract, 0), 
-									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+										_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+										_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 			break;
 
 		case eLeft:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,m_distance,0), 
-									gp_Pnt(-1.0 * m_retract, m_distance, 0), m_depth, 
-									gp_Pnt(+1.0 * m_retract, m_distance,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0,2.0 * m_distance,0), 
-									gp_Pnt(-1.0 * m_retract, 2.0 * m_distance, 0), m_depth, 
-									gp_Pnt(+1.0 * m_retract, 2.0 * m_distance,0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), +1.0 * probe_radius,0 );
 			break;
 
 		case eRight:
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance, 0), 
-									gp_Pnt(m_retract, m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance, 0), 
-									gp_Pnt(m_retract, 2.0 * m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, 2.0 * m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 			break;
 		} // End switch
@@ -364,45 +333,29 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		{
 		case eBottomLeft:
 			// Bottom
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0, 0), 
-									gp_Pnt(m_distance, -1.0 * m_retract, 0), m_depth, 
-									gp_Pnt(m_distance, +1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance, 0,0), 
-									gp_Pnt(2.0 * m_distance,-1.0 * m_retract,0), m_depth, 
-									gp_Pnt(2.0 * m_distance, +1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
 			// Left
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance,0), 
-									gp_Pnt(-1.0 * m_retract, m_distance, 0), m_depth, 
-									gp_Pnt( +1.0 * m_retract, m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1005"), _T("1006"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance,0), 
-									gp_Pnt(-1.0 * m_retract,2.0 * m_distance, 0), m_depth, 
-									gp_Pnt( +1.0 * m_retract, 2.0 * m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1007"), _T("1008"), +1.0 * probe_radius, 0 );
 			break;
 
 		case eBottomRight:
 			// Bottom
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-1.0 * m_distance, 0, 0), 
-									gp_Pnt(-1.0 * m_distance, -1.0 * m_retract, 0), m_depth, 
-									gp_Pnt(-1.0 * m_distance, +1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-2.0 * m_distance, 0,0), 
-									gp_Pnt(-2.0 * m_distance,-1.0 * m_retract,0), m_depth, 
-									gp_Pnt(-2.0 * m_distance, +1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
 			// Right
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance, 0), 
-									gp_Pnt(m_retract, m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance, 0), 
-									gp_Pnt(m_retract, 2.0 * m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, 2.0 * m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 
 			
@@ -410,45 +363,29 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 
 		case eTopLeft:
 			// Top
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(m_distance,0,0), 
-									gp_Pnt(m_distance, +1.0 * m_retract,0), m_depth, 
-									gp_Pnt(m_distance, -1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(2.0 * m_distance,0,0), 
-									gp_Pnt(2.0 * m_distance, +1.0 * m_retract,0), m_depth, 
-									gp_Pnt(2.0 * m_distance, -1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 
 			// Left
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, m_distance,0), 
-									gp_Pnt(1.0 * m_retract, m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, 2.0 * m_distance,0), 
-									gp_Pnt(1.0 * m_retract, 2.0 * m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			break;
 
 		case eTopRight:
 			// Top
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-1.0 * m_distance,0,0), 
-									gp_Pnt(-1.0 * m_distance, 1.0 * m_retract, 0), m_depth, 
-									gp_Pnt( -1.0 * m_distance, -1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(-2.0 * m_distance,0,0), 
-									gp_Pnt(-2.0 * m_distance, 1.0 * m_retract, 0), m_depth, 
-									gp_Pnt( -2.0 * m_distance, -1.0 * m_retract, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 
 			// Right
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, -1.0 * m_distance, 0), 
-									gp_Pnt(m_retract, -1.0 * m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, -1.0 * m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
 									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	gp_Pnt(0, -2.0 * m_distance, 0), 
-									gp_Pnt(m_retract, -2.0 * m_distance, 0), m_depth, 
-									gp_Pnt(-1.0 * m_retract, -2.0 * m_distance, 0), 
+			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			break;
 		} // End switch
@@ -502,17 +439,19 @@ static void on_set_number_of_points(int zero_based_offset, HeeksObj* object)
 {
 	if (zero_based_offset == 0) ((CProbe_Centre *)object)->m_number_of_points = 2;
 	if (zero_based_offset == 1) ((CProbe_Centre *)object)->m_number_of_points = 4;
-	heeksCAD->Changed();
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_direction(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Centre*)object)->m_direction = CProbing::eProbeDirection_t(zero_based_choice);
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_alignment(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Centre*)object)->m_alignment = CProbing::eAlignment_t(zero_based_choice);
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 void CProbe_Centre::GetProperties(std::list<Property *> *list)
@@ -577,17 +516,20 @@ static void on_set_number_of_edges(int zero_based_offset, HeeksObj* object)
 static void on_set_retract(double value, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_retract = value;
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_edge(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_edge = CProbing::eEdges_t(zero_based_choice);
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 
 static void on_set_corner(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_corner = CProbing::eCorners_t(zero_based_choice);
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 
@@ -741,6 +683,76 @@ void CProbing::ReadBaseXML(TiXmlElement* element)
 
 void CProbing::glCommands(bool select, bool marked, bool no_color)
 {
+}
+
+void CProbe_Edge::glCommands(bool select, bool marked, bool no_color)
+{
+	CNCPoint last_point(0,0,0);
+
+	CProbing::PointsList_t points = GetPoints();
+	for (CProbing::PointsList_t::const_iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
+	{
+		switch (l_itPoint->first)
+		{
+		case eRapid:
+			CNCCode::Color(ColorRapidType).glColor();
+			glBegin(GL_LINE_STRIP);
+			glVertex3d( last_point.X(), last_point.Y(), last_point.Z() );
+			glVertex3d( l_itPoint->second.X(), l_itPoint->second.Y(), l_itPoint->second.Z() );
+			glEnd();
+			break;
+
+		case eProbe:
+			CNCCode::Color(ColorFeedType).glColor();
+			glBegin(GL_LINE_STRIP);
+			glVertex3d( last_point.X(), last_point.Y(), last_point.Z() );
+			glVertex3d( l_itPoint->second.X(), l_itPoint->second.Y(), l_itPoint->second.Z() );
+			glEnd();
+			break;
+
+		case eEndOfData:
+			break;
+		} // End switch
+
+		last_point = l_itPoint->second;
+	} // End for
+	
+	CProbing::glCommands(select,marked,no_color);
+}
+
+void CProbe_Centre::glCommands(bool select, bool marked, bool no_color)
+{
+	CNCPoint last_point(0,0,0);
+
+	CProbing::PointsList_t points = GetPoints();
+	for (CProbing::PointsList_t::const_iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
+	{
+		switch (l_itPoint->first)
+		{
+		case eRapid:
+			CNCCode::Color(ColorRapidType).glColor();
+			glBegin(GL_LINE_STRIP);
+			glVertex3d( last_point.X(), last_point.Y(), last_point.Z() );
+			glVertex3d( l_itPoint->second.X(), l_itPoint->second.Y(), l_itPoint->second.Z() );
+			glEnd();
+			break;
+
+		case eProbe:
+			CNCCode::Color(ColorFeedType).glColor();
+			glBegin(GL_LINE_STRIP);
+			glVertex3d( last_point.X(), last_point.Y(), last_point.Z() );
+			glVertex3d( l_itPoint->second.X(), l_itPoint->second.Y(), l_itPoint->second.Z() );
+			glEnd();
+			break;
+
+		case eEndOfData:
+			break;
+		} // End switch
+
+		last_point = l_itPoint->second;
+	} // End for
+	
+	CProbing::glCommands(select,marked,no_color);
 }
 
 
@@ -922,3 +934,312 @@ void CProbe_Edge::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	t_list->push_back( &generate_edge_gcode );
 }
+
+/**
+	Based on this object's parameters, determine a set of coordinates (relative to (0,0,0)) that
+	the machine will move through when probing.
+ */
+CProbing::PointsList_t CProbe_Edge::GetPoints() const
+{
+	CProbing::PointsList_t points;
+
+	if (m_number_of_edges == 1)
+	{
+		switch (m_edge)
+		{
+		case eBottom:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance,-1.0 * m_retract,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance,-1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+
+		case eTop:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract,0 ) ));
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract,0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+
+		case eLeft:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+
+		case eRight:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+		} // End switch
+	} // End if - then
+	else
+	{
+		// We're using corners (number_of_edges = 2)
+		switch (m_corner)
+		{
+		case eBottomLeft:
+			// Bottom
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, -1.0 * m_retract, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			// Left
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+
+		case eBottomRight:
+			// Bottom
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, -1.0 * m_retract, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, -1.0 * m_retract, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			// Right
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );			
+			break;
+
+		case eTopLeft:
+			// Top
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract,0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract,0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			// Left
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-1.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -1.0 * m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-2.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -2.0 * m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+
+		case eTopRight:
+			// Top
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, +1.0 * m_retract,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, +1.0 * m_retract,0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			// Right
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-1.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -1.0 * m_distance, 0 )) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-2.0 * m_distance,0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -2.0 * m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+		} // End switch
+	} // End if - else
+
+	return(points);
+
+} // End SetPoints() method
+
+
+
+/**
+	Based on this object's parameters, determine a set of coordinates (relative to (0,0,0)) that
+	the machine will move through when probing.
+ */
+CProbing::PointsList_t CProbe_Centre::GetPoints() const
+{
+	CProbing::PointsList_t points;
+
+	if (m_direction == eOutside)
+	{
+		switch (m_alignment)
+		{
+		case eXAxis:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0,0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+
+		case eYAxis:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+		} // End switch
+	} // End if - then
+	else
+	{
+		// From inside - outwards
+
+		switch (m_alignment)
+		{
+		case eXAxis:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_distance ,0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_distance ,0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+
+		case eYAxis:
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, +1.0 * m_distance , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, -1.0 * m_distance , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+			break;
+		} // End switch
+	} // End if - else
+
+	if (m_number_of_points == 4)
+	{
+		if (m_direction == eOutside)
+		{
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+		}
+		else
+		{
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, +1.0 * m_distance , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, -1.0 * m_distance , -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+		} // End if - else
+	} // End if - then
+
+	return(points);
+
+} // End SetPoints() method
+
+
