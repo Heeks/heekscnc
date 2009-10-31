@@ -251,7 +251,7 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 		std::ostringstream l_ossChange;
 #endif
 
-		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") does not have a cutting tool assigned.  It can not produce GCode without a cutting tool assignment.\n";
+		l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("does not have a cutting tool assigned") << ". " << _("It can not produce GCode without a cutting tool assignment") << ".\n";
 		changes.push_back(l_ossChange.str().c_str());
 	} // End if - then
 	else
@@ -265,7 +265,7 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 			std::ostringstream l_ossChange;
 #endif
 
-			l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") is set to cut deeper than the assigned cutting tool will allow\n";
+			l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("is set to cut deeper than the assigned cutting tool will allow") << ".\n";
 			changes.push_back(l_ossChange.str().c_str());
 		} // End if - then
 	} // End if - else
@@ -277,7 +277,7 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 #else
 		std::ostringstream l_ossChange;
 #endif
-		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ") has poor start and final depths.  Can't change this setting automatically\n";
+		l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("has poor start and final depths") << ". " << _("Can't change this setting automatically") << ".\n";
 		changes.push_back(l_ossChange.str().c_str());
 	} // End if - then
 
@@ -289,12 +289,12 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 		std::ostringstream l_ossChange;
 #endif
 
-		l_ossChange << "WARNING: Depth Operation (id=" << m_id << ").  Clearance height is below start depth\n";
+		l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("Clearance height is below start depth") << ".\n";
 		changes.push_back(l_ossChange.str().c_str());
 
 		if (apply_changes)
 		{
-			l_ossChange << "Depth Operation (id=" << m_id << ").  Raising clearance height up to start depth (+5 mm)\n";
+			l_ossChange << _("Depth Operation") << " (id=" << m_id << ").  " << _("Raising clearance height up to start depth (+5 mm)") << "\n";
 			m_depth_op_params.m_clearance_height = m_depth_op_params.m_start_depth + 5;
 		} // End if - then
 	} // End if - then

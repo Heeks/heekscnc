@@ -693,7 +693,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 #else
 									std::ostringstream l_ossChange;
 #endif
-									l_ossChange << "Chamfering bit for drilling op (id=" << m_id << ") is too big for previously drilled hole (drilling id=" << obj->m_id << ")\n";
+									l_ossChange << _("Chamfering bit for drilling op") << " (id=" << m_id << ") " << _("is too big for previously drilled hole") << " (drilling id=" << obj->m_id << ")\n";
 									changes.push_back( l_ossChange.str().c_str() );
 								} // End if - then
 
@@ -704,7 +704,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 #else
 									std::ostringstream l_ossChange;
 #endif
-									l_ossChange << "Chamfering bit for drilling op (id=" << m_id << ") is too small for previously drilled hole (drilling id=" << obj->m_id << ")\n";
+									l_ossChange << _("Chamfering bit for drilling op") << " (id=" << m_id << ") " << _("is too small for previously drilled hole") << " (drilling id=" << obj->m_id << ")\n";
 									changes.push_back( l_ossChange.str().c_str() );
 								} // End if - then
 							} // End if - then
@@ -732,8 +732,8 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 				std::ostringstream l_ossChange;
 #endif
 
-				l_ossChange << "Adjusting depth of drill cycle id='" << m_id << "' from '" 
-					<< m_params.m_depth / theApp.m_program->m_units << " to "
+				l_ossChange << _("Adjusting depth of drill cycle") << " id='" << m_id << "' " << _("from") << " '" 
+					<< m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " "
 					<< pDrill->m_params.m_cutting_edge_height / theApp.m_program->m_units << "\n";
 				changes.push_back(l_ossChange.str().c_str());
 
@@ -747,7 +747,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 				std::ostringstream l_ossChange;
 #endif
 
-				l_ossChange << "WARNING: Drilling (id=" << m_id << ").  Can't drill hole " << m_params.m_depth / theApp.m_program->m_units << " when the drill bit's cutting length is only " << pDrill->m_params.m_cutting_edge_height << " long\n";
+				l_ossChange << _("WARNING") << ": " << _("Drilling") << " (id=" << m_id << ").  " << _("Can't drill hole") << " " << m_params.m_depth / theApp.m_program->m_units << " when the drill bit's cutting length is only " << pDrill->m_params.m_cutting_edge_height << " long\n";
 				changes.push_back(l_ossChange.str().c_str());
 			} // End if - else
 		} // End if - then
@@ -770,9 +770,9 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 				std::ostringstream l_ossChange;
 #endif
 
-						l_ossChange << "Adjusting depth of drill cycle (id='" << m_id << "') from '" 
-							<< m_params.m_depth / theApp.m_program->m_units << " to "
-							<< depthOp_depth  / theApp.m_program->m_units<< "\n";
+						l_ossChange << _("Adjusting depth of drill cycle") << " (id='" << m_id << "') " << _("from") << " '" 
+							<< m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " '"
+							<< depthOp_depth  / theApp.m_program->m_units<< "'\n";
 						changes.push_back(l_ossChange.str().c_str());
 
 						if (apply_changes)
