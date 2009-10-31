@@ -426,7 +426,7 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 			std::ostringstream l_ossChange;
 #endif
 
-			l_ossChange << "Invalid reference to sketch id='" << *l_itSketch << "' in pocket operations id='" << m_id << "'\n";
+			l_ossChange << _("Invalid reference to sketch") << " id='" << *l_itSketch << "' " << _("in pocket operations") << " id='" << m_id << "'\n";
 			changes.push_back(l_ossChange.str().c_str());
 
 			if (apply_changes)
@@ -456,7 +456,7 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 			std::ostringstream l_ossChange;
 #endif
 
-			l_ossChange << "No valid sketches upon which to act for pocket operations id='" << m_id << "'\n";
+			l_ossChange << _("No valid sketches upon which to act for pocket operations") << " id='" << m_id << "'\n";
 			changes.push_back(l_ossChange.str().c_str());
 	} // End if - then
 
@@ -475,9 +475,9 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 			std::ostringstream l_ossChange;
 #endif
 
-			l_ossChange << "Adjusting depth of pocket id='" << m_id << "' from '" 
-				<< m_depth_op_params.m_final_depth << " to "
-				<< pCutter->m_params.m_cutting_edge_height << " due to cutting edge length of selected tool\n";
+			l_ossChange << _("Adjusting depth of pocket") << " id='" << m_id << "' " << _("from") << " '" 
+				<< m_depth_op_params.m_final_depth << "' " << _("to") << " "
+				<< pCutter->m_params.m_cutting_edge_height << " " << _("due to cutting edge length of selected tool") << "\n";
 			changes.push_back(l_ossChange.str().c_str());
 
 			if (apply_changes)
