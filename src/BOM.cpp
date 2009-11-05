@@ -105,7 +105,7 @@ struct ByHeight
 
 double CBOM::SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
             int xmin2, int xmax2, int ymin2, int ymax2,
-			std::vector<NCRect>&rects, bool* is_positioned)
+			Rectangles_t &rects, bool* is_positioned)
 {
             NCRect rect1(xmin1, ymin1, xmax1 - xmin1, ymax1 - ymin1,NULL);
             NCRect rect2(xmin2, ymin2, xmax2 - xmin2, ymax2 - ymin2,NULL);
@@ -130,7 +130,7 @@ double CBOM::SolutionDensity(int xmin1, int xmax1, int ymin1, int ymax1,
 
 
 int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
-						int &num_unpositioned, std::vector<NCRect>&rects, bool *is_positioned, int level, bool test)
+						int &num_unpositioned, Rectangles_t &rects, bool *is_positioned, int level, bool test)
 {
 	// See if every rectangle has been positioned.
     if (num_unpositioned <= 0) return xmin;
@@ -142,7 +142,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 
     // Save a copy of the solution so far.
     int best_num_unpositioned = num_unpositioned;
-    std::vector<NCRect> best_rects = rects;
+    Rectangles_t best_rects = rects;
 	bool *best_is_positioned = new bool[rects.size()];
 	memcpy(best_is_positioned,is_positioned,sizeof(bool) * rects.size());
 
@@ -166,7 +166,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
             // **************************************************
             // Divide the remaining area horizontally.
             int test1_num_unpositioned = num_unpositioned - 1;
-            std::vector<NCRect> test1_rects = rects;
+            Rectangles_t test1_rects = rects;
 			bool *test1_is_positioned = new bool[rects.size()];
 			memcpy(test1_is_positioned,is_positioned,sizeof(bool) * rects.size());
 
@@ -213,7 +213,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
             // **************************************************
             // Divide the remaining area vertically.
             int test2_num_unpositioned = num_unpositioned - 1;
-			std::vector<NCRect> test2_rects = rects;
+			Rectangles_t test2_rects = rects;
  			bool *test2_is_positioned = new bool[rects.size()];
 			memcpy(test2_is_positioned,is_positioned,sizeof(bool) * rects.size());
 
@@ -263,7 +263,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 		{
 			int i=best_index;
             int test2_num_unpositioned = num_unpositioned - 1;
-			std::vector<NCRect> test2_rects = rects;
+			Rectangles_t test2_rects = rects;
  			bool *test2_is_positioned = new bool[rects.size()];
 			memcpy(test2_is_positioned,is_positioned,sizeof(bool) * rects.size());
 
@@ -287,7 +287,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 		{
 			int i=best_index;
 			int test1_num_unpositioned = num_unpositioned - 1;
-            std::vector<NCRect> test1_rects = rects;
+            Rectangles_t test1_rects = rects;
 			bool *test1_is_positioned = new bool[rects.size()];
 			memcpy(test1_is_positioned,is_positioned,sizeof(bool) * rects.size());
 
@@ -320,7 +320,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 void CBOM::Pack(double bin_width, double height, int gap)
 {
 	m_gap = gap;
-	std::vector<NCRect> best_rects;
+	Rectangles_t best_rects;
 	rects.clear();
 	HeeksObj* child = GetFirstChild();
 	while(child)
@@ -385,23 +385,23 @@ void CBOM::Pack(double bin_width, double height, int gap)
 void CBOM::Regurgitate()
 {
 //Options
-	bool remove_tool_changes = true;
-	bool remove_unknown_nc_codes = true;
+	// bool remove_tool_changes = true;
+	// bool remove_unknown_nc_codes = true;
 
 	//First sorts the rects by nearest neighbor. Don't have a TSP solver yet.
 	
 	//storage for the ordered rects
-	std::vector<NCRect> ordered_rects;
+	Rectangles_t ordered_rects;
 
 	bool *is_ordered = new bool[rects.size()];
-	for(int i=0; i < rects.size(); i++)
+	for(Rectangles_t::size_type i=0; i < rects.size(); i++)
 		is_ordered[i]=false;
 
 	int lastx=0;
 	int lasty=0;
 	int num_unordered = rects.size()-1;
 	//find the rect at 0,0
-	for(int i=0; i < rects.size(); i++)
+	for(Rectangles_t::size_type i=0; i < rects.size(); i++)
 	{
 		if(rects[i].m_x == 0 && rects[i].m_y == 0)
 		{
@@ -415,7 +415,7 @@ void CBOM::Regurgitate()
 	int besti = 0;
 	while(num_unordered)
 	{
-		for(int i=0; i < rects.size(); i++)
+		for(Rectangles_t::size_type i=0; i < rects.size(); i++)
 		{
 			if(is_ordered[i])
 				continue;
@@ -448,7 +448,7 @@ void CBOM::Regurgitate()
 	else
 		f.Create();
 	//Now go through and write out the nc code one at a time
-	for(int i=0; i < ordered_rects.size(); i++)
+	for(Rectangles_t::size_type i=0; i < ordered_rects.size(); i++)
 	{
 		ordered_rects[i].m_code->WriteCode(f);
 	}

@@ -30,7 +30,8 @@ public:
 class CBOM:public ObjList
 {
 public:
-	std::vector<NCRect> rects;
+	typedef std::vector<NCRect> Rectangles_t;
+	Rectangles_t rects;
 	int m_max_levels;
 	int m_gap;
 
