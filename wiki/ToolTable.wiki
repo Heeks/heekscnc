@@ -130,4 +130,6 @@ When the various parameters of the cutting tool are adjusted, the system attempt
 
 == Default Tool Table ==
 
-A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process involves adding cutting tools to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Tools icon.  This allows the tool definitions to be saved to a file.  If the file is called 'default.tooltable' and is located in the HeeksCNC directory (along with the HeeksCNC.so or HeeksCNC.DLL) then these tools will be automatically added to all new data files.
+A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process involves adding cutting tools to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Tools icon.  This allows the tool definitions to be saved to a file.  If the file is called 'default.tooltable' and is located in one of the two possible directories then these tools will be automatically added to all new data files.
+
+The default.tooltable file may come from either the user's default configuration directory (HOME directory on Linux and "c:\Documents and Settings\username\Application Data" on Windows) or it must be located in the same directory as the HeeksCNC.so or HeeksCNC.DLL file.
