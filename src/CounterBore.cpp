@@ -283,7 +283,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
  */
 void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram(pFixture);
+	CDepthOp::AppendTextToProgram(pFixture);
 
 #ifdef UNICODE
 	std::wostringstream ss;
