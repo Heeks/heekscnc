@@ -404,7 +404,8 @@ class CreatorIso(nc.Creator):
 	self.write(iso.codes.RETRACT(self.fmt, retract_height))
 
         if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
-        self.write_feedrate()
+        self.write( iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )
+
         self.write_spindle()
 
         self.write_misc()
