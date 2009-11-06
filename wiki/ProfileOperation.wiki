@@ -44,6 +44,9 @@ http://code.google.com/p/heekscnc/wiki/DepthOps
 ===tool on side===
 Choose between "Left", "Right" and "On". If "Left" or "Right" is chosen the tool path will be offset to that side of the sketch by the radius of the tool and roll-on and roll-off moves will be done. If "On" is chosen, the tool path will exactly follow the sketch and no roll-on or roll-off moves will be done.
 
+===cut mode===
+Choose between "Climb" and "Conventional". See http://en.wikipedia.org/wiki/Milling_cutter#Conventional_milling_versus_climb_milling
+
 ===auto roll on===
 If ticked, the "roll on point" will be automatically calculated. If unticked, you must also specify "roll on point".
 
@@ -56,6 +59,9 @@ If ticked, the "roll off point" will be automatically calculated. If unticked, y
 ===roll off point===
 The point where the tool will end after feeding on an arc tangential to the end of the sketch.
 
+===roll radius===
+The radius to be used to calculate the "auto roll on" and "auto roll off" points. This is only available if "auto roll on" or "auto roll off" are ticked.
+
 ===use start point===
 If ticked "start point" can be specified.
 
@@ -67,6 +73,3 @@ If ticked "end point" can be specified.
 
 ===end point===
 This will cut the end of the sketch off, after the point on the sketch nearest this point.
-
-=== sort sketches ===
-    If this is 'true', the list of locations at which profiles should be machined is sorted.  The sorting algorithm finds the nearest starting point to (0,0,0) and then, from there, the closest point to the previous profile's end point.
