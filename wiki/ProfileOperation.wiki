@@ -42,7 +42,7 @@ A Profile operation has all the properties for multiple depths of cut, see here:
 http://code.google.com/p/heekscnc/wiki/DepthOps
 
 ===tool on side===
-Choose between "Left", "Right" and "On". If "Left" or "Right" is chosen the tool path will be offset to that side of the sketch by the radius of the tool and roll-on and roll-off moves will be done. If "On" is chosen, the tool path will exactly follow the sketch and no roll-on or roll-off moves will be done.
+Choose between "Left", "Right" and "On". If "Left" or "Right" is chosen the tool path will be offset to that side of the sketch by the radius of the tool and roll-on and roll-off moves will be done. If "On" is chosen, the tool path will exactly follow the sketch and no roll-on or roll-off moves will be done. If the sketch is a closed shape, these options will be "Outside", "Inside" and "On".
 
 ===cut mode===
 Choose between "Climb" and "Conventional". See http://en.wikipedia.org/wiki/Milling_cutter#Conventional_milling_versus_climb_milling
