@@ -22,3 +22,5 @@ http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png
 
 If you have islands that need to machined, then you must make sure that the inside sketches have a different direction to the outside sketches, see sketch property "order".
 Then, you must combine them into one sketch; select the outside sketch, then the inside sketches ( with Ctrl pressed ), then right-click and choose "combine sketches". Use this combined sketch to do the pocketing.
+
+The final result will look like something like this: http://celer.oni.biz/~celeron55/random/2009-03/heeks/pocketing_separated_2.png
