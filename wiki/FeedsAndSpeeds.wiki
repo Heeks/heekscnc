@@ -34,4 +34,5 @@ Part of the feeds and speeds calculations come from speed reference elements tha
 
 The HeeksCNC application supports the automatic loading of these values from a 'default.speeds' file whenever a 'File'->'New' command is issued.
 
-The file's name MUST begin with 'default' and it must have the keyword 'speed' in it somewhere.  It must also be located along with the HeeksCNC plugin (.so or .dll).  The file must contain the parent element <HeeksCNC_Document> as well as <SpeedReference> elements.  It should not contain elements other than these two.
+The file's name MUST begin with 'default' and it must have the keyword 'speed' in it somewhere.  The default.speeds file may come from either the user's default configuration directory (HOME directory on Linux and "c:\Documents and Settings\username\Application Data" on Windows) or it must be located in the same directory as the HeeksCNC.so or HeeksCNC.DLL file. 
+The file must contain the parent element <HeeksCNC_Document> as well as <SpeedReference> elements.  It should not contain elements other than these two.
