@@ -1003,7 +1003,7 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 
 	std::list<wxString>	results;
 
-	DIR *pdir = opendir(".");	// Look in the current directory for files
+	DIR *pdir = opendir(p_szRoot);	// Look in the current directory for files
 				// whose names begin with "default."
 	if (pdir != NULL) 
 	{
@@ -1018,7 +1018,6 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 	return(results);
 } // End of GetFileNames() method
 #endif
-
 
 
 
@@ -1047,68 +1046,82 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		heeksCAD->Changed();
 	}
 
-
 	if (! open)
 	{
-		// Must be a new file.
-		// Read in any default speed reference or tool table data.
-		std::list<wxString> all_file_names = GetFileNames( "." );
-		std::list<wxString> seed_file_names;
+		std::list<wxString> directories;
+		wxString directory_separator;
 
-		for (std::list<wxString>::iterator l_itFileName = all_file_names.begin();
-				l_itFileName != all_file_names.end(); l_itFileName++)
+		#ifdef WIN32
+			directory_separator = _T("\\");
+		#else
+			directory_separator = _T("/");
+		#endif
+
+		wxStandardPaths standard_paths;
+		directories.push_back( standard_paths.GetUserConfigDir() );	// Look for a user-specific file first
+		directories.push_back( _T(".") );	// And then look in the application-delivered directory
+
+		bool tool_table_found = false;
+		bool speed_references_found = false;
+		bool fixtures_found = false;
+
+		for (std::list<wxString>::iterator l_itDirectory = directories.begin();
+			l_itDirectory != directories.end(); l_itDirectory++)
 		{
-#ifdef UNICODE
-			std::wstring l_ssName;
-			std::wstring l_ssPrefix = _T("default");
-#else
-			std::string l_ssName;
-			std::string l_ssPrefix = _T("default");
-#endif
+ 			printf("Looking for default data in '%s'\n", Ttc(l_itDirectory->c_str()));
 
-			l_ssName = l_itFileName->c_str();
+			// Must be a new file.
+			// Read in any default speed reference or tool table data.
+			std::list<wxString> all_file_names = GetFileNames( Ttc(l_itDirectory->c_str()) );
+			std::list<wxString> seed_file_names;
 
-			if (l_ssName.substr(0,l_ssPrefix.size()) == l_ssPrefix)
+			for (std::list<wxString>::iterator l_itFileName = all_file_names.begin();
+					l_itFileName != all_file_names.end(); l_itFileName++)
 			{
-				seed_file_names.push_back(l_ssName.c_str());
-			} // End if - then
-		} // End for
+				if (l_itFileName->Find( _("default") ) != -1)
+				{
+					wxString path;
+					path << *l_itDirectory << directory_separator << *l_itFileName;
 
-		seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
-		for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
-		{
+					seed_file_names.push_back(path);
+				} // End if - then
+			} // End for
 
-			wxString lowercase_file_name( *l_itFile );
-			lowercase_file_name.MakeLower();
+			seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
+			for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
+			{
+				wxString lowercase_file_name( *l_itFile );
+				lowercase_file_name.MakeLower();
 
-			if (lowercase_file_name.Find(_T("speed")) != -1) 
-			{
-				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
-				heeksCAD->Changed();
-			} // End if - then
-			else if (lowercase_file_name.Find(_T("feed")) != -1) 
-			{
-				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
-				heeksCAD->Changed();
-			}
-			else if (lowercase_file_name.Find(_T("tool")) != -1) 
-			{
-				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Tools() );
-				heeksCAD->Changed();
-			}
-			else if (lowercase_file_name.Find(_T("fixture")) != -1) 
-			{
-				printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-				heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Fixtures() );
-				heeksCAD->Changed();
-			}
-			else
-			{
-				printf("possible default filename does not contain either 'speed', 'feed' or 'tool' in its name.\n");
-			} // End if - else
+				if ((speed_references_found == false) && (lowercase_file_name.Find(_T("speed")) != -1))
+				{
+					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
+					heeksCAD->Changed();
+					speed_references_found = true;
+				} // End if - then
+				else if ((tool_table_found == false) && (lowercase_file_name.Find(_T("feed")) != -1))
+				{
+					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
+					heeksCAD->Changed();
+					tool_table_found = true;
+				} // End if - then
+				else if ((tool_table_found == false) && (lowercase_file_name.Find(_T("tool")) != -1))
+				{
+					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Tools() );
+					heeksCAD->Changed();
+					tool_table_found = true;
+				}
+				else if ((fixtures_found == false) && (lowercase_file_name.Find(_T("fixture")) != -1))
+				{
+					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
+					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Fixtures() );
+					heeksCAD->Changed();
+					fixtures_found = true;
+				}
+			} // End for
 		} // End for
 	} // End if - then
 }
