@@ -23,4 +23,6 @@ public:
 	bool UsesID() const { return(false); }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+
 };
