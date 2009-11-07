@@ -64,4 +64,8 @@ The HeeksCNC Probing operations also support (for EMC2-based machines) the gener
 
 If no fixtures are explicitly defined, the generated GCode will be added against a G54 coordinate system.
 
-The application also has the ability to load a series of fixture data automatically during a 'File'->'New' command.  This data comes from a file that must be manually setup and called 'default.fixtures'.  This file must contain the parent XML element name <HeeksCAD_Document> as well as <Fixture> elements but it should NOT contain any other elements.  The default.fixtures file may come from either the user's default configuration directory (HOME directory on Linux and "c:\Documents and Settings\username\Application Data" on Windows) or it must be located in the same directory as the HeeksCNC.so or HeeksCNC.DLL file.
+The application also has the ability to load a series of fixture data automatically during a 'File'->'New' command.  
+
+A default fixtures table may be configured by saving a HeeksCNC data file that already contains a set of fixture definitions into a file called 'default.fixtures'. The process involves adding fixtures to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Fixtures icon. This allows the fixture definitions to be saved to a file. If the file is called 'default.fixtures' and is located in one of the two possible directories then these fixtures will be automatically added to all new data files.
+
+The default.fixtures file may come from either the user's default configuration directory (HOME directory on Linux and "c:\Documents and Settings\username\Application Data" on Windows) or it must be located in the same directory as the HeeksCNC.so or HeeksCNC.DLL file.
