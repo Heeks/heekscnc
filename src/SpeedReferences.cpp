@@ -13,6 +13,7 @@
 #include "Op.h"
 #include "SpeedOp.h"
 #include "interface/strconv.h"
+#include <wx/stdpaths.h>
 
 #include <vector>
 #include <algorithm>
@@ -25,10 +26,12 @@ class ExportSpeedReferences: public Tool{
 	const wxChar* GetTitle(){return _("Export");}
 	void Run()
 	{
+		wxStandardPaths standard_paths;
 		if (previous_path.Length() == 0) previous_path = _T("default.speeds");
 
 		// Prompt the user to select a file to import.
-		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to export to"), _T("."), previous_path.c_str(),
+		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to export to"),
+				standard_paths.GetUserConfigDir().c_str(), previous_path.c_str(),
 				wxString(_("Known Files")) + _T(" |*.heeks;*.HEEKS;")
 					+ _T("*.speed;*.SPEED;*.Speed;")
 					+ _T("*.feed;*.FEED;*.Feed;")
@@ -59,10 +62,12 @@ class ImportSpeedReferences: public Tool{
 	const wxChar* GetTitle(){return _("Import");}
 	void Run()
 	{
+		wxStandardPaths standard_paths;
 		if (previous_path.Length() == 0) previous_path = _T("default.speeds");
 
 		// Prompt the user to select a file to import.
-		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"), _T("."), previous_path.c_str(),
+		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"),
+				standard_paths.GetUserConfigDir().c_str(), previous_path.c_str(),
 				wxString(_("Known Files")) + _T(" |*.heeks;*.HEEKS;")
 					+ _T("*.speed;*.SPEED;*.Speed;")
 					+ _T("*.feed;*.FEED;*.Feed;")
