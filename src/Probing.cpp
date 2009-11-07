@@ -88,22 +88,20 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_T(""));
 
-		switch (m_alignment)
+		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-		case eXAxis:
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 								       	_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 										_T("1003"), _T("1004"), +1.0 * probe_radius, 0 );
-			break;
-
-		case eYAxis:
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+		} // End if - then
+		else
+		{
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
-			break;
-		} // End switch
+		} // End if - else
 	} // End if - then
 	else
 	{
@@ -115,22 +113,21 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_T(""));
 
-		switch (m_alignment)
+		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-		case eXAxis:
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
-			break;
-
-		case eYAxis:
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+		} // End if - then
+		else
+		{
+			// eYAxis:
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius  );
-			break;
-		} // End switch
+		} // End if - else
 	} // End if - else
 
 	// Now move to the centre of these two intersection points.
@@ -156,9 +153,9 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 		} // End if - then
 		else
@@ -171,10 +168,10 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
-									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
-									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
+			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
+			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 		} // End if - else
 
 		// Now move to the centre of these two intersection points.
@@ -216,7 +213,7 @@ void CProbing::AppendTextForSingleProbeOperation(
 
 	// Make sure it's negative as we're stepping down.  There is no option
 	// to specify a starting height so this can only be a relative distance.
-	double relative_depth = (m_depth > 0)?(-1.0 * m_depth):m_depth;
+	double relative_depth = (depth > 0)?(-1.0 * depth):depth;
 
 	ss << "comment('Begin probing operation for a single point.')\n";
 	ss << "comment('The results will be stored with respect to the current location of the machine')\n";
@@ -287,30 +284,30 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		switch(m_edge)
 		{
 		case eBottom:
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 								       	_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 										_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 			break;
 
 		case eTop:
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 										_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 										_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 			break;
 
 		case eLeft:
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), +1.0 * probe_radius,0 );
 			break;
 
 		case eRight:
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 			break;
 		} // End switch
@@ -333,29 +330,29 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		{
 		case eBottomLeft:
 			// Bottom
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
 			// Left
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1005"), _T("1006"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
 									_T("1007"), _T("1008"), +1.0 * probe_radius, 0 );
 			break;
 
 		case eBottomRight:
 			// Bottom
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
 			// Right
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 
 			
@@ -363,29 +360,29 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 
 		case eTopLeft:
 			// Top
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 
 			// Left
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			break;
 
 		case eTopRight:
 			// Top
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 
 			// Right
-			AppendTextForSingleProbeOperation( pFixture, 	points[0].second, points[1].second, m_depth, points[3].second,
+			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, 	points[4].second, points[5].second, m_depth, points[7].second, 
+			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			break;
 		} // End switch
@@ -406,6 +403,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		// This should be safe as the 'probe_single_point() call made in the AppendTextForSingleOperation() routine returns
 		// the machine's position to the originally jogged position.  This is expected to be above the workpiece
 		// at a same movement height.
+		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
 		ss << "rapid_to_intersection( "
 				<< "x1='#1001', "
 				<< "y1='#1002', "
@@ -422,6 +420,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				<< "ub_numerator='#1013', "
 				<< "ua='#1014', "
 				<< "ub='#1015' )\n";
+		ss << "remove_temporary_origin()\n";
 	} // End if - else
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -439,18 +438,21 @@ static void on_set_number_of_points(int zero_based_offset, HeeksObj* object)
 {
 	if (zero_based_offset == 0) ((CProbe_Centre *)object)->m_number_of_points = 2;
 	if (zero_based_offset == 1) ((CProbe_Centre *)object)->m_number_of_points = 4;
+	((CProbe_Centre*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_direction(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Centre*)object)->m_direction = CProbing::eProbeDirection_t(zero_based_choice);
+	((CProbe_Centre*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_alignment(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Centre*)object)->m_alignment = CProbing::eAlignment_t(zero_based_choice);
+	((CProbe_Centre*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
@@ -510,18 +512,21 @@ void CProbe_Centre::GetProperties(std::list<Property *> *list)
 static void on_set_number_of_edges(int zero_based_offset, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_number_of_edges = zero_based_offset + 1;
+	((CProbe_Edge*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();
 }
 
 static void on_set_retract(double value, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_retract = value;
+	((CProbe_Edge*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_edge(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_edge = CProbing::eEdges_t(zero_based_choice);
+	((CProbe_Edge*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
@@ -529,6 +534,7 @@ static void on_set_edge(int zero_based_choice, HeeksObj* object)
 static void on_set_corner(int zero_based_choice, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_corner = CProbing::eCorners_t(zero_based_choice);
+	((CProbe_Edge*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
@@ -1139,9 +1145,8 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 
 	if (m_direction == eOutside)
 	{
-		switch (m_alignment)
+		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-		case eXAxis:
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, -1.0 * m_depth) ) );
@@ -1153,9 +1158,9 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
-			break;
-
-		case eYAxis:
+		} // End if - then
+		else
+		{
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
@@ -1167,16 +1172,14 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
-			break;
-		} // End switch
+		} // End if - else
 	} // End if - then
 	else
 	{
 		// From inside - outwards
 
-		switch (m_alignment)
+		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-		case eXAxis:
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
@@ -1188,9 +1191,10 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_distance ,0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
-			break;
-
-		case eYAxis:
+		} // End if - then
+		else
+		{
+			// eYAxis
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
@@ -1202,8 +1206,7 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, -1.0 * m_distance , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
-			break;
-		} // End switch
+		} // End if - else
 	} // End if - else
 
 	if (m_number_of_points == 4)
@@ -1243,3 +1246,44 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 } // End SetPoints() method
 
 
+void CProbe_Edge::GenerateMeaningfullName()
+{
+	if (m_number_of_edges == 1)
+	{
+		m_title = _("Probe ");
+		m_title << eEdges_t(m_edge) << _(" edge");
+	} // End if - then
+	else
+	{
+		// We're looking for the intersection of two edges.
+
+		m_title = _("Probe ");
+		m_title << eCorners_t(m_corner) << _(" corner");
+	} // End if - else
+}
+
+void CProbe_Centre::GenerateMeaningfullName()
+{
+	if (m_direction == eOutside)
+	{
+		m_title = _("Probe protrusion along ");
+		m_title << eAlignment_t(m_alignment);
+	} // End if - then
+	else
+	{
+		m_title = _("Probe hole along ");
+		m_title << eAlignment_t(m_alignment);
+	} // End if - else
+
+	if (m_number_of_points == 4)
+	{
+		if (m_direction == eOutside)
+		{
+			m_title = _("Probe protrusion");
+		} // End if - then
+		else
+		{
+			m_title = _("Probe hole");
+		} // End if - else
+	} // End if - then
+}
