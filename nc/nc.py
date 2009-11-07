@@ -252,7 +252,7 @@ class Creator:
     def rapid_to_midpoint(self, x1, y1, z1, x2, y2, z2):
 	pass
 
-def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
+    def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
 	pass
 
 ################################################################################

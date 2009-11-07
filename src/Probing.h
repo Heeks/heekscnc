@@ -312,6 +312,7 @@ public:
 		m_direction = int(eOutside);
 		m_number_of_points = 2;
 		m_alignment = int(eXAxis);
+		GenerateMeaningfullName();
 	}
 
 	// HeeksObj's virtual functions
@@ -331,6 +332,7 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void GenerateMeaningfullName();
 
 	CProbing::PointsList_t GetPoints() const;
 
@@ -364,6 +366,7 @@ public:
 								// cutting point back to the intersection of these edges.
 		m_edge = eBottom;
 		m_corner = eBottomLeft;
+		GenerateMeaningfullName();
 	}
 
 	// HeeksObj's virtual functions
@@ -383,6 +386,7 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void GenerateMeaningfullName();
 
 	PointsList_t GetPoints() const;
 
