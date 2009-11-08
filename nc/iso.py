@@ -483,12 +483,40 @@ class CreatorIso(nc.Creator):
 	self.comment('Now move back to the original location')
 	self.rapid(retracted_point_x,retracted_point_y)
 	self.rapid(z=0)
+	self.rapid(point_along_edge_x,point_along_edge_y)
 	self.rapid(x=0, y=0)
 
 	self.write_blocknum()
 	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
-    def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, xml_file_name=None ):
+    def probe_downward_point(self, x=None, y=None, depth=None, intersection_variable_z=None):
+	self.write_blocknum()
+	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+	if (self.fhv) : self.calc_feedrate_hv(1, 0)
+	self.write_blocknum()
+	self.write(iso.codes.FEEDRATE() + ' [' + (self.fmt % self.fh) + ' / 5.0 ]')
+	self.write('\t(Set the feed rate for probing)\n')
+
+    	self.write_blocknum();
+	self.write(iso.codes.RAPID())
+	self.write(' X ' + x + ' Y ' + y + '\n')
+
+	self.write_blocknum()
+	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + ' Z ' + (self.fmt % depth) + ('\t(Probe towards our destination point)\n')))
+
+	self.comment('Store the probed location somewhere we can get it again later')
+	self.write_blocknum()
+	self.write(('#' + intersection_variable_z + '= #5063\n'))
+
+	self.comment('Now move back to the original location')
+	self.rapid(z=0)
+	self.rapid(x=0, y=0)
+
+	self.write_blocknum()
+	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
+
+
+    def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
 	pass
 
     # Rapid movement to the midpoint between the two points specified.

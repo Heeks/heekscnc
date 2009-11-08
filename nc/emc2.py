@@ -72,7 +72,7 @@ class CreatorEMC2(iso.CreatorIso):
 			self.write_blocknum()
 			self.write( ((iso_codes.codes.WORKPLANE() % (6 + iso_codes.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6))) + '\t (Select Relative Coordinate System)\n')
 
-	def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, xml_file_name=None ):
+	def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
 		self.comment('Generate an XML document describing the probed coordinates found');
 		self.write_blocknum()
 		self.write('(LOGOPEN,')
@@ -159,6 +159,46 @@ class CreatorEMC2(iso.CreatorIso):
 			self.write('(LOG,<Z>' + z4 + '</Z>)\n')
 
 		if ((x4 != None) or (y4 != None) or (z4 != None)):
+			self.write_blocknum()
+			self.write('(LOG,</POINT>)\n')
+
+		if ((x5 != None) or (y5 != None) or (z5 != None)):
+			self.write_blocknum()
+			self.write('(LOG,<POINT>)\n')
+
+		if (x5 != None):
+			self.write_blocknum()
+			self.write('(LOG,<X>' + x5 + '</X>)\n')
+
+		if (y5 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Y>' + y5 + '</Y>)\n')
+
+		if (z5 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Z>' + z5 + '</Z>)\n')
+
+		if ((x5 != None) or (y5 != None) or (z5 != None)):
+			self.write_blocknum()
+			self.write('(LOG,</POINT>)\n')
+
+		if ((x6 != None) or (y6 != None) or (z6 != None)):
+			self.write_blocknum()
+			self.write('(LOG,<POINT>)\n')
+
+		if (x6 != None):
+			self.write_blocknum()
+			self.write('(LOG,<X>' + x6 + '</X>)\n')
+
+		if (y6 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Y>' + y6 + '</Y>)\n')
+
+		if (z6 != None):
+			self.write_blocknum()
+			self.write('(LOG,<Z>' + z6 + '</Z>)\n')
+
+		if ((x6 != None) or (y6 != None) or (z6 != None)):
 			self.write_blocknum()
 			self.write('(LOG,</POINT>)\n')
 

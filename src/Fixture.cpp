@@ -626,8 +626,24 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 				points.push_back(point);
 			} // End for
 
-			if (points.size() >= 2)
+			if (points.size() >= 3)
 			{
+				if ((points[2] == gp_Pnt(1,0,0)) ||
+				    (points[2] == gp_Pnt(-1,0,0)) ||
+				    (points[2] == gp_Pnt(0,1,0)) ||
+				    (points[2] == gp_Pnt(0,-1,0)))
+				{
+					points[0].SetZ(0);
+					points[1].SetZ(0);
+				}
+
+				if ((points[2] == gp_Pnt(0,0,1)) ||
+				    (points[2] == gp_Pnt(0,0,-1)))
+				{
+					points[0].SetY(0);
+					points[1].SetY(0);
+				}
+
 				double tolerance = heeksCAD->GetTolerance();
 				if (fabs(points[0].X() - points[1].X()) < tolerance)
 				{
