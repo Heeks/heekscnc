@@ -87,6 +87,10 @@ If the number of edges parameter is set to 'Two' then the corner parameter becom
 
 For two point centre finding probe operations, this alignment setting determines if we're looking to find the centre along the X axis or the Y axis.  It is only relevant if the number of points is set to two.
 
+=== Check Levels ===
+
+If this is 'True' then an extra probing operation will occur at each of an edge (or corner) probed point.  This extra probe is to find the Z coordinate at the probed point's location.  The intent is to support the import of enough information to ascertain the part's rotation in all of the XY, XZ and YZ planes.  At the moment, the Fixture importing function only supports the determination of an XY plane rotation via an XML data import. 
+
 === XML data file ===
 
 NOTE: Where an edge is probed, the resulting probed locations will be written to an XML data file.  This file may be manually imported into a Fixture object so as to set the workpiece's rotation.  It should be noted that this feature is available *ONLY FOR EMC2* based machines.  It uses a LOGOPEN, LOG and LOGCLOSE special comment that is supported by the EMC2 application.  For other machines, the probing operations will work but the XML data will not be generated.
