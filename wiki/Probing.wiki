@@ -89,7 +89,7 @@ For two point centre finding probe operations, this alignment setting determines
 
 === Check Levels ===
 
-If this is 'True' then an extra probing operation will occur at each of an edge (or corner) probed point.  This extra probe is to find the Z coordinate at the probed point's location.  The intent is to support the import of enough information to ascertain the part's rotation in all of the XY, XZ and YZ planes.  At the moment, the Fixture importing function only supports the determination of an XY plane rotation via an XML data import. 
+If this is 'True' then an extra probing operation will occur at each of an edge (or corner) probed point.  This extra probe is to find the Z coordinate at the probed point's location.  The intent is to support the import of enough information to ascertain the part's rotation in all of the XY, XZ and YZ planes.  NOTE that, although the fixture rotations can be set for the XZ and YZ planes as well, many of the GCode generation routines only support rotation in the XY plane. 
 
 === XML data file ===
 
