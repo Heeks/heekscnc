@@ -104,8 +104,7 @@ public:
 	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/probe"); else return COp::GetIcon();}
 	bool CanAddTo(HeeksObj* owner);
 
-	void AppendTextForSingleProbeOperation( const CFixture *pFixture,
-						const CNCPoint setup_point,
+	void AppendTextForSingleProbeOperation( const CNCPoint setup_point,
 						const CNCPoint retract_point,
 						const double depth,
 						const CNCPoint probe_point,
@@ -113,6 +112,13 @@ public:
 						const wxString &intersection_variable_y,
 						const double probe_radius_x_component,
 						const double probe_radius_y_component	 ) const;
+
+	void AppendTextForDownwardProbingOperation(
+						const wxString setup_point_x,
+						const wxString setup_point_y,
+						const double depth,
+						const wxString &intersection_variable_z ) const;
+
 
 	wxString GetOutputFileName(const wxString extension, const bool filename_only);
 	void GeneratePythonPreamble();
@@ -366,6 +372,7 @@ public:
 								// cutting point back to the intersection of these edges.
 		m_edge = eBottom;
 		m_corner = eBottomLeft;
+		m_check_levels = 1;
 		GenerateMeaningfullName();
 	}
 
@@ -398,6 +405,12 @@ public:
 
 	eEdges_t m_edge;	// This is only valid if m_number_of_edges = 1
 	eCorners_t m_corner;	// This is only valid if m_number_of_edges = 2
+
+	// If m_check_levels is true then we should also probe directly down near the point
+	// of intersection to find the workpiece's Z coordinate.  We store these coordinates
+	// in the XML file so that we can calculate the YZ and/or XZ plane rotations as well
+	// as the XY plane rotation during the IMPORT function of the CFixture class.
+	int m_check_levels;	// 1 = true, 0 = false
 };
 
 
