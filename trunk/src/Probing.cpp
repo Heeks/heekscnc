@@ -90,16 +90,16 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 
 		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 								       	_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 										_T("1003"), _T("1004"), +1.0 * probe_radius, 0 );
 		} // End if - then
 		else
 		{
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 		} // End if - else
 	} // End if - then
@@ -115,17 +115,17 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 
 		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 		} // End if - then
 		else
 		{
 			// eYAxis:
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius  );
 		} // End if - else
 	} // End if - else
@@ -153,9 +153,9 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
-			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 		} // End if - then
 		else
@@ -168,9 +168,9 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
-			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
 		} // End if - else
 
@@ -193,7 +193,6 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	variables specified.
  */
 void CProbing::AppendTextForSingleProbeOperation(
-	const CFixture *pFixture,
 	const CNCPoint setup_point,
 	const CNCPoint retract_point,
 	const double depth,
@@ -233,6 +232,42 @@ void CProbing::AppendTextForSingleProbeOperation(
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
+
+/**
+	Generate the Python script that will move to the setup point and then probe directly down to
+	find the Z coordinate at that point.  Once found, it should store the results in the
+	variable specified.
+ */
+void CProbing::AppendTextForDownwardProbingOperation(
+	const wxString setup_point_x,
+	const wxString setup_point_y,
+	const double depth,
+	const wxString &intersection_variable_z ) const
+{
+#ifdef UNICODE
+	std::wostringstream ss;
+#else
+	std::ostringstream ss;
+#endif
+	ss.imbue(std::locale("C"));
+	ss<<std::setprecision(10);
+
+	// Make sure it's negative as we're stepping down.  There is no option
+	// to specify a starting height so this can only be a relative distance.
+	double relative_depth = (depth > 0)?(-1.0 * depth):depth;
+
+	ss << "comment('Begin probing operation for a single point.')\n";
+	ss << "comment('The results will be stored with respect to the current location of the machine')\n";
+	ss << "comment('The machine will be returned to this original position following this single probe operation')\n";
+	ss << "probe_downward_point("
+		<< "x='" << setup_point_x.c_str() << "', "
+			<< "y='" << setup_point_y.c_str() << "', "
+			<< "depth=" << relative_depth / theApp.m_program->m_units << ", "
+			<< "intersection_variable_z='" << intersection_variable_z.c_str() << "' )\n";
+
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+}
+
 
 void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 {
@@ -281,34 +316,113 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 
 	if (m_number_of_edges == 1)
 	{
+		gp_Vec reference_vector;
 		switch(m_edge)
 		{
 		case eBottom:
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			reference_vector = gp_Vec( 1, 0, 0 );
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 								       	_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-										_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 ]");
+				setup_point_y << _T("[ #1002 + ") << probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+										_T("1004"), _T("1005"), 0, +1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 ]");
+				setup_point_y << _T("[ #1005 + ") << probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 			break;
 
 		case eTop:
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			reference_vector = gp_Vec( 1, 0, 0 );
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 										_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-										_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 ]");
+				setup_point_y << _T("[ #1002 + ") << -1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+										_T("1004"), _T("1005"), 0, -1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 ]");
+				setup_point_y << _T("[ #1005 + ") << -1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 			break;
 
 		case eLeft:
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			reference_vector = gp_Vec( 0, -1, 0 );
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-									_T("1003"), _T("1004"), +1.0 * probe_radius,0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 + ") << +1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1002 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+									_T("1004"), _T("1005"), +1.0 * probe_radius,0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 + ") << +1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1005 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 			break;
 
 		case eRight:
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			reference_vector = gp_Vec( 0, 1, 0 );
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 + ") << -1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1002 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+									_T("1004"), _T("1005"), -1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 + ") << -1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1005 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 			break;
 		} // End switch
 
@@ -316,9 +430,20 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		ss << "report_probe_results( "
 				<< "x1='#1001', "
 				<< "y1='#1002', "
-				<< "x2='#1003', "
-				<< "y2='#1004', "
-				<< "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
+				<< "x2='#1004', "
+				<< "y2='#1005', "
+				<< "x3='" << reference_vector.X() << "', "
+				<< "y3='" << reference_vector.Y() << "', ";
+
+		if (m_check_levels)
+		{
+			ss << "z1='#1003', ";
+			ss << "z2='#1006', ";
+			ss << "z3='" << reference_vector.Z() << "', ";
+		} // End if - then
+
+		ss << "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
+
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_T(""));
 	} // End if - then
@@ -326,64 +451,225 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 	{
 		// We're looking for the intersection of two edges.
 
+		gp_Vec ref1, ref2;
+
 		switch (m_corner)
 		{
 		case eBottomLeft:
 			// Bottom
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			ref1 = gp_Vec(1,0,0);
+			ref2 = gp_Vec(0,1,0);
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 ]");
+				setup_point_y << _T("[ #1002 + ") << +1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+									_T("1004"), _T("1005"), 0, +1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 ]");
+				setup_point_y << _T("[ #1005 + ") << +1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 
 			// Left
-			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
-									_T("1005"), _T("1006"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1007"), _T("1008"), +1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1007 + ") << +1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1008 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+			} // End if - then
+			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+									_T("1010"), _T("1011"), +1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1010 + ") << +1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1011 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+			} // End if - then
 			break;
 
 		case eBottomRight:
+			ref1 = gp_Vec(-1,0,0);
+			ref2 = gp_Vec(0,1,0);
 			// Bottom
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 ]");
+				setup_point_y << _T("[ #1002 + ") << +1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+									_T("1004"), _T("1005"), 0, +1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 ]");
+				setup_point_y << _T("[ #1005 + ") << +1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 
 			// Right
-			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
-									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1007 + ") << -1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1008 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+									_T("1010"), _T("1011"), -1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1010 + ") << -1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1011 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+			} // End if - then
 
 			
 			break;
 
 		case eTopLeft:
+			ref1 = gp_Vec(1,0,0);
+			ref2 = gp_Vec(0,-1,0);
 			// Top
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 ]");
+				setup_point_y << _T("[ #1002 + ") << -1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+									_T("1004"), _T("1005"), 0, -1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 ]");
+				setup_point_y << _T("[ #1005 + ") << -1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 
 			// Left
-			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
-									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
-									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
+			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+									_T("1007"), _T("1008"), +1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1007 + ") << +1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1008 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+									_T("1010"), _T("1011"), +1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1010 + ") << +1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1011 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+			} // End if - then
 			break;
 
 		case eTopRight:
+			ref1 = gp_Vec(-1,0,0);
+			ref2 = gp_Vec(0,-1,0);
 			// Top
-			AppendTextForSingleProbeOperation( pFixture, points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( pFixture, points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
-									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1001 ]");
+				setup_point_y << _T("[ #1002 + ") << -1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second, 
+									_T("1004"), _T("1005"), 0, -1.0 * probe_radius );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1004 ]");
+				setup_point_y << _T("[ #1005 + ") << -1.0 * probe_radius << _T(" ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+			} // End if - then
 
 			// Right
-			AppendTextForSingleProbeOperation( pFixture, points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
-									_T("1005"), _T("1006"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( pFixture, points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1007 + ") << -1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1008 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+			} // End if - then
+
+			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
+									_T("1010"), _T("1011"), -1.0 * probe_radius, 0 );
+			if (m_check_levels)
+			{
+				wxString setup_point_x;
+				wxString setup_point_y;
+				setup_point_x << _T("[ #1010 + ") << -1.0 * probe_radius << _T(" ]");
+				setup_point_y << _T("[ #1011 ]");
+
+				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+			} // End if - then
 			break;
 		} // End switch
 
@@ -391,13 +677,27 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		ss << "report_probe_results( "
 				<< "x1='#1001', "
 				<< "y1='#1002', "
-				<< "x2='#1003', "
-				<< "y2='#1004', "
-				<< "x3='#1005', "
-				<< "y3='#1006', "
+				<< "x2='#1004', "
+				<< "y2='#1005', "
+				<< "x3='" << ref1.X() << "', "
+				<< "y3='" << ref1.Y() << "', "
 				<< "x4='#1007', "
 				<< "y4='#1008', "
-				<< "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
+				<< "x5='#1010', "
+				<< "y5='#1011', "
+				<< "x6='" << ref2.X() << "', "
+				<< "y6='" << ref2.Y() << "', ";
+		if (m_check_levels)
+		{
+			ss << "z1='#1003', ";
+			ss << "z2='#1006', ";
+			ss << "z3='" << ref1.Z() << "', ";
+			ss << "z4='#1009', ";
+			ss << "z5='#1012', ";
+			ss << "z6='" << ref2.Z() << "', ";
+		}
+
+		ss << "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
 
 		// And position the cutting tool at the intersection of the two lines.
 		// This should be safe as the 'probe_single_point() call made in the AppendTextForSingleOperation() routine returns
@@ -407,19 +707,19 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		ss << "rapid_to_intersection( "
 				<< "x1='#1001', "
 				<< "y1='#1002', "
-				<< "x2='#1003', "
-				<< "y2='#1004', "
-				<< "x3='#1005', "
-				<< "y3='#1006', "
-				<< "x4='#1007', "
-				<< "y4='#1008', "
-				<< "intersection_x='#1009', "
-				<< "intersection_y='#1010', "
-				<< "ua_numerator='#1011', "
-				<< "ua_denominator='#1012', "
-				<< "ub_numerator='#1013', "
-				<< "ua='#1014', "
-				<< "ub='#1015' )\n";
+				<< "x2='#1004', "
+				<< "y2='#1005', "
+				<< "x3='#1007', "
+				<< "y3='#1008', "
+				<< "x4='#1010', "
+				<< "y4='#1011', "
+				<< "intersection_x='#1013', "
+				<< "intersection_y='#1014', "
+				<< "ua_numerator='#1015', "
+				<< "ua_denominator='#1016', "
+				<< "ub_numerator='#1017', "
+				<< "ua='#1018', "
+				<< "ub='#1019' )\n";
 		ss << "remove_temporary_origin()\n";
 	} // End if - else
 
@@ -538,10 +838,26 @@ static void on_set_corner(int zero_based_choice, HeeksObj* object)
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
+static void on_set_check_levels(int zero_based_choice, HeeksObj* object)
+{
+	((CProbe_Edge*)object)->m_check_levels = zero_based_choice;
+	((CProbe_Edge*)object)->GenerateMeaningfullName();
+	heeksCAD->Changed();	// Force a re-draw from glCommands()
+}
 
 void CProbe_Edge::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("Retract"), m_retract, this, on_set_retract));
+
+	{ // Begin choice scope
+		std::list< wxString > choices;
+
+		choices.push_back(_("False"));
+		choices.push_back(_("True"));
+
+		int choice = m_check_levels;
+		list->push_back(new PropertyChoice(_("Check Levels"), choices, choice, this, on_set_check_levels));
+	} // End choice scope
 
 	{ // Begin choice scope
 		std::list< wxString > choices;
@@ -626,6 +942,9 @@ void CProbe_Edge::WriteXML(TiXmlNode *root)
 
 	element->SetDoubleAttribute("retract", m_retract);
 	element->SetAttribute("number_of_edges", m_number_of_edges);
+	element->SetAttribute("edge", m_edge);
+	element->SetAttribute("corner", m_corner);
+	element->SetAttribute("check_levels", m_check_levels);
 
 	WriteBaseXML(element);
 }
@@ -637,6 +956,9 @@ HeeksObj* CProbe_Edge::ReadFromXMLElement(TiXmlElement* element)
 
 	if (element->Attribute("retract")) new_object->m_retract = atof(element->Attribute("retract"));
 	if (element->Attribute("number_of_edges")) new_object->m_number_of_edges = atoi(element->Attribute("number_of_edges"));
+	if (element->Attribute("edge")) new_object->m_edge = CProbing::eEdges_t(atoi(element->Attribute("edge")));
+	if (element->Attribute("corner")) new_object->m_corner = CProbing::eCorners_t(atoi(element->Attribute("corner")));
+	if (element->Attribute("check_levels")) new_object->m_check_levels = atoi(element->Attribute("check_levels"));
 
 	new_object->ReadBaseXML(element);
 
@@ -1260,6 +1582,11 @@ void CProbe_Edge::GenerateMeaningfullName()
 		m_title = _("Probe ");
 		m_title << eCorners_t(m_corner) << _(" corner");
 	} // End if - else
+
+	m_title << _T(" at ") << m_distance / theApp.m_program->m_units;
+	if (theApp.m_program->m_units > 1) m_title << _T(" inch intervals");
+	else m_title << _T(" mm intervals");
+	
 }
 
 void CProbe_Centre::GenerateMeaningfullName()
@@ -1268,11 +1595,17 @@ void CProbe_Centre::GenerateMeaningfullName()
 	{
 		m_title = _("Probe protrusion along ");
 		m_title << eAlignment_t(m_alignment);
+		m_title << _T(" min ") << m_distance / theApp.m_program->m_units;
+		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
+		else m_title << _T(" mm");
 	} // End if - then
 	else
 	{
 		m_title = _("Probe hole along ");
 		m_title << eAlignment_t(m_alignment);
+		m_title << _T(" max ") << m_distance / theApp.m_program->m_units;
+		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
+		else m_title << _T(" mm");
 	} // End if - else
 
 	if (m_number_of_points == 4)
@@ -1280,10 +1613,16 @@ void CProbe_Centre::GenerateMeaningfullName()
 		if (m_direction == eOutside)
 		{
 			m_title = _("Probe protrusion");
+			m_title << _T(" min ") << m_distance / theApp.m_program->m_units;
+			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
+			else m_title << _T(" mm");
 		} // End if - then
 		else
 		{
 			m_title = _("Probe hole");
+			m_title << _T(" max ") << m_distance / theApp.m_program->m_units;
+			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
+			else m_title << _T(" mm");
 		} // End if - else
 	} // End if - then
 }
