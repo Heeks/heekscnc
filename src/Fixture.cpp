@@ -628,70 +628,50 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 
 			if (points.size() >= 3)
 			{
-				if ((points[2] == gp_Pnt(1,0,0)) ||
-				    (points[2] == gp_Pnt(-1,0,0)) ||
-				    (points[2] == gp_Pnt(0,1,0)) ||
-				    (points[2] == gp_Pnt(0,-1,0)))
-				{
-					points[0].SetZ(0);
-					points[1].SetZ(0);
-				}
+				double reference_rise;
+				double reference_run;
 
-				if ((points[2] == gp_Pnt(0,0,1)) ||
-				    (points[2] == gp_Pnt(0,0,-1)))
-				{
-					points[0].SetY(0);
-					points[1].SetY(0);
-				}
+				// rotation around Z
+				reference_rise = points[2].Y();
+				reference_run = points[2].X();
 
-				double tolerance = heeksCAD->GetTolerance();
-				if (fabs(points[0].X() - points[1].X()) < tolerance)
-				{
-					// Both points were found at the same X value.  This means
-					// that we're rotating around the X axis by some value.  Determine
-					// which by aligning the points with both the Y and Z axes to figure
-					// out which is closer.  We assume the closer one is what we
-					// were after.
+				double xy_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
 
-					gp_Vec pivot( gp_Pnt(0,0,0), gp_Pnt(1,0,0) );
-					double y_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0)));
-					double z_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1)));
+				// rotation around Y
+				reference_rise = points[2].Z();
+				reference_run = points[2].X();
 
-					if (fabs(y_axis_offset) < fabs(z_axis_offset)) m_params.m_yz_plane = y_axis_offset;
-					else m_params.m_yz_plane = z_axis_offset;
-				}
+				double xz_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
 
-				if (fabs(points[0].Y() - points[1].Y()) < tolerance)
-				{
-					// Both points were found at the same Y value.  This means
-					// that we're rotating around the Y axis by some value.  Determine
-					// which by aligning the points with both the X and Z axes to figure
-					// out which is closer.  We assume the closer one is what we
-					// were after.
+				// rotation around X
+				reference_rise = points[2].Z();
+				reference_run = points[2].Y();
 
-					gp_Vec pivot( gp_Pnt(0,0,0), gp_Pnt(0,1,0) );
-					double x_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0)));
-					double z_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1)));
+				double yz_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
+				double measured_rise;
+				double measured_run;
 
-					if (fabs(x_axis_offset) < fabs(z_axis_offset)) m_params.m_xz_plane = x_axis_offset;
-					else m_params.m_xz_plane = z_axis_offset;
-				}
+				// rotation around Z
+				measured_rise = points[1].Y() - points[0].Y();
+				measured_run = points[1].X() - points[0].X();
 
-				if (fabs(points[0].Z() - points[1].Z()) < tolerance)
-				{
-					// Both points were found at the same Z value.  This means
-					// that we're rotating around the Z axis by some value.  Determine
-					// which by aligning the points with both the X and Y axes to figure
-					// out which is closer.  We assume the closer one is what we
-					// were after.
+				m_params.m_xy_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+				m_params.m_xy_plane -= xy_reference;
 
-					gp_Vec pivot( gp_Pnt(0,0,0), gp_Pnt(0,0,1) );
-					double x_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0)));
-					double y_axis_offset = AxisAngle( points[0], points[1], pivot, gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0)));
+				// rotation around Y
+				measured_rise = points[1].Z() - points[0].Z();
+				measured_run = points[1].X() - points[0].X();
 
-					if (fabs(x_axis_offset) < fabs(y_axis_offset)) m_params.m_xy_plane = x_axis_offset;
-					else m_params.m_xy_plane = y_axis_offset;
-				}
+				m_params.m_xz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+				m_params.m_xz_plane -= xz_reference;
+
+				// rotation around X
+				measured_rise = points[1].Z() - points[0].Z();
+				measured_run = points[1].Y() - points[0].Y();
+
+				m_params.m_yz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+				m_params.m_yz_plane -= yz_reference;
+
 			} // End if - then
 		} // End if - then
 	} // End if - else
