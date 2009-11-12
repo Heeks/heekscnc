@@ -9,6 +9,10 @@
 
 You need to add pycam, if you want to do zig zag machining, so the folders will need to be like this:
 
+for Linux the pycam dir needs to be in /usr/lib/python2.5/site-packages/pycam not PyCam, not inside HeeksCNC, then zigzag works
+
+for Windows, I put it under HeeksCNC, like this
+
 HeeksCNC
 
 ---bitmaps
