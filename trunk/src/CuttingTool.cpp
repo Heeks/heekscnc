@@ -141,22 +141,22 @@ static void on_set_diameter(double value, HeeksObj* object)
 
 static void on_set_max_advance_per_revolution(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_max_advance_per_revolution = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_max_advance_per_revolution = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_x_offset(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_x_offset = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_x_offset = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_tool_length_offset(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_tool_length_offset = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_tool_length_offset = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
@@ -196,22 +196,22 @@ static void on_set_material(int zero_based_choice, HeeksObj* object)
 
 static void on_set_front_angle(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_front_angle = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_front_angle = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_tool_angle(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_tool_angle = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_tool_angle = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_back_angle(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_back_angle = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_back_angle = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
@@ -325,7 +325,7 @@ void CCuttingTool::ResetParametersToReasonableValues()
 				if (m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				m_params.m_corner_radius = 0;
 
-				if (m_params.m_flat_radius != (m_params.m_diameter / 2)) 
+				if (m_params.m_flat_radius != (m_params.m_diameter / 2))
 				{
 					l_ossChange << "Changing flat radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
 					m_params.m_flat_radius = m_params.m_diameter / 2;
@@ -344,7 +344,7 @@ void CCuttingTool::ResetParametersToReasonableValues()
 				break;
 
 		case CCuttingToolParams::eBallEndMill:
-				if (m_params.m_corner_radius != (m_params.m_diameter / 2)) 
+				if (m_params.m_corner_radius != (m_params.m_diameter / 2))
 				{
 					l_ossChange << "Changing corner radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
 					m_params.m_corner_radius = (m_params.m_diameter / 2);
@@ -366,7 +366,7 @@ void CCuttingTool::ResetParametersToReasonableValues()
 				break;
 
 		case CCuttingToolParams::eTouchProbe:
-				if (m_params.m_corner_radius != (m_params.m_diameter / 2)) 
+				if (m_params.m_corner_radius != (m_params.m_diameter / 2))
 				{
 					l_ossChange << "Changing corner radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
 					m_params.m_corner_radius = (m_params.m_diameter / 2);
@@ -379,7 +379,7 @@ void CCuttingTool::ResetParametersToReasonableValues()
 				break;
 
 		case CCuttingToolParams::eToolLengthSwitch:
-				if (m_params.m_corner_radius != (m_params.m_diameter / 2)) 
+				if (m_params.m_corner_radius != (m_params.m_diameter / 2))
 				{
 					l_ossChange << "Changing corner radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
 					m_params.m_corner_radius = (m_params.m_diameter / 2);
@@ -427,29 +427,29 @@ void CCuttingTool::ResetParametersToReasonableValues()
 
 static void on_set_corner_radius(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_corner_radius = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_corner_radius = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_flat_radius(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_flat_radius = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_flat_radius = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_cutting_edge_angle(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_cutting_edge_angle = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_cutting_edge_angle = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_cutting_edge_height(double value, HeeksObj* object)
 {
-	((CCuttingTool*)object)->m_params.m_cutting_edge_height = value; 
-	object->KillGLLists(); 
+	((CCuttingTool*)object)->m_params.m_cutting_edge_height = value;
+	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
@@ -475,7 +475,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		{
 			choices.push_back(materials[i].second);
 			if (m_material == materials[i].first) choice = int(i);
-			
+
 		} // End for
 		list->push_back(new PropertyChoice(_("Material"), choices, choice, parent, on_set_material));
 	}
@@ -490,7 +490,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		{
 			choices.push_back(cutting_tool_types[i].second);
 			if (m_type == cutting_tool_types[i].first) choice = int(i);
-			
+
 		} // End for
 		list->push_back(new PropertyChoice(_("Type"), choices, choice, parent, on_set_type));
 	}
@@ -540,7 +540,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		} // End if - then
 	} // End if - else
 
-	
+
 
 }
 
@@ -548,7 +548,7 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 
 	element->SetDoubleAttribute("diameter", m_diameter);
 	element->SetDoubleAttribute("x_offset", m_x_offset);
@@ -668,7 +668,7 @@ void CCuttingTool::AppendTextToProgram()
 	{
 		ss << "length=None";
 	} // End if - else
-	
+
 	ss << ")\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -693,12 +693,15 @@ void CCuttingTool::GetProperties(std::list<Property *> *list)
 
 HeeksObj *CCuttingTool::MakeACopy(void)const
 {
-	return new CCuttingTool(*this);
+	HeeksObj *duplicate = new CCuttingTool(*this);
+	((CCuttingTool *) duplicate)->m_pToolSolid = NULL;	// We didn't duplicate this so reset the pointer.
+	return(duplicate);
 }
 
 void CCuttingTool::CopyFrom(const HeeksObj* object)
 {
 	operator=(*((CCuttingTool*)object));
+	m_pToolSolid = NULL;	// We didn't duplicate this so reset the pointer.
 }
 
 bool CCuttingTool::CanAddTo(HeeksObj* owner)
@@ -735,7 +738,7 @@ wxString CCuttingTool::GetIcon()
 void CCuttingTool::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "CuttingTool" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 
 	std::ostringstream l_ossValue;
@@ -924,16 +927,16 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 #endif
 
 	if (	(m_params.m_type != CCuttingToolParams::eTurningTool) &&
-		(m_params.m_type != CCuttingToolParams::eTouchProbe) && 
+		(m_params.m_type != CCuttingToolParams::eTouchProbe) &&
 		(m_params.m_type != CCuttingToolParams::eToolLengthSwitch))
-	{	
+	{
 		if (theApp.m_program->m_units == 1)
 		{
 			// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
 			l_ossName << m_params.m_diameter / theApp.m_program->m_units << " mm ";
 		} // End if - then
 		else
-		{	
+		{
 			// We're using inches.  Find a fractional representation if one matches.
 			l_ossName << FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units).c_str() << " inch ";
 		} // End if - else
@@ -945,7 +948,7 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 		{
 			case CCuttingToolParams::eHighSpeedSteel: l_ossName << "HSS ";
 								  break;
-	
+
 			case CCuttingToolParams::eCarbide:	l_ossName << (_("Carbide "));
 								break;
 		} // End switch
@@ -1271,8 +1274,8 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			TopoDS_Face shaft_face = BRepBuilderAPI_MakeFace( shaft_wire );
 			gp_Vec shaft_vec( 0, (-1 * tool_length_offset), 0 );
 			TopoDS_Shape shaft = BRepPrimAPI_MakePrism( shaft_face, shaft_vec );
-	
-			// Aggregate the shaft and cutting tip	
+
+			// Aggregate the shaft and cutting tip
 			TopoDS_Shape cutting_tool_shape = BRepAlgoAPI_Fuse(shaft , cutting_tip );
 
 			// Now orient the tool as per its settings.
@@ -1430,7 +1433,7 @@ CCuttingToolParams::eCuttingToolType CCuttingTool::CutterType( const int tool_nu
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( tool_number );
 	if (pCuttingTool == NULL) return(CCuttingToolParams::eUndefinedToolType);
-	
+
 	return(pCuttingTool->m_params.m_type);
 } // End of CutterType() method
 
@@ -1441,7 +1444,7 @@ CCuttingToolParams::eMaterial_t CCuttingTool::CutterMaterial( const int tool_num
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( tool_number );
 	if (pCuttingTool == NULL) return(CCuttingToolParams::eUndefinedMaterialType);
-	
+
 	return(CCuttingToolParams::eMaterial_t(pCuttingTool->m_params.m_material));
 } // End of CutterType() method
 
