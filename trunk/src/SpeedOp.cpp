@@ -269,9 +269,7 @@ static void on_set_auto_speeds(bool value, HeeksObj* object){CSpeedOp::m_auto_se
 // static
 void CSpeedOp::GetOptions(std::list<Property *> *list)
 {
-	PropertyList* speeds_options = new PropertyList(_("speeds"));
-	speeds_options->m_list.push_back ( new PropertyCheck ( _("auto set speeds for new operation"), m_auto_set_speeds_feeds, NULL, on_set_auto_speeds ) );
-	list->push_back(speeds_options);
+	list->push_back ( new PropertyCheck ( _("auto set speeds for new operation"), m_auto_set_speeds_feeds, NULL, on_set_auto_speeds ) );
 }
 
 // static

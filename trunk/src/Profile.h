@@ -56,6 +56,8 @@ public:
 	std::list<int> m_sketches;
 	CProfileParams m_profile_params;
 
+	static double max_deviation_for_spline_to_arc;
+
 	CProfile():CDepthOp(GetTypeString()){}
 	CProfile(const std::list<int> &sketches, const int cutting_tool_number )
 		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number), 
@@ -96,4 +98,7 @@ public:
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	std::list<wxString> ConfirmAutoRollRadius(const bool apply_changes);
 
+	static void GetOptions(std::list<Property *> *list);
+	static void ReadFromConfig();
+	static void WriteToConfig();
 };
