@@ -29,6 +29,8 @@ public:
 	std::list<int> m_sketches;
 	CPocketParams m_pocket_params;
 
+	static double max_deviation_for_spline_to_arc;
+
 	CPocket():CDepthOp(GetTypeString()){}
 	CPocket(const std::list<int> &sketches, const int cutting_tool_number ):CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches){ReadDefaultValues();}
 
@@ -52,4 +54,7 @@ public:
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
+	static void GetOptions(std::list<Property *> *list);
+	static void ReadFromConfig();
+	static void WriteToConfig();
 };
