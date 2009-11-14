@@ -24,6 +24,9 @@
 
 #include <sstream>
 
+// static
+double CPocket::max_deviation_for_spline_to_arc = 0.1;
+
 CPocketParams::CPocketParams()
 {
 	m_step_over = 0.0;
@@ -97,8 +100,23 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 
 	double prev_e[3];
 
-	for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
+	std::list<HeeksObj*> new_spans;
+	for(HeeksObj* span = sketch->GetFirstChild(); span; span = sketch->GetNextChild())
 	{
+		if(span->GetType() == SplineType)
+		{
+			heeksCAD->SplineToBiarcs(span, new_spans, CPocket::max_deviation_for_spline_to_arc);
+		}
+		else
+		{
+			new_spans.push_back(span->MakeACopy());
+		}
+	}
+
+	for(std::list<HeeksObj*>::iterator It = new_spans.begin(); It != new_spans.end(); It++)
+	{
+		HeeksObj* span_object = *It;
+
 		double s[3] = {0, 0, 0};
 		double e[3] = {0, 0, 0};
 		double c[3] = {0, 0, 0};
@@ -215,6 +233,13 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 				}
 			} // End if - else
 		}
+	}
+
+	// delete the spans made
+	for(std::list<HeeksObj*>::iterator It = new_spans.begin(); It != new_spans.end(); It++)
+	{
+		HeeksObj* span = *It;
+		delete span;
 	}
 
 	theApp.m_program_canvas->AppendText(_T("\n"));
@@ -493,3 +518,28 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 	return(changes);
 
 } // End DesignRulesAdjustment() method
+
+static void on_set_spline_deviation(double value, HeeksObj* object){
+	CPocket::max_deviation_for_spline_to_arc = value;
+	CPocket::WriteToConfig();
+}
+
+// static
+void CPocket::GetOptions(std::list<Property *> *list)
+{
+	list->push_back ( new PropertyDouble ( _("Pocket spline deviation"), max_deviation_for_spline_to_arc, NULL, on_set_spline_deviation ) );
+}
+
+// static
+void CPocket::ReadFromConfig()
+{
+	CNCConfig config;
+	config.Read(_T("PocketSplineDeviation"), &max_deviation_for_spline_to_arc, 0.1);
+}
+
+// static
+void CPocket::WriteToConfig()
+{
+	CNCConfig config;
+	config.Write(_T("PocketSplineDeviation"), max_deviation_for_spline_to_arc);
+}
