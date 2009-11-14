@@ -29,6 +29,9 @@
 #include <sstream>
 #include <iomanip>
 
+// static
+double CProfile::max_deviation_for_spline_to_arc = 0.1;
+
 CProfileParams::CProfileParams()
 {
 	m_tool_on_side = eOn;
@@ -438,7 +441,21 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 		else spans.push_back(span_object);
 	}
 
+	std::list<HeeksObj*> new_spans;
 	for(std::list<HeeksObj*>::iterator It = spans.begin(); It != spans.end(); It++)
+	{
+		HeeksObj* span = *It;
+		if(span->GetType() == SplineType)
+		{
+			heeksCAD->SplineToBiarcs(span, new_spans, CProfile::max_deviation_for_spline_to_arc);
+		}
+		else
+		{
+			new_spans.push_back(span->MakeACopy());
+		}
+	}
+
+	for(std::list<HeeksObj*>::iterator It = new_spans.begin(); It != new_spans.end(); It++)
 	{
 		HeeksObj* span_object = *It;
 		double s[3] = {0, 0, 0};
@@ -577,6 +594,13 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 				}
 			}
 		}
+	}
+
+	// delete the spans made
+	for(std::list<HeeksObj*>::iterator It = new_spans.begin(); It != new_spans.end(); It++)
+	{
+		HeeksObj* span = *It;
+		delete span;
 	}
 
 	l_ossPythonCode << _T("\n");
@@ -1299,3 +1323,27 @@ std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
 
 } // End DesignRulesAdjustment() method
 
+static void on_set_spline_deviation(double value, HeeksObj* object){
+	CProfile::max_deviation_for_spline_to_arc = value;
+	CProfile::WriteToConfig();
+}
+
+// static
+void CProfile::GetOptions(std::list<Property *> *list)
+{
+	list->push_back ( new PropertyDouble ( _("maximum spline deviation"), max_deviation_for_spline_to_arc, NULL, on_set_spline_deviation ) );
+}
+
+// static
+void CProfile::ReadFromConfig()
+{
+	CNCConfig config;
+	config.Read(_T("ProfileSplineDeviation"), &max_deviation_for_spline_to_arc, 0.1);
+}
+
+// static
+void CProfile::WriteToConfig()
+{
+	CNCConfig config;
+	config.Write(_T("ProfileSplineDeviation"), max_deviation_for_spline_to_arc);
+}
