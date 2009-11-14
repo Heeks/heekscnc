@@ -929,13 +929,10 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	config.Read(_T("ProgramVisible"), &program_visible);
 	config.Read(_T("OutputVisible"), &output_visible);
 
-	// Read NC Code colors
+	// read other settings
 	CNCCode::ReadColorsFromConfig();
-
-	// read maximum spline deviation
 	CProfile::ReadFromConfig();
-
-	// read auto speed set
+	CPocket::ReadFromConfig();
 	CSpeedOp::ReadFromConfig();
 
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
@@ -1135,6 +1132,7 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	CNCCode::GetOptions(&(machining_options->m_list));
 	CSpeedOp::GetOptions(&(machining_options->m_list));
 	CProfile::GetOptions(&(machining_options->m_list));
+	CPocket::GetOptions(&(machining_options->m_list));
 
 	list->push_back(machining_options);
 }
@@ -1149,6 +1147,7 @@ void CHeeksCNCApp::OnFrameDelete()
 
 	CNCCode::WriteColorsToConfig();
 	CProfile::WriteToConfig();
+	CPocket::WriteToConfig();
 	CSpeedOp::WriteToConfig();
 }
 

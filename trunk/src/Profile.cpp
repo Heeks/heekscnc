@@ -1331,14 +1331,14 @@ static void on_set_spline_deviation(double value, HeeksObj* object){
 // static
 void CProfile::GetOptions(std::list<Property *> *list)
 {
-	list->push_back ( new PropertyDouble ( _("maximum spline deviation"), max_deviation_for_spline_to_arc, NULL, on_set_spline_deviation ) );
+	list->push_back ( new PropertyDouble ( _("Profile spline deviation"), max_deviation_for_spline_to_arc, NULL, on_set_spline_deviation ) );
 }
 
 // static
 void CProfile::ReadFromConfig()
 {
 	CNCConfig config;
-	config.Read(_T("ProfileSplineDeviation"), &max_deviation_for_spline_to_arc, 0.1);
+	config.Read(_T("ProfileSplineDeviation"), &max_deviation_for_spline_to_arc, 0.01);
 }
 
 // static
