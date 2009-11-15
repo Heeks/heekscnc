@@ -447,7 +447,14 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 		HeeksObj* span = *It;
 		if(span->GetType() == SplineType)
 		{
-			heeksCAD->SplineToBiarcs(span, new_spans, CProfile::max_deviation_for_spline_to_arc);
+			std::list<HeeksObj*> new_spans2;
+			heeksCAD->SplineToBiarcs(span, new_spans2, CProfile::max_deviation_for_spline_to_arc);
+			for(std::list<HeeksObj*>::iterator It2 = new_spans2.begin(); It2 != new_spans2.end(); It2++)
+			{
+				HeeksObj* s = *It2;
+				if(reversed)new_spans.push_front(s);
+				else new_spans.push_back(s);
+			}
 		}
 		else
 		{
