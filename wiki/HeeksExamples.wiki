@@ -17,3 +17,12 @@ This file contains a sketch with an eight sided closed polygon.  The selected to
 
 
 http://img405.imageshack.us/img405/4239/screenshot004sn.png
+
+== Profiling: ==
+This file contains two sketches.  Each sketch is a 1" x 1" square.  One is profiled on the inside and the other on the outside.  It uses the Linus Enhanced Machine Controller (EMC) postprocessor.
+
+[http://heekscnc.googlecode.com/files/simpleprofile.heeks simpleprofile.heeks]
+
+
+http://img510.imageshack.us/img510/9512/screenshot005dd.png
+ 
