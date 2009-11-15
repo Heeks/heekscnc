@@ -14,3 +14,6 @@ The following example files contain simple geometry and machining operations.  I
 This file contains a sketch with an eight sided closed polygon.  The selected tool is a 6.35mm (1/4") endmill.  It uses the STandard ISO Output postprocessor.
 
 [http://heekscnc.googlecode.com/files/simplepocket.heeks simplepocket.heeks]
+
+
+http://img405.imageshack.us/img405/4239/screenshot004sn.png
