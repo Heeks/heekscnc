@@ -25,3 +25,6 @@ Then, you must combine them into one sketch; select the outside sketch, then the
 
 The final result will look like something like this:
 http://celer.oni.biz/~celeron55/random/2009-03/heeks/pocketing_separated_2.png
+
+= Download an example .heeks file = 
+http://heekscnc.googlecode.com/files/simplepocket.heeks
