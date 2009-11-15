@@ -11,7 +11,7 @@ The following example files contain simple geometry and machining operations.  I
 = Examples =
 
 == Pocketing: ==
-This file contains a sketch with an eight sided closed polygon.  The selected tool is a 6.35mm (1/4") endmill.  It uses the STandard ISO Output postprocessor.
+This file contains a sketch with an eight sided closed polygon.  The selected tool is a 6.35mm (1/4") endmill.  It uses the STandard ISO Output postprocessor.  To learn more about configuring this operation refer to the PocketOperation page.
 
 [http://heekscnc.googlecode.com/files/simplepocket.heeks simplepocket.heeks]
 
