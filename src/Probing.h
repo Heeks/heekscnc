@@ -374,6 +374,14 @@ public:
 		m_corner = eBottomLeft;
 		m_check_levels = 1;
 		GenerateMeaningfullName();
+
+		m_corner_coordinate.SetX(0.0);
+		m_corner_coordinate.SetY(0.0);
+		m_corner_coordinate.SetZ(0.0);
+
+		m_final_coordinate.SetX(0.0);
+		m_final_coordinate.SetY(0.0);
+		m_final_coordinate.SetZ(0.0);
 	}
 
 	// HeeksObj's virtual functions
@@ -411,6 +419,10 @@ public:
 	// in the XML file so that we can calculate the YZ and/or XZ plane rotations as well
 	// as the XY plane rotation during the IMPORT function of the CFixture class.
 	int m_check_levels;	// 1 = true, 0 = false
+
+	// The following two members are only relevant when probing a corner.
+	CNCPoint m_corner_coordinate;
+	CNCPoint m_final_coordinate;
 };
 
 
