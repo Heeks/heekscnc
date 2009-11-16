@@ -258,6 +258,9 @@ class Creator:
     def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
 	pass
 
+    def rapid_to_rotated_coordinate(self, x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
+	pass
+
 ################################################################################
 
 creator = Creator()
@@ -450,5 +453,8 @@ def rapid_to_midpoint(x1, y1, z1, x2, y2, z2):
 
 def rapid_to_intersection(x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
     creator.rapid_to_intersection(x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub)
+
+def rapid_to_rotated_coordinate(x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
+    creator.rapid_to_rotated_coordinate(x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final)
 
 

@@ -574,6 +574,33 @@ class CreatorIso(nc.Creator):
 	self.write('O901    ENDIF\n')
 	self.write('O900 ENDIF\n')
 
+	# We need to calculate the rotation angle based on the line formed by the
+	# x1,y1 and x2,y2 coordinate pair.  With that angle, we need to move
+	# x_offset and y_offset distance from the current (0,0,0) position.
+	#
+	# The x1,y1,x2 and y2 parameters are all variable names that contain the actual
+	# values.
+	# The x_offset and y_offset are both numeric (floating point) values
+    def rapid_to_rotated_coordinate(self, x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
+	self.comment('Rapid to rotated coordinate')
+    	self.write_blocknum();
+	self.write( '#1 = [atan[' + y2 + '-' + y1 + ']/[' + x2 +' - ' + x1 + ']] (nominal_angle)\n')
+    	self.write_blocknum();
+	self.write( '#2 = [atan[' + ref_y + ']/[' + ref_x + ']] (reference angle)\n')
+    	self.write_blocknum();
+	self.write( '#3 = [#1 - #2] (angle)\n' )
+    	self.write_blocknum();
+	self.write( '#4 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * COS[ #3 ]] - [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * SIN[ #3 ]]]\n' )
+    	self.write_blocknum();
+	self.write( '#5 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * SIN[ #3 ]] + [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * COS[ #3 ]]]\n' )
+
+    	self.write_blocknum();
+	self.write( '#6 = [[' + (self.fmt % x_final) + ' * COS[ #3 ]] - [' + (self.fmt % y_final) + ' * SIN[ #3 ]]]\n' )
+    	self.write_blocknum();
+	self.write( '#7 = [[' + (self.fmt % y_final) + ' * SIN[ #3 ]] + [' + (self.fmt % y_final) + ' * COS[ #3 ]]]\n' )
+
+    	self.write_blocknum();
+	self.write( iso.codes.RAPID() + ' X [ #4 + #6 ] Y [ #5 + #7 ]\n' )
 
 ################################################################################
 

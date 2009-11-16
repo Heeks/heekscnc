@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/libheekscnc.so.0.5.1" prefix_auto="0" extension_auto="0" />
+				<Option output="../libheekscnc.so.0.5.1" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="/usr/local/bin" />
 				<Option object_output="obj/Debug/" />
 				<Option type="3" />
@@ -33,9 +33,11 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="`wx-config --cxxflags`\" />
-			<Add option='-Wall -fPIC -g -I &quot;./&quot; $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DRUNINPLACE -DCODEBLOCKS' />
+			<Add option='-Wall -fPIC -g -I &quot;./&quot; $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DRUNINPLACE -DCODEBLOCKS -DOPEN_SOURCE_GEOMETRY' />
 			<Add directory="/usr/include/opencascade" />
-			<Add directory="../../HeeksCAD" />
+			<Add directory="../../heekscad" />
+			<Add directory="../heekscad" />
+			<Add directory="kurve/geometry" />
 		</Compiler>
 		<Linker>
 			<Add option="`wx-config --libs`" />
@@ -44,7 +46,10 @@
 		</Linker>
 		<Unit filename="src/Adaptive.cpp" />
 		<Unit filename="src/Adaptive.h" />
+		<Unit filename="src/BOM.cpp" />
+		<Unit filename="src/BOM.h" />
 		<Unit filename="src/CNCConfig.h" />
+		<Unit filename="src/CNCPoint.h" />
 		<Unit filename="src/CounterBore.cpp" />
 		<Unit filename="src/CounterBore.h" />
 		<Unit filename="src/CuttingTool.cpp" />
@@ -61,6 +66,8 @@
 		<Unit filename="src/HeeksCNCTypes.h" />
 		<Unit filename="src/Interface.cpp" />
 		<Unit filename="src/Interface.h" />
+		<Unit filename="src/Locating.cpp" />
+		<Unit filename="src/Locating.h" />
 		<Unit filename="src/NCCode.cpp" />
 		<Unit filename="src/NCCode.h" />
 		<Unit filename="src/Op.cpp" />
@@ -69,6 +76,8 @@
 		<Unit filename="src/OutputCanvas.h" />
 		<Unit filename="src/Pocket.cpp" />
 		<Unit filename="src/Pocket.h" />
+		<Unit filename="src/Probe.cpp" />
+		<Unit filename="src/Probe.h" />
 		<Unit filename="src/Profile.cpp" />
 		<Unit filename="src/Profile.h" />
 		<Unit filename="src/Program.cpp" />
@@ -77,6 +86,18 @@
 		<Unit filename="src/ProgramCanvas.h" />
 		<Unit filename="src/PythonStuff.cpp" />
 		<Unit filename="src/PythonStuff.h" />
+		<Unit filename="src/RawMaterial.cpp" />
+		<Unit filename="src/RawMaterial.h" />
+		<Unit filename="src/SpeedOp.cpp" />
+		<Unit filename="src/SpeedOp.h" />
+		<Unit filename="src/SpeedReference.cpp" />
+		<Unit filename="src/SpeedReference.h" />
+		<Unit filename="src/SpeedReferences.cpp" />
+		<Unit filename="src/SpeedReferences.h" />
+		<Unit filename="src/Tools.cpp" />
+		<Unit filename="src/Tools.h" />
+		<Unit filename="src/TurnRough.cpp" />
+		<Unit filename="src/TurnRough.h" />
 		<Unit filename="src/ZigZag.cpp" />
 		<Unit filename="src/ZigZag.h" />
 		<Unit filename="src/stdafx.cpp" />

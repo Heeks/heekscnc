@@ -14,6 +14,7 @@
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
+#include "interface/PropertyVertex.h"
 #include "interface/Tool.h"
 #include "interface/strconv.h"
 #include "tinyxml/tinyxml.h"
@@ -721,6 +722,25 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				<< "ua='#1018', "
 				<< "ub='#1019' )\n";
 		ss << "remove_temporary_origin()\n";
+
+		// We're now sitting at the corner.  If this position represents the m_corner_coordinate
+		// then we need to calculate where the m_final_coordinate lays (along these rotated axes)
+		// and move there.
+
+		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
+		ss << "rapid_to_rotated_coordinate( "
+				<< "x1='#1001', "
+				<< "y1='#1002', "
+				<< "x2='#1004', "
+				<< "y2='#1005', "
+				<< "ref_x='" << ref1.X() << "', "
+				<< "ref_y='" << ref1.Y() << "', "
+				<< "x_current=" << m_corner_coordinate.X(true) << ", "
+				<< "y_current=" << m_corner_coordinate.Y(true) << ", "
+				<< "x_final=" << m_final_coordinate.X(true) << ", "
+				<< "y_final=" << m_final_coordinate.Y(true) << ")\n";
+		ss << "remove_temporary_origin()\n";
+
 	} // End if - else
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -845,6 +865,16 @@ static void on_set_check_levels(int zero_based_choice, HeeksObj* object)
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
+static void on_set_corner_coordinate(const double *vt, HeeksObj* object)
+{
+	((CProbe_Edge *)object)->m_corner_coordinate = CNCPoint(vt);
+}
+
+static void on_set_final_coordinate(const double *vt, HeeksObj* object)
+{
+	((CProbe_Edge *)object)->m_final_coordinate = CNCPoint(vt);
+}
+
 void CProbe_Edge::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("Retract"), m_retract, this, on_set_retract));
@@ -904,6 +934,13 @@ void CProbe_Edge::GetProperties(std::list<Property *> *list)
 		} // End for
 
 		list->push_back(new PropertyChoice(_("Edge"), choices, choice, this, on_set_corner));
+
+		double corner_coordinate[3], final_coordinate[3];
+		m_corner_coordinate.ToDoubleArray(corner_coordinate);
+		m_final_coordinate.ToDoubleArray(final_coordinate);
+
+		list->push_back(new PropertyVertex(_("Corner Coordinate"), corner_coordinate, this, on_set_corner_coordinate));
+		list->push_back(new PropertyVertex(_("Final Coordinate"), final_coordinate, this, on_set_final_coordinate));
 	} // End if - else
 
 	CProbing::GetProperties(list);
@@ -945,6 +982,12 @@ void CProbe_Edge::WriteXML(TiXmlNode *root)
 	element->SetAttribute("edge", m_edge);
 	element->SetAttribute("corner", m_corner);
 	element->SetAttribute("check_levels", m_check_levels);
+	element->SetDoubleAttribute("corner_coordinate_x", m_corner_coordinate.X());
+	element->SetDoubleAttribute("corner_coordinate_y", m_corner_coordinate.Y());
+	element->SetDoubleAttribute("corner_coordinate_z", m_corner_coordinate.Z());
+	element->SetDoubleAttribute("final_coordinate_x", m_final_coordinate.X());
+	element->SetDoubleAttribute("final_coordinate_y", m_final_coordinate.Y());
+	element->SetDoubleAttribute("final_coordinate_z", m_final_coordinate.Z());
 
 	WriteBaseXML(element);
 }
@@ -959,6 +1002,20 @@ HeeksObj* CProbe_Edge::ReadFromXMLElement(TiXmlElement* element)
 	if (element->Attribute("edge")) new_object->m_edge = CProbing::eEdges_t(atoi(element->Attribute("edge")));
 	if (element->Attribute("corner")) new_object->m_corner = CProbing::eCorners_t(atoi(element->Attribute("corner")));
 	if (element->Attribute("check_levels")) new_object->m_check_levels = atoi(element->Attribute("check_levels"));
+
+	if (element->Attribute("corner_coordinate_x")) 
+		new_object->m_corner_coordinate.SetX(atof(element->Attribute("corner_coordinate_x")));
+	if (element->Attribute("corner_coordinate_y")) 
+		new_object->m_corner_coordinate.SetY(atof(element->Attribute("corner_coordinate_y")));
+	if (element->Attribute("corner_coordinate_z")) 
+		new_object->m_corner_coordinate.SetZ(atof(element->Attribute("corner_coordinate_z")));
+
+	if (element->Attribute("final_coordinate_x")) 
+		new_object->m_final_coordinate.SetX(atof(element->Attribute("final_coordinate_x")));
+	if (element->Attribute("final_coordinate_y")) 
+		new_object->m_final_coordinate.SetY(atof(element->Attribute("final_coordinate_y")));
+	if (element->Attribute("final_coordinate_z")) 
+		new_object->m_final_coordinate.SetZ(atof(element->Attribute("final_coordinate_z")));
 
 	new_object->ReadBaseXML(element);
 
