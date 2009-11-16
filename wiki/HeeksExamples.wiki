@@ -32,3 +32,10 @@ This file contains a sketch with a square and 8 circles.  The circles have been 
 [http://heekscnc.googlecode.com/files/SimpleDrilling.heeks SimpleDrilling.heeks]
 
 http://img35.imageshack.us/img35/2115/screenshot006vw.png 
+
+== Adaptive Roughing: ==
+This file contains a 10cm x 10cm x 25cm solid with a pocket.  An adaptive roughing operation has been used starting at the the center.  It uses a 6.35mm (1/4") end-mill and the EMC postprocessor.  Note that the .heeks file contains the gcode from my run and is quite large (5.4MB).  To verify that adaptive roughing is working on your computer, hit the 'G0' button on the machining toolbar.  This is a cpu intensive operation and may take some time to complete.  On my computer, it takes about 3 minutes.
+
+[http://heekscnc.googlecode.com/files/AdaptivePocket.heeks AdaptivePocket.heeks]
+
+http://img260.imageshack.us/img260/9454/screenshot007l.png
