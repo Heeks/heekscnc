@@ -72,6 +72,6 @@ http://code.google.com/p/heekscnc/wiki/Fixtures
 
 http://code.google.com/p/heekscnc/wiki/PrintedCircuitBoard
 
-=== Some Example Files ===
+= Some Example Files =
 
 http://code.google.com/p/heekscnc/wiki/HeeksExamples
