@@ -19,10 +19,16 @@ This file contains a sketch with an eight sided closed polygon.  The selected to
 http://img405.imageshack.us/img405/4239/screenshot004sn.png
 
 == Profiling: ==
-This file contains two sketches.  Each sketch is a 1" x 1" square.  One is profiled on the inside and the other on the outside.  It uses the Linus Enhanced Machine Controller (EMC) postprocessor.
+This file contains two sketches.  Each sketch is a 1" x 1" square.  One is profiled on the inside and the other on the outside.  It uses the Linus Enhanced Machine Controller (EMC) postprocessor.  Details about configuring this operation are on the ProfileOperation page.
 
 [http://heekscnc.googlecode.com/files/simpleprofile.heeks simpleprofile.heeks]
 
 
 http://img510.imageshack.us/img510/9512/screenshot005dd.png
- 
+
+== Drilling: ==
+This file contains a sketch with a square and 8 circles.  The circles have been selected and a drilling operation applied.  Note that the size of the drawn circle doesn't affect the size of the final hole.  The circle's center is used to locate the center of the hole, but the tool selected ultimately determines the hole size.  To learn more about drilling refer to the [Drilling] page.
+
+[http://heekscnc.googlecode.com/files/SimpleDrilling.heeks SimpleDrilling.heeks]
+
+http://img35.imageshack.us/img35/2115/screenshot006vw.png 
