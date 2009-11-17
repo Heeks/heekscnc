@@ -46,3 +46,10 @@ This file contains a 10cm x 10cm x 2.5cm solid with a pocket.  A zigzag operatio
 [http://heekscnc.googlecode.com/files/zigzagpocket.heeks zigzagpocket.heeks]
 
 http://img694.imageshack.us/img694/7192/screenshot008o.png
+
+== Counterbore: ==
+This file uses the earlier drilling example and adds a counterbore operation.  The drilling tool has been changed to an 1/8" drill bit and the end mil is used for the counterbore operation.
+
+[http://heekscnc.googlecode.com/files/Counterbore.heeks Counterbore.heeks]
+
+http://img17.imageshack.us/img17/2736/screenshot009o.png
