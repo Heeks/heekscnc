@@ -72,6 +72,10 @@ http://code.google.com/p/heekscnc/wiki/Fixtures
 
 http://code.google.com/p/heekscnc/wiki/PrintedCircuitBoard
 
+== Probing Operations for location and alignment ==
+
+http://code.google.com/p/heekscnc/wiki/Probing
+
 = Some Example Files =
 
 http://code.google.com/p/heekscnc/wiki/HeeksExamples
