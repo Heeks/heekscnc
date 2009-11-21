@@ -490,6 +490,7 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.
 		CCuttingTool *pCutter = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+
 		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
 		{
 			// The tool we've chosen can't cut as deep as we've setup to go.
@@ -508,6 +509,21 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 			if (apply_changes)
 			{
 				m_depth_op_params.m_final_depth = pCutter->m_params.m_cutting_edge_height;
+			} // End if - then
+		} // End if - then
+
+		// Also make sure the 'step-over' distance isn't larger than the cutting tool's diameter.
+		if ((pCutter != NULL) && ((pCutter->CuttingRadius(false) * 2.0) < m_pocket_params.m_step_over))
+		{
+			wxString change;
+			change << _("The step-over distance for pocket (id=");
+			change << m_id;
+			change << _(") is larger than the cutting tool's diameter");
+			changes.push_back(change);
+
+			if (apply_changes)
+			{
+				m_pocket_params.m_step_over = (pCutter->CuttingRadius(false) * 2.0);
 			} // End if - then
 		} // End if - then
 	} // End if - then
