@@ -24,9 +24,9 @@ This design rules check confirms that the NC operation's depth is not deeper tha
 
 When a profile includes an automatically generated roll-on and/or roll-off point, that movement is applied via an arc whose radius is specified by the auto_roll_radius parameter of the profile.  The auto_roll_radius is compared with the cutting tool's radius as well as the minimum radius of the sketch and, if necessary, reduced accordingly.
 
-== Profile refers to deleted sketches ==
+== Profile or Pocket refers to deleted sketches ==
 
-This check confirms that the sketch objects that form the basis of this profile operation have not all been deleted.  i.e. is this an 'orphan' profile operation.
+This check confirms that the sketch objects that form the basis of this operation have not all been deleted.  i.e. is this an 'orphan' profile/pocket operation.  This check occurs for both Profile and Pocketing operations.
 
 == Pocket step-over larger than tool ==
 
