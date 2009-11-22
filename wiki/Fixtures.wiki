@@ -21,7 +21,7 @@ The HeeksCNC Probing operations also support (for EMC2-based machines) the gener
 
 - Touch off against the material (physically) so that the machine's current coordinate system's origin is set correctly.
 
-- Enter the material's rotation angle (found by probing) into the 'C Axis Rotation' for the corresponding Fixture's coordinate system (G54 for example).
+- Enter the material's rotation angle (found by probing) into the 'XY Plane Rotation' for the corresponding Fixture's coordinate system (G54 for example).
 
 - Generate the GCode.
 
@@ -46,7 +46,7 @@ The HeeksCNC Probing operations also support (for EMC2-based machines) the gener
 
 - Execute the touch probe GCode program.
 
-- Copy the resultant XML data file back to the HeeksCNC machine.
+- Copy the resultant XML data file back to the HeeksCNC machine.  (NOTE: When using EMC2 as the machine's controller, the XML file is placed in the currently used configuration directory.  eg: "~/emc2/configs/HM50")
 
 - Touch off against the material (physically) so that the machine's current coordinate system's origin is set correctly.
 
