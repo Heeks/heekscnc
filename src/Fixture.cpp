@@ -598,7 +598,6 @@ double CFixture::AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec
 
 void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_file_name )
 {
-
 	TiXmlDocument xml;
 	if (! xml.LoadFile( Ttc(probed_points_xml_file_name.c_str()) ))
 	{
@@ -652,26 +651,34 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 				double measured_run;
 
 				// rotation around Z
-				measured_rise = points[1].Y() - points[0].Y();
-				measured_run = points[1].X() - points[0].X();
+				if ((points[2].X() != 0.0) || (points[2].Y() != 0.0))
+				{
+					measured_rise = points[1].Y() - points[0].Y();
+					measured_run = points[1].X() - points[0].X();
 
-				m_params.m_xy_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
-				m_params.m_xy_plane -= xy_reference;
+					m_params.m_xy_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+					m_params.m_xy_plane -= xy_reference;
+				}
 
 				// rotation around Y
-				measured_rise = points[1].Z() - points[0].Z();
-				measured_run = points[1].X() - points[0].X();
+				if ((points[2].X() != 0.0) || (points[2].Z() != 0.0))
+				{
+					measured_rise = points[1].Z() - points[0].Z();
+					measured_run = points[1].X() - points[0].X();
 
-				m_params.m_xz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
-				m_params.m_xz_plane -= xz_reference;
+					m_params.m_xz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+					m_params.m_xz_plane -= xz_reference;
+				}
 
 				// rotation around X
-				measured_rise = points[1].Z() - points[0].Z();
-				measured_run = points[1].Y() - points[0].Y();
+				if ((points[2].Y() != 0.0) || (points[2].Z() != 0.0))
+				{
+					measured_rise = points[1].Z() - points[0].Z();
+					measured_run = points[1].Y() - points[0].Y();
 
-				m_params.m_yz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
-				m_params.m_yz_plane -= yz_reference;
-
+					m_params.m_yz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+					m_params.m_yz_plane -= yz_reference;
+				}
 			} // End if - then
 		} // End if - then
 	} // End if - else
