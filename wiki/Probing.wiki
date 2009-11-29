@@ -40,6 +40,24 @@ When complete, the GCode will generate an XML file with the probed point locatio
 
 The machine's position will be returned to the originally jogged position upon completion of the GCode program.
 
+== Calibrating the probe ==
+
+By drilling a hole and measuring its centre position, we can measure any constant offsets imposed by the probe's physical geometry.  These offsets may be read into the touch probe's definition (within the 'Tools' list) for use in subsequent probing operations.
+
+=== Procedure ===
+
+1. Touch off to set the current physical machine position as (0,0,0).
+2. Drill a hole.
+3. Replace the drill bit with the touch probe.
+4. Load and run a centre-finding operation (using 4 points).  This centre point will be stored in an XML file (for EMC2-based machines only).  This coordinate represents how far away from the 0,0 point the probe is.
+5. Open up HeeksCNC.
+6. Select the touch probe tool from within the 'Tools' list.
+7. Use the right mouse button to select the 'Import probe calibration data' option.
+8. Navigate and open the XML file generated during the previous probing operation.
+9. Save the file.  Optionally, you may want to use the 'Export' function for the 'Tools' so that these calibration values can be written to the default.tooltable for future use.
+
+Once the calibration data exists within the  touch probe definition, these offsets will be used in subsequent probing operations to allow for the probe's geometry.
+
 == Parameters ==
 
 === Depth ===
@@ -98,3 +116,7 @@ NOTE: Where an edge is probed, the resulting probed locations will be written to
 === Corner and Final Coordinates ===
 
 If a corner probing operation is being used then two optional coordinate values may be entered.  These allow the user to define the probed corner as representing a particular coordinate in the HeeksCNC design space.  The final coordinate represents where the probe's tip will end up when the probing operation is complete.  The scenario being that the only corner available for probing is the bottom right corner (due to the fixtures covering up the other corners, for example).  The bottom right corner represents a particular coordinate in the design (say 120, -100, 0).  If this value is assigned as the corner coordinate and the final coordinate is set to (0,0,0) then the probing operation will calculate where the 0,0,0 point would be if the probed point represents (120, -100, 0) and the workpiece has been rotated by some measured amount.  NOTE: that, if the workpiece's rotation is used following the probing operation, it makes sense to assign the final coordinate as (0,0,0) as all rotations occur around this point.
+
+=== Probe Offset X & Y ===
+
+For touch probe tools ONLY, these values define the coordinate found following a calibration exercise.  i.e. if the final position following a centre probing operation was (x=1.5, y=-3.0) then the probe offsets would be probe_offset_x = +1.5, probe_offset_y = -3.0.  These offsets will be subtracted from subsequent probing operations as necessary.
