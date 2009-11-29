@@ -132,12 +132,12 @@ This is the maximum distance a tool should advance during a single revolution.  
 
 When the various parameters of the cutting tool are adjusted, the system attempts to find a more appropriate title for the cutting tool so that it is easily selected from the Tools list.  There are occasions, however, where the user may wish to manually assign a tool name.  This flag is set to 'true' by default so that the object's title is automatically changed to reflect the tool's parameters.  If the user manually edits the object title then this flag will implicitly be changed to 'false'.  i.e. from this point on, the manually assigned title will be used.  If, on the other hand, the user wishes to reinstate the automatic naming function, this parameter may be changed.
 
+=== Probe Offset X & Y ===
+
+For touch probe tools ONLY, these values define the coordinate found following a calibration exercise.  i.e. if the final position following a centre probing operation was (x=1.5, y=-3.0) then the probe offsets would be probe_offset_x = +1.5, probe_offset_y = -3.0.  These offsets will be subtracted from subsequent probing operations as necessary.
+
 == Default Tool Table ==
 
 A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process involves adding cutting tools to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Tools icon.  This allows the tool definitions to be saved to a file.  If the file is called 'default.tooltable' and is located in one of the two possible directories then these tools will be automatically added to all new data files.
 
 The default.tooltable file may come from either the user's default configuration directory (HOME directory on Linux and "c:\Documents and Settings\username\Application Data" on Windows) or it must be located in the same directory as the HeeksCNC.so or HeeksCNC.DLL file.
-
-=== Probe Offset X & Y ===
-
-For touch probe tools ONLY, these values define the coordinate found following a calibration exercise.  i.e. if the final position following a centre probing operation was (x=1.5, y=-3.0) then the probe offsets would be probe_offset_x = +1.5, probe_offset_y = -3.0.  These offsets will be subtracted from subsequent probing operations as necessary.
