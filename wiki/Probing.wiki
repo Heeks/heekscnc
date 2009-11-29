@@ -47,14 +47,24 @@ By drilling a hole and measuring its centre position, we can measure any constan
 === Procedure ===
 
 1. Touch off to set the current physical machine position as (0,0,0).
+
 2. Drill a hole.
+
 3. Replace the drill bit with the touch probe.
-4. Load and run a centre-finding operation (using 4 points).  This centre point will be stored in an XML file (for EMC2-based machines only).  This coordinate represents how far away from the 0,0 point the probe is.
+
+4. Load and run a centre-finding operation (using 4 points).  This centre point will be 
+stored in an XML file (for EMC2-based machines only).  This coordinate represents how far away from the 0,0 point the probe is.
+
 5. Open up HeeksCNC.
+
 6. Select the touch probe tool from within the 'Tools' list.
+
 7. Use the right mouse button to select the 'Import probe calibration data' option.
+
 8. Navigate and open the XML file generated during the previous probing operation.
+
 9. Save the file.  Optionally, you may want to use the 'Export' function for the 'Tools' so that these calibration values can be written to the default.tooltable for future use.
+
 
 Once the calibration data exists within the  touch probe definition, these offsets will be used in subsequent probing operations to allow for the probe's geometry.
 
