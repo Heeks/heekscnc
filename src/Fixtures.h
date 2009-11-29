@@ -14,7 +14,7 @@ public:
 	int GetType()const{return FixturesType;}
 	const wxChar* GetTypeString(void)const{return _("Fixtures");}
 	HeeksObj *MakeACopy(void)const{ return new CFixtures(*this);}
-	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/fixtures");}
+	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(9, 0);}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object) {	return(object->GetType() == FixtureType); }
 	bool CanBeRemoved(){return false;}

@@ -27,6 +27,7 @@ public:
 	bool m_run_program_on_new_line;
 	wxToolBarBase* m_machiningBar;
 	wxString m_dll_path;
+	int m_icon_texture_number;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();

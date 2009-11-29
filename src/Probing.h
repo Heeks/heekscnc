@@ -101,7 +101,7 @@ public:
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/probe"); else return COp::GetIcon();}
+	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(15, 0);}else COp::GetIcon(texture_number, x, y);}
 	bool CanAddTo(HeeksObj* owner);
 
 	void AppendTextForSingleProbeOperation( const CNCPoint setup_point,

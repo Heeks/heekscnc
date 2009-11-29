@@ -22,9 +22,9 @@ enum{
 	SpeedReferencesType,
 	CuttingRateType,
 	LocatingType,
-	HeeksCNCMaximumType,
 	BOMType,
 	TrsfNCCodeType,
 	ProbeCentreType,
 	ProbeEdgeType,
+	HeeksCNCMaximumType
 };

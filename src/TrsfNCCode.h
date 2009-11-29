@@ -23,7 +23,7 @@ public:
 	int GetType()const{return TrsfNCCodeType;}
 	long GetMarkingMask()const{return MARKING_FILTER_UNKNOWN;}
 	const wxChar* GetTypeString(void)const{return _T("Transformable NC Code");}
-	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/program");}
+	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(1, 1);}
 	HeeksObj *MakeACopy(void)const;
 	void GetProperties(std::list<Property *> *list);
 	void WriteXML(TiXmlNode *root);
