@@ -189,7 +189,7 @@ public:
 	const wxChar* GetTypeString(void)const{return _T("NC Code");}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
-	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/nccode");}
+	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(11, 0);}
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;

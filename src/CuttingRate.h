@@ -56,7 +56,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-	wxString GetIcon() { return theApp.GetResFolder() + _T("/icons/tool"); }
+	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(4, 1);}
         const wxChar* GetShortString(void)const{return m_title.c_str();}
 
         bool CanEditString(void)const{return true;}

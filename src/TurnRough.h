@@ -47,7 +47,7 @@ public:
 	int GetType()const{return TurnRoughType;}
 	const wxChar* GetTypeString(void)const{return _T("Rough Turning");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/turnrough"); else return CSpeedOp::GetIcon();}
+	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(7, 1);}else CSpeedOp::GetIcon(texture_number, x, y);}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

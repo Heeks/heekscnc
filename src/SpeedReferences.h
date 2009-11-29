@@ -31,7 +31,7 @@ public:
 	int GetType()const{return SpeedReferencesType;}
 	const wxChar* GetTypeString(void)const{return _("Feeds and Speeds");}
 	HeeksObj *MakeACopy(void)const{ return new CSpeedReferences(*this);}
-	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/speeds");}
+	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(3, 1);}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object) {	return((object->GetType() == SpeedReferenceType) || (object->GetType() == CuttingRateType)); }
 	bool CanBeRemoved(){return false;}
