@@ -139,6 +139,20 @@ public:
 
 	int m_automatically_generate_title;	// Set to true by default but reset to false when the user edits the title.
 
+	// The following coordinates relate ONLY to touch probe tools.  They describe
+	// the error the probe tool has in locating an X,Y point.  These values are
+	// added to a probed point's location to find the actual point.  The values
+	// should come from calibrating the touch probe.  i.e. set machine position
+	// to (0,0,0), drill a hole and then probe for the centre of the hole.  The
+	// coordinates found by the centre finding operation should be entered into
+	// these values verbatim.  These will represent how far off concentric the
+	// touch probe's tip is with respect to the quil.  Of course, these only
+	// make sense if the probe's body is aligned consistently each time.  I will
+	// ASSUME this is correct.
+
+	double m_probe_offset_x;
+	double m_probe_offset_y;
+
 	void set_initial_values();
 	void write_values_to_config();
 	void GetProperties(CCuttingTool* parent, std::list<Property *> *list);
@@ -191,6 +205,7 @@ public:
     const wxChar* GetShortString(void)const{return m_title.c_str();}
 	void glCommands(bool select, bool marked, bool no_color);
 	void KillGLLists(void);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
@@ -211,6 +226,7 @@ public:
 
 	void SetDiameter( const double diameter );
 	void ResetParametersToReasonableValues();
+	void ImportProbeCalibrationData( const wxString & probed_points_xml_file_name );
 
 private:
 	void DeleteSolid();

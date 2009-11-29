@@ -63,13 +63,19 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	ss.imbue(std::locale("C"));
 	ss<<std::setprecision(10);
 
+	double probe_offset_x = 0.0;
+	double probe_offset_y = 0.0;
+
 	double probe_radius = 0.0;
+
 	if (m_cutting_tool_number > 0)
 	{
 		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number);
 		if (pCuttingTool != NULL)
 		{
 			probe_radius = pCuttingTool->CuttingRadius(true);
+			probe_offset_x = 0.0 - pCuttingTool->m_params.m_probe_offset_x;
+			probe_offset_y = 0.0 - pCuttingTool->m_params.m_probe_offset_y;
 		} // End if - then
 	} // End if - then
 
@@ -135,7 +141,7 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	ss << "comment('Move back to the intersection points')\n";
 	ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
 	ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-	ss << "rapid_to_midpoint( '" << _T("#1001") << "','" << _T("#1002") << "', '0', '" << _T("#1003") << "','" << _T("#1004") << "', '0' )\n";
+	ss << "rapid_to_midpoint( '" << _T("[#1001 + ") << probe_offset_x << "]','" << _T("[#1002 + ") << probe_offset_y << "]', '0', '" << _T("[#1003 + ") << probe_offset_x << "]','" << _T("[#1004 + ") << probe_offset_y << "]', '0' )\n";
 	ss << "remove_temporary_origin()\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
@@ -155,9 +161,9 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			ss.str(_T(""));
 
 			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
-									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
+									_T("1005"), _T("1006"), 0, -1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
-									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
+									_T("1007"), _T("1008"), 0, +1.0 * probe_radius );
 		} // End if - then
 		else
 		{
@@ -170,17 +176,22 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			ss.str(_T(""));
 
 			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
-									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
+									_T("1005"), _T("1006"), 0, +1.0 * probe_radius );
 			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second, 
-									_T("1003"), _T("1004"), 0, -1.0 * probe_radius );
+									_T("1007"), _T("1008"), 0, -1.0 * probe_radius );
 		} // End if - else
 
 		// Now move to the centre of these two intersection points.
 		ss << "comment('Move back to the intersection points')\n";
 		ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
 		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-		ss << "rapid_to_midpoint( '" << _T("#1001") << "','" << _T("#1002") << "', '0', '" << _T("#1003") << "','" << _T("#1004") << "', '0' )\n";
+		ss << "rapid_to_midpoint( '" << _T("#1005") << "','" << _T("#1006") << "', '0', '" << _T("#1007") << "','" << _T("#1008") << "', '0' )\n";
 		ss << "remove_temporary_origin()\n";
+
+		ss << "report_probe_results( "
+				<< "x1='[[[[#1005-#1007]/2.0]+#1007] + " << probe_offset_x << "]', "
+				<< "y1='[[[[#1006-#1008]/2.0]+#1008] + " << probe_offset_y << "]', ";
+		ss << "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
 
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_T(""));
@@ -200,8 +211,8 @@ void CProbing::AppendTextForSingleProbeOperation(
 	const CNCPoint probe_point,
 	const wxString &intersection_variable_x,
 	const wxString &intersection_variable_y,
-        const double probe_radius_x_component,
-	const double probe_radius_y_component	) const
+        const double probe_offset_x_component,
+	const double probe_offset_y_component	) const
 {
 #ifdef UNICODE
 	std::wostringstream ss;
@@ -228,8 +239,8 @@ void CProbing::AppendTextForSingleProbeOperation(
 			<< "destination_point_y=" << probe_point.Y(true) << ", "
 			<< "intersection_variable_x='" << intersection_variable_x.c_str() << "', "
 			<< "intersection_variable_y='" << intersection_variable_y.c_str() << "', "
-		        << "probe_radius_x_component='" << probe_radius_x_component << "', "
-			<< "probe_radius_y_component='" << probe_radius_y_component << "' )\n";
+		        << "probe_offset_x_component='" << probe_offset_x_component << "', "
+			<< "probe_offset_y_component='" << probe_offset_y_component << "' )\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
@@ -298,13 +309,18 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		ss << eCorners_t(m_corner) << " corner of the workpiece.')\n";
 	}
 
+	double probe_offset_x = 0.0;
+	double probe_offset_y = 0.0;
 	double probe_radius = 0.0;
+
 	if (m_cutting_tool_number > 0)
 	{
 		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number);
 		if (pCuttingTool != NULL)
 		{
 			probe_radius = pCuttingTool->CuttingRadius(true);
+			probe_offset_x = 0.0 - pCuttingTool->m_params.m_probe_offset_x;
+			probe_offset_y = 0.0 - pCuttingTool->m_params.m_probe_offset_y;
 		} // End if - then
 	} // End if - then
 
@@ -374,7 +390,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			break;
 
 		case eLeft:
-			reference_vector = gp_Vec( 0, -1, 0 );
+			reference_vector = gp_Vec( 0, 1, 0 );
 			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
 			if (m_check_levels)
@@ -429,10 +445,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 
 		// Combine the two probed points into an edge and generate an XML document describing the angle they form.
 		ss << "report_probe_results( "
-				<< "x1='#1001', "
-				<< "y1='#1002', "
-				<< "x2='#1004', "
-				<< "y2='#1005', "
+				<< "x1='[#1001 + " << probe_offset_x << "]', "
+				<< "y1='[#1002 + " << probe_offset_y << "]', "
+				<< "x2='[#1004 + " << probe_offset_x << "]', "
+				<< "y2='[#1005 + " << probe_offset_y << "]', "
 				<< "x3='" << reference_vector.X() << "', "
 				<< "y3='" << reference_vector.Y() << "', ";
 
@@ -676,16 +692,16 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 
 		// Now report the angle of rotation
 		ss << "report_probe_results( "
-				<< "x1='#1001', "
-				<< "y1='#1002', "
-				<< "x2='#1004', "
-				<< "y2='#1005', "
+				<< "x1='[#1001 + " << probe_offset_x << "]', "
+				<< "y1='[#1002 + " << probe_offset_y << "]', "
+				<< "x2='[#1004 + " << probe_offset_x << "]', "
+				<< "y2='[#1005 + " << probe_offset_y << "]', "
 				<< "x3='" << ref1.X() << "', "
 				<< "y3='" << ref1.Y() << "', "
-				<< "x4='#1007', "
-				<< "y4='#1008', "
-				<< "x5='#1010', "
-				<< "y5='#1011', "
+				<< "x4='[#1007 + " << probe_offset_x << "]', "
+				<< "y4='[#1008 + " << probe_offset_y << "]', "
+				<< "x5='[#1010 + " << probe_offset_x << "]', "
+				<< "y5='[#1011 + " << probe_offset_y << "]', "
 				<< "x6='" << ref2.X() << "', "
 				<< "y6='" << ref2.Y() << "', ";
 		if (m_check_levels)
@@ -706,14 +722,14 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		// at a same movement height.
 		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
 		ss << "rapid_to_intersection( "
-				<< "x1='#1001', "
-				<< "y1='#1002', "
-				<< "x2='#1004', "
-				<< "y2='#1005', "
-				<< "x3='#1007', "
-				<< "y3='#1008', "
-				<< "x4='#1010', "
-				<< "y4='#1011', "
+				<< "x1='[#1001 + " << probe_offset_x << "]', "
+				<< "y1='[#1002 + " << probe_offset_y << "]', "
+				<< "x2='[#1004 + " << probe_offset_x << "]', "
+				<< "y2='[#1005 + " << probe_offset_y << "]', "
+				<< "x3='[#1007 + " << probe_offset_x << "]', "
+				<< "y3='[#1008 + " << probe_offset_y << "]', "
+				<< "x4='[#1010 + " << probe_offset_x << "]', "
+				<< "y4='[#1011 + " << probe_offset_y << "]', "
 				<< "intersection_x='#1013', "
 				<< "intersection_y='#1014', "
 				<< "ua_numerator='#1015', "
@@ -729,10 +745,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 
 		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
 		ss << "rapid_to_rotated_coordinate( "
-				<< "x1='#1001', "
-				<< "y1='#1002', "
-				<< "x2='#1004', "
-				<< "y2='#1005', "
+				<< "x1='[#1001 + " << probe_offset_x << "]', "
+				<< "y1='[#1002 + " << probe_offset_y << "]', "
+				<< "x2='[#1004 + " << probe_offset_x << "]', "
+				<< "y2='[#1005 + " << probe_offset_y << "]', "
 				<< "ref_x='" << ref1.X() << "', "
 				<< "ref_y='" << ref1.Y() << "', "
 				<< "x_current=" << m_corner_coordinate.X(true) << ", "

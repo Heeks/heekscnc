@@ -440,7 +440,7 @@ class CreatorIso(nc.Creator):
     # into the 'intersection variable' variables.  Finally the machine moves back to the
     # original location.  This is important so that the results of multiple calls to this
     # routine may be compared meaningfully.
-    def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_radius_x_component=None, probe_radius_y_component=None ):
+    def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_offset_x_component=None, probe_offset_y_component=None ):
 	self.write_blocknum()
 	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
 	if (self.fhv) : self.calc_feedrate_hv(1, 0)
@@ -457,9 +457,9 @@ class CreatorIso(nc.Creator):
 
 	self.comment('Back off the workpiece and re-probe more slowly')
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '= [#5061 - [ 2.0 * ' + probe_radius_x_component + ']]\n'))
+	self.write(('#' + intersection_variable_x + '= [#5061 - [ 2.0 * ' + probe_offset_x_component + ']]\n'))
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '= [#5062 - [ 2.0 * ' + probe_radius_y_component + ']]\n'))
+	self.write(('#' + intersection_variable_y + '= [#5062 - [ 2.0 * ' + probe_offset_y_component + ']]\n'))
     	self.write_blocknum();
 	self.write(iso.codes.RAPID())
 	self.write(' X #' + intersection_variable_x + ' Y #' + intersection_variable_y + '\n')
@@ -472,11 +472,11 @@ class CreatorIso(nc.Creator):
 
 	self.comment('Store the probed location somewhere we can get it again later')
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '=' + probe_radius_x_component + ' (Portion of probe radius that contributes to the X coordinate)\n'))
+	self.write(('#' + intersection_variable_x + '=' + probe_offset_x_component + ' (Portion of probe radius that contributes to the X coordinate)\n'))
 	self.write_blocknum()
 	self.write(('#' + intersection_variable_x + '=[#' + intersection_variable_x + ' + #5061]\n'))
 	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '=' + probe_radius_y_component + ' (Portion of probe radius that contributes to the Y coordinate)\n'))
+	self.write(('#' + intersection_variable_y + '=' + probe_offset_y_component + ' (Portion of probe radius that contributes to the Y coordinate)\n'))
 	self.write_blocknum()
 	self.write(('#' + intersection_variable_y + '=[#' + intersection_variable_y + ' + #5062]\n'))
 

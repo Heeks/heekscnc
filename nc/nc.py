@@ -243,7 +243,7 @@ class Creator:
     def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None ):
 	pass
 
-    def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_radius_x_component=None, probe_radius_y_component=None ):
+    def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_offset_x_component=None, probe_offset_y_component=None ):
         pass
 
     def probe_downward_point(self, x=None, y=None, depth=None, intersection_variable_z=None):
@@ -439,8 +439,8 @@ def variable(id):
 def variable_set(id, value):
     creator.variable_set(id, value)
 
-def probe_single_point(point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_radius_x_component=None, probe_radius_y_component=None ):
-    creator.probe_single_point(point_along_edge_x, point_along_edge_y, depth, retracted_point_x, retracted_point_y, destination_point_x, destination_point_y, intersection_variable_x, intersection_variable_y, probe_radius_x_component, probe_radius_y_component )
+def probe_single_point(point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_offset_x_component=None, probe_offset_y_component=None ):
+    creator.probe_single_point(point_along_edge_x, point_along_edge_y, depth, retracted_point_x, retracted_point_y, destination_point_x, destination_point_y, intersection_variable_x, intersection_variable_y, probe_offset_x_component, probe_offset_y_component )
 
 def probe_downward_point(x=None, y=None, depth=None, intersection_variable_z=None):
     creator.probe_downward_point(x, y, depth, intersection_variable_z)
