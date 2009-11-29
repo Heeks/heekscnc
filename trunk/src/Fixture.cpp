@@ -625,61 +625,73 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 				points.push_back(point);
 			} // End for
 
-			if (points.size() >= 3)
+			while (points.size() > 0)
 			{
-				double reference_rise;
-				double reference_run;
-
-				// rotation around Z
-				reference_rise = points[2].Y();
-				reference_run = points[2].X();
-
-				double xy_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
-
-				// rotation around Y
-				reference_rise = points[2].Z();
-				reference_run = points[2].X();
-
-				double xz_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
-
-				// rotation around X
-				reference_rise = points[2].Z();
-				reference_run = points[2].Y();
-
-				double yz_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
-				double measured_rise;
-				double measured_run;
-
-				// rotation around Z
-				if ((points[2].X() != 0.0) || (points[2].Y() != 0.0))
+				if (points.size() >= 3)
 				{
-					measured_rise = points[1].Y() - points[0].Y();
-					measured_run = points[1].X() - points[0].X();
+					double reference_rise;
+					double reference_run;
 
-					m_params.m_xy_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
-					m_params.m_xy_plane -= xy_reference;
-				}
+					// rotation around Z
+					reference_rise = points[2].Y();
+					reference_run = points[2].X();
 
-				// rotation around Y
-				if ((points[2].X() != 0.0) || (points[2].Z() != 0.0))
+					double xy_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
+
+					// rotation around Y
+					reference_rise = points[2].Z();
+					reference_run = points[2].X();
+
+					double xz_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
+
+					// rotation around X
+					reference_rise = points[2].Z();
+					reference_run = points[2].Y();
+
+					double yz_reference = (atan2( reference_rise, reference_run ) / (2 * PI)) * 360.0;
+					double measured_rise;
+					double measured_run;
+
+					// rotation around Z
+					if ((points[2].X() != 0.0) || (points[2].Y() != 0.0))
+					{
+						measured_rise = points[1].Y() - points[0].Y();
+						measured_run = points[1].X() - points[0].X();
+
+						m_params.m_xy_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+						m_params.m_xy_plane -= xy_reference;
+					}
+
+					// rotation around Y
+					if ((points[2].X() != 0.0) || (points[2].Z() != 0.0))
+					{
+						measured_rise = points[1].Z() - points[0].Z();
+						measured_run = points[1].X() - points[0].X();
+
+						m_params.m_xz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+						m_params.m_xz_plane -= xz_reference;
+					}
+
+					// rotation around X
+					if ((points[2].Y() != 0.0) || (points[2].Z() != 0.0))
+					{
+						measured_rise = points[1].Z() - points[0].Z();
+						measured_run = points[1].Y() - points[0].Y();
+
+						m_params.m_yz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
+						m_params.m_yz_plane -= yz_reference;
+					}
+
+					// Erase these three points
+					points.erase(points.begin());
+					points.erase(points.begin());
+					points.erase(points.begin());
+				} // End if - then
+				else
 				{
-					measured_rise = points[1].Z() - points[0].Z();
-					measured_run = points[1].X() - points[0].X();
-
-					m_params.m_xz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
-					m_params.m_xz_plane -= xz_reference;
+					points.erase(points.begin(), points.end());	// They're not in a group of three so ignore them.
 				}
-
-				// rotation around X
-				if ((points[2].Y() != 0.0) || (points[2].Z() != 0.0))
-				{
-					measured_rise = points[1].Z() - points[0].Z();
-					measured_run = points[1].Y() - points[0].Y();
-
-					m_params.m_yz_plane = (atan2( measured_rise, measured_run ) / (2 * PI)) * 360.0;
-					m_params.m_yz_plane -= yz_reference;
-				}
-			} // End if - then
+			} // End while
 		} // End if - then
 	} // End if - else
 } // End SetRotationsFromProbedPoints() method

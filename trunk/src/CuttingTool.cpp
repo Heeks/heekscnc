@@ -18,6 +18,7 @@
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
+#include "CNCPoint.h"
 
 #include <sstream>
 #include <string>
@@ -98,6 +99,10 @@ void CCuttingToolParams::set_initial_values()
 	config.Read(_T("m_front_angle"), &m_front_angle, 95);
 	config.Read(_T("m_tool_angle"), &m_tool_angle, 60);
 	config.Read(_T("m_back_angle"), &m_back_angle, 25);
+
+	// The following are ONLY for touch probe tools
+	config.Read(_T("probe_offset_x"), &m_probe_offset_x, 0.0);
+	config.Read(_T("probe_offset_y"), &m_probe_offset_y, 0.0);
 }
 
 void CCuttingToolParams::write_values_to_config()
@@ -124,6 +129,10 @@ void CCuttingToolParams::write_values_to_config()
 	config.Write(_T("m_front_angle"), m_front_angle);
 	config.Write(_T("m_tool_angle"), m_tool_angle);
 	config.Write(_T("m_back_angle"), m_back_angle);
+
+	// The following are ONLY for touch probe tools
+	config.Read(_T("probe_offset_x"), m_probe_offset_x);
+	config.Read(_T("probe_offset_y"), m_probe_offset_y);
 }
 
 void CCuttingTool::SetDiameter( const double diameter )
@@ -453,6 +462,20 @@ static void on_set_cutting_edge_height(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
+static void on_set_probe_offset_x(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_probe_offset_x = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_probe_offset_y(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_probe_offset_y = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
 
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
 {
@@ -540,6 +563,12 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		} // End if - then
 	} // End if - else
 
+	if (m_type == eTouchProbe)
+	{
+		// The following are ONLY for touch probe tools
+		list->push_back(new PropertyLength(_("Probe offset X"), m_probe_offset_x, parent, on_set_probe_offset_x));
+		list->push_back(new PropertyLength(_("Probe offset Y"), m_probe_offset_y, parent, on_set_probe_offset_y));
+	}
 
 
 }
@@ -576,6 +605,9 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("front_angle", m_front_angle);
 	element->SetDoubleAttribute("tool_angle", m_tool_angle);
 	element->SetDoubleAttribute("back_angle", m_back_angle);
+
+	element->SetDoubleAttribute("probe_offset_x", m_probe_offset_x);
+	element->SetDoubleAttribute("probe_offset_y", m_probe_offset_y);
 }
 
 void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -603,6 +635,9 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("front_angle")) m_front_angle = atof(pElem->Attribute("front_angle"));
 	if (pElem->Attribute("tool_angle")) m_tool_angle = atof(pElem->Attribute("tool_angle"));
 	if (pElem->Attribute("back_angle")) m_back_angle = atof(pElem->Attribute("back_angle"));
+
+	if (pElem->Attribute( "probe_offset_x" )) m_probe_offset_x = atof(pElem->Attribute("probe_offset_x"));
+	if (pElem->Attribute( "probe_offset_y" )) m_probe_offset_y = atof(pElem->Attribute("probe_offset_y"));
 }
 
 CCuttingTool::~CCuttingTool()
@@ -1449,4 +1484,81 @@ CCuttingToolParams::eMaterial_t CCuttingTool::CutterMaterial( const int tool_num
 } // End of CutterType() method
 
 
+class CuttingTool_ImportProbeData: public Tool 
+{
+
+CCuttingTool *m_pThis;
+
+public:
+	CuttingTool_ImportProbeData() { m_pThis = NULL; }
+
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Import probe calibration data");}
+
+	void Run()
+	{
+		// Prompt the user to select a file to import.
+		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"), _T("."), _T(""),
+				wxString(_("Known Files")) + _T(" |*.xml;*.XML;")
+					+ _T("*.Xml;"),
+					wxOPEN | wxFILE_MUST_EXIST );
+		fd.SetFilterIndex(1);
+		if (fd.ShowModal() == wxID_CANCEL) return;
+		m_pThis->ImportProbeCalibrationData( fd.GetPath().c_str() );
+	}
+	wxString BitmapPath(){ return _T("import");}
+	wxString previous_path;
+	void Set( CCuttingTool *pThis ) { m_pThis = pThis; }
+};
+
+static CuttingTool_ImportProbeData import_probe_calibration_data;
+
+void CCuttingTool::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+	if (m_params.m_type == CCuttingToolParams::eTouchProbe)
+	{
+		import_probe_calibration_data.Set( this );
+
+		t_list->push_back( &import_probe_calibration_data );
+	}
+}
+
+
+void CCuttingTool::ImportProbeCalibrationData( const wxString & probed_points_xml_file_name )
+{
+	TiXmlDocument xml;
+	if (! xml.LoadFile( Ttc(probed_points_xml_file_name.c_str()) ))
+	{
+		printf("Failed to load XML file '%s'\n", Ttc(probed_points_xml_file_name.c_str()) );
+	} // End if - then
+	else
+	{
+		TiXmlElement *root = xml.RootElement();
+		if (root != NULL)
+		{
+			std::vector<CNCPoint> points;
+
+			for(TiXmlElement* pElem = TiXmlHandle(root).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+			{
+				CNCPoint point(0,0,0);
+				for(TiXmlElement* pPoint = TiXmlHandle(pElem).FirstChildElement().Element(); pPoint; pPoint = pPoint->NextSiblingElement())
+				{
+					std::string name(pPoint->Value());
+
+					if (name == "X") point.SetX( atof(pPoint->GetText()) / theApp.m_program->m_units );
+					if (name == "Y") point.SetY( atof(pPoint->GetText()) / theApp.m_program->m_units );
+					if (name == "Z") point.SetZ( atof(pPoint->GetText()) / theApp.m_program->m_units );
+				} // End for
+
+				points.push_back(point);
+			} // End for
+
+			if (points.size() >= 1)
+			{
+				m_params.m_probe_offset_x = points[0].X(false);
+				m_params.m_probe_offset_y = points[0].Y(false);
+			} // End if - then
+		} // End if - then
+	} // End if - else
+} // End ImportProbeCalibrationData() method
 
