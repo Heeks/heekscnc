@@ -111,8 +111,8 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-	wxString GetIcon() { return theApp.GetResFolder() + _T("/icons/fixture"); }
-        const wxChar* GetShortString(void)const{return m_title.c_str();}
+	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(8, 0);}
+    const wxChar* GetShortString(void)const{return m_title.c_str();}
 	void glCommands(bool select, bool marked, bool no_color);
 
         bool CanEditString(void)const{return true;}

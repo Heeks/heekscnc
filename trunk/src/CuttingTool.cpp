@@ -744,29 +744,39 @@ bool CCuttingTool::CanAddTo(HeeksObj* owner)
 	return owner->GetType() == ToolsType;
 }
 
-wxString CCuttingTool::GetIcon()
+void CCuttingTool::GetIcon(int& texture_number, int& x, int& y)
 {
 	switch(m_params.m_type){
 		case CCuttingToolParams::eDrill:
-			return theApp.GetResFolder() + _T("/icons/drill");
+			GET_ICON(5, 0);
+			return;
 		case CCuttingToolParams::eCentreDrill:
-			return theApp.GetResFolder() + _T("/icons/centredrill");
+			GET_ICON(2, 0);
+			return;
 		case CCuttingToolParams::eEndmill:
-			return theApp.GetResFolder() + _T("/icons/endmill");
+			GET_ICON(7, 0);
+			return;
 		case CCuttingToolParams::eSlotCutter:
-			return theApp.GetResFolder() + _T("/icons/slotdrill");
+			GET_ICON(2, 1);
+			return;
 		case CCuttingToolParams::eBallEndMill:
-			return theApp.GetResFolder() + _T("/icons/ballmill");
+			GET_ICON(1, 0);
+			return;
 		case CCuttingToolParams::eChamfer:
-			return theApp.GetResFolder() + _T("/icons/chamfmill");
+			GET_ICON(3, 0);
+			return;
 		case CCuttingToolParams::eTurningTool:
-			return theApp.GetResFolder() + _T("/icons/turntool");
+			GET_ICON(7, 1);
+			return;
 		case CCuttingToolParams::eTouchProbe:
-			return theApp.GetResFolder() + _T("/icons/probe");
+			GET_ICON(15, 0);
+			return;
 		case CCuttingToolParams::eToolLengthSwitch:
-			return theApp.GetResFolder() + _T("/icons/probe");
+			GET_ICON(15, 0);
+			return;
 		default:
-			return theApp.GetResFolder() + _T("/icons/tool");
+			GET_ICON(4, 1);
+			return;
 	}
 }
 

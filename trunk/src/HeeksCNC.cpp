@@ -57,6 +57,7 @@ CHeeksCNCApp::CHeeksCNCApp(){
 	m_program = NULL;
 	m_run_program_on_new_line = false;
 	m_machiningBar = NULL;
+	m_icon_texture_number = 0;
 }
 
 CHeeksCNCApp::~CHeeksCNCApp(){
@@ -837,6 +838,12 @@ static void AddToolBars()
 	heeksCAD->RegisterToolBar(theApp.m_machiningBar);
 }
 
+void OnBuildTexture()
+{
+	wxString filepath = theApp.GetResFolder() + _T("/icons/iconimage.png");
+	theApp.m_icon_texture_number = heeksCAD->LoadIconsTexture(filepath.c_str());
+}
+
 void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 {
 	m_dll_path = dll_path;
@@ -970,6 +977,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Fixtures", CFixtures::ReadFromXMLElement);
 
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=328;besth=40;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=339;prop=100000;bestw=334;besth=40;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=0;pos=1256;prop=100000;bestw=298;besth=40;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=355;floaty=210;floatw=315;floath=64|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=684;prop=100000;bestw=292;besth=40;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=340;floaty=169;floatw=309;floath=64|name=TransformBar;caption=Transformation Tools;state=2108156;dir=1;layer=10;row=0;pos=987;prop=100000;bestw=256;besth=40;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=353;floaty=159;floatw=273;floath=64|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MachiningBar;caption=Machining tools;state=2108156;dir=1;layer=10;row=3;pos=4;prop=100000;bestw=688;besth=42;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Program;caption=Program;state=2099196;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Output;caption=Output;state=2099196;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=334|dock_size(3,0,0)=110|dock_size(1,10,0)=42|dock_size(1,10,3)=44|")));
+
+	// icons
+	heeksCAD->RegisterOnBuildTexture(OnBuildTexture);
 }
 
 std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const

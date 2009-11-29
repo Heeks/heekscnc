@@ -34,7 +34,7 @@ public:
 	int GetType()const{return ZigZagType;}
 	const wxChar* GetTypeString(void)const{return _T("ZigZag");}
 	void glCommands(bool select, bool marked, bool no_color);
-	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/zigzag"); else return COp::GetIcon();}
+	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(8, 0);}else CSpeedOp::GetIcon(texture_number, x, y);}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

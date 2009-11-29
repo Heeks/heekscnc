@@ -114,7 +114,7 @@ public:
 	const wxChar* GetTypeString(void)const{return _T("CounterBore");}
 	void glCommands(bool select, bool marked, bool no_color);
 
-	wxString GetIcon(){if(m_active)return theApp.GetResFolder() + _T("/icons/drilling"); else return COp::GetIcon();}
+	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(6, 0);}else COp::GetIcon(texture_number, x, y);}
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

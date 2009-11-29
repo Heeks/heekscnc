@@ -71,7 +71,7 @@ public:
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("Program");}
-	wxString GetIcon(){return theApp.GetResFolder() + _T("/icons/program");}
+	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(1, 1);}
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void GetProperties(std::list<Property *> *list);
