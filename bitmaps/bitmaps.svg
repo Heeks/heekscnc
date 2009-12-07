@@ -31,7 +31,7 @@
      inkscape:cy="797.98"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
+     showgrid="true"
      inkscape:window-width="1495"
      inkscape:window-height="1139"
      inkscape:window-x="407"
@@ -10957,6 +10957,16 @@
        y2="416.67319"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(0.1120081,0,0,7.7789015e-2,400.51143,278.0665)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3200"
+       id="linearGradient4279"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.5002539,0,0,1.3998036,211.96953,-35.431151)"
+       x1="109.5"
+       y1="69.862183"
+       x2="130.5"
+       y2="69.862183" />
   </defs>
   <metadata
      id="metadata7">
@@ -12191,6 +12201,43 @@
            id="path5056"
            sodipodi:nodetypes="ccccc" />
       </g>
+    </g>
+    <g
+       id="g5096"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\runpython.png"
+       inkscape:export-xdpi="244.77592"
+       inkscape:export-ydpi="244.77592">
+      <path
+         style="fill:url(#linearGradient4279);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.14491586;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 376.99746,79.859728 L 407.00254,79.859728 L 407.00254,44.864638 L 376.99746,44.864638 L 376.99746,79.859728 z"
+         id="path4268" />
+      <text
+         xml:space="preserve"
+         style="font-size:16.91489029px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         x="326.57013"
+         y="63.422798"
+         id="text4270"
+         transform="scale(1.1666713,0.8571395)"><tspan
+           sodipodi:role="line"
+           id="tspan4272"
+           x="326.57013"
+           y="63.422798">py</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:15.52020454px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         x="381.97543"
+         y="77.164627"
+         id="text4285"
+         transform="scale(0.9974463,1.0025602)"><tspan
+           sodipodi:role="line"
+           id="tspan4287"
+           x="381.97543"
+           y="77.164627">G0</tspan></text>
+      <path
+         sodipodi:nodetypes="cccccccc"
+         id="path5094"
+         d="M 392,65.362183 L 395,62.362183 L 393,62.362183 L 393,58.362183 L 391,58.362183 L 391,62.362183 L 389,62.362183 L 392,65.362183 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>
