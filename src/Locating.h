@@ -18,7 +18,7 @@
 class CLocating;
 
 class CLocatingParams{
-	
+
 public:
 	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
 	int    m_sort_locations;	// Perform a location-based sort before generating GCode?
@@ -68,13 +68,13 @@ public:
 	//	be respected when generating GCode.  We will, eventually, allow a user to sort the sub-elements
 	//	visually from within the main user interface.  When this occurs, the change in order should be
 	//	reflected in the ordering of symbols in the m_symbols list.
-	
+
 	Symbols_t m_symbols;
 	CLocatingParams m_params;
 
 	//	Constructors.
 	CLocating():COp(GetTypeString(), 0){}
-	CLocating(	const Symbols_t &symbols ) 
+	CLocating(	const Symbols_t &symbols )
 		: COp(GetTypeString(), 0), m_symbols(symbols)
 	{
 		m_params.set_initial_values();
@@ -91,6 +91,8 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+
+	static bool ValidType( const int object_type );
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.

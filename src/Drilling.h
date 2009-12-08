@@ -18,7 +18,7 @@
 class CDrilling;
 
 class CDrillingParams{
-	
+
 public:
 	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
 	double m_dwell;			// If dwell_bottom is non-zero then we're using the G82 drill cycle rather than G83 peck drill cycle.  This is the 'P' word
@@ -80,15 +80,15 @@ public:
 	//	be respected when generating GCode.  We will, eventually, allow a user to sort the sub-elements
 	//	visually from within the main user interface.  When this occurs, the change in order should be
 	//	reflected in the ordering of symbols in the m_symbols list.
-	
+
 	Symbols_t m_symbols;
 	CDrillingParams m_params;
 
 	//	Constructors.
 	CDrilling():CSpeedOp(GetTypeString(), 0){}
-	CDrilling(	const Symbols_t &symbols, 
+	CDrilling(	const Symbols_t &symbols,
 			const int cutting_tool_number,
-			const double depth ) 
+			const double depth )
 		: CSpeedOp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
 	{
 		m_params.set_initial_values(depth, cutting_tool_number);
@@ -117,6 +117,7 @@ public:
 	std::vector<CNCPoint> FindAllLocations() const;
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
+	static bool ValidType( const int object_type );
 };
 
 

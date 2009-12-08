@@ -1494,7 +1494,7 @@ CCuttingToolParams::eMaterial_t CCuttingTool::CutterMaterial( const int tool_num
 } // End of CutterType() method
 
 
-class CuttingTool_ImportProbeData: public Tool 
+class CuttingTool_ImportProbeData: public Tool
 {
 
 CCuttingTool *m_pThis;

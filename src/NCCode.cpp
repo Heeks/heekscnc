@@ -39,7 +39,7 @@ void ColouredText::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "text" );
-	root->LinkEndChild( element ); 
+	root->LinkEndChild( element );
 
 	// add actual text as a child object
    	TiXmlText* text = new TiXmlText(Ttc(m_str.c_str()));
@@ -57,7 +57,7 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 	if(text)m_str = wxString(Ctt(text));
 }
 
-// static 
+// static
 double PathObject::m_current_x[3] = {0, 0, 0};
 
 void PathObject::WriteBaseXML(TiXmlElement *pElem)
@@ -85,7 +85,7 @@ void PathObject::ReadFromXMLElement(TiXmlElement* pElem)
 	m_x[2] *= CNCCodeBlock::multiplier;
 
 	if (pElem->Attribute("cutting_tool_number"))
-	{	
+	{
 		m_cutting_tool_number = atoi(pElem->Attribute("cutting_tool_number"));
 	} // End if - then
 	else
@@ -98,7 +98,7 @@ void PathLine::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "line" );
-	root->LinkEndChild( element ); 
+	root->LinkEndChild( element );
 
 	PathObject::WriteBaseXML(element);
 }
@@ -137,7 +137,7 @@ bool PathArc::IsIncluded(gp_Pnt pnt,const PathObject* prev_po)
 	double ex = -m_c[0] + m_x[0] - prev_po->m_x[0];
 	double ey = -m_c[1] + m_x[1] - prev_po->m_x[1];
 	double rs = sqrt(sx * sx + sy * sy);
-	double re = sqrt(ex * ex + ey * ey);
+	// double re = sqrt(ex * ex + ey * ey);
 	m_radius = rs;
 
 	double start_angle = atan2(sy, sx);
@@ -150,7 +150,7 @@ bool PathArc::IsIncluded(gp_Pnt pnt,const PathObject* prev_po)
 		if(start_angle < end_angle)start_angle += 6.283185307179;
 	}
 
-	double angle_step = 0;
+	// double angle_step = 0;
 
 	if (start_angle == end_angle)
 		// It's a full circle.
@@ -164,7 +164,7 @@ bool PathArc::IsIncluded(gp_Pnt pnt,const PathObject* prev_po)
 void PathArc::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "arc" );
-	root->LinkEndChild( element ); 
+	root->LinkEndChild( element );
 
 	element->SetDoubleAttribute("i", m_c[0] / CNCCodeBlock::multiplier);
 	element->SetDoubleAttribute("j", m_c[1] / CNCCodeBlock::multiplier);
@@ -245,7 +245,7 @@ std::list<gp_Pnt> PathArc::Interpolate( const PathObject *prev_po, const unsigne
 		double x = prev_po->m_x[0] + m_c[0] + r * cos(angle);
 		double y = prev_po->m_x[1] + m_c[1] + r * sin(angle);
 		double z = prev_po->m_x[2] + ((m_x[2] - prev_po->m_x[2]) * (i+1))/number_of_points;
-	
+
 		points.push_back( gp_Pnt( x, y, z ) );
 	}
 
@@ -307,7 +307,7 @@ void ColouredPath::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "path" );
-	root->LinkEndChild( element ); 
+	root->LinkEndChild( element );
 
 	element->SetAttribute("col", CNCCode::GetColor(m_color_type));
 	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
@@ -348,7 +348,7 @@ HeeksObj *CNCCodeBlock::MakeACopy(void)const{return new CNCCodeBlock(*this);}
 void CNCCodeBlock::WriteNCCode(wxTextFile &f, double ox, double oy)
 {
 	//TODO: offset is always in millimeters, but this gcode block could be in anything
-	//I used inches, so I hacked it into working. 
+	//I used inches, so I hacked it into working.
 	wxString movement;
 	std::list<ColouredText>::iterator it;
 	for(it = m_text.begin(); it != m_text.end(); it++)
@@ -416,7 +416,7 @@ void CNCCodeBlock::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "ncblock" );
-	root->LinkEndChild( element ); 
+	root->LinkEndChild( element );
 
 	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
 	{
@@ -433,7 +433,7 @@ void CNCCodeBlock::WriteXML(TiXmlNode *root)
 	WriteBaseXML(element);
 }
 
-// static 
+// static
 HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 {
 	CNCCodeBlock* new_object = new CNCCodeBlock;
@@ -736,8 +736,8 @@ class ApplyNCCode: public Tool{
 
 			// This stuff takes a long time.  Give the user something to look at in the meantime.
 			int progress = 1;
-			std::auto_ptr<wxProgressDialog> pProgressBar = std::auto_ptr<wxProgressDialog>(new wxProgressDialog(	wxString(_T("Apply")), 
-							wxString(_T("Applying NC operations to solid")), 
+			std::auto_ptr<wxProgressDialog> pProgressBar = std::auto_ptr<wxProgressDialog>(new wxProgressDialog(	wxString(_T("Apply")),
+							wxString(_T("Applying NC operations to solid")),
 							paths.size(),
 							NULL,
 							wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME | wxPD_AUTO_HIDE ));
@@ -756,28 +756,28 @@ class ApplyNCCode: public Tool{
 					{
 						try {
 							tools.insert( std::make_pair( l_itPath->first->m_cutting_tool_number, l_itPath->second->GetShape() ) );
-						} catch(...) 
-						{ 
+						} catch(...)
+						{
 							// There must be something wrong with the parameters that describe
 							// the cutting tool.  Just skip this one.
 							continue;
 						}
 					} // End if - then
-		
+
 					gp_Pnt previous_point(pPreviousPoint->m_x[0], pPreviousPoint->m_x[1], pPreviousPoint->m_x[2] );
 					gp_Pnt this_point(l_itPath->first->m_x[0], l_itPath->first->m_x[1], l_itPath->first->m_x[2] );
 					pPreviousPoint = l_itPath->first;
-		
+
 					// Just put some values here for now.  The feed_rate and spindle_rpm will eventually come from
 					// the GCode.  The number_of_cutting_edges will come from the CCuttingTool class.
-		
+
 					double feed_rate = 100.0;
 					double spindle_rpm = 50;
 					unsigned int number_of_cutting_edges = 2;
 
 					std::list<gp_Pnt> interpolated_points;
 					switch (l_itPath->first->GetType())
-					{	
+					{
 						case PathObject::eArc:
 							interpolated_points = ((PathArc *) l_itPath->first)->Interpolate(pPreviousPoint, feed_rate, spindle_rpm, number_of_cutting_edges );
 							break;
@@ -813,8 +813,8 @@ class ApplyNCCode: public Tool{
 			} // End for
 
 			progress = 1;
-			pProgressBar = std::auto_ptr<wxProgressDialog>(new wxProgressDialog(	wxString(_T("Apply")), 
-							wxString(_T("Replacing solids in model")), 
+			pProgressBar = std::auto_ptr<wxProgressDialog>(new wxProgressDialog(	wxString(_T("Apply")),
+							wxString(_T("Replacing solids in model")),
 							shapes.size(),
 							NULL,
 							wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME | wxPD_AUTO_HIDE ));
@@ -829,7 +829,7 @@ class ApplyNCCode: public Tool{
 #endif
 				l_ossTitle << "Machined " << solids[ l_itShape->first ]->GetShortString();
 				HeeksObj *pNewSolid = heeksCAD->NewSolid( *((TopoDS_Solid *) &(l_itShape->second)), l_ossTitle.str().c_str(), (*(solids[ l_itShape->first ]->GetColor())) );
-				if (pNewSolid != NULL) 
+				if (pNewSolid != NULL)
 				{
 					heeksCAD->Add( pNewSolid, NULL );		// Add the machined solid
 					heeksCAD->Remove( solids[ l_itShape->first ] );	// Delete the original.
@@ -870,7 +870,7 @@ void CNCCode::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "nccode" );
-	root->LinkEndChild( element ); 
+	root->LinkEndChild( element );
 
 	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
@@ -1038,8 +1038,8 @@ static double Distance( const gp_Pnt start, const gp_Pnt end )
 std::list<gp_Pnt> PathLine::Interpolate(
 	const gp_Pnt & start_point,
 	const gp_Pnt & end_point,
-	const double feed_rate, 
-	const double spindle_rpm, 
+	const double feed_rate,
+	const double spindle_rpm,
 	const unsigned int number_of_cutting_edges) const
 {
 	std::list<gp_Pnt> points;
@@ -1069,8 +1069,8 @@ std::list<gp_Pnt> PathLine::Interpolate(
 
 std::list<gp_Pnt> PathArc::Interpolate(
 	const PathObject *previous_point,
-	const double feed_rate, 
-	const double spindle_rpm, 
+	const double feed_rate,
+	const double spindle_rpm,
 	const unsigned int number_of_cutting_edges) const
 {
 	std::list<gp_Pnt> points;
@@ -1082,7 +1082,7 @@ std::list<gp_Pnt> PathArc::Interpolate(
 
 	// This distance is wrong for arcs.  We're doing a straight line distance but we really want a distance
 	// around the arc.  TODO Fix this.
-	double number_of_interpolated_points = Distance( gp_Pnt( previous_point->m_x[0], previous_point->m_x[1], previous_point->m_x[2] ), 
+	double number_of_interpolated_points = Distance( gp_Pnt( previous_point->m_x[0], previous_point->m_x[1], previous_point->m_x[2] ),
 							gp_Pnt( m_x[0], m_x[1], m_x[2] ) ) / advance_distance;
 
 	points = Interpolate( previous_point, (unsigned int) (floor(number_of_interpolated_points)) );
@@ -1095,7 +1095,7 @@ std::list<gp_Pnt> PathArc::Interpolate(
 std::list< std::pair<PathObject *, CCuttingTool *> > CNCCode::GetPaths() const
 {
 	std::list< std::pair<PathObject *, CCuttingTool *> > paths;
-	
+
 	// This stuff takes a long time.  Give the user something to look at in the meantime.
 	for(std::list<CNCCodeBlock*>::const_iterator l_itCodeBlock = m_blocks.begin(); l_itCodeBlock != m_blocks.end(); l_itCodeBlock++)
 	{

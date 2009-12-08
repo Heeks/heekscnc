@@ -19,7 +19,7 @@
 class CCounterBore;
 
 class CCounterBoreParams{
-	
+
 public:
 	double m_diameter;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 	int m_sort_locations;		// '1' = sort location points prior to generating GCode (to optimize paths)
@@ -82,7 +82,7 @@ public:
 
 	//	Constructors.
 	CCounterBore():CDepthOp(GetTypeString()){}
-	CCounterBore(	const Symbols_t &symbols, 
+	CCounterBore(	const Symbols_t &symbols,
 			const int cutting_tool_number )
 		: CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_symbols(symbols)
 	{
@@ -130,6 +130,7 @@ public:
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
 	std::vector<CNCPoint> FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced ) const;
+	static bool ValidType( const int object_type );
 
 };
 

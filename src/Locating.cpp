@@ -182,17 +182,17 @@ bool CLocating::CanAddTo(HeeksObj* owner)
 void CLocating::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Locating" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_params.WriteXMLAttributes(element);
 
 	TiXmlElement * symbols;
 	symbols = new TiXmlElement( "symbols" );
-	element->LinkEndChild( symbols );  
+	element->LinkEndChild( symbols );
 
 	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 	{
 		TiXmlElement * symbol = new TiXmlElement( "symbol" );
-		symbols->LinkEndChild( symbol );  
+		symbols->LinkEndChild( symbol );
 		symbol->SetAttribute("type", l_itSymbol->first );
 		symbol->SetAttribute("id", l_itSymbol->second );
 	} // End for
@@ -248,7 +248,7 @@ std::vector<CNCPoint> CLocating::FindAllLocations( const CLocating::Symbols_t & 
 		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
 							// intersect anything else, we want to know
 							// about it.
-		
+
 		if (lhs->first == PointType)
 		{
 			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
@@ -265,7 +265,7 @@ std::vector<CNCPoint> CLocating::FindAllLocations( const CLocating::Symbols_t & 
 			} // End if - then
 
 			continue;	// No need to intersect a point with anything.
-		} // End if - then		
+		} // End if - then
 
                 for (CLocating::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
                 {
@@ -386,7 +386,7 @@ std::vector<CNCPoint> CLocating::FindAllLocations( const CLocating::Symbols_t & 
 			} // End if - then
 			else
 			{
-				// We've already begun.  Just sort based on the previous point's location.	
+				// We've already begun.  Just sort based on the previous point's location.
 				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
 				l_itNextPoint++;
 
@@ -418,4 +418,22 @@ std::list<wxString> CLocating::DesignRulesAdjustment(const bool apply_changes)
 
 } // End DesignRulesAdjustment() method
 
+
+/**
+    This method returns TRUE if the type of symbol is suitable for reference as a source of location
+ */
+/* static */ bool CLocating::ValidType( const int object_type )
+{
+    switch (object_type)
+    {
+        case PointType:
+        case CircleType:
+        case SketchType:
+        case DrillingType:
+            return(true);
+
+        default:
+            return(false);
+    }
+}
 
