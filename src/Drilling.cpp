@@ -195,9 +195,9 @@ void CDrilling::AppendTextToProgram( const CFixture *pFixture )
 	to generate data suitable for OpenGL calls to paint a circle.  This graphics is transient but will
 	help represent what the GCode will be doing when it's generated.
  */
-std::list< CNCPoint > CDrilling::PointsAround( 
-		const CNCPoint & origin, 
-		const double radius, 
+std::list< CNCPoint > CDrilling::PointsAround(
+		const CNCPoint & origin,
+		const double radius,
 		const unsigned int numPoints ) const
 {
 	std::list<CNCPoint> results;
@@ -230,7 +230,7 @@ std::list< CNCPoint > CDrilling::PointsAround(
 std::list< CNCPoint > CDrilling::DrillBitVertices( const CNCPoint & origin, const double radius, const double length ) const
 {
 	std::list<CNCPoint> top, spiral, bottom, countersink, result;
-    
+
 	double flutePitch = 5.0;	// 5mm of depth per spiral of the drill bit's flute.
 	double countersinkDepth = -1 * radius * tan(31.0); // this is the depth of the countersink cone at the end of the drill bit. (for a typical 118 degree bevel)
 	unsigned int numPoints = 20;	// number of points in one circle (360 degrees) i.e. how smooth do we want the graphics
@@ -248,14 +248,14 @@ std::list< CNCPoint > CDrilling::DrillBitVertices( const CNCPoint & origin, cons
 	depthPerItteration = (length - countersinkDepth) / l_iNumItterations;
 
 	// Now generate the spirals.
-	
+
 	unsigned int i = 0;
 	while( i++ < l_iNumItterations )
 	{
 		double theta = alpha * i;
 		CNCPoint pointOnCircle( cos( theta ) * radius, sin( theta ) * radius, 0 );
 		pointOnCircle += origin;
-		
+
 		// And spiral down as we go.
 		pointOnCircle.SetZ( pointOnCircle.Z() - (depthPerItteration * i) );
 
@@ -337,14 +337,14 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			end[2] = l_itLocation->Z();
 
 			end[2] -= m_params.m_depth;
-				
+
 			glBegin(GL_LINE_STRIP);
 			glVertex3dv( start );
 			glVertex3dv( end );
 			glEnd();
 
-			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	*l_itLocation, 
-												l_dHoleDiameter / 2, 
+			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	*l_itLocation,
+												l_dHoleDiameter / 2,
 												m_params.m_depth);
 
 			glBegin(GL_LINE_STRIP);
@@ -353,7 +353,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 				l_itPoint != pointsAroundCircle.end();
 				l_itPoint++)
 			{
-				
+
 				glVertex3d( l_itPoint->X(), l_itPoint->Y(), l_itPoint->Z() );
 			}
 			glEnd();
@@ -386,17 +386,17 @@ bool CDrilling::CanAddTo(HeeksObj* owner)
 void CDrilling::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Drilling" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_params.WriteXMLAttributes(element);
 
 	TiXmlElement * symbols;
 	symbols = new TiXmlElement( "symbols" );
-	element->LinkEndChild( symbols );  
+	element->LinkEndChild( symbols );
 
 	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 	{
 		TiXmlElement * symbol = new TiXmlElement( "symbol" );
-		symbols->LinkEndChild( symbol );  
+		symbols->LinkEndChild( symbol );
 		symbol->SetAttribute("type", l_itSymbol->first );
 		symbol->SetAttribute("id", l_itSymbol->second );
 	} // End for
@@ -452,7 +452,7 @@ std::vector<CNCPoint> CDrilling::FindAllLocations( const CDrilling::Symbols_t & 
 		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
 							// intersect anything else, we want to know
 							// about it.
-		
+
 		if (lhs->first == PointType)
 		{
 			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
@@ -469,7 +469,7 @@ std::vector<CNCPoint> CDrilling::FindAllLocations( const CDrilling::Symbols_t & 
 			} // End if - then
 
 			continue;	// No need to intersect a point with anything.
-		} // End if - then		
+		} // End if - then
 
                 for (CDrilling::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
                 {
@@ -610,7 +610,7 @@ std::vector<CNCPoint> CDrilling::FindAllLocations( const CDrilling::Symbols_t & 
 			} // End if - then
 			else
 			{
-				// We've already begun.  Just sort based on the previous point's location.	
+				// We've already begun.  Just sort based on the previous point's location.
 				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
 				l_itNextPoint++;
 
@@ -732,7 +732,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 				std::ostringstream l_ossChange;
 #endif
 
-				l_ossChange << _("Adjusting depth of drill cycle") << " id='" << m_id << "' " << _("from") << " '" 
+				l_ossChange << _("Adjusting depth of drill cycle") << " id='" << m_id << "' " << _("from") << " '"
 					<< m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " "
 					<< pDrill->m_params.m_cutting_edge_height / theApp.m_program->m_units << "\n";
 				changes.push_back(l_ossChange.str().c_str());
@@ -770,7 +770,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 				std::ostringstream l_ossChange;
 #endif
 
-						l_ossChange << _("Adjusting depth of drill cycle") << " (id='" << m_id << "') " << _("from") << " '" 
+						l_ossChange << _("Adjusting depth of drill cycle") << " (id='" << m_id << "') " << _("from") << " '"
 							<< m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " '"
 							<< depthOp_depth  / theApp.m_program->m_units<< "'\n";
 						changes.push_back(l_ossChange.str().c_str());
@@ -791,5 +791,26 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 	return(changes);
 
 } // End DesignRulesAdjustment() method
+
+
+/**
+    This method returns TRUE if the type of symbol is suitable for reference as a source of location
+ */
+/* static */ bool CDrilling::ValidType( const int object_type )
+{
+    switch (object_type)
+    {
+        case PointType:
+        case CircleType:
+        case SketchType:
+        case DrillingType:
+        case ProfileType:
+        case PocketType:
+            return(true);
+
+        default:
+            return(false);
+    }
+}
 
 

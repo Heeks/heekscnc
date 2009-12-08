@@ -242,7 +242,7 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
 	}
 
-	// if no selected solids, 
+	// if no selected solids,
 	if(solids.size() == 0)
 	{
 		// use all the solids in the drawing
@@ -287,7 +287,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		} // End if - then
 	}
 
-	// if no selected solids, 
+	// if no selected solids,
 	if(solids.size() == 0)
 	{
 		// use all the solids in the drawing
@@ -309,10 +309,10 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 #endif
-	CAdaptive *new_object = new CAdaptive(	solids, 
-						sketches, 
-						cutting_tool_number, 
-						reference_object_type, 
+	CAdaptive *new_object = new CAdaptive(	solids,
+						sketches,
+						cutting_tool_number,
+						reference_object_type,
 						reference_object_id);
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
@@ -338,7 +338,10 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		} // End if - then
 		else
 		{
-			symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+		    if (CDrilling::ValidType( object->GetType() ))
+		    {
+                symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+		    }
 		} // End if - else
 	} // End for
 
@@ -392,9 +395,18 @@ static void NewLocatingOpMenuCallback(wxCommandEvent &event)
 		HeeksObj* object = *It;
 		if (object != NULL)
 		{
-			symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+		    if (CLocating::ValidType( object->GetType() ))
+		    {
+                symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+		    }
 		} // End if - then
 	} // End for
+
+    if (symbols.size() == 0)
+    {
+        wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
+        return;
+    }
 
 	CLocating *new_object = new CLocating( symbols );
 	theApp.m_program->Operations()->Add(new_object, NULL);
@@ -532,7 +544,10 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 		} // End if - then
 		else
 		{
-			symbols.push_back( CCounterBore::Symbol_t( object->GetType(), object->m_id ) );
+		    if (CCounterBore::ValidType( object->GetType() ))
+		    {
+                symbols.push_back( CCounterBore::Symbol_t( object->GetType(), object->m_id ) );
+		    }
 		} // End if - else
 	} // End for
 
@@ -1012,12 +1027,12 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 	hFind = FindFirstFile(Ctt(pattern.c_str()), &file_data);
 
 	// Now recurse down until we find document files within 'current' directories.
-	if (hFind != INVALID_HANDLE_VALUE) 
+	if (hFind != INVALID_HANDLE_VALUE)
 	{
 		do
 		{
 			if ((file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) continue;
-						
+
 			results.push_back( file_data.cFileName );
 		} while (FindNextFile( hFind, &file_data));
 
@@ -1034,7 +1049,7 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 
 	DIR *pdir = opendir(p_szRoot);	// Look in the current directory for files
 				// whose names begin with "default."
-	if (pdir != NULL) 
+	if (pdir != NULL)
 	{
 		struct dirent *pent = NULL;
 		while ((pent=readdir(pdir)))
@@ -1199,23 +1214,23 @@ wxString CHeeksCNCApp::GetResFolder()
 
 class MyApp : public wxApp
 {
- 
+
  public:
- 
+
    virtual bool OnInit(void);
- 
+
  };
- 
+
  bool MyApp::OnInit(void)
- 
+
  {
- 
+
    return true;
- 
+
  }
 
 
  DECLARE_APP(MyApp)
- 
+
  IMPLEMENT_APP(MyApp)
- 
+
