@@ -29,7 +29,7 @@ extern CHeeksCADInterface* heeksCAD;
 void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
 {
 	CNCConfig config;
-	
+
 	config.Read(_T("m_diameter"), &m_diameter, (25.4 / 10));	// One tenth of an inch
 	config.Read(_T("m_sort_locations"), &m_sort_locations, 1);
 
@@ -78,7 +78,7 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetDoubleAttribute("diameter", m_diameter);
 
 	std::ostringstream l_ossValue;
@@ -169,7 +169,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 					"j=" << drawing_units(centre.Y(false) - point.Y()) << ")\n";
 		point.SetX( centre.X(false) - radius_of_spiral );
 		point.SetY( centre.Y(false) );
-					
+
 		// Second quadrant (9 O'Clock to 6 O'Clock)
 		ss << "arc_ccw( x=" << centre.X(true) << ", " <<
 					"y=" << drawing_units(centre.Y(false) - radius_of_spiral) << ", " <<
@@ -187,7 +187,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 					"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
 		point.SetX( centre.X(false) + radius_of_spiral );
 		point.SetY( centre.Y(false) );
-					
+
 		// Fourth quadrant (3 O'Clock to 12 O'Clock)
 		ss << "arc_ccw( x=" << centre.X(true) << ", " <<
 					"y=" << drawing_units(centre.Y(false) + radius_of_spiral) << ", " <<
@@ -196,7 +196,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 					"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) + radius_of_spiral );
-	
+
 		ss << "comment('Now spiral outwards to the counterbore perimeter')\n";
 
 		do {
@@ -222,7 +222,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 						"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
 			point.SetX( centre.X(false) - radius_of_spiral );
 			point.SetY( centre.Y(false) );
-					
+
 			// Second quadrant (9 O'Clock to 6 O'Clock)
 			ss << "arc_ccw( x=" << centre.X(true) << ", " <<
 						"y=" << drawing_units(centre.Y(false) - radius_of_spiral) << ", " <<
@@ -240,7 +240,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 						"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
 			point.SetX( centre.X(false) + radius_of_spiral );
 			point.SetY( centre.Y(false) );
-					
+
 			// Fourth quadrant (3 O'Clock to 12 O'Clock)
 			ss << "arc_ccw( x=" << centre.X(true) << ", " <<
 						"y=" << drawing_units(centre.Y(false) + radius_of_spiral) << ", " <<
@@ -310,7 +310,7 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 
 			std::vector<CNCPoint> locations = FindAllLocations( m_symbols, NULL );
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
-			{   
+			{
 				CNCPoint point( pFixture->Adjustment(*l_itLocation) );
 				GenerateGCodeForOneLocation( point, pCuttingTool );
 			} // End for
@@ -409,7 +409,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 					end[0] = l_itPoint->X();
 					end[1] = l_itPoint->Y();
 					end[2] = m_depth_op_params.m_start_depth;
-				
+
 					glVertex3dv( start );
 					glVertex3dv( end );
 				} // End if - then
@@ -431,7 +431,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 					end[0] = l_itPoint->X();
 					end[1] = l_itPoint->Y();
 					end[2] = m_depth_op_params.m_final_depth;
-				
+
 					glVertex3dv( start );
 					glVertex3dv( end );
 				} // End if - then
@@ -449,7 +449,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 				end[0] = l_itPoint->X();
 				end[1] = l_itPoint->Y();
 				end[2] = m_depth_op_params.m_final_depth;
-			
+
 				glVertex3dv( start );
 				glVertex3dv( end );
 				glVertex3dv( start );
@@ -484,17 +484,17 @@ bool CCounterBore::CanAddTo(HeeksObj* owner)
 void CCounterBore::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "CounterBore" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_params.WriteXMLAttributes(element);
 
 	TiXmlElement * symbols;
 	symbols = new TiXmlElement( "symbols" );
-	element->LinkEndChild( symbols );  
+	element->LinkEndChild( symbols );
 
 	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 	{
 		TiXmlElement * symbol = new TiXmlElement( "symbol" );
-		symbols->LinkEndChild( symbol );  
+		symbols->LinkEndChild( symbol );
 		symbol->SetAttribute("type", l_itSymbol->first );
 		symbol->SetAttribute("id", l_itSymbol->second );
 	} // End for
@@ -537,7 +537,7 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
  * 	then the object's location is added to the result set.  If it's a circle object
  * 	that doesn't intersect any other element (selected) then add its centre to
  * 	the result set.  Finally, find the intersections of all of these elements and
- * 	add the intersection points to the result set. 
+ * 	add the intersection points to the result set.
  *
  *	If any of the selected objects are DrillingType objects then see if they refer
  *	to CuttingTool objects.  If so, remember which ones.  We may want to see what
@@ -556,7 +556,7 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbol
 		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
 							// intersect anything else, we want to know
 							// about it.
-		
+
 		if (lhs->first == PointType)
 		{
 			HeeksObj *obj = heeksCAD->GetIDObject( lhs->first, lhs->second );
@@ -570,7 +570,7 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbol
 				} // End if - then
 				continue;	// No need to intersect a point with anything.
 			} // End if - then
-		} // End if - then		
+		} // End if - then
 
 		if (lhs->first == DrillingType)
 		{
@@ -678,7 +678,7 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbol
 			} // End if - then
 			else
 			{
-				// We've already begun.  Just sort based on the previous point's location.	
+				// We've already begun.  Just sort based on the previous point's location.
 				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
 				l_itNextPoint++;
 
@@ -704,6 +704,26 @@ std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_
 	return( std::make_pair( drill_hole_diameter * 1, drill_hole_diameter * 1.7 )  );
 
 } // End SelectSizeForHead() method
+
+
+/**
+    This method returns TRUE if the type of symbol is suitable for reference as a source of location
+ */
+/* static */ bool CCounterBore::ValidType( const int object_type )
+{
+    switch (object_type)
+    {
+        case PointType:
+        case CircleType:
+        case SketchType:
+        case DrillingType:
+        case LineType:
+            return(true);
+
+        default:
+            return(false);
+    }
+}
 
 
 
