@@ -78,7 +78,7 @@ class ImportExcellonDrillFile: public Tool{
 	{
 		wxFileDialog dialog(heeksCAD->GetMainFrame(), _("Import Excellon Drill File"), 
 					wxEmptyString, wxEmptyString, 
-					wxString(_("Excellon Drill Files")) + _T(" |*.cnc;*.CNC;*.drill;*.DRILL;") );
+					wxString(_("Excellon Drill Files")) + _T(" |*.cnc;*.CNC;*.drill;*.DRILL;*.drl;*.DRL") );
 		dialog.CentreOnParent();
 		if (dialog.ShowModal() == wxID_OK)
 		{
