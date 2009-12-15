@@ -1093,10 +1093,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 		theApp.m_program_canvas->Clear();
 		theApp.m_output_canvas->Clear();
 		heeksCAD->Changed();
-	}
 
-	if (! open)
-	{
 		std::list<wxString> directories;
 		wxString directory_separator;
 
