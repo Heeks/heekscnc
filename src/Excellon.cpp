@@ -79,7 +79,7 @@ char Excellon::ReadChar( const char *data, int *pos, const int max_pos )
 	} // End if - else
 } // End ReadChar() method
 
-std::string Excellon::ReadBlock( const char *data, int *pos, const int max_pos ) 
+std::string Excellon::ReadBlock( const char *data, int *pos, const int max_pos )
 {
 	char delimiter;
 	std::ostringstream l_ossBlock;
@@ -93,12 +93,12 @@ std::string Excellon::ReadBlock( const char *data, int *pos, const int max_pos )
 
 	l_ossBlock << c;
 
-	while (((c = ReadChar(data,pos,max_pos)) > 0) && (c != delimiter)) 
+	while (((c = ReadChar(data,pos,max_pos)) > 0) && (c != delimiter))
 	{
 		l_ossBlock << c;
 	} // End while
 
-	return(l_ossBlock.str());	
+	return(l_ossBlock.str());
 } // End ReadBlock() method
 
 bool Excellon::Read( const char *p_szFileName )
@@ -230,7 +230,8 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 	memset(buffer,'\0', sizeof(buffer));
 	strcpy( buffer, data_block.c_str() );
 
-	std::auto_ptr<gp_Pnt> pPosition;
+	static gp_Pnt position(0.0,0.0,0.0);
+	bool position_has_been_set = false;
 
 	bool m02_found = false;
 	bool swap_axis = false;
@@ -241,7 +242,207 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 
 	while (_data.size() > 0)
 	{
-		if (_data.substr(0,3) == "M30")
+	    if (_data.substr(0,2) == "RT")
+		{
+			// Reset Tool Data
+			_data.erase(0,2);
+            m_tool_table_map.clear();
+            m_active_cutting_tool_number = 0;
+		}
+		else if (_data.substr(0,4) == "FMAT")
+		{
+			// Ignore format
+			_data.erase(0,4);
+			char *end = NULL;
+			unsigned long format = strtoul( _data.c_str(), &end, 10 );
+			_data.erase(0, end - _data.c_str());
+			printf("Ignoring Format %ld command\n", format );
+		}
+		else if (_data.substr(0,3) == "AFS")
+		{
+			// Ignore format
+			_data.erase(0,3);
+			printf("Ignoring Automatic Feeds and Speeds\n");
+		}
+		else if (_data.substr(0,3) == "CCW")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Counter-Clockwise routing\n");
+		}
+		else if (_data.substr(0,2) == "CP")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Cutter Compensation\n");
+		}
+		else if (_data.substr(0,6) == "DETECT")
+		{
+			_data.erase(0,6);
+			printf("Ignoring Broken Tool Detection\n");
+		}
+        else if (_data.substr(0,2) == "DN")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Down Limit Set\n");
+		}
+		else if (_data.substr(0,6) == "DTMDIST")
+		{
+			_data.erase(0,6);
+			printf("Ignoring Maximum Route Distance Before Tool Change\n");
+		}
+		else if (_data.substr(0,4) == "EXDA")
+		{
+			_data.erase(0,4);
+			printf("Ignoring Extended Drill Area\n");
+		}
+		else if (_data.substr(0,3) == "FSB")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Feeds and Speeds Button OFF\n");
+		}
+		else if (_data.substr(0,4) == "HBCK")
+		{
+			_data.erase(0,4);
+			printf("Ignoring Home Button Check\n");
+		}
+		else if (_data.substr(0,4) == "NCSL")
+		{
+			_data.erase(0,4);
+			printf("Ignoring NC Slope Enable/Disable\n");
+		}
+		else if (_data.substr(0,4) == "OM48")
+		{
+			_data.erase(0,4);
+			printf("Ignoring Override Part Program Header\n");
+		}
+		else if (_data.substr(0,5) == "OSTOP")
+		{
+			_data.erase(0,5);
+			printf("Ignoring Optional Stop switch\n");
+		}
+		else if (_data.substr(0,6) == "OTCLMP")
+		{
+			_data.erase(0,6);
+			printf("Ignoring Override Table Clamp\n");
+		}
+		else if (_data.substr(0,8) == "PCKPARAM")
+		{
+			_data.erase(0,8);
+			printf("Ignoring Set up pecking tool,depth,infeed and retract parameters\n");
+		}
+        else if (_data.substr(0,2) == "PF")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Floating Pressure Foot Switch\n");
+		}
+		else if (_data.substr(0,3) == "PPR")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Programmable Plunge Rate Enable\n");
+		}
+		else if (_data.substr(0,3) == "PVS")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Pre-vacuum Shut-off Switch\n");
+		}
+		else if (_data.substr(0,3) == "RC")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Reset Clocks\n");
+		}
+		else if (_data.substr(0,3) == "RCP")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Reset Program Clocks\n");
+		}
+		else if (_data.substr(0,3) == "RCR")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Reset Run Clocks\n");
+		}
+		else if (_data.substr(0,2) == "RD")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Reset All Cutter Distances\n");
+		}
+		else if (_data.substr(0,2) == "RH")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Reset All Hit Counters\n");
+		}
+		else if (_data.substr(0,3) == "SBK")
+		{
+			_data.erase(0,3);
+			printf("Ignoring Single Block Mode Switch\n");
+		}
+		else if (_data.substr(0,2) == "SG")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Spindle Group Mode\n");
+		}
+		else if (_data.substr(0,4) == "SIXM")
+		{
+			_data.erase(0,4);
+			printf("Ignoring Input From External Source\n");
+		}
+		else if (_data.substr(0,2) == "UP")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Upper Limit Switch Set\n");
+		}
+		else if (_data.substr(0,2) == "ZA")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Auxiliary Zero\n");
+		}
+		else if (_data.substr(0,2) == "ZC")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Zero Correction\n");
+		}
+		else if (_data.substr(0,2) == "ZS")
+		{
+			_data.erase(0,2);
+			printf("Ignoring Zero Preset\n");
+		}
+		else if (_data.substr(0,1) == "Z")
+		{
+			_data.erase(0,1);
+			printf("Ignoring Zero Set\n");
+		}
+		else if (_data.substr(0,3) == "VER")
+		{
+			// Ignore version
+			_data.erase(0,3);
+			char *end = NULL;
+			unsigned long version = strtoul( _data.c_str(), &end, 10 );
+			_data.erase(0, end - _data.c_str());
+			printf("Ignoring Version %ld command\n", version);
+		}
+		else if (_data.substr(0,6) == "TCSTON")
+		{
+			// Tool Change Stop - ON
+			printf("Ignoring Tool Change Stop - ON command\n");
+			_data.erase(0,6);
+		}
+		else if (_data.substr(0,7) == "TCSTOFF")
+		{
+			// Tool Change Stop - OFF
+			printf("Ignoring Tool Change Stop - OFF command\n");
+			_data.erase(0,7);
+		}
+		else if (_data.substr(0,5) == "ATCON")
+		{
+			// Automatic Tool Change - ON
+			printf("Ignoring Tool Change - ON command\n");
+			_data.erase(0,5);
+		}
+		else if (_data.substr(0,6) == "ATCOFF")
+		{
+			// Automatic Tool Change - OFF
+			printf("Ignoring Tool Change - OFF command\n");
+			_data.erase(0,6);
+		}
+		else if (_data.substr(0,3) == "M30")
 		{
 			// End of program
 			_data.erase(0,3);
@@ -352,73 +553,98 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		{
 			_data.erase(0,1);	// Erase X
 			char *end = NULL;
-			std::string sign;
 
-			if (_data[0] == '-')
-			{
-				sign = "-";
-				_data.erase(0,1);
-			} // End if - then
-
-			if (_data[0] == '+')
-			{
-				sign = "+";
-				_data.erase(0,1);
-			} // End if - then
-
-			strtoul( _data.c_str(), &end, 10 );
+			double x = strtod( _data.c_str(), &end );
 			if ((end == NULL) || (end == _data.c_str()))
 			{
 				printf("Expected number following 'X'\n");
 				return(false);
 			} // End if - then
-			std::string x = sign + _data.substr(0, end - _data.c_str());
+			std::string x_string = _data.substr(0, end - _data.c_str());
 			_data.erase(0, end - _data.c_str());
 
-			if (pPosition.get() == NULL) pPosition = std::auto_ptr<gp_Pnt>(new gp_Pnt(0.0, 0.0, 0.0));
+            position_has_been_set = true;
+            if (x_string.find('.') == std::string::npos)
+            {
 
-			pPosition->SetX( InterpretCoord( x.c_str(), 
-							m_YDigitsLeftOfPoint, 
-							m_YDigitsRightOfPoint, 
-							m_leadingZeroSuppression, 
-							m_trailingZeroSuppression ) );
-			if (m_mirror_image_y_axis) pPosition->SetX( pPosition->X() * -1.0 ); // mirror about Y axis
+                double x = InterpretCoord( x_string.c_str(),
+                                m_YDigitsLeftOfPoint,
+                                m_YDigitsRightOfPoint,
+                                m_leadingZeroSuppression,
+                                m_trailingZeroSuppression );
+
+                if (m_absoluteCoordinatesMode)
+                {
+                    position.SetX( x );
+                }
+                else
+                {
+                    // Incremental position.
+                    position.SetX( position.X() + x );
+                }
+            }
+            else
+            {
+                // The number had a decimal point explicitly defined within it.  Read it as a correctly
+                // represented number as is.
+                if (m_absoluteCoordinatesMode)
+                {
+                    position.SetX( x );
+                }
+                else
+                {
+                    // Incremental position.
+                    position.SetX( position.X() + x );
+                }
+            }
 		}
 		else if (_data.substr(0,1) == "Y")
 		{
 			_data.erase(0,1);	// Erase Y
 			char *end = NULL;
-			std::string sign;
 
-			if (_data[0] == '-')
-			{
-				sign = "-";
-				_data.erase(0,1);
-			} // End if - then
-
-			if (_data[0] == '+')
-			{
-				sign = "+";
-				_data.erase(0,1);
-			} // End if - then
-
-			strtoul( _data.c_str(), &end, 10 );
+			double y = strtod( _data.c_str(), &end );
 			if ((end == NULL) || (end == _data.c_str()))
 			{
 				printf("Expected number following 'Y'\n");
 				return(false);
 			} // End if - then
-			std::string y = sign + _data.substr(0, end - _data.c_str());
+			std::string y_string = _data.substr(0, end - _data.c_str());
 			_data.erase(0, end - _data.c_str());
 
-			if (pPosition.get() == NULL) pPosition = std::auto_ptr<gp_Pnt>(new gp_Pnt(0.0, 0.0, 0.0));
+            position_has_been_set = true;
+            if (y_string.find('.') == std::string::npos)
+            {
+                double y = InterpretCoord( y_string.c_str(),
+                                m_YDigitsLeftOfPoint,
+                                m_YDigitsRightOfPoint,
+                                m_leadingZeroSuppression,
+                                m_trailingZeroSuppression );
 
-			pPosition->SetY( InterpretCoord( y.c_str(), 
-							m_YDigitsLeftOfPoint, 
-							m_YDigitsRightOfPoint, 
-							m_leadingZeroSuppression, 
-							m_trailingZeroSuppression ));
-			if (m_mirror_image_x_axis) pPosition->SetY( pPosition->Y() * -1.0 ); // mirror about X axis
+                if (m_absoluteCoordinatesMode)
+                {
+                    position.SetY( y );
+                }
+                else
+                {
+                    // Incremental position.
+                    position.SetY( position.Y() + y );
+                }
+            }
+            else
+            {
+                    // The number already has a decimal point explicitly defined within it.
+
+                    if (m_absoluteCoordinatesMode)
+                    {
+                        position.SetY( y );
+                    }
+                    else
+                    {
+                        // Incremental position.
+                        position.SetY( position.Y() + y );
+                    }
+            }
 		}
 		else if (_data.substr(0,3) == "G05")
 		{
@@ -440,11 +666,20 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 			_data.erase(0,3);
 			m_absoluteCoordinatesMode = true; 	// It's the only mode we use anyway.
 		}
-		else if (_data.substr(0,3) == "G91")
+        else if (_data.substr(0,6) == "ICIOFF")
+		{
+			_data.erase(0,6);
+			m_absoluteCoordinatesMode = true; 	// It's the only mode we use anyway.
+		}
+		else if (_data.substr(0,3) == "G91")    // Incremental coordinates mode ON
 		{
 			_data.erase(0,3);
-			printf("Incremental coordinates mode (G91) is not yet supported\n");
-			return(false);
+			m_absoluteCoordinatesMode = false;
+		}
+		else if (_data.substr(0,5) == "ICION")    // Incremental coordinates mode ON
+		{
+			_data.erase(0,5);
+			m_absoluteCoordinatesMode = false;
 		}
 		else if (_data.substr(0,3) == "G92")
 		{
@@ -500,7 +735,48 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		} // End if - else
 	} // End while
 
-	if (pPosition.get() != NULL)
+    if ((excellon_tool_number > 0) && (tool_diameter > 0.0))
+	{
+		// We either want to find an existing drill bit of this size or we need
+		// to define a new one.
+
+        bool found = false;
+		for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild(); tool != NULL; tool = theApp.m_program->Tools()->GetNextChild() )
+		{
+			// We're looking for a tool whose diameter is tool_diameter.
+			CCuttingTool *pCuttingTool = (CCuttingTool *)tool;
+			if ((pCuttingTool->m_params.m_diameter - tool_diameter) < heeksCAD->GetTolerance())
+			{
+				// We've found it.
+				// Keep a map of the tool numbers found in the Excellon file to those in our tool table.
+                m_tool_table_map.insert( std::make_pair( excellon_tool_number, pCuttingTool->m_tool_number ));
+                m_active_cutting_tool_number = pCuttingTool->m_tool_number;	// Use our internal tool number
+                found = true;
+                break;
+			} // End if - then
+		} // End for
+
+        if (! found)
+        {
+            // We didn't find an existing tool with the right diameter.  Add one now.
+            CCuttingTool *tool = new CCuttingTool(NULL, CCuttingToolParams::eDrill, heeksCAD->GetNextID(CuttingToolType));
+            tool->SetDiameter( tool_diameter * m_units );
+            theApp.m_program->Tools()->Add( tool, NULL );
+
+            // Keep a map of the tool numbers found in the Excellon file to those in our tool table.
+            m_tool_table_map.insert( std::make_pair( excellon_tool_number, tool->m_tool_number ));
+            m_active_cutting_tool_number = tool->m_tool_number;	// Use our internal tool number
+        }
+	} // End if - then
+
+	if (excellon_tool_number > 0)
+	{
+		// They may have selected a tool.
+		m_active_cutting_tool_number = m_tool_table_map[excellon_tool_number];
+	} // End if - then
+
+
+	if (position_has_been_set)
 	{
 		if (m_active_cutting_tool_number <= 0)
 		{
@@ -511,17 +787,19 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		{
 			// We've been given a position.  See if we already have a point object
 			// at this location.  If so, use it.  Otherwise add a new one.
-			CNCPoint cnc_point( *(pPosition.get()) );
+			CNCPoint cnc_point( position );
+			if (m_mirror_image_x_axis) cnc_point.SetY( cnc_point.Y() * -1.0 ); // mirror about X axis
+            if (m_mirror_image_y_axis) cnc_point.SetX( cnc_point.X() * -1.0 ); // mirror about Y axis
 
 			if (m_existing_points.find( cnc_point ) == m_existing_points.end())
 			{
 				// There are no pre-existing Point objects for this location.  Add one now.
 				double location[3];
-				CNCPoint( *(pPosition.get()) ).ToDoubleArray( location );
+				cnc_point.ToDoubleArray( location );
 				HeeksObj *point = heeksCAD->NewPoint( location );
 				heeksCAD->Add( point, NULL );
 				CDrilling::Symbol_t symbol( point->GetType(), point->m_id );
-				m_existing_points.insert( std::make_pair( CNCPoint( *(pPosition.get()) ), symbol ));
+				m_existing_points.insert( std::make_pair( cnc_point, symbol ));
 			} // End if - then
 
 			// There is already a point here.  Use it.
@@ -547,40 +825,7 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		} // End if - else
 	} // End if - then
 
-	if ((excellon_tool_number > 0) && (tool_diameter > 0.0))
-	{
-		// We either want to find an existing drill bit of this size or we need
-		// to define a new one.
 
-		for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild(); tool != NULL; tool = theApp.m_program->Tools()->GetNextChild() )
-		{
-			// We're looking for a tool whose diameter is tool_diameter.
-			CCuttingTool *pCuttingTool = (CCuttingTool *)tool;
-			if ((pCuttingTool->m_params.m_diameter - tool_diameter) < heeksCAD->GetTolerance())
-			{
-				// We've found it.
-
-				m_active_cutting_tool_number = pCuttingTool->m_tool_number;
-				return(true);
-			} // End if - then
-		} // End for
-
-		// We didn't find an existing tool with the right diameter.  Add one now.
-		CCuttingTool *tool = new CCuttingTool(NULL, CCuttingToolParams::eDrill, heeksCAD->GetNextID(CuttingToolType));
-		tool->SetDiameter( tool_diameter * m_units );
-		theApp.m_program->Tools()->Add( tool, NULL );
-
-		// Keep a map of the tool numbers found in the Excellon file to those in our tool table.
-		m_tool_table_map.insert( std::make_pair( excellon_tool_number, tool->m_tool_number ));
-
-		m_active_cutting_tool_number = tool->m_tool_number;	// Use our internal tool number
-	} // End if - then
-
-	if (excellon_tool_number > 0)
-	{
-		// They may have selected a tool.
-		m_active_cutting_tool_number = m_tool_table_map[excellon_tool_number];
-	} // End if - then
 
 	return(true);
 } // End ReadDataBlock() method
