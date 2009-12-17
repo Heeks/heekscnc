@@ -7,12 +7,12 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../libheekscnc.so.0.5.1" prefix_auto="0" extension_auto="0" />
+				<Option output="./libheekscnc.so.0.5.1" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="./" />
-				<Option host_Application="../HeeksCAD.exe" />
 				<Option object_output="obj/Debug/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option host_application="../HeeksCAD.exe" />
 				<Compiler>
 					<Add option="-g" />
 					<Add directory="src" />
@@ -21,7 +21,6 @@
 			<Target title="Release">
 				<Option output="bin/Release/libheekscnc.so.0.5.1" prefix_auto="0" extension_auto="0" />
 				<Option object_output="obj/Release/" />
-				<Option host_Application="../HeeksCAD.exe" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -46,6 +45,14 @@
 			<Add option="`wx-config --gl-libs`" />
 			<Add option="-lTKVRML -lTKSTL -lTKBRep -lTKIGES -lTKShHealing -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKXSBase -lTKShapeSchema -lFWOSPlugin -lTKBool -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKMath -lTKOffset -lTKPrim -lTKPShape -lTKService -lTKTopAlgo -lTKV2d -lTKV3d -lTKMesh -lTKAdvTools -lTKBO -lTKXDESTEP -lTKXCAF -lTKXCAFSchema -lTKLCAF -lTKPLCAF -lstdc++ -lGLU -lGL ${WXLIBS}" />
 		</Linker>
+		<Unit filename="kurve/PythonInterface.cpp" />
+		<Unit filename="kurve/PythonInterface.h" />
+		<Unit filename="kurve/geometry/Construction.cpp" />
+		<Unit filename="kurve/geometry/Finite.cpp" />
+		<Unit filename="kurve/geometry/Matrix.cpp" />
+		<Unit filename="kurve/geometry/geometry.h" />
+		<Unit filename="kurve/geometry/kurve.cpp" />
+		<Unit filename="kurve/geometry/offset.cpp" />
 		<Unit filename="src/Adaptive.cpp" />
 		<Unit filename="src/Adaptive.h" />
 		<Unit filename="src/BOM.cpp" />
@@ -54,6 +61,8 @@
 		<Unit filename="src/CNCPoint.h" />
 		<Unit filename="src/CounterBore.cpp" />
 		<Unit filename="src/CounterBore.h" />
+		<Unit filename="src/CuttingRate.cpp" />
+		<Unit filename="src/CuttingRate.h" />
 		<Unit filename="src/CuttingTool.cpp" />
 		<Unit filename="src/CuttingTool.h" />
 		<Unit filename="src/DepthOp.cpp" />
@@ -62,6 +71,16 @@
 		<Unit filename="src/Drilling.h" />
 		<Unit filename="src/DropCutter.cpp" />
 		<Unit filename="src/DropCutter.h" />
+		<Unit filename="src/Excellon.cpp" />
+		<Unit filename="src/Excellon.h" />
+		<Unit filename="src/Fixture.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="src/Fixture.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="src/Fixtures.cpp" />
+		<Unit filename="src/Fixtures.h" />
 		<Unit filename="src/GTri.h" />
 		<Unit filename="src/HeeksCNC.cpp" />
 		<Unit filename="src/HeeksCNC.h" />
@@ -74,6 +93,8 @@
 		<Unit filename="src/NCCode.h" />
 		<Unit filename="src/Op.cpp" />
 		<Unit filename="src/Op.h" />
+		<Unit filename="src/Operations.cpp" />
+		<Unit filename="src/Operations.h" />
 		<Unit filename="src/OutputCanvas.cpp" />
 		<Unit filename="src/OutputCanvas.h" />
 		<Unit filename="src/Pocket.cpp" />
@@ -99,6 +120,8 @@
 		<Unit filename="src/SpeedReferences.h" />
 		<Unit filename="src/Tools.cpp" />
 		<Unit filename="src/Tools.h" />
+		<Unit filename="src/TrsfNCCode.cpp" />
+		<Unit filename="src/TrsfNCCode.h" />
 		<Unit filename="src/TurnRough.cpp" />
 		<Unit filename="src/TurnRough.h" />
 		<Unit filename="src/ZigZag.cpp" />
@@ -133,6 +156,18 @@
 		<Unit filename="../interface/PropertyString.h" />
 		<Unit filename="../interface/PropertyVertex.cpp" />
 		<Unit filename="../interface/PropertyVertex.h" />
+		<Unit filename="../interface/ToolImage.cpp" />
+		<Unit filename="../interface/ToolImage.h" />
+		<Unit filename="../interface/TransientObject.cpp" />
+		<Unit filename="../interface/TransientObject.h" />
+		<Unit filename="../interface/strconv.cpp" />
+		<Unit filename="../interface/strconv.h" />
+		<Unit filename="../tinyxml/tinystr.cpp" />
+		<Unit filename="../tinyxml/tinystr.h" />
+		<Unit filename="../tinyxml/tinyxml.cpp" />
+		<Unit filename="../tinyxml/tinyxml.h" />
+		<Unit filename="../tinyxml/tinyxmlerror.cpp" />
+		<Unit filename="../tinyxml/tinyxmlparser.cpp" />
 		<Extensions>
 			<envvars />
 			<code_completion />
