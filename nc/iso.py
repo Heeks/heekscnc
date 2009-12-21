@@ -455,20 +455,12 @@ class CreatorIso(nc.Creator):
 	self.write_blocknum()
 	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
 
-	self.comment('Back off the workpiece and re-probe more slowly')
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '= [#5061 - [ 2.0 * ' + probe_offset_x_component + ']]\n'))
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '= [#5062 - [ 2.0 * ' + probe_offset_y_component + ']]\n'))
-    	self.write_blocknum();
-	self.write(iso.codes.RAPID())
-	self.write(' X #' + intersection_variable_x + ' Y #' + intersection_variable_y + '\n')
-
+	self.comment('Now probe back away from the workpiece slowly')
 	self.write_blocknum()
 	self.write(iso.codes.FEEDRATE() + (self.fmt % (self.fh / 2.0)) + '\n')
 
 	self.write_blocknum()
-	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+	self.write((iso.codes.PROBE_AWAY_WITH_SIGNAL() + (' X ' + (self.fmt % 0.0) + ' Y ' + (self.fmt % 0.0) ) + ('\t(Probe away from the contact point)\n')))
 
 	self.comment('Store the probed location somewhere we can get it again later')
 	self.write_blocknum()
