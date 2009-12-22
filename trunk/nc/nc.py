@@ -252,7 +252,7 @@ class Creator:
     def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
         pass
 
-    def rapid_to_midpoint(self, x1, y1, z1, x2, y2, z2):
+    def rapid_to_midpoint(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
 	pass
 
     def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
@@ -448,7 +448,7 @@ def probe_downward_point(x=None, y=None, depth=None, intersection_variable_z=Non
 def report_probe_results(x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
     creator.report_probe_results(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6, xml_file_name)
 
-def rapid_to_midpoint(x1, y1, z1, x2, y2, z2):
+def rapid_to_midpoint(x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
     creator.rapid_to_midpoint(x1, y1, z1, x2, y2, z2)
 
 def rapid_to_intersection(x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
