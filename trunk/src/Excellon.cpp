@@ -190,7 +190,7 @@ double Excellon::InterpretCoord(
 
 	if (leading_zero_suppression)
 	{
-		while (_coord.size() < (unsigned int) digits_right_of_point) _coord.push_back('0');
+	    while (_coord.size() < (unsigned int) digits_right_of_point) _coord.insert(0,"0");
 
 		// use the end of the string as the reference point.
 		result = atof( _coord.substr( 0, _coord.size() - digits_right_of_point ).c_str() );
@@ -200,7 +200,7 @@ double Excellon::InterpretCoord(
 	{
 		if (trailing_zero_suppression)
 		{
-			while (_coord.size() < (unsigned int) digits_left_of_point) _coord.insert(0,"0");
+		    while (_coord.size() < (unsigned int) digits_left_of_point) _coord.push_back('0');
 		} // End while
 
 		// use the beginning of the string as the reference point.
