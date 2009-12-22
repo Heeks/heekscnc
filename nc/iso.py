@@ -460,7 +460,7 @@ class CreatorIso(nc.Creator):
 	self.write(iso.codes.FEEDRATE() + (self.fmt % (self.fh / 2.0)) + '\n')
 
 	self.write_blocknum()
-	self.write((iso.codes.PROBE_AWAY_WITH_SIGNAL() + (' X ' + (self.fmt % 0.0) + ' Y ' + (self.fmt % 0.0) ) + ('\t(Probe away from the contact point)\n')))
+	self.write((iso.codes.PROBE_AWAY_WITH_SIGNAL() + (' X ' + (self.fmt % retracted_point_x) + ' Y ' + (self.fmt % retracted_point_y) ) + ('\t(Probe away from the contact point)\n')))
 
 	self.comment('Store the probed location somewhere we can get it again later')
 	self.write_blocknum()
@@ -515,12 +515,18 @@ class CreatorIso(nc.Creator):
     # NOTE: The points are specified either as strings representing numbers or as strings
     # representing variable names.  This allows the HeeksCNC module to determine which
     # variable names are used in these various routines.
-    def rapid_to_midpoint(self, x1, y1, z1, x2, y2, z2):
+    def rapid_to_midpoint(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
 	self.write_blocknum()
 	self.write(iso.codes.RAPID())
-	self.write((' X ' + '[[[' + x1 + '-' + x2 + '] / 2.0] + ' + x2 + ']'))
-	self.write((' Y ' + '[[[' + y1 + '-' + y2 + '] / 2.0] + ' + y2 + ']'))
-	self.write((' Z ' + '[[[' + z1 + '-' + z2 + '] / 2.0] + ' + z2 + ']'))
+	if ((x1 != None) and (x2 != None)):
+		self.write((' X ' + '[[[' + x1 + '-' + x2 + '] / 2.0] + ' + x2 + ']'))
+
+	if ((y1 != None) and (y2 != None)):
+		self.write((' Y ' + '[[[' + y1 + '-' + y2 + '] / 2.0] + ' + y2 + ']'))
+
+	if ((z1 != None) and (z2 != None)):
+		self.write((' Z ' + '[[[' + z1 + '-' + z2 + '] / 2.0] + ' + z2 + ']'))
+
 	self.write('\n')
 
     # Rapid movement to the intersection of two lines (in the XY plane only). This routine
