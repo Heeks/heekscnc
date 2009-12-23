@@ -168,6 +168,8 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
             ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
             ss << "rapid_to_midpoint(" << _T("y1='[#1002 + ") << probe_offset_y << "]'," << _T("y2='[#1004 + ") << probe_offset_y << "]')\n";
             ss << "remove_temporary_origin()\n";
+            theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+            ss.str(_T(""));
 		} // End if - else
 	} // End if - else
 
@@ -211,11 +213,11 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		ss << "comment('Move back to the intersection points')\n";
 		ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
 		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-		ss << "rapid_to_midpoint( y1='" << _T("#1006") << "', y2='" << _T("#1008") << "' )\n";
+		ss << "rapid_to_midpoint(" << _T("y1='[#1006 + ") << probe_offset_y << "]'," << _T("y2='[#1008 + ") << probe_offset_y << "]')\n";
 		ss << "remove_temporary_origin()\n";
 
 		ss << "report_probe_results( "
-				<< "x1='[[[[#1005-#1007]/2.0]+#1007] + " << probe_offset_x << "]', "
+				<< "x1='[[[[#1001-#1003]/2.0]+#1003] + " << probe_offset_x << "]', "
 				<< "y1='[[[[#1006-#1008]/2.0]+#1008] + " << probe_offset_y << "]', ";
 		ss << "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
 
