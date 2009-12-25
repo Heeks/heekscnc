@@ -176,7 +176,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetAttribute("side", m_tool_on_side);
 	element->SetAttribute("cut_mode", m_cut_mode);
 	element->SetAttribute("auto_roll_on", m_auto_roll_on ? 1:0);
@@ -382,7 +382,7 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
 	Kurve *offset_k = geoff_geometry::kurve_new();
 
 	bool offset_success = geoff_geometry::kurve_offset(pKurve, offset_k, offset);
-	if (offset_success == false) 
+	if (offset_success == false)
 	{
        		// raise "couldn't offset kurve %d" % (k)
 		return(false);
@@ -405,7 +405,7 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
 			off_vx = -off_vx;
 			off_vy = -off_vy;
 		} // End if - then
-	
+
 	        *pRoll_on_x = sx + off_vx * roll_radius - vx * roll_radius;
         	*pRoll_on_y = sy + off_vy * roll_radius - vy * roll_radius;
 	} // End if - then
@@ -490,7 +490,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					started = true;
 
 					geoff_geometry::kurve_add_point(pKurve,
-									0, 
+									0,
 									start.X(true),
 									start.Y(true),
 									0.0, 0.0);
@@ -510,7 +510,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					l_ossPythonCode << (_T(", 0.0, 0.0)\n"));
 
 					geoff_geometry::kurve_add_point(pKurve,
-									0, 
+									0,
 									end.X(true),
 									end.Y(true),
 									0.0, 0.0);
@@ -538,7 +538,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					l_ossPythonCode << (_T(")\n"));
 
 					geoff_geometry::kurve_add_point(pKurve,
-									span_type, 
+									span_type,
 									end.X(true),
 									end.Y(true),
 									centre.X(true),
@@ -664,7 +664,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 		}
 
 		l_ossPythonCode << (wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str())).c_str();
-		make_smaller( 	pKurve, 
+		make_smaller( 	pKurve,
 				(m_profile_params.m_start_given)?&startx:NULL,
 				(m_profile_params.m_start_given)?&starty:NULL,
 				(m_profile_params.m_end_given)?&finishx:NULL,
@@ -1026,7 +1026,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points,
 			delete re_ordered_sketch;
 		}
 	}
-	
+
 	return( l_ossPythonCode.str().c_str() );
 }
 
@@ -1131,7 +1131,7 @@ void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	t_list->push_back(&pick_roll_on);
 	t_list->push_back(&pick_roll_off);
 
-	HeeksObj::GetTools(t_list, p);
+	CDepthOp::GetTools(t_list, p);
 }
 
 HeeksObj *CProfile::MakeACopy(void)const
@@ -1152,7 +1152,7 @@ bool CProfile::CanAddTo(HeeksObj* owner)
 void CProfile::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Profile" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_profile_params.WriteXMLAttributes(element);
 
 	// write sketch ids
@@ -1160,7 +1160,7 @@ void CProfile::WriteXML(TiXmlNode *root)
 	{
 		int sketch = *It;
 		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );  
+		element->LinkEndChild( sketch_element );
 		sketch_element->SetAttribute("id", sketch);
 	}
 
@@ -1219,18 +1219,18 @@ std::list<wxString> CProfile::ConfirmAutoRollRadius(const bool apply_changes)
 				{
 					CBox bounding_box;
 					sketch->GetBox( bounding_box );
-	
+
 					double min_distance_across = (bounding_box.Height() < bounding_box.Width())?bounding_box.Height():bounding_box.Width();
 					double max_roll_radius = (min_distance_across - (pCuttingTool->CuttingRadius() * 2.0)) / 2.0;
 
 					if (max_roll_radius < m_profile_params.m_auto_roll_radius)
 					{
-						l_ossChange << "Need to adjust auto_roll_radius for profile id=" << m_id << " from " 
+						l_ossChange << "Need to adjust auto_roll_radius for profile id=" << m_id << " from "
 								<< m_profile_params.m_auto_roll_radius << " to " << max_roll_radius << "\n";
 						changes.push_back(l_ossChange.str().c_str());
-					
+
 						if (apply_changes)
-						{	
+						{
 							m_profile_params.m_auto_roll_radius = max_roll_radius;
 						} // End if - then
 					}
@@ -1308,7 +1308,7 @@ std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
 
 			std::wostringstream l_ossChange;
 
-			l_ossChange << _("Adjusting depth of profile") << " id='" << m_id << "' " << _("from") << " '" 
+			l_ossChange << _("Adjusting depth of profile") << " id='" << m_id << "' " << _("from") << " '"
 				<< m_depth_op_params.m_final_depth << " " << _("to") << " "
 				<< pCutter->m_params.m_cutting_edge_height << " " << _("due to cutting edge length of selected tool") << "\n";
 			changes.push_back(l_ossChange.str().c_str());

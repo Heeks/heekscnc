@@ -81,7 +81,7 @@ void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list
 void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 {
 	TiXmlElement * element = new TiXmlElement( "depthop" );
-	pElem->LinkEndChild( element ); 
+	pElem->LinkEndChild( element );
 	element->SetDoubleAttribute("clear", m_clearance_height);
 	element->SetDoubleAttribute("down", m_step_down);
 	element->SetDoubleAttribute("startdepth", m_start_depth);
@@ -302,4 +302,9 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 	return(changes);
 
 } // End DesignRulesAdjustment() method
+
+void CDepthOp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    CSpeedOp::GetTools( t_list, p );
+}
 

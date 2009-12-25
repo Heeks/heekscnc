@@ -39,7 +39,7 @@ class CProbing;
 
 	I can imagine a time when the results of some of these probing operations could generate an XML report of
 	their results.  The user would need to retrieve this XML file and ask HeeksCNC to read it back in so that
-	things like fixture rotations could be set accordingly.  That's just a wish-list thing though.  At the 
+	things like fixture rotations could be set accordingly.  That's just a wish-list thing though.  At the
 	moment this class will do what I need it to (today)
 
 	It is based on CSpeedOp so that feed rates can be obtained.
@@ -103,6 +103,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(15, 0);}else COp::GetIcon(texture_number, x, y);}
 	bool CanAddTo(HeeksObj* owner);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	void AppendTextForSingleProbeOperation( const CNCPoint setup_point,
 						const CNCPoint retract_point,
@@ -201,8 +202,8 @@ public:
 		return(ss);
 	}
 
-	
-	
+
+
 #ifdef UNICODE
 	friend std::wostringstream & operator << ( std::wostringstream & ss, const eEdges_t & edge )
 #else
@@ -238,7 +239,7 @@ public:
 
 		return(ss);
 	}
-	
+
 
 #ifdef UNICODE
 	friend std::wostringstream & operator << ( std::wostringstream & ss, const eProbeDirection_t & direction )
@@ -312,7 +313,7 @@ public:
 class CProbe_Centre: public CProbing {
 public:
 	//	Constructors.
-	CProbe_Centre(const int cutting_tool_number = 0) : CProbing(_("Probe Centre"), cutting_tool_number ) 
+	CProbe_Centre(const int cutting_tool_number = 0) : CProbing(_("Probe Centre"), cutting_tool_number )
 	{
 
 		m_direction = int(eOutside);
@@ -329,7 +330,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
-	
+
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
 	void AppendTextToProgram( const CFixture *pFixture );
@@ -354,7 +355,7 @@ public:
 	probes again to find another point along the same edge.  These two points indicate a straight line
 	that represents the edge of the workpiece.  The resultant angle is stored in an XML file that may
 	be re-read by HeeksCNC's fixture objects.
-	
+
 	This class may also repeat this operation so as to find two perpendicular edges.  It then intersects
 	these two lines and moves the cutting point to the intersection point.  The intend is to use this
 	GCode program to set the zero point at the intersection of two perpendicular edges.
@@ -388,7 +389,7 @@ public:
 	int GetType()const{return ProbeEdgeType;}
 	void WriteXML(TiXmlNode *root);
 	const wxChar* GetTypeString(void)const{return _T("ProbeEdge");}
-	
+
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

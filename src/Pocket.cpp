@@ -77,7 +77,7 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetDoubleAttribute("step", m_step_over);
 	element->SetDoubleAttribute("mat", m_material_allowance);
 	element->SetDoubleAttribute("rf", m_round_corner_factor);
@@ -269,8 +269,8 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 		HeeksObj* re_ordered_sketch = NULL;
 		SketchOrderType order = heeksCAD->GetSketchOrder(object);
-		if( 	(order != SketchOrderTypeCloseCW) && 
-			(order != SketchOrderTypeCloseCCW) && 
+		if( 	(order != SketchOrderTypeCloseCW) &&
+			(order != SketchOrderTypeCloseCCW) &&
 			(order != SketchOrderTypeMultipleCurves) &&
 			(order != SketchOrderHasCircles))
 		{
@@ -278,7 +278,7 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
 			object = re_ordered_sketch;
 			order = heeksCAD->GetSketchOrder(object);
-			if(	(order != SketchOrderTypeCloseCW) && 
+			if(	(order != SketchOrderTypeCloseCW) &&
 				(order != SketchOrderTypeCloseCCW) &&
 				(order != SketchOrderTypeMultipleCurves) &&
 				(order != SketchOrderHasCircles))
@@ -324,7 +324,7 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 			theApp.m_program_canvas->AppendText(_T(")\n"));
 
 			// rapid back up to clearance plane
-			theApp.m_program_canvas->AppendText(_T("rapid(z = clearance)\n"));			
+			theApp.m_program_canvas->AppendText(_T("rapid(z = clearance)\n"));
 		}
 
 		if(re_ordered_sketch)
@@ -392,7 +392,7 @@ bool CPocket::CanAddTo(HeeksObj* owner)
 void CPocket::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Pocket" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_pocket_params.WriteXMLAttributes(element);
 
 	// write sketch ids
@@ -400,7 +400,7 @@ void CPocket::WriteXML(TiXmlNode *root)
 	{
 		int sketch = *It;
 		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );  
+		element->LinkEndChild( sketch_element );
 		sketch_element->SetAttribute("id", sketch);
 	}
 
@@ -501,7 +501,7 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 			std::ostringstream l_ossChange;
 #endif
 
-			l_ossChange << _("Adjusting depth of pocket") << " id='" << m_id << "' " << _("from") << " '" 
+			l_ossChange << _("Adjusting depth of pocket") << " id='" << m_id << "' " << _("from") << " '"
 				<< m_depth_op_params.m_final_depth << "' " << _("to") << " "
 				<< pCutter->m_params.m_cutting_edge_height << " " << _("due to cutting edge length of selected tool") << "\n";
 			changes.push_back(l_ossChange.str().c_str());
@@ -558,4 +558,9 @@ void CPocket::WriteToConfig()
 {
 	CNCConfig config;
 	config.Write(_T("PocketSplineDeviation"), max_deviation_for_spline_to_arc);
+}
+
+void CPocket::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    CDepthOp::GetTools( t_list, p );
 }

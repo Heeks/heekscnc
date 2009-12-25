@@ -69,7 +69,7 @@ void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 					m_vertical_feed_rate = feed_rate_inches_per_minute * 25.4;	// mm per minute
 					m_horizontal_feed_rate = 0.0;	// We're going straight down with a drill bit.
 				} // End if - then
-				else if (pCuttingTool->m_params.m_max_advance_per_revolution > 0) 
+				else if (pCuttingTool->m_params.m_max_advance_per_revolution > 0)
 				{
 					// Spindle speed is in revolutions per minute.
 					double advance_per_rev = pCuttingTool->m_params.m_max_advance_per_revolution;
@@ -86,14 +86,14 @@ void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 							m_vertical_feed_rate = feed_rate_mm_per_minute;
 							m_horizontal_feed_rate = 0.0;	// We're going straight down with a drill bit.
 							break;
-				
+
 						case CCuttingToolParams::eChamfer:
 						case CCuttingToolParams::eTurningTool:
 							// Spread it across both horizontal and vertical
 							m_vertical_feed_rate = (1.0/sqrt(2.0)) * feed_rate_mm_per_minute;
 							m_horizontal_feed_rate = (1.0/sqrt(2.0)) * feed_rate_mm_per_minute;
 							break;
-				
+
 						case CCuttingToolParams::eEndmill:
 						case CCuttingToolParams::eBallEndMill:
 						case CCuttingToolParams::eSlotCutter:
@@ -129,7 +129,7 @@ void CSpeedOpParams::ResetSpeeds(const int cutting_tool_number)
 				CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
 				if (pCuttingTool != NULL)
 				{
-					if (pCuttingTool->m_params.m_diameter > 0) 
+					if (pCuttingTool->m_params.m_diameter > 0)
 					{
 						m_spindle_speed = (surface_speed * 1000.0) / (PI * pCuttingTool->m_params.m_diameter);
 						m_spindle_speed = floor(m_spindle_speed);	// Round down to integer
@@ -179,7 +179,7 @@ void CSpeedOpParams::GetProperties(CSpeedOp* parent, std::list<Property *> *list
 void CSpeedOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 {
 	TiXmlElement * element = new TiXmlElement( "speedop" );
-	pElem->LinkEndChild( element ); 
+	pElem->LinkEndChild( element );
 	element->SetDoubleAttribute("hfeed", m_horizontal_feed_rate);
 	element->SetDoubleAttribute("vfeed", m_vertical_feed_rate);
 	element->SetDoubleAttribute("spin", m_spindle_speed);
@@ -285,3 +285,49 @@ void CSpeedOp::WriteToConfig()
 	CNCConfig config;
 	config.Write(_T("SpeedOpAutoSetSpeeds"), m_auto_set_speeds_feeds);
 }
+
+
+class ResetFeedsAndSpeeds: public Tool{
+public:
+    void SetObject( CSpeedOp *pThis )
+    {
+        m_pThis = pThis;
+    }
+
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Reset Feeds and Speeds");}
+	void Run()
+	{
+     	m_pThis->m_speed_op_params.ResetSpeeds( m_pThis->m_cutting_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
+		m_pThis->m_speed_op_params.ResetFeeds( m_pThis->m_cutting_tool_number);
+	}
+	wxString BitmapPath(){ return _T("import");}
+	wxString previous_path;
+
+private:
+	CSpeedOp *m_pThis;
+};
+
+static ResetFeedsAndSpeeds reset_feeds_and_speeds;
+
+void CSpeedOp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    if (m_cutting_tool_number > 0)
+    {
+        wxString material_name = theApp.m_program->m_raw_material.m_material_name;
+        double hardness = theApp.m_program->m_raw_material.m_brinell_hardness;
+        double surface_speed = CSpeedReferences::GetSurfaceSpeed( material_name,
+                                        CCuttingTool::CutterMaterial( m_cutting_tool_number ),
+                                            hardness );
+        if (surface_speed > 0)
+        {
+            // We have enough information to set feeds and speeds.  Make the option available.
+            reset_feeds_and_speeds.SetObject( this );
+            t_list->push_back(&reset_feeds_and_speeds);
+        }
+    }
+
+    COp::GetTools(t_list, p);
+}
+
+

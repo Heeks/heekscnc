@@ -204,11 +204,16 @@ bool COp::IsAnOperation(int object_type)
 		case ProbeEdgeType:
 			return true;
 		default:
-			return false;		
+			return false;
 	}
 }
 
 void COp::OnEditString(const wxChar* str){
 	m_title.assign(str);
 	heeksCAD->Changed();
+}
+
+void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    HeeksObj::GetTools( t_list, p );
 }

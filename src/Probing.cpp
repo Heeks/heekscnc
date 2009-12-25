@@ -1310,6 +1310,8 @@ void CProbe_Centre::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	generate_gcode.Set( this );
 
 	t_list->push_back( &generate_gcode );
+
+	CProbing::GetTools( t_list, p );
 }
 
 
@@ -1362,6 +1364,8 @@ void CProbe_Edge::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	generate_edge_gcode.Set( this );
 
 	t_list->push_back( &generate_edge_gcode );
+
+	CProbing::GetTools( t_list, p );
 }
 
 /**
@@ -1726,4 +1730,9 @@ void CProbe_Centre::GenerateMeaningfullName()
 			else m_title << _T(" mm");
 		} // End if - else
 	} // End if - then
+}
+
+void CProbing::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    CSpeedOp::GetTools( t_list, p );
 }
