@@ -64,7 +64,7 @@ void CTurnRoughParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetAttribute("outside", m_outside ? 1:0);
 	element->SetAttribute("front", m_front ? 1:0);
 	element->SetAttribute("facing", m_facing ? 1:0);
@@ -325,7 +325,7 @@ bool CTurnRough::CanAddTo(HeeksObj* owner)
 void CTurnRough::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "TurnRough" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_turn_rough_params.WriteXMLAttributes(element);
 
 	// write sketch ids
@@ -333,7 +333,7 @@ void CTurnRough::WriteXML(TiXmlNode *root)
 	{
 		int sketch = *It;
 		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );  
+		element->LinkEndChild( sketch_element );
 		sketch_element->SetAttribute("id", sketch);
 	}
 
@@ -361,4 +361,9 @@ HeeksObj* CTurnRough::ReadFromXMLElement(TiXmlElement* element)
 	new_object->ReadBaseXML(element);
 
 	return new_object;
+}
+
+void CTurnRough::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    CSpeedOp::GetTools( t_list, p );
 }

@@ -725,5 +725,10 @@ std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_
     }
 }
 
+void CCounterBore::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    CDepthOp::GetTools( t_list, p );
+}
+
 
 

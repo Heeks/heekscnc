@@ -35,9 +35,9 @@ int CAdaptive::number_for_stl_file = 1;
  * parameter accordingly.
  */
 void CAdaptiveParams::set_initial_values(
-		const std::list<int> &solids, 
+		const std::list<int> &solids,
 		const int cutting_tool_number /* = 0 */,
-		const int reference_object_type, /* = -1 */ 
+		const int reference_object_type, /* = -1 */
 		const unsigned int reference_object_id, /* = -1 */
 		const std::list<int> &sketches )
 {
@@ -284,7 +284,7 @@ void CAdaptiveParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetDoubleAttribute("leadoffdz", m_leadoffdz);
 	element->SetDoubleAttribute("leadofflen", m_leadofflen);
 	element->SetDoubleAttribute("leadoffrad", m_leadoffrad);
@@ -427,7 +427,7 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 	// Reconfirm that our retractzheight value is sufficient.
 	const double small_buffer = 5.0;	// Don't scrape the mountain tops.
 	double max_z = CAdaptive::GetMaxHeight( SolidType, m_solids );
-	if (m_params.m_retractzheight < (max_z + small_buffer)) 
+	if (m_params.m_retractzheight < (max_z + small_buffer))
 	{
 		m_params.m_retractzheight = max_z + small_buffer;
 	} // End if - then
@@ -622,7 +622,7 @@ bool CAdaptive::CanAddTo(HeeksObj* owner)
 void CAdaptive::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Adaptive" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_params.WriteXMLAttributes(element);
 
 	// write solid ids
@@ -630,7 +630,7 @@ void CAdaptive::WriteXML(TiXmlNode *root)
 	{
 		int solid = *It;
 		TiXmlElement * solid_element = new TiXmlElement( "solid" );
-		element->LinkEndChild( solid_element );  
+		element->LinkEndChild( solid_element );
 		solid_element->SetAttribute("id", solid);
 	}
 	// write sketch ids
@@ -638,7 +638,7 @@ void CAdaptive::WriteXML(TiXmlNode *root)
 	{
 		int sketch = *It;
 		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );  
+		element->LinkEndChild( sketch_element );
 		sketch_element->SetAttribute("id", sketch);
 	}
 
@@ -682,4 +682,9 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 	new_object->ReadBaseXML(element);
 
 	return new_object;
+}
+
+void CAdaptive::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+	COp::GetTools(t_list, p);
 }

@@ -814,3 +814,9 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 }
 
 
+void CDrilling::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    CSpeedOp::GetTools( t_list, p );
+}
+
+
