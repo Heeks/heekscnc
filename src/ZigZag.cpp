@@ -49,7 +49,7 @@ void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetDoubleAttribute("minx", m_box.m_x[0]);
 	element->SetDoubleAttribute("maxx", m_box.m_x[3]);
 	element->SetDoubleAttribute("miny", m_box.m_x[1]);
@@ -200,7 +200,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 		wxMessageBox(_("invalid tool type"));
 		break;
 	};
- 
+
     ss << "model = ImportModel('" << filepath.c_str() << "')\n";
 
     ss << "pg = DropCutter(c, model)\n";
@@ -256,7 +256,7 @@ bool CZigZag::CanAddTo(HeeksObj* owner)
 void CZigZag::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "ZigZag" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	m_params.WriteXMLAttributes(element);
 
 	// write solid ids
@@ -264,7 +264,7 @@ void CZigZag::WriteXML(TiXmlNode *root)
 	{
 		int solid = *It;
 		TiXmlElement * solid_element = new TiXmlElement( "solid" );
-		element->LinkEndChild( solid_element );  
+		element->LinkEndChild( solid_element );
 		solid_element->SetAttribute("id", solid);
 	}
 
@@ -330,4 +330,9 @@ void CZigZag::ReadDefaultValues()
 	config.Read(wxString(GetTypeString()) + _T("DX"), &m_params.m_dx, 1.0);
 	config.Read(wxString(GetTypeString()) + _T("DY"), &m_params.m_dy, 1.0);
 	config.Read(wxString(GetTypeString()) + _T("Direction"), &m_params.m_direction, 0);
+}
+
+void CZigZag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    CSpeedOp::GetTools( t_list, p );
 }

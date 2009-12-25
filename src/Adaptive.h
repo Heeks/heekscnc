@@ -62,13 +62,13 @@ public:
 	static int number_for_stl_file;
 
 	CAdaptive():COp(GetTypeString()){}
-	CAdaptive(	const std::list<int> &solids, 
-			const std::list<int> &sketches, 
+	CAdaptive(	const std::list<int> &solids,
+			const std::list<int> &sketches,
 			const int cutting_tool_number = 0,
 			const int reference_object_type = -1,	// For possible starting point
 			const int reference_object_id = -1 )	// For possible starting point
-		: COp(GetTypeString(), cutting_tool_number), 
-			m_solids(solids), 
+		: COp(GetTypeString(), cutting_tool_number),
+			m_solids(solids),
 			m_sketches(sketches)
 	{
 		m_params.set_initial_values(solids, cutting_tool_number, reference_object_type, reference_object_id, sketches);
@@ -84,6 +84,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	void AppendTextToProgram(const CFixture *pFixture);
 

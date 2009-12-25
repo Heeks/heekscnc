@@ -53,6 +53,7 @@ public:
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 	void AppendTextToProgram(const CFixture *pFixture);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);

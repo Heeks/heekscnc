@@ -51,6 +51,7 @@ public:
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();
 	static void WriteToConfig();
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 };
 
 #endif

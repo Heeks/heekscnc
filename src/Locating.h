@@ -91,6 +91,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	static bool ValidType( const int object_type );
 

@@ -37,7 +37,7 @@ public:
 
 	CTurnRough():CSpeedOp(GetTypeString()){}
 	CTurnRough(const std::list<int> &sketches, const int cutting_tool_number )
-		: 	CSpeedOp(GetTypeString(), cutting_tool_number), 
+		: 	CSpeedOp(GetTypeString(), cutting_tool_number),
 			m_sketches(sketches)
 	{
 		m_turn_rough_params.set_initial_values();
@@ -53,6 +53,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	void WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture );
 	void AppendTextForOneSketch(HeeksObj* object, int sketch, const CFixture *pFixture);

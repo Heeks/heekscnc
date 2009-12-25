@@ -32,6 +32,7 @@ public:
 	const wxChar* GetShortString(void)const{return m_title.c_str();}
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wxChar* str);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	virtual void WriteDefaultValues();
 	virtual void ReadDefaultValues();

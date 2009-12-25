@@ -437,3 +437,9 @@ std::list<wxString> CLocating::DesignRulesAdjustment(const bool apply_changes)
     }
 }
 
+void CLocating::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+    COp::GetTools( t_list, p );
+}
+
+
