@@ -45,6 +45,7 @@
 #include "CNCPoint.h"
 #include "BOM.h"
 #include "Probing.h"
+#include "Excellon.h"
 
 #include <sstream>
 
@@ -877,6 +878,12 @@ void OnBuildTexture()
 	theApp.m_icon_texture_number = heeksCAD->LoadIconsTexture(filepath.c_str());
 }
 
+static void ImportExcellonDrillFile( const wxChar *file_path )
+{
+    Excellon drill;
+    drill.Read( Ttc(file_path) );
+}
+
 void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 {
 	m_dll_path = dll_path;
@@ -1018,6 +1025,16 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// icons
 	heeksCAD->RegisterOnBuildTexture(OnBuildTexture);
+
+	// Import functions.
+	std::list<wxString> file_extensions;
+	file_extensions.push_back(_T("cnc"));
+	file_extensions.push_back(_T("drl"));
+	file_extensions.push_back(_T("drill"));
+	if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportExcellonDrillFile ))
+	{
+	    printf("Failed to register handler for Excellon dril files\n");
+	}
 }
 
 std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
