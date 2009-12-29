@@ -53,6 +53,10 @@ CHeeksCADInterface* heeksCAD = NULL;
 
 CHeeksCNCApp theApp;
 
+extern void ImportFixturesFile( const wxChar *file_path );
+extern void ImportCuttingToolsFile( const wxChar *file_path );
+extern void ImportSpeedReferencesFile( const wxChar *file_path );
+
 CHeeksCNCApp::CHeeksCNCApp(){
 	m_draw_cutter_radius = true;
 	m_program = NULL;
@@ -1027,13 +1031,46 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterOnBuildTexture(OnBuildTexture);
 
 	// Import functions.
-	std::list<wxString> file_extensions;
-	file_extensions.push_back(_T("cnc"));
-	file_extensions.push_back(_T("drl"));
-	file_extensions.push_back(_T("drill"));
-	if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportExcellonDrillFile ))
 	{
-	    printf("Failed to register handler for Excellon dril files\n");
+        std::list<wxString> file_extensions;
+        file_extensions.push_back(_T("cnc"));
+        file_extensions.push_back(_T("drl"));
+        file_extensions.push_back(_T("drill"));
+        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportExcellonDrillFile ))
+        {
+            printf("Failed to register handler for Excellon dril files\n");
+        }
+	}
+	{
+        std::list<wxString> file_extensions;
+        file_extensions.push_back(_T("fixture"));
+        file_extensions.push_back(_T("fixtures"));
+        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportFixturesFile ))
+        {
+            printf("Failed to register handler for Fixture files\n");
+        }
+	}
+	{
+        std::list<wxString> file_extensions;
+        file_extensions.push_back(_T("tool"));
+        file_extensions.push_back(_T("tools"));
+        file_extensions.push_back(_T("tooltable"));
+        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportCuttingToolsFile ))
+        {
+            printf("Failed to register handler for Tool Table files\n");
+        }
+	}
+	{
+        std::list<wxString> file_extensions;
+        file_extensions.push_back(_T("speed"));
+        file_extensions.push_back(_T("speeds"));
+        file_extensions.push_back(_T("feed"));
+        file_extensions.push_back(_T("feeds"));
+        file_extensions.push_back(_T("feedsnspeeds"));
+        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportSpeedReferencesFile ))
+        {
+            printf("Failed to register handler for Speed References files\n");
+        }
 	}
 }
 
