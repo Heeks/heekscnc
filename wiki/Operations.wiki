@@ -23,7 +23,7 @@ This is a property of all NC operation objects.  It is used to sort the various 
 
 = Import Excellon Drill File =
 
-The 'import Excellon drill file' menu option appears beneath the right mouse button on the Operations icon.  It asks the user to select a file that contains Excellon drill file data.  Where the drill file specifies a tool definition (T1C0.050), the import utility will look for existing drill bits that are of the same diameter.  If none can be found, new CuttingTool definitions are made.
+An Excellon drill file may be imported via the standard 'Import' option beneath File menu.  Where the drill file specifies a tool definition (T1C0.050), the import utility will look for existing drill bits that are of the same diameter.  If none can be found, new CuttingTool definitions are made.
 
 Similarly, the import utility aims to place Point objects at the starting locations of all drilling cycles.  It looks for existing Point objects at each location so as to avoid adding duplicate Point objects.
 
