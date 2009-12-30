@@ -759,7 +759,9 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
         if (! found)
         {
             // We didn't find an existing tool with the right diameter.  Add one now.
-            CCuttingTool *tool = new CCuttingTool(NULL, CCuttingToolParams::eDrill, heeksCAD->GetNextID(CuttingToolType));
+            int id = heeksCAD->GetNextID(CuttingToolType);
+            CCuttingTool *tool = new CCuttingTool(NULL, CCuttingToolParams::eDrill, id);
+            heeksCAD->SetObjectID( tool, id );
             tool->SetDiameter( tool_diameter * m_units );
             theApp.m_program->Tools()->Add( tool, NULL );
 
