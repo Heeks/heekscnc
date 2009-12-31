@@ -801,6 +801,14 @@
 			>
 		</File>
 		<File
+			RelativePath="$(HEEKSCADPATH)\interface\PropertyFile.cpp"
+			>
+		</File>
+		<File
+			RelativePath="$(HEEKSCADPATH)\interface\PropertyFile.h"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\interface\PropertyInt.cpp"
 			>
 		</File>
@@ -813,7 +821,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\PropertyLength.h"
+			RelativePath="$(HEEKSCADPATH)\interface\PropertyLength.h"
 			>
 		</File>
 		<File
