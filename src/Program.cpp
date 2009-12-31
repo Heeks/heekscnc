@@ -10,6 +10,7 @@
 #include "NCCode.h"
 #include "interface/MarkedObject.h"
 #include "interface/PropertyString.h"
+#include "interface/PropertyFile.h"
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
@@ -43,9 +44,7 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed
 	config.Read(_T("ProgramMachine"), &machine_file_name, _T("iso"));
 	m_machine = CProgram::GetMachine(machine_file_name);
 
-	wxString localValue;
-	config.Read(_T("OutputFileNameFollowsDataFileName"), &localValue, _T("0"));
-	m_output_file_name_follows_data_file_name = (atoi( Ttc(localValue.c_str()) ) != 0);
+	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, false);
 
 #ifdef WIN32
 	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
@@ -131,7 +130,7 @@ void CProgram::GetProperties(std::list<Property *> *list)
 
 	if (m_output_file_name_follows_data_file_name == false)
 	{
-		list->push_back(new PropertyString(_("output file"), m_output_file, this, on_set_output_file));
+		list->push_back(new PropertyFile(_("output file"), m_output_file, this, on_set_output_file));
 	} // End if - then
 
 	{
