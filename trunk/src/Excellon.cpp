@@ -54,6 +54,31 @@ Excellon::Excellon()
 } // End constructor
 
 
+/**
+	This routine is the same as the normal strtod() routine except that it
+	doesn't accept 'd' or 'D' as radix values.  Some locale configurations
+	use 'd' or 'D' as radix values just as 'e' or 'E' might be used.  This
+	confuses subsequent commands held on the same line as the coordinate.
+ */
+double Excellon::special_strtod( const char *value, const char **end ) const
+{
+	std::string _value(value);
+	char *_end = NULL;
+
+	std::string::size_type offset = _value.find_first_of( "dD" );
+	if (offset != std::string::npos)
+	{
+		_value.erase(offset);
+	}
+
+	double dval = strtod( _value.c_str(), &_end );
+	if (end)
+	{
+		*end = value + (_end - _value.c_str());
+	}
+	return(dval);
+}
+
 // Filter out '\r' and '\n' characters.
 char Excellon::ReadChar( const char *data, int *pos, const int max_pos )
 {
@@ -491,8 +516,8 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		else if (_data.substr(0,1) == "C")
 		{
 			_data.erase(0,1);
-			char *end = NULL;
-			tool_diameter = strtod( _data.c_str(), &end );
+			const char *end = NULL;
+			tool_diameter = special_strtod( _data.c_str(), &end );
 			_data.erase(0, end - _data.c_str());
 		}
 		else if (_data.substr(0,3) == "M02")
@@ -552,9 +577,9 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		else if (_data.substr(0,1) == "X")
 		{
 			_data.erase(0,1);	// Erase X
-			char *end = NULL;
+			const char *end = NULL;
 
-			double x = strtod( _data.c_str(), &end );
+			double x = special_strtod( _data.c_str(), &end );
 			if ((end == NULL) || (end == _data.c_str()))
 			{
 				printf("Expected number following 'X'\n");
@@ -601,9 +626,9 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		else if (_data.substr(0,1) == "Y")
 		{
 			_data.erase(0,1);	// Erase Y
-			char *end = NULL;
+			const char *end = NULL;
 
-			double y = strtod( _data.c_str(), &end );
+			double y = special_strtod( _data.c_str(), &end );
 			if ((end == NULL) || (end == _data.c_str()))
 			{
 				printf("Expected number following 'Y'\n");
@@ -717,15 +742,15 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		else if (_data.substr(0,1) == "S")
 		{
 			_data.erase(0,1);
-			char *end = NULL;
-			m_spindle_speed = strtod( _data.c_str(), &end );
+			const char *end = NULL;
+			m_spindle_speed = special_strtod( _data.c_str(), &end );
 			_data.erase(0, end - _data.c_str());
 		}
 		else if (_data.substr(0,1) == "F")
 		{
 			_data.erase(0,1);
-			char *end = NULL;
-			m_feed_rate = strtod( _data.c_str(), &end ) * m_units;
+			const char *end = NULL;
+			m_feed_rate = special_strtod( _data.c_str(), &end ) * m_units;
 			_data.erase(0, end - _data.c_str());
 		}
 		else
