@@ -37,6 +37,7 @@ class Excellon
 
 		char ReadChar( const char *data, int *pos, const int max_pos );
 		std::string ReadBlock( const char *data, int *pos, const int max_pos );
+		double special_strtod( const char *value, const char **end ) const;
 
 		bool ReadDataBlock( const std::string & data_block );
 
