@@ -12,6 +12,7 @@
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
+#include "Reselect.h"
 
 #include <sstream>
 
@@ -234,6 +235,7 @@ void CZigZag::glCommands(bool select, bool marked, bool no_color)
 
 void CZigZag::GetProperties(std::list<Property *> *list)
 {
+	AddSolidsProperties(list, m_solids);
 	m_params.GetProperties(this, list);
 	COp::GetProperties(list);
 }
@@ -332,7 +334,13 @@ void CZigZag::ReadDefaultValues()
 	config.Read(wxString(GetTypeString()) + _T("Direction"), &m_params.m_direction, 0);
 }
 
+static ReselectSolids reselect_solids;
+
 void CZigZag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-    CSpeedOp::GetTools( t_list, p );
+	reselect_solids.m_solids = &m_solids;
+	reselect_solids.m_object = this;
+	t_list->push_back(&reselect_solids);
+
+	CSpeedOp::GetTools( t_list, p );
 }
