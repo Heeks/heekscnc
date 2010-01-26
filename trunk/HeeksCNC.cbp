@@ -112,6 +112,8 @@
 		<Unit filename="src/PythonStuff.h" />
 		<Unit filename="src/RawMaterial.cpp" />
 		<Unit filename="src/RawMaterial.h" />
+		<Unit filename="src/Reselect.cpp" />
+		<Unit filename="src/Reselect.h" />
 		<Unit filename="src/SpeedOp.cpp" />
 		<Unit filename="src/SpeedOp.h" />
 		<Unit filename="src/SpeedReference.cpp" />

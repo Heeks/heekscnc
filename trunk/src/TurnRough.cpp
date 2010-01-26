@@ -17,6 +17,7 @@
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 #include "CuttingTool.h"
+#include "Reselect.h"
 
 #include <sstream>
 #include <iomanip>
@@ -301,6 +302,7 @@ void CTurnRough::glCommands(bool select, bool marked, bool no_color)
 void CTurnRough::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyString(_T("TO DO!"), _T("THIS OPERATION DOESN'T WORK YET!"), this, NULL));
+	AddSketchesProperties(list, m_sketches);
 
 	m_turn_rough_params.GetProperties(this, list);
 
@@ -363,7 +365,13 @@ HeeksObj* CTurnRough::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
+static ReselectSketches reselect_sketches;
+
 void CTurnRough::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
+	reselect_sketches.m_sketches = &m_sketches;
+	reselect_sketches.m_object = this;
+	t_list->push_back(&reselect_sketches);
+
     CSpeedOp::GetTools( t_list, p );
 }

@@ -21,6 +21,7 @@
 #include "CuttingTool.h"
 #include "geometry.h"
 #include "CNCPoint.h"
+#include "Reselect.h"
 
 #include <sstream>
 
@@ -370,6 +371,7 @@ void CPocket::glCommands(bool select, bool marked, bool no_color)
 
 void CPocket::GetProperties(std::list<Property *> *list)
 {
+	AddSketchesProperties(list, m_sketches);
 	m_pocket_params.GetProperties(this, list);
 	CDepthOp::GetProperties(list);
 }
@@ -560,7 +562,13 @@ void CPocket::WriteToConfig()
 	config.Write(_T("PocketSplineDeviation"), max_deviation_for_spline_to_arc);
 }
 
+static ReselectSketches reselect_sketches;
+
 void CPocket::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
+	reselect_sketches.m_sketches = &m_sketches;
+	reselect_sketches.m_object = this;
+	t_list->push_back(&reselect_sketches);
+
     CDepthOp::GetTools( t_list, p );
 }

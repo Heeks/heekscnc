@@ -905,6 +905,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Reselect.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Reselect.h"
+			>
+		</File>
+		<File
 			RelativePath=".\SpeedOp.cpp"
 			>
 		</File>
