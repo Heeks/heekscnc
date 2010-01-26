@@ -19,6 +19,7 @@
 #include "interface/Tool.h"
 #include "CuttingTool.h"
 #include "CNCPoint.h"
+#include "Reselect.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -1080,6 +1081,7 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 
 void CProfile::GetProperties(std::list<Property *> *list)
 {
+	AddSketchesProperties(list, m_sketches);
 	m_profile_params.GetProperties(this, list);
 
 	CDepthOp::GetProperties(list);
@@ -1123,6 +1125,8 @@ class PickRollOff: public Tool{
 
 static PickRollOff pick_roll_off;
 
+static ReselectSketches reselect_sketches;
+
 void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	object_for_pick = this;
@@ -1130,6 +1134,9 @@ void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	t_list->push_back(&pick_end);
 	t_list->push_back(&pick_roll_on);
 	t_list->push_back(&pick_roll_off);
+	reselect_sketches.m_sketches = &m_sketches;
+	reselect_sketches.m_object = this;
+	t_list->push_back(&reselect_sketches);
 
 	CDepthOp::GetTools(t_list, p);
 }

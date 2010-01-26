@@ -16,6 +16,7 @@
 #include "CuttingTool.h"
 #include "Drilling.h"
 #include "CNCPoint.h"
+#include "Reselect.h"
 #include <sstream>
 
 int CAdaptive::number_for_stl_file = 1;
@@ -600,6 +601,8 @@ void CAdaptive::glCommands(bool select, bool marked, bool no_color)
 
 void CAdaptive::GetProperties(std::list<Property *> *list)
 {
+	AddSolidsProperties(list, m_solids);
+	AddSketchesProperties(list, m_sketches);
 	m_params.GetProperties(this, list);
 	COp::GetProperties(list);
 }
@@ -684,7 +687,17 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
+static ReselectSketches reselect_sketches;
+static ReselectSolids reselect_solids;
+
 void CAdaptive::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
+	reselect_sketches.m_sketches = &m_sketches;
+	reselect_sketches.m_object = this;
+	t_list->push_back(&reselect_sketches);
+	reselect_solids.m_solids = &m_solids;
+	reselect_solids.m_object = this;
+	t_list->push_back(&reselect_solids);
+
 	COp::GetTools(t_list, p);
 }
