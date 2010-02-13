@@ -80,8 +80,8 @@ public:
 
 	std::list<gp_Pnt> Interpolate( const gp_Pnt & start_point,
 					const gp_Pnt & end_point,
-					const double feed_rate, 
-					const double spindle_rpm, 
+					const double feed_rate,
+					const double spindle_rpm,
 					const unsigned int number_of_cutting_edges) const;
 
 };
@@ -104,8 +104,8 @@ public:
 	bool IsIncluded(gp_Pnt pnt,const PathObject* prev_po);
 
 	std::list<gp_Pnt> Interpolate( const PathObject *previous_object,
-					const double feed_rate, 
-					const double spindle_rpm, 
+					const double feed_rate,
+					const double spindle_rpm,
 					const unsigned int number_of_cutting_edges) const;
 };
 
@@ -204,6 +204,7 @@ public:
 	static void ReadColorsFromConfig();
 	static void WriteColorsToConfig();
 	static void GetOptions(std::list<Property *> *list);
+	static wxString ConfigScope() { return(_T("NC Code")); }
 
 	void DestroyGLLists(void); // not void KillGLLists(void), because I don't want the display list recreated on the Redraw button
 	void SetTextCtrl(wxTextCtrl *textCtrl);

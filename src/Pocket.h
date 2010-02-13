@@ -22,6 +22,7 @@ public:
 	void GetProperties(CPocket* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
+	static wxString ConfigScope() { return(_T("Pocket")); }
 };
 
 class CPocket: public CDepthOp{

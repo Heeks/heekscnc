@@ -28,7 +28,7 @@ extern CHeeksCADInterface* heeksCAD;
 
 void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	config.Read(_T("m_diameter"), &m_diameter, (25.4 / 10));	// One tenth of an inch
 	config.Read(_T("m_sort_locations"), &m_sort_locations, 1);

@@ -19,8 +19,7 @@
 
 class CFixture;
 
-class CFixtureParams{
-	
+class CFixtureParams {
 public:
 	double m_yz_plane;	// i.e. rotation angle around x axis - in degrees
 	double m_xz_plane;	// i.e. rotation angle around y axis - in degrees
@@ -42,6 +41,8 @@ public:
 	void GetProperties(CFixture* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
+
+	wxString ConfigScope() const { return(_("Fixture")); }
 };
 
 /**
@@ -80,14 +81,14 @@ public:
 		G59_2,
 		G59_3
 	} eCoordinateSystemNumber_t;
-	
+
 	eCoordinateSystemNumber_t m_coordinate_system_number;
 
 	//	Constructors.
         CFixture(const wxChar *title, const eCoordinateSystemNumber_t coordinate_system_number) : m_coordinate_system_number(coordinate_system_number)
 	{
-		m_params.set_initial_values(); 
-		if (title != NULL) 
+		m_params.set_initial_values();
+		if (title != NULL)
 		{
 			m_title = title;
 		} // End if - then

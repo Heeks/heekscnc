@@ -125,24 +125,24 @@ void CDepthOp::WriteDefaultValues()
 {
 	CSpeedOp::WriteDefaultValues();
 
-	CNCConfig config;
-	config.Write(wxString(GetTypeString()) + _T("ClearanceHeight"), m_depth_op_params.m_clearance_height);
-	config.Write(wxString(GetTypeString()) + _T("StartDepth"), m_depth_op_params.m_start_depth);
-	config.Write(wxString(GetTypeString()) + _T("StepDown"), m_depth_op_params.m_step_down);
-	config.Write(wxString(GetTypeString()) + _T("FinalDepth"), m_depth_op_params.m_final_depth);
-	config.Write(wxString(GetTypeString()) + _T("RapidDown"), m_depth_op_params.m_rapid_down_to_height);
+	CNCConfig config(GetTypeString());
+	config.Write(_T("ClearanceHeight"), m_depth_op_params.m_clearance_height);
+	config.Write(_T("StartDepth"), m_depth_op_params.m_start_depth);
+	config.Write(_T("StepDown"), m_depth_op_params.m_step_down);
+	config.Write(_T("FinalDepth"), m_depth_op_params.m_final_depth);
+	config.Write(_T("RapidDown"), m_depth_op_params.m_rapid_down_to_height);
 }
 
 void CDepthOp::ReadDefaultValues()
 {
 	CSpeedOp::ReadDefaultValues();
 
-	CNCConfig config;
-	config.Read(wxString(GetTypeString()) + _T("ClearanceHeight"), &m_depth_op_params.m_clearance_height, 5.0);
-	config.Read(wxString(GetTypeString()) + _T("StartDepth"), &m_depth_op_params.m_start_depth, 0.0);
-	config.Read(wxString(GetTypeString()) + _T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
-	config.Read(wxString(GetTypeString()) + _T("FinalDepth"), &m_depth_op_params.m_final_depth, -1.0);
-	config.Read(wxString(GetTypeString()) + _T("RapidDown"), &m_depth_op_params.m_rapid_down_to_height, 2.0);
+	CNCConfig config(GetTypeString());
+	config.Read(_T("ClearanceHeight"), &m_depth_op_params.m_clearance_height, 5.0);
+	config.Read(_T("StartDepth"), &m_depth_op_params.m_start_depth, 0.0);
+	config.Read(_T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
+	config.Read(_T("FinalDepth"), &m_depth_op_params.m_final_depth, -1.0);
+	config.Read(_T("RapidDown"), &m_depth_op_params.m_rapid_down_to_height, 2.0);
 }
 
 void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)

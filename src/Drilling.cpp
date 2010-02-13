@@ -31,7 +31,7 @@ extern CHeeksCADInterface* heeksCAD;
 
 void CDrillingParams::set_initial_values( const double depth, const int cutting_tool_number )
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
 	config.Read(_T("m_dwell"), &m_dwell, 1);
@@ -69,7 +69,7 @@ void CDrillingParams::write_values_to_config()
 {
 	// We always want to store the parameters in mm and convert them back later on.
 
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	// These values are in mm.
 	config.Write(_T("m_standoff"), m_standoff);

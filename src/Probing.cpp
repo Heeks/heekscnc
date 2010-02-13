@@ -42,12 +42,14 @@ extern CHeeksCADInterface* heeksCAD;
 static void on_set_distance(double value, HeeksObj* object)
 {
 	((CProbing*)object)->m_distance = value;
+	((CProbe_Centre*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_depth(double value, HeeksObj* object)
 {
 	((CProbing*)object)->m_depth = value;
+	((CProbe_Centre*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
@@ -963,7 +965,6 @@ void CProbe_Edge::GetProperties(std::list<Property *> *list)
 	else
 	{
 		// We're probing two edges.
-
 		std::list< wxString > choices;
 		int choice = 0;
 

@@ -51,6 +51,16 @@ public:
 		return(*this);
 	}
 
+	CNCPoint operator- ( const CNCPoint & rhs ) const
+	{
+		CNCPoint result(*this);
+		result.SetX( X() - rhs.X() );
+		result.SetY( Y() - rhs.Y() );
+		result.SetZ( Z() - rhs.Z() );
+
+		return(result);
+	}
+
 	bool operator==( const CNCPoint & rhs ) const
 	{
 		if (X() != rhs.X()) return(false);

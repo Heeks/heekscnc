@@ -31,6 +31,8 @@ public:
 	void GetProperties(CLocating* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
+
+	wxString ConfigScope() const { return(_("Locating")); }
 };
 
 /**

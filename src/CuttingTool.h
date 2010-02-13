@@ -15,6 +15,7 @@
 #include <gp_Pnt.hxx>
 #include <gp_Dir.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TopoDS_Face.hxx>
 
 #include <vector>
 #include <algorithm>
@@ -22,7 +23,7 @@
 class CCuttingTool;
 
 class CCuttingToolParams{
-	
+
 public:
 
 	typedef enum {
@@ -158,6 +159,8 @@ public:
 	void GetProperties(CCuttingTool* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
+
+	const wxString ConfigScope(void)const{return _T("CuttingToolParam_");}
 };
 
 class CCuttingTool: public HeeksObj {
@@ -173,9 +176,9 @@ public:
 	//	Constructors.
 	CCuttingTool(const wxChar *title, CCuttingToolParams::eCuttingToolType type, const int tool_number) : m_tool_number(tool_number), m_pToolSolid(NULL)
 	{
-		m_params.set_initial_values(); 
+		m_params.set_initial_values();
 		m_params.m_type = type;
-		if (title != NULL) 
+		if (title != NULL)
 		{
 			m_title = title;
 		} // End if - then
@@ -219,6 +222,7 @@ public:
 	wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 ) const;
 
 	TopoDS_Shape GetShape() const;
+	TopoDS_Face  GetSideProfile() const;
 
 	double CuttingRadius(const bool express_in_drawing_units = false) const;
 	static CCuttingToolParams::eCuttingToolType CutterType( const int tool_number );

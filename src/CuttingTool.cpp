@@ -80,7 +80,7 @@ extern CHeeksCADInterface* heeksCAD;
 
 void CCuttingToolParams::set_initial_values()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Read(_T("m_material"), &m_material, int(eCarbide));
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
@@ -107,7 +107,7 @@ void CCuttingToolParams::set_initial_values()
 
 void CCuttingToolParams::write_values_to_config()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
 	// If we're now in inches then convert the values.
@@ -1414,6 +1414,78 @@ TopoDS_Shape CCuttingTool::GetShape() const
 	throw;	// Re-throw the exception.
    } // End catch
 } // End GetShape() method
+
+
+TopoDS_Face CCuttingTool::GetSideProfile() const
+{
+   try {
+	gp_Dir orientation(0,0,1);	// This method always draws it up and down.  Leave it
+					// for other methods to rotate the resultant shape if
+					// they need to.
+	gp_Pnt tool_tip_location(0,0,0);	// Always from the origin in this method.
+
+	double diameter = m_params.m_diameter;
+	if (diameter < 0.01) diameter = 2;
+
+	double tool_length_offset = m_params.m_tool_length_offset;
+	if (tool_length_offset <  diameter) tool_length_offset = 10 * diameter;
+
+	double cutting_edge_height = m_params.m_cutting_edge_height;
+	if (cutting_edge_height < (2 * diameter)) cutting_edge_height = 2 * diameter;
+
+    gp_Pnt top_left( tool_tip_location );
+    gp_Pnt top_right( tool_tip_location );
+    gp_Pnt bottom_left( tool_tip_location );
+    gp_Pnt bottom_right( tool_tip_location );
+
+    top_left.SetY( tool_tip_location.Y() - CuttingRadius());
+    bottom_left.SetY( tool_tip_location.Y() - CuttingRadius());
+
+    top_right.SetY( tool_tip_location.Y() + CuttingRadius());
+    bottom_right.SetY( tool_tip_location.Y() + CuttingRadius());
+
+    top_left.SetZ( tool_tip_location.Z() + cutting_edge_height);
+    bottom_left.SetZ( tool_tip_location.Z() );
+
+    top_right.SetZ( tool_tip_location.Z() + cutting_edge_height);
+    bottom_right.SetZ( tool_tip_location.Z() );
+
+    Handle(Geom_TrimmedCurve) seg1 = GC_MakeSegment(top_left, bottom_left);
+    Handle(Geom_TrimmedCurve) seg2 = GC_MakeSegment(bottom_left, bottom_right);
+    Handle(Geom_TrimmedCurve) seg3 = GC_MakeSegment(bottom_right, top_right);
+    Handle(Geom_TrimmedCurve) seg4 = GC_MakeSegment(top_right, top_left);
+
+    TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge(seg1);
+    TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge(seg2);
+    TopoDS_Edge edge3 = BRepBuilderAPI_MakeEdge(seg3);
+    TopoDS_Edge edge4 = BRepBuilderAPI_MakeEdge(seg4);
+
+    BRepBuilderAPI_MakeWire wire_maker;
+
+    wire_maker.Add(edge1);
+    wire_maker.Add(edge2);
+    wire_maker.Add(edge3);
+    wire_maker.Add(edge4);
+
+    TopoDS_Face face = BRepBuilderAPI_MakeFace(wire_maker.Wire());
+    return(face);
+   } // End try
+   // These are due to poor parameter settings resulting in negative lengths and the like.  I need
+   // to work through the various parameters to either ensure they're correct or don't try
+   // to construct a shape.
+   catch (Standard_ConstructionError)
+   {
+	// printf("Construction error thrown while generating tool shape\n");
+	throw;	// Re-throw the exception.
+   } // End catch
+   catch (Standard_DomainError)
+   {
+	// printf("Domain error thrown while generating tool shape\n");
+	throw;	// Re-throw the exception.
+   } // End catch
+} // End GetSideProfile() method
+
+
 
 
 /**

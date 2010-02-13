@@ -49,6 +49,8 @@ public:
 	std::list<wxString> GetFileNames( const char *p_szRoot ) const;
 	static void GetNewCuttingToolTools(std::list<Tool*>* t_list);
 	static void GetNewOperationTools(std::list<Tool*>* t_list);
+
+	wxString ConfigScope() const { return(_("Program")); }
 };
 
 extern CHeeksCNCApp theApp;
