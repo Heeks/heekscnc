@@ -315,7 +315,6 @@ public:
 	//	Constructors.
 	CProbe_Centre(const int cutting_tool_number = 0) : CProbing(_("Probe Centre"), cutting_tool_number )
 	{
-
 		m_direction = int(eOutside);
 		m_number_of_points = 2;
 		m_alignment = int(eXAxis);

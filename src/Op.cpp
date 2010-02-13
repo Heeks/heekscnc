@@ -115,8 +115,8 @@ void COp::GetProperties(std::list<Property *> *list)
 
 void COp::WriteDefaultValues()
 {
-	CNCConfig config;
-	config.Write(wxString(GetTypeString()) + _T("CuttingTool"), m_cutting_tool_number);
+	CNCConfig config(GetTypeString());
+	config.Write(_T("CuttingTool"), m_cutting_tool_number);
 }
 
 void COp::ReadDefaultValues()
@@ -126,7 +126,7 @@ void COp::ReadDefaultValues()
 		// The cutting tool number hasn't been assigned from above.  Set some reasonable
 		// defaults.
 
-		CNCConfig config;
+		CNCConfig config(GetTypeString());
 
 		// assume that default.tooltable contains tools with IDs:
 		// 1 drill
@@ -175,7 +175,7 @@ void COp::ReadDefaultValues()
 			if (default_tool <= 0) default_tool = 4;
 			break;
 		}
-		config.Read(wxString(GetTypeString()) + _T("CuttingTool"), &m_cutting_tool_number, default_tool);
+		config.Read(_T("CuttingTool"), &m_cutting_tool_number, default_tool);
 	} // End if - then
 }
 

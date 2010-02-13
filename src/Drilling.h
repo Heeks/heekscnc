@@ -34,6 +34,8 @@ public:
 	void GetProperties(CDrilling* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
+
+	const wxString ConfigScope(void)const{return _T("Drilling");}
 };
 
 /**

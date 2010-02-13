@@ -338,22 +338,22 @@ void CPocket::WriteDefaultValues()
 {
 	CDepthOp::WriteDefaultValues();
 
-	CNCConfig config;
-	config.Write(wxString(GetTypeString()) + _T("StepOver"), m_pocket_params.m_step_over);
-	config.Write(wxString(GetTypeString()) + _T("MaterialAllowance"), m_pocket_params.m_material_allowance);
-	config.Write(wxString(GetTypeString()) + _T("RoundCornerFactor"), m_pocket_params.m_round_corner_factor);
-	config.Write(wxString(GetTypeString()) + _T("FromCenter"), m_pocket_params.m_starting_place);
+	CNCConfig config(CPocketParams::ConfigScope());
+	config.Write(_T("StepOver"), m_pocket_params.m_step_over);
+	config.Write(_T("MaterialAllowance"), m_pocket_params.m_material_allowance);
+	config.Write(_T("RoundCornerFactor"), m_pocket_params.m_round_corner_factor);
+	config.Write(_T("FromCenter"), m_pocket_params.m_starting_place);
 }
 
 void CPocket::ReadDefaultValues()
 {
 	CDepthOp::ReadDefaultValues();
 
-	CNCConfig config;
-	config.Read(wxString(GetTypeString()) + _T("StepOver"), &m_pocket_params.m_step_over, 1.0);
-	config.Read(wxString(GetTypeString()) + _T("MaterialAllowance"), &m_pocket_params.m_material_allowance, 0.2);
-	config.Read(wxString(GetTypeString()) + _T("RoundCornerFactor"), &m_pocket_params.m_round_corner_factor, 1.5);
-	config.Read(wxString(GetTypeString()) + _T("FromCenter"), &m_pocket_params.m_starting_place, 1);
+	CNCConfig config(CPocketParams::ConfigScope());
+	config.Read(_T("StepOver"), &m_pocket_params.m_step_over, 1.0);
+	config.Read(_T("MaterialAllowance"), &m_pocket_params.m_material_allowance, 0.2);
+	config.Read(_T("RoundCornerFactor"), &m_pocket_params.m_round_corner_factor, 1.5);
+	config.Read(_T("FromCenter"), &m_pocket_params.m_starting_place, 1);
 }
 
 void CPocket::glCommands(bool select, bool marked, bool no_color)
@@ -551,14 +551,14 @@ void CPocket::GetOptions(std::list<Property *> *list)
 // static
 void CPocket::ReadFromConfig()
 {
-	CNCConfig config;
+	CNCConfig config(CPocketParams::ConfigScope());
 	config.Read(_T("PocketSplineDeviation"), &max_deviation_for_spline_to_arc, 0.1);
 }
 
 // static
 void CPocket::WriteToConfig()
 {
-	CNCConfig config;
+	CNCConfig config(CPocketParams::ConfigScope());
 	config.Write(_T("PocketSplineDeviation"), max_deviation_for_spline_to_arc);
 }
 

@@ -545,7 +545,7 @@ const char* CNCCode::GetColor(ColorEnum i, const char* def)
 // static
 void CNCCode::ReadColorsFromConfig()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	long col;
 	ClearColors();
 	config.Read(_T("ColorDefaultType"),		&col, HeeksColor(0, 0, 0).COLORREF_color()); AddColor("default", HeeksColor(col));
@@ -564,7 +564,7 @@ void CNCCode::ReadColorsFromConfig()
 // static
 void CNCCode::WriteColorsToConfig()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	config.Write(_T("ColorDefaultType"),	CNCCode::m_colors[ColorDefaultType	].COLORREF_color());
 	config.Write(_T("ColorBlockType"),		CNCCode::m_colors[ColorBlockType	].COLORREF_color());
@@ -615,7 +615,7 @@ void CNCCode::GetOptions(std::list<Property *> *list)
 
 CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL), m_user_edited(false)
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Read(_T("CNCCode_ArcInterpolationCount"), &CNCCode::s_arc_interpolation_count, 20);
 }
 
@@ -692,7 +692,7 @@ void CNCCode::GetBox(CBox &box)
 void on_set_arc_interpolation_count(int value, HeeksObj*object)
 {
 	CNCCode::s_arc_interpolation_count = value;
-	CNCConfig config;
+	CNCConfig config(CNCCode::ConfigScope());
 	config.Write(_T("CNCCode_ArcInterpolationCount"), CNCCode::s_arc_interpolation_count);
 }
 
@@ -742,6 +742,7 @@ class ApplyNCCode: public Tool{
 							NULL,
 							wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME | wxPD_AUTO_HIDE ));
 
+
 			PathObject *pPreviousPoint = NULL;
 			for (l_itPath = paths.begin(); l_itPath != paths.end(); l_itPath++)
 			{
@@ -789,6 +790,7 @@ class ApplyNCCode: public Tool{
 
 					} // End switch
 
+
 					for (std::list<gp_Pnt>::const_iterator l_itPnt = interpolated_points.begin(); l_itPnt != interpolated_points.end(); l_itPnt++)
 					{
 						// Now move the tool to this point's location.
@@ -809,8 +811,10 @@ class ApplyNCCode: public Tool{
 							} // End catch
 						} // End for
 					} // End for
+
 				} // End if - else
 			} // End for
+
 
 			progress = 1;
 			pProgressBar = std::auto_ptr<wxProgressDialog>(new wxProgressDialog(	wxString(_T("Apply")),
@@ -835,6 +839,7 @@ class ApplyNCCode: public Tool{
 					heeksCAD->Remove( solids[ l_itShape->first ] );	// Delete the original.
 				} // End if - then
 			} // End for
+
 
 			heeksCAD->Repaint();
 		} // End try
@@ -1096,7 +1101,6 @@ std::list< std::pair<PathObject *, CCuttingTool *> > CNCCode::GetPaths() const
 {
 	std::list< std::pair<PathObject *, CCuttingTool *> > paths;
 
-	// This stuff takes a long time.  Give the user something to look at in the meantime.
 	for(std::list<CNCCodeBlock*>::const_iterator l_itCodeBlock = m_blocks.begin(); l_itCodeBlock != m_blocks.end(); l_itCodeBlock++)
 	{
 		for (std::list<ColouredPath>::const_iterator l_itColouredPath = (*l_itCodeBlock)->m_line_strips.begin();

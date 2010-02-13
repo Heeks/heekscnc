@@ -30,7 +30,7 @@ extern CHeeksCADInterface* heeksCAD;
 
 void CLocatingParams::set_initial_values()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
 	config.Read(_T("m_sort_locations"), &m_sort_locations, 1);
@@ -40,7 +40,7 @@ void CLocatingParams::write_values_to_config()
 {
 	// We always want to store the parameters in mm and convert them back later on.
 
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	// These values are in mm.
 	config.Write(_T("m_standoff"), m_standoff);
