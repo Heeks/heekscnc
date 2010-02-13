@@ -34,7 +34,7 @@ extern CHeeksCADInterface* heeksCAD;
 
 void CFixtureParams::set_initial_values()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	config.Read(_T("m_yz_plane"), &m_yz_plane, 0.0);
 	config.Read(_T("m_xz_plane"), &m_xz_plane, 0.0);
@@ -50,11 +50,11 @@ void CFixtureParams::set_initial_values()
 
 void CFixtureParams::write_values_to_config()
 {
-	CNCConfig config;
-
 	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
 	// If we're now in inches then convert the values.
 	// We're in mm already.
+	CNCConfig config(ConfigScope());
+
 	config.Write(_T("m_yz_plane"), m_yz_plane);
 	config.Write(_T("m_xz_plane"), m_xz_plane);
 	config.Write(_T("m_xy_plane"), m_xy_plane);
@@ -67,19 +67,19 @@ void CFixtureParams::write_values_to_config()
 static void on_set_yz_plane(double value, HeeksObj* object)
 {
 	((CFixture*)object)->m_params.m_yz_plane = value;
-	 ((CFixture*)object)->ResetTitle(); 
+	 ((CFixture*)object)->ResetTitle();
 }
 
 static void on_set_xz_plane(double value, HeeksObj* object)
 {
-	((CFixture*)object)->m_params.m_xz_plane = value; 
-	((CFixture*)object)->ResetTitle(); 
+	((CFixture*)object)->m_params.m_xz_plane = value;
+	((CFixture*)object)->ResetTitle();
 }
 
 static void on_set_xy_plane(double value, HeeksObj* object)
 {
-	((CFixture*)object)->m_params.m_xy_plane = value; 
-	((CFixture*)object)->ResetTitle(); 
+	((CFixture*)object)->m_params.m_xy_plane = value;
+	((CFixture*)object)->ResetTitle();
 }
 
 static void on_set_pivot_point(const double *vt, HeeksObj* object){
@@ -106,7 +106,7 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 
 	element->SetDoubleAttribute("yz_plane", m_yz_plane);
 	element->SetDoubleAttribute("xz_plane", m_xz_plane);
@@ -214,7 +214,7 @@ bool CFixture::CanAddTo(HeeksObj* owner)
 void CFixture::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Fixture" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 
 	std::ostringstream l_ossValue;
@@ -295,7 +295,7 @@ int CFixture::GetNextFixture()
 		for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
 		{
 			if (ob->GetType() != FixtureType) continue;
-	
+
 			if (ob != NULL)
 			{
 				existing_fixtures.insert( int(((CFixture *)ob)->m_coordinate_system_number) );
@@ -529,7 +529,7 @@ double CFixture::AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec
 	if (pivot.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,0,1) ) ) < 0.0001)
 	{
 		// We're pivoting around the Z axis
-	
+
 		if (axis.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0) ) ) < 0.0001)
 		{
 			// We're comparing it with the X axis.
@@ -562,7 +562,7 @@ double CFixture::AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec
 	else if (pivot.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(0,1,0) ) ) < 0.0001)
 	{
 		// We're pivoting around the Y axis
-	
+
 		if (axis.Angle( gp_Vec( gp_Pnt(0,0,0), gp_Pnt(1,0,0) ) ) < 0.0001)
 		{
 			// We're comparing it with the X axis.
@@ -572,7 +572,7 @@ double CFixture::AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec
 				lhs = rhs;
 				rhs = temp;
 			}
-				
+
 			double angle = axis.Angle( gp_Vec( lhs, rhs ) );
 			if (lhs.Z() > rhs.Z()) angle *= -1.0;
 			return((angle / (2 * PI)) * 360.0);
@@ -697,7 +697,7 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 } // End SetRotationsFromProbedPoints() method
 
 
-class Fixture_ImportProbeData: public Tool 
+class Fixture_ImportProbeData: public Tool
 {
 
 CFixture *m_pThis;

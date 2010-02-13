@@ -49,6 +49,7 @@ public:
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 
+	static wxString ConfigScope() { return(_T("Profile")); }
 };
 
 class CProfile: public CDepthOp{
@@ -60,7 +61,7 @@ public:
 
 	CProfile():CDepthOp(GetTypeString()){}
 	CProfile(const std::list<int> &sketches, const int cutting_tool_number )
-		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number), 
+		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number),
 			m_sketches(sketches)
 	{
 		ReadDefaultValues();

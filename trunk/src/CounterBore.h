@@ -29,6 +29,8 @@ public:
 	void GetProperties(CCounterBore* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
+
+	wxString ConfigScope() const { return(_("CounterBore")); }
 };
 
 /**

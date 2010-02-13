@@ -325,6 +325,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 }
 
 
+
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 {
 	std::vector<CNCPoint> intersections;
@@ -388,6 +389,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
 }
+
 
 static void NewLocatingOpMenuCallback(wxCommandEvent &event)
 {
@@ -896,7 +898,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	wxInitialize();
 #endif
 
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 
 	// About box, stuff
 	heeksCAD->AddToAboutBox(wxString(_T("\n\n")) + _("HeeksCNC is the free machining add-on to HeeksCAD")
@@ -1239,7 +1241,7 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 void CHeeksCNCApp::OnFrameDelete()
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
 	config.Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
 	config.Write(_T("MachiningBarVisible"), aui_manager->GetPane(m_machiningBar).IsShown());

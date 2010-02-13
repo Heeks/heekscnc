@@ -846,24 +846,24 @@ void CProfile::WriteDefaultValues()
 {
 	CDepthOp::WriteDefaultValues();
 
-	CNCConfig config;
-	config.Write(wxString(GetTypeString()) + _T("ToolOnSide"), m_profile_params.m_tool_on_side);
-	config.Write(wxString(GetTypeString()) + _T("CutMode"), m_profile_params.m_cut_mode);
-	config.Write(wxString(GetTypeString()) + _T("RollRadius"), m_profile_params.m_auto_roll_radius);
+	CNCConfig config(CProfileParams::ConfigScope());
+	config.Write(_T("ToolOnSide"), m_profile_params.m_tool_on_side);
+	config.Write(_T("CutMode"), m_profile_params.m_cut_mode);
+	config.Write(_T("RollRadius"), m_profile_params.m_auto_roll_radius);
 }
 
 void CProfile::ReadDefaultValues()
 {
 	CDepthOp::ReadDefaultValues();
 
-	CNCConfig config;
+	CNCConfig config(CProfileParams::ConfigScope());
 	int int_side = m_profile_params.m_tool_on_side;
-	config.Read(wxString(GetTypeString()) + _T("ToolOnSide"), &int_side, CProfileParams::eLeftOrOutside);
+	config.Read(_T("ToolOnSide"), &int_side, CProfileParams::eLeftOrOutside);
 	m_profile_params.m_tool_on_side = (CProfileParams::eSide)int_side;
 	int int_mode = m_profile_params.m_cut_mode;
-	config.Read(wxString(GetTypeString()) + _T("CutMode"), &int_mode, CProfileParams::eConventional);
+	config.Read(_T("CutMode"), &int_mode, CProfileParams::eConventional);
 	m_profile_params.m_cut_mode = (CProfileParams::eCutMode)int_mode;
-	config.Read(wxString(GetTypeString()) + _T("RollRadius"), &m_profile_params.m_auto_roll_radius, 2.0);
+	config.Read(_T("RollRadius"), &m_profile_params.m_auto_roll_radius, 2.0);
 
 	ConfirmAutoRollRadius(true);
 
@@ -1351,13 +1351,13 @@ void CProfile::GetOptions(std::list<Property *> *list)
 // static
 void CProfile::ReadFromConfig()
 {
-	CNCConfig config;
+	CNCConfig config(CProfileParams::ConfigScope());
 	config.Read(_T("ProfileSplineDeviation"), &max_deviation_for_spline_to_arc, 0.01);
 }
 
 // static
 void CProfile::WriteToConfig()
 {
-	CNCConfig config;
+	CNCConfig config(CProfileParams::ConfigScope());
 	config.Write(_T("ProfileSplineDeviation"), max_deviation_for_spline_to_arc);
 }

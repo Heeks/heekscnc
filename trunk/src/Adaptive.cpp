@@ -42,7 +42,7 @@ void CAdaptiveParams::set_initial_values(
 		const unsigned int reference_object_id, /* = -1 */
 		const std::list<int> &sketches )
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Read(_T("m_leadoffdz"), &m_leadoffdz, 0.1);
 	config.Read(_T("m_leadofflen"), &m_leadofflen, 1.1);
 	config.Read(_T("m_leadoffrad"), &m_leadoffrad, 2.0);
@@ -139,7 +139,7 @@ void CAdaptiveParams::set_initial_values(
 
 void CAdaptiveParams::write_values_to_config()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Write(_T("m_leadoffdz"), m_leadoffdz);
 	config.Write(_T("m_leadofflen"), m_leadofflen);
 	config.Write(_T("m_leadoffrad"), m_leadoffrad);

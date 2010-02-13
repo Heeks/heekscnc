@@ -52,6 +52,8 @@ public:
 	void GetProperties(CAdaptive* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
+
+	const wxString ConfigScope(void)const{return _T("Adaptive");}
 };
 
 class CAdaptive: public COp{
