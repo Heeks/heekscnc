@@ -19,6 +19,8 @@ public:
 	void GetProperties(CZigZag* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
+
+	const wxString ConfigScope(void)const{return _T("ZigZag");}
 };
 
 class CZigZag: public CSpeedOp{

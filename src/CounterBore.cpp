@@ -48,7 +48,7 @@ void CCounterBoreParams::write_values_to_config()
 {
 	// We always want to store the parameters in mm and convert them back later on.
 
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Write(_T("m_diameter"), m_diameter);
 	config.Write(_T("m_sort_locations"), m_sort_locations);
 }
