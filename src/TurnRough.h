@@ -28,6 +28,8 @@ public:
 	void GetProperties(CTurnRough* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
+
+	static wxString ConfigScope() { return(_T("TurnRough")); }
 };
 
 class CTurnRough: public CSpeedOp{

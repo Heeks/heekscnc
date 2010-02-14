@@ -65,9 +65,11 @@ public:
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
 
-	double GetSurfaceSpeed( const wxChar *material_name, 
-				const int cutting_tool_material, 
+	double GetSurfaceSpeed( const wxChar *material_name,
+				const int cutting_tool_material,
 				const double brinell_hardness_of_raw_material ) const;
+
+    const wxString ConfigScope(void)const{return _T("SpeedReference");}
 
 }; // End CSpeedReference class definition.
 

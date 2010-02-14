@@ -39,7 +39,7 @@ using namespace std;
 
 CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed_references(NULL), m_fixtures(NULL), m_script_edited(false)
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	wxString machine_file_name;
 	config.Read(_T("ProgramMachine"), &machine_file_name, _T("iso"));
 	m_machine = CProgram::GetMachine(machine_file_name);
@@ -69,7 +69,7 @@ static void on_set_machine(int value, HeeksObj* object)
 	std::vector<CMachine> machines;
 	CProgram::GetMachines(machines);
 	((CProgram*)object)->m_machine = machines[value];
-	CNCConfig config;
+	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("ProgramMachine"), ((CProgram*)object)->m_machine.file_name);
 	heeksCAD->RefreshProperties();
 }
@@ -77,14 +77,14 @@ static void on_set_machine(int value, HeeksObj* object)
 static void on_set_output_file(const wxChar* value, HeeksObj* object)
 {
 	((CProgram*)object)->m_output_file = value;
-	CNCConfig config;
+	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("ProgramOutputFile"), ((CProgram*)object)->m_output_file);
 }
 
 static void on_set_units(int value, HeeksObj* object)
 {
 	((CProgram*)object)->m_units = (value == 0) ? 1.0:25.4;
-	CNCConfig config;
+	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("ProgramUnits"), ((CProgram*)object)->m_units);
 
 	// also change HeeksCAD's view units automatically
@@ -97,7 +97,7 @@ static void on_set_output_file_name_follows_data_file_name(int zero_based_choice
 	pProgram->m_output_file_name_follows_data_file_name = (zero_based_choice != 0);
 	heeksCAD->RefreshProperties();
 
-	CNCConfig config;
+	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("OutputFileNameFollowsDataFileName"), pProgram->m_output_file_name_follows_data_file_name );
 }
 
@@ -171,9 +171,9 @@ void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
 
 bool CProgram::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == NCCodeType || 
-		object->GetType() == OperationsType || 
-		object->GetType() == ToolsType || 
+	return object->GetType() == NCCodeType ||
+		object->GetType() == OperationsType ||
+		object->GetType() == ToolsType ||
 		object->GetType() == SpeedReferencesType ||
 		object->GetType() == FixturesType;
 }
@@ -203,7 +203,7 @@ void CProgram::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "Program" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetAttribute("machine", Ttc(m_machine.file_name.c_str()));
 	element->SetAttribute("output_file", Ttc(m_output_file.c_str()));
 
@@ -325,11 +325,11 @@ struct sort_operations : public std::binary_function< bool, COp *, COp * >
 
 				if ((lhsPtr->m_params.m_type == CCuttingToolParams::eDrill) &&
 				    (rhsPtr->m_params.m_type != CCuttingToolParams::eDrill)) return(true);
-			
+
 				if ((lhsPtr->m_params.m_type != CCuttingToolParams::eDrill) &&
 				    (rhsPtr->m_params.m_type == CCuttingToolParams::eDrill)) return(false);
-			
-				// Finally, give preference to a milling bit over a chamfer bit.	
+
+				// Finally, give preference to a milling bit over a chamfer bit.
 				if ((lhsPtr->m_params.m_type == CCuttingToolParams::eChamfer) &&
 				    (rhsPtr->m_params.m_type != CCuttingToolParams::eChamfer)) return(true);
 
@@ -369,7 +369,7 @@ void CProgram::RewritePythonProgram()
 
 	if (m_operations == NULL)
 	{
-		// If there are no operations then there is no GCode. 
+		// If there are no operations then there is no GCode.
 		// No socks, no shirt, no service.
 		return;
 	} // End if - then
@@ -575,7 +575,7 @@ void CProgram::RewritePythonProgram()
 		{
 			HeeksObj *object = (HeeksObj *) *l_itOperation;
 			if (object == NULL) continue;
-			
+
 			if(COp::IsAnOperation(object->GetType()))
 			{
 				if(((COp*)object)->m_active)
@@ -637,7 +637,7 @@ void CProgram::UpdateFromUserType()
 #endif
 }
 
-// static 
+// static
 void CProgram::GetMachines(std::vector<CMachine> &machines)
 {
 	wxString machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
@@ -686,7 +686,7 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 			} // End if - then
 		} // End if - then
 #endif
-	
+
 		// Everything else must be a description.
 #ifdef UNICODE
 		std::wostringstream l_ossDescription;

@@ -306,7 +306,7 @@ void CZigZag::WriteDefaultValues()
 {
 	CSpeedOp::WriteDefaultValues();
 
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Write(wxString(GetTypeString()) + _T("BoxXMin"), m_params.m_box.m_x[0]);
 	config.Write(wxString(GetTypeString()) + _T("BoxYMin"), m_params.m_box.m_x[1]);
 	config.Write(wxString(GetTypeString()) + _T("BoxZMin"), m_params.m_box.m_x[2]);
@@ -322,7 +322,7 @@ void CZigZag::ReadDefaultValues()
 {
 	CSpeedOp::ReadDefaultValues();
 
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Read(wxString(GetTypeString()) + _T("BoxXMin"), &m_params.m_box.m_x[0], -7.0);
 	config.Read(wxString(GetTypeString()) + _T("BoxYMin"), &m_params.m_box.m_x[1], -7.0);
 	config.Read(wxString(GetTypeString()) + _T("BoxZMin"), &m_params.m_box.m_x[2], 0.0);

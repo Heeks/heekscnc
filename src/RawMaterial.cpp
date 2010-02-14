@@ -28,7 +28,7 @@ static void on_set_raw_material(int zero_based_choice, HeeksObj* object)
 
 	std::copy( materials.begin(), materials.end(), std::inserter(copy,copy.end()));
 
-	CNCConfig config;
+	CNCConfig config(CRawMaterial::ConfigScope());
 	if (zero_based_choice <= int(copy.size()-1))
 	{
 		pProgram->m_raw_material.m_material_name = copy[zero_based_choice];
@@ -58,7 +58,7 @@ static void on_set_brinell_hardness(int zero_based_choice, HeeksObj *object)
 		heeksCAD->Changed();
 	} // End if - then
 
-	CNCConfig config;
+	CNCConfig config(CRawMaterial::ConfigScope());
 	config.Write(_T("RawMaterial_BrinellHardness"), pProgram->m_raw_material.m_brinell_hardness );
 } // End on_set_brinell_hardness() routine
 
@@ -71,7 +71,7 @@ static void on_set_brinell_hardness(int zero_based_choice, HeeksObj *object)
  */
 CRawMaterial::CRawMaterial()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Read(_T("RawMaterial_BrinellHardness"), &m_brinell_hardness, 0.0);
 	config.Read(_T("RawMaterial_MaterialName"), &m_material_name, _T("Please select a material to machine"));
 }
@@ -94,7 +94,7 @@ void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 			l_itMaterial != materials.end(); l_itMaterial++)
 		{
 			choices.push_back(*l_itMaterial);
-			if (*l_itMaterial == m_material_name) 
+			if (*l_itMaterial == m_material_name)
 			{
 				choice = std::distance( materials.begin(), l_itMaterial );
 			} // End if - then
@@ -136,12 +136,12 @@ void CRawMaterial::WriteBaseXML(TiXmlElement *element)
 
 void CRawMaterial::ReadBaseXML(TiXmlElement* element)
 {
-	if (element->Attribute("brinell_hardness")) 
+	if (element->Attribute("brinell_hardness"))
 	{
 		m_brinell_hardness = atof(element->Attribute("brinell_hardness"));
 	} // End if - then
 
-	if (element->Attribute("raw_material_name")) 
+	if (element->Attribute("raw_material_name"))
 	{
 		m_material_name = wxString(Ctt(element->Attribute("raw_material_name")));
 	} // End if - then
