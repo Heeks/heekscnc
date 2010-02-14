@@ -32,7 +32,7 @@ CTurnRoughParams::CTurnRoughParams()
 
 void CTurnRoughParams::set_initial_values()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Read(_T("TurnRoughOutside"), &m_outside, true);
 	config.Read(_T("TurnRoughFront"), &m_front, true);
 	config.Read(_T("TurnRoughFacing"), &m_facing, false);
@@ -41,7 +41,7 @@ void CTurnRoughParams::set_initial_values()
 
 void CTurnRoughParams::write_values_to_config()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Write(_T("TurnRoughOutside"), m_outside);
 	config.Write(_T("TurnRoughFront"), m_front);
 	config.Write(_T("TurnRoughFacing"), m_facing);

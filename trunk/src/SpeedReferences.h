@@ -17,10 +17,11 @@
 class CSpeedReferences: public ObjList{
 public:
 	bool m_estimate_when_possible;	// flag to turn feeds and speeds estimation on and off.
+	static wxString ConfigScope(void) {return _T("SpeedReferences");}
 
 	CSpeedReferences()
 	{
-		CNCConfig config;
+		CNCConfig config(ConfigScope());
                 int value;
                 config.Read(_T("SpeedReferences_m_estimate_when_possible"), &value, 1);
                 m_estimate_when_possible = (value != 0);
@@ -46,8 +47,8 @@ public:
 	static std::set< double > GetHardnessForMaterial( const wxString & material_name );
 	static std::set< double > GetAllHardnessValues();
 
-	static double GetSurfaceSpeed( const wxString & material_name, 
-					const int cutting_tool_material, 
+	static double GetSurfaceSpeed( const wxString & material_name,
+					const int cutting_tool_material,
 					const double brinell_hardness_of_raw_material );
 };
 

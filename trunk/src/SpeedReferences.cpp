@@ -145,8 +145,8 @@ static void on_set_estimate_when_possible(int value, HeeksObj* object)
 {
 	((CSpeedReferences *)object)->m_estimate_when_possible = (value == 0) ? true: false;
 
-	CNCConfig config;
-	config.Write(_T("SpeedReferences_m_estimate_when_possible"), int(((CSpeedReferences *)object)->m_estimate_when_possible?1:0));
+	CNCConfig config(CSpeedReferences::ConfigScope());
+	config.Write(_T("estimate_when_possible"), int(((CSpeedReferences *)object)->m_estimate_when_possible?1:0));
 }
 
 void CSpeedReferences::GetProperties(std::list<Property *> *list)

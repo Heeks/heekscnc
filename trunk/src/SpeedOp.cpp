@@ -215,7 +215,7 @@ void CSpeedOp::WriteDefaultValues()
 {
 	COp::WriteDefaultValues();
 
-	CNCConfig config;
+	CNCConfig config(CSpeedOp::ConfigScope());
 	config.Write(_T("SpeedOpHorizFeed"), m_speed_op_params.m_horizontal_feed_rate);
 	config.Write(_T("SpeedOpVertFeed"), m_speed_op_params.m_vertical_feed_rate);
 	config.Write(_T("SpeedOpSpindleSpeed"), m_speed_op_params.m_spindle_speed);
@@ -225,7 +225,7 @@ void CSpeedOp::ReadDefaultValues()
 {
 	COp::ReadDefaultValues();
 
-	CNCConfig config;
+	CNCConfig config(CSpeedOp::ConfigScope());
 	config.Read(_T("SpeedOpHorizFeed"), &m_speed_op_params.m_horizontal_feed_rate, 100.0);
 	config.Read(_T("SpeedOpVertFeed"), &m_speed_op_params.m_vertical_feed_rate, 100.0);
 	config.Read(_T("SpeedOpSpindleSpeed"), &m_speed_op_params.m_spindle_speed, 7000);
@@ -275,14 +275,14 @@ void CSpeedOp::GetOptions(std::list<Property *> *list)
 // static
 void CSpeedOp::ReadFromConfig()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Read(_T("SpeedOpAutoSetSpeeds"), &m_auto_set_speeds_feeds,true);
 }
 
 // static
 void CSpeedOp::WriteToConfig()
 {
-	CNCConfig config;
+	CNCConfig config(ConfigScope());
 	config.Write(_T("SpeedOpAutoSetSpeeds"), m_auto_set_speeds_feeds);
 }
 

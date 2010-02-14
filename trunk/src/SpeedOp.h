@@ -52,6 +52,8 @@ public:
 	static void ReadFromConfig();
 	static void WriteToConfig();
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+
+	static wxString ConfigScope() { return(_T("SpeedOp")); }
 };
 
 #endif

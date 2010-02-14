@@ -35,5 +35,7 @@ public:
 	void ReadBaseXML(TiXmlElement* element);
 	void AppendTextToProgram();
 
+	static wxString ConfigScope() { return(_T("RawMaterial")); }
+
 }; // End CRawMaterial class definition.
 
