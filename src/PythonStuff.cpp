@@ -57,17 +57,20 @@ protected:
 	const CProgram* m_program;
 	HeeksObj* m_into;
 	wxString m_filename;
+	wxBusyCursor *m_busy_cursor;
 
 	static CPyBackPlot* m_object;
 
 public:
-	CPyBackPlot(const CProgram* program, HeeksObj* into, const wxChar* filename): m_program(program), m_into(into),m_filename(filename) { m_object = this; }
+	CPyBackPlot(const CProgram* program, HeeksObj* into, const wxChar* filename): m_program(program), m_into(into),m_filename(filename),m_busy_cursor(NULL) { m_object = this; }
 	~CPyBackPlot(void) { m_object = NULL; }
 
 	static void StaticCancel(void) { if (m_object) m_object->Cancel(); }
 
 	void Do(void)
 	{
+		if(m_busy_cursor == NULL)m_busy_cursor = new wxBusyCursor();
+
 		if (m_program->m_machine.file_name == _T("not found"))
 		{
 			wxMessageBox(_T("Machine name (defined in Program Properties) not found"));
@@ -98,6 +101,9 @@ public:
 
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
 		heeksCAD->GetMainFrame()->Raise();
+
+		delete m_busy_cursor;
+		m_busy_cursor = NULL;
 	}
 };
 
@@ -127,6 +133,7 @@ public:
 
 	void Do(void)
 	{
+		wxBusyCursor wait; // show an hour glass until the end of this function
 #ifdef WIN32
 		Execute(theApp.GetDllFolder() + wxString(_T("/post.bat")));
 #else
