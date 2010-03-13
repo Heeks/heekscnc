@@ -119,6 +119,8 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 	CNCPoint point( location );
 	CNCPoint centre( point );
 
+    ss << "comment('Begin Counterbore operation for ID " << m_id << "')\n";
+
 	// Rapid to above the starting point (up at clearance height)
 	point.SetZ( m_depth_op_params.m_clearance_height );
 	ss << "rapid( x=" << point.X(true) << ", y=" << point.Y(true) << ", z=" << point.Z(true) << ")\n";
@@ -132,7 +134,6 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 
 	while ((cutting_depth - final_depth) > tolerance)
 	{
-		ss << "comment('Spiral down half a circle until we get to the cutting depth')\n";
 
 		double step_down = m_depth_op_params.m_step_down;
 		if ((cutting_depth - step_down) < final_depth)
@@ -152,6 +153,8 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 
 			radius_of_spiral = max_radius_of_spiral;
 		} // End if - then
+
+        ss << "comment('Spiral down half a circle until we get to the cutting depth of " << (cutting_depth - step_down) << "')\n";
 
 		// Now spiral down using the width_of_spiral to the cutting_depth.
 		// Move to 12 O'Clock.
@@ -197,8 +200,6 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) + radius_of_spiral );
 
-		ss << "comment('Now spiral outwards to the counterbore perimeter')\n";
-
 		do {
 			radius_of_spiral += (pCuttingTool->CuttingRadius(false) * 0.75);
 			if (radius_of_spiral > max_radius_of_spiral)
@@ -206,6 +207,8 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 				// Reduce the radius of the spiral so that we don't run outside the hole.
 				radius_of_spiral = max_radius_of_spiral;
 			} // End if - then
+
+			ss << "comment('Now spiral outwards to the counterbore perimeter of " << ((radius_of_spiral + pCuttingTool->CuttingRadius(true)) * 2.0) << "')\n";
 
 			// Move to 12 O'Clock.
 			ss << "feed( x=" << centre.X(true) << ", "
@@ -269,6 +272,8 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 	// Rapid to above the starting point (up at clearance height)
 	point.SetZ( m_depth_op_params.m_clearance_height );
 	ss << "rapid( x=" << centre.X(true) << ", y=" << centre.Y(true) << ", z=" << point.Z(true) << ")\n";
+
+    ss << "comment('End Counterbore operation for ID " << m_id << "')\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 
