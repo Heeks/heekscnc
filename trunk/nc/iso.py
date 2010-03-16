@@ -197,11 +197,12 @@ class CreatorIso(nc.Creator):
         self.fhv = True
 
     def calc_feedrate_hv(self, h, v):
-        l = math.sqrt(h*h+v*v)
-        if (h == 0) : self.f = iso.codes.FEEDRATE() + (self.fmt % self.fv)
-        elif (v == 0) : self.f = iso.codes.FEEDRATE() + (self.fmt % self.fh)
+        if math.fabs(v) > math.fabs(h * 2):
+            # some horizontal, so it should be fine to use the horizontal feed rate
+            self.f = iso.codes.FEEDRATE() + (self.fmt % self.fv)
         else:
-            self.f = iso.codes.FEEDRATE() + (self.fmt % (self.fh * l * min([1/h, 1/v])))
+            # not much, if any horizontal component, so use the vertical feed rate
+            self.f = iso.codes.FEEDRATE() + (self.fmt % self.fh)
 
     def spindle(self, s, clockwise):
 	if s < 0: clockwise = not clockwise
