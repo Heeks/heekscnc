@@ -42,6 +42,10 @@ public:
 	double m_start[3];
 	double m_end[3];
 	int m_sort_sketches;
+	int m_num_tags;
+	double m_tag_width; // in mm
+	double m_tag_angle; // in degrees
+	double m_offset_extra; // in mm
 
 	CProfileParams();
 

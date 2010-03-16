@@ -1,4 +1,5 @@
 import kurve
+import math
 from nc.nc import *
 
 def make_smaller( k, startx = None, starty = None, finishx = None, finishy = None ):
@@ -18,10 +19,68 @@ def make_smaller( k, startx = None, starty = None, finishx = None, finishy = Non
         if finishy == None: finishy = ey
 
         kurve.change_end(k, finishx, finishy)
+
+def split_for_tags( k, radius, start_depth, depth, tag ):
+    num_tags, tag_width, tag_angle = tag
+    tag_height = tag_width/2 * math.tan(tag_angle)
+    perim = kurve.perim(k)
+    sub_perim = perim / num_tags
+    half_flat_top = radius
+    if tag_height > (start_depth - depth):
+        # cut the top off the tag
+        chop_off_height = tag_height - (start_depth - depth)
+        half_flat_top += chop_off_height / math.tan(tag_angle)
+
+    for i in range(0, num_tags):
+        d = sub_perim * i
+
+        d0 = d - half_flat_top
+        while d0 < 0: d0 += perim
+        while d0 > perim: d0 -= perim
+        px, py = kurve.perim_to_point(k, d0)
+        kurve.kbreak(k, px, py)
+        d1 = d + half_flat_top
+        while d1 < 0: d1 += perim
+        while d1 > perim: d1 -= perim
+        px, py = kurve.perim_to_point(k, d1)
+        kurve.kbreak(k, px, py)
+        
+        if tag_width + 2 * radius > sub_perim:
+            px, py = kurve.perim_to_point(k, d + sub_perim/2)
+            kurve.kbreak(k, px, py)
+        else:
+            d0 = d - tag_width/2 - radius
+            while d0 < 0: d0 += perim
+            while d0 > perim: d0 -= perim
+            px, py = kurve.perim_to_point(k, d0)
+            kurve.kbreak(k, px, py)
+            d1 = d + tag_width/2 + radius
+            while d1 < 0: d1 += perim
+            while d1 > perim: d1 -= perim
+            px, py = kurve.perim_to_point(k, d1)
+            kurve.kbreak(k, px, py)
+
+def get_tag_z_for_span(current_perim, k, radius, start_depth, depth, tag):
+    num_tags, tag_width, tag_angle = tag
+    tag_height = tag_width/2 * math.tan(tag_angle)
+    perim = kurve.perim(k)
+    sub_perim = perim / num_tags
+    max_z = depth
+    for i in range(0, num_tags + 1):
+        d = sub_perim * i
+        dist_from_d = math.fabs(current_perim - d) - radius
+        if dist_from_d < 0: dist_from_d = 0
+        z = (depth + tag_height) - (dist_from_d / ( tag_width / 2 )) * tag_height
+        if z > max_z: max_z = z
+
+    if max_z > start_depth:
+        max_z = start_depth
+        
+    return max_z 
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(k, direction = "on", radius = 1.0, rollstartx = None, rollstarty = None, rollfinishx = None, rollfinishy = None):
+def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, rollstartx = None, rollstarty = None, rollfinishx = None, rollfinishy = None, start_depth = None, depth = None, tag = None):
     if kurve.exists(k) == False:
         raise "kurve doesn't exist, number %d" % (k)
 
@@ -32,18 +91,33 @@ def profile(k, direction = "on", radius = 1.0, rollstartx = None, rollstarty = N
             raise "direction must be left or right", direction
 
         # get tool diameter
-        offset = radius
+        offset = radius + offset_extra
         if direction == "right":
             offset = -offset
         offset_k = kurve.new()
         offset_success = kurve.offset(k, offset_k, offset)
         if offset_success == False:
             raise "couldn't offset kurve %d" % (k)
+
+    if tag != None:
+        num_tags, tag_width, tag_angle = tag
+        if tag_width < 0.00001:
+            tag = None
+        else:
+            tag_height = tag_width/2 * math.tan(tag_angle)
+            perim = kurve.perim(offset_k)
+            sub_perim = perim / num_tags
+            lowest_z = (depth + tag_height) - ((sub_perim / 2) / ( tag_width / 2 )) * tag_height
+            if lowest_z > start_depth:
+                return # the whole layer is tag
+            split_for_tags(offset_k, radius, start_depth, depth, tag)
         
     num_spans = kurve.num_spans(offset_k)
 
     if num_spans == 0:
         raise "sketch has no spans!"
+
+    current_perim = 0.0
     
     for span in range(0, num_spans):
         sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, span)
@@ -66,15 +140,22 @@ def profile(k, direction = "on", radius = 1.0, rollstartx = None, rollstarty = N
                     arc_cw(sx, sy, i = rcx, j = rcy)
                 else:# line
                     feed(sx, sy)
+
+        # height for tags
+        current_perim += kurve.get_span_length(offset_k, span)
+        ez = None
+        if tag != None:
+            ez = get_tag_z_for_span(current_perim, offset_k, radius, start_depth, depth, tag)
+        
         if sp == 0:#line
-            feed(ex, ey)
+            feed(ex, ey, ez)
         else:
             cx = cx - sx # make relative to the start position
             cy = cy - sy
             if sp == 1:# anti-clockwise arc
-                arc_ccw(ex, ey, i = cx, j = cy)
+                arc_ccw(ex, ey, ez, i = cx, j = cy)
             else:
-                arc_cw(ex, ey, i = cx, j = cy)
+                arc_cw(ex, ey, ez, i = cx, j = cy)
 
         if span == num_spans - 1:# last span
             if (rollfinishx != ex or rollfinishy != ey) and direction != "on":
