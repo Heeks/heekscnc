@@ -430,6 +430,9 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("import sys\n"));
 	theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
 #endif
+
+	theApp.m_program_canvas->AppendText(_T("import math\n"));
+
 	// kurve related things
 	if(kurve_module_needed)
 	{
