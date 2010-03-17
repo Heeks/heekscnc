@@ -80,7 +80,21 @@ public:
 		: COp(GetTypeString(), 0), m_symbols(symbols)
 	{
 		m_params.set_initial_values();
+
+		for (Symbols_t::const_iterator symbol = symbols.begin(); symbol != symbols.end(); symbol++)
+		{
+			HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+			if (object != NULL)
+			{
+				Add( object, NULL );
+			} // End if - then
+		} // End for
+
+		m_symbols.clear();	// we don't want to do this twice.
 	}
+
+	CLocating( const CLocating & rhs );
+	CLocating & operator= ( const CLocating & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return LocatingType;}
@@ -94,6 +108,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void ReloadPointers();
 
 	static bool ValidType( const int object_type );
 
@@ -104,8 +119,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	std::vector<CNCPoint> FindAllLocations( const CLocating::Symbols_t & symbols ) const;
-	std::vector<CNCPoint> FindAllLocations() const;
+	std::vector<CNCPoint> FindAllLocations();
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 };

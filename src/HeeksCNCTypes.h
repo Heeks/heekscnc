@@ -26,5 +26,7 @@ enum{
 	TrsfNCCodeType,
 	ProbeCentreType,
 	ProbeEdgeType,
+	ContourType,
+	ChamferType,
 	HeeksCNCMaximumType
 };

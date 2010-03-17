@@ -193,7 +193,32 @@ void CSpeedOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 		speedop->Attribute("hfeed", &m_horizontal_feed_rate);
 		speedop->Attribute("vfeed", &m_vertical_feed_rate);
 		speedop->Attribute("spin", &m_spindle_speed);
+
+		pElem->RemoveChild(speedop);
 	}
+}
+
+void CSpeedOp::glCommands(bool select, bool marked, bool no_color)
+{
+	COp::glCommands(select, marked, no_color);
+}
+
+
+CSpeedOp & CSpeedOp::operator= ( const CSpeedOp & rhs )
+{
+	if (this != &rhs)
+	{
+		COp::operator=(rhs);
+		m_speed_op_params = rhs.m_speed_op_params;
+		// static bool m_auto_set_speeds_feeds;
+	}
+
+	return(*this);	
+}
+
+CSpeedOp::CSpeedOp( const CSpeedOp & rhs ) : COp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
 }
 
 // static

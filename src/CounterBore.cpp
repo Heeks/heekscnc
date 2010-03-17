@@ -119,8 +119,6 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 	CNCPoint point( location );
 	CNCPoint centre( point );
 
-    ss << "comment('Begin Counterbore operation for ID " << m_id << "')\n";
-
 	// Rapid to above the starting point (up at clearance height)
 	point.SetZ( m_depth_op_params.m_clearance_height );
 	ss << "rapid( x=" << point.X(true) << ", y=" << point.Y(true) << ", z=" << point.Z(true) << ")\n";
@@ -134,6 +132,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 
 	while ((cutting_depth - final_depth) > tolerance)
 	{
+		ss << "comment('Spiral down half a circle until we get to the cutting depth')\n";
 
 		double step_down = m_depth_op_params.m_step_down;
 		if ((cutting_depth - step_down) < final_depth)
@@ -153,8 +152,6 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 
 			radius_of_spiral = max_radius_of_spiral;
 		} // End if - then
-
-        ss << "comment('Spiral down half a circle until we get to the cutting depth of " << (cutting_depth - step_down) << "')\n";
 
 		// Now spiral down using the width_of_spiral to the cutting_depth.
 		// Move to 12 O'Clock.
@@ -200,6 +197,8 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) + radius_of_spiral );
 
+		ss << "comment('Now spiral outwards to the counterbore perimeter')\n";
+
 		do {
 			radius_of_spiral += (pCuttingTool->CuttingRadius(false) * 0.75);
 			if (radius_of_spiral > max_radius_of_spiral)
@@ -207,8 +206,6 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 				// Reduce the radius of the spiral so that we don't run outside the hole.
 				radius_of_spiral = max_radius_of_spiral;
 			} // End if - then
-
-			ss << "comment('Now spiral outwards to the counterbore perimeter of " << ((radius_of_spiral + pCuttingTool->CuttingRadius(true)) * 2.0) << "')\n";
 
 			// Move to 12 O'Clock.
 			ss << "feed( x=" << centre.X(true) << ", "
@@ -273,8 +270,6 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 	point.SetZ( m_depth_op_params.m_clearance_height );
 	ss << "rapid( x=" << centre.X(true) << ", y=" << centre.Y(true) << ", z=" << point.Z(true) << ")\n";
 
-    ss << "comment('End Counterbore operation for ID " << m_id << "')\n";
-
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 
 } // End GenerateGCodeForOneLocation() method
@@ -313,7 +308,7 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 				return;
 			} // End if - then
 
-			std::vector<CNCPoint> locations = FindAllLocations( m_symbols, NULL );
+			std::vector<CNCPoint> locations = FindAllLocations( NULL );
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point( pFixture->Adjustment(*l_itLocation) );
@@ -378,21 +373,14 @@ std::list< CNCPoint > CCounterBore::PointsAround( const CNCPoint & origin, const
  */
 void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 {
+	CDepthOp::glCommands(select,marked,no_color);
+
 	if(marked && !no_color)
 	{
-		// For all graphical symbols that this module refers to, highlight them as well.
-		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-		{
-			HeeksObj* object = heeksCAD->GetIDObject(l_itSymbol->first, l_itSymbol->second);
-
-			// If we found something, ask its CAD code to draw itself highlighted.
-			if(object)object->glCommands(false, true, false);
-		} // End for
-
 		// For all coordinates that relate to these reference objects, draw the graphics that represents
 		// both a drilling hole and a counterbore.
 
-		std::vector<CNCPoint> locations = FindAllLocations( m_symbols, NULL );
+		std::vector<CNCPoint> locations = FindAllLocations( NULL );
 		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
 			std::list< CNCPoint > circle = PointsAround( *l_itLocation, m_params.m_diameter / 2, 10 );
@@ -463,6 +451,24 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 		} // End for
 	} // End if - then
 }
+CCounterBore::CCounterBore( const CCounterBore & rhs ) : CDepthOp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CCounterBore & CCounterBore::operator= ( const CCounterBore & rhs )
+{
+	if (this != &rhs)
+	{
+		CDepthOp::operator=(rhs);
+		m_symbols.clear();
+		std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ) );
+
+		m_params = rhs.m_params;
+	}
+
+	return(*this);
+}
 
 
 void CCounterBore::GetProperties(std::list<Property *> *list)
@@ -478,7 +484,10 @@ HeeksObj *CCounterBore::MakeACopy(void)const
 
 void CCounterBore::CopyFrom(const HeeksObj* object)
 {
-	operator=(*((CCounterBore*)object));
+	if (object->GetType() == GetType())
+	{
+		operator=(*((CCounterBore*)object));
+	}
 }
 
 bool CCounterBore::CanAddTo(HeeksObj* owner)
@@ -512,12 +521,15 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 {
 	CCounterBore* new_object = new CCounterBore;
 
+	std::list<TiXmlElement *> elements_to_remove;
+
 	// read point and circle ids
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
 			new_object->m_params.ReadParametersFromXMLElement(pElem);
+			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
 			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
@@ -527,12 +539,42 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 					new_object->AddSymbol( atoi(child->Attribute("type")), atoi(child->Attribute("id")) );
 				}
 			} // End for
+
+			elements_to_remove.push_back(pElem);
 		} // End if
+	}
+
+	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
+	{
+		element->RemoveChild(*itElem);
 	}
 
 	new_object->ReadBaseXML(element);
 
 	return new_object;
+}
+
+/**
+	The old version of the CDrilling object stored references to graphics as type/id pairs
+	that get read into the m_symbols list.  The new version stores these graphics references
+	as child elements (based on ObjList).  If we read in an old-format file then the m_symbols
+	list will have data in it for which we don't have children.  This routine converts
+	these type/id pairs into the HeeksObj pointers as children.
+ */
+void CCounterBore::ReloadPointers()
+{
+	for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+		if (object != NULL)
+		{
+			Add( object, NULL );
+		}
+	}
+
+	m_symbols.clear();	// We don't want to convert them twice.
+
+	CDepthOp::ReloadPointers();
 }
 
 
@@ -549,22 +591,31 @@ HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
  *	size holes were drilled so that we can make an intellegent selection for the
  *	socket head.
  */
-std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced ) const
+std::vector<CNCPoint> CCounterBore::FindAllLocations( std::list<int> *pToolNumbersReferenced )
 {
 	std::vector<CNCPoint> locations;
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
-        // a drilling cycle.
+	// a drilling cycle.
 
-        for (CCounterBore::Symbols_t::const_iterator lhs = symbols.begin(); lhs != symbols.end(); lhs++)
-        {
+    std::list<HeeksObj *> lhs_children;
+	std::list<HeeksObj *> rhs_children;
+	for (HeeksObj *lhsPtr = GetFirstChild(); lhsPtr != NULL; lhsPtr = GetNextChild())
+	{
+	    lhs_children.push_back( lhsPtr );
+	    rhs_children.push_back( lhsPtr );
+	}
+
+	for (std::list<HeeksObj *>::iterator itLhs = lhs_children.begin(); itLhs != lhs_children.end(); itLhs++)
+	{
+	    HeeksObj *lhsPtr = *itLhs;
 		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
 							// intersect anything else, we want to know
 							// about it.
 
-		if (lhs->first == PointType)
+		if (lhsPtr->GetType() == PointType)
 		{
-			HeeksObj *obj = heeksCAD->GetIDObject( lhs->first, lhs->second );
+			HeeksObj *obj = lhsPtr;
 			if (obj != NULL)
 			{
 				double pos[3];
@@ -577,85 +628,74 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( const CCounterBore::Symbol
 			} // End if - then
 		} // End if - then
 
-		if (lhs->first == DrillingType)
+		if (lhsPtr->GetType() == DrillingType)
 		{
 			// Ask the Drilling object what reference points it uses.
-
-
-			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			// Ask the Drilling object what reference points it uses.
-			if (lhsPtr != NULL)
+			if ((((COp *) lhsPtr)->m_cutting_tool_number > 0) && (pToolNumbersReferenced != NULL))
 			{
-				if ((((COp *) lhsPtr)->m_cutting_tool_number > 0) && (pToolNumbersReferenced != NULL))
-				{
-					pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_cutting_tool_number );
-				} // End if - then
-
-				std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
-				for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
-				{
-					if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
-					{
-						locations.push_back( *l_itHole );
-					} // End if - then
-				} // End for
+				pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_cutting_tool_number );
 			} // End if - then
+
+			std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
+			for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
+			{
+				if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
+				{
+					locations.push_back( *l_itHole );
+				} // End if - then
+			} // End for
 		} // End if - then
 
-                for (CCounterBore::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
-                {
-                        if (lhs == rhs) continue;
-			if (lhs->first == PointType) continue;	// No need to intersect a point type.
+		for (std::list<HeeksObj *>::iterator itRhs = rhs_children.begin(); itRhs != rhs_children.end(); itRhs++)
+        {
+            HeeksObj *rhsPtr = *itRhs;
+
+			if (lhsPtr == rhsPtr) continue;
+			if (lhsPtr->GetType() == PointType) continue;	// No need to intersect a point type.
 
 			// Avoid repeated calls to the intersection code where possible.
-                        std::list<double> results;
-                        HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-                        HeeksObj *rhsPtr = heeksCAD->GetIDObject( rhs->first, rhs->second );
+            std::list<double> results;
 
 			if (lhsPtr == NULL) continue;
 			if (rhsPtr == NULL) continue;
 
-                        if (lhsPtr->Intersects( rhsPtr, &results ))
-                        {
+			if (lhsPtr->Intersects( rhsPtr, &results ))
+			{
 				l_bIntersectionsFound = true;
-                                while (((results.size() % 3) == 0) && (results.size() > 0))
-                                {
-                                        CNCPoint intersection;
+                while (((results.size() % 3) == 0) && (results.size() > 0))
+                {
+                        CNCPoint intersection;
 
-                                        intersection.SetX( *(results.begin()) );
-                                        results.erase(results.begin());
+                        intersection.SetX( *(results.begin()) );
+                        results.erase(results.begin());
 
-                                        intersection.SetY( *(results.begin()) );
-                                        results.erase(results.begin());
+                        intersection.SetY( *(results.begin()) );
+                        results.erase(results.begin());
 
-                                        intersection.SetZ( *(results.begin()) );
-                                        results.erase(results.begin());
+                        intersection.SetZ( *(results.begin()) );
+                        results.erase(results.begin());
 
-					if (std::find( locations.begin(), locations.end(), intersection ) == locations.end())
-					{
-                                        	locations.push_back(intersection);
-					} // End if - then
-                                } // End while
-                        } // End if - then
-                } // End for
+						if (std::find( locations.begin(), locations.end(), intersection ) == locations.end())
+						{
+							locations.push_back(intersection);
+						} // End if - then
+					} // End while
+				} // End if - then
+			} // End for
 
 		if (! l_bIntersectionsFound)
 		{
 			// This element didn't intersect anything else.  If it's a circle
 			// then add its centre point to the result set.
 
-			if (lhs->first == CircleType)
+			if (lhsPtr->GetType() == CircleType)
 			{
-                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-				if (lhsPtr != NULL)
+				double pos[3];
+				if (heeksCAD->GetArcCentre( lhsPtr, pos ))
 				{
-					double pos[3];
-					if (heeksCAD->GetArcCentre( lhsPtr, pos ))
+					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 					{
-						if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
-						{
-							locations.push_back( CNCPoint( pos ) );
-						} // End if - then
+						locations.push_back( CNCPoint( pos ) );
 					} // End if - then
 				} // End if - then
 			} // End if - then
@@ -710,6 +750,11 @@ std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_
 
 } // End SelectSizeForHead() method
 
+
+bool CCounterBore::CanAdd(HeeksObj* object)
+{
+	return(CCounterBore::ValidType(object->GetType()));
+}
 
 /**
     This method returns TRUE if the type of symbol is suitable for reference as a source of location

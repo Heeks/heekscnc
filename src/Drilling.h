@@ -94,7 +94,19 @@ public:
 		: CSpeedOp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
 	{
 		m_params.set_initial_values(depth, cutting_tool_number);
+		for (Symbols_t::iterator itSymbol = m_symbols.begin(); itSymbol != m_symbols.end(); itSymbol++)
+		{
+			HeeksObj *obj = heeksCAD->GetIDObject(itSymbol->first, itSymbol->second);
+			if (obj != NULL)
+			{
+				Add(obj, NULL);
+			}
+		} // End for
+		m_symbols.clear();	// We don't want to convert them twice.
 	}
+
+	CDrilling( const CDrilling & rhs );
+	CDrilling & operator= ( const CDrilling & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return DrillingType;}
@@ -107,7 +119,9 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	bool CanAdd(HeeksObj* object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void ReloadPointers();
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
@@ -116,8 +130,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	std::vector<CNCPoint> FindAllLocations( const CDrilling::Symbols_t & symbols ) const;
-	std::vector<CNCPoint> FindAllLocations() const;
+	std::vector<CNCPoint> FindAllLocations();
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	static bool ValidType( const int object_type );

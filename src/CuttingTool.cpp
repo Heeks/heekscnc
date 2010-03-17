@@ -138,7 +138,18 @@ void CCuttingToolParams::write_values_to_config()
 void CCuttingTool::SetDiameter( const double diameter )
 {
 	m_params.m_diameter = diameter;
-	ResetParametersToReasonableValues();
+	if (m_params.m_type == CCuttingToolParams::eChamfer)
+	{
+		// Recalculate the cutting edge length based on this new diameter
+		// and the cutting angle.
+
+		double opposite = m_params.m_diameter - m_params.m_flat_radius;
+		double angle = m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
+		
+		m_params.m_cutting_edge_height = opposite / tan(angle);
+	}
+
+	ResetTitle();
 	KillGLLists();
 	heeksCAD->Repaint();
 } // End SetDiameter() method
@@ -192,7 +203,7 @@ static void on_set_material(int zero_based_choice, HeeksObj* object)
 	if ((zero_based_choice >= CCuttingToolParams::eHighSpeedSteel) && (zero_based_choice <= CCuttingToolParams::eCarbide))
 	{
 		((CCuttingTool*)object)->m_params.m_material = zero_based_choice;
-		((CCuttingTool*)object)->ResetParametersToReasonableValues();
+		((CCuttingTool*)object)->ResetTitle();
 		heeksCAD->RefreshProperties();
 		object->KillGLLists();
 		heeksCAD->Repaint();
@@ -213,6 +224,7 @@ static void on_set_front_angle(double value, HeeksObj* object)
 static void on_set_tool_angle(double value, HeeksObj* object)
 {
 	((CCuttingTool*)object)->m_params.m_tool_angle = value;
+	((CCuttingTool*)object)->ResetTitle();
 	object->KillGLLists();
 	heeksCAD->Repaint();
 }
@@ -240,6 +252,8 @@ static void on_set_automatically_generate_title(int zero_based_choice, HeeksObj*
 	if (zero_based_choice < 0) return;	// An error has occured.
 
 	((CCuttingTool*)object)->m_params.m_automatically_generate_title = zero_based_choice;
+	((CCuttingTool*)object)->ResetTitle();
+
 } // End on_set_type() routine
 
 
@@ -252,174 +266,77 @@ static double degrees_to_radians( const double degrees )
 
 void CCuttingTool::ResetParametersToReasonableValues()
 {
-#ifdef UNICODE
-	std::wostringstream l_ossChange;
-#else
-    std::ostringstream l_ossChange;
-#endif
-
 	if (m_params.m_type != CCuttingToolParams::eTurningTool)
 	{
-		if (m_params.m_tool_length_offset != (5 * m_params.m_diameter))
-		{
-			m_params.m_tool_length_offset = (5 * m_params.m_diameter);
-			l_ossChange << "Resetting tool length to " << (m_params.m_tool_length_offset / theApp.m_program->m_units) << "\n";
-		} // End if - then
+		m_params.m_tool_length_offset = (5 * m_params.m_diameter);
 	} // End if - then
 
 	double height;
 	switch(m_params.m_type)
 	{
 		case CCuttingToolParams::eDrill:
-				if (m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				m_params.m_corner_radius = 0;
-
-				if (m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero\n";
 				m_params.m_flat_radius = 0;
-
-				if (m_params.m_cutting_edge_angle != 59) l_ossChange << "Changing cutting edge angle to 59 degrees (for normal 118 degree cutting face)\n";
 				m_params.m_cutting_edge_angle = 59;
-
-				if (m_params.m_cutting_edge_height != m_params.m_diameter * 3.0)
-				{
-					l_ossChange << "Changing cutting edge height to " << m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				} // End if - then
-
-				l_ossChange << ResetTitle().c_str();
+				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eCentreDrill:
-				if (m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				m_params.m_corner_radius = 0;
-
-				if (m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero\n";
 				m_params.m_flat_radius = 0;
-
-				if (m_params.m_cutting_edge_angle != 59) l_ossChange << "Changing cutting edge angle to 59 degrees (for normal 118 degree cutting face)\n";
 				m_params.m_cutting_edge_angle = 59;
-
-				if (m_params.m_cutting_edge_height != m_params.m_diameter * 1.0)
-				{
-					l_ossChange << "Changing cutting edge height to " << m_params.m_diameter / theApp.m_program->m_units * 1.0 << "\n";
-					m_params.m_cutting_edge_height = m_params.m_diameter * 1.0;
-				} // End if - then
-
-				l_ossChange << ResetTitle().c_str();
+				m_params.m_cutting_edge_height = m_params.m_diameter * 1.0;
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eEndmill:
-				if (m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				m_params.m_corner_radius = 0;
-
-				if (m_params.m_flat_radius != ( m_params.m_diameter / 2) )
-				{
-					l_ossChange << "Changing flat radius to " << m_params.m_diameter / 2 << "\n";
-					m_params.m_flat_radius = m_params.m_diameter / 2;
-				} // End if - then
-
-				if (m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
+				m_params.m_flat_radius = m_params.m_diameter / 2;
 				m_params.m_cutting_edge_angle = 0;
-
-				if (m_params.m_cutting_edge_height != m_params.m_diameter * 3.0)
-				{
-					l_ossChange << "Changing cutting edge height to " << m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				} // End if - then
-
-				l_ossChange << ResetTitle().c_str();
+				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eSlotCutter:
-				if (m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				m_params.m_corner_radius = 0;
-
-				if (m_params.m_flat_radius != (m_params.m_diameter / 2))
-				{
-					l_ossChange << "Changing flat radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
-					m_params.m_flat_radius = m_params.m_diameter / 2;
-				} // End if- then
-
-				if (m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
+				m_params.m_flat_radius = m_params.m_diameter / 2;
 				m_params.m_cutting_edge_angle = 0;
-
-				if (m_params.m_cutting_edge_height != m_params.m_diameter * 3.0)
-				{
-					l_ossChange << "Changing cutting edge height to " << m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				} // End if - then
-
-				l_ossChange << ResetTitle().c_str();
+				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eBallEndMill:
-				if (m_params.m_corner_radius != (m_params.m_diameter / 2))
-				{
-					l_ossChange << "Changing corner radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
-					m_params.m_corner_radius = (m_params.m_diameter / 2);
-				} // End if - then
-
-				if (m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero\n";
+				m_params.m_corner_radius = (m_params.m_diameter / 2);
 				m_params.m_flat_radius = 0;
-
-				if (m_params.m_cutting_edge_angle != 0) l_ossChange << "Changing cutting edge angle to zero degrees\n";
 				m_params.m_cutting_edge_angle = 0;
-
-				if (m_params.m_cutting_edge_height != m_params.m_diameter * 3.0)
-				{
-					l_ossChange << "Changing cutting edge height to " << m_params.m_diameter / theApp.m_program->m_units * 3.0 << "\n";
-					m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				} // End if - then
-
-				l_ossChange << ResetTitle().c_str();
+				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eTouchProbe:
-				if (m_params.m_corner_radius != (m_params.m_diameter / 2))
-				{
-					l_ossChange << "Changing corner radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
-					m_params.m_corner_radius = (m_params.m_diameter / 2);
-				} // End if - then
-
-				if (m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero\n";
+				m_params.m_corner_radius = (m_params.m_diameter / 2);
 				m_params.m_flat_radius = 0;
-
-				l_ossChange << ResetTitle().c_str();
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eToolLengthSwitch:
-				if (m_params.m_corner_radius != (m_params.m_diameter / 2))
-				{
-					l_ossChange << "Changing corner radius to " << ((m_params.m_diameter / 2) / theApp.m_program->m_units) << "\n";
-					m_params.m_corner_radius = (m_params.m_diameter / 2);
-				} // End if - then
-
-				l_ossChange << ResetTitle().c_str();
+				m_params.m_corner_radius = (m_params.m_diameter / 2);
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eChamfer:
-				if (m_params.m_corner_radius != 0) l_ossChange << "Changing corner radius to zero\n";
 				m_params.m_corner_radius = 0;
-
-				if (m_params.m_flat_radius != 0) l_ossChange << "Changing flat radius to zero (this may need to be reset)\n";
 				m_params.m_flat_radius = 0;
-
-				if (m_params.m_cutting_edge_angle != 45) l_ossChange << "Changing cutting edge angle to 45 degrees\n";
 				m_params.m_cutting_edge_angle = 45;
-
 				height = (m_params.m_diameter / 2.0) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
-				if (m_params.m_cutting_edge_height != height)
-				{
-					l_ossChange << "Changing cutting edge height to " << height / theApp.m_program->m_units << "\n";
-					m_params.m_cutting_edge_height = height;
-				} // End if - then
-
-				l_ossChange << ResetTitle().c_str();
+				m_params.m_cutting_edge_height = height;
+				ResetTitle();
 				break;
 
 		case CCuttingToolParams::eTurningTool:
 				// No special constraints for this.
-				l_ossChange << ResetTitle().c_str();
+				ResetTitle();
 				break;
 
 		default:
@@ -427,11 +344,6 @@ void CCuttingTool::ResetParametersToReasonableValues()
 				return;
 	} // End switch
 
-	if (l_ossChange.str().size() > 0)
-	{
-		// Removed to preserve user sanity. (and maybe their nearby property)
-		// wxMessageBox( wxString( l_ossChange.str().c_str() ).c_str() );
-	} // End if - then
 } // End ResetParametersToReasonableValues() method
 
 static void on_set_corner_radius(double value, HeeksObj* object)
@@ -443,20 +355,68 @@ static void on_set_corner_radius(double value, HeeksObj* object)
 
 static void on_set_flat_radius(double value, HeeksObj* object)
 {
+	if (value > (((CCuttingTool*)object)->m_params.m_diameter / 2.0))
+	{
+		wxMessageBox(_T("Flat radius cannot be larger than the tool's diameter"));
+		return;
+	}
+
 	((CCuttingTool*)object)->m_params.m_flat_radius = value;
+
+	if (((CCuttingTool*)object)->m_params.m_type == CCuttingToolParams::eChamfer)
+	{
+		// Recalculate the cutting edge length based on this new diameter
+		// and the cutting angle.
+
+		double opposite = ((CCuttingTool*)object)->m_params.m_diameter - ((CCuttingTool*)object)->m_params.m_flat_radius;
+		double angle = ((CCuttingTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
+		
+		((CCuttingTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
+	}
+
 	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_cutting_edge_angle(double value, HeeksObj* object)
 {
+	if (value < 0)
+	{
+		wxMessageBox(_T("Cutting edge angle must be zero or positive."));
+		return;
+	}
+
 	((CCuttingTool*)object)->m_params.m_cutting_edge_angle = value;
+	if (((CCuttingTool*)object)->m_params.m_type == CCuttingToolParams::eChamfer)
+	{
+		// Recalculate the cutting edge length based on this new diameter
+		// and the cutting angle.
+
+		double opposite = ((CCuttingTool*)object)->m_params.m_diameter - ((CCuttingTool*)object)->m_params.m_flat_radius;
+		double angle = ((CCuttingTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
+		
+		((CCuttingTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
+	}
+
+	((CCuttingTool*)object)->ResetTitle();
 	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
 static void on_set_cutting_edge_height(double value, HeeksObj* object)
 {
+	if (value <= 0)
+	{
+		wxMessageBox(_T("Cutting edge height must be positive."));
+		return;
+	}
+
+	if (((CCuttingTool*)object)->m_params.m_type == CCuttingToolParams::eChamfer)
+	{
+		wxMessageBox(_T("Cutting edge height is generated from diameter, flat radius and cutting edge angle for chamfering bits."));
+		return;
+	}
+
 	((CCuttingTool*)object)->m_params.m_cutting_edge_height = value;
 	object->KillGLLists();
 	heeksCAD->Repaint();

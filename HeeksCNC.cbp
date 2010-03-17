@@ -59,6 +59,10 @@
 		<Unit filename="src/BOM.h" />
 		<Unit filename="src/CNCConfig.h" />
 		<Unit filename="src/CNCPoint.h" />
+		<Unit filename="src/Chamfer.cpp" />
+		<Unit filename="src/Chamfer.h" />
+		<Unit filename="src/Contour.cpp" />
+		<Unit filename="src/Contour.h" />
 		<Unit filename="src/CounterBore.cpp" />
 		<Unit filename="src/CounterBore.h" />
 		<Unit filename="src/CuttingRate.cpp" />

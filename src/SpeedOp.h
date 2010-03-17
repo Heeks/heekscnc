@@ -37,6 +37,8 @@ public:
 	static bool m_auto_set_speeds_feeds;
 
 	CSpeedOp(const wxString& title, const int cutting_tool_number = -1 ):COp(title, cutting_tool_number){ReadDefaultValues();}
+	CSpeedOp & operator= ( const CSpeedOp & rhs );
+	CSpeedOp( const CSpeedOp & rhs );
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
@@ -52,6 +54,8 @@ public:
 	static void ReadFromConfig();
 	static void WriteToConfig();
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void glCommands(bool select, bool marked, bool no_color);
+	void ReloadPointers() { COp::ReloadPointers(); }
 
 	static wxString ConfigScope() { return(_T("SpeedOp")); }
 };
