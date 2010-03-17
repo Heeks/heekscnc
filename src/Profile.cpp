@@ -237,7 +237,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 		element->SetDoubleAttribute("tag_width", m_tag_width);
 		element->SetDoubleAttribute("tag_angle", m_tag_angle);
 	}
-	
+
 	element->SetDoubleAttribute("offset_extra", m_offset_extra);
 }
 
@@ -284,6 +284,28 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("tag_angle", &m_tag_angle);
 	pElem->Attribute("offset_extra", &m_offset_extra);
 }
+
+CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
+{
+	*this = rhs;	 // Call the assignment operator.
+}
+
+CProfile & CProfile::operator= ( const CProfile & rhs )
+{
+	if (this != &rhs)
+	{
+		CDepthOp::operator=( rhs );
+		m_sketches.clear();
+		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+
+		m_profile_params = rhs.m_profile_params;
+
+		// static double max_deviation_for_spline_to_arc;
+	}
+
+	return(*this);
+}
+
 
 void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
 {
@@ -906,7 +928,8 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 			if(m_profile_params.m_num_tags > 0)
 			{
-				l_ossPythonCode << _T(" tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle\n");
+			    l_ossPythonCode << wxString::Format(_T("depth_of_cut = ( start_depth - final_depth )\n")).c_str();
+				l_ossPythonCode << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle\n");
 				tag_string = _T(", start_depth, depth_of_cut, tag");
 			}
 
@@ -961,11 +984,21 @@ void CProfile::AppendTextToProgram(const CFixture *pFixture)
 		return;
 	} // End if - then
 
+	for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
+	{
+	    if (child->GetType() == SketchType)
+	    {
+	        m_sketches.push_back( child->m_id );
+	    }
+	}
+
 	std::vector<CNCPoint> starting_points;
 	wxString python_code = AppendTextToProgram( starting_points, pFixture );
 
 	CDepthOp::AppendTextToProgram(pFixture);
 	theApp.m_program_canvas->m_textCtrl->AppendText( python_code.c_str() );
+
+	m_sketches.clear();
 
 } // End AppendTextToProgram() method
 
@@ -1120,6 +1153,8 @@ static unsigned char cross16[32] = {0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x
 
 void CProfile::glCommands(bool select, bool marked, bool no_color)
 {
+	CDepthOp::glCommands(select, marked, no_color);
+
 	if(marked && !no_color)
 	{
 		// show the sketches as highlighted
@@ -1233,7 +1268,10 @@ HeeksObj *CProfile::MakeACopy(void)const
 
 void CProfile::CopyFrom(const HeeksObj* object)
 {
-	operator=(*((CProfile*)object));
+	if (object->GetType() == GetType())
+	{
+		operator=(*((CProfile*)object));
+	}
 }
 
 bool CProfile::CanAddTo(HeeksObj* owner)
@@ -1247,6 +1285,7 @@ void CProfile::WriteXML(TiXmlNode *root)
 	root->LinkEndChild( element );
 	m_profile_params.WriteXMLAttributes(element);
 
+	/*
 	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -1255,8 +1294,9 @@ void CProfile::WriteXML(TiXmlNode *root)
 		element->LinkEndChild( sketch_element );
 		sketch_element->SetAttribute("id", sketch);
 	}
+	*/
 
-	WriteBaseXML(element);
+	CDepthOp::WriteBaseXML(element);
 }
 
 // static member function
@@ -1264,16 +1304,37 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 {
 	CProfile* new_object = new CProfile;
 
+	std::list<TiXmlElement *> elements_to_remove;
+
 	// read profile parameters
 	TiXmlElement* params = TiXmlHandle(element).FirstChildElement("params").Element();
-	if(params)new_object->m_profile_params.ReadFromXMLElement(params);
+	if(params)
+	{
+		new_object->m_profile_params.ReadFromXMLElement(params);
+		elements_to_remove.push_back(params);
+	}
 
 	// read sketch ids
 	for(TiXmlElement* sketch = TiXmlHandle(element).FirstChildElement("sketch").Element(); sketch; sketch = sketch->NextSiblingElement())
 	{
-		int id = 0;
-		sketch->Attribute("id", &id);
-		if(id)new_object->m_sketches.push_back(id);
+		if ((wxString(Ctt(sketch->Value())) == wxString(_T("sketch"))) &&
+			(sketch->Attribute("id") != NULL) &&
+			(sketch->Attribute("title") == NULL))
+		{
+			int id = 0;
+			sketch->Attribute("id", &id);
+			if(id)
+			{
+				new_object->m_sketches.push_back(id);
+			}
+
+			elements_to_remove.push_back(sketch);
+		} // End if - then
+	}
+
+	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
+	{
+		element->RemoveChild(*itElem);
 	}
 
 	// read common parameters
@@ -1281,6 +1342,31 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 
 	return new_object;
 }
+
+
+/**
+	The old version of the CDrilling object stored references to graphics as type/id pairs
+	that get read into the m_symbols list.  The new version stores these graphics references
+	as child elements (based on ObjList).  If we read in an old-format file then the m_symbols
+	list will have data in it for which we don't have children.  This routine converts
+	these type/id pairs into the HeeksObj pointers as children.
+ */
+void CProfile::ReloadPointers()
+{
+	for (Sketches_t::iterator symbol = m_sketches.begin(); symbol != m_sketches.end(); symbol++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( SketchType, *symbol );
+		if (object != NULL)
+		{
+			Add( object, NULL );
+		}
+	}
+
+	m_sketches.clear();	// We don't want to convert them twice.
+
+	CDepthOp::ReloadPointers();
+}
+
 
 /**
 	If it's an 'inside' profile then we need to make sure the auto_roll_radius is not so large

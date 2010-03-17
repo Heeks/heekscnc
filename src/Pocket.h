@@ -27,13 +27,16 @@ public:
 
 class CPocket: public CDepthOp{
 public:
-	std::list<int> m_sketches;
+	typedef std::list<int> Sketches_t;
+	Sketches_t m_sketches;
 	CPocketParams m_pocket_params;
 
 	static double max_deviation_for_spline_to_arc;
 
 	CPocket():CDepthOp(GetTypeString()){}
-	CPocket(const std::list<int> &sketches, const int cutting_tool_number ):CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches){ReadDefaultValues();}
+	CPocket(const std::list<int> &sketches, const int cutting_tool_number );
+	CPocket( const CPocket & rhs );
+	CPocket & operator= ( const CPocket & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return PocketType;}
@@ -46,6 +49,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void ReloadPointers();
 
 	// COp's virtual functions
 	void AppendTextToProgram(const CFixture *pFixture);

@@ -44,16 +44,21 @@ public:
 		SetDepthsFromSketchesAndTool(sketches);
 	}
 
+	CDepthOp & operator= ( const CDepthOp & rhs );
+	CDepthOp( const CDepthOp & rhs );
+
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
+	void ReloadPointers();
 
 	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 	void AppendTextToProgram(const CFixture *pFixture);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void glCommands(bool select, bool marked, bool no_color);
 
 	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);

@@ -58,7 +58,8 @@ public:
 
 class CProfile: public CDepthOp{
 public:
-	std::list<int> m_sketches;
+	typedef std::list<int> Sketches_t;
+	Sketches_t	m_sketches;
 	CProfileParams m_profile_params;
 
 	static double max_deviation_for_spline_to_arc;
@@ -69,7 +70,20 @@ public:
 			m_sketches(sketches)
 	{
 		ReadDefaultValues();
+		for (std::list<int>::iterator id = m_sketches.begin(); id != m_sketches.end(); id++)
+		{
+			HeeksObj *object = heeksCAD->GetIDObject( SketchType, *id );
+			if (object != NULL)
+			{
+				Add( object, NULL );
+			}
+		}
+
+		m_sketches.clear();
 	} // End constructor
+
+	CProfile( const CProfile & rhs );
+	CProfile & operator= ( const CProfile & rhs );
 
 
 	// HeeksObj's virtual functions
@@ -83,6 +97,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	void ReloadPointers();
 
 	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed );
 	wxString AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, const CFixture *pFixture);

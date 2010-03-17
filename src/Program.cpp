@@ -59,9 +59,56 @@ HeeksObj *CProgram::MakeACopy(void)const
 	return new CProgram(*this);
 }
 
+/**
+	This is ALMOST the same as the assignment operator.  The difference is that
+	this, and its subordinate methods, augment themselves with the contents
+	of the object passed in rather than replacing their own copies.
+ */
 void CProgram::CopyFrom(const HeeksObj* object)
 {
-	operator=(*((CProgram*)object));
+	if (object->GetType() == GetType())
+	{
+		CProgram *rhs = (CProgram *) object;
+		// ObjList::operator=(*rhs);	// I don't think this will do anything in this case. But it might one day.
+
+		if ((m_nc_code != NULL) && (rhs->m_nc_code != NULL)) m_nc_code->CopyFrom( rhs->m_nc_code );
+		if ((m_operations != NULL) && (rhs->m_operations != NULL)) m_operations->CopyFrom( rhs->m_operations );
+		if ((m_tools != NULL) && (rhs->m_tools != NULL)) m_tools->CopyFrom( rhs->m_tools );
+		if ((m_speed_references != NULL) && (rhs->m_speed_references != NULL)) m_speed_references->CopyFrom(rhs->m_speed_references);
+		if ((m_fixtures != NULL) && (rhs->m_fixtures != NULL)) m_fixtures->CopyFrom(rhs->m_fixtures);
+
+		m_raw_material = rhs->m_raw_material;
+		m_machine = rhs->m_machine;
+		m_output_file = rhs->m_output_file;
+		m_output_file_name_follows_data_file_name = rhs->m_output_file_name_follows_data_file_name;
+
+		m_script_edited = rhs->m_script_edited;
+		m_units = rhs->m_units;
+	}
+}
+
+CProgram & CProgram::operator= ( const CProgram & rhs )
+{
+	if (this != &rhs)
+	{
+		ObjList::operator=(rhs);
+
+		if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
+		if ((m_operations != NULL) && (rhs.m_operations != NULL)) *m_operations = *(rhs.m_operations);
+		if ((m_tools != NULL) && (rhs.m_tools != NULL)) *m_tools = *(rhs.m_tools);
+		if ((m_speed_references != NULL) && (rhs.m_speed_references != NULL)) *m_speed_references = *(rhs.m_speed_references);
+		if ((m_fixtures != NULL) && (rhs.m_fixtures != NULL)) *m_fixtures = *(rhs.m_fixtures);
+
+		m_raw_material = rhs.m_raw_material;
+		m_machine = rhs.m_machine;
+		m_output_file = rhs.m_output_file;
+		m_output_file_name_follows_data_file_name = rhs.m_output_file_name_follows_data_file_name;
+
+		m_script_edited = rhs.m_script_edited;
+		m_units = rhs.m_units;
+	}
+
+	return(*this);
 }
 
 static void on_set_machine(int value, HeeksObj* object)

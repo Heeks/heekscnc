@@ -636,6 +636,152 @@ static PyObject* kurve_tangential_arc(PyObject* self, PyObject* args)
 	return pTuple;
 }
 
+Kurve BreakKurve(const Kurve& kurve, const Point& point)
+{
+	static bool f = true;
+
+	Kurve new_kurve;
+	int nspans = kurve.nSpans();
+	bool OnSpan_found = false;
+	for(int i = 0; i< nspans; i++)
+	{
+		Span span;
+		kurve.Get(i + 1, span, true);
+		if(point == span.p0 || point == span.p1)return kurve;
+		if(!new_kurve.Started())new_kurve.Start(span.p0);
+		if(OnSpan_found)
+		{
+			new_kurve.Add(span);
+		}
+		else
+		{
+			Point pn = span.NearOn(point);
+			if(pn == point)
+			{
+				Span span0 = span;
+				Span span1 = span;
+				span0.p1 = pn;
+				span1.p0 = pn;
+				span0.SetProperties(true);
+				span1.SetProperties(true);
+				new_kurve.Add(span0);
+				new_kurve.Add(span1);
+				OnSpan_found = true;
+			}
+			else
+			{
+				new_kurve.Add(span);
+			}
+		}
+	}
+
+	f = false;
+	return new_kurve;
+}
+
+Point PerimToPoint(const Kurve& kurve, double perim)
+{
+	int nspans = kurve.nSpans();
+	double kperim = 0.0;
+	Span span;
+	for(int i = 0; i< nspans; i++)
+	{
+		kurve.Get(i + 1, span, true);
+		if(perim < kperim + span.length)
+		{
+			return span.MidPerim(perim - kperim);
+		}
+		kperim += span.length;
+	}
+	return span.p1;
+}
+
+#ifdef KURVE_PYTHON_INTERFACE
+static PyObject* kurve_perim_to_point(PyObject* self, PyObject* args)
+{
+	double perim;
+	int ik;
+	if (!PyArg_ParseTuple(args, "id", &ik, &perim)) return NULL;
+
+	double px = 0, py = 0;
+#else
+void geoff_geometry::kurve_perim_to_point(Kurve *ik, double perim, double &px, double &py)
+{
+#endif // KURVE_PYTHON_INTERFACE
+
+	Kurve* k = (Kurve*)ik;
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		Point p = PerimToPoint(*k, perim);
+		px = p.x;
+		py = p.y;
+	}
+
+#ifdef KURVE_PYTHON_INTERFACE
+	// return point as a tuple
+	PyObject *pTuple = PyTuple_New(2);
+	{
+		PyObject *pValue = PyFloat_FromDouble(px);
+		if (!pValue){
+			Py_DECREF(pTuple);return NULL;
+		}
+		PyTuple_SetItem(pTuple, 0, pValue);
+	}
+	{
+		PyObject *pValue = PyFloat_FromDouble(py);
+		if (!pValue){
+			Py_DECREF(pTuple);return NULL;
+		}
+		PyTuple_SetItem(pTuple, 1, pValue);
+	}
+
+	Py_INCREF(pTuple);
+	return pTuple;
+#endif // KURVE_PYTHON_INTERFACE
+}
+
+#ifdef KURVE_PYTHON_INTERFACE
+static PyObject* kurve_perim(PyObject *self, PyObject *args)
+{
+	int ik;
+	if (!PyArg_ParseTuple(args, "i", &ik)) return NULL;
+	Kurve* k = (Kurve*)ik;
+
+	double perim = 0.0;
+
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		perim = k->Perim();
+	}
+
+	PyObject *pValue = PyFloat_FromDouble(perim);
+	Py_INCREF(pValue);
+	return pValue;
+}
+#endif
+
+#ifdef KURVE_PYTHON_INTERFACE
+static PyObject* kurve_kbreak(PyObject* self, PyObject* args)
+{
+	double x, y;
+	int ik;
+	if (!PyArg_ParseTuple(args, "idd", &ik, &x, &y)) return NULL;
+#else
+void geoff_geometry::kurve_kbreak(Kurve *ik, double x, double y)
+{
+#endif // KURVE_PYTHON_INTERFACE
+
+	Kurve* k = (Kurve*)ik;
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		*k = BreakKurve(*k, Point(x, y));
+	}
+
+#ifdef KURVE_PYTHON_INTERFACE
+	Py_RETURN_NONE;
+#endif // KURVE_PYTHON_INTERFACE
+}
+
 
 static PyMethodDef KurveMethods[] = {
 	{"new", kurve_new, METH_VARARGS , ""},
@@ -654,6 +800,9 @@ static PyMethodDef KurveMethods[] = {
 	{"get_span_dir", kurve_get_span_dir, METH_VARARGS , ""},
 	{"get_span_length", kurve_get_span_length, METH_VARARGS , ""},
 	{"tangential_arc", kurve_tangential_arc, METH_VARARGS , ""},
+	{"perim_to_point", kurve_perim_to_point, METH_VARARGS , ""},
+	{"perim", kurve_perim, METH_VARARGS , ""},
+	{"kbreak", kurve_kbreak, METH_VARARGS , ""},
 	{NULL, NULL, 0, NULL}
 };
 

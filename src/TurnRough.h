@@ -44,6 +44,8 @@ public:
 	{
 		m_turn_rough_params.set_initial_values();
 	} // End constructor
+	CTurnRough( const CTurnRough & rhs );
+	CTurnRough & operator= ( const CTurnRough & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return TurnRoughType;}

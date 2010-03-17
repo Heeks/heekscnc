@@ -170,7 +170,7 @@ void CDrilling::AppendTextToProgram( const CFixture *pFixture )
     ss.imbue(std::locale("C"));
 	ss<<std::setprecision(10);
 
-	std::vector<CNCPoint> locations = FindAllLocations( m_symbols );
+	std::vector<CNCPoint> locations = FindAllLocations();
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		gp_Pnt point = pFixture->Adjustment( *l_itLocation );
@@ -301,6 +301,8 @@ std::list< CNCPoint > CDrilling::DrillBitVertices( const CNCPoint & origin, cons
  */
 void CDrilling::glCommands(bool select, bool marked, bool no_color)
 {
+	CSpeedOp::glCommands(select, marked, no_color);
+
 	if(marked && !no_color)
 	{
 		double l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
@@ -314,15 +316,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			} // End if - then
 		} // End if - then
 
-		std::vector<CNCPoint> locations = FindAllLocations( m_symbols );
-
-		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-		{
-			HeeksObj* object = heeksCAD->GetIDObject(l_itSymbol->first, l_itSymbol->second);
-
-			// If we found something, ask its CAD code to draw itself highlighted.
-			if(object)object->glCommands(false, true, false);
-		} // End for
+		std::vector<CNCPoint> locations = FindAllLocations();
 
 		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
@@ -375,12 +369,44 @@ HeeksObj *CDrilling::MakeACopy(void)const
 
 void CDrilling::CopyFrom(const HeeksObj* object)
 {
-	operator=(*((CDrilling*)object));
+	if (object->GetType() == GetType())
+	{
+		operator=(*((CDrilling*)object));
+	}
+}
+
+CDrilling::CDrilling( const CDrilling & rhs ) : CSpeedOp( rhs )
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CDrilling & CDrilling::operator= ( const CDrilling & rhs )
+{
+	if (this != &rhs)
+	{
+		CSpeedOp::operator=(rhs);
+		m_symbols.clear();
+		std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ));
+
+		m_params = rhs.m_params;
+	}
+
+	return(*this);
 }
 
 bool CDrilling::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	int type = owner->GetType();
+
+	if (type == OperationsType) return(true);
+	if (type == CounterBoreType) return(true);
+
+	return(false);
+}
+
+bool CDrilling::CanAdd(HeeksObj* object)
+{
+	return(CDrilling::ValidType(object->GetType()));
 }
 
 void CDrilling::WriteXML(TiXmlNode *root)
@@ -393,14 +419,6 @@ void CDrilling::WriteXML(TiXmlNode *root)
 	symbols = new TiXmlElement( "symbols" );
 	element->LinkEndChild( symbols );
 
-	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-	{
-		TiXmlElement * symbol = new TiXmlElement( "symbol" );
-		symbols->LinkEndChild( symbol );
-		symbol->SetAttribute("type", l_itSymbol->first );
-		symbol->SetAttribute("id", l_itSymbol->second );
-	} // End for
-
 	WriteBaseXML(element);
 }
 
@@ -409,12 +427,15 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 {
 	CDrilling* new_object = new CDrilling;
 
+	std::list<TiXmlElement *> elements_to_remove;
+
 	// read point and circle ids
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
 			new_object->m_params.ReadParametersFromXMLElement(pElem);
+			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
 			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
@@ -422,9 +443,25 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 				if (child->Attribute("type") && child->Attribute("id"))
 				{
 					new_object->AddSymbol( atoi(child->Attribute("type")), atoi(child->Attribute("id")) );
+
+					// We need to convert these type/id pairs into HeeksObj pointers but we want them to
+					// come from the right source.  If we're importing data then they need to come from the
+					// data we're importing.  If we're updating the main model then the main tree
+					// will do.  We don't want to just use heeksCAD->GetIDObject() here as it will always
+					// look in the main tree.  Perhaps we can force a recursive 'ReloadPointers()' call
+					// so that these values are reset when necessary.  Eventually we will be storing the
+					// child elements as real XML elements rather than just references.  Until time passes
+					// a little longer, we need to support this type/id version.  Otherwise old HeeksCNC files
+					// won't read in correctly.
 				}
 			} // End for
+			elements_to_remove.push_back(pElem);
 		} // End if
+	}
+
+	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
+	{
+		element->RemoveChild(*itElem);
 	}
 
 	new_object->ReadBaseXML(element);
@@ -434,85 +471,115 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 
 
 /**
+	The old version of the CDrilling object stored references to graphics as type/id pairs
+	that get read into the m_symbols list.  The new version stores these graphics references
+	as child elements (based on ObjList).  If we read in an old-format file then the m_symbols
+	list will have data in it for which we don't have children.  This routine converts
+	these type/id pairs into the HeeksObj pointers as children.
+ */
+void CDrilling::ReloadPointers()
+{
+	for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+		if (object != NULL)
+		{
+			Add( object, NULL );
+		}
+	}
+
+	m_symbols.clear();	// We don't want to convert them twice.
+
+	CSpeedOp::ReloadPointers();
+}
+
+
+
+/**
  * 	This method looks through the symbols in the list.  If they're PointType objects
  * 	then the object's location is added to the result set.  If it's a circle object
  * 	that doesn't intersect any other element (selected) then add its centre to
  * 	the result set.  Finally, find the intersections of all of these elements and
  * 	add the intersection points to the result vector.
  */
-std::vector<CNCPoint> CDrilling::FindAllLocations( const CDrilling::Symbols_t & symbols ) const
+std::vector<CNCPoint> CDrilling::FindAllLocations()
 {
 	std::vector<CNCPoint> locations;
+	ReloadPointers();   // Make sure our integer lists have been converted into children first.
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
-        // a drilling cycle.
+	// a drilling cycle.
 
-        for (CDrilling::Symbols_t::const_iterator lhs = symbols.begin(); lhs != symbols.end(); lhs++)
-        {
+	std::list<HeeksObj *> lhs_children;
+	std::list<HeeksObj *> rhs_children;
+	for (HeeksObj *lhsPtr = GetFirstChild(); lhsPtr != NULL; lhsPtr = GetNextChild())
+	{
+	    lhs_children.push_back( lhsPtr );
+	    rhs_children.push_back( lhsPtr );
+	}
+
+	for (std::list<HeeksObj *>::iterator itLhs = lhs_children.begin(); itLhs != lhs_children.end(); itLhs++)
+	{
+	    HeeksObj *lhsPtr = *itLhs;
 		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
 							// intersect anything else, we want to know
 							// about it.
 
-		if (lhs->first == PointType)
+		if (lhsPtr->GetType() == PointType)
 		{
-			HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-			if (lhsPtr != NULL)
-			{
-				double pos[3];
-				lhsPtr->GetStartPoint(pos);
+			double pos[3];
+			lhsPtr->GetStartPoint(pos);
 
-				// Copy the results in ONLY if each point doesn't already exist.
-				if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
-				{
-					locations.push_back( CNCPoint( pos ) );
-				} // End if - then
+			// Copy the results in ONLY if each point doesn't already exist.
+			if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
+			{
+				locations.push_back( CNCPoint( pos ) );
 			} // End if - then
 
 			continue;	// No need to intersect a point with anything.
 		} // End if - then
 
-                for (CDrilling::Symbols_t::const_iterator rhs = symbols.begin(); rhs != symbols.end(); rhs++)
-                {
-                        if (lhs == rhs) continue;
-			if (lhs->first == PointType) continue;	// No need to intersect a point type.
+        for (std::list<HeeksObj *>::iterator itRhs = rhs_children.begin(); itRhs != rhs_children.end(); itRhs++)
+        {
+            HeeksObj *rhsPtr = *itRhs;
 
-                        std::list<double> results;
-                        HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-                        HeeksObj *rhsPtr = heeksCAD->GetIDObject( rhs->first, rhs->second );
+			if (lhsPtr == rhsPtr) continue;
+			if (lhsPtr->GetType() == PointType) continue;	// No need to intersect a point type.
 
-                        if ((lhsPtr != NULL) && (rhsPtr != NULL) && (lhsPtr->Intersects( rhsPtr, &results )))
-                        {
+            std::list<double> results;
+
+            if ((lhsPtr != NULL) && (rhsPtr != NULL) && (lhsPtr->Intersects( rhsPtr, &results )))
+            {
 				l_bIntersectionsFound = true;
-                                while (((results.size() % 3) == 0) && (results.size() > 0))
-                                {
-                                        CNCPoint intersection;
+                while (((results.size() % 3) == 0) && (results.size() > 0))
+                {
+                    CNCPoint intersection;
 
-                                        intersection.SetX( *(results.begin()) );
-                                        results.erase(results.begin());
+                    intersection.SetX( *(results.begin()) );
+                    results.erase(results.begin());
 
-                                        intersection.SetY( *(results.begin()) );
-                                        results.erase(results.begin());
+                    intersection.SetY( *(results.begin()) );
+                    results.erase(results.begin());
 
-                                        intersection.SetZ( *(results.begin()) );
-                                        results.erase(results.begin());
+                    intersection.SetZ( *(results.begin()) );
+                    results.erase(results.begin());
 
 					// Copy the results in ONLY if each point doesn't already exist.
 					if (std::find( locations.begin(), locations.end(), intersection ) == locations.end())
 					{
-	                                        locations.push_back(intersection);
+						locations.push_back(intersection);
 					} // End if - then
-                                } // End while
-                        } // End if - then
-                } // End for
+				} // End while
+			} // End if - then
+		} // End for
 
 		if (! l_bIntersectionsFound)
 		{
 			// This element didn't intersect anything else.  If it's a circle
 			// then add its centre point to the result set.
 
-			if (lhs->first == CircleType)
+			if (lhsPtr->GetType() == CircleType)
 			{
-                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
 				double pos[3];
 				if ((lhsPtr != NULL) && (heeksCAD->GetArcCentre( lhsPtr, pos )))
 				{
@@ -525,64 +592,52 @@ std::vector<CNCPoint> CDrilling::FindAllLocations( const CDrilling::Symbols_t & 
 			} // End if - then
 
 
-			if (lhs->first == SketchType)
+			if (lhsPtr->GetType() == SketchType)
 			{
-                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-				if (lhsPtr != NULL)
+				CBox bounding_box;
+				lhsPtr->GetBox( bounding_box );
+				double pos[3];
+				bounding_box.Centre(pos);
+				// Copy the results in ONLY if each point doesn't already exist.
+				if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
 				{
-					CBox bounding_box;
-					lhsPtr->GetBox( bounding_box );
-					double pos[3];
-					bounding_box.Centre(pos);
-					// Copy the results in ONLY if each point doesn't already exist.
-					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
+					locations.push_back( CNCPoint( pos ) );
+				} // End if - then
+			} // End if - then
+
+			if (lhsPtr->GetType() == ProfileType)
+			{
+				std::vector<CNCPoint> starting_points;
+				CFixture perfectly_aligned_fixture(NULL,CFixture::G54);
+
+				((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &perfectly_aligned_fixture );
+
+				// Copy the results in ONLY if each point doesn't already exist.
+				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
+				{
+					if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
 					{
-						locations.push_back( CNCPoint( pos ) );
+						locations.push_back( *l_itPoint );
 					} // End if - then
-				} // End if - then
+				} // End for
 			} // End if - then
 
-			if (lhs->first == ProfileType)
+			if (lhsPtr->GetType() == DrillingType)
 			{
-                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-				if (lhsPtr != NULL)
+				std::vector<CNCPoint> starting_points;
+				starting_points = ((CDrilling *)lhsPtr)->FindAllLocations();
+
+				// Copy the results in ONLY if each point doesn't already exist.
+				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
 				{
-					std::vector<CNCPoint> starting_points;
-					CFixture perfectly_aligned_fixture(NULL,CFixture::G54);
-
-					((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &perfectly_aligned_fixture );
-
-					// Copy the results in ONLY if each point doesn't already exist.
-					for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
+					if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
 					{
-						if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
-						{
-							locations.push_back( *l_itPoint );
-						} // End if - then
-					} // End for
-				} // End if - then
-			} // End if - then
-
-			if (lhs->first == DrillingType)
-			{
-                        	HeeksObj *lhsPtr = heeksCAD->GetIDObject( lhs->first, lhs->second );
-				if (lhsPtr != NULL)
-				{
-					std::vector<CNCPoint> starting_points;
-					starting_points = ((CDrilling *)lhsPtr)->FindAllLocations();
-
-					// Copy the results in ONLY if each point doesn't already exist.
-					for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
-					{
-						if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
-						{
-							locations.push_back( *l_itPoint );
-						} // End if - then
-					} // End for
-				} // End if - then
+						locations.push_back( *l_itPoint );
+					} // End if - then
+				} // End for
 			} // End if - then
 		} // End if - then
-        } // End for
+	} // End for
 
 	if (m_params.m_sort_drilling_locations)
 	{
@@ -626,10 +681,6 @@ std::vector<CNCPoint> CDrilling::FindAllLocations( const CDrilling::Symbols_t & 
 	return(locations);
 } // End FindAllLocations() method
 
-std::vector<CNCPoint> CDrilling::FindAllLocations() const
-{
-	return( FindAllLocations( m_symbols ) );
-} // End FindAllLocations() method
 
 /**
 	This method adjusts any parameters that don't make sense.  It should report a list

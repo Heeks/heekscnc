@@ -74,7 +74,29 @@ public:
 			m_sketches(sketches)
 	{
 		m_params.set_initial_values(solids, cutting_tool_number, reference_object_type, reference_object_id, sketches);
+
+		std::list<int>::iterator id;
+		for (id = m_solids.begin(); id != m_solids.end(); id++)
+		{
+			HeeksObj *object = heeksCAD->GetIDObject( SolidType, *id );
+			if (object != NULL)
+			{
+				Add(object, NULL);
+			}
+		}
+
+		for (id = m_sketches.begin(); id != m_sketches.end(); id++)
+		{
+			HeeksObj *object = heeksCAD->GetIDObject( SketchType, *id );
+			if (object != NULL)
+			{
+				Add(object, NULL);
+			}
+		}
 	} // End constructor
+
+	CAdaptive( const CAdaptive & rhs );
+	CAdaptive & operator= ( const CAdaptive & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return AdaptiveType;}

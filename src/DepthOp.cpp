@@ -27,6 +27,27 @@ CDepthOpParams::CDepthOpParams()
 	m_rapid_down_to_height = 0.0;
 }
 
+CDepthOp & CDepthOp::operator= ( const CDepthOp & rhs )
+{
+	if (this != &rhs)
+	{
+		CSpeedOp::operator=( rhs );
+		m_depth_op_params = rhs.m_depth_op_params;
+	}
+
+	return(*this);
+}
+
+CDepthOp::CDepthOp( const CDepthOp & rhs ) : CSpeedOp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+void CDepthOp::ReloadPointers()
+{
+	CSpeedOp::ReloadPointers();
+}
+
 static double degrees_to_radians( const double degrees )
 {
 	return( (degrees / 360.0) * (2 * PI) );
@@ -94,13 +115,20 @@ void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 	TiXmlElement* depthop = TiXmlHandle(pElem).FirstChildElement("depthop").Element();
 	if(depthop)
 	{
-
 		depthop->Attribute("clear", &m_clearance_height);
 		depthop->Attribute("down", &m_step_down);
 		depthop->Attribute("startdepth", &m_start_depth);
 		depthop->Attribute("depth", &m_final_depth);
 		depthop->Attribute("r", &m_rapid_down_to_height);
+
+		pElem->RemoveChild(depthop);	// We don't want to interpret this again when
+										// the ObjList::ReadBaseXML() method gets to it.
 	}
+}
+
+void CDepthOp::glCommands(bool select, bool marked, bool no_color)
+{
+	CSpeedOp::glCommands(select, marked, no_color);
 }
 
 void CDepthOp::WriteBaseXML(TiXmlElement *element)
