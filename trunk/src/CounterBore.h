@@ -88,10 +88,20 @@ public:
 			const int cutting_tool_number )
 		: CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_symbols(symbols)
 	{
+		for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
+		{
+			HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+			if (object != NULL)
+			{
+				Add(object,NULL);
+			} // End if - then
+		} // End for
+		m_symbols.clear();
+
 		m_params.set_initial_values( cutting_tool_number );
 
 		std::list<int> drillbits;
-		std::vector<CNCPoint> locations = FindAllLocations( symbols, &drillbits );
+		std::vector<CNCPoint> locations = FindAllLocations( &drillbits );
 		if (drillbits.size() > 0)
 		{
 			// We found some drilling objects amongst the symbols. Use the diameter of
@@ -110,6 +120,9 @@ public:
 		} // End if - then
 	}
 
+	CCounterBore( const CCounterBore & rhs );
+	CCounterBore & operator= ( const CCounterBore & rhs );
+
 
 	// HeeksObj's virtual functions
 	int GetType()const{return CounterBoreType;}
@@ -122,7 +135,9 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	bool CanAdd(HeeksObj* object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void ReloadPointers();
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
@@ -132,7 +147,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	std::vector<CNCPoint> FindAllLocations( const CCounterBore::Symbols_t & symbols, std::list<int> *pToolNumbersReferenced ) const;
+	std::vector<CNCPoint> FindAllLocations( std::list<int> *pToolNumbersReferenced );
 	static bool ValidType( const int object_type );
 
 };

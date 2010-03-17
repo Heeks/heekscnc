@@ -8,12 +8,12 @@
 #ifndef OP_HEADER
 #define OP_HEADER
 
-#include "interface/HeeksObj.h"
+#include "interface/ObjList.h"
 #include "Fixture.h"
 
 class CFixture;	// Forward declaration.
 
-class COp : public HeeksObj
+class COp : public ObjList
 {
 public:
 	wxString m_comment;
@@ -23,6 +23,8 @@ public:
 	int m_cutting_tool_number;	// joins the m_tool_number in one of the CCuttingTool objects in the tools list.
 
 	COp(const wxString& title, const int cutting_tool_number = 0):m_active(true), m_title(title), m_execution_order(0), m_cutting_tool_number(cutting_tool_number) {ReadDefaultValues();}
+	COp & operator= ( const COp & rhs );
+	COp( const COp & rhs );
 
 	// HeeksObj's virtual functions
 	void GetProperties(std::list<Property *> *list);
@@ -33,10 +35,13 @@ public:
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wxChar* str);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void glCommands(bool select, bool marked, bool no_color);
 
 	virtual void WriteDefaultValues();
 	virtual void ReadDefaultValues();
 	virtual void AppendTextToProgram( const CFixture *pFixture );
+
+	void ReloadPointers() { ObjList::ReloadPointers(); }
 
 	static bool IsAnOperation(int object_type);
 

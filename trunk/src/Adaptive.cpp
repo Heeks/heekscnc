@@ -588,15 +588,7 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 
 void CAdaptive::glCommands(bool select, bool marked, bool no_color)
 {
-	if(0 && marked && !no_color)
-	{
-		for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
-		{
-			int solid = *It;
-			HeeksObj* object = heeksCAD->GetIDObject(SolidType, solid);
-			if(object)object->glCommands(false, true, false);
-		}
-	}
+	COp::glCommands(select, marked, no_color);
 }
 
 void CAdaptive::GetProperties(std::list<Property *> *list)
@@ -616,6 +608,31 @@ void CAdaptive::CopyFrom(const HeeksObj* object)
 {
 	operator=(*((CAdaptive*)object));
 }
+
+CAdaptive::CAdaptive( const CAdaptive & rhs ) : COp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+CAdaptive & CAdaptive::operator= ( const CAdaptive & rhs )
+{
+	if (this != &rhs)
+	{
+		COp::operator =(rhs);
+
+		m_solids.clear();
+		std::copy( rhs.m_solids.begin(), rhs.m_solids.end(), std::inserter( m_solids, m_solids.begin() ) );
+
+		m_sketches.clear();
+		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+
+		m_params = rhs.m_params;
+		// static int number_for_stl_file;
+	}
+
+	return(*this);
+}
+
+
 
 bool CAdaptive::CanAddTo(HeeksObj* owner)
 {
@@ -653,12 +670,15 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 {
 	CAdaptive* new_object = new CAdaptive;
 
+	std::list<TiXmlElement *> elements_to_remove;
+
 	// read solid and sketch ids
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
 			new_object->m_params.ReadFromXMLElement(pElem);
+			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "solid"){
 			for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
@@ -669,6 +689,7 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 					new_object->m_solids.push_back(id);
 				}
 			}
+			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "sketch"){
 			for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
@@ -679,7 +700,13 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 					new_object->m_sketches.push_back(id);
 				}
 			}
+			elements_to_remove.push_back(pElem);
 		}
+	}
+
+	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
+	{
+		element->RemoveChild(*itElem);
 	}
 
 	new_object->ReadBaseXML(element);

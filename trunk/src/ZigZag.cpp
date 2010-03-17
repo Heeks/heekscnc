@@ -96,6 +96,8 @@ CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CS
 			{
 				m_params.m_box.Insert(CBox(extents));
 			}
+
+			Add(object, NULL);
 		}
 	}
 
@@ -113,6 +115,29 @@ CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CS
 		}
 	}
 }
+
+CZigZag::CZigZag( const CZigZag & rhs ) : CSpeedOp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CZigZag & CZigZag::operator= ( const CZigZag & rhs )
+{
+	if (this != &rhs)
+	{
+		CSpeedOp::operator =(rhs);
+
+		m_solids.clear();
+		std::copy( rhs.m_solids.begin(), rhs.m_solids.end(), std::inserter( m_solids, m_solids.begin() ) );
+
+		m_params = rhs.m_params;
+		// static int number_for_stl_file;
+	}
+
+	return(*this);
+}
+
+
 
 void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 {
@@ -222,15 +247,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 
 void CZigZag::glCommands(bool select, bool marked, bool no_color)
 {
-	if(0 && marked && !no_color)
-	{
-		for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
-		{
-			int solid = *It;
-			HeeksObj* object = heeksCAD->GetIDObject(SolidType, solid);
-			if(object)object->glCommands(false, true, false);
-		}
-	}
+	CSpeedOp::glCommands(select, marked, no_color);
 }
 
 void CZigZag::GetProperties(std::list<Property *> *list)
@@ -278,12 +295,15 @@ HeeksObj* CZigZag::ReadFromXMLElement(TiXmlElement* element)
 {
 	CZigZag* new_object = new CZigZag;
 
+	std::list<TiXmlElement *> elements_to_remove;
+
 	// read solid ids
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
 			new_object->m_params.ReadFromXMLElement(pElem);
+			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "solid"){
 			for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
@@ -294,12 +314,31 @@ HeeksObj* CZigZag::ReadFromXMLElement(TiXmlElement* element)
 					new_object->m_solids.push_back(id);
 				}
 			}
+			elements_to_remove.push_back(pElem);
 		}
+	}
+
+	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
+	{
+		element->RemoveChild(*itElem);
 	}
 
 	new_object->ReadBaseXML(element);
 
 	return new_object;
+}
+
+bool CZigZag::CanAdd(HeeksObj* object)
+{
+	switch (object->GetType())
+	{
+	case SolidType:
+	case SketchType:
+		return(true);
+
+	default:
+		return(false);
+	}
 }
 
 void CZigZag::WriteDefaultValues()

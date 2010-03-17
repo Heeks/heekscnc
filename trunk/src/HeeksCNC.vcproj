@@ -369,6 +369,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Chamfer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Chamfer.h"
+			>
+		</File>
+		<File
 			RelativePath="..\kurve\geometry\Construction.cpp"
 			>
 			<FileConfiguration
@@ -522,6 +530,10 @@
 		</File>
 		<File
 			RelativePath=".\HeeksCNC.h"
+			>
+		</File>
+		<File
+			RelativePath=".\HeeksCNCTypes.h"
 			>
 		</File>
 		<File

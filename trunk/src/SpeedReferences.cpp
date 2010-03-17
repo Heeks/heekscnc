@@ -77,7 +77,6 @@ void ImportSpeedReferencesFile( const wxChar *file_path )
     } // End for
 
     // And read the default speed references.
-    // heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_speed_references );
     heeksCAD->OpenXMLFile( file_path, theApp.m_program->SpeedReferences() );
 }
 

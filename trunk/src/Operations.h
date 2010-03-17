@@ -10,7 +10,12 @@
 class COperations: public ObjList {
 	static wxIcon* m_icon;
 public:
+	COperations() { }
+	COperations & operator= ( const COperations & rhs );
+	COperations( const COperations & rhs );
+
 	// HeeksObj's virtual functions
+	void CopyFrom(const HeeksObj *object);
 	bool OneOfAKind(){return true;}
 	int GetType()const{return OperationsType;}
 	const wxChar* GetTypeString(void)const{return _("Operations");}
@@ -23,6 +28,8 @@ public:
 	bool AutoExpand(){return true;}
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	bool UsesID() const { return(false); }
+	void glCommands(bool select, bool marked, bool no_color);
+	void ReloadPointers();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

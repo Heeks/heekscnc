@@ -1017,6 +1017,71 @@ bool CProbing::CanAddTo(HeeksObj* owner)
 }
 
 
+CProbing::CProbing( const CProbing & rhs) : CSpeedOp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CProbing & CProbing::operator= ( const CProbing & rhs )
+{
+	if (this != &rhs)
+	{
+		CSpeedOp::operator=( rhs );
+
+		m_depth = rhs.m_depth;
+		m_distance = rhs.m_distance;
+	}
+
+	return(*this);
+}
+
+
+CProbe_Centre::CProbe_Centre( const CProbe_Centre & rhs ) : CProbing(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CProbe_Centre & CProbe_Centre::operator= ( const CProbe_Centre & rhs )
+{
+	if (this != &rhs)
+	{
+		CProbing::operator =(rhs);
+
+		m_direction = rhs.m_direction;
+		m_number_of_points = rhs.m_number_of_points;
+		m_alignment = rhs.m_alignment;
+	}
+
+	return(*this);
+}
+
+
+CProbe_Edge::CProbe_Edge( const CProbe_Edge & rhs ) : CProbing(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CProbe_Edge & CProbe_Edge::operator= ( const CProbe_Edge & rhs )
+{
+	if (this != &rhs)
+	{
+		CProbing::operator =(rhs);
+
+		m_retract = rhs.m_retract;
+		m_number_of_edges = rhs.m_number_of_edges;
+		m_edge = rhs.m_edge;
+		m_corner = rhs.m_corner;
+		m_check_levels = rhs.m_check_levels;
+
+		m_corner_coordinate = rhs.m_corner_coordinate;
+		m_final_coordinate = rhs.m_final_coordinate;
+	}
+
+	return(*this);
+}
+
+
+
 void CProbe_Edge::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( Ttc(GetTypeString()) );

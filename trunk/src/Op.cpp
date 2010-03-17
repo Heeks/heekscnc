@@ -28,7 +28,7 @@ void COp::WriteBaseXML(TiXmlElement *element)
 	element->SetAttribute("execution_order", m_execution_order);
 	element->SetAttribute("cutting_tool_number", m_cutting_tool_number);
 
-	HeeksObj::WriteBaseXML(element);
+	ObjList::WriteBaseXML(element);
 }
 
 void COp::ReadBaseXML(TiXmlElement* element)
@@ -63,7 +63,7 @@ void COp::ReadBaseXML(TiXmlElement* element)
 		m_cutting_tool_number = 0;
 	} // End if - else
 
-	HeeksObj::ReadBaseXML(element);
+	ObjList::ReadBaseXML(element);
 }
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
@@ -107,11 +107,52 @@ void COp::GetProperties(std::list<Property *> *list)
 			} // End if - then
 		} // End for
 
-                list->push_back(new PropertyChoice(_("cutting tool"), choices, choice, this, on_set_cutting_tool_number));
-        }
+		list->push_back(new PropertyChoice(_("cutting tool"), choices, choice, this, on_set_cutting_tool_number));
+	}
 
-	HeeksObj::GetProperties(list);
+	ObjList::GetProperties(list);
 }
+
+COp & COp::operator= ( const COp & rhs )
+{
+	if (this != &rhs)
+	{
+		// In the case of machine operations, the child objects are all used
+		// for reference (position etc.) only.  When we duplicate the machine
+		// operation, we don't want to duplicate these reference (child)
+		// objects too.
+		// To this end, we want to copy the m_objects list without duplicating the
+		// objects they point to.  i.e. don't call the ObjList::operator=( rhs ) method.
+
+		m_objects.clear();
+		for (HeeksObj *child = ((ObjList &)rhs).GetFirstChild(); child != NULL; child = ((ObjList &)rhs).GetNextChild())
+		{
+			m_objects.push_back( child );
+		} // End for
+
+		HeeksObj::operator=(rhs);	// We need to call this as we've skipped over the ObjList::operator=() method
+									// which would normally have called it for us.
+
+		m_comment = rhs.m_comment;
+		m_active = rhs.m_active;
+		m_title = rhs.m_title;
+		m_execution_order = rhs.m_execution_order;
+		m_cutting_tool_number = m_cutting_tool_number;
+	}
+
+	return(*this);
+}
+
+COp::COp( const COp & rhs ) : ObjList(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+void COp::glCommands(bool select, bool marked, bool no_color)
+{
+	ObjList::glCommands(select, marked, no_color);
+}
+
 
 void COp::WriteDefaultValues()
 {
@@ -202,6 +243,7 @@ bool COp::IsAnOperation(int object_type)
 		case LocatingType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
+		case ChamferType:
 			return true;
 		default:
 			return false;
@@ -215,5 +257,5 @@ void COp::OnEditString(const wxChar* str){
 
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-    HeeksObj::GetTools( t_list, p );
+    ObjList::GetTools( t_list, p );
 }

@@ -97,6 +97,10 @@ public:
 
 		CNCCode::ReadColorsFromConfig();	// We're going to need them in the glCommands() methods
 	}
+
+	CProbing( const CProbing & rhs);
+	CProbing & operator= ( const CProbing & rhs );
+
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
@@ -321,6 +325,9 @@ public:
 		GenerateMeaningfullName();
 	}
 
+	CProbe_Centre( const CProbe_Centre & rhs );
+	CProbe_Centre & operator= ( const CProbe_Centre & rhs );
+
 	// HeeksObj's virtual functions
 	int GetType()const{return ProbeCentreType;}
 	void WriteXML(TiXmlNode *root);
@@ -383,6 +390,9 @@ public:
 		m_final_coordinate.SetY(0.0);
 		m_final_coordinate.SetZ(0.0);
 	}
+
+	CProbe_Edge( const CProbe_Edge & rhs );
+	CProbe_Edge & operator= ( const CProbe_Edge & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProbeEdgeType;}

@@ -15,6 +15,47 @@ bool COperations::CanAdd(HeeksObj* object)
 	return 	COp::IsAnOperation(object->GetType());
 }
 
+COperations & COperations::operator= ( const COperations & rhs )
+{
+	if (this != &rhs)
+	{
+		ObjList::operator=( rhs );
+	}
+
+	return(*this);
+}
+
+COperations::COperations( const COperations & rhs ) : ObjList(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+/**
+	This is ALMOST the same as the assignment operator.  The difference is that
+	this method augments its local list of operations with those passed in rather
+	than replacing them.
+ */
+void COperations::CopyFrom(const HeeksObj *object)
+{
+	COperations *rhs = (COperations*)object;
+	for (HeeksObj *child = rhs->GetFirstChild(); child != NULL; child = rhs->GetNextChild())
+	{
+		child->SetID( heeksCAD->GetNextID(child->GetType()) );
+		Add(child, NULL);
+	} // End for
+}
+
+void COperations::ReloadPointers()
+{
+	ObjList::ReloadPointers();
+}
+
+void COperations::glCommands(bool select, bool marked, bool no_color)
+{
+	ObjList::glCommands(select, marked, no_color);
+}
+
+
 void COperations::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;

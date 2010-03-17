@@ -31,6 +31,8 @@ public:
 
 	CZigZag():CSpeedOp(GetTypeString()){}
 	CZigZag(const std::list<int> &solids, const int cutting_tool_number = -1);
+	CZigZag( const CZigZag & rhs );
+	CZigZag & operator= ( const CZigZag & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ZigZagType;}
@@ -42,6 +44,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	bool CanAdd(HeeksObj* object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	void WriteDefaultValues();

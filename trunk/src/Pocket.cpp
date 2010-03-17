@@ -248,6 +248,8 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 
 void CPocket::AppendTextToProgram(const CFixture *pFixture)
 {
+    ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
+
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool == NULL)
 	{
@@ -257,14 +259,10 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 	CDepthOp::AppendTextToProgram(pFixture);
 
-	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-	{
-		int sketch = *It;
-
-		// write an area definition
-		HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
+    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
+    {
 		if(object == NULL || object->GetNumChildren() == 0){
-			wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist - %d"), sketch));
+			wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
 			continue;
 		}
 
@@ -288,7 +286,7 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 				{
 				case SketchOrderTypeOpen:
 					{
-						wxMessageBox(wxString::Format(_("Pocket operation - Sketch must be a closed shape - sketch %d"), sketch));
+						wxMessageBox(wxString::Format(_("Pocket operation - Sketch must be a closed shape - sketch %d"), object->m_id));
 						delete re_ordered_sketch;
 						continue;
 					}
@@ -296,7 +294,7 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 				default:
 					{
-						wxMessageBox(wxString::Format(_("Pocket operation - Badly ordered sketch - sketch %d"), sketch));
+						wxMessageBox(wxString::Format(_("Pocket operation - Badly ordered sketch - sketch %d"), object->m_id));
 						delete re_ordered_sketch;
 						continue;
 					}
@@ -307,13 +305,13 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 		if(object)
 		{
-			WriteSketchDefn(object, pFixture, sketch);
+			WriteSketchDefn(object, pFixture, object->m_id);
 
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
 			theApp.m_program_canvas->AppendText(_T("area_funcs.pocket(a"));
-			theApp.m_program_canvas->AppendText(sketch);
+			theApp.m_program_canvas->AppendText(object->m_id);
 			theApp.m_program_canvas->AppendText(_T(", tool_diameter/2 + "));
 			theApp.m_program_canvas->AppendText(m_pocket_params.m_material_allowance / theApp.m_program->m_units);
 			theApp.m_program_canvas->AppendText(_T(", rapid_down_to_height, start_depth, final_depth, "));
@@ -358,15 +356,7 @@ void CPocket::ReadDefaultValues()
 
 void CPocket::glCommands(bool select, bool marked, bool no_color)
 {
-	if(marked && !no_color)
-	{
-		for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-		{
-			int sketch = *It;
-			HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
-			if(object)object->glCommands(false, true, false);
-		}
-	}
+	CDepthOp::glCommands( select, marked, no_color );
 }
 
 void CPocket::GetProperties(std::list<Property *> *list)
@@ -384,6 +374,26 @@ HeeksObj *CPocket::MakeACopy(void)const
 void CPocket::CopyFrom(const HeeksObj* object)
 {
 	operator=(*((CPocket*)object));
+}
+
+CPocket::CPocket( const CPocket & rhs ) : CDepthOp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CPocket & CPocket::operator= ( const CPocket & rhs )
+{
+	if (this != &rhs)
+	{
+		CDepthOp::operator=(rhs);
+		m_sketches.clear();
+		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+
+		m_pocket_params = rhs.m_pocket_params;
+		// static double max_deviation_for_spline_to_arc;
+	}
+
+	return(*this);
 }
 
 bool CPocket::CanAddTo(HeeksObj* owner)
@@ -414,16 +424,37 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 {
 	CPocket* new_object = new CPocket;
 
+	std::list<TiXmlElement *> elements_to_remove;
+
 	// read profile parameters
 	TiXmlElement* params = TiXmlHandle(element).FirstChildElement("params").Element();
-	if(params)new_object->m_pocket_params.ReadFromXMLElement(params);
+	if(params)
+	{
+		new_object->m_pocket_params.ReadFromXMLElement(params);
+		elements_to_remove.push_back(params);
+	}
 
 	// read sketch ids
 	for(TiXmlElement* sketch = TiXmlHandle(element).FirstChildElement("sketch").Element(); sketch; sketch = sketch->NextSiblingElement())
 	{
-		int id = 0;
-		sketch->Attribute("id", &id);
-		if(id)new_object->m_sketches.push_back(id);
+		if ((wxString(Ctt(sketch->Value())) == wxString(_T("sketch"))) &&
+			(sketch->Attribute("id") != NULL) &&
+			(sketch->Attribute("title") == NULL))
+		{
+			int id = 0;
+			sketch->Attribute("id", &id);
+			if(id)
+			{
+				new_object->m_sketches.push_back(id);
+			}
+
+			elements_to_remove.push_back(sketch);
+		} // End if - then
+	}
+
+	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
+	{
+		element->RemoveChild(*itElem);
 	}
 
 	// read common parameters
@@ -431,6 +462,48 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 
 	return new_object;
 }
+
+CPocket::CPocket(const std::list<int> &sketches, const int cutting_tool_number )
+	: CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches)
+{
+	ReadDefaultValues();
+
+	for (Sketches_t::iterator sketch = m_sketches.begin(); sketch != m_sketches.end(); sketch++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( SketchType, *sketch );
+		if (object != NULL)
+		{
+			Add( object, NULL );
+		}
+	}
+
+	m_sketches.clear();
+}
+
+
+/**
+	The old version of the CDrilling object stored references to graphics as type/id pairs
+	that get read into the m_symbols list.  The new version stores these graphics references
+	as child elements (based on ObjList).  If we read in an old-format file then the m_symbols
+	list will have data in it for which we don't have children.  This routine converts
+	these type/id pairs into the HeeksObj pointers as children.
+ */
+void CPocket::ReloadPointers()
+{
+	for (Sketches_t::iterator symbol = m_sketches.begin(); symbol != m_sketches.end(); symbol++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( SketchType, *symbol );
+		if (object != NULL)
+		{
+			Add( object, NULL );
+		}
+	}
+
+	m_sketches.clear();	// We don't want to convert them twice.
+
+	CDepthOp::ReloadPointers();
+}
+
 
 
 /**

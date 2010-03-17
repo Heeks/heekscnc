@@ -287,16 +287,7 @@ void CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 
 void CTurnRough::glCommands(bool select, bool marked, bool no_color)
 {
-	if(marked && !no_color)
-	{
-		// show the sketches as highlighted
-		for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-		{
-			int sketch = *It;
-			HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
-			if(object)object->glCommands(false, true, false);
-		}
-	}
+	CSpeedOp::glCommands(select, marked, no_color);
 }
 
 void CTurnRough::GetProperties(std::list<Property *> *list)
@@ -318,6 +309,27 @@ void CTurnRough::CopyFrom(const HeeksObj* object)
 {
 	operator=(*((CTurnRough*)object));
 }
+
+CTurnRough::CTurnRough( const CTurnRough & rhs ) : CSpeedOp(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CTurnRough & CTurnRough::operator= ( const CTurnRough & rhs )
+{
+	if (this != &rhs)
+	{
+		CSpeedOp::operator =(rhs);
+
+		m_sketches.clear();
+		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+		
+		m_turn_rough_params = rhs.m_turn_rough_params;
+	}
+	
+	return(*this);
+}
+
 
 bool CTurnRough::CanAddTo(HeeksObj* owner)
 {
