@@ -402,10 +402,11 @@ void CProgram::RewritePythonProgram()
 	CAdaptive::number_for_stl_file = 1;
 
 	bool kurve_module_needed = false;
+	bool kurve_funcs_needed = false;
 	bool area_module_needed = false;
-	bool profile_op_exists = false;
-	bool pocket_op_exists = false;
-	bool zigzag_op_exists = false;
+	bool area_funcs_needed = false;
+	bool pycam_needed = false;
+	bool opencamlib_needed = false;
 	bool adaptive_op_exists = false;
 	bool drilling_op_exists = false;
 	bool counterbore_op_exists = false;
@@ -430,7 +431,7 @@ void CProgram::RewritePythonProgram()
 			if(((CProfile*)object)->m_active)
 			{
 				kurve_module_needed = true;
-				profile_op_exists = true;
+				kurve_funcs_needed = true;
 			}
 		}
 		else if(object->GetType() == PocketType)
@@ -438,12 +439,25 @@ void CProgram::RewritePythonProgram()
 			if(((CPocket*)object)->m_active)
 			{
 				area_module_needed = true;
-				pocket_op_exists = true;
+				area_funcs_needed = true;
 			}
 		}
 		else if(object->GetType() == ZigZagType)
 		{
-			if(((CZigZag*)object)->m_active)zigzag_op_exists = true;
+			if(((CZigZag*)object)->m_active)
+			{
+				switch(((CZigZag*)object)->m_params.m_lib)
+				{
+				case 0:// pycam
+					pycam_needed = true;
+					break;
+				case 1:
+					opencamlib_needed = true;
+					break;
+				default:
+					break;
+				}
+			}
 		}
 		else if(object->GetType() == AdaptiveType)
 		{
@@ -486,7 +500,7 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->AppendText(_T("import kurve\n"));
 	}
 
-	if(profile_op_exists)
+	if(kurve_funcs_needed)
 	{
 		theApp.m_program_canvas->AppendText(_T("import kurve_funcs\n"));
 	}
@@ -500,13 +514,13 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->AppendText(_T(")\n"));
 	}
 
-	if(pocket_op_exists)
+	if(area_funcs_needed)
 	{
 		theApp.m_program_canvas->AppendText(_T("import area_funcs\n"));
 	}
 
 	// pycam stuff
-	if(zigzag_op_exists)
+	if(pycam_needed)
 	{
 #ifdef WIN32
 		theApp.m_program_canvas->AppendText(_T("import sys\n"));
@@ -521,6 +535,12 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->AppendText(_T("from pycam.PathGenerators.DropCutter import DropCutter\n"));
 		theApp.m_program_canvas->AppendText(_T("from PyCamToHeeks import HeeksCNCExporter\n"));
 		theApp.m_program_canvas->AppendText(_T("\n"));
+	}
+
+	// OpenCamLib stuff
+	if(opencamlib_needed)
+	{
+		theApp.m_program_canvas->AppendText(_T("import ocl\n"));
 	}
 
 	// actp
