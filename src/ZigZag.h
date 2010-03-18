@@ -7,12 +7,19 @@
 
 class CZigZag;
 
+enum DropCutterLibraryEnum
+{
+	DropCutterUsePyCam,
+	DropCutterUseOpenCamLib,
+};
+
 class CZigZagParams{
 public:
 	CBox m_box;
 	double m_dx;
 	double m_dy;
 	int m_direction; // 0 = x, 1 = y
+	int m_lib; // 0 = pycam, 1 = OpenCamLib
 
 	void set_initial_values(const std::list<int> &solids);
 	void write_values_to_config();

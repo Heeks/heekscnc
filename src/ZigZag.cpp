@@ -27,6 +27,7 @@ static void on_set_z1(double value, HeeksObj* object){((CZigZag*)object)->m_para
 static void on_set_dx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_dx = value;}
 static void on_set_dy(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_dy = value;}
 static void on_set_direction(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_direction = value;}
+static void on_set_library(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_lib = value;}
 
 void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 {
@@ -44,6 +45,12 @@ void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 		choices.push_back(_("Y"));
 		list->push_back(new PropertyChoice(_("direction"), choices, m_direction, parent, on_set_direction));
 	}
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("pycam"));
+		choices.push_back(_("OpenCamLib"));
+		list->push_back(new PropertyChoice(_("library"), choices, m_lib, parent, on_set_library));
+	}
 }
 
 void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
@@ -60,24 +67,22 @@ void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("dx", m_dx);
 	element->SetDoubleAttribute("dy", m_dy);
 	element->SetAttribute("dir", m_direction);
+	element->SetAttribute("lib", m_lib);
 }
 
 void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	// get the attributes
-	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
-	{
-		std::string name(a->Name());
-		if(name == "minx"){m_box.m_x[0] = a->DoubleValue();}
-		else if(name == "maxx"){m_box.m_x[3] = a->DoubleValue();}
-		else if(name == "miny"){m_box.m_x[1] = a->DoubleValue();}
-		else if(name == "maxy"){m_box.m_x[4] = a->DoubleValue();}
-		else if(name == "z0"){m_box.m_x[2] = a->DoubleValue();}
-		else if(name == "z1"){m_box.m_x[5] = a->DoubleValue();}
-		else if(name == "dx"){m_dx = a->DoubleValue();}
-		else if(name == "dy"){m_dy = a->DoubleValue();}
-		else if(name == "dir"){m_direction = a->IntValue();}
-	}
+	pElem->Attribute("minx", &m_box.m_x[0]);
+	pElem->Attribute("maxx", &m_box.m_x[3]);
+	pElem->Attribute("miny", &m_box.m_x[1]);
+	pElem->Attribute("maxy", &m_box.m_x[4]);
+	pElem->Attribute("z0", &m_box.m_x[2]);
+	pElem->Attribute("z1", &m_box.m_x[5]);
+	pElem->Attribute("dx", &m_dx);
+	pElem->Attribute("dy", &m_dy);
+	pElem->Attribute("dir", &m_direction);
+	pElem->Attribute("lib", &m_lib);
 }
 
 CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CSpeedOp(GetTypeString(), cutting_tool_number), m_solids(solids)
@@ -205,7 +210,11 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 #endif
     ss.imbue(std::locale("C"));
 
-	switch(pCuttingTool->m_params.m_type){
+	switch(this->m_params.m_lib)
+	{
+	case 0: // pycam
+		{
+			switch(pCuttingTool->m_params.m_type){
 	case CCuttingToolParams::eBallEndMill:
 	case CCuttingToolParams::eSlotCutter:
 	case CCuttingToolParams::eEndmill:
@@ -225,22 +234,41 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 	default:
 		wxMessageBox(_("invalid tool type"));
 		break;
-	};
+			};
 
-    ss << "model = ImportModel('" << filepath.c_str() << "')\n";
+			ss << "model = ImportModel('" << filepath.c_str() << "')\n";
 
-    ss << "pg = DropCutter(c, model)\n";
+			ss << "pg = DropCutter(c, model)\n";
 
-	// Rotate the coordinates to align with the fixture.
-	gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
-	gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
+			// Rotate the coordinates to align with the fixture.
+			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
+			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
-	// def GenerateToolPath(self, minx, maxx, miny, maxy, z0, z1, dx, dy, direction):
-    ss << "pathlist = pg.GenerateToolPath(" << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << min.Z() << ", " << max.Z() << ", " << m_params.m_dx << ", " << m_params.m_dy << "," <<m_params.m_direction<< ")\n";
+			// def GenerateToolPath(self, minx, maxx, miny, maxy, z0, z1, dx, dy, direction):
+			ss << "pathlist = pg.GenerateToolPath(" << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << min.Z() << ", " << max.Z() << ", " << m_params.m_dx << ", " << m_params.m_dy << "," <<m_params.m_direction<< ")\n";
 
-    ss << "h = HeeksCNCExporter(" << m_params.m_box.m_x[5] << ")\n";
+			ss << "h = HeeksCNCExporter(" << m_params.m_box.m_x[5] << ")\n";
 
-    ss << "h.AddPathList(pathlist)\n";
+			ss << "h.AddPathList(pathlist)\n";
+		} // end of case 0
+		break;
+
+	case 1:// OpenCamLib
+		{
+			ss << "s = ocl.STLSurf('" << filepath.c_str() << "')\n";
+			ss << "cutter = ocl.CylCutter(" << pCuttingTool->m_params.m_diameter << ")\n";
+			ss << "for i in range(0, 100):\n";
+			ss << " for j in range(0, 100):\n";
+			ss << "  cl = ocl.Point(float(i) * 0.1, float(j) * 0.1, 0.0)\n";
+			ss << "  cc = ocl.CCPoint()\n";
+			ss << "  cutter.dropCutterSTL(cl,cc,s)\n";
+			ss << "  feed(cl.x, cl.y, cl.z)\n";
+		}
+		break;
+
+	default:
+		break;
+	}
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
@@ -355,6 +383,7 @@ void CZigZag::WriteDefaultValues()
 	config.Write(wxString(GetTypeString()) + _T("DX"), m_params.m_dx);
 	config.Write(wxString(GetTypeString()) + _T("DY"), m_params.m_dy);
 	config.Write(wxString(GetTypeString()) + _T("Direction"), m_params.m_direction);
+	config.Write(wxString(GetTypeString()) + _T("Lib"), m_params.m_lib);
 }
 
 void CZigZag::ReadDefaultValues()
@@ -371,6 +400,7 @@ void CZigZag::ReadDefaultValues()
 	config.Read(wxString(GetTypeString()) + _T("DX"), &m_params.m_dx, 1.0);
 	config.Read(wxString(GetTypeString()) + _T("DY"), &m_params.m_dy, 1.0);
 	config.Read(wxString(GetTypeString()) + _T("Direction"), &m_params.m_direction, 0);
+	config.Read(wxString(GetTypeString()) + _T("Lib"), &m_params.m_lib, 0);
 }
 
 static ReselectSolids reselect_solids;
