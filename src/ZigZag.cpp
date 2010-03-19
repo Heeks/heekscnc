@@ -210,6 +210,10 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 #endif
     ss.imbue(std::locale("C"));
 
+			// Rotate the coordinates to align with the fixture.
+			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
+			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
+
 	switch(this->m_params.m_lib)
 	{
 	case 0: // pycam
@@ -240,10 +244,6 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 
 			ss << "pg = DropCutter(c, model)\n";
 
-			// Rotate the coordinates to align with the fixture.
-			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
-			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
-
 			// def GenerateToolPath(self, minx, maxx, miny, maxy, z0, z1, dx, dy, direction):
 			ss << "pathlist = pg.GenerateToolPath(" << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << min.Z() << ", " << max.Z() << ", " << m_params.m_dx << ", " << m_params.m_dy << "," <<m_params.m_direction<< ")\n";
 
@@ -257,12 +257,39 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 		{
 			ss << "s = ocl.STLSurf('" << filepath.c_str() << "')\n";
 			ss << "cutter = ocl.CylCutter(" << pCuttingTool->m_params.m_diameter << ")\n";
-			ss << "for i in range(0, 100):\n";
-			ss << " for j in range(0, 100):\n";
-			ss << "  cl = ocl.Point(float(i) * 0.1, float(j) * 0.1, 0.0)\n";
+			ss << "xsteps = " << (int)((max.X() - min.X())/m_params.m_dx) + 1 << "\n";
+			ss << "ysteps = " << (int)((max.Y() - min.Y())/m_params.m_dy) + 1 << "\n";
+			ss << "dx = " << m_params.m_dx << "\n";
+			ss << "dy = " << m_params.m_dy << "\n";
+			ss << "minx = " << min.X() << "\n";
+			ss << "miny = " << min.Y() << "\n";
+			if(m_params.m_direction)
+			{
+				ss << "for i in range(0, xsteps):\n";
+				ss << " for j in range(0, ysteps):\n";
+			}
+			else
+			{
+				ss << "for j in range(0, ysteps):\n";
+				ss << " for i in range(0, xsteps):\n";
+			}
+			ss << "  cl = ocl.Point(minx + float(i) * dx, miny + float(j) * dy, 0.0)\n";
 			ss << "  cc = ocl.CCPoint()\n";
 			ss << "  cutter.dropCutterSTL(cl,cc,s)\n";
-			ss << "  feed(cl.x, cl.y, cl.z)\n";
+			if(m_params.m_direction)
+			{
+				ss << "  if j == 0:\n";
+			}
+			else
+			{
+				ss << "  if i == 0:\n";
+			}
+			ss << "   rapid(cl.x, cl.y)\n";
+			ss << "   rapid(z = cl.z + 5)\n";
+			ss << "   feed(z = cl.z)\n";
+			ss << "  else:\n";
+			ss << "   feed(cl.x, cl.y, cl.z)\n";
+			ss << " rapid(z = " << max.Z() + 5 << ")\n";
 		}
 		break;
 
