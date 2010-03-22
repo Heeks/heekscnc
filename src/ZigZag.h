@@ -16,8 +16,7 @@ enum DropCutterLibraryEnum
 class CZigZagParams{
 public:
 	CBox m_box;
-	double m_dx;
-	double m_dy;
+	double m_step_over;
 	int m_direction; // 0 = x, 1 = y
 	int m_lib; // 0 = pycam, 1 = OpenCamLib
 
