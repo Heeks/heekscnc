@@ -56,6 +56,7 @@ public:
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 	void AppendTextToProgram(const CFixture *pFixture);
+	void ReloadPointers();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
