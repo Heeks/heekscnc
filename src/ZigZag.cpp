@@ -138,6 +138,26 @@ CZigZag & CZigZag::operator= ( const CZigZag & rhs )
 	return(*this);
 }
 
+/**
+	The old version of the CZigZag object stored references to graphics as type/id pairs
+	that get read into the m_solids list.  The new version stores these graphics references
+	as child elements (based on ObjList).  If we read in an old-format file then the m_solids
+	list will have data in it for which we don't have children.  This routine converts
+	these type/id pairs into the HeeksObj pointers as children.
+ */
+void CZigZag::ReloadPointers()
+{
+	for (std::list<int>::iterator symbol = m_solids.begin(); symbol != m_solids.end(); symbol++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( SolidType, *symbol );
+		if (object != NULL)
+		{
+			Add( object, NULL );
+		}
+	}
+
+	CSpeedOp::ReloadPointers();
+}
 
 
 void CZigZag::AppendTextToProgram(const CFixture *pFixture)
@@ -169,18 +189,27 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 				int type = copy->GetType();
 				unsigned int id = copy->m_id;
 
-				if (copy->ModifyByMatrix(m))
-				{
-					// The modification has resulted in a new HeeksObj that uses
-					// the same ID as the old one.  We just need to renew our
-					// HeeksObj pointer so that we use (and delete) the right one later on.
+                if (copy->ModifyByMatrix(m))
+                {
+                    // The modification has resulted in a new HeeksObj that uses
+                    // the same ID as the old one.  We just need to renew our
+                    // HeeksObj pointer so that we use (and delete) the right one later on.
+                    // Note: this occures due to the CShape::ModifyByMatrix() method.
+                    // We need to find a pointer to the new shape object by looking
+                    // in the main tree.
 
-					copy = heeksCAD->GetIDObject( type, id );
-				} // End if - then
-			} // End if - then
-
-			if(copy) solids.push_back(copy);
-		} // End if - then
+                    std::list<HeeksObj *> objects = heeksCAD->GetIDObjects(type, id );
+                    // We need to figure out which ones are NOT the original so that we can delete them later on.
+                    for (std::list<HeeksObj *>::iterator l_itObject = objects.begin(); l_itObject != objects.end(); l_itObject++)
+                    {
+                        if (*l_itObject != object)
+                        {
+                            solids.push_back(*l_itObject);
+                        }
+                    }
+                } // End if - then
+            } // End if - then
+        } // End if - then
 	} // End for
 
 #ifdef WIN32
