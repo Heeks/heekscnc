@@ -290,8 +290,10 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			ss << "dcf = ocl.PathDropCutterFinish(s)\n";
 			ss << "cutter = ocl.CylCutter(" << pCuttingTool->m_params.m_diameter << ")\n";
 			ss << "dcf.setCutter(cutter)\n";
-			ss << "steps = " << (int)((max.X() - min.X())/m_params.m_step_over) + 1 << "\n";
-			ss << "step_over = " << (max.X() - min.X()) << " / steps\n";
+			if(m_params.m_direction)ss << "steps = " << (int)((max.X() - min.X())/m_params.m_step_over) + 1 << "\n";
+			else ss << "steps = " << (int)((max.Y() - min.Y())/m_params.m_step_over) + 1 << "\n";
+			if(m_params.m_direction)ss << "step_over = " << (max.X() - min.X()) << " / steps\n";
+			else ss << "step_over = " << (max.Y() - min.Y()) << " / steps\n";
 			ss << "minx = " << min.X() << "\n";
 			ss << "miny = " << min.Y() << "\n";
 			ss << "maxx = " << max.X() << "\n";
