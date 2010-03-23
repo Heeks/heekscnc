@@ -102,7 +102,7 @@ void CContourParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 }
 
 
-typedef struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS_Edge &, bool >
+struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS_Edge &, bool >
 {
     EdgeComparison( const TopoDS_Edge & edge )
     {
