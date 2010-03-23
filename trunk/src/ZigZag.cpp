@@ -92,12 +92,7 @@ CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CS
 		HeeksObj* object = heeksCAD->GetIDObject(SolidType, solid);
 		if(object)
 		{
-			double extents[6];
-			if(heeksCAD->BodyGetExtents(object, extents))
-			{
-				m_params.m_box.Insert(CBox(extents));
-			}
-
+			object->GetBox(m_params.m_box);
 			Add(object, NULL);
 		}
 	}
