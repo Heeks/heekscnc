@@ -118,3 +118,37 @@ void CFixtures::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	ObjList::GetTools(t_list, p);
 }
+
+
+/**
+    Augment my list of child CFixture objects with any found in the CFixtures (children)
+    passed in.
+ */
+void CFixtures::CopyFrom(const HeeksObj* object)
+{
+    if (object->GetType() == GetType())
+    {
+        for (HeeksObj *child = ((HeeksObj *) object)->GetFirstChild(); child != NULL; child = ((HeeksObj *) object)->GetNextChild())
+        {
+            if (child->GetType() == FixtureType)
+            {
+                bool found = false;
+                for (HeeksObj *mine = GetFirstChild(); ((mine != NULL) && (! found)); mine = GetNextChild())
+                {
+                    if (mine->GetType() == FixtureType)
+                    {
+                        if (((*(CFixture *) mine)) == (*((CFixture *) child)))
+                        {
+                            found = true;
+                            break;
+                        } // End if - then
+                    } // End if - then
+                } // End for
+                if (! found)
+                {
+                    Add( child, NULL );
+                } // End if - then
+            } // End if - then
+        } // End for
+    } // End if - then
+}

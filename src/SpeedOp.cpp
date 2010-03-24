@@ -213,7 +213,7 @@ CSpeedOp & CSpeedOp::operator= ( const CSpeedOp & rhs )
 		// static bool m_auto_set_speeds_feeds;
 	}
 
-	return(*this);	
+	return(*this);
 }
 
 CSpeedOp::CSpeedOp( const CSpeedOp & rhs ) : COp(rhs)

@@ -145,7 +145,7 @@ void CCuttingTool::SetDiameter( const double diameter )
 
 		double opposite = m_params.m_diameter - m_params.m_flat_radius;
 		double angle = m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
-		
+
 		m_params.m_cutting_edge_height = opposite / tan(angle);
 	}
 
@@ -370,7 +370,7 @@ static void on_set_flat_radius(double value, HeeksObj* object)
 
 		double opposite = ((CCuttingTool*)object)->m_params.m_diameter - ((CCuttingTool*)object)->m_params.m_flat_radius;
 		double angle = ((CCuttingTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
-		
+
 		((CCuttingTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
 	}
 
@@ -394,7 +394,7 @@ static void on_set_cutting_edge_angle(double value, HeeksObj* object)
 
 		double opposite = ((CCuttingTool*)object)->m_params.m_diameter - ((CCuttingTool*)object)->m_params.m_flat_radius;
 		double angle = ((CCuttingTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
-		
+
 		((CCuttingTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
 	}
 
@@ -693,6 +693,33 @@ HeeksObj *CCuttingTool::MakeACopy(void)const
 	return(duplicate);
 }
 
+CCuttingTool::CCuttingTool( const CCuttingTool & rhs )
+{
+    m_pToolSolid = NULL;
+    *this = rhs;    // Call the assignment operator.
+}
+
+CCuttingTool & CCuttingTool::operator= ( const CCuttingTool & rhs )
+{
+    if (this != &rhs)
+    {
+        m_params = rhs.m_params;
+        m_title = rhs.m_title;
+        m_tool_number = rhs.m_tool_number;
+
+        if (m_pToolSolid)
+        {
+            delete m_pToolSolid;
+            m_pToolSolid = NULL;
+        }
+
+        HeeksObj::operator=( rhs );
+    }
+
+    return(*this);
+}
+
+
 void CCuttingTool::CopyFrom(const HeeksObj* object)
 {
 	operator=(*((CCuttingTool*)object));
@@ -795,10 +822,10 @@ CCuttingTool *CCuttingTool::Find( const int tool_number )
 
 CCuttingTool::ToolNumber_t CCuttingTool::FindFirstByType( const CCuttingToolParams::eCuttingToolType type )
 {
+   
 	if ((theApp.m_program) && (theApp.m_program->Tools()))
 	{
 		HeeksObj* tool_list = theApp.m_program->Tools();
-
 		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
 			if (ob->GetType() != CuttingToolType) continue;
@@ -818,6 +845,7 @@ CCuttingTool::ToolNumber_t CCuttingTool::FindFirstByType( const CCuttingToolPara
  */
 int CCuttingTool::FindCuttingTool( const int tool_number )
 {
+
 	if ((theApp.m_program) && (theApp.m_program->Tools()))
 	{
 		HeeksObj* tool_list = theApp.m_program->Tools();

@@ -29,7 +29,7 @@ extern CHeeksCADInterface* heeksCAD;
 static void on_set_cutting_tool_material(int zero_based_choice, HeeksObj* object)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
-	
+
 	CSpeedReference *pSpeedReference = (CSpeedReference *) object;
 
 	pSpeedReference->m_cutting_tool_material = zero_based_choice;
@@ -49,7 +49,7 @@ static void on_set_surface_speed(double value, HeeksObj* object)
 	if (theApp.m_program->m_units == 1.0)
 	{
 		// We're in metric already.  Leave it as they've entered it.
-		((CSpeedReference*)object)->m_surface_speed = value; 
+		((CSpeedReference*)object)->m_surface_speed = value;
 	} // End if - then
 	else
 	{
@@ -60,7 +60,7 @@ static void on_set_surface_speed(double value, HeeksObj* object)
 		((CSpeedReference*)object)->m_surface_speed = double(value * metres_per_foot);
 	} // End if - else
 
-	((CSpeedReference*)object)->ResetTitle(); 
+	((CSpeedReference*)object)->ResetTitle();
 }
 
 static void on_set_material_name(const wxChar *value, HeeksObj* object){((CSpeedReference*)object)->m_material_name = value; ((CSpeedReference*)object)->ResetTitle(); }
@@ -77,7 +77,7 @@ void CSpeedReference::GetProperties(std::list<Property *> *list)
 		{
 			choices.push_back(materials[i].second);
 			if (m_cutting_tool_material == materials[i].first) choice = int(i);
-			
+
 		} // End for
 		list->push_back(new PropertyChoice(_("Material"), choices, choice, this, on_set_cutting_tool_material));
 	}
@@ -119,7 +119,7 @@ bool CSpeedReference::CanAddTo(HeeksObj* owner)
 void CSpeedReference::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "SpeedReference" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 
 	std::ostringstream l_ossValue;
@@ -141,19 +141,19 @@ void CSpeedReference::WriteXML(TiXmlNode *root)
 HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 {
 	double brinell_hardness_of_raw_material = 15.0;
-	if (element->Attribute("brinell_hardness_of_raw_material")) 
+	if (element->Attribute("brinell_hardness_of_raw_material"))
 		brinell_hardness_of_raw_material = atof(element->Attribute("brinell_hardness_of_raw_material"));
 
 	double surface_speed = 600.0;
-	if (element->Attribute("surface_speed")) 
+	if (element->Attribute("surface_speed"))
 		surface_speed = atof(element->Attribute("surface_speed"));
 
 	wxString raw_material_name;
-	if (element->Attribute("raw_material_name")) 
+	if (element->Attribute("raw_material_name"))
 		raw_material_name = Ctt(element->Attribute("raw_material_name"));
 
 	int cutting_tool_material = int(CCuttingToolParams::eCarbide);
-	if (element->Attribute("cutting_tool_material")) 
+	if (element->Attribute("cutting_tool_material"))
 		cutting_tool_material = atoi(element->Attribute("cutting_tool_material"));
 
 	wxString title(Ctt(element->Attribute("title")));
@@ -188,6 +188,16 @@ void CSpeedReference::ResetTitle()
 	OnEditString(l_ossTitle.str().c_str());
 } // End ResetTitle() method
 
+
+bool CSpeedReference::operator== ( const CSpeedReference & rhs ) const
+{
+    if (m_cutting_tool_material != rhs.m_cutting_tool_material) return(false);
+	if (m_material_name != rhs.m_material_name) return(false);
+	if (m_brinell_hardness_of_raw_material != rhs.m_brinell_hardness_of_raw_material) return(false);
+	if (m_surface_speed != rhs.m_surface_speed) return(false);
+
+	return(true);
+}
 
 
 

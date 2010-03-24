@@ -735,4 +735,9 @@ void CFixture::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 }
 
 
+bool CFixture::operator== ( const CFixture & rhs ) const
+{
+    return(m_coordinate_system_number == rhs.m_coordinate_system_number);
+}
+
 
