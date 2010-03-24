@@ -11,10 +11,53 @@
 
 bool CTools::CanAdd(HeeksObj* object)
 {
-	return 	(((object->GetType() == CuttingToolType)) ||
-		 ((object->GetType() == FixtureType)));
+	return 	(object->GetType() == CuttingToolType);
 }
 
+
+HeeksObj *CTools::MakeACopy(void) const
+{
+    return(new CTools(*this));  // Call the copy constructor.
+}
+
+
+CTools::CTools() {}
+
+CTools::CTools( const CTools & rhs )
+{
+    *this = rhs;    // Call the assignment operator.
+}
+
+CTools & CTools::operator= ( const CTools & rhs )
+{
+    if (this != &rhs)
+    {
+        ObjList::operator=( rhs );
+    }
+    return(*this);
+}
+
+
+/**
+	We need to copy the tools from the CTools object passed in into our own
+	list.  We don't want to duplicate tools that are already in our local tool table.
+	If we import a tool, we need to make sure the tool number is unique within the
+	whole tool table.  If we need to renumber a tool during this import, we need to
+	also update any associated Operations objects that refer to this tool number
+	so that they now point to the new tool number.
+ */
+void CTools::CopyFrom(const HeeksObj* object)
+{
+    /*
+    if (object->GetType() == GetType())
+    {
+        for (HeeksObj *tool = object->GetFirstChild(); tool != NULL; tool = object->GetNextChild())
+        {
+
+        }
+    }
+    */
+}
 
 void CTools::WriteXML(TiXmlNode *root)
 {

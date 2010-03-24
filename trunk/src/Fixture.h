@@ -135,6 +135,8 @@ public:
 	void SetRotationsFromProbedPoints( const wxString & probed_points_xml_file_name );
 	double AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec & pivot, const gp_Vec & axis ) const;
 
+	bool operator== ( const CFixture & rhs ) const;
+
 }; // End CFixture class definition.
 
 

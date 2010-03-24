@@ -21,6 +21,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
 	bool UsesID() const { return(false); }
+	void CopyFrom(const HeeksObj* object);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);

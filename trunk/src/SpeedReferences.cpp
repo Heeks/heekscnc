@@ -265,3 +265,35 @@ double CSpeedReferences::GetSurfaceSpeed(
 } // End GetSurfaceSpeed() method
 
 
+
+void CSpeedReferences::CopyFrom(const HeeksObj* object)
+{
+    if (object->GetType() == GetType())
+    {
+        for (HeeksObj *child = ((HeeksObj *) object)->GetFirstChild(); child != NULL; child = ((HeeksObj *) object)->GetNextChild())
+        {
+            if (child->GetType() == SpeedReferenceType)
+            {
+                bool found = false;
+                for (HeeksObj *mine = GetFirstChild(); ((mine != NULL) && (! found)); mine = GetNextChild())
+                {
+                    if (mine->GetType() == SpeedReferenceType)
+                    {
+                        if (((*(CSpeedReference *) mine)) == (*((CSpeedReference *) child)))
+                        {
+                            found = true;
+                            break;
+                        } // End if - then
+                    } // End if - then
+                } // End for
+                if (! found)
+                {
+                    Add( child, NULL );
+                } // End if - then
+            } // End if - then
+        } // End for
+    } // End if - then
+    return;
+}
+
+

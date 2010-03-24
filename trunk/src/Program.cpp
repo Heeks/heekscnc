@@ -59,6 +59,29 @@ HeeksObj *CProgram::MakeACopy(void)const
 	return new CProgram(*this);
 }
 
+
+CProgram::CProgram( const CProgram & rhs )
+{
+    m_nc_code = NULL;
+    m_operations = NULL;
+    m_tools = NULL;
+    m_speed_references = NULL;
+    m_fixtures = NULL;
+    m_script_edited = false;
+
+	*this = rhs;    // And finish off with the assignment operator.
+}
+
+CProgram::~CProgram()
+{
+	// Only remove the global pointer if 'we are the one'.  When a file is imported, extra
+	// CProgram objects exist temporarily.  They're not all used as the master data pointer.
+	if (theApp.m_program == this)
+	{
+		theApp.m_program = NULL;
+	}
+}
+
 /**
 	This is ALMOST the same as the assignment operator.  The difference is that
 	this, and its subordinate methods, augment themselves with the contents
@@ -283,7 +306,7 @@ bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 		break;
 
 	case ToolsType:
-		m_tools = (CTools*)object;
+			m_tools = (CTools*)object;
 		break;
 
 	case SpeedReferencesType:
@@ -300,7 +323,15 @@ bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 
 void CProgram::Remove(HeeksObj* object)
 {
-	 // these shouldn't happen, though
+	// This occurs when the HeeksCAD application performs a 'Reset()'.  This, in turn, deletes
+	// the whole of the master data tree.  With this tree's destruction, we must ensure that
+	// we delete ourselves cleanly so that this plugin doesn't end up with pointers to
+	// deallocated memory.
+	//
+	// Since these pointes are also stored as children, the ObjList::~ObjList() destructor will
+	// delete the children but our pointers to them won't get cleaned up.  That's what this
+	// method is all about.
+
 	if(object == m_nc_code)m_nc_code = NULL;
 	else if(object == m_operations)m_operations = NULL;
 	else if(object == m_tools)m_tools = NULL;
@@ -314,7 +345,10 @@ void CProgram::Remove(HeeksObj* object)
 HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	CProgram* new_object = new CProgram;
-	theApp.m_program = new_object;
+	if (theApp.m_program == NULL)
+	{
+	    theApp.m_program = new_object;
+	}
 
 	// get the attributes
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())

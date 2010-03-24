@@ -14,7 +14,12 @@ public:
 	bool OneOfAKind(){return true;}
 	int GetType()const{return ToolsType;}
 	const wxChar* GetTypeString(void)const{return _("Tools");}
-	HeeksObj *MakeACopy(void)const{ return new CTools(*this);}
+	HeeksObj *MakeACopy(void)const;
+
+	CTools();
+	CTools( const CTools & rhs );
+	CTools & operator= ( const CTools & rhs );
+
 	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(5, 1);}
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object);
@@ -22,6 +27,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
 	bool UsesID() const { return(false); }
+	void CopyFrom(const HeeksObj* object);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);

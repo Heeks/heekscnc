@@ -71,6 +71,8 @@ public:
 
     const wxString ConfigScope(void)const{return _T("SpeedReference");}
 
+    bool operator== ( const CSpeedReference & rhs ) const;
+
 }; // End CSpeedReference class definition.
 
 

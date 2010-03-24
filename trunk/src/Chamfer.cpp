@@ -98,6 +98,8 @@ bool CChamfer::CanAdd(HeeksObj* object)
 {
 	switch (object->GetType())
 	{
+		case PocketType:
+		case CounterBoreType:
 		case DrillingType:	return(true);
 
 		default:			return(false);
@@ -283,9 +285,9 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 				ss << "drill("
 					<< "x=" << point.X(true) << ", "
 					<< "y=" << point.Y(true) << ", "
-					<< "z=" << drawing_units(gap_closure_depth) << ", "
-					<< "depth=" << plunge_depth/theApp.m_program->m_units << ", "
-					<< "standoff=" << m_depth_op_params.m_clearance_height/theApp.m_program->m_units << ", "
+					<< "z=" << drawing_units(point.Z(false) - gap_closure_depth) << ", "
+					<< "depth=" << drawing_units(required_bit_plunge_depth) << ", "
+					<< "standoff=" << drawing_units(m_depth_op_params.m_clearance_height) << ", "
 					<< "dwell=" << 0 << ", "
 					<< "peck_depth=" << 0 // << ", "
 					<< ")\n";
@@ -298,13 +300,13 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 				CNCPoint centre(l_itCircle->Location());
 				CNCPoint point(l_itCircle->Location());
 
-				double radius_of_spiral = bit_radius_at_plunge_depth;
+				double radius_of_spiral = hole_radius - bit_radius_at_plunge_depth + (m_params.m_chamfer_width * sin(theta));
 
 				ss << "rapid( x=" << centre.X(true) << ", "
 							<< "y=" << centre.Y(true) << ", "
 							<< "z=" << m_depth_op_params.m_clearance_height/theApp.m_program->m_units << ")\n";
 
-				double cutting_depth = point.Z(false) - required_bit_plunge_depth;
+				double cutting_depth = point.Z(false) - plunge_depth;
 
 				// Move to 12 O'Clock.
 				ss << "feed( x=" << centre.X(true) << ", "

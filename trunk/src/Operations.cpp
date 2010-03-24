@@ -37,12 +37,15 @@ COperations::COperations( const COperations & rhs ) : ObjList(rhs)
  */
 void COperations::CopyFrom(const HeeksObj *object)
 {
-	COperations *rhs = (COperations*)object;
-	for (HeeksObj *child = rhs->GetFirstChild(); child != NULL; child = rhs->GetNextChild())
-	{
-		child->SetID( heeksCAD->GetNextID(child->GetType()) );
-		Add(child, NULL);
-	} // End for
+    if (object->GetType() == GetType())
+    {
+        COperations *rhs = (COperations*)object;
+        for (HeeksObj *child = rhs->GetFirstChild(); child != NULL; child = rhs->GetNextChild())
+        {
+            child->SetID( heeksCAD->GetNextID(child->GetType()) );
+            Add(child, NULL);
+        } // End for
+    }
 }
 
 void COperations::ReloadPointers()
