@@ -81,7 +81,7 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("lib", &m_lib);
 }
 
-CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CSpeedOp(GetTypeString(), cutting_tool_number), m_solids(solids)
+CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_solids(solids)
 {
 	ReadDefaultValues();
 
@@ -112,7 +112,7 @@ CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CS
 	}
 }
 
-CZigZag::CZigZag( const CZigZag & rhs ) : CSpeedOp(rhs)
+CZigZag::CZigZag( const CZigZag & rhs ) : CDepthOp(rhs)
 {
 	*this = rhs;	// Call the assignment operator.
 }
@@ -121,7 +121,7 @@ CZigZag & CZigZag::operator= ( const CZigZag & rhs )
 {
 	if (this != &rhs)
 	{
-		CSpeedOp::operator =(rhs);
+		CDepthOp::operator =(rhs);
 
 		m_solids.clear();
 		std::copy( rhs.m_solids.begin(), rhs.m_solids.end(), std::inserter( m_solids, m_solids.begin() ) );
@@ -151,7 +151,7 @@ void CZigZag::ReloadPointers()
 		}
 	}
 
-	CSpeedOp::ReloadPointers();
+	CDepthOp::ReloadPointers();
 }
 
 
@@ -163,7 +163,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 		return;
 	}
 
-	CSpeedOp::AppendTextToProgram(pFixture);
+	CDepthOp::AppendTextToProgram(pFixture);
 
 	heeksCAD->CreateUndoPoint();
 
@@ -184,25 +184,8 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 				int type = copy->GetType();
 				unsigned int id = copy->m_id;
 
-                if (copy->ModifyByMatrix(m))
-                {
-                    // The modification has resulted in a new HeeksObj that uses
-                    // the same ID as the old one.  We just need to renew our
-                    // HeeksObj pointer so that we use (and delete) the right one later on.
-                    // Note: this occures due to the CShape::ModifyByMatrix() method.
-                    // We need to find a pointer to the new shape object by looking
-                    // in the main tree.
-
-                    std::list<HeeksObj *> objects = heeksCAD->GetIDObjects(type, id );
-                    // We need to figure out which ones are NOT the original so that we can delete them later on.
-                    for (std::list<HeeksObj *>::iterator l_itObject = objects.begin(); l_itObject != objects.end(); l_itObject++)
-                    {
-                        if (*l_itObject != object)
-                        {
-                            solids.push_back(*l_itObject);
-                        }
-                    }
-                } // End if - then
+                copy->ModifyByMatrix(m);
+                solids.push_back(copy);
             } // End if - then
         } // End if - then
 	} // End for
@@ -331,7 +314,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 
 void CZigZag::glCommands(bool select, bool marked, bool no_color)
 {
-	CSpeedOp::glCommands(select, marked, no_color);
+	CDepthOp::glCommands(select, marked, no_color);
 }
 
 void CZigZag::GetProperties(std::list<Property *> *list)
@@ -427,7 +410,7 @@ bool CZigZag::CanAdd(HeeksObj* object)
 
 void CZigZag::WriteDefaultValues()
 {
-	CSpeedOp::WriteDefaultValues();
+	CDepthOp::WriteDefaultValues();
 
 	CNCConfig config(ConfigScope());
 	config.Write(wxString(GetTypeString()) + _T("BoxXMin"), m_params.m_box.m_x[0]);
@@ -443,7 +426,7 @@ void CZigZag::WriteDefaultValues()
 
 void CZigZag::ReadDefaultValues()
 {
-	CSpeedOp::ReadDefaultValues();
+	CDepthOp::ReadDefaultValues();
 
 	CNCConfig config(ConfigScope());
 	config.Read(wxString(GetTypeString()) + _T("BoxXMin"), &m_params.m_box.m_x[0], -7.0);
@@ -465,5 +448,5 @@ void CZigZag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	reselect_solids.m_object = this;
 	t_list->push_back(&reselect_solids);
 
-	CSpeedOp::GetTools( t_list, p );
+	CDepthOp::GetTools( t_list, p );
 }
