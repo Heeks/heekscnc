@@ -407,21 +407,9 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 			{
 				double m[16];	// A different form of the transformation matrix.
 				CFixture::extract( pFixture->GetMatrix(), m );
-
-				int type = copy->GetType();
-				unsigned int id = copy->m_id;
-
-				if (copy->ModifyByMatrix(m))
-				{
-					// The modification has resulted in a new HeeksObj that uses
-					// the same ID as the old one.  We just need to renew our
-					// HeeksObj pointer so that we use (and delete) the right one later on.
-
-					copy = heeksCAD->GetIDObject( type, id );
-				} // End if - then
+				copy->ModifyByMatrix(m);
+				solids.push_back(copy);
 			} // End if - then
-
-			if(copy) solids.push_back(copy);
 		} // End if - then
 	} // End for
 

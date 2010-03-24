@@ -165,7 +165,7 @@ void CDepthOp::ReadDefaultValues()
 {
 	CSpeedOp::ReadDefaultValues();
 
-	CNCConfig config(GetTypeString());
+	CNCConfig config(ConfigScope());
 	config.Read(_T("ClearanceHeight"), &m_depth_op_params.m_clearance_height, 5.0);
 	config.Read(_T("StartDepth"), &m_depth_op_params.m_start_depth, 0.0);
 	config.Read(_T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
