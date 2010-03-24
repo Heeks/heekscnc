@@ -31,5 +31,5 @@ public:
 	bool OneOfAKind(){return true;}
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void glCommands(bool select, bool marked, bool no_color);
-	bool ModifyByMatrix(const double *m);
+	void ModifyByMatrix(const double *m);
 };

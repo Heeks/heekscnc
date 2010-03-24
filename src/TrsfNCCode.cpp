@@ -59,14 +59,13 @@ gp_Trsf make_matrix(const double* m)
 	return tr;
 }
 
-bool CTrsfNCCode::ModifyByMatrix(const double *m)
+void CTrsfNCCode::ModifyByMatrix(const double *m)
 {
 	gp_Trsf mat = make_matrix(m);
 	gp_Pnt pos(m_x,m_y,0);
 	pos.Transform(mat);
 	m_x = pos.X();
 	m_y = pos.Y();
-	return false;
 }
 
 void CTrsfNCCode::WriteCode(wxTextFile &f)
