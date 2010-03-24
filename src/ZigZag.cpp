@@ -273,6 +273,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			ss << "dcf = ocl.PathDropCutterFinish(s)\n";
 			ss << "cutter = ocl.CylCutter(" << pCuttingTool->m_params.m_diameter << ")\n";
 			ss << "dcf.setCutter(cutter)\n";
+			ss << "dcf.minimumZ = " << min.Z() << "\n";
 			if(m_params.m_direction)ss << "steps = " << (int)((max.X() - min.X())/m_params.m_step_over) + 1 << "\n";
 			else ss << "steps = " << (int)((max.Y() - min.Y())/m_params.m_step_over) + 1 << "\n";
 			if(m_params.m_direction)ss << "step_over = " << (max.X() - min.X()) << " / steps\n";
@@ -321,7 +322,7 @@ void CZigZag::GetProperties(std::list<Property *> *list)
 {
 	AddSolidsProperties(list, m_solids);
 	m_params.GetProperties(this, list);
-	COp::GetProperties(list);
+	CDepthOp::GetProperties(list);
 }
 
 HeeksObj *CZigZag::MakeACopy(void)const
