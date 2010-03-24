@@ -75,7 +75,7 @@ void CContourParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 
 /* static */ bool CContour::Clockwise( const gp_Circ & circle )
 {
-	return(circle.Axis().Direction().Z() < 0);
+	return(circle.Axis().Direction().Z() <= 0);
 }
 
 
@@ -179,7 +179,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 	wxString gcode;
 	double tolerance = heeksCAD->GetTolerance();
 
-    /*
+
     ShapeFix_Wire fixWire;
     fixWire.Load(wire);
     fixWire.FixReorder();
@@ -189,34 +189,15 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 
     // TopoDS_Wire profileWire = fixWire.WireAPIMake();
     TopoDS_Wire profileWire = fixWire.Wire();
-*/
 
-/*
-    Handle(ShapeFix_Wire) spSFW = new ShapeFix_Wire;
-spSFW->SetPrecision(Precision::Confusion());
-spSFW->Load (wire);
 
-spSFW->FixSelfIntersectionMode () = 1;
-spSFW->FixNonAdjacentIntersectingEdgesMode () = 1;
-spSFW->ModifyTopologyMode () = true;
-spSFW->ModifyRemoveLoopMode () = true;
-spSFW->ClosedWireMode () = true;
 
-spSFW->FixReorder();
-spSFW->FixConnected();
-
-bool performed = spSFW->Perform();
-bool selfIntFixed = spSFW->FixSelfIntersection();
-Handle(ShapeExtend_WireData) spWD = spSFW->WireData();
-TopoDS_Wire profileWire = spSFW->Wire();
-*/
-
-    std::vector<TopoDS_Edge> edges = SortEdges(wire);
-    for (std::vector<TopoDS_Edge>::iterator l_itEdge = edges.begin(); l_itEdge != edges.end(); l_itEdge++)
-    // for(BRepTools_WireExplorer expEdge(TopoDS::Wire(wire)); expEdge.More(); expEdge.Next())
+    // std::vector<TopoDS_Edge> edges = SortEdges(wire);
+    // for (std::vector<TopoDS_Edge>::iterator l_itEdge = edges.begin(); l_itEdge != edges.end(); l_itEdge++)
+    for(BRepTools_WireExplorer expEdge(TopoDS::Wire(profileWire)); expEdge.More(); expEdge.Next())
 	{
-		// const TopoDS_Shape &E = expEdge.Current();
-		const TopoDS_Edge &E = *l_itEdge;
+		const TopoDS_Shape &E = expEdge.Current();
+		// const TopoDS_Edge &E = *l_itEdge;
 
 		// enum GeomAbs_CurveType
 		// 0 - GeomAbs_Line
@@ -460,6 +441,8 @@ TopoDS_Wire profileWire = spSFW->Wire();
  */
 void CContour::AppendTextToProgram( const CFixture *pFixture )
 {
+	ReloadPointers();
+
 	wxString gcode;
 	CDepthOp::AppendTextToProgram( pFixture );
 
@@ -474,51 +457,47 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 
 	CNCPoint last_position(0.0, 0.0, 0.0);
 
-	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
+	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
 	{
-		HeeksObj* object = heeksCAD->GetIDObject(l_itSymbol->first, l_itSymbol->second);
-		if (object != NULL)
+		std::list<TopoDS_Shape> wires;
+		if (! heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
 		{
-			std::list<TopoDS_Shape> wires;
-			if (! heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
-			{
-				number_of_bad_sketches++;
-			} // End if - then
-			else
-			{
-				// The wire(s) represent the sketch objects for a tool path.  We need to apply
-				// either the 'inside', 'on' or 'outside' attributes by translating the wires
-				// by the cutting tool's radius first.
-
-				try {
-					for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
-					{
-					    TopoDS_Shape& wire_to_fix = *It2;
-					    ShapeFix_Wire fix;
-					    fix.Load( TopoDS::Wire(wire_to_fix) );
-					    fix.FixReorder();
-
-
-						TopoDS_Shape wire = fix.Wire();
-						BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
-
-						double radius = pCuttingTool->CuttingRadius();
-						if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
-						if (m_params.m_tool_on_side == CContourParams::eOn) radius = 0.0;
-
-						offset_wire.Perform(radius);
-						TopoDS_Wire tool_path_wire(TopoDS::Wire(offset_wire.Shape()));
-
-						// Now generate a toolpath along this wire.
-						gcode << GeneratePathFromWire(tool_path_wire, last_position );
-					}
-				} // End try
-				catch (Standard_Failure) {
-					Handle_Standard_Failure e = Standard_Failure::Caught();
-					number_of_bad_sketches++;
-				} // End catch
-			} // End if - else
+			number_of_bad_sketches++;
 		} // End if - then
+		else
+		{
+			// The wire(s) represent the sketch objects for a tool path.  We need to apply
+			// either the 'inside', 'on' or 'outside' attributes by translating the wires
+			// by the cutting tool's radius first.
+
+			try {
+				for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
+				{
+				    TopoDS_Shape& wire_to_fix = *It2;
+				    ShapeFix_Wire fix;
+				    fix.Load( TopoDS::Wire(wire_to_fix) );
+				    fix.FixReorder();
+
+
+					TopoDS_Shape wire = fix.Wire();
+					BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
+
+					double radius = pCuttingTool->CuttingRadius();
+					if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
+					if (m_params.m_tool_on_side == CContourParams::eOn) radius = 0.0;
+
+					offset_wire.Perform(radius);
+					TopoDS_Wire tool_path_wire(TopoDS::Wire(offset_wire.Shape()));
+
+					// Now generate a toolpath along this wire.
+					gcode << GeneratePathFromWire(tool_path_wire, last_position );
+				}
+			} // End try
+			catch (Standard_Failure) {
+				Handle_Standard_Failure e = Standard_Failure::Caught();
+				number_of_bad_sketches++;
+			} // End catch
+		} // End if - else
 	} // End for
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(gcode.c_str());
@@ -702,9 +681,9 @@ std::list<wxString> CContour::DesignRulesAdjustment(const bool apply_changes)
 /**
     This method returns TRUE if the type of symbol is suitable for reference as a source of location
  */
-/* static */ bool CContour::ValidType( const int object_type )
+bool CContour::CanAdd( HeeksObj *object )
 {
-    switch (object_type)
+    switch (object->GetType())
     {
         case CircleType:
         case SketchType:
@@ -720,6 +699,40 @@ std::list<wxString> CContour::DesignRulesAdjustment(const bool apply_changes)
 void CContour::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     CDepthOp::GetTools( t_list, p );
+}
+
+void CContour::ReloadPointers()
+{
+	for (Symbols_t::iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
+		if (CanAdd(object))
+		{
+			Add( object, NULL );
+		}
+	}
+
+	m_symbols.clear();
+}
+
+
+CContour::CContour( const CContour & rhs ) : CDepthOp( rhs )
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CContour & CContour::operator= ( const CContour & rhs )
+{
+	if (this != &rhs)
+	{
+		m_params = rhs.m_params;
+		m_symbols.clear();
+		std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ) );
+
+		CDepthOp::operator=( rhs );
+	}
+
+	return(*this);
 }
 
 

@@ -30,6 +30,11 @@ public:
 	eSide m_tool_on_side;
 
 public:
+	CContourParams()
+	{
+		m_tool_on_side = eOn;
+	}
+
 	void set_initial_values();
 	void write_values_to_config();
 	void GetProperties(CContour* parent, std::list<Property *> *list);
@@ -79,12 +84,20 @@ public:
 	CContourParams m_params;
 
 	//	Constructors.
-	CContour():CDepthOp(GetTypeString(), 0){}
+	CContour():CDepthOp(GetTypeString(), 0)
+	{
+		m_params.set_initial_values();
+	}
 	CContour(	const Symbols_t &symbols,
 			const int cutting_tool_number )
 		: CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_symbols(symbols)
 	{
+		m_params.set_initial_values();
+		ReloadPointers();
 	}
+
+	CContour( const CContour & rhs );
+	CContour & operator= ( const CContour & rhs );
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ContourType;}
@@ -97,6 +110,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	bool CanAdd(HeeksObj *object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
@@ -108,9 +122,9 @@ public:
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
-	static bool ValidType( const int object_type );
 	wxString GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & last_position ) const;
 	static bool Clockwise( const gp_Circ & circle );
+	void ReloadPointers();
 
 private:
 	std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire ) const;

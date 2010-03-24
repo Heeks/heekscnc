@@ -244,6 +244,7 @@ bool COp::IsAnOperation(int object_type)
 		case ProbeCentreType:
 		case ProbeEdgeType:
 		case ChamferType:
+		case ContourType:
 			return true;
 		default:
 			return false;

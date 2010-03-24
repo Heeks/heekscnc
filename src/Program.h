@@ -68,7 +68,9 @@ public:
 	double m_units; // 1.0 for mm, 25.4 for inches
 
 	CProgram();
+	CProgram( const CProgram & rhs );
 	CProgram & operator= ( const CProgram & rhs );
+	~CProgram();
 
 	wxString GetOutputFileName() const;
 

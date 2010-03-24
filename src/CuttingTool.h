@@ -188,6 +188,9 @@ public:
 		} // End if - else
 	} // End constructor
 
+    CCuttingTool( const CCuttingTool & rhs );
+    CCuttingTool & operator= ( const CCuttingTool & rhs );
+
 	~CCuttingTool();
 
 	 // HeeksObj's virtual functions

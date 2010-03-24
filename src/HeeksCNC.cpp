@@ -47,6 +47,7 @@
 #include "Probing.h"
 #include "Excellon.h"
 #include "Chamfer.h"
+#include "Contour.h"
 
 #include <sstream>
 
@@ -413,8 +414,6 @@ static void NewChamferOpMenuCallback(wxCommandEvent &event)
 		} // End if - else
 	} // End for
 
-	double depth = -1;
-
 	if(cuttingTools.size() == 0)
 	{
 		wxMessageBox(_("You haven't selected a cutting tool for this hole.  By default no 'tool definition' or 'select tool' code will be generated for this chamfer cycle."));
@@ -638,6 +637,35 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+static void NewContourOpMenuCallback(wxCommandEvent &event)
+{
+	CContour::Symbols_t symbols;
+	CContour::Symbols_t cuttingTools;
+	int cutting_tool_number = 0;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if (object->GetType() == CuttingToolType)
+		{
+			cuttingTools.push_back( CContour::Symbol_t( object->GetType(), object->m_id ) );
+			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+		} // End if - then
+		else
+		{
+		    symbols.push_back( CContour::Symbol_t( object->GetType(), object->m_id ) );
+		} // End if - else
+	} // End for
+
+	CContour *new_object = new CContour( symbols, cutting_tool_number );
+	theApp.m_program->Operations()->Add(new_object, NULL);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
+
+
 static void NewSpeedReferenceMenuCallback(wxCommandEvent &event)
 {
 	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), int(CCuttingToolParams::eCarbide), 0.0, 0.0);
@@ -860,7 +888,8 @@ static CCallbackTool new_adaptive_rough_operation(_("New Adaptive Roughing Opera
 static CCallbackTool new_drilling_operation(_("New Drilling Operation..."), _T("drilling"), NewDrillingOpMenuCallback);
 static CCallbackTool new_counterbore_operation(_("New CounterBore Operation..."), _T("counterbore"), NewCounterBoreOpMenuCallback);
 static CCallbackTool new_rough_turn_operation(_("New Rough Turning Operation..."), _T("turnrough"), NewRoughTurnOpMenuCallback);
-// static CCallbackTool new_chamfer_operation(_("New Chamfer Operation..."), _T("drilling"), NewChamferOpMenuCallback);
+static CCallbackTool new_chamfer_operation(_("New Chamfer Operation..."), _T("drilling"), NewChamferOpMenuCallback);
+// static CCallbackTool new_contour_operation(_("New Contour Operation..."), _T("contour"), NewContourOpMenuCallback);
 
 void CHeeksCNCApp::GetNewOperationTools(std::list<Tool*>* t_list)
 {
@@ -871,7 +900,8 @@ void CHeeksCNCApp::GetNewOperationTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_drilling_operation);
 	t_list->push_back(&new_counterbore_operation);
 	t_list->push_back(&new_rough_turn_operation);
-	// t_list->push_back(&new_chamfer_operation);
+	t_list->push_back(&new_chamfer_operation);
+	// t_list->push_back(&new_contour_operation);
 }
 
 static void AddToolBars()
@@ -889,10 +919,11 @@ static void AddToolBars()
 	heeksCAD->AddFlyoutButton(_("Adaptive"), ToolImage(_T("adapt")), _("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("CounterBore"), ToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
+	// heeksCAD->AddFlyoutButton(_("Contour"), ToolImage(_T("contour")), _("New Contour Operation..."), NewContourOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
-	// heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("drilling")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
+	heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("drilling")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
 	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("drill")), _("New Cutting Tool Definition..."), NewDrillMenuCallback);
@@ -992,7 +1023,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuTools, _("New End Mill..."), ToolImage(_T("endmill")), NewEndmillMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("New Slot Drill..."), ToolImage(_T("slotdrill")), NewSlotCutterMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("New Ball End Mill..."), ToolImage(_T("ballmill")), NewBallEndMillMenuCallback);
-	// heeksCAD->AddMenuItem(menuTools, _("New Chamfer Mill..."), ToolImage(_T("chamfmill")), NewChamferMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("New Chamfer Mill..."), ToolImage(_T("chamfmill")), NewChamferMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("New Turning Tool..."), ToolImage(_T("turntool")), NewTurningToolMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("New Touch Probe..."), ToolImage(_T("probe")), NewTouchProbeMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("New Tool Length Switch..."), ToolImage(_T("probe")), NewToolLengthSwitchMenuCallback);
@@ -1068,6 +1099,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("CuttingRate", CCuttingRate::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixtures", CFixtures::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Chamfer", CChamfer::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Contour", CContour::ReadFromXMLElement);
 
 #ifdef WIN32
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=147;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=0;pos=448;prop=100000;bestw=116;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=485;floaty=209;floatw=143;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=575;prop=100000;bestw=89;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=479;floaty=236;floatw=116;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=205|dock_size(1,10,0)=33|")));
@@ -1191,6 +1223,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open)
 	{
 		// add the program
 		m_program = new CProgram;
+
 		m_program->AddMissingChildren();
 		heeksCAD->GetMainObject()->Add(m_program, NULL);
 		theApp.m_program_canvas->Clear();
