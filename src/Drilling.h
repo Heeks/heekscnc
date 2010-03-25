@@ -91,7 +91,7 @@ public:
 	CDrilling(	const Symbols_t &symbols,
 			const int cutting_tool_number,
 			const double depth )
-		: CSpeedOp(GetTypeString(), cutting_tool_number), m_symbols(symbols)
+		: CSpeedOp(GetTypeString(), cutting_tool_number, DrillingType), m_symbols(symbols)
 	{
 		m_params.set_initial_values(depth, cutting_tool_number);
 		for (Symbols_t::iterator itSymbol = m_symbols.begin(); itSymbol != m_symbols.end(); itSymbol++)
@@ -109,7 +109,7 @@ public:
 	CDrilling & operator= ( const CDrilling & rhs );
 
 	// HeeksObj's virtual functions
-	int GetType()const{return DrillingType;}
+	virtual int GetType() const {return DrillingType;}
 	const wxChar* GetTypeString(void)const{return _T("Drilling");}
 	void glCommands(bool select, bool marked, bool no_color);
 

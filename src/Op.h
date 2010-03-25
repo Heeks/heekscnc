@@ -10,6 +10,7 @@
 
 #include "interface/ObjList.h"
 #include "Fixture.h"
+#include "HeeksCNCTypes.h"
 
 class CFixture;	// Forward declaration.
 
@@ -21,8 +22,15 @@ public:
 	wxString m_title;
 	int m_execution_order;	// Order by which the GCode sequences are generated.
 	int m_cutting_tool_number;	// joins the m_tool_number in one of the CCuttingTool objects in the tools list.
+	int m_operation_type; // Type of operation (because GetType() overloading does not allow this class to call the parent's method)
 
-	COp(const wxString& title, const int cutting_tool_number = 0):m_active(true), m_title(title), m_execution_order(0), m_cutting_tool_number(cutting_tool_number) {ReadDefaultValues();}
+	COp(const wxString& title, const int cutting_tool_number = 0, const int operation_type = UnknownType )
+            :m_active(true), m_title(title), m_execution_order(0), m_cutting_tool_number(cutting_tool_number),
+            m_operation_type(operation_type)
+    {
+        ReadDefaultValues();
+    }
+
 	COp & operator= ( const COp & rhs );
 	COp( const COp & rhs );
 
