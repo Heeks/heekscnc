@@ -47,6 +47,9 @@ The diameter of the tool
 ===tool type===
 can be spherical, cylindrical, toroidal
 
+== Machining Boundary ==
+The bounds of the machining operation are defined by the min/max x/y parameters listed below.  These values are initially set to be larger than the combined solids area by half a cutting tool diameter added around the boundary.  If the solids, upon which this machine operation is based, are changed then the 'Reset Boundary' menu option may be used to reset the boundary based on the new solid boundaries.
+
 ===minimum x===
 the left side of the machining
 
