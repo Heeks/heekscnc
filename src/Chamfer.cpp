@@ -342,6 +342,8 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 							"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
 				point.SetX( centre.X(false) );
 				point.SetY( centre.Y(false) + radius_of_spiral );
+
+				ss << "rapid( z=" << drawing_units(m_depth_op_params.m_clearance_height) << ")\n";
 			}
 		} // End for
 	} // End for
