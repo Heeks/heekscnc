@@ -483,14 +483,26 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 					BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
 
 					double radius = pCuttingTool->CuttingRadius();
+					m_params.m_tool_on_side = CContourParams::eRightOrInside;
+
 					if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
 					if (m_params.m_tool_on_side == CContourParams::eOn) radius = 0.0;
 
-					offset_wire.Perform(radius);
-					TopoDS_Wire tool_path_wire(TopoDS::Wire(offset_wire.Shape()));
+                    if (m_params.m_tool_on_side != CContourParams::eOn)
+                    {
+                        offset_wire.Perform(radius);
+                        TopoDS_Wire tool_path_wire(TopoDS::Wire(offset_wire.Shape()));
 
-					// Now generate a toolpath along this wire.
-					gcode << GeneratePathFromWire(tool_path_wire, last_position );
+                        // Now generate a toolpath along this wire.
+                        gcode << GeneratePathFromWire(tool_path_wire, last_position );
+                    }
+                    else
+                    {
+                        // Now generate a toolpath along this wire.
+                        gcode << GeneratePathFromWire(TopoDS::Wire(wire), last_position );
+                    }
+
+
 				}
 			} // End try
 			catch (Standard_Failure) {

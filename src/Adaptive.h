@@ -63,13 +63,13 @@ public:
 	CAdaptiveParams m_params;
 	static int number_for_stl_file;
 
-	CAdaptive():COp(GetTypeString()){}
+	CAdaptive():COp(GetTypeString(), 0, AdaptiveType){}
 	CAdaptive(	const std::list<int> &solids,
 			const std::list<int> &sketches,
 			const int cutting_tool_number = 0,
 			const int reference_object_type = -1,	// For possible starting point
 			const int reference_object_id = -1 )	// For possible starting point
-		: COp(GetTypeString(), cutting_tool_number),
+		: COp(GetTypeString(), cutting_tool_number, AdaptiveType),
 			m_solids(solids),
 			m_sketches(sketches)
 	{

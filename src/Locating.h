@@ -75,9 +75,9 @@ public:
 	CLocatingParams m_params;
 
 	//	Constructors.
-	CLocating():COp(GetTypeString(), 0){}
+	CLocating():COp(GetTypeString(), 0, LocatingType){}
 	CLocating(	const Symbols_t &symbols )
-		: COp(GetTypeString(), 0), m_symbols(symbols)
+		: COp(GetTypeString(), 0, LocatingType), m_symbols(symbols)
 	{
 		m_params.set_initial_values();
 

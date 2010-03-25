@@ -80,7 +80,7 @@ public:
 
 public:
 	//	Constructors.
-	CProbing( const wxString title, const int cutting_tool_number):CSpeedOp(title, cutting_tool_number)
+	CProbing( const wxString title, const int cutting_tool_number, const int operation_type):CSpeedOp(title, cutting_tool_number, operation_type)
 	{
 		m_speed_op_params.m_spindle_speed = 0;	// We don't want the spindle to move while we're probing.
 		COp::m_active = 0;	// We don't want the normal GCode generation routines to include us.
@@ -317,7 +317,7 @@ public:
 class CProbe_Centre: public CProbing {
 public:
 	//	Constructors.
-	CProbe_Centre(const int cutting_tool_number = 0) : CProbing(_("Probe Centre"), cutting_tool_number )
+	CProbe_Centre(const int cutting_tool_number = 0) : CProbing(_("Probe Centre"), cutting_tool_number, ProbeCentreType )
 	{
 		m_direction = int(eOutside);
 		m_number_of_points = 2;
@@ -372,7 +372,7 @@ class CProbe_Edge: public CProbing {
 public:
 	//	Constructors.
 	CProbe_Edge(const int cutting_tool_number = 0) :
-		CProbing(_("Probe Edge"), cutting_tool_number )
+		CProbing(_("Probe Edge"), cutting_tool_number, ProbeEdgeType )
 	{
 		m_retract = 5.0;	// mm.  This is how far to retract from the edge before probing back in.
 		m_number_of_edges = 2;	// A single edge produces only an angle in an XML document.  Two edges also moves the

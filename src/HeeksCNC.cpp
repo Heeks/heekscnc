@@ -375,11 +375,6 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	if(cuttingTools.size() == 0)
-	{
-		wxMessageBox(_("You haven't selected a cutting tool for this hole.  By default no 'tool definition' or 'select tool' code will be generated for this drilling cycle."));
-	}
-
 	if(cuttingTools.size() > 1)
 	{
 		wxMessageBox(_("You may only select a single cutting tool for each drilling operation.!"));
@@ -413,11 +408,6 @@ static void NewChamferOpMenuCallback(wxCommandEvent &event)
 			symbols.push_back( CChamfer::Symbol_t( object->GetType(), object->m_id ) );
 		} // End if - else
 	} // End for
-
-	if(cuttingTools.size() == 0)
-	{
-		wxMessageBox(_("You haven't selected a cutting tool for this hole.  By default no 'tool definition' or 'select tool' code will be generated for this chamfer cycle."));
-	}
 
 	if(cuttingTools.size() > 1)
 	{
@@ -618,11 +608,6 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 	{
 		wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
 		return;
-	}
-
-	if(cuttingTools.size() == 0)
-	{
-		wxMessageBox(_("You haven't selected a cutting tool for this hole.  By default no 'tool definition' or 'select tool' code will be generated for this drilling cycle."));
 	}
 
 	if(cuttingTools.size() > 1)

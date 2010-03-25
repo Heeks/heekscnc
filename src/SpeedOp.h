@@ -36,7 +36,12 @@ public:
 
 	static bool m_auto_set_speeds_feeds;
 
-	CSpeedOp(const wxString& title, const int cutting_tool_number = -1 ):COp(title, cutting_tool_number){ReadDefaultValues();}
+	CSpeedOp(const wxString& title, const int cutting_tool_number = -1, const int operation_type = UnknownType )
+            :COp(title, cutting_tool_number, operation_type)
+    {
+        ReadDefaultValues();
+    }
+
 	CSpeedOp & operator= ( const CSpeedOp & rhs );
 	CSpeedOp( const CSpeedOp & rhs );
 

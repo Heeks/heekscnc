@@ -81,7 +81,8 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("lib", &m_lib);
 }
 
-CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number):CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_solids(solids)
+CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number)
+    :CDepthOp(GetTypeString(), NULL, cutting_tool_number, ZigZagType), m_solids(solids)
 {
 	ReadDefaultValues();
 

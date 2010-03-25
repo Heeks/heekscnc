@@ -37,8 +37,8 @@ class CDepthOp : public CSpeedOp
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(const wxString& title, const std::list<int> *sketches = NULL, const int cutting_tool_number = -1 )
-		: CSpeedOp(title, cutting_tool_number)
+	CDepthOp(const wxString& title, const std::list<int> *sketches = NULL, const int cutting_tool_number = -1, const int operation_type = UnknownType )
+		: CSpeedOp(title, cutting_tool_number, operation_type)
 	{
 		ReadDefaultValues();
 		SetDepthsFromSketchesAndTool(sketches);

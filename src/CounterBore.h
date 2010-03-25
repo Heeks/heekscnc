@@ -83,10 +83,10 @@ public:
 	static std::pair< double, double > SelectSizeForHead( const double drill_hole_diameter );
 
 	//	Constructors.
-	CCounterBore():CDepthOp(GetTypeString()){}
+	CCounterBore():CDepthOp(GetTypeString(), 0, CounterBoreType){}
 	CCounterBore(	const Symbols_t &symbols,
 			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_symbols(symbols)
+		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, CounterBoreType), m_symbols(symbols)
 	{
 		for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
 		{

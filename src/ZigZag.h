@@ -35,7 +35,7 @@ public:
 	CZigZagParams m_params;
 	static int number_for_stl_file;
 
-	CZigZag():CDepthOp(GetTypeString()){}
+	CZigZag():CDepthOp(GetTypeString(), 0, ZigZagType){}
 	CZigZag(const std::list<int> &solids, const int cutting_tool_number = -1);
 	CZigZag( const CZigZag & rhs );
 	CZigZag & operator= ( const CZigZag & rhs );
