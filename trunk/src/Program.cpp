@@ -443,8 +443,7 @@ void CProgram::RewritePythonProgram()
 	bool kurve_funcs_needed = false;
 	bool area_module_needed = false;
 	bool area_funcs_needed = false;
-	bool pycam_needed = false;
-	bool opencamlib_needed = false;
+	bool ocl_funcs_needed = false;
 	bool adaptive_op_exists = false;
 	bool drilling_op_exists = false;
 	bool counterbore_op_exists = false;
@@ -484,17 +483,7 @@ void CProgram::RewritePythonProgram()
 		{
 			if(((CZigZag*)object)->m_active)
 			{
-				switch(((CZigZag*)object)->m_params.m_lib)
-				{
-				case 0:// pycam
-					pycam_needed = true;
-					break;
-				case 1:
-					opencamlib_needed = true;
-					break;
-				default:
-					break;
-				}
+				ocl_funcs_needed = true;
 			}
 		}
 		else if(object->GetType() == AdaptiveType)
@@ -557,28 +546,10 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->AppendText(_T("import area_funcs\n"));
 	}
 
-	// pycam stuff
-	if(pycam_needed)
-	{
-#ifdef WIN32
-		theApp.m_program_canvas->AppendText(_T("import sys\n"));
-#endif
-		theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'PyCam/trunk')\n"));
-		theApp.m_program_canvas->AppendText(_T("\n"));
-		theApp.m_program_canvas->AppendText(_T("from pycam.Geometry import *\n"));
-		theApp.m_program_canvas->AppendText(_T("from pycam.Cutters.SphericalCutter import *\n"));
-		theApp.m_program_canvas->AppendText(_T("from pycam.Cutters.CylindricalCutter import *\n"));
-		theApp.m_program_canvas->AppendText(_T("from pycam.Cutters.ToroidalCutter import *\n"));
-		theApp.m_program_canvas->AppendText(_T("from pycam.Importers.STLImporter import ImportModel\n"));
-		theApp.m_program_canvas->AppendText(_T("from pycam.PathGenerators.DropCutter import DropCutter\n"));
-		theApp.m_program_canvas->AppendText(_T("from PyCamToHeeks import HeeksCNCExporter\n"));
-		theApp.m_program_canvas->AppendText(_T("\n"));
-	}
-
 	// OpenCamLib stuff
-	if(opencamlib_needed)
+	if(ocl_funcs_needed)
 	{
-		theApp.m_program_canvas->AppendText(_T("import ocl\n"));
+		theApp.m_program_canvas->AppendText(_T("import ocl_funcs\n"));
 	}
 
 	// actp

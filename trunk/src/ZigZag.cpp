@@ -9,7 +9,7 @@
 #include "ZigZag.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
-#include "interface/PropertyDouble.h"
+#include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "Reselect.h"
@@ -22,33 +22,24 @@ static void on_set_minx(double value, HeeksObj* object){((CZigZag*)object)->m_pa
 static void on_set_maxx(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[3] = value;}
 static void on_set_miny(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[1] = value;}
 static void on_set_maxy(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[4] = value;}
-static void on_set_z0(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[2] = value;}
-static void on_set_z1(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_box.m_x[5] = value;}
 static void on_set_step_over(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_step_over = value;}
 static void on_set_direction(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_direction = value;}
-static void on_set_library(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_lib = value;}
+static void on_set_material_allowance(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_material_allowance = value;}
 
 void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("minimum x"), m_box.m_x[0], parent, on_set_minx));
-	list->push_back(new PropertyDouble(_("maximum x"), m_box.m_x[3], parent, on_set_maxx));
-	list->push_back(new PropertyDouble(_("minimum y"), m_box.m_x[1], parent, on_set_miny));
-	list->push_back(new PropertyDouble(_("maximum y"), m_box.m_x[4], parent, on_set_maxy));
-	list->push_back(new PropertyDouble(_("z0"), m_box.m_x[2], parent, on_set_z0));
-	list->push_back(new PropertyDouble(_("z1"), m_box.m_x[5], parent, on_set_z1));
-	list->push_back(new PropertyDouble(_("step over"), m_step_over, parent, on_set_step_over));
+	list->push_back(new PropertyLength(_("minimum x"), m_box.m_x[0], parent, on_set_minx));
+	list->push_back(new PropertyLength(_("maximum x"), m_box.m_x[3], parent, on_set_maxx));
+	list->push_back(new PropertyLength(_("minimum y"), m_box.m_x[1], parent, on_set_miny));
+	list->push_back(new PropertyLength(_("maximum y"), m_box.m_x[4], parent, on_set_maxy));
+	list->push_back(new PropertyLength(_("step over"), m_step_over, parent, on_set_step_over));
 	{
 		std::list< wxString > choices;
 		choices.push_back(_("X"));
 		choices.push_back(_("Y"));
 		list->push_back(new PropertyChoice(_("direction"), choices, m_direction, parent, on_set_direction));
 	}
-	{
-		std::list< wxString > choices;
-		choices.push_back(_("pycam"));
-		choices.push_back(_("OpenCamLib"));
-		list->push_back(new PropertyChoice(_("library"), choices, m_lib, parent, on_set_library));
-	}
+	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, parent, on_set_material_allowance));
 }
 
 void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
@@ -60,11 +51,9 @@ void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("maxx", m_box.m_x[3]);
 	element->SetDoubleAttribute("miny", m_box.m_x[1]);
 	element->SetDoubleAttribute("maxy", m_box.m_x[4]);
-	element->SetDoubleAttribute("z0", m_box.m_x[2]);
-	element->SetDoubleAttribute("z1", m_box.m_x[5]);
 	element->SetDoubleAttribute("step_over", m_step_over);
 	element->SetAttribute("dir", m_direction);
-	element->SetAttribute("lib", m_lib);
+	element->SetDoubleAttribute("material_allowance", m_material_allowance);
 }
 
 void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -74,11 +63,9 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("maxx", &m_box.m_x[3]);
 	pElem->Attribute("miny", &m_box.m_x[1]);
 	pElem->Attribute("maxy", &m_box.m_x[4]);
-	pElem->Attribute("z0", &m_box.m_x[2]);
-	pElem->Attribute("z1", &m_box.m_x[5]);
 	pElem->Attribute("step_over", &m_step_over);
 	pElem->Attribute("dir", &m_direction);
-	pElem->Attribute("lib", &m_lib);
+	pElem->Attribute("material_allowance", &m_material_allowance);
 }
 
 CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number)
@@ -97,6 +84,8 @@ CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number)
 			Add(object, NULL);
 		}
 	}
+
+	SetDepthOpParamsFromBox();
 
 	// add tool radius all around the box
 	if(m_params.m_box.m_valid)
@@ -155,6 +144,14 @@ void CZigZag::ReloadPointers()
 	CDepthOp::ReloadPointers();
 }
 
+void CZigZag::SetDepthOpParamsFromBox()
+{
+	m_depth_op_params.m_start_depth = m_params.m_box.MaxZ();
+	m_depth_op_params.m_clearance_height = m_params.m_box.MaxZ() + 5.0;
+	m_depth_op_params.m_final_depth = m_params.m_box.MinZ();
+	m_depth_op_params.m_rapid_down_to_height = m_params.m_box.MaxZ() + 2.0;
+	m_depth_op_params.m_step_down = m_params.m_box.Depth(); // set it to a finishing pass
+}
 
 void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 {
@@ -205,7 +202,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 #endif
 	number_for_stl_file++;
 
-	heeksCAD->SaveSTLFile(solids, filepath);
+	heeksCAD->SaveSTLFile(solids, filepath, 0.01);
 
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
@@ -225,98 +222,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
 			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
-	switch(this->m_params.m_lib)
-	{
-	case 0: // pycam
-		{
-			switch(pCuttingTool->m_params.m_type){
-	case CCuttingToolParams::eBallEndMill:
-	case CCuttingToolParams::eSlotCutter:
-	case CCuttingToolParams::eEndmill:
-		if(fabs(pCuttingTool->m_params.m_corner_radius - pCuttingTool->m_params.m_diameter/2) < 0.0000001)
-		{
-			ss << "c = SphericalCutter(" << pCuttingTool->m_params.m_diameter/2 << ", Point(0,0,7))\n";
-		}
-		else if(fabs(pCuttingTool->m_params.m_corner_radius) < 0.0000001)
-		{
-			ss << "c = CylindricalCutter(" << pCuttingTool->m_params.m_diameter/2 << ", Point(0,0,7))\n";
-		}
-		else
-		{
-			ss << "c = ToroidalCutter(" << pCuttingTool->m_params.m_diameter/2 << ", " << pCuttingTool->m_params.m_corner_radius << ", Point(0,0,7))\n";
-		}
-		break;
-	default:
-		wxMessageBox(_("invalid tool type"));
-		break;
-			};
-
-			ss << "model = ImportModel('" << filepath.c_str() << "')\n";
-
-			ss << "pg = DropCutter(c, model)\n";
-
-			// def GenerateToolPath(self, minx, maxx, miny, maxy, z0, z1, dx, dy, direction):
-			double dx, dy;
-			if(m_params.m_direction)
-			{
-				dx = m_params.m_step_over;
-				dy = 0.1;
-			}
-			else
-			{
-				dx = 0.1;
-				dy = m_params.m_step_over;
-			}
-			ss << "pathlist = pg.GenerateToolPath(" << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << min.Z() << ", " << max.Z() << ", " << dx << ", " << dy << "," <<m_params.m_direction<< ")\n";
-
-			ss << "h = HeeksCNCExporter(" << m_params.m_box.m_x[5] << ")\n";
-
-			ss << "h.AddPathList(pathlist)\n";
-		} // end of case 0
-		break;
-
-	case 1:// OpenCamLib
-		{
-			ss << "s = ocl.STLSurf('" << filepath.c_str() << "')\n";
-			ss << "dcf = ocl.PathDropCutterFinish(s)\n";
-			ss << "cutter = ocl.CylCutter(" << pCuttingTool->m_params.m_diameter << ")\n";
-			ss << "dcf.setCutter(cutter)\n";
-			ss << "dcf.minimumZ = " << min.Z() << "\n";
-			if(m_params.m_direction)ss << "steps = " << (int)((max.X() - min.X())/m_params.m_step_over) + 1 << "\n";
-			else ss << "steps = " << (int)((max.Y() - min.Y())/m_params.m_step_over) + 1 << "\n";
-			if(m_params.m_direction)ss << "step_over = " << (max.X() - min.X()) << " / steps\n";
-			else ss << "step_over = " << (max.Y() - min.Y()) << " / steps\n";
-			ss << "minx = " << min.X() << "\n";
-			ss << "miny = " << min.Y() << "\n";
-			ss << "maxx = " << max.X() << "\n";
-			ss << "maxy = " << max.Y() << "\n";
-			if(m_params.m_direction)ss << "prev_x = " << min.X() << "\n";
-			else ss << "prev_y = " << min.Y() << "\n";
-			ss << "for i in range(0, steps + 1):\n";
-			if(m_params.m_direction)ss << " x = minx + float(i) * step_over\n";
-			else ss << " y = miny + float(i) * step_over\n";
-			ss << " path = ocl.Path()\n";
-			if(m_params.m_direction)ss << " path.append(ocl.Line(ocl.Point(x, miny, 0), ocl.Point(x, maxy, 0)))\n";
-			else ss << " path.append(ocl.Line(ocl.Point(minx, y, 0), ocl.Point(maxx, y, 0)))\n";
-			ss << " dcf.setPath(path)\n";
-			ss << " dcf.run()\n";
-			ss << " plist = dcf.getCLPoints()\n";
-			ss << " n = 0\n";
-			ss << " for p in plist:\n";
-			ss << "  if n == 0:\n";
-			ss << "   rapid(p.x, p.y)\n";
-			ss << "   rapid(z = p.z + 5)\n";
-			ss << "   feed(z = p.z)\n";
-			ss << "  else:\n";
-			ss << "   feed(p.x, p.y, p.z)\n";
-			ss << "  n = n + 1\n";
-			ss << " rapid(z = " << max.Z() + 5 << ")\n";
-		}
-		break;
-
-	default:
-		break;
-	}
+	ss << "ocl_funcs.zigzag('" << filepath.c_str() << "', tool_diameter, " << m_params.m_step_over << ", " << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
@@ -424,13 +330,11 @@ void CZigZag::WriteDefaultValues()
 	CNCConfig config(ConfigScope());
 	config.Write(wxString(GetTypeString()) + _T("BoxXMin"), m_params.m_box.m_x[0]);
 	config.Write(wxString(GetTypeString()) + _T("BoxYMin"), m_params.m_box.m_x[1]);
-	config.Write(wxString(GetTypeString()) + _T("BoxZMin"), m_params.m_box.m_x[2]);
 	config.Write(wxString(GetTypeString()) + _T("BoxXMax"), m_params.m_box.m_x[3]);
 	config.Write(wxString(GetTypeString()) + _T("BoxYMax"), m_params.m_box.m_x[4]);
-	config.Write(wxString(GetTypeString()) + _T("BoxZMax"), m_params.m_box.m_x[5]);
 	config.Write(wxString(GetTypeString()) + _T("StepOver"), m_params.m_step_over);
 	config.Write(wxString(GetTypeString()) + _T("Direction"), m_params.m_direction);
-	config.Write(wxString(GetTypeString()) + _T("Lib"), m_params.m_lib);
+	config.Write(wxString(GetTypeString()) + _T("MatAllowance"), m_params.m_material_allowance);
 }
 
 void CZigZag::ReadDefaultValues()
@@ -440,13 +344,11 @@ void CZigZag::ReadDefaultValues()
 	CNCConfig config(ConfigScope());
 	config.Read(wxString(GetTypeString()) + _T("BoxXMin"), &m_params.m_box.m_x[0], -7.0);
 	config.Read(wxString(GetTypeString()) + _T("BoxYMin"), &m_params.m_box.m_x[1], -7.0);
-	config.Read(wxString(GetTypeString()) + _T("BoxZMin"), &m_params.m_box.m_x[2], 0.0);
 	config.Read(wxString(GetTypeString()) + _T("BoxXMax"), &m_params.m_box.m_x[3], 7.0);
 	config.Read(wxString(GetTypeString()) + _T("BoxYMax"), &m_params.m_box.m_x[4], 7.0);
-	config.Read(wxString(GetTypeString()) + _T("BoxZMax"), &m_params.m_box.m_x[5], 10.0);
 	config.Read(wxString(GetTypeString()) + _T("StepOver"), &m_params.m_step_over, 1.0);
 	config.Read(wxString(GetTypeString()) + _T("Direction"), &m_params.m_direction, 0);
-	config.Read(wxString(GetTypeString()) + _T("Lib"), &m_params.m_lib, 1);
+	config.Read(wxString(GetTypeString()) + _T("MatAllowance"), &m_params.m_material_allowance, 0.0);
 }
 
 
@@ -461,7 +363,7 @@ public:
 	    for (HeeksObj *object = m_pThis->GetFirstChild(); object != NULL; object = m_pThis->GetNextChild())
 	    {
                 object->GetBox(bounding_box);
-	    }
+		}
 
         // add tool radius all around the box
         if(bounding_box.m_valid)
@@ -478,6 +380,7 @@ public:
         }
 
 	    m_pThis->m_params.m_box = bounding_box;
+		m_pThis->SetDepthOpParamsFromBox();
 	}
 
 public:
