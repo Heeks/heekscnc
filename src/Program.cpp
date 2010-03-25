@@ -383,7 +383,11 @@ struct sort_operations : public std::binary_function< bool, COp *, COp * >
 		if (lhs->m_execution_order < rhs->m_execution_order) return(true);
 		if (lhs->m_execution_order > rhs->m_execution_order) return(false);
 
-		// We want to run through all the centre drilling, then drilling, then milling.
+		// We want to run through all the centre drilling, then drilling, then milling then chamfering.
+
+		if ((((HeeksObj *)lhs)->GetType() == ChamferType) && (((HeeksObj *)rhs)->GetType() != ChamferType)) return(false);
+		if ((((HeeksObj *)lhs)->GetType() != ChamferType) && (((HeeksObj *)rhs)->GetType() == ChamferType)) return(true);
+
 		if ((((HeeksObj *)lhs)->GetType() == DrillingType) && (((HeeksObj *)rhs)->GetType() != DrillingType)) return(true);
 		if ((((HeeksObj *)lhs)->GetType() != DrillingType) && (((HeeksObj *)rhs)->GetType() == DrillingType)) return(false);
 
@@ -412,10 +416,10 @@ struct sort_operations : public std::binary_function< bool, COp *, COp * >
 
 				// Finally, give preference to a milling bit over a chamfer bit.
 				if ((lhsPtr->m_params.m_type == CCuttingToolParams::eChamfer) &&
-				    (rhsPtr->m_params.m_type != CCuttingToolParams::eChamfer)) return(true);
+				    (rhsPtr->m_params.m_type != CCuttingToolParams::eChamfer)) return(false);
 
 				if ((lhsPtr->m_params.m_type != CCuttingToolParams::eChamfer) &&
-				    (rhsPtr->m_params.m_type == CCuttingToolParams::eChamfer)) return(false);
+				    (rhsPtr->m_params.m_type == CCuttingToolParams::eChamfer)) return(true);
 			} // End if - then
 		} // End if - then
 
