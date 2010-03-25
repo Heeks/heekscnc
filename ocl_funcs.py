@@ -10,10 +10,7 @@ def zigzag( filepath, tool_diameter = 3.0, step_over = 1.0, x0= -10.0, x1 = 10.0
    if final_depth > start_depth:
       raise 'final_depth > start_depth'
    height = start_depth - final_depth
-   print 'height = ', height
    zsteps = int( height / math.fabs(step_down) + 0.999999 )
-   print 'step_down = ', step_down
-   print 'height / step_down + 0.999999 = ', height / step_down + 0.999999 
    zstep_down = height / zsteps
    incremental_rapid_to = rapid_down_to_height - start_depth
    if incremental_rapid_to < 0: incremental_rapid_to = 0.1
