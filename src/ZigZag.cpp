@@ -157,6 +157,8 @@ void CZigZag::ReloadPointers()
 
 void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 {
+    ReloadPointers();   // Make sure all the solids in m_solids are included as child objects.
+
 	CCuttingTool *pCuttingTool = CCuttingTool::Find(m_cutting_tool_number);
 	if(pCuttingTool == NULL)
 	{
@@ -169,9 +171,13 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 
 	//write stl file
 	std::list<HeeksObj*> solids;
-	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
+	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
 	{
-		HeeksObj* object = heeksCAD->GetIDObject(SolidType, *It);
+	    if (object->GetType() != SolidType)
+	    {
+	        continue;
+	    }
+
 		if (object != NULL)
 		{
 			// Need to rotate a COPY of the solid by the fixture settings.
@@ -189,6 +195,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
             } // End if - then
         } // End if - then
 	} // End for
+
 
 #ifdef WIN32
 	wxString filepath = wxString::Format(_T("zigzag%d.stl"), number_for_stl_file);
@@ -441,6 +448,51 @@ void CZigZag::ReadDefaultValues()
 	config.Read(wxString(GetTypeString()) + _T("Lib"), &m_params.m_lib, 1);
 }
 
+
+class ResetBoundary: public Tool {
+public:
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Reset Boundary");}
+	void Run()
+	{
+	    CBox bounding_box;
+
+	    for (HeeksObj *object = m_pThis->GetFirstChild(); object != NULL; object = m_pThis->GetNextChild())
+	    {
+                object->GetBox(bounding_box);
+	    }
+
+        // add tool radius all around the box
+        if(bounding_box.m_valid)
+        {
+            CCuttingTool *pCuttingTool = CCuttingTool::Find(m_pThis->m_cutting_tool_number);
+            if(pCuttingTool)
+            {
+                double extra = pCuttingTool->m_params.m_diameter/2 + 0.01;
+                bounding_box.m_x[0] -= extra;
+                bounding_box.m_x[1] -= extra;
+                bounding_box.m_x[3] += extra;
+                bounding_box.m_x[4] += extra;
+            }
+        }
+
+	    m_pThis->m_params.m_box = bounding_box;
+	}
+
+public:
+	void Set( CZigZag *pThis )
+	{
+	    m_pThis = pThis;
+	}
+
+	wxString BitmapPath(){ return _T("import");}
+	CZigZag *m_pThis;
+};
+
+static ResetBoundary reset_boundary;
+
+
+
 static ReselectSolids reselect_solids;
 
 void CZigZag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
@@ -448,6 +500,9 @@ void CZigZag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	reselect_solids.m_solids = &m_solids;
 	reselect_solids.m_object = this;
 	t_list->push_back(&reselect_solids);
+
+	reset_boundary.Set(this);
+	t_list->push_back(&reset_boundary);
 
 	CDepthOp::GetTools( t_list, p );
 }
