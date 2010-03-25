@@ -33,7 +33,7 @@ public:
 
 	static double max_deviation_for_spline_to_arc;
 
-	CPocket():CDepthOp(GetTypeString()){}
+	CPocket():CDepthOp(GetTypeString(), 0, PocketType){}
 	CPocket(const std::list<int> &sketches, const int cutting_tool_number );
 	CPocket( const CPocket & rhs );
 	CPocket & operator= ( const CPocket & rhs );

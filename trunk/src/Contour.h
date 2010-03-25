@@ -84,13 +84,13 @@ public:
 	CContourParams m_params;
 
 	//	Constructors.
-	CContour():CDepthOp(GetTypeString(), 0)
+	CContour():CDepthOp(GetTypeString(), 0, ContourType)
 	{
 		m_params.set_initial_values();
 	}
 	CContour(	const Symbols_t &symbols,
 			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_symbols(symbols)
+		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ContourType), m_symbols(symbols)
 	{
 		m_params.set_initial_values();
 		ReloadPointers();

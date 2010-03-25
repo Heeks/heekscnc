@@ -137,7 +137,8 @@ COp & COp::operator= ( const COp & rhs )
 		m_active = rhs.m_active;
 		m_title = rhs.m_title;
 		m_execution_order = rhs.m_execution_order;
-		m_cutting_tool_number = m_cutting_tool_number;
+		m_cutting_tool_number = rhs.m_cutting_tool_number;
+		m_operation_type = rhs.m_operation_type;
 	}
 
 	return(*this);
@@ -179,7 +180,7 @@ void COp::ReadDefaultValues()
 		// 7 turn tool
 
 		int default_tool = 0;
-		switch(GetType())
+		switch(m_operation_type)
 		{
 		case DrillingType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eDrill );
@@ -205,9 +206,13 @@ void COp::ReadDefaultValues()
 		case TurnRoughType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTurningTool );
 			break;
+        case LocatingType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+			break;
+        case ChamferType:
+			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eChamfer );
 			break;
 		default:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );

@@ -60,7 +60,7 @@ public:
 private:
 	class Circle
 	{
-	public: 
+	public:
 		Circle( const CNCPoint location,
 				const double diameter,
 				const double max_depth )
@@ -105,10 +105,10 @@ public:
 	CChamferParams m_params;
 
 	//	Constructors.
-	CChamfer():CDepthOp(GetTypeString()){}
+	CChamfer():CDepthOp(GetTypeString(), NULL, 0, ChamferType){}
 	CChamfer(	const Symbols_t &symbols,
 			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number), m_symbols(symbols)
+		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ChamferType), m_symbols(symbols)
 	{
 		for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
 		{

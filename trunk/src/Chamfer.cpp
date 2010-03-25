@@ -184,11 +184,7 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 		// really cut with the top-most cutting edge so that it's as strong as it can be.  This
 		// depends on the area available for fitting the chamfering bit.
 
-		double max_depth_possible = pChamferingBit->m_params.m_cutting_edge_height * cos(theta);
 		double min_chamfer_diameter = pChamferingBit->m_params.m_flat_radius * 2.0;
-
-		// Calculate the maximum chamfering diameter that will allow the required chamfer width.
-		double max_chamfer_diameter = pChamferingBit->m_params.m_diameter - (m_params.m_chamfer_width * sin(theta));
 
 		Circles_t circles;
 
@@ -246,7 +242,6 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 			double max_hole_depth = l_itCircle->MaxDepth();
 			double max_bit_plunge_depth = pChamferingBit->m_params.m_cutting_edge_height * cos(theta);
 
-			double max_bit_radius = pChamferingBit->m_params.m_diameter / 2.0;
 			double min_bit_radius = pChamferingBit->m_params.m_flat_radius;
 
 			double hole_radius = l_itCircle->Diameter() / 2.0;
@@ -262,9 +257,6 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 
 			double plunge_depth = (max_hole_depth<=max_bit_plunge_depth)?max_hole_depth:max_bit_plunge_depth;
 			double bit_radius_at_plunge_depth = pChamferingBit->m_params.m_flat_radius + (plunge_depth / tan(theta));
-
-			// Figure out how far down the chamfering bit needs to be before it's touching the top surface.
-			double top_surface = l_itCircle->Location().Z(false);
 
 			// This is the gap between the bit and the hole when the bit's bottom is at the top surface.
 			double gap_radius = hole_radius - min_bit_radius;
