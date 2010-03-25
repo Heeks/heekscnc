@@ -7,21 +7,13 @@
 
 class CZigZag;
 
-enum DropCutterLibraryEnum
-{
-	DropCutterUsePyCam,
-	DropCutterUseOpenCamLib,
-};
-
 class CZigZagParams{
 public:
-	CBox m_box;
+	CBox m_box; // z values ignored ( use start_depth, final_depth instead )
 	double m_step_over;
 	int m_direction; // 0 = x, 1 = y
-	int m_lib; // 0 = pycam, 1 = OpenCamLib
+	double m_material_allowance;
 
-	void set_initial_values(const std::list<int> &solids);
-	void write_values_to_config();
 	void GetProperties(CZigZag* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -57,6 +49,7 @@ public:
 	void ReadDefaultValues();
 	void AppendTextToProgram(const CFixture *pFixture);
 	void ReloadPointers();
+	void SetDepthOpParamsFromBox();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
