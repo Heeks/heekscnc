@@ -1,0 +1,47 @@
+#summary Generate a chamfering tool path
+
+= Introduction =
+
+The chamfering operation uses a chamfering bit to either plunge directly into a hole or navigate its outer edge (depending on geometry).  At the moment the chamfering operation may be added to either a drilling operation or a counterbore operation.
+
+The GCode is generated such that, if the chamfering bit will make the required chamfer width by plunging straight down, it will do so.  It checks for the hole's depth as well as the maximum plunge distance based on the tool's geometry.
+
+If the geometry precludes a straight plunge, a circular tool path is chosen instead.  The maximum depth of the hole and the maximum plunge distance (based on the geometry of the chamfering bit) are taken into account so as to use the top-most portion of the chamfering bit's edge.  i.e. we don't want to chamfer with the very tip of the bit unless we must as this is the weakest part of the tool.
+
+The operator may set the chamfer width and the speed settings but the start and end depth values are ignored so that they may be calculated at GCode generation time.
+
+= Example =
+
+See video of operation in action.  The holes are small enough that a straight plunge is sufficient.  The two counterbores must be chamfered via a circular arc.  The closest counterbore is deep enough to allow a full-depth chamfer for this bit's geometry.  The counterbore at the back is slightly too shallow to allow a full-depth operation so that depth is reduced and the radius of the circular tool path is increased so as to provide the required chamfering width.
+
+See http://www.youtube.com/watch?v=x8M8f2HcfFU
+
+= Parameters =
+
+== Chamfer Width ==
+
+This is the width of the chamfered edge.  The tool's cutting edge angle is used to calculate the plunge depth (or the circlular path's radius) so that this width of chamfered edge is achieved.
+
+== Clearance Height ==
+
+This is the height, above the workpiece, to which the operation moves once complete.
+
+== Step Down ==
+
+Is ignored by this operation.  If the operation can't be performed in a single pass then it is not attempted.
+
+== Start Depth and Final Depth ==
+
+Is ignored by this operation.  The values are calculated when the GCode is generated.
+
+== Rapid Down To Height ==
+
+Is ignored by this operation
+
+== Horizontal Feed Rate and Vertical Feed Rate ==
+
+Are supported.
+
+== Spindle Speed == 
+
+Is used by this operation.
