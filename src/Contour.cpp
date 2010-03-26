@@ -50,10 +50,82 @@ void CContourParams::write_values_to_config()
 	config.Write(_T("ToolOnSide"), (int) m_tool_on_side);
 }
 
-
+static void on_set_tool_on_side(int value, HeeksObj* object){
+	switch(value)
+	{
+	case 0:
+		((CContour*)object)->m_params.m_tool_on_side = CContourParams::eLeftOrOutside;
+		break;
+	case 1:
+		((CContour*)object)->m_params.m_tool_on_side = CContourParams::eRightOrInside;
+		break;
+	default:
+		((CContour*)object)->m_params.m_tool_on_side = CContourParams::eOn;
+		break;
+	}
+	((CContour*)object)->WriteDefaultValues();
+}
 
 void CContourParams::GetProperties(CContour* parent, std::list<Property *> *list)
 {
+    std::list< wxString > choices;
+
+    SketchOrderType order = SketchOrderTypeUnknown;
+
+    if(parent->GetNumChildren() > 0)
+    {
+        HeeksObj* sketch = NULL;
+
+        for (HeeksObj *object = parent->GetFirstChild(); ((sketch == NULL) && (object != NULL)); object = parent->GetNextChild())
+        {
+            if (object->GetType() == SketchType)
+            {
+                sketch = object;
+            }
+        }
+
+        if(sketch != NULL)
+        {
+            order = heeksCAD->GetSketchOrder(sketch);
+            switch(order)
+            {
+            case SketchOrderTypeOpen:
+                choices.push_back(_("Left"));
+                choices.push_back(_("Right"));
+                break;
+
+            case SketchOrderTypeCloseCW:
+            case SketchOrderTypeCloseCCW:
+                choices.push_back(_("Outside"));
+                choices.push_back(_("Inside"));
+                break;
+
+            default:
+                choices.push_back(_("Outside or Left"));
+                choices.push_back(_("Inside or Right"));
+                break;
+            }
+        }
+
+        choices.push_back(_("On"));
+
+        int choice = int(CContourParams::eOn);
+        switch (parent->m_params.m_tool_on_side)
+        {
+            case CContourParams::eRightOrInside:	choice = 1;
+                    break;
+
+            case CContourParams::eOn:	choice = 2;
+                    break;
+
+            case CContourParams::eLeftOrOutside:	choice = 0;
+                    break;
+        } // End switch
+
+        list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
+    }
+
+
 }
 
 void CContourParams::WriteXMLAttributes(TiXmlNode *root)
@@ -172,6 +244,38 @@ std::vector<TopoDS_Edge> CContour::SortEdges( const TopoDS_Wire & wire ) const
 } // End SortEdges() method
 
 
+bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to ) const
+{
+    const bool forwards = true;
+    const bool backwards = false;
+
+    bool direction = forwards;
+
+    double min_distance = 999999999999999;  // Some big number.
+    if (GetStart(from).Distance( GetEnd( to )) < min_distance)
+    {
+        min_distance = GetStart( from ).Distance( GetEnd( to ));
+        direction = backwards;
+    }
+
+    if (GetEnd(from).Distance( GetEnd( to )) < min_distance)
+    {
+        min_distance = GetEnd(from).Distance( GetEnd( to ));
+        direction = forwards;
+    }
+
+    if (GetStart(from).Distance( GetStart( to )) < min_distance)
+    {
+        min_distance = GetStart(from).Distance( GetStart( to ));
+        direction = backwards;
+    }
+
+    if (GetEnd(from).Distance( GetStart( to )) < min_distance)
+    {
+        min_distance = GetEnd(from).Distance( GetStart( to ));
+        direction = forwards;
+    }
+}
 
 
 wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & last_position ) const
@@ -179,7 +283,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 	wxString gcode;
 	double tolerance = heeksCAD->GetTolerance();
 
-
+/*
     ShapeFix_Wire fixWire;
     fixWire.Load(wire);
     fixWire.FixReorder();
@@ -189,14 +293,27 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 
     // TopoDS_Wire profileWire = fixWire.WireAPIMake();
     TopoDS_Wire profileWire = fixWire.Wire();
+*/
 
-
-
-    // std::vector<TopoDS_Edge> edges = SortEdges(wire);
+    std::vector<TopoDS_Edge> edges = SortEdges(wire);
     // for (std::vector<TopoDS_Edge>::iterator l_itEdge = edges.begin(); l_itEdge != edges.end(); l_itEdge++)
+
+    // std::vector<TopoDS_Edge> edges;
+
+/*
     for(BRepTools_WireExplorer expEdge(TopoDS::Wire(profileWire)); expEdge.More(); expEdge.Next())
+    {
+        edges.push_back( expEdge.Current() );
+    }
+*/
+
+    for (int i=0; i<edges.size(); i++)
 	{
-		const TopoDS_Shape &E = expEdge.Current();
+		// const TopoDS_Shape &E = expEdge.Current();
+
+		const TopoDS_Shape &E = edges[i];
+
+
 		// const TopoDS_Edge &E = *l_itEdge;
 
 		// enum GeomAbs_CurveType
@@ -245,6 +362,20 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 					CNCPoint start(PS);
 					CNCPoint end(PE);
 
+					if (i < (edges.size()-1))
+					{
+                        if (! DirectionTowarardsNextEdge( edges[i], edges[i+1] ))
+                        {
+                            // The next edge is closer to this edge's start point.  reverse direction
+                            // so that the next movement is better.
+
+                            CNCPoint temp = start;
+                            start = end;
+                            end = temp;
+                        }
+					}
+
+
 					gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 					gcode << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
 					gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
@@ -292,7 +423,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 						// Arc towards PS
 						CNCPoint point(PS);
 						CNCPoint centre( circle.Location() );
-						bool l_bClockwise = Clockwise(circle);
+						bool l_bClockwise = ! Clockwise(circle);
 
 						CNCPoint offset = centre - CNCPoint(PH);
 
@@ -341,7 +472,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 						// Arc towards PS
 						CNCPoint point(PS);
 						CNCPoint centre( circle.Location() );
-						bool l_bClockwise = Clockwise(circle);
+						bool l_bClockwise = ! Clockwise(circle);
 
 						CNCPoint offset = centre - CNCPoint(PE);
 
@@ -353,20 +484,34 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 					{
 						// Move to PS first.
 						CNCPoint start(PS);
+						CNCPoint end(PE);
+						CNCPoint centre( circle.Location() );
+						bool l_bClockwise = Clockwise(circle);
+
+						if (i < (edges.size()-1))
+                        {
+                            if (! DirectionTowarardsNextEdge( edges[i], edges[i+1] ))
+                            {
+                                // The next edge is closer to this edge's start point.  reverse direction
+                                // so that the next movement is better.
+
+                                CNCPoint temp = start;
+                                start = end;
+                                end = temp;
+                                l_bClockwise = ! l_bClockwise;
+                            }
+                        }
+
 
 						gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 						gcode <<_T( "rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
 						gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
 
-						CNCPoint point(PE);
-						CNCPoint centre( circle.Location() );
-						bool l_bClockwise = Clockwise(circle);
+						CNCPoint offset = centre - start;
 
-						CNCPoint offset = centre - CNCPoint(PS);
-
-						gcode << (l_bClockwise?_T("arc_cw"):_T("arc_ccw")) << _T("(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(", ")
+						gcode << (l_bClockwise?_T("arc_cw"):_T("arc_ccw")) << _T("(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(", ")
 							<< _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
-						last_position = point;
+						last_position = end;
 					}
 				}
 			}
@@ -483,8 +628,8 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 					BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
 
 					double radius = pCuttingTool->CuttingRadius();
-					m_params.m_tool_on_side = CContourParams::eRightOrInside;
 
+                    if (m_params.m_tool_on_side == CContourParams::eLeftOrOutside) radius *= +1.0;
 					if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
 					if (m_params.m_tool_on_side == CContourParams::eOn) radius = 0.0;
 
@@ -527,87 +672,14 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
  */
 void CContour::glCommands(bool select, bool marked, bool no_color)
 {
-	if(marked && !no_color)
-	{
-		for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-		{
-			HeeksObj* object = heeksCAD->GetIDObject(l_itSymbol->first, l_itSymbol->second);
-
-			// If we found something, ask its CAD code to draw itself highlighted.
-			if(object)object->glCommands(false, true, false);
-		} // End for
-	} // End if - then
+	CDepthOp::glCommands( select, marked, no_color );
 }
 
-static void on_set_tool_on_side(int value, HeeksObj* object){
-	switch(value)
-	{
-	case 0:
-		((CContour*)object)->m_params.m_tool_on_side = CContourParams::eLeftOrOutside;
-		break;
-	case 1:
-		((CContour*)object)->m_params.m_tool_on_side = CContourParams::eRightOrInside;
-		break;
-	default:
-		((CContour*)object)->m_params.m_tool_on_side = CContourParams::eOn;
-		break;
-	}
-	((CContour*)object)->WriteDefaultValues();
-}
+
 
 
 void CContour::GetProperties(std::list<Property *> *list)
 {
-    {
-		std::list< wxString > choices;
-
-		SketchOrderType order = SketchOrderTypeUnknown;
-
-		if(m_symbols.size() == 1)
-		{
-			HeeksObj* sketch = heeksCAD->GetIDObject(m_symbols.front().first, m_symbols.front().second);
-			if(sketch != NULL)
-			{
-				order = heeksCAD->GetSketchOrder(sketch);
-				switch(order)
-                {
-                case SketchOrderTypeOpen:
-                    choices.push_back(_("Left"));
-                    choices.push_back(_("Right"));
-                    break;
-
-                case SketchOrderTypeCloseCW:
-                case SketchOrderTypeCloseCCW:
-                    choices.push_back(_("Outside"));
-                    choices.push_back(_("Inside"));
-                    break;
-
-                default:
-                    choices.push_back(_("Outside or Left"));
-                    choices.push_back(_("Inside or Right"));
-                    break;
-                }
-			}
-		}
-
-		choices.push_back(_("On"));
-
-		int choice = int(CContourParams::eOn);
-		switch (m_params.m_tool_on_side)
-		{
-			case CContourParams::eRightOrInside:	choice = 1;
-					break;
-
-			case CContourParams::eOn:	choice = 2;
-					break;
-
-			case CContourParams::eLeftOrOutside:	choice = 0;
-					break;
-		} // End switch
-
-		list->push_back(new PropertyChoice(_("tool on side"), choices, choice, this, on_set_tool_on_side));
-	}
-
 	m_params.GetProperties(this, list);
 	CDepthOp::GetProperties(list);
 }
@@ -730,6 +802,7 @@ void CContour::ReloadPointers()
 
 CContour::CContour( const CContour & rhs ) : CDepthOp( rhs )
 {
+    m_params.set_initial_values();
 	*this = rhs;	// Call the assignment operator.
 }
 

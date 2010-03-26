@@ -128,6 +128,7 @@ public:
 
 private:
 	std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire ) const;
+	bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to ) const;
 
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);
