@@ -275,6 +275,8 @@ bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS
         min_distance = GetEnd(from).Distance( GetStart( to ));
         direction = forwards;
     }
+
+    return(direction);
 }
 
 
@@ -283,7 +285,6 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 	wxString gcode;
 	double tolerance = heeksCAD->GetTolerance();
 
-/*
     ShapeFix_Wire fixWire;
     fixWire.Load(wire);
     fixWire.FixReorder();
@@ -293,19 +294,16 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 
     // TopoDS_Wire profileWire = fixWire.WireAPIMake();
     TopoDS_Wire profileWire = fixWire.Wire();
-*/
 
-    std::vector<TopoDS_Edge> edges = SortEdges(wire);
+    // std::vector<TopoDS_Edge> edges = SortEdges(wire);
     // for (std::vector<TopoDS_Edge>::iterator l_itEdge = edges.begin(); l_itEdge != edges.end(); l_itEdge++)
 
-    // std::vector<TopoDS_Edge> edges;
+    std::vector<TopoDS_Edge> edges;
 
-/*
     for(BRepTools_WireExplorer expEdge(TopoDS::Wire(profileWire)); expEdge.More(); expEdge.Next())
     {
         edges.push_back( expEdge.Current() );
     }
-*/
 
     for (int i=0; i<edges.size(); i++)
 	{
@@ -724,6 +722,7 @@ void CContour::WriteXML(TiXmlNode *root)
 HeeksObj* CContour::ReadFromXMLElement(TiXmlElement* element)
 {
 	CContour* new_object = new CContour;
+	std::list<TiXmlElement *> elements_to_remove;
 
 	// read point and circle ids
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
@@ -731,6 +730,7 @@ HeeksObj* CContour::ReadFromXMLElement(TiXmlElement* element)
 		std::string name(pElem->Value());
 		if(name == "params"){
 			new_object->m_params.ReadParametersFromXMLElement(pElem);
+			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
 			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
@@ -740,7 +740,13 @@ HeeksObj* CContour::ReadFromXMLElement(TiXmlElement* element)
 					new_object->AddSymbol( atoi(child->Attribute("type")), atoi(child->Attribute("id")) );
 				}
 			} // End for
+			elements_to_remove.push_back(pElem);
 		} // End if
+	}
+
+	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
+	{
+		element->RemoveChild(*itElem);
 	}
 
 	new_object->ReadBaseXML(element);
