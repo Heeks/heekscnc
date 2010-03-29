@@ -13,6 +13,7 @@ public:
 	double m_step_over;
 	int m_direction; // 0 = x, 1 = y
 	double m_material_allowance;
+	int m_style; // 0 = one way, 1 = two ways
 
 	void GetProperties(CZigZag* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
