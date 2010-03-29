@@ -25,6 +25,7 @@ static void on_set_maxy(double value, HeeksObj* object){((CZigZag*)object)->m_pa
 static void on_set_step_over(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_step_over = value;}
 static void on_set_direction(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_direction = value;}
 static void on_set_material_allowance(double value, HeeksObj* object){((CZigZag*)object)->m_params.m_material_allowance = value;}
+static void on_set_style(int value, HeeksObj* object){((CZigZag*)object)->m_params.m_style = value;}
 
 void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 {
@@ -40,6 +41,12 @@ void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 		list->push_back(new PropertyChoice(_("direction"), choices, m_direction, parent, on_set_direction));
 	}
 	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, parent, on_set_material_allowance));
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("one way"));
+		choices.push_back(_("back and forth"));
+		list->push_back(new PropertyChoice(_("style"), choices, m_style, parent, on_set_style));
+	}
 }
 
 void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
@@ -54,6 +61,7 @@ void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("step_over", m_step_over);
 	element->SetAttribute("dir", m_direction);
 	element->SetDoubleAttribute("material_allowance", m_material_allowance);
+	element->SetAttribute("style", m_style);
 }
 
 void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -66,6 +74,7 @@ void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("step_over", &m_step_over);
 	pElem->Attribute("dir", &m_direction);
 	pElem->Attribute("material_allowance", &m_material_allowance);
+	pElem->Attribute("style", &m_style);
 }
 
 CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number)
@@ -222,7 +231,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
 			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
-	ss << "ocl_funcs.zigzag('" << filepath.c_str() << "', tool_diameter, " << m_params.m_step_over << ", " << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
+	ss << "ocl_funcs.zigzag('" << filepath.c_str() << "', tool_diameter, " << m_params.m_step_over << ", " << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance << ", " << m_params.m_style << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
@@ -334,7 +343,8 @@ void CZigZag::WriteDefaultValues()
 	config.Write(wxString(GetTypeString()) + _T("BoxYMax"), m_params.m_box.m_x[4]);
 	config.Write(wxString(GetTypeString()) + _T("StepOver"), m_params.m_step_over);
 	config.Write(wxString(GetTypeString()) + _T("Direction"), m_params.m_direction);
-	config.Write(wxString(GetTypeString()) + _T("MatAllowance"), m_params.m_material_allowance);
+	config.Write(wxString(GetTypeString()) + _T("Direction"), m_params.m_direction);
+	config.Write(wxString(GetTypeString()) + _T("Style"), m_params.m_style);
 }
 
 void CZigZag::ReadDefaultValues()
@@ -349,6 +359,7 @@ void CZigZag::ReadDefaultValues()
 	config.Read(wxString(GetTypeString()) + _T("StepOver"), &m_params.m_step_over, 1.0);
 	config.Read(wxString(GetTypeString()) + _T("Direction"), &m_params.m_direction, 0);
 	config.Read(wxString(GetTypeString()) + _T("MatAllowance"), &m_params.m_material_allowance, 0.0);
+	config.Read(wxString(GetTypeString()) + _T("Style"), &m_params.m_style, 0);
 }
 
 
