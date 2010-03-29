@@ -2,7 +2,7 @@ import ocl
 import math
 from nc.nc import *
 
-def zigzag( filepath, tool_diameter = 3.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0):
+def zigzag( filepath, tool_diameter = 3.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0):
    s = ocl.STLSurf(filepath)
    dcf = ocl.PathDropCutterFinish(s)
    cutter = ocl.CylCutter(tool_diameter + mat_allowance)
@@ -24,24 +24,47 @@ def zigzag( filepath, tool_diameter = 3.0, step_over = 1.0, x0= -10.0, x1 = 10.0
       if direction == 'Y': sub_step_over = (x1 - x0)/ steps
       rapid_to = z1 + incremental_rapid_to
       for i in range(0, steps + 1):
-         u = y0 + float(i) * step_over
+         odd_numbered_pass = (i%2 == 1)
+         u = y0 + float(i) * sub_step_over
          if direction == 'Y': u = x0 + float(i) * sub_step_over
          path = ocl.Path()
-         if direction == 'Y': path.append(ocl.Line(ocl.Point(u, y0, 0), ocl.Point(u, y1, 0)))
-         else: path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
+         if style == 0: # one way
+            if direction == 'Y': path.append(ocl.Line(ocl.Point(u, y0, 0), ocl.Point(u, y1, 0)))
+            else: path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
+         else: # back and forth
+            if direction == 'Y':
+               if odd_numbered_pass:
+                  path.append(ocl.Line(ocl.Point(u, y1, 0), ocl.Point(u, y0, 0)))
+                  if i < steps: path.append(ocl.Line(ocl.Point(u, y0, 0), ocl.Point(u + sub_step_over, y0, 0))) # feed across to next pass
+               else:
+                  path.append(ocl.Line(ocl.Point(u, y0, 0), ocl.Point(u, y1, 0)))
+                  if i < steps: path.append(ocl.Line(ocl.Point(u, y1, 0), ocl.Point(u + sub_step_over, y1, 0))) # feed across to next pass
+            else: # 'X'
+               if odd_numbered_pass:
+                  path.append(ocl.Line(ocl.Point(x1, u, 0), ocl.Point(x0, u, 0)))
+                  if i < steps: path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x0, u + sub_step_over, 0))) # feed across to next pass
+               else:
+                  path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
+                  if i < steps: path.append(ocl.Line(ocl.Point(x1, u, 0), ocl.Point(x1, u + sub_step_over, 0))) # feed across to next pass
          dcf.setPath(path)
          dcf.run()
          plist = dcf.getCLPoints()
          n = 0
          for p in plist:
             p.z = p.z + mat_allowance
-            if n == 0:
-               rapid(p.x, p.y)
-               rz = rapid_to
-               if p.z > z1: rz = p.z + incremental_rapid_to
-               rapid(z = rz)
-               feed(z = p.z)
+            if i == 0 or style == 0:
+               if n == 0:
+                  rapid(p.x, p.y)
+                  rz = rapid_to
+                  if p.z > z1: rz = p.z + incremental_rapid_to
+                  rapid(z = rz)
+                  feed(z = p.z)
+               else:
+                  feed(p.x, p.y, p.z)
             else:
-               feed(p.x, p.y, p.z)
+               if n > 0: feed(p.x, p.y, p.z)
             n = n + 1
+         if style == 0: # one way
+            rapid(z = clearance)
+      if style != 0: # back and forth
          rapid(z = clearance)
