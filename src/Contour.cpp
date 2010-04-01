@@ -703,17 +703,20 @@ void CContour::WriteXML(TiXmlNode *root)
 	root->LinkEndChild( element );
 	m_params.WriteXMLAttributes(element);
 
-	TiXmlElement * symbols;
-	symbols = new TiXmlElement( "symbols" );
-	element->LinkEndChild( symbols );
+    if (m_symbols.size() > 0)
+    {
+        TiXmlElement * symbols;
+        symbols = new TiXmlElement( "symbols" );
+        element->LinkEndChild( symbols );
 
-	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-	{
-		TiXmlElement * symbol = new TiXmlElement( "symbol" );
-		symbols->LinkEndChild( symbol );
-		symbol->SetAttribute("type", l_itSymbol->first );
-		symbol->SetAttribute("id", l_itSymbol->second );
-	} // End for
+        for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
+        {
+            TiXmlElement * symbol = new TiXmlElement( "symbol" );
+            symbols->LinkEndChild( symbol );
+            symbol->SetAttribute("type", l_itSymbol->first );
+            symbol->SetAttribute("id", l_itSymbol->second );
+        } // End for
+    } // End if - then
 
 	WriteBaseXML(element);
 }

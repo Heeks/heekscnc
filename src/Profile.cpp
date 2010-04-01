@@ -102,10 +102,10 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 
 		SketchOrderType order = SketchOrderTypeUnknown;
 
-		if(parent->m_sketches.size() == 1)
+		if(parent->GetNumChildren() == 1)
 		{
-			HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, parent->m_sketches.front());
-			if(sketch)
+			HeeksObj* sketch = parent->GetFirstChild();
+			if((sketch) && (sketch->GetType() == SketchType))
 			{
 				order = heeksCAD->GetSketchOrder(sketch);
 			}
@@ -154,7 +154,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		list->push_back(new PropertyChoice(_("cut mode"), choices, m_cut_mode, parent, on_set_cut_mode));
 	}
 
-	if(parent->m_sketches.size() == 1) // multiple sketches must use auto roll on, and can not have start and end points specified
+	if(parent->GetNumChildren() == 1) // multiple sketches must use auto roll on, and can not have start and end points specified
 	{
 		list->push_back(new PropertyCheck(_("auto roll on"), m_auto_roll_on, parent, on_set_auto_roll_on));
 		if(!m_auto_roll_on)list->push_back(new PropertyVertex(_("roll on point"), m_roll_on_point, parent, on_set_roll_on_point));
@@ -662,7 +662,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 
 	l_ossPythonCode << _T("\n");
 
-	if(m_sketches.size() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
+	if(GetNumChildren() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
 	{
 		double startx, starty, finishx, finishy;
 
@@ -783,7 +783,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 		case CProfileParams::eLeftOrOutside:
 		case CProfileParams::eRightOrInside:
 			{
-				if(m_profile_params.m_auto_roll_on || (m_sketches.size() > 1))
+				if(m_profile_params.m_auto_roll_on || (GetNumChildren() > 1))
 				{
 					l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
 
@@ -831,7 +831,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 		case CProfileParams::eLeftOrOutside:
 		case CProfileParams::eRightOrInside:
 			{
-			if(m_profile_params.m_auto_roll_off || (m_sketches.size() > 1))
+			if(m_profile_params.m_auto_roll_off || (GetNumChildren() > 1))
 			{
 				l_ossPythonCode << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
 				roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
@@ -1157,15 +1157,7 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 
 	if(marked && !no_color)
 	{
-		// show the sketches as highlighted
-		for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-		{
-			int sketch = *It;
-			HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
-			if(object)object->glCommands(false, true, false);
-		}
-
-		if(m_sketches.size() == 1)
+		if(GetNumChildren() == 1)
 		{
 			// draw roll on point
 			if(!m_profile_params.m_auto_roll_on)
@@ -1463,7 +1455,7 @@ std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
 		} // End for
 	} // End if - then
 
-	if (m_sketches.size() == 0)
+	if (GetNumChildren() == 0)
 	{
 #ifdef UNICODE
 			std::wostringstream l_ossChange;
