@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="C:\Python25\include;.\"
+				AdditionalIncludeDirectories="$(PYTHON_INCLUDE);.\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;KURVE_EXPORTS;OPEN_SOURCE_GEOMETRY;KURVE_PYTHON_INTERFACE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
