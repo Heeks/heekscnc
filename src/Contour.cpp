@@ -217,12 +217,34 @@ std::vector<TopoDS_Edge> CContour::SortEdges( const TopoDS_Wire & wire ) const
     {
         if (l_itEdge == edges.begin())
         {
-            // It's the first point.  Reference this to zero so that the order makes some sense.  It would
-            // be nice, eventually, to have this first reference point be the last point produced by the
-            // previous NC operation.  i.e. where the last operation left off, we should start drilling close
-            // by.
+            // It's the first edge.  Find the edge whose endpoint is closest to gp_Pnt(0,0,0) so that
+            // the resutls of this sorting are consistent.  When we just use the first edge in the
+            // wire, we end up with different results every time.  We want consistency so that, if we
+            // use this Contour operation as a location for drilling a relief hole (one day), we want
+            // to be sure the machining will begin from a consistently known location.
 
-            EdgeComparison compare( *(edges.begin()) );
+            std::vector<TopoDS_Edge>::iterator l_itStartingEdge = edges.begin();
+            gp_Pnt closest_point = GetStart(*l_itStartingEdge);
+            if (GetEnd(*l_itStartingEdge).Distance(gp_Pnt(0,0,0)) < closest_point.Distance(gp_Pnt(0,0,0)))
+            {
+                closest_point = GetEnd(*l_itStartingEdge);
+            }
+            for (std::vector<TopoDS_Edge>::iterator l_itCheck = edges.begin(); l_itCheck != edges.end(); l_itCheck++)
+            {
+                if (GetStart(*l_itCheck).Distance(gp_Pnt(0,0,0)) < closest_point.Distance(gp_Pnt(0,0,0)))
+                {
+                    closest_point = GetStart(*l_itCheck);
+                    l_itStartingEdge = l_itCheck;
+                }
+
+                if (GetEnd(*l_itCheck).Distance(gp_Pnt(0,0,0)) < closest_point.Distance(gp_Pnt(0,0,0)))
+                {
+                    closest_point = GetEnd(*l_itCheck);
+                    l_itStartingEdge = l_itCheck;
+                }
+            }
+
+            EdgeComparison compare( *l_itStartingEdge );
             std::sort( edges.begin(), edges.end(), compare );
         } // End if - then
         else
@@ -244,6 +266,15 @@ std::vector<TopoDS_Edge> CContour::SortEdges( const TopoDS_Wire & wire ) const
 } // End SortEdges() method
 
 
+/**
+    When we're starting a new sequence of edges, we want to run along the first edge
+    so that we end up nearby to the next edge in the sorted sequence.  If we go in the
+    wrong direction then we're just going to have to rapid up to clearance height and
+    move to the beginning of the next edge anyway.  This routine returns 'true' if
+    the next edge is closer to the 'end' of this edge and 'false' if it's closer to
+    the 'beginning' of this edge.  This tell us whether we want to run forwards
+    or backwards along this edge so that we're setup ready to machine the next edge.
+ */
 bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to ) const
 {
     const bool forwards = true;
@@ -285,6 +316,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 	wxString gcode;
 	double tolerance = heeksCAD->GetTolerance();
 
+    /*
     ShapeFix_Wire fixWire;
     fixWire.Load(wire);
     fixWire.FixReorder();
@@ -294,16 +326,19 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 
     // TopoDS_Wire profileWire = fixWire.WireAPIMake();
     TopoDS_Wire profileWire = fixWire.Wire();
+    */
 
-    // std::vector<TopoDS_Edge> edges = SortEdges(wire);
+    std::vector<TopoDS_Edge> edges = SortEdges(wire);
     // for (std::vector<TopoDS_Edge>::iterator l_itEdge = edges.begin(); l_itEdge != edges.end(); l_itEdge++)
 
+    /*
     std::vector<TopoDS_Edge> edges;
 
     for(BRepTools_WireExplorer expEdge(TopoDS::Wire(profileWire)); expEdge.More(); expEdge.Next())
     {
         edges.push_back( expEdge.Current() );
     }
+    */
 
     for (int i=0; i<edges.size(); i++)
 	{
