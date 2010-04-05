@@ -62,6 +62,8 @@ public:
 
 	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
+
+	std::list<double> GetDepths() const;
 };
 
 #endif
