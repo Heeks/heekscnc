@@ -82,6 +82,7 @@ public:
 
 	Symbols_t m_symbols;
 	CContourParams m_params;
+	static double max_deviation_for_spline_to_arc;
 
 	//	Constructors.
 	CContour():CDepthOp(GetTypeString(), 0, ContourType)
@@ -125,6 +126,7 @@ public:
 	wxString GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & last_position ) const;
 	static bool Clockwise( const gp_Circ & circle );
 	void ReloadPointers();
+	static void GetOptions(std::list<Property *> *list);
 
 private:
 	std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire ) const;
