@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
 AppName=HeeksCNC
-AppVerName=HeeksCNC 0.11.1
+AppVerName=HeeksCNC 0.12.0
 AppPublisher=Heeks Software
 AppPublisherURL=http://code.google.com/p/heekscnc/
 AppSupportURL=http://code.google.com/p/heekscnc/
@@ -15,7 +15,7 @@ AppUpdatesURL=http://code.google.com/p/heekscnc/
 DefaultDirName={pf}\HeeksCNC
 DefaultGroupName=HeeksCNC
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.11.1
+OutputBaseFilename=HeeksCNC 0.12.0
 Compression=lzma
 SolidCompression=yes
 
@@ -48,7 +48,8 @@ Source: "C:\Users\Dan\HeeksCNC\actp_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags:
 Source: "C:\Users\Dan\HeeksCNC\actp.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCamToHeeks.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\ocl_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\ocl.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\sample adaptive roughing2.heeks"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\circular_pocket.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\*.speeds"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
@@ -58,29 +59,19 @@ Source: "C:\Users\Dan\HeeksCNC\nc\*.txt"; DestDir: "{app}\HeeksCNC\nc"; Flags: i
 Source: "C:\Users\Dan\HeeksCNC\HeeksCNC.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\bitmaps\*.png"; DestDir: "{app}\HeeksCNC\bitmaps"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\icons\*.png"; DestDir: "{app}\HeeksCNC\icons"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\PathProcessors\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam\PathProcessors"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\PathGenerators\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam\PathGenerators"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\Importers\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam\Importers"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\Exporters\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam\Exporters"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\Geometry\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam\Geometry"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\Cutters\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam\Cutters"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\PyCam\trunk\pycam\Utils\*.py"; DestDir: "{app}\HeeksCNC\PyCam\trunk\pycam\Utils"; Flags: ignoreversion
 Source: "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\apps\python-2.5.2.msi"; DestDir: "{tmp}"; Flags: ignoreversion
+Source: "C:\apps\python-2.6.4.msi"; DestDir: "{tmp}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\HeeksCAD"; Filename: "{app}\HeeksCAD.exe"
 
 [Run]
-Filename: "{tmp}\python-2.5.2.msi"; Flags: shellexec skipifsilent
-Filename: "{app}\HeeksCAD.exe"; Description: "{cm:LaunchProgram,HeeksCAD}"; Flags: nowait postinstall skipifsilent
+Filename: "{tmp}\python-2.6.4.msi"; Flags: shellexec skipifsilent
+Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Description: "{cm:LaunchProgram,HeeksCAD}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
 Root: HKCU; Subkey: "Software\HeeksCAD"; Flags: uninsdeletekeyifempty
-Root: HKCU; Subkey: "Software\HeeksCAD\plugins"; Flags: uninsdeletekeyifempty
-Root: HKCU; Subkey: "Software\HeeksCAD\plugins"; Flags: uninsdeletekey; ValueType: string; ValueName: "HeeksCNC"; ValueData: "HeeksCNC\HeeksCNC.dll"
 
 
