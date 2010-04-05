@@ -336,3 +336,28 @@ void CDepthOp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
     CSpeedOp::GetTools( t_list, p );
 }
 
+std::list<double> CDepthOp::GetDepths() const
+{
+    std::list<double> depths;
+
+    if (m_depth_op_params.m_start_depth <= m_depth_op_params.m_final_depth)
+    {
+        // Invalid depth values defined.
+        return(depths); // Empty list.
+    }
+
+    for (double depth=m_depth_op_params.m_start_depth - m_depth_op_params.m_step_down;
+                depth > m_depth_op_params.m_final_depth;
+                depth -= m_depth_op_params.m_step_down)
+    {
+        depths.push_back(depth);
+    }
+
+    if ((*(depths.rbegin()) > m_depth_op_params.m_final_depth) || (depths.size() == 0))
+    {
+        depths.push_back( m_depth_op_params.m_final_depth );
+    }
+
+    return(depths);
+}
+

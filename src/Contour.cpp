@@ -34,9 +34,15 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <gp_Circ.hxx>
 #include <ShapeFix_Wire.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepTools.hxx>
+#include <BRepMesh.hxx>
+#include <Poly_Polygon3D.hxx>
 
 extern CHeeksCADInterface* heeksCAD;
 
+/* static */ double CContour::max_deviation_for_spline_to_arc = 0.1;
 
 void CContourParams::set_initial_values()
 {
@@ -282,7 +288,7 @@ bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS
 
     bool direction = forwards;
 
-    double min_distance = 999999999999999;  // Some big number.
+    double min_distance = 9999999;  // Some big number.
     if (GetStart(from).Distance( GetEnd( to )) < min_distance)
     {
         min_distance = GetStart( from ).Distance( GetEnd( to ));
@@ -309,6 +315,10 @@ bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS
 
     return(direction);
 }
+
+
+
+
 
 
 wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & last_position ) const
@@ -340,7 +350,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
     }
     */
 
-    for (int i=0; i<edges.size(); i++)
+    for (std::vector<TopoDS_Edge>::size_type i=0; i<edges.size(); i++)
 	{
 		// const TopoDS_Shape &E = expEdge.Current();
 
@@ -407,7 +417,6 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
                             end = temp;
                         }
 					}
-
 
 					gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 					gcode << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
@@ -556,12 +565,21 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
             case GeomAbs_BSplineCurve:
             */
 
-			/*
 			default:
 			{
 				// make lots of small lines
-				BRepTools::Clean(TopoDS::Edge(E));
-				BRepMesh::Mesh(TopoDS::Edge(E), deviation);
+				double uStart = curve.FirstParameter();
+				double uEnd = curve.LastParameter();
+				gp_Pnt PS;
+				gp_Vec VS;
+				curve.D1(uStart, PS, VS);
+				gp_Pnt PE;
+				gp_Vec VE;
+				curve.D1(uEnd, PE, VE);
+
+				TopoDS_Edge edge(TopoDS::Edge(E));
+				BRepTools::Clean(edge);
+				BRepMesh::Mesh(edge, max_deviation_for_spline_to_arc);
 
 				TopLoc_Location L;
 				Handle(Poly_Polygon3D) Polyg = BRep_Tool::Polygon3D(edge, L);
@@ -572,30 +590,23 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 					for (po = Points.Lower(); po <= Points.Upper(); po++, i++) {
 						CNCPoint p = (Points.Value(po)).Transformed(L);
 
-						HLine* new_object = new HLine(prev_p, p, &wxGetApp().current_color);
-						sketch->Add(new_object, NULL);
-
-						if (last_point.Distance(p) < tolerance)
+						if (i > 0)
 						{
-							// No change in position.
-						} // End if - then
-						else if (last_point.Distance(PE) < tolerance)
-						{
-							CNCPoint point(PS);
-							gcode << "feed(x=" << point.X(true) << ", y=" << point.Y(true) << ", z=" << point.Z(true) << ")\n";
+							CNCPoint point(p);
+							gcode << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 							last_position = point;
 						}
-						else
+						else if (last_position.Distance(p) > tolerance)
 						{
 							// We need to move to the start BEFORE machining this line.
-							CNCPoint start(PS);
-							CNCPoint end(PE);
+							CNCPoint start(last_position);
+							CNCPoint end(p);
 
-							gcode << "rapid(z=" << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << ")\n";
-							gcode << "rapid(x=" << start.X(true) << ", y=" << start.Y(true) << ")\n";
-							gcode << "feed(z=" << start.Z(true) << ")\n";
+							gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+                            gcode <<_T( "rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
+                            gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
 
-							gcode << "feed(x=" << end.X(true) << ", y=" << end.Y(true) << ", z=" << end.Z(true) << ")\n";
+							gcode << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
 							last_position = end;
 						}
 
@@ -603,7 +614,6 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 				} // End if - then
 			}
 			break;
-			*/
 		} // End switch
 	}
 
@@ -624,7 +634,6 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 	wxString gcode;
 	CDepthOp::AppendTextToProgram( pFixture );
 
-	double deviation = heeksCAD->GetTolerance();
 	unsigned int number_of_bad_sketches = 0;
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
@@ -656,8 +665,12 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 				    fix.Load( TopoDS::Wire(wire_to_fix) );
 				    fix.FixReorder();
 
-
 					TopoDS_Shape wire = fix.Wire();
+
+					BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
+                    transform.Perform(wire, false);
+                    wire = transform.Shape();
+
 					BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
 
 					double radius = pCuttingTool->CuttingRadius();
@@ -666,24 +679,30 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 					if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
 					if (m_params.m_tool_on_side == CContourParams::eOn) radius = 0.0;
 
+                    TopoDS_Wire tool_path_wire(TopoDS::Wire(wire));
+
                     if (m_params.m_tool_on_side != CContourParams::eOn)
                     {
                         offset_wire.Perform(radius);
-                        TopoDS_Wire tool_path_wire(TopoDS::Wire(offset_wire.Shape()));
-
-                        // Now generate a toolpath along this wire.
-                        gcode << GeneratePathFromWire(tool_path_wire, last_position );
+                        tool_path_wire = TopoDS::Wire(offset_wire.Shape());
                     }
-                    else
+
+                    // Now generate a toolpath along this wire.
+                    std::list<double> depths = GetDepths();
+                    for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
                     {
-                        // Now generate a toolpath along this wire.
-                        gcode << GeneratePathFromWire(TopoDS::Wire(wire), last_position );
+                        gp_Trsf matrix;
+                        matrix.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,*itDepth)));
+                        BRepBuilderAPI_Transform transform(matrix);
+                        transform.Perform(tool_path_wire, false); // notice false as second parameter
+
+                        gcode << GeneratePathFromWire(TopoDS::Wire(transform.Shape()), last_position );
                     }
 
 
 				}
 			} // End try
-			catch (Standard_Failure) {
+			catch (Standard_Failure & error) {
 				Handle_Standard_Failure e = Standard_Failure::Caught();
 				number_of_bad_sketches++;
 			} // End catch
@@ -828,6 +847,18 @@ void CContour::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     CDepthOp::GetTools( t_list, p );
 }
+
+static void on_set_spline_deviation(double value, HeeksObj* object){
+	CContour::max_deviation_for_spline_to_arc = value;
+	CContour::WriteToConfig();
+}
+
+// static
+void CContour::GetOptions(std::list<Property *> *list)
+{
+	list->push_back ( new PropertyDouble ( _("Contour spline deviation"), max_deviation_for_spline_to_arc, NULL, on_set_spline_deviation ) );
+}
+
 
 void CContour::ReloadPointers()
 {
