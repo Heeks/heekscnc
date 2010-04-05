@@ -7,8 +7,10 @@
   # http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png Select machining->"Post-Process" to make the NC code
   * http://heekscnc.googlecode.com/svn/trunk/bitmaps/savenc.png Now you can save the NC code by clicking the save button on the machining tool bar 
 
+==ocl file==
 You need to add the opencamlib shared library file, if you want to do zig zag machining.
 See http://code.google.com/p/opencamlib/
+
 For Windows, you need to build "ocl.dll" and put it in your HeeksCNC folder.
 For Linux, you need to build "ocl.so" and put it in your HeeksCNC folder.
 
