@@ -2,10 +2,16 @@ import ocl
 import math
 from nc.nc import *
 
-def zigzag( filepath, tool_diameter = 3.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0):
+def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0):
    s = ocl.STLSurf(filepath)
    dcf = ocl.PathDropCutterFinish(s)
-   cutter = ocl.CylCutter(tool_diameter + mat_allowance)
+   cutter = ocl.CylCutter()
+   if corner_radius == 0.0:
+      cutter = ocl.CylCutter(tool_diameter + mat_allowance)
+   elif corner_radius > tool_diameter / 2 - 0.000000001:
+      cutter = ocl.BallCutter(tool_diameter + mat_allowance)
+   else:
+      cutter = ocl.BullCutter(tool_diameter + mat_allowance, corner_radius)
    dcf.setCutter(cutter)
    if final_depth > start_depth:
       raise 'final_depth > start_depth'
