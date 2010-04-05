@@ -2,44 +2,19 @@
 
   # Draw a 3D-object
   # http://heekscnc.googlecode.com/svn/trunk/bitmaps/zigzag.png Select the 3D-object and select machining->operations->new zigzag operation (or in the machining tool bar if you have enabled it)
-  # Change some values in the bottom left "Properties" box (at least be sure that z1 (safety height) is high enough if you are going to run the nc code in a real machine)
+  # Change some values in the bottom left "Properties" box.
   # http://heekscnc.googlecode.com/svn/trunk/bitmaps/apply.png Hit the apply button
   # http://heekscnc.googlecode.com/svn/trunk/bitmaps/postprocess.png Select machining->"Post-Process" to make the NC code
   * http://heekscnc.googlecode.com/svn/trunk/bitmaps/savenc.png Now you can save the NC code by clicking the save button on the machining tool bar 
 
-You need to add pycam, if you want to do zig zag machining, so the folders will need to be like this:
-
-for Linux the pycam dir needs to be in /usr/lib/python2.5/site-packages/pycam not PyCam, not inside HeeksCNC, then zigzag works
-
-for Windows, I put it under HeeksCNC, like this
-
-HeeksCNC
-
----bitmaps
-
----icons
-
----kurve
-
----nc
-
----PyCam
-
-------branches
-
-------tags
-
-------trunk
-
----------pycam
-
----------Samples
-
----------Tests
+You need to add the opencamlib shared library file, if you want to do zig zag machining.
+See http://code.google.com/p/opencamlib/
+For Windows, you need to build "ocl.dll" and put it in your HeeksCNC folder.
+For Linux, you need to build "ocl.so" and put it in your HeeksCNC folder.
 
 = Properties =
-All operations have some common properties, see here:
-http://code.google.com/p/heekscnc/wiki/Operations
+A ZigZag operation has all the properties for multiple depths of cut, see here:
+http://code.google.com/p/heekscnc/wiki/DepthOps
 
 ===tool diameter===
 The diameter of the tool
@@ -62,26 +37,14 @@ the bottom y of the machining
 ===maximum y===
 the top y of the machining
 
-===z0===
-the minimum z height
-
-===z1===
-clearance height
-
-===dx===
-step over in x
-
-===dy===
-step over in y
-
-===horizontal feed rate===
-horizontal feed rate
-
-===vertical feed rate===
-vertical feed rate
-
-===spindle speed===
-spindle speed
+===step over===
+step over between passes
 
 ===direction===
 cut along x or along y
+
+===material allowance===
+leave this distance horizontally and vertically from the surface
+
+===style===
+this can be "one way" or "back and forth"
