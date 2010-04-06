@@ -123,7 +123,7 @@ public:
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
-	wxString GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & last_position ) const;
+	wxString GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & last_position, const CFixture *pFixture) const;
 	static bool Clockwise( const gp_Circ & circle );
 	void ReloadPointers();
 	static void GetOptions(std::list<Property *> *list);
