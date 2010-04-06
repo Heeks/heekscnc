@@ -17,6 +17,7 @@
 #include "interface/Tool.h"
 #include "CNCConfig.h"
 #include "CuttingTool.h"
+#include "CNCPoint.h"
 
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Solid.hxx>
@@ -27,6 +28,7 @@
 #include <BRepAlgoAPI_Cut.hxx>
 #include <Standard_Failure.hxx>
 #include <StdFail_NotDone.hxx>
+#include <gp_Ax2.hxx>
 
 #include <wx/progdlg.h>
 
@@ -205,49 +207,74 @@ std::list<gp_Pnt> PathArc::Interpolate( const PathObject *prev_po, const unsigne
 {
 	std::list<gp_Pnt> points;
 
-	double sx = -m_c[0];
-	double sy = -m_c[1];
-	// e = cs + se = -c + e - s
-	double ex = -m_c[0] + m_x[0] - prev_po->m_x[0];
-	double ey = -m_c[1] + m_x[1] - prev_po->m_x[1];
-	double rs = sqrt(sx * sx + sy * sy);
-	double re = sqrt(ex * ex + ey * ey);
+	CNCPoint start(prev_po->m_x);
+	CNCPoint centre( start );
+	CNCPoint offset( m_c );
+	centre += offset;
+	CNCPoint end(m_x);
 
-	double start_angle = atan2(sy, sx);
-	double end_angle = atan2(ey, ex);
+	gp_Ax2 axis(centre, gp_Dir(0,0,1));
 
-	if(m_dir == 1){
-		if(end_angle < start_angle)end_angle += 6.283185307179;
-	}
-	else{
-		if(start_angle < end_angle)start_angle += 6.283185307179;
-	}
-
-	double angle_step = 0;
-
-	if (start_angle == end_angle)
+	if (gp_Vec( start, centre ).Angle( gp_Vec( centre, end )) < 0.001)
 	{
-		// It's a full circle.
-		angle_step = (2 * PI) / number_of_points;
-	} // End if - then
+	    // The start, centre and end points are along the same line.  We can't
+	    // derive the arc's axis with this geometry.  Assume it's straight up
+	    // the Z axis (default).
+
+	    axis = gp_Ax2(centre, gp_Dir(0,0,1));
+	}
 	else
 	{
-		// It's an arc.
-		angle_step = (end_angle - start_angle) / number_of_points;
-	} // End if - else
-
-	points.push_back( gp_Pnt( prev_po->m_x[0], prev_po->m_x[1], prev_po->m_x[2] ) );
-
-	for(unsigned int i = 0; i< number_of_points; i++)
-	{
-		double angle = start_angle + angle_step * (i + 1);
-		double r = rs + ((re - rs) * (i + 1)) /number_of_points;
-		double x = prev_po->m_x[0] + m_c[0] + r * cos(angle);
-		double y = prev_po->m_x[1] + m_c[1] + r * sin(angle);
-		double z = prev_po->m_x[2] + ((m_x[2] - prev_po->m_x[2]) * (i+1))/number_of_points;
-
-		points.push_back( gp_Pnt( x, y, z ) );
+	    // The cross product of the two vectors gives the axis direction.
+	    gp_Vec a( start, centre );
+	    gp_Vec b( end, centre );
+	    a.Cross(b);
+	    axis = gp_Ax2( centre, gp_Dir(a) );
 	}
+
+
+	gp_Dir x_axis = axis.XDirection();
+	gp_Dir y_axis = axis.YDirection();
+
+
+	double ax = gp_Vec(start.XYZ() - centre.XYZ()) * x_axis;
+	double ay = gp_Vec(start.XYZ() - centre.XYZ()) * y_axis;
+	double bx = gp_Vec(end.XYZ() - centre.XYZ()) * x_axis;
+	double by = gp_Vec(end.XYZ() - centre.XYZ()) * y_axis;
+
+	double start_angle = atan2(ay, ax);
+	double end_angle = atan2(by, bx);
+
+	if(start_angle > end_angle)end_angle += 6.28318530717958;
+
+	double radius = m_radius;
+	double d_angle = end_angle - start_angle;
+	int segments = number_of_points;
+
+    double theta = d_angle / (double)segments;
+    double tangetial_factor = tan(theta);
+    double radial_factor = 1 - cos(theta);
+
+    double x = radius * cos(start_angle);
+    double y = radius * sin(start_angle);
+
+   for(int i = 0; i < segments + 1; i++)
+    {
+		gp_Pnt p = centre.XYZ() + x * x_axis.XYZ() + y * y_axis.XYZ();
+		points.push_back(p);
+
+        double tx = -y;
+        double ty = x;
+
+        x += tx * tangetial_factor;
+        y += ty * tangetial_factor;
+
+        double rx = - x;
+        double ry = - y;
+
+        x += rx * radial_factor;
+        y += ry * radial_factor;
+    }
 
 	return(points);
 }
