@@ -27,6 +27,7 @@
 #include "CuttingTool.h"
 #include "interface/HeeksColor.h"
 #include "NCCode.h"
+#include "PythonStuff.h"
 
 #include <sstream>
 #include <iomanip>
@@ -88,12 +89,12 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 
 	if (m_direction == eOutside)
 	{
-		ss << "comment('This program assumes that the machine operator has jogged')\n";
-		ss << "comment('the machine to approximatedly the correct location')\n";
-		ss << "comment('immediately above the protrusion we are finding the centre of.')\n";
-		ss << "comment('This program then jogs out and down in two opposite directions')\n";
-		ss << "comment('before probing back towards the centre point looking for the')\n";
-		ss << "comment('protrusion.')\n";
+		ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("immediately above the protrusion we are finding the centre of.")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("This program then jogs out and down in two opposite directions")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("before probing back towards the centre point looking for the")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("protrusion.")).c_str() << ")\n";
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_T(""));
 
@@ -105,8 +106,8 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 										_T("1003"), _T("1004"), +1.0 * probe_radius, 0 );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment('Move back to the intersection points')\n";
-            ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
+            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
+            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
             ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
             ss << "rapid_to_midpoint(" << _T("x1='[#1001 + ") << probe_offset_x << "]'," << _T("x2='[#1003 + ") << probe_offset_x << "]')\n";
             ss << "remove_temporary_origin()\n";
@@ -121,8 +122,8 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment('Move back to the intersection points')\n";
-            ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
+            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
+            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
             ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
             ss << "rapid_to_midpoint(" << _T("y1='[#1002 + ") << probe_offset_y << "]'," << _T("y2='[#1004 + ") << probe_offset_y << "]')\n";
             ss << "remove_temporary_origin()\n";
@@ -132,11 +133,11 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	} // End if - then
 	else
 	{
-		ss << "comment('This program assumes that the machine operator has jogged')\n";
-		ss << "comment('the machine to approximatedly the correct location')\n";
-		ss << "comment('immediately above the hole we are finding the centre of.')\n";
-		ss << "comment('This program then jogs down and probes out in two opposite directions')\n";
-		ss << "comment('looking for the workpiece')\n";
+		ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("immediately above the hole we are finding the centre of.")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("This program then jogs down and probes out in two opposite directions")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("looking for the workpiece")).c_str() << ")\n";
 		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		ss.str(_T(""));
 
@@ -148,8 +149,8 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment('Move back to the intersection points')\n";
-            ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
+            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
+            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
             ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
             ss << "rapid_to_midpoint(" << _T("x1='[#1001 + ") << probe_offset_x << "]'," << _T("x2='[#1003 + ") << probe_offset_x << "]')\n";
             ss << "remove_temporary_origin()\n";
@@ -165,8 +166,8 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius  );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment('Move back to the intersection points')\n";
-            ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
+            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
+            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
             ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
             ss << "rapid_to_midpoint(" << _T("y1='[#1002 + ") << probe_offset_y << "]'," << _T("y2='[#1004 + ") << probe_offset_y << "]')\n";
             ss << "remove_temporary_origin()\n";
@@ -181,12 +182,12 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	{
 		if (m_direction == eOutside)
 		{
-			ss << "comment('This program assumes that the machine operator has jogged')\n";
-			ss << "comment('the machine to approximatedly the correct location')\n";
-			ss << "comment('immediately above the protrusion we are finding the centre of.')\n";
-			ss << "comment('This program then jogs out and down in two opposite directions')\n";
-			ss << "comment('before probing back towards the centre point looking for the')\n";
-			ss << "comment('protrusion.')\n";
+			ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("immediately above the protrusion we are finding the centre of.")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("This program then jogs out and down in two opposite directions")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("before probing back towards the centre point looking for the")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("protrusion.")) << ")\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
@@ -197,11 +198,11 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		} // End if - then
 		else
 		{
-			ss << "comment('This program assumes that the machine operator has jogged')\n";
-			ss << "comment('the machine to approximatedly the correct location')\n";
-			ss << "comment('immediately above the hole we are finding the centre of.')\n";
-			ss << "comment('This program then jogs down and probes out in two opposite directions')\n";
-			ss << "comment('looking for the workpiece')\n";
+			ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("immediately above the hole we are finding the centre of.")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("This program then jogs down and probes out in two opposite directions")).c_str() << ")\n";
+			ss << "comment(" << PythonString(_("looking for the workpiece")).c_str() << ")\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
@@ -212,8 +213,8 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		} // End if - else
 
 		// Now move to the centre of these two intersection points.
-		ss << "comment('Move back to the intersection points')\n";
-		ss << "comment('NOTE: We set the temporary origin because it was in effect when the values in these variables were established')\n";
+		ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
+		ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
 		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
 		ss << "rapid_to_midpoint(" << _T("y1='[#1006 + ") << probe_offset_y << "]'," << _T("y2='[#1008 + ") << probe_offset_y << "]')\n";
 		ss << "remove_temporary_origin()\n";
@@ -326,8 +327,8 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate centre point.
 
-	ss << "comment('This program assumes that the machine operator has jogged')\n";
-	ss << "comment('the machine to approximatedly the correct location')\n";
+	ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")) << ")\n";
+	ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")) << ")\n";
 	ss << "comment('immediately above the ";
 
 	if (m_number_of_edges == 1)
@@ -1291,10 +1292,15 @@ void CProbing::GeneratePythonPreamble()
 
 		// add standard stuff at the top
 		//hackhack, make it work on unix with FHS
-#ifndef WIN32
-		theApp.m_program_canvas->AppendText(_T("import sys\n"));
-		theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
-#endif
+        theApp.m_program_canvas->AppendText(_T("import sys\n"));
+
+    #ifndef WIN32
+        theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
+    #endif
+
+        theApp.m_program_canvas->AppendText(wxString(_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()) + wxString(_T(")\n")));
+        theApp.m_program_canvas->AppendText(_T("import math\n"));
+
 
 		// machine general stuff
 		theApp.m_program_canvas->AppendText(_T("from nc.nc import *\n"));
@@ -1311,7 +1317,7 @@ void CProbing::GeneratePythonPreamble()
 		} // End if - else
 
 		// output file
-		theApp.m_program_canvas->AppendText(_T("output('") + this->GetOutputFileName(_T(".tap"), false) + _T("')\n"));
+		theApp.m_program_canvas->AppendText(_T("output(") + PythonString( this->GetOutputFileName(_T(".tap"), false)) + _T(")\n"));
 
 		// begin program
 		theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));

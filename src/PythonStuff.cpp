@@ -6,6 +6,8 @@
 #include <wx/file.h>
 #include <wx/mimetype.h>
 #include <wx/process.h>
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
 #include "PythonStuff.h"
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
@@ -78,7 +80,7 @@ public:
 		else
 		{
 #ifdef WIN32
-			Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("/nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
+			Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
 #else
 			Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/") + m_program->m_machine.file_name + _T("_read.py\" ")) + wxString(_T("\"")) + m_filename + wxString(_T("\"")) );
 #endif
@@ -119,12 +121,12 @@ protected:
 	static CPyPostProcess* m_object;
 
 public:
-	CPyPostProcess(const CProgram* program, 
+	CPyPostProcess(const CProgram* program,
 			const wxChar* filename,
-			const bool include_backplot_processing = true ) : 
+			const bool include_backplot_processing = true ) :
 		m_program(program), m_filename(filename), m_include_backplot_processing(include_backplot_processing)
 	{
-		m_object = this; 
+		m_object = this;
 	}
 
 	~CPyPostProcess(void) { m_object = NULL; }
@@ -134,17 +136,21 @@ public:
 	void Do(void)
 	{
 		wxBusyCursor wait; // show an hour glass until the end of this function
+		wxStandardPaths standard_paths;
+		wxFileName path( standard_paths.GetTempDir().c_str(), _T("post.py"));
+
 #ifdef WIN32
-		Execute(theApp.GetDllFolder() + wxString(_T("/post.bat")));
+        Execute(theApp.GetDllFolder() + wxString(_T("\\post.bat \"")) + path.GetFullPath() + wxString(_T("\"")));
 #else
-		Execute(wxString(_T("python ")) + wxString(_T("/tmp/heekscnc_post.py")));
+
+		Execute(wxString(_T("python ")) + path.GetFullPath());
 #endif
 	}
-	void ThenDo(void) 
+	void ThenDo(void)
 	{
 		if (m_include_backplot_processing)
 		{
-			(new CPyBackPlot(m_program, (HeeksObj*)m_program, m_filename))->Do(); 
+			(new CPyBackPlot(m_program, (HeeksObj*)m_program, m_filename))->Do();
 		}
 	}
 };
@@ -169,22 +175,25 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath, const
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
-#ifdef WIN32
-		wxString file_str = theApp.GetDllFolder() + wxString(_T("/post.py"));
-#else
-		wxString file_str = wxString(_T("/tmp/heekscnc_post.py"));
-#endif
-		if(!write_python_file(file_str))
+		wxStandardPaths standard_paths;
+		wxFileName file_str( standard_paths.GetTempDir().c_str(), _T("post.py"));
+
+		if(!write_python_file(file_str.GetFullPath()))
 		{
-			wxMessageBox(_T("couldn't write post.py!"));
+		    wxString error;
+		    error << _T("couldn't write ") << file_str.GetFullPath();
+		    wxMessageBox(error.c_str());
 		}
 		else
 		{
 #ifdef WIN32
+			// Set the working directory to the area that contains the DLL so that
+			// the system can find the post.bat file correctly.
 			::wxSetWorkingDirectory(theApp.GetDllFolder());
 #else
-			::wxSetWorkingDirectory(wxString(_T("/tmp")));
+			::wxSetWorkingDirectory(standard_paths.GetTempDir());
 #endif
+
 			// call the python file
 			(new CPyPostProcess(program, filepath, include_backplot_processing))->Do();
 
@@ -225,3 +234,40 @@ void HeeksPyCancel(void)
 	CPyBackPlot::StaticCancel();
 	CPyPostProcess::StaticCancel();
 }
+
+/**
+	When a string is passed into a Python routine, it needs to be surrounded by
+	single (or double) quote characters.  If the contents of the string contain
+	backslash characters then these may be interpreted by Python as part of
+	a special character representation.  eg: '\n' represents a single newline
+	character.  If we pass a Windows path in then the backslash characters that
+	separate directory names may be interpreted rather than be taken literaly.
+	This routine also adds the single quotes to the beginning and end of the
+	string passed in.
+
+	eg: if value = "abcde" then the returned string would be 'abcde'
+	    if value = "c:\temp\myfile.txt" then the returned string would be 'c:\\temp\\myfile.txt'
+		if value = "abc'de" then the returned string would be 'abc\'de'.
+ */
+wxString PythonString( const wxString value )
+{
+	wxString _value(value);
+	wxString result;
+	if ((_value[0] == '\'') || (_value[0] == '\"'))
+	{
+		_value.erase(0, 1);
+	}
+
+	if ((_value.EndsWith(_T("\'"))) || (_value.EndsWith(_T("\""))))
+	{
+		_value.erase(_value.Len()-1);
+	}
+
+	_value.Replace(_T("\\"), _T("\\\\"), true );
+	_value.Replace(_T("\'"), _T("\\\'"), true );
+	_value.Replace(_T("\""), _T("\\\""), true );
+
+	result << _T("\'") << _value << _T("\'");
+	return(result);
+}
+

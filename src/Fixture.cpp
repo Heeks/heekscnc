@@ -21,6 +21,7 @@
 #include "tinyxml/tinyxml.h"
 #include "Op.h"
 #include "CNCPoint.h"
+#include "PythonStuff.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -150,7 +151,7 @@ void CFixture::AppendTextToProgram() const
 
 	if (m_title.size() > 0)
 	{
-		ss << "comment('" << m_title.c_str() << "')\n";
+		ss << "comment(" << PythonString(m_title).c_str() << ")\n";
 	} // End if - then
 
 	ss << "workplane(" << m_coordinate_system_number << ")\n";

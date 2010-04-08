@@ -30,6 +30,8 @@
 #include "Fixtures.h"
 #include "Tools.h"
 #include "interface/strconv.h"
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
 
 #include <vector>
 #include <algorithm>
@@ -46,11 +48,11 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed
 
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, false);
 
-#ifdef WIN32
-	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("test.tap"));
-#else
-	config.Read(_T("ProgramOutputFile"), &m_output_file, _T("/tmp/test.tap"));
-#endif
+    wxStandardPaths standard_paths;
+    wxFileName default_path( standard_paths.GetTempDir().c_str(), _T("test.tap"));
+
+	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
+
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 }
 
@@ -446,7 +448,6 @@ void CProgram::RewritePythonProgram()
 	bool ocl_funcs_needed = false;
 	bool adaptive_op_exists = false;
 	bool drilling_op_exists = false;
-	bool counterbore_op_exists = false;
 	bool rough_turning_op_exists = false;
 
 	typedef std::vector< COp * > OperationsMap_t;
@@ -494,10 +495,6 @@ void CProgram::RewritePythonProgram()
 		{
 			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
 		}
-		else if(object->GetType() == CounterBoreType)
-		{
-			counterbore_op_exists = true;
-		}
 		else if(object->GetType() == TurnRoughType)
 		{
 			if(((CProfile*)object)->m_active)
@@ -514,11 +511,13 @@ void CProgram::RewritePythonProgram()
 
 	// add standard stuff at the top
 	//hackhack, make it work on unix with FHS
-#ifndef WIN32
 	theApp.m_program_canvas->AppendText(_T("import sys\n"));
-	theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
+
+#ifndef WIN32
+	theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,") + PythonString(_T("/usr/local/lib/heekscnc/")) + wxString(_T(")\n")));
 #endif
 
+	theApp.m_program_canvas->AppendText(wxString(_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()) + wxString(_T(")\n")));
 	theApp.m_program_canvas->AppendText(_T("import math\n"));
 
 	// kurve related things
@@ -560,12 +559,6 @@ void CProgram::RewritePythonProgram()
 		theApp.m_program_canvas->AppendText(_T("\n"));
 	}
 
-	if(counterbore_op_exists)
-	{
-		theApp.m_program_canvas->AppendText(_T("import circular_pocket as circular\n"));
-		theApp.m_program_canvas->AppendText(_T("\n"));
-	}
-
 	if(rough_turning_op_exists)
 	{
 		theApp.m_program_canvas->AppendText(_T("import turning\n"));
@@ -588,10 +581,10 @@ void CProgram::RewritePythonProgram()
 	} // End if - else
 
 	// output file
-	theApp.m_program_canvas->AppendText(_T("output('") + GetOutputFileName() + _T("')\n"));
+	theApp.m_program_canvas->AppendText(wxString(_T("output(")) + PythonString(GetOutputFileName()) + wxString(_T(")\n")));
 
 	// begin program
-	theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
+	theApp.m_program_canvas->AppendText(wxString(_T("program_begin(123, ")) + PythonString(_T("Test program")) + wxString(_T(")\n")));
 	theApp.m_program_canvas->AppendText(_T("absolute()\n"));
 	if(m_units > 25.0)
 	{
@@ -671,7 +664,7 @@ void CProgram::RewritePythonProgram()
 						CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
 						if (pCuttingTool != NULL)
 						{
-							l_ossValue << _T("comment( 'tool change to ") << pCuttingTool->m_title.c_str() << "')\n";
+							l_ossValue << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title).c_str() << ")\n";
 						} // End if - then
 
 

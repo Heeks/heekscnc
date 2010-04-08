@@ -1,3 +1,3 @@
-c:\python26\python.exe post.py
+c:\python26\python.exe %1
 
 #pause
