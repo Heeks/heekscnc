@@ -85,7 +85,7 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 {
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("comment('%s')\n"), wxString(sketch->GetShortString()).c_str()));
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("comment(R'%s')\n"), wxString(sketch->GetShortString()).c_str()));
 	}
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
@@ -323,10 +323,10 @@ CTurnRough & CTurnRough::operator= ( const CTurnRough & rhs )
 
 		m_sketches.clear();
 		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
-		
+
 		m_turn_rough_params = rhs.m_turn_rough_params;
 	}
-	
+
 	return(*this);
 }
 

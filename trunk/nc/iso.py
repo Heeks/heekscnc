@@ -8,7 +8,6 @@
 import iso_codes as iso
 import nc
 import math
-import circular_pocket as circular
 
 ################################################################################
 class CreatorIso(nc.Creator):
@@ -341,12 +340,6 @@ class CreatorIso(nc.Creator):
 
     def profile(self):
         pass
-
-    def circular_pocket(self, x=None, y=None, ToolDiameter=None, HoleDiameter=None, ClearanceHeight=None, StartHeight=None, MaterialTop=None, FeedRate=None, SpindleRPM=None, HoleDepth=None, DepthOfCut=None, StepOver=None ):
-	self.write_preps()
-	circular.pocket.block_number = self.n
-	(self.g_code, self.n) = circular.pocket.GeneratePath( x,y, ToolDiameter, HoleDiameter, ClearanceHeight, StartHeight, MaterialTop, FeedRate, SpindleRPM, HoleDepth, DepthOfCut, StepOver )
-	self.write(self.g_code)
 
 	# The drill routine supports drilling (G81), drilling with dwell (G82) and peck drilling (G83).
 	# The x,y,z values are INITIAL locations (above the hole to be made.  This is in contrast to

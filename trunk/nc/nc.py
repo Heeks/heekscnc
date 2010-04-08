@@ -209,10 +209,6 @@ class Creator:
         """Profile routine"""
         pass
 
-    def circular_pocket(self, 	x=None, y=None, ToolDiameter=None, HoleDiameter=None, ClearanceHeight=None, StartHeight=None, MaterialTop=None, FeedRate=None, SpindleRPM=None, HoleDepth=None, DepthOfCut=None, StepOver=None):
-        """Circular Pocket routines"""
-        pass
-
     def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
         """Drilling routines"""
         pass
@@ -405,9 +401,6 @@ def pocket():
 
 def profile():
     creator.profile()
-
-def circular_pocket(x=None, y=None, ToolDiameter=None, HoleDiameter=None, ClearanceHeight=None, StartHeight=None, MaterialTop=None, FeedRate=None, SpindleRPM=None, HoleDepth=None, DepthOfCut=None, StepOver=None):
-	creator.circular_pocket(x, y, ToolDiameter, HoleDiameter, ClearanceHeight, StartHeight, MaterialTop, FeedRate, SpindleRPM, HoleDepth, DepthOfCut, StepOver)
 
 def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
     creator.drill(x, y, z, depth, standoff, dwell, peck_depth)
