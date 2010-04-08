@@ -19,6 +19,7 @@
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
 #include "CNCPoint.h"
+#include "PythonStuff.h"
 
 #include <sstream>
 #include <string>
@@ -639,7 +640,7 @@ void CCuttingTool::AppendTextToProgram()
 
 	if (m_title.size() > 0)
 	{
-		ss << "name='" << m_title.c_str() << "\', ";
+		ss << "name=" << PythonString(m_title).c_str() << ", ";
 	} // End if - then
 	else
 	{
@@ -822,7 +823,7 @@ CCuttingTool *CCuttingTool::Find( const int tool_number )
 
 CCuttingTool::ToolNumber_t CCuttingTool::FindFirstByType( const CCuttingToolParams::eCuttingToolType type )
 {
-   
+
 	if ((theApp.m_program) && (theApp.m_program->Tools()))
 	{
 		HeeksObj* tool_list = theApp.m_program->Tools();

@@ -13,6 +13,9 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "Reselect.h"
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
+#include "PythonStuff.h"
 
 #include <sstream>
 
@@ -223,14 +226,11 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 	} // End for
 
 
-#ifdef WIN32
-	wxString filepath = wxString::Format(_T("zigzag%d.stl"), number_for_stl_file);
-#else
-        wxString filepath = wxString::Format(_T("/tmp/zigzag%d.stl"), number_for_stl_file);
-#endif
+    wxStandardPaths standard_paths;
+    wxFileName filepath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("zigzag%d.stl"), number_for_stl_file).c_str() );
 	number_for_stl_file++;
 
-	heeksCAD->SaveSTLFile(solids, filepath, 0.01);
+	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
 
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
@@ -250,7 +250,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
 			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
-	ss << "ocl_funcs.zigzag('" << filepath.c_str() << "', tool_diameter, corner_radius, " << m_params.m_step_over << ", " << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance << ", " << m_params.m_style << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
+	ss << "ocl_funcs.zigzag(" << PythonString(filepath.GetFullPath()).c_str() << ", tool_diameter, corner_radius, " << m_params.m_step_over << ", " << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance << ", " << m_params.m_style << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }

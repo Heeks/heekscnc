@@ -18,6 +18,9 @@
 #include "CNCPoint.h"
 #include "Reselect.h"
 #include <sstream>
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
+#include "PythonStuff.h"
 
 int CAdaptive::number_for_stl_file = 1;
 
@@ -424,18 +427,13 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 	max_z = CAdaptive::GetMaxHeight( SketchType, m_sketches );
 	if (m_params.m_boundaryclear < max_z) m_params.m_boundaryclear = max_z;
 
+    wxStandardPaths standard_paths;
+    wxFileName filepath;
 
-#ifdef WIN32
-
-	wxString filepath = wxString::Format(_T("adaptive%d.stl"), number_for_stl_file);
-
-#else
-	wxString filepath = wxString::Format(_T("/tmp/adaptive%d.stl"), number_for_stl_file);
-#endif
-
+    filepath.Assign( standard_paths.GetTempDir().c_str(), wxString::Format(_T("adaptive%d.stl"), number_for_stl_file).c_str() );
 
 	number_for_stl_file++;
-	heeksCAD->SaveSTLFile(solids, filepath);
+	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath());
 
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
@@ -567,7 +565,7 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 
 	}
 
-	ss << "actp_funcs.cut('" << filepath.c_str() << "')\n";
+	ss << "actp_funcs.cut(" << PythonString(filepath.GetFullPath()).c_str() << ")\n";
 
 	ss << "rapid(z=" << m_params.m_retractzheight << ")\n";
 

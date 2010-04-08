@@ -18,6 +18,7 @@
 #include "CuttingTool.h"
 #include "Drilling.h"
 #include "CNCPoint.h"
+#include "PythonStuff.h"
 
 #include <sstream>
 #include <algorithm>
@@ -197,7 +198,7 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) + radius_of_spiral );
 
-		ss << "comment('Now spiral outwards to the counterbore perimeter')\n";
+		ss << "comment(" << PythonString(_T("Now spiral outwards to the counterbore perimeter")).c_str() << ")\n";
 
 		do {
 			radius_of_spiral += (pCuttingTool->CuttingRadius(false) * 0.75);

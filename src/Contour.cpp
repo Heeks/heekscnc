@@ -326,38 +326,10 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 	wxString gcode;
 	double tolerance = heeksCAD->GetTolerance();
 
-    /*
-    ShapeFix_Wire fixWire;
-    fixWire.Load(wire);
-    fixWire.FixReorder();
-    // fixWire.FixConnected(); //to ensure vertices are shared btw edges
-    // fixWire.FixClosed();
-    bool performed = fixWire.Perform();
-
-    // TopoDS_Wire profileWire = fixWire.WireAPIMake();
-    TopoDS_Wire profileWire = fixWire.Wire();
-    */
-
     std::vector<TopoDS_Edge> edges = SortEdges(wire);
-    // for (std::vector<TopoDS_Edge>::iterator l_itEdge = edges.begin(); l_itEdge != edges.end(); l_itEdge++)
-
-    /*
-    std::vector<TopoDS_Edge> edges;
-
-    for(BRepTools_WireExplorer expEdge(TopoDS::Wire(profileWire)); expEdge.More(); expEdge.Next())
-    {
-        edges.push_back( expEdge.Current() );
-    }
-    */
-
     for (std::vector<TopoDS_Edge>::size_type i=0; i<edges.size(); i++)
 	{
-		// const TopoDS_Shape &E = expEdge.Current();
-
 		const TopoDS_Shape &E = edges[i];
-
-
-		// const TopoDS_Edge &E = *l_itEdge;
 
 		// enum GeomAbs_CurveType
 		// 0 - GeomAbs_Line
@@ -427,6 +399,13 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 				}
 			}
 			break;
+
+            /*
+            // It would be great if we could do the BiArc movements along the spline that Dan put in for
+            // Profile operations.  I will get there eventually.
+            case GeomAbs_BSplineCurve:
+            */
+
 
 			case GeomAbs_Circle:
 			if ((pFixture->m_params.m_xz_plane == 0.0) && (pFixture->m_params.m_yz_plane == 0.0))
@@ -644,13 +623,6 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 			    // option which will stroke the arcs into small lines.
 			}
 
-
-            /*
-            // It would be great if we could do the BiArc movements along the spline that Dan put in for
-            // Profile operations.  I will get there eventually.
-            case GeomAbs_BSplineCurve:
-            */
-
 			default:
 			{
 				// make lots of small lines
@@ -784,8 +756,6 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 
                         gcode << GeneratePathFromWire(TopoDS::Wire(transform.Shape()), last_position, pFixture );
                     }
-
-
 				}
 			} // End try
 			catch (Standard_Failure & error) {

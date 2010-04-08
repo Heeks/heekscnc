@@ -21,6 +21,7 @@
 #include "CuttingTool.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
+#include "PythonStuff.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -476,7 +477,8 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
-		l_ossPythonCode << (wxString::Format(_T("comment('%s')\n"), wxString(sketch->GetShortString()).c_str())).c_str(); }
+		l_ossPythonCode << _T("comment(") << PythonString(sketch->GetShortString()) << _T(")\n");
+	}
 
 	l_ossPythonCode << (wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id)).c_str();
 

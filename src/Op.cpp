@@ -16,6 +16,7 @@
 #include "tinyxml/tinyxml.h"
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
+#include "PythonStuff.h"
 
 #include <iterator>
 #include <vector>
@@ -229,7 +230,7 @@ void COp::AppendTextToProgram(const CFixture *pFixture)
 {
 	if(m_comment.Len() > 0)
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("comment('")) + m_comment + _T("')\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("comment(")) + PythonString(m_comment) + _T(")\n"));
 	}
 }
 
