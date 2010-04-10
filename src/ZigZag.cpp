@@ -216,9 +216,6 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 				double m[16];	// A different form of the transformation matrix.
 				CFixture::extract( pFixture->GetMatrix(), m );
 
-				int type = copy->GetType();
-				unsigned int id = copy->m_id;
-
                 copy->ModifyByMatrix(m);
                 solids.push_back(copy);
             } // End if - then
