@@ -20,6 +20,7 @@
 #include "Profile.h"
 #include "Fixture.h"
 #include "CNCPoint.h"
+#include "PythonStuff.h"
 
 #include <sstream>
 #include <iomanip>
@@ -327,6 +328,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 	double tolerance = heeksCAD->GetTolerance();
 
     std::vector<TopoDS_Edge> edges = SortEdges(wire);
+
     for (std::vector<TopoDS_Edge>::size_type i=0; i<edges.size(); i++)
 	{
 		const TopoDS_Shape &E = edges[i];
@@ -420,199 +422,144 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 				curve.D1(uEnd, PE, VE);
 				gp_Circ circle = curve.Circle();
 
-				if(curve.IsPeriodic())
-				{
-					double period = curve.Period();
-					double uHalf = uStart + period/2;
-					gp_Pnt PH;
-					gp_Vec VH;
-					curve.D1(uHalf, PH, VH);
-					if (last_position.Distance(PS) < tolerance)
-					{
-						// Arc towards PH
-						CNCPoint point(PH);
-						CNCPoint centre( circle.Location() );
-						bool l_bClockwise = Clockwise(circle);
 
-						CNCPoint offset = centre - CNCPoint(PS);
+                // It's an Arc.
 
-						gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(", ")
-							<< _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
-						last_position = point;
-					}
-					else if (last_position.Distance(PH) < tolerance)
-					{
-						// Arc towards PS
-						CNCPoint point(PS);
-						CNCPoint centre( circle.Location() );
-						bool l_bClockwise = ! Clockwise(circle);
+                if (last_position.Distance(PS) < tolerance)
+                {
+                    // Arc towards PE
+                    CNCPoint point(PE);
+                    CNCPoint centre( circle.Location() );
+                    bool l_bClockwise = Clockwise(circle);
 
-						CNCPoint offset = centre - CNCPoint(PH);
-
-						gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(", ")
-							<< _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
-						last_position = point;
-					}
-					else
-					{
-						// Move to PS first.
-						CNCPoint start(PS);
-
-						gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-						gcode << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
-						gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
-
-						CNCPoint point(PE);
-						CNCPoint centre( circle.Location() );
-						bool l_bClockwise = Clockwise(circle);
-
-						CNCPoint offset = centre - CNCPoint(PS);
-
-						gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(", ")
-							<< _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
-						last_position = point;
-					}
-				}
-				else
-				{
-				    // It's an Arc.
-
-                    if (last_position.Distance(PS) < tolerance)
+                     std::list<CNCPoint> points;
+                    double period = curve.Period();
+                    double u = uStart;
+                    for (u = uStart; u <= uEnd; u += (period/4.0))
                     {
-                        // Arc towards PE
-                        CNCPoint point(PE);
-                        CNCPoint centre( circle.Location() );
-                        bool l_bClockwise = Clockwise(circle);
-
-                         std::list<CNCPoint> points;
-                        double period = curve.Period();
-                        double u = uStart;
-                        for (u = uStart; u <= uEnd; u += (period/4.0))
-                        {
-                            gp_Pnt p;
-                            gp_Vec v;
-                            curve.D1(u, p, v);
-                            points.push_back( p );
-                        }
-                        if (points.rbegin()->Distance( CNCPoint(PE) ) > tolerance)
-                        {
-                            points.push_back( CNCPoint(PE) );
-                        }
-
-                        for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
-                        {
-                            if (itPoint->Distance(last_position) > tolerance)
-                            {
-                                CNCPoint offset = centre - last_position;
-                                gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                    << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
-                                last_position = *itPoint;
-                            }
-                        } // End for
+                        gp_Pnt p;
+                        gp_Vec v;
+                        curve.D1(u, p, v);
+                        points.push_back( p );
                     }
-                    else if (last_position.Distance(PE) < tolerance)
+                    if (points.rbegin()->Distance( CNCPoint(PE) ) > tolerance)
                     {
-                        // Arc towards PS
-                        CNCPoint point(PS);
-                        CNCPoint centre( circle.Location() );
-                        bool l_bClockwise = ! Clockwise(circle);
-
-                        std::list<CNCPoint> points;
-                        double period = curve.Period();
-                        for (double u = uEnd; u >= uStart; u -= (period/4.0))
-                        {
-                            gp_Pnt p;
-                            gp_Vec v;
-                            curve.D1(u, p, v);
-                            points.push_back( p );
-                        }
-                        if (points.rbegin()->Distance( CNCPoint(PS) ) > tolerance)
-                        {
-                            points.push_back( CNCPoint(PS) );
-                        }
-
-                        for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
-                        {
-                            if (itPoint->Distance(last_position) > tolerance)
-                            {
-                                CNCPoint offset = centre - last_position;
-
-                                gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                    << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
-                                last_position = *itPoint;
-                            }
-                        } // End for
+                        points.push_back( CNCPoint(PE) );
                     }
-                    else
+
+                    for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
                     {
-                        // Move to PS first.
-                        std::list<CNCPoint> points;
-                        double period = curve.Period();
-
-                        CNCPoint start(PS);
-                        CNCPoint end(PE);
-                        CNCPoint centre( circle.Location() );
-                        bool l_bClockwise = Clockwise(circle);
-
-                        for (double u = uStart; u <= uEnd; u += (period/4.0))
+                        if (itPoint->Distance(last_position) > tolerance)
                         {
-                            gp_Pnt p;
-                            gp_Vec v;
-                            curve.D1(u, p, v);
-                            points.push_back( p );
+                            CNCPoint offset = centre - last_position;
+                            gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
+                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
+                            last_position = *itPoint;
                         }
-                        if (points.rbegin()->Distance( CNCPoint(PE) ) > tolerance)
-                        {
-                            points.push_back( CNCPoint(PE) );
-                        }
+                    } // End for
+                }
+                else if (last_position.Distance(PE) < tolerance)
+                {
+                    // Arc towards PS
+                    CNCPoint point(PS);
+                    CNCPoint centre( circle.Location() );
+                    bool l_bClockwise = ! Clockwise(circle);
 
-                        if (i < (edges.size()-1))
-                        {
-                            if (! DirectionTowarardsNextEdge( edges[i], edges[i+1] ))
-                            {
-                                // The next edge is closer to this edge's start point.  reverse direction
-                                // so that the next movement is better.
-
-                                CNCPoint temp = start;
-                                start = end;
-                                end = temp;
-                                l_bClockwise = ! l_bClockwise;
-
-                                points.clear();
-                                for (double u = uEnd; u >= uStart; u -= (period/4.0))
-                                {
-                                    gp_Pnt p;
-                                    gp_Vec v;
-                                    curve.D1(u, p, v);
-                                    points.push_back( p );
-                                }
-                                if (points.rbegin()->Distance( CNCPoint(PS) ) > tolerance)
-                                {
-                                    points.push_back( CNCPoint(PS) );
-                                }
-                            }
-                        }
-
-
-                        gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-                        gcode <<_T( "rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
-                        gcode << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
-
-                        last_position = *(points.begin());
-
-                        for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
-                        {
-                            if (itPoint->Distance(last_position) > tolerance)
-                            {
-                                CNCPoint offset = centre - last_position;
-
-                                gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                    << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
-                                last_position = *itPoint;
-                            }
-                        } // End for
+                    std::list<CNCPoint> points;
+                    double period = curve.Period();
+                    for (double u = uEnd; u >= uStart; u -= (period/4.0))
+                    {
+                        gp_Pnt p;
+                        gp_Vec v;
+                        curve.D1(u, p, v);
+                        points.push_back( p );
                     }
-				}
+                    if (points.rbegin()->Distance( CNCPoint(PS) ) > tolerance)
+                    {
+                        points.push_back( CNCPoint(PS) );
+                    }
+
+                    for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
+                    {
+                        if (itPoint->Distance(last_position) > tolerance)
+                        {
+                            CNCPoint offset = centre - last_position;
+
+                            gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
+                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
+                            last_position = *itPoint;
+                        }
+                    } // End for
+                }
+                else
+                {
+                    // Move to PS first.
+                    std::list<CNCPoint> points;
+                    double period = curve.Period();
+
+                    CNCPoint start(PS);
+                    CNCPoint end(PE);
+                    CNCPoint centre( circle.Location() );
+                    bool l_bClockwise = Clockwise(circle);
+
+                    for (double u = uStart; u <= uEnd; u += (period/4.0))
+                    {
+                        gp_Pnt p;
+                        gp_Vec v;
+                        curve.D1(u, p, v);
+                        points.push_back( p );
+                    }
+                    if (points.rbegin()->Distance( CNCPoint(PE) ) > tolerance)
+                    {
+                        points.push_back( CNCPoint(PE) );
+                    }
+
+                    if (i < (edges.size()-1))
+                    {
+                        if (! DirectionTowarardsNextEdge( edges[i], edges[i+1] ))
+                        {
+                            // The next edge is closer to this edge's start point.  reverse direction
+                            // so that the next movement is better.
+
+                            CNCPoint temp = start;
+                            start = end;
+                            end = temp;
+                            l_bClockwise = ! l_bClockwise;
+
+                            points.clear();
+                            for (double u = uEnd; u >= uStart; u -= (period/4.0))
+                            {
+                                gp_Pnt p;
+                                gp_Vec v;
+                                curve.D1(u, p, v);
+                                points.push_back( p );
+                            }
+                            if (points.rbegin()->Distance( CNCPoint(PS) ) > tolerance)
+                            {
+                                points.push_back( CNCPoint(PS) );
+                            }
+                        }
+                    }
+
+
+                    gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+                    gcode <<_T( "rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
+                    gcode << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
+
+                    last_position = *(points.begin());
+
+                    for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
+                    {
+                        if (itPoint->Distance(last_position) > tolerance)
+                        {
+                            CNCPoint offset = centre - last_position;
+
+                            gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
+                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
+                            last_position = *itPoint;
+                        }
+                    } // End for
+                }
 				break;
 			}
 			else
@@ -714,6 +661,11 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 			// The wire(s) represent the sketch objects for a tool path.  We need to apply
 			// either the 'inside', 'on' or 'outside' attributes by translating the wires
 			// by the cutting tool's radius first.
+
+			if (object->GetShortString() != NULL)
+			{
+			    gcode << _T("comment(") << PythonString(object->GetShortString()) << _T(")\n");
+			}
 
 			try {
 				for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
