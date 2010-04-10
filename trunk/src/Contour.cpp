@@ -453,7 +453,9 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
                         {
                             CNCPoint offset = centre - last_position;
                             gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
+                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
+                            if (offset.Z(true) > tolerance) gcode << _T(", k=") << offset.Z(true);
+                            gcode << _T(")\n");
                             last_position = *itPoint;
                         }
                     } // End for
@@ -486,7 +488,9 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
                             CNCPoint offset = centre - last_position;
 
                             gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
+                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
+                            if (offset.Z(true) > tolerance) gcode << _T(", k=") << offset.Z(true);
+                            gcode << _T(")\n");
                             last_position = *itPoint;
                         }
                     } // End for
@@ -555,7 +559,9 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
                             CNCPoint offset = centre - last_position;
 
                             gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true) << _T(", k=") << offset.Z(true) << _T(")\n");
+                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
+                            if (offset.Z(true) > tolerance) gcode << _T(", k=") << offset.Z(true);
+                            gcode << _T(")\n");
                             last_position = *itPoint;
                         }
                     } // End for
