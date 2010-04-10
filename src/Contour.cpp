@@ -394,6 +394,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 
 					gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 					gcode << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
+					gcode << _T("rapid(z=") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
 					gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
 
 					gcode << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
@@ -548,6 +549,7 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 
                     gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
                     gcode <<_T( "rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
+                    gcode << _T("rapid(z=") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
                     gcode << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
 
                     last_position = *(points.begin());
@@ -614,10 +616,10 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 							CNCPoint end(p);
 
 							gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-                            gcode <<_T( "rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
-                            gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
+                            gcode <<_T( "rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
+                            gcode << _T("rapid(z=") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+                            gcode << _T("feed(z=") << end.Z(true) << _T(")\n");
 
-							gcode << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
 							last_position = end;
 						}
 
@@ -627,6 +629,9 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 			break;
 		} // End switch
 	}
+
+	gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+	last_position.SetZ( m_depth_op_params.m_clearance_height );
 
 	return(gcode);
 }
