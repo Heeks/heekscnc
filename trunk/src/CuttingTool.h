@@ -227,7 +227,7 @@ public:
 	TopoDS_Shape GetShape() const;
 	TopoDS_Face  GetSideProfile() const;
 
-	double CuttingRadius(const bool express_in_drawing_units = false) const;
+	double CuttingRadius(const bool express_in_drawing_units = false, const double depth = -1) const;
 	static CCuttingToolParams::eCuttingToolType CutterType( const int tool_number );
 	static CCuttingToolParams::eMaterial_t CutterMaterial( const int tool_number );
 
