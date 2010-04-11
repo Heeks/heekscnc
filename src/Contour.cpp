@@ -651,6 +651,7 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 	CDepthOp::AppendTextToProgram( pFixture );
 
 	unsigned int number_of_bad_sketches = 0;
+	double tolerance = heeksCAD->GetTolerance();
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (! pCuttingTool)
@@ -694,24 +695,31 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 
 					BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
 
-					double radius = pCuttingTool->CuttingRadius();
-
-                    if (m_params.m_tool_on_side == CContourParams::eLeftOrOutside) radius *= +1.0;
-					if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
-					if (m_params.m_tool_on_side == CContourParams::eOn) radius = 0.0;
-
-                    TopoDS_Wire tool_path_wire(TopoDS::Wire(wire));
-
-                    if (m_params.m_tool_on_side != CContourParams::eOn)
-                    {
-                        offset_wire.Perform(radius);
-                        tool_path_wire = TopoDS::Wire(offset_wire.Shape());
-                    }
-
                     // Now generate a toolpath along this wire.
                     std::list<double> depths = GetDepths();
                     for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
                     {
+                        double radius = pCuttingTool->CuttingRadius(false,*(depths.begin()) - *itDepth);
+
+                        if (m_params.m_tool_on_side == CContourParams::eLeftOrOutside) radius *= +1.0;
+                        if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
+                        if (m_params.m_tool_on_side == CContourParams::eOn) radius = 0.0;
+
+                        TopoDS_Wire tool_path_wire(TopoDS::Wire(wire));
+
+                        double offset = radius;
+                        if (offset < 0) offset *= -1.0;
+
+                        if (offset > tolerance)
+                        {
+                            offset_wire.Perform(radius);
+                            if (! offset_wire.IsDone())
+                            {
+                                break;
+                            }
+                            tool_path_wire = TopoDS::Wire(offset_wire.Shape());
+                        }
+
                         gp_Trsf matrix;
                         matrix.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,*itDepth)));
                         BRepBuilderAPI_Transform transform(matrix);
