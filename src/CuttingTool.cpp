@@ -1494,8 +1494,12 @@ TopoDS_Face CCuttingTool::GetSideProfile() const
 	units value.  We use metric (mm) internally and convert to inches only
 	if we need to and only as the last step in the process.  By default, return
 	the value in internal (metric) units.
+
+	If the depth value is passed in as a positive number then the radius is given
+	for the corresponding depth (from the bottom-most tip of the cutting tool).  This is
+	only relevant for chamfering (angled) bits.
  */
-double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = false */ ) const
+double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = false */, const double depth /* = -1 */ ) const
 {
 	double radius;
 
@@ -1503,15 +1507,27 @@ double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = fal
 	{
 		case CCuttingToolParams::eChamfer:
 			{
-				// We want to decide where, along the cutting edge, we want
-				// to machine.  Let's start with 1/3 of the way from the inside
-				// cutting edge so that, as we plunge it into the material, it
-				// cuts towards the outside.  We don't want to run right on
-				// the edge because we don't want to break the top off.
+			    if (depth < 0.0)
+			    {
+                    // We want to decide where, along the cutting edge, we want
+                    // to machine.  Let's start with 1/3 of the way from the inside
+                    // cutting edge so that, as we plunge it into the material, it
+                    // cuts towards the outside.  We don't want to run right on
+                    // the edge because we don't want to break the top off.
 
-				// one third from the centre-most point.
-				double proportion_near_centre = 0.3;
-				radius = (((m_params.m_diameter/2) - m_params.m_flat_radius) * proportion_near_centre) + m_params.m_flat_radius;
+                    // one third from the centre-most point.
+                    double proportion_near_centre = 0.3;
+                    radius = (((m_params.m_diameter/2) - m_params.m_flat_radius) * proportion_near_centre) + m_params.m_flat_radius;
+			    }
+			    else
+			    {
+			        radius = m_params.m_flat_radius + (depth * tan((m_params.m_cutting_edge_angle / 360.0 * 2 * PI)));
+			        if (radius > (m_params.m_diameter / 2.0))
+			        {
+			            // The angle and depth would have us cutting larger than our largest diameter.
+			            radius = (m_params.m_diameter / 2.0);
+			        }
+			    }
 			}
 			break;
 
