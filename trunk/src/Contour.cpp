@@ -211,7 +211,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     TopoDS_Edge m_reference_edge;
 };
 
-std::vector<TopoDS_Edge> CContour::SortEdges( const TopoDS_Wire & wire ) const
+/* static */ std::vector<TopoDS_Edge> CContour::SortEdges( const TopoDS_Wire & wire )
 {
     std::vector<TopoDS_Edge> edges;
 
@@ -282,7 +282,7 @@ std::vector<TopoDS_Edge> CContour::SortEdges( const TopoDS_Wire & wire ) const
     the 'beginning' of this edge.  This tell us whether we want to run forwards
     or backwards along this edge so that we're setup ready to machine the next edge.
  */
-bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to ) const
+/* static */ bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to )
 {
     const bool forwards = true;
     const bool backwards = false;
@@ -322,7 +322,12 @@ bool CContour::DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS
 
 
 
-wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & last_position, const CFixture *pFixture) const
+/* static */ wxString CContour::GeneratePathFromWire(
+	const TopoDS_Wire & wire,
+	CNCPoint & last_position,
+	const CFixture *pFixture,
+	const double clearance_height,
+	const double rapid_down_to_height )
 {
 	wxString gcode;
 	double tolerance = heeksCAD->GetTolerance();
@@ -392,9 +397,9 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
                         }
 					}
 
-					gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+					gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
 					gcode << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
-					gcode << _T("rapid(z=") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+					gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
 					gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
 
 					gcode << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
@@ -546,10 +551,9 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
                         }
                     }
 
-
-                    gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+					gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
                     gcode <<_T( "rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
-                    gcode << _T("rapid(z=") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+                    gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
                     gcode << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
 
                     last_position = *(points.begin());
@@ -615,14 +619,13 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 							CNCPoint start(last_position);
 							CNCPoint end(p);
 
-							gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+							gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
                             gcode <<_T( "rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
-                            gcode << _T("rapid(z=") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+                            gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
                             gcode << _T("feed(z=") << end.Z(true) << _T(")\n");
 
 							last_position = end;
 						}
-
 					} // End for
 				} // End if - then
 			}
@@ -630,8 +633,8 @@ wxString CContour::GeneratePathFromWire( const TopoDS_Wire & wire, CNCPoint & la
 		} // End switch
 	}
 
-	gcode << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-	last_position.SetZ( m_depth_op_params.m_clearance_height );
+	gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
+	last_position.SetZ( clearance_height );
 
 	return(gcode);
 }
@@ -659,47 +662,45 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 		return;
 	}
 
-	CNCPoint last_position(0.0, 0.0, 0.0);
+    CNCPoint last_position(0.0, 0.0, 0.0);
 
-	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
-	{
-		std::list<TopoDS_Shape> wires;
-		if (! heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
-		{
-			number_of_bad_sketches++;
-		} // End if - then
-		else
-		{
-			// The wire(s) represent the sketch objects for a tool path.  We need to apply
-			// either the 'inside', 'on' or 'outside' attributes by translating the wires
-			// by the cutting tool's radius first.
+    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
+    {
+        std::list<TopoDS_Shape> wires;
+        if (! heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
+        {
+            number_of_bad_sketches++;
+        } // End if - then
+        else
+        {
+            // The wire(s) represent the sketch objects for a tool path.
+            if (object->GetShortString() != NULL)
+            {
+                gcode << _T("comment(") << PythonString(object->GetShortString()) << _T(")\n");
+            }
 
-			if (object->GetShortString() != NULL)
-			{
-			    gcode << _T("comment(") << PythonString(object->GetShortString()) << _T(")\n");
-			}
+            try {
+                for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
+                {
+                    TopoDS_Shape& wire_to_fix = *It2;
+                    ShapeFix_Wire fix;
+                    fix.Load( TopoDS::Wire(wire_to_fix) );
+                    fix.FixReorder();
 
-			try {
-				for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
-				{
-				    TopoDS_Shape& wire_to_fix = *It2;
-				    ShapeFix_Wire fix;
-				    fix.Load( TopoDS::Wire(wire_to_fix) );
-				    fix.FixReorder();
+                    TopoDS_Shape wire = fix.Wire();
 
-					TopoDS_Shape wire = fix.Wire();
-
-					BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
+                    BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
                     transform.Perform(wire, false);
                     wire = transform.Shape();
 
-					BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
+                    BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
 
                     // Now generate a toolpath along this wire.
                     std::list<double> depths = GetDepths();
+
                     for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
                     {
-                        double radius = pCuttingTool->CuttingRadius(false,*(depths.begin()) - *itDepth);
+                        double radius = pCuttingTool->CuttingRadius(false,m_depth_op_params.m_start_depth - *itDepth);
 
                         if (m_params.m_tool_on_side == CContourParams::eLeftOrOutside) radius *= +1.0;
                         if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;
@@ -720,21 +721,31 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
                             tool_path_wire = TopoDS::Wire(offset_wire.Shape());
                         }
 
-                        gp_Trsf matrix;
-                        matrix.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,*itDepth)));
-                        BRepBuilderAPI_Transform transform(matrix);
-                        transform.Perform(tool_path_wire, false); // notice false as second parameter
+                        if ((m_params.m_tool_on_side == CContourParams::eOn) || (offset > tolerance))
+                        {
+                            gp_Trsf matrix;
 
-                        gcode << GeneratePathFromWire(TopoDS::Wire(transform.Shape()), last_position, pFixture );
-                    }
-				}
-			} // End try
-			catch (Standard_Failure & error) {
-				Handle_Standard_Failure e = Standard_Failure::Caught();
-				number_of_bad_sketches++;
-			} // End catch
-		} // End if - else
-	} // End for
+                            matrix.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,*itDepth)));
+                            BRepBuilderAPI_Transform transform(matrix);
+                            transform.Perform(tool_path_wire, false); // notice false as second parameter
+                            tool_path_wire = TopoDS::Wire(transform.Shape());
+
+                            gcode << GeneratePathFromWire(	tool_path_wire,
+                                                            last_position,
+                                                            pFixture,
+                                                            m_depth_op_params.m_clearance_height,
+                                                            m_depth_op_params.m_rapid_down_to_height );
+                        } // End if - then
+                    } // End for
+                } // End for
+            } // End try
+            catch (Standard_Failure & error) {
+                (void) error;	// Avoid the compiler warning.
+                Handle_Standard_Failure e = Standard_Failure::Caught();
+                number_of_bad_sketches++;
+            } // End catch
+        } // End if - else
+    } // End for
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(gcode.c_str());
 }

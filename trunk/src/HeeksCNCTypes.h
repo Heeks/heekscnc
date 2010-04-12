@@ -28,5 +28,6 @@ enum{
 	ProbeEdgeType,
 	ContourType,
 	ChamferType,
+	InlayType,
 	HeeksCNCMaximumType
 };

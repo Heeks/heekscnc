@@ -213,6 +213,7 @@ void COp::ReadDefaultValues()
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
 			break;
         case ChamferType:
+        case InlayType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eChamfer );
 			break;
 		default:
@@ -251,6 +252,7 @@ bool COp::IsAnOperation(int object_type)
 		case ProbeEdgeType:
 		case ChamferType:
 		case ContourType:
+		case InlayType:
 			return true;
 		default:
 			return false;
