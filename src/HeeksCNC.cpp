@@ -48,6 +48,7 @@
 #include "Excellon.h"
 #include "Chamfer.h"
 #include "Contour.h"
+#include "Inlay.h"
 
 #include <sstream>
 
@@ -624,7 +625,6 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 
 static void NewContourOpMenuCallback(wxCommandEvent &event)
 {
-#if 0
 	CContour::Symbols_t symbols;
 	CContour::Symbols_t cuttingTools;
 	int cutting_tool_number = 0;
@@ -648,7 +648,34 @@ static void NewContourOpMenuCallback(wxCommandEvent &event)
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
-#endif
+}
+
+
+static void NewInlayOpMenuCallback(wxCommandEvent &event)
+{
+	CInlay::Symbols_t symbols;
+	CInlay::Symbols_t cuttingTools;
+	int cutting_tool_number = 0;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if (object->GetType() == CuttingToolType)
+		{
+			cuttingTools.push_back( CInlay::Symbol_t( object->GetType(), object->m_id ) );
+			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+		} // End if - then
+		else
+		{
+		    symbols.push_back( CInlay::Symbol_t( object->GetType(), object->m_id ) );
+		} // End if - else
+	} // End for
+
+	CInlay *new_object = new CInlay( symbols, cutting_tool_number );
+	theApp.m_program->Operations()->Add(new_object, NULL);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
 }
 
 
@@ -876,7 +903,8 @@ static CCallbackTool new_drilling_operation(_("New Drilling Operation..."), _T("
 static CCallbackTool new_counterbore_operation(_("New CounterBore Operation..."), _T("counterbore"), NewCounterBoreOpMenuCallback);
 static CCallbackTool new_rough_turn_operation(_("New Rough Turning Operation..."), _T("turnrough"), NewRoughTurnOpMenuCallback);
 static CCallbackTool new_chamfer_operation(_("New Chamfer Operation..."), _T("opchamfer"), NewChamferOpMenuCallback);
-// static CCallbackTool new_contour_operation(_("New Contour Operation..."), _T("opcontour"), NewContourOpMenuCallback);
+static CCallbackTool new_contour_operation(_("New Contour Operation..."), _T("opcontour"), NewContourOpMenuCallback);
+static CCallbackTool new_inlay_operation(_("New Inlay Operation..."), _T("opcontour"), NewInlayOpMenuCallback);
 
 void CHeeksCNCApp::GetNewOperationTools(std::list<Tool*>* t_list)
 {
@@ -888,7 +916,8 @@ void CHeeksCNCApp::GetNewOperationTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_counterbore_operation);
 	t_list->push_back(&new_rough_turn_operation);
 	t_list->push_back(&new_chamfer_operation);
-	// t_list->push_back(&new_contour_operation);
+	t_list->push_back(&new_contour_operation);
+	t_list->push_back(&new_inlay_operation);
 }
 
 static void AddToolBars()
@@ -906,7 +935,8 @@ static void AddToolBars()
 	heeksCAD->AddFlyoutButton(_("Adaptive"), ToolImage(_T("adapt")), _("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("CounterBore"), ToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
-	// heeksCAD->AddFlyoutButton(_("Contour"), ToolImage(_T("opcontour")), _("New Contour Operation..."), NewContourOpMenuCallback);
+	heeksCAD->AddFlyoutButton(_("Contour"), ToolImage(_T("opcontour")), _("New Contour Operation..."), NewContourOpMenuCallback);
+	heeksCAD->AddFlyoutButton(_("Inlay"), ToolImage(_T("opcontour")), _("New Inlay Operation..."), NewInlayOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
@@ -1086,7 +1116,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("CuttingRate", CCuttingRate::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixtures", CFixtures::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Chamfer", CChamfer::ReadFromXMLElement);
-	// heeksCAD->RegisterReadXMLfunction("Contour", CContour::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Contour", CContour::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Inlay", CContour::ReadFromXMLElement);
 
 #ifdef WIN32
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=147;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=0;pos=448;prop=100000;bestw=116;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=485;floaty=209;floatw=143;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=575;prop=100000;bestw=89;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=479;floaty=236;floatw=116;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=205|dock_size(1,10,0)=33|")));
@@ -1301,7 +1332,8 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	CSpeedOp::GetOptions(&(machining_options->m_list));
 	CProfile::GetOptions(&(machining_options->m_list));
 	CPocket::GetOptions(&(machining_options->m_list));
-	// CContour::GetOptions(&(machining_options->m_list));
+	CContour::GetOptions(&(machining_options->m_list));
+	CInlay::GetOptions(&(machining_options->m_list));
 
 	list->push_back(machining_options);
 }

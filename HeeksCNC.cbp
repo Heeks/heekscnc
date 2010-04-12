@@ -89,6 +89,8 @@
 		<Unit filename="src/HeeksCNC.cpp" />
 		<Unit filename="src/HeeksCNC.h" />
 		<Unit filename="src/HeeksCNCTypes.h" />
+		<Unit filename="src/Inlay.cpp" />
+		<Unit filename="src/Inlay.h" />
 		<Unit filename="src/Interface.cpp" />
 		<Unit filename="src/Interface.h" />
 		<Unit filename="src/Locating.cpp" />

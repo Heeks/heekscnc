@@ -1,8 +1,8 @@
 
-#ifndef CONTOUR_CYCLE_CLASS_DEFINITION
-#define CONTOUR_CYCLE_CLASS_DEFINITION
+#ifndef INLAY_CYCLE_CLASS_DEFINITION
+#define INLAY_CYCLE_CLASS_DEFINITION
 
-// Contour.h
+// Inlay.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
  * This program is released under the BSD license. See the file COPYING for
@@ -18,9 +18,9 @@
 #include <TopoDS_Edge.hxx>
 
 
-class CContour;
+class CInlay;
 
-class CContourParams{
+class CInlayParams{
 public:
 	typedef enum {
 		eRightOrInside = -1,
@@ -30,27 +30,27 @@ public:
 	eSide m_tool_on_side;
 
 public:
-	CContourParams()
+	CInlayParams()
 	{
 		m_tool_on_side = eOn;
 	}
 
 	void set_initial_values();
 	void write_values_to_config();
-	void GetProperties(CContour* parent, std::list<Property *> *list);
+	void GetProperties(CInlay* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
-	const wxString ConfigPrefix(void)const{return _T("Contour");}
+	const wxString ConfigPrefix(void)const{return _T("Inlay");}
 };
 
 /**
-	The CContour class is suspiciously similar to the CProfile class.  The main difference is that the NC path
+	The CInlay class is suspiciously similar to the CProfile class.  The main difference is that the NC path
 	is generated from this class itself (in C++) rather than by using the kurve Pythin library.  It also
 	has depth values that are RELATIVE to the sketch coordinate rather than assuming a horozontal sketch.  The idea
 	of this is to allow for a rotation of the XZ or YZ planes.
 
-	Finally, it is hoped that the CContour class will support 'bridging tabs' during a cutout so that the
+	Finally, it is hoped that the CInlay class will support 'bridging tabs' during a cutout so that the
 	workpiece is held in place until the very last moment.
 
 	This class uses the offet functionality for TopoDS_Wire objects to handle the path generation. This is DIFFERENT
@@ -63,7 +63,13 @@ public:
 	shapes.  Perhaps we will add a flag to enable/disable this behaviour later.
  */
 
-class CContour: public CDepthOp {
+class CInlay: public CDepthOp {
+private:
+	typedef enum {
+		eFemale,		// No mirroring and take depths from DepthOp settings.
+		eMale			// Reverse depth values (bottom up measurement)
+	} eInlayPass_t;
+
 public:
 	/**
 		Define some data structures to hold references to CAD elements.
@@ -81,28 +87,28 @@ public:
 	//	reflected in the ordering of symbols in the m_symbols list.
 
 	Symbols_t m_symbols;
-	CContourParams m_params;
+	CInlayParams m_params;
 	static double max_deviation_for_spline_to_arc;
 
 	//	Constructors.
-	CContour():CDepthOp(GetTypeString(), 0, ContourType)
+	CInlay():CDepthOp(GetTypeString(), 0, InlayType)
 	{
 		m_params.set_initial_values();
 	}
-	CContour(	const Symbols_t &symbols,
+	CInlay(	const Symbols_t &symbols,
 			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ContourType), m_symbols(symbols)
+		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, InlayType), m_symbols(symbols)
 	{
 		m_params.set_initial_values();
 		ReloadPointers();
 	}
 
-	CContour( const CContour & rhs );
-	CContour & operator= ( const CContour & rhs );
+	CInlay( const CInlay & rhs );
+	CInlay & operator= ( const CInlay & rhs );
 
 	// HeeksObj's virtual functions
-	int GetType()const{return ContourType;}
-	const wxChar* GetTypeString(void)const{return _T("Contour");}
+	int GetType()const{return InlayType;}
+	const wxChar* GetTypeString(void)const{return _T("Inlay");}
 	void glCommands(bool select, bool marked, bool no_color);
 
 	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(6, 0);}else COp::GetIcon(texture_number, x, y);}
@@ -124,8 +130,8 @@ public:
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
-	static wxString GeneratePathFromWire( 	const TopoDS_Wire & wire,
-											CNCPoint & last_position,
+	static wxString GeneratePathFromWire( 	const TopoDS_Wire & wire, 
+											CNCPoint & last_position, 
 											const CFixture *pFixture,
 											const double clearance_height,
 											const double rapid_down_to_height );
@@ -145,4 +151,4 @@ public:
 
 
 
-#endif // CONTOUR_CYCLE_CLASS_DEFINITION
+#endif // INLAY_CYCLE_CLASS_DEFINITION

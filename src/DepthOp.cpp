@@ -353,7 +353,7 @@ std::list<double> CDepthOp::GetDepths() const
         depths.push_back(depth);
     }
 
-    if ((*(depths.rbegin()) > m_depth_op_params.m_final_depth) || (depths.size() == 0))
+    if ((depths.size() == 0) || (*(depths.rbegin()) > m_depth_op_params.m_final_depth))
     {
         depths.push_back( m_depth_op_params.m_final_depth );
     }
