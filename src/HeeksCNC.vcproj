@@ -561,6 +561,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Inlay.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Inlay.h"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\HeeksCAD\interface\InputMode.h"
 			>
 		</File>
