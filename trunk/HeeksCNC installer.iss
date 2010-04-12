@@ -65,7 +65,7 @@ Source: "C:\apps\python-2.6.4.msi"; DestDir: "{tmp}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\HeeksCAD"; Filename: "{app}\HeeksCAD.exe"
+Name: "{group}\HeeksCAD"; Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
 
 [Run]
 Filename: "{tmp}\python-2.6.4.msi"; Flags: shellexec skipifsilent
