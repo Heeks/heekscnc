@@ -477,7 +477,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
-		l_ossPythonCode << _T("comment(") << PythonString(sketch->GetShortString()) << _T(")\n");
+		l_ossPythonCode << (wxString::Format(_T("comment(%s)\n"), PythonString(sketch->GetShortString()).c_str())).c_str();
 	}
 
 	l_ossPythonCode << (wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id)).c_str();
