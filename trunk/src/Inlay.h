@@ -11,6 +11,7 @@
 
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
+#include "CuttingTool.h"
 #include <list>
 #include <vector>
 #include "CNCPoint.h"
@@ -22,17 +23,23 @@ class CInlay;
 
 class CInlayParams{
 public:
+    typedef enum {
+		eFemale,		// No mirroring and take depths from DepthOp settings.
+		eMale,			// Reverse depth values (bottom up measurement)
+		eBoth
+	} eInlayPass_t;
+
 	typedef enum {
-		eRightOrInside = -1,
-		eOn = 0,
-		eLeftOrOutside = +1
-	}eSide;
-	eSide m_tool_on_side;
+	    eXAxis = 0,
+	    eYAxis
+	} eAxis_t;
 
 public:
 	CInlayParams()
 	{
-		m_tool_on_side = eOn;
+		m_boarder_width = 25.4; // 1 inch.
+		m_clearance_tool = 0;
+		m_pass = eBoth;
 	}
 
 	void set_initial_values();
@@ -42,6 +49,11 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	const wxString ConfigPrefix(void)const{return _T("Inlay");}
+
+	double m_boarder_width;
+	CCuttingTool::ToolNumber_t  m_clearance_tool;
+	eInlayPass_t    m_pass;
+	eAxis_t         m_mirror_axis;
 };
 
 /**
@@ -65,10 +77,6 @@ public:
 
 class CInlay: public CDepthOp {
 private:
-	typedef enum {
-		eFemale,		// No mirroring and take depths from DepthOp settings.
-		eMale			// Reverse depth values (bottom up measurement)
-	} eInlayPass_t;
 
 public:
 	/**
@@ -123,6 +131,7 @@ public:
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
 	void AppendTextToProgram( const CFixture *pFixture );
+	wxString GenerateGCode( const CFixture *pFixture, const bool keep_mirrored_sketches );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
@@ -130,8 +139,8 @@ public:
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
-	static wxString GeneratePathFromWire( 	const TopoDS_Wire & wire, 
-											CNCPoint & last_position, 
+	static wxString GeneratePathFromWire( 	const TopoDS_Wire & wire,
+											CNCPoint & last_position,
 											const CFixture *pFixture,
 											const double clearance_height,
 											const double rapid_down_to_height );
