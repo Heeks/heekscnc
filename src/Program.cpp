@@ -472,9 +472,9 @@ void CProgram::RewritePythonProgram()
 				kurve_funcs_needed = true;
 			}
 		}
-		else if(object->GetType() == PocketType)
+		else if((object->GetType() == PocketType) || (object->GetType() == InlayType))
 		{
-			if(((CPocket*)object)->m_active)
+			if(((COp*)object)->m_active)
 			{
 				area_module_needed = true;
 				area_funcs_needed = true;
