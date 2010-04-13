@@ -1,0 +1,63 @@
+#summary Generate toolpaths for both halves of an inlay operation.
+
+= Introduction =
+
+Warning!  This code is NOT finished yet.  This wiki is only here so that I don't forget the details before it's documented.
+
+HeeksCNC supports the generation of toolpaths that allow both halves of an inlay operation to be performed.  The general workflow is as follows;
+
+ - Place closed sketches in the positive X and/or positive Y quadrant.  These closed sketches form the boundaries between the male and female parts of the inlay.
+
+ - Select the closed sketches and add a 'New Inlay' operation.
+
+ - Ensure the 'Cutting Tool' chosen is the appropriate chamfering bit.  The geometry of a pointy-ended chamfering bit allows both sharp corners to be retained as well as allowing a wedge-shape match between the male and female parts of the inlay.
+
+ - Select an appropriate flat-based tool (endmill or slot mill) for the 'Clearance Tool'  This tool will be used to clear the waste material from between the 'mountains' of the male half of the inlay.
+
+ - Adjust the start depth, step down and final depth settings.
+
+ - Select 'Female Half' for the 'GCode Generation' property of the Inlay operation.
+
+ - Generate GCode for the 'female' half of the operation.  These will be the valleys machined into the base material.
+
+ - Use the right mouse button on the Inlay operation so as to find the 'Make Male Pocket' option.
+
+ - Select the 'Male Half' for the 'GCode Generation' property of the Inlay operation.
+
+ - Generate GCode for the 'male' half of the operation.  These will be the mountains machined into another piece of, normally contrasting, material.
+
+
+= Details =
+
+The Inlay operation uses the selected sketches as boundaries for both the valleys (female half) and the mountains (male half).  It expects to use a chamfering bit with a pointed end (flat radius = 0) to machine both halves.
+
+The toolpath for each sketch starts at the 'start depth' and steps down until either the 'final depth' is reached or the chamfering bit won't fit within the bounds of the sketch any more.  This means that some valleys/mountains will be shallower/shorter than others.  Where a sketch's toolpath does not reach the final depth, the male half will have a mirrored copy of the original sketch added and a pocketing operation added based on the mirrored sketch.  This pocketing operation removes the material from above the 'mountain'.  This is done using the 'Clearance Tool' endmill so that the chamfering bit can form the walls of the mountain from its peak down to its base.
+
+Once all valleys have been formed in the female half of the operation, the Inlay process mirrors all the selected sketches about either the X or Y axis (based on the 'Mirror Axis' property).  The bounding box for these mirrored sketches is expanded by the 'Boarder Width' distance.  At this point, the bounding box sketch and the mirrored, smaller, sketches are oriented clockwise and counter-clockwise respectively before being joined to form a single bounding sketch object.  This bounding sketch is used as the basis of a pocketing operation (also added by the 'Make Male Pocket' menu option of the Inlay operation).  This pocketing operation will use the 'Clearance Tool' to remove the material from between the mountains on the male half of the workpiece.  This results in the bases of all the mountains being at a common level.  The idea is that this level will, when flipped over onto the female workpiece, align with the top-most surface of the female workpiece.  The walls of both the mountains and the valleys will form wedge shapes due to the geometry of the chamfering bit so that, when they are pressed together, they should form a tight fit.
+
+When the two machined halves have been glued together, the male side can be machined down using a pocketing operation (not provided) to a level at the top of the female workpiece.
+
+== Properties ==
+
+=== Boarder Width ===
+
+When the male half of the operation is generated, it uses the selected sketches and mirrors them about one of the axes.  In order that the material between these sketches be removed, it forms a rectangular bounding sketch that includes and encompases the mirrored sketches.  The bounding box of all the mirrored sketches is enlarged by this parameter's distance in both positive and negative X and Y directions.
+
+=== Clearance Tool ===
+
+This is expected to be a flat-based milling bit such as an endmill or a slot cutting mill.  It will be used in all generated pocketing operations to clear unwanted material both from between the 'mountains' of the male half as well as from above those mountains that are shorter than the others.
+
+=== GCode Generation ===
+
+This specifies whether the GCode for the female half, the male half or both halves will be generated with the normal 'GCode PostProcessing' button is used.
+
+=== Mirror Axis ===
+
+The geometry and location of the sketches must be mirrored when generating toolpaths for the male half of the operation.  This will allow the two halves, once machined, to fit together correctly.  This setting specifies whether the selected sketches are mirrored about the X or Y axis when the male half is generated.
+
+=== Depth Operations ===
+
+The Inlay operation is based on both the Depth Operation and the Speed Operation so the start depth, step down, final depth and all related settings are the same as for other such machine operations.  These values are specified in absolute values.  i.e the 'start depth' must be a larger number than the 'final depth' etc.
+
+
+
