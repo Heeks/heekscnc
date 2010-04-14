@@ -270,23 +270,25 @@ void CSpeedOp::GetProperties(std::list<Property *> *list)
 
 void CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram(pFixture);
+    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture));
+}
+
+wxString CSpeedOp::GenerateGCode(const CFixture *pFixture)
+{
+    wxString gcode;
+
+	gcode << COp::GenerateGCode(pFixture);
 
 	if (m_speed_op_params.m_spindle_speed != 0)
 	{
-		theApp.m_program_canvas->AppendText(_T("spindle("));
-		theApp.m_program_canvas->AppendText(m_speed_op_params.m_spindle_speed);
-		theApp.m_program_canvas->AppendText(_T(")\n"));
+		gcode << _T("spindle(") << m_speed_op_params.m_spindle_speed << _T(")\n");
 	} // End if - then
 
-	theApp.m_program_canvas->AppendText(_T("feedrate_hv("));
-	theApp.m_program_canvas->AppendText(m_speed_op_params.m_horizontal_feed_rate / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(", "));
+	gcode << _T("feedrate_hv(") << m_speed_op_params.m_horizontal_feed_rate / theApp.m_program->m_units << _T(", ");
+    gcode << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
+    gcode << _T("flush_nc()\n");
 
-	theApp.m_program_canvas->AppendText(m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
-
-	theApp.m_program_canvas->AppendText(_T("flush_nc()\n"));
+    return(gcode);
 }
 
 static void on_set_auto_speeds(bool value, HeeksObj* object){CSpeedOp::m_auto_set_speeds_feeds = value;}

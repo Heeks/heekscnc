@@ -26,7 +26,8 @@ public:
     typedef enum {
 		eFemale,		// No mirroring and take depths from DepthOp settings.
 		eMale,			// Reverse depth values (bottom up measurement)
-		eBoth
+		eBoth,
+		eFemalePocket,	// Just the pockets part (before the chamfering bit is used).
 	} eInlayPass_t;
 
 	typedef enum {

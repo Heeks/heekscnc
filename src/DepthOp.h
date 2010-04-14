@@ -44,6 +44,13 @@ public:
 		SetDepthsFromSketchesAndTool(sketches);
 	}
 
+	CDepthOp(const wxString& title, const std::list<HeeksObj *> sketches, const int cutting_tool_number = -1, const int operation_type = UnknownType )
+		: CSpeedOp(title, cutting_tool_number, operation_type)
+	{
+		ReadDefaultValues();
+		SetDepthsFromSketchesAndTool(sketches);
+	}
+
 	CDepthOp & operator= ( const CDepthOp & rhs );
 	CDepthOp( const CDepthOp & rhs );
 
@@ -61,9 +68,11 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 
 	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
+	void SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches);
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 	std::list<double> GetDepths() const;
+	wxString GenerateGCode( const CFixture *pFixture );
 };
 
 #endif

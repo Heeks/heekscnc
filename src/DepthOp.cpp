@@ -175,6 +175,8 @@ void CDepthOp::ReadDefaultValues()
 
 void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
 {
+	std::list<HeeksObj *> objects;
+
 	if (sketches != NULL)
 	{
 		for (std::list<int>::const_iterator l_itSketch = sketches->begin(); l_itSketch != sketches->end(); l_itSketch++)
@@ -183,34 +185,49 @@ void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
 			HeeksObj *pSketch = heeksCAD->GetIDObject( SketchType, *l_itSketch );
 			if (pSketch != NULL)
 			{
-				CBox bounding_box;
-				pSketch->GetBox( bounding_box );
+				objects.push_back(pSketch);
+			}
+		}
+	}
 
-				if (l_itSketch == sketches->begin())
-				{
-					// This is the first cab off the rank.
+	SetDepthsFromSketchesAndTool( objects );
+}
 
-					m_depth_op_params.m_start_depth = bounding_box.MaxZ();
-					m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - default_depth;
-				} // End if - then
-				else
-				{
-					// We've seen some before.  If this one is higher up then use
-					// that instead.
+void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches)
+{
+	for (std::list<HeeksObj *>::const_iterator l_itSketch = sketches.begin(); l_itSketch != sketches.end(); l_itSketch++)
+	{
+		double default_depth = 1.0;	// mm
+		HeeksObj *pSketch = *l_itSketch;
+		if (pSketch != NULL)
+		{
+			CBox bounding_box;
+			pSketch->GetBox( bounding_box );
 
-					if (m_depth_op_params.m_start_depth < bounding_box.MaxZ())
-					{
-						m_depth_op_params.m_start_depth = bounding_box.MaxZ();
-					} // End if - then
+			if (l_itSketch == sketches.begin())
+			{
+				// This is the first cab off the rank.
 
-					if (m_depth_op_params.m_final_depth > bounding_box.MinZ())
-					{
-						m_depth_op_params.m_final_depth = bounding_box.MinZ() - default_depth;
-					} // End if - then
-				} // End if - else
+				m_depth_op_params.m_start_depth = bounding_box.MaxZ();
+				m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - default_depth;
 			} // End if - then
-		} // End for
-	} // End if - then
+			else
+			{
+				// We've seen some before.  If this one is higher up then use
+				// that instead.
+
+				if (m_depth_op_params.m_start_depth < bounding_box.MaxZ())
+				{
+					m_depth_op_params.m_start_depth = bounding_box.MaxZ();
+				} // End if - then
+
+				if (m_depth_op_params.m_final_depth > bounding_box.MinZ())
+				{
+					m_depth_op_params.m_final_depth = bounding_box.MinZ() - default_depth;
+				} // End if - then
+			} // End if - else
+		} // End if - then
+	} // End for
 
 	// If we've chosen a chamfering bit, calculate the depth required to give a 1 mm wide
 	// chamfer.  It's as good as any width to start with.  If it's not a chamfering bit
@@ -233,35 +250,28 @@ void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
 
 void CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 {
-	CSpeedOp::AppendTextToProgram(pFixture);
+    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture));
+}
 
-	theApp.m_program_canvas->AppendText(_T("clearance = float("));
-	theApp.m_program_canvas->AppendText(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
+wxString CDepthOp::GenerateGCode( const CFixture *pFixture )
+{
+    wxString gcode;
 
-	theApp.m_program_canvas->AppendText(_T("rapid_down_to_height = float("));
-	theApp.m_program_canvas->AppendText(m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
+    gcode << CSpeedOp::GenerateGCode(pFixture);
 
-	theApp.m_program_canvas->AppendText(_T("start_depth = float("));
-	theApp.m_program_canvas->AppendText(m_depth_op_params.m_start_depth / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
-
-	theApp.m_program_canvas->AppendText(_T("step_down = float("));
-	theApp.m_program_canvas->AppendText(m_depth_op_params.m_step_down / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
-
-	theApp.m_program_canvas->AppendText(_T("final_depth = float("));
-	theApp.m_program_canvas->AppendText(m_depth_op_params.m_final_depth / theApp.m_program->m_units);
-	theApp.m_program_canvas->AppendText(_T(")\n"));
+	gcode << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+	gcode << _T("rapid_down_to_height = float(") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+    gcode << _T("start_depth = float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")\n");
+    gcode << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
+    gcode << _T("final_depth = float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")\n");
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool != NULL)
 	{
-		theApp.m_program_canvas->AppendText(_T("tool_diameter = float("));
-		theApp.m_program_canvas->AppendText( pCuttingTool->CuttingRadius(true) * 2.0);
-		theApp.m_program_canvas->AppendText(_T(")\n"));
+		gcode << _T("tool_diameter = float(") << (pCuttingTool->CuttingRadius(true) * 2.0) << _T(")\n");
 	} // End if - then
+
+	return(gcode);
 }
 
 

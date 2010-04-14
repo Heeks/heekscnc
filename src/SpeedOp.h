@@ -63,6 +63,7 @@ public:
 	void ReloadPointers() { COp::ReloadPointers(); }
 
 	static wxString ConfigScope() { return(_T("SpeedOp")); }
+	wxString GenerateGCode( const CFixture *pFixture );
 };
 
 #endif
