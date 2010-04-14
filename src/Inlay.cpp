@@ -474,7 +474,6 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 										std::list<HeeksObj *> objects;
 										objects.push_back(pBoundary);
 
-                                        double depth = *itDepth;
 										CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
 										pPocket->m_depth_op_params = m_depth_op_params;
                                         pPocket->m_depth_op_params.m_rapid_down_to_height = previous_depth + 1;
