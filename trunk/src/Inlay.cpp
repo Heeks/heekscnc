@@ -113,12 +113,14 @@ void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 	}
 
 	{
+	    // Note: these options MUST be in the same order as they are defined in the enum.
 		int choice = (int) m_pass;
         std::list< wxString > choices;
 
 		choices.push_back(_("Female half"));
 		choices.push_back(_("Male half"));
 		choices.push_back(_("Both halves"));
+		// choices.push_back(_("Female pocket only"));
 
 		list->push_back(new PropertyChoice(_("GCode generation"), choices, choice, parent, on_set_pass));
 	}
@@ -214,7 +216,10 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 
 	unsigned int number_of_bad_sketches = 0;
 	double tolerance = heeksCAD->GetTolerance();
-	std::map<HeeksObj *, double> mirrored_sketches;
+
+	typedef double Depth_t;
+	typedef std::map<HeeksObj *, Depth_t> MirroredSketches_t;
+	MirroredSketches_t mirrored_sketches;
 	CBox	bounding_box;
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
@@ -227,7 +232,13 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 	// NOTE: The determination of the 'max_depth_in_female_pass' assumes that the female
 	// pass occurs BEFORE the male pass.
 	std::list<CInlayParams::eInlayPass_t> passes;
-	passes.push_back( CInlayParams::eFemale );	// Always.
+
+	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eFemale))
+	{
+		passes.push_back( CInlayParams::eFemalePocket );	// Add this in before the female pass.
+	}
+
+	passes.push_back( CInlayParams::eFemale );	// Always.  We need this whether we want to keep the gcode or not.
 	passes.push_back( CInlayParams::eMale );
 
     // Use the parameters to determine if we're going to mirror the selected
@@ -248,10 +259,45 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 	// a starting_depth of 0 would be assigned a depth value of '5'.
 	double max_depth_in_female_pass = 0.0;
 
+	CCuttingTool::ToolNumber_t current_tool = this->m_cutting_tool_number;	// The chamfering bit.
+
     // We need to run through the female pass even if we don't want its gcode output.  This pass generates
     // shapes and statistics that are required when generating the male pass.
 	for (std::list<CInlayParams::eInlayPass_t>::const_iterator itPass = passes.begin(); itPass != passes.end(); itPass++)
 	{
+		if ((*itPass == CInlayParams::eFemale) || (*itPass == CInlayParams::eMale))
+		{
+			if (current_tool != m_cutting_tool_number)
+			{
+				// Change tool to the chamfering bit.
+
+				CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+				if (pCuttingTool != NULL)
+				{
+					gcode << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title).c_str() << _T(")\n");
+				} // End if - then
+
+				gcode << _T("tool_change( id=") << m_cutting_tool_number << _T(")\n");
+				current_tool = m_cutting_tool_number;
+			}
+		}
+		else if (*itPass == CInlayParams::eFemalePocket)
+		{
+			if (current_tool != m_params.m_clearance_tool)
+			{
+				// Change tool to the endmill for pocket operations.
+
+				CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_params.m_clearance_tool );
+				if (pCuttingTool != NULL)
+				{
+					gcode << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title).c_str() << _T(")\n");
+				} // End if - then
+
+				gcode << _T("tool_change( id=") << m_params.m_clearance_tool << _T(")\n");
+				current_tool = m_params.m_clearance_tool;
+			}
+		}
+
         // Required for the Contour operation's toolpath generation (which we will use here as well)
 		CNCPoint last_position(0.0, 0.0, 0.0);
 
@@ -334,10 +380,11 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 						// but our depth values will need to be reversed here.
 						if (*itPass == CInlayParams::eMale) depths.reverse();
 
+						double previous_depth = m_depth_op_params.m_start_depth;
                         // For each depth value (with respect to the m_depth_op_params.m_start_depth value).  Consider this
                         // to be the value 'down' for each female machining operation.  The rotation to produce the male
                         // half makes all this work out correctly.
-						for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
+						for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); previous_depth = *itDepth, itDepth++)
 						{
 						    // What radius does this tapered cutting tool have at this depth of cut.  This is how we can
 						    // get right up to the lines in the corners during shallow cuts.
@@ -390,7 +437,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
                                 // Translate this wire down to the depth we're looking at right now.
 								matrix.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,*itDepth)));
 								BRepBuilderAPI_Transform transform(matrix);
-								transform.Perform(tool_path_wire, false); // notice false as second parameter
+								transform.Perform(tool_path_wire, false);
 								tool_path_wire = TopoDS::Wire(transform.Shape());
 
 								if (*itPass == CInlayParams::eMale)
@@ -402,7 +449,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 
 									rotation.SetRotation( mirror_axis, PI );
 									BRepBuilderAPI_Transform rotate(rotation);
-									rotate.Perform(tool_path_wire, false); // notice false as second parameter
+									rotate.Perform(tool_path_wire, false);
 									tool_path_wire = TopoDS::Wire(rotate.Shape());
 
                                     // And offset the wire 'down' so that the maximum depth reached during the
@@ -411,8 +458,32 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 									gp_Trsf translation;
 									translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,-1.0 * max_depth_in_female_pass)));
 									BRepBuilderAPI_Transform translate(translation);
-									translate.Perform(tool_path_wire, false); // notice false as second parameter
+									translate.Perform(tool_path_wire, false);
 									tool_path_wire = TopoDS::Wire(translate.Shape());
+								}
+
+								if (*itPass == CInlayParams::eFemalePocket)
+								{
+									// We need to generate a pocket operation based on this tool_path_wire
+									// and using the Clearance Tool.  Without this, the chamfering bit would need
+									// to machine out the centre of the valley as well as the walls.
+
+									HeeksObj *pBoundary = heeksCAD->NewSketch();
+									if (heeksCAD->ConvertWireToSketch(TopoDS::Wire(tool_path_wire), pBoundary, heeksCAD->GetTolerance()))
+									{
+										std::list<HeeksObj *> objects;
+										objects.push_back(pBoundary);
+
+                                        double depth = *itDepth;
+										CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
+										pPocket->m_depth_op_params = m_depth_op_params;
+                                        pPocket->m_depth_op_params.m_rapid_down_to_height = previous_depth + 1;
+										pPocket->m_depth_op_params.m_start_depth = previous_depth;
+										pPocket->m_depth_op_params.m_final_depth = *itDepth;
+										pPocket->m_speed_op_params = m_speed_op_params;
+										gcode << pPocket->GenerateGCode(pFixture);
+										delete pPocket;		// We don't need it any more.
+									}
 								}
 
 								if (*itPass == CInlayParams::eFemale)
@@ -544,7 +615,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
                 heeksCAD->ReOrderSketch( bounding_sketch, SketchOrderTypeCloseCW );
             } // End for
 
-			for (std::map<HeeksObj *,double>::iterator itObject = mirrored_sketches.begin(); itObject != mirrored_sketches.end(); itObject++)
+			for (MirroredSketches_t::iterator itObject = mirrored_sketches.begin(); itObject != mirrored_sketches.end(); itObject++)
 			{
 			    std::list<HeeksObj*> new_lines_and_arcs;
 			    for (HeeksObj *child = itObject->first->GetFirstChild(); child != NULL; child = itObject->first->GetNextChild())
@@ -579,7 +650,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
             // so that the chamfering bit can cut from the peak down to the base of the mountain.  The
             // reference depth is the 'max_depth_in_female_pass' as this represents the tallest
             // 'mountain' required in the male half.
-            for (std::map<HeeksObj *, double>::iterator itMirroredSketch = mirrored_sketches.begin();
+            for (MirroredSketches_t::iterator itMirroredSketch = mirrored_sketches.begin();
                     itMirroredSketch != mirrored_sketches.end(); itMirroredSketch++)
             {
                 if ((itMirroredSketch->second > tolerance) && ((max_depth_in_female_pass - itMirroredSketch->second) > tolerance))

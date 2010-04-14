@@ -35,6 +35,7 @@ public:
 
 	CPocket():CDepthOp(GetTypeString(), 0, PocketType){}
 	CPocket(const std::list<int> &sketches, const int cutting_tool_number );
+	CPocket(const std::list<HeeksObj *> &sketches, const int cutting_tool_number );
 	CPocket( const CPocket & rhs );
 	CPocket & operator= ( const CPocket & rhs );
 
@@ -59,6 +60,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
+	wxString GenerateGCode(const CFixture *pFixture);
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();
