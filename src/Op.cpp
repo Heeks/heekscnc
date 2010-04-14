@@ -229,10 +229,19 @@ void COp::ReadDefaultValues()
 
 void COp::AppendTextToProgram(const CFixture *pFixture)
 {
+    theApp.m_program_canvas->m_textCtrl->AppendText(GenerateGCode(pFixture));
+}
+
+wxString COp::GenerateGCode(const CFixture *pFixture)
+{
+    wxString gcode;
+
 	if(m_comment.Len() > 0)
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString(_T("comment(")) + PythonString(m_comment) + _T(")\n"));
+		gcode << wxString(_T("comment(")) + PythonString(m_comment) + _T(")\n");
 	}
+
+	return(gcode);
 }
 
 //static

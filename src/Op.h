@@ -59,6 +59,8 @@ public:
 	// than the profile operation.
 	// The list of strings provides a description of what was changed.
 	virtual std::list<wxString> DesignRulesAdjustment(const bool apply_changes) { std::list<wxString> empty; return(empty); }
+
+	wxString GenerateGCode(const CFixture *pFixture);
 };
 
 #endif

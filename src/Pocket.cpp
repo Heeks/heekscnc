@@ -93,9 +93,11 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("from_center", &m_starting_place);
 }
 
-static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_to_use = 0)
+static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_to_use = 0)
 {
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("a%d = area.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
+	wxString gcode;
+
+	gcode << wxString::Format(_T("a%d = area.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id);
 
 	bool started = false;
 
@@ -132,21 +134,17 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 
 				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
 				{
-					theApp.m_program_canvas->AppendText(_T("area.start_new_curve(a"));
-					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
+					gcode << _T("area.start_new_curve(a");
+					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
+					gcode << _T(")\n");
 					started = false;
 				}
 
 				if(!started)
 				{
-					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
-					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(start.X(true));
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(start.Y(true));
-					theApp.m_program_canvas->AppendText(_T(", 0, 0)\n"));
+					gcode << _T("area.add_point(a");
+					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
+					gcode << _T(", 0, ") << start.X(true) << _T(", ") << start.Y(true) << _T(", 0, 0)\n");
 					started = true;
 				}
 				span_object->GetEndPoint(e);
@@ -154,13 +152,9 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 
 				if(type == LineType)
 				{
-					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
-					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(end.X(true));
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(end.Y(true));
-					theApp.m_program_canvas->AppendText(_T(", 0, 0)\n"));
+					gcode << _T("area.add_point(a");
+					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
+					gcode << _T(", 0, ") << end.X(true) << _T(", ") << end.Y(true) << _T(", 0, 0)\n");
 				}
 				else if(type == ArcType)
 				{
@@ -170,19 +164,10 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-					theApp.m_program_canvas->AppendText(_T("area.add_point(a"));
-					theApp.m_program_canvas->AppendText(id_to_use > 0 ? id_to_use : sketch->m_id);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(span_type);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(end.X(true));
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(end.Y(true));
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(centre.X(true));
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(centre.Y(true));
-					theApp.m_program_canvas->AppendText(_T(")\n"));
+					gcode << _T("area.add_point(a");
+					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
+					gcode << _T(", ") << span_type << _T(", ") << end.X(true) << _T(", ") << end.Y(true);
+					gcode << _T(", ") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")\n");
 				}
 				memcpy(prev_e, e, 3*sizeof(double));
 			} // End if - then
@@ -190,12 +175,6 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 			{
 				if (type == CircleType)
 				{
-#ifdef UNICODE
-					std::wostringstream l_ossPythonCode;
-#else
-					std::ostringstream l_ossPythonCode;
-#endif
-
 					std::list< std::pair<int, gp_Pnt > > points;
 					span_object->GetCentrePoint(c);
 
@@ -217,20 +196,12 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 					{
 						CNCPoint pnt = pFixture->Adjustment( l_itPoint->second );
 
-						l_ossPythonCode << (_T("area.add_point(a"));
-						l_ossPythonCode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-						l_ossPythonCode << _T(", ") << l_itPoint->first << _T(", ");
-						l_ossPythonCode << pnt.X(true);
-						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << pnt.Y(true);
-						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << centre.X(true);
-						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << centre.Y(true);
-						l_ossPythonCode << (_T(")\n"));
+						gcode << (_T("area.add_point(a"));
+						gcode << (id_to_use > 0 ? id_to_use : sketch->m_id);
+						gcode << _T(", ") << l_itPoint->first << _T(", ");
+						gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
+						gcode << (_T(", ")) << centre.X(true) << (_T(", ")) << centre.Y(true) << (_T(")\n"));
 					} // End for
-
-					theApp.m_program_canvas->AppendText(l_ossPythonCode.str().c_str());
 				}
 			} // End if - else
 		}
@@ -243,21 +214,30 @@ static void WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_t
 		delete span;
 	}
 
-	theApp.m_program_canvas->AppendText(_T("\n"));
+	gcode << _T("\n");
+	return(gcode);
 }
 
 void CPocket::AppendTextToProgram(const CFixture *pFixture)
 {
+	wxString gcode = GenerateGCode(pFixture);
+	theApp.m_program_canvas->AppendText(gcode.c_str());
+}
+
+wxString CPocket::GenerateGCode(const CFixture *pFixture)
+{
+	wxString gcode;
+
     ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool == NULL)
 	{
 		wxMessageBox(_T("Cannot generate GCode for pocket without a cutting tool assigned"));
-		return;
+		return(_T(""));
 	} // End if - then
 
-	CDepthOp::AppendTextToProgram(pFixture);
+	gcode << CDepthOp::GenerateGCode(pFixture);
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
@@ -305,33 +285,35 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 		if(object)
 		{
-			WriteSketchDefn(object, pFixture, object->m_id);
+			gcode << WriteSketchDefn(object, pFixture, object->m_id).c_str();
 
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
-			theApp.m_program_canvas->AppendText(_T("area_funcs.pocket(a"));
-			theApp.m_program_canvas->AppendText(object->m_id);
-			theApp.m_program_canvas->AppendText(_T(", tool_diameter/2 + "));
-			theApp.m_program_canvas->AppendText(m_pocket_params.m_material_allowance / theApp.m_program->m_units);
-			theApp.m_program_canvas->AppendText(_T(", rapid_down_to_height, start_depth, final_depth, "));
-			theApp.m_program_canvas->AppendText(m_pocket_params.m_step_over / theApp.m_program->m_units);
-			theApp.m_program_canvas->AppendText(_T(", step_down, "));
-			theApp.m_program_canvas->AppendText(m_pocket_params.m_round_corner_factor);
-			theApp.m_program_canvas->AppendText(_T(", clearance, "));
-			theApp.m_program_canvas->AppendText(m_pocket_params.m_starting_place);
-			theApp.m_program_canvas->AppendText(_T(")\n"));
+			gcode << _T("area_funcs.pocket(a") << object->m_id << _T(", tool_diameter/2 + ");
+			gcode << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
+			gcode << _T(", rapid_down_to_height, start_depth, final_depth, ");
+			gcode << m_pocket_params.m_step_over / theApp.m_program->m_units;
+			gcode << _T(", step_down, ");
+			gcode << m_pocket_params.m_round_corner_factor;
+			gcode << _T(", clearance, ");
+			gcode << m_pocket_params.m_starting_place <<_T(")\n");
 
 			// rapid back up to clearance plane
-			theApp.m_program_canvas->AppendText(_T("rapid(z = clearance)\n"));
+			gcode << _T("rapid(z = clearance)\n");
 		}
 
 		if(re_ordered_sketch)
 		{
 			delete re_ordered_sketch;
 		}
-	}
-}
+	} // End for
+
+	return(gcode);
+
+} // End GenerateGCode() method
+
+
 void CPocket::WriteDefaultValues()
 {
 	CDepthOp::WriteDefaultValues();
@@ -479,6 +461,18 @@ CPocket::CPocket(const std::list<int> &sketches, const int cutting_tool_number )
 
 	m_sketches.clear();
 }
+
+CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int cutting_tool_number )
+	: CDepthOp(GetTypeString(), sketches, cutting_tool_number )
+{
+	ReadDefaultValues();
+
+	for (std::list<HeeksObj *>::const_iterator sketch = sketches.begin(); sketch != sketches.end(); sketch++)
+	{
+		Add( *sketch, NULL );
+	}
+}
+
 
 
 /**
