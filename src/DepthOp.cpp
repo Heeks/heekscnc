@@ -181,7 +181,6 @@ void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
 	{
 		for (std::list<int>::const_iterator l_itSketch = sketches->begin(); l_itSketch != sketches->end(); l_itSketch++)
 		{
-			double default_depth = 1.0;	// mm
 			HeeksObj *pSketch = heeksCAD->GetIDObject( SketchType, *l_itSketch );
 			if (pSketch != NULL)
 			{
