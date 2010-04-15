@@ -33,7 +33,7 @@ public:
 	~CHeeksCNCApp();
 
 	void OnStartUp(CHeeksCADInterface* h, const wxString& dll_path);
-	void OnNewOrOpen(bool open);
+	void OnNewOrOpen(bool open, int res);
 	void OnInitDLL();
 	void OnDestroyDLL();
 	void GetOptions(std::list<Property *> *list);
