@@ -12,9 +12,9 @@ void OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	theApp.OnStartUp(h, dll_path);
 }
 
-void OnNewOrOpen(int open)
+void OnNewOrOpen(int open, int res)
 {
-	theApp.OnNewOrOpen(open != 0);
+	theApp.OnNewOrOpen(open != 0, res);
 }
 
 void GetOptions(void(*callbackfunc)(Property*))

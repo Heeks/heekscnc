@@ -1223,7 +1223,7 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 
 
 
-void CHeeksCNCApp::OnNewOrOpen(bool open)
+void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 {
 	// check for existance of a program
 
