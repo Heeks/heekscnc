@@ -19,6 +19,7 @@ public:
 
 	CPocketParams();
 
+    void set_initial_values(const CCuttingTool::ToolNumber_t cutting_tool_number);
 	void GetProperties(CPocket* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
