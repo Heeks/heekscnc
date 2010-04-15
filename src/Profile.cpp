@@ -473,6 +473,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 #else
 	std::ostringstream l_ossPythonCode;
 #endif
+	l_ossPythonCode.imbue(std::locale("C"));
 	l_ossPythonCode<<std::setprecision(10);
 
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
@@ -686,6 +687,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 			startx = starting.X();
 			starty = starting.Y();
 
+			ss.imbue(std::locale("C"));
 			ss<<std::setprecision(10);
 			ss << ", startx = " << startx << ", starty = " << starty;
 			start_string = ss.str().c_str();
@@ -710,6 +712,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 			finishx = finish.X();
 			finishy = finish.Y();
 
+			ss.imbue(std::locale("C"));
 			ss<<std::setprecision(10);
 			ss << ", finishx = " << finishx << ", finishy = " << finishy;
 			finish_string = ss.str().c_str();
@@ -845,6 +848,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 #else
 				std::ostringstream ss;
 #endif
+				ss.imbue(std::locale("C"));
 				ss<<std::setprecision(10);
 				ss << m_profile_params.m_roll_off_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_off_point[1] / theApp.m_program->m_units;
 				roll_off_string = ss.str().c_str();
@@ -1055,6 +1059,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points,
 #else
 	std::ostringstream l_ossPythonCode;
 #endif
+	l_ossPythonCode.imbue(std::locale("C"));
 	l_ossPythonCode<<std::setprecision(10);
 	l_ossPythonCode<<_T("offset_extra = ")<<m_profile_params.m_offset_extra<<_T("\n");
 
