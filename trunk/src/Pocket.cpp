@@ -36,6 +36,18 @@ CPocketParams::CPocketParams()
 	m_starting_place = true;
 }
 
+void CPocketParams::set_initial_values(const CCuttingTool::ToolNumber_t cutting_tool_number)
+{
+    if (cutting_tool_number > 0)
+    {
+        CCuttingTool *pCuttingTool = CCuttingTool::Find(cutting_tool_number);
+        if (pCuttingTool != NULL)
+        {
+            m_step_over = pCuttingTool->CuttingRadius() * 3.0 / 5.0;
+        }
+    }
+}
+
 static void on_set_step_over(double value, HeeksObj* object)
 {
 	((CPocket*)object)->m_pocket_params.m_step_over = value;
@@ -449,6 +461,7 @@ CPocket::CPocket(const std::list<int> &sketches, const int cutting_tool_number )
 	: CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches)
 {
 	ReadDefaultValues();
+	m_pocket_params.set_initial_values(cutting_tool_number);
 
 	for (Sketches_t::iterator sketch = m_sketches.begin(); sketch != m_sketches.end(); sketch++)
 	{
@@ -466,6 +479,7 @@ CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int cutting_tool_n
 	: CDepthOp(GetTypeString(), sketches, cutting_tool_number )
 {
 	ReadDefaultValues();
+	m_pocket_params.set_initial_values(cutting_tool_number);
 
 	for (std::list<HeeksObj *>::const_iterator sketch = sketches.begin(); sketch != sketches.end(); sketch++)
 	{
