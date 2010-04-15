@@ -1226,7 +1226,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
 			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, diameter / 2, shaft_length );
-			BRepPrimAPI_MakeSphere ball( shaft_start_location, m_params.m_corner_radius );
+			BRepPrimAPI_MakeSphere ball( shaft_start_location, diameter / 2 );
 
 			// TopoDS_Compound cutting_tool_shape;
 			TopoDS_Shape cutting_tool_shape;
