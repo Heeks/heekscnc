@@ -1,1 +1,1 @@
-@nc\%1_read.py %2
+c:\python26\python.exe nc\%1_read.py %2
