@@ -344,7 +344,7 @@ void CPocket::ReadDefaultValues()
 	CNCConfig config(CPocketParams::ConfigScope());
 	config.Read(_T("StepOver"), &m_pocket_params.m_step_over, 1.0);
 	config.Read(_T("MaterialAllowance"), &m_pocket_params.m_material_allowance, 0.2);
-	config.Read(_T("RoundCornerFactor"), &m_pocket_params.m_round_corner_factor, 1.5);
+	config.Read(_T("RoundCornerFactor"), &m_pocket_params.m_round_corner_factor, 1.0);
 	config.Read(_T("FromCenter"), &m_pocket_params.m_starting_place, 1);
 }
 
