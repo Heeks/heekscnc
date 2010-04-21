@@ -10,7 +10,7 @@ Use the 'File' menu and click on 'Import'
 
 http://heekscnc.googlecode.com/svn/wiki/ddfalck/importing.png
 
-Here is a drawing in Qcad that has been saved as a DXF file (Qcad's native format). Heeks seems to import Qcad files fine, except for circles- they have to be divided up into segments before Heeks can use them.
+Here is a drawing in Qcad that has been saved as a DXF file (Qcad's native format). Heeks seems to import Qcad files fine.  Layers in Qcad will be imported to separate sketches in HeeksCAD.
 
 http://heekscnc.googlecode.com/svn/wiki/ddfalck/qcad_blob.png
 
@@ -37,8 +37,6 @@ After selecting the sketches, right click on one of them and click on 'Combine S
 http://heekscnc.googlecode.com/svn/wiki/ddfalck/combine_sketches.png
 
 Now you are ready to do machining operations to your sketch.
-
-
 
 
 
