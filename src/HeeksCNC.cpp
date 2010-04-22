@@ -479,6 +479,31 @@ static void NewProbe_Centre_MenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 }
 
+static void NewProbe_Grid_MenuCallback(wxCommandEvent &event)
+{
+	CCuttingTool::ToolNumber_t cutting_tool_number = 0;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if ((object != NULL) && (object->GetType() == CuttingToolType))
+		{
+			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+		} // End if - then
+	} // End for
+
+	if (cutting_tool_number == 0)
+	{
+		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+	} // End if - then
+
+	CProbe_Grid *new_object = new CProbe_Grid( cutting_tool_number );
+	theApp.m_program->Operations()->Add(new_object, NULL);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
 
 static void NewProbe_Edge_MenuCallback(wxCommandEvent &event)
 {
@@ -940,6 +965,7 @@ static void AddToolBars()
 	heeksCAD->AddFlyoutButton(_("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
+	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
 	heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
 	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
@@ -1032,6 +1058,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("New Locating Operation..."), ToolImage(_T("locating")), NewLocatingOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Probe Centre Operation..."), ToolImage(_T("probe")), NewProbe_Centre_MenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("New Probe Edge Operation..."), ToolImage(_T("probe")), NewProbe_Edge_MenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("New Probe Grid Operation..."), ToolImage(_T("probe")), NewProbe_Grid_MenuCallback);
 
 	// Tools menu
 	wxMenu *menuTools = new wxMenu;
@@ -1107,6 +1134,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Locating", CLocating::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ProbeCentre", CProbe_Centre::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ProbeEdge", CProbe_Edge::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("ProbeGrid", CProbe_Grid::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CounterBore", CCounterBore::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingTool", CCuttingTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixture", CFixture::ReadFromXMLElement);
