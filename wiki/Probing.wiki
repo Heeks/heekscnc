@@ -5,7 +5,7 @@
 HeeksCNC supports the generation of GCode suitable for both edge and centre-point detection via a touch probe.  In the case of edge detection routines, the generated GCode includes a feature whereby the GCode stores the probed point locations into an XML file.  This XML file may be read into a Fixture object so that the edge's rotation from its nearest axis can be determined.
 
 The suite of GCode routines available include;
- - Move to the centre of a protrusion by probing from the 'outside-inwards' at two locations.  (See http://www.youtube.com/watch?v=2Wk4H_XmIek )
+ - Move to the centre of a protrusion by probing from the 'outside-inwards' at either two or four locations.  (See http://www.youtube.com/watch?v=2Wk4H_XmIek )
 
  - Move to the centre of a hole by probing from the 'inside-outwards' at either two or four locations. (See http://www.youtube.com/watch?v=7BEpL-wE0O8 )
 
@@ -18,15 +18,15 @@ The suite of GCode routines available include;
 
 == Move to centre of a protrusion (probe from the outside-in) ==
 
-Before executing the GCode, the machine operator should jog the machine to the approximate location immediately above the protrusion to be probed.  The machine will move both out and down before probing back towards the original XY location.  This will be repeated in two opposing directions.  When finished, the machine's location will be at the original Z height but at the centre X,Y location of the two probed points.
+Before executing the GCode, the machine operator should jog the machine to the approximate location immediately above the protrusion to be probed.  The machine will move both out and down before probing back towards the original XY location.  This will be repeated in two opposing directions.  When finished, the machine's location will be at the original Z height but at the centre X,Y location of the two probed points.  This process will be repeated at the remaining two locations if the 'Number of Points' value is set to 'Four'.
 
-== Move to centre of a hole (probe from inside-out) ==
+== Move to the centre of a hole (probe from inside-out) ==
 
 Before executing the GCode, the machine operator should jog the machine to the approximate location immediately above the hole to be probed.  The machine will move down before probing outwards in either two or four directions.  When completed, the machine will be returned to the original Z height but at the centre X,Y location of the probed points.  This function may be used for finding the centre of either a circular or rectangular hole.
 
 == Move to the corner of two edges ==
 
-Before executing the GCode, the machine operator should jog the machine to the approximate location immediately above the chosen corner of the workpiece.  NOTE: The selection of which corner MUST have been chosen within the probing operation's parameters.  The machine will move out, back and down before probing into an edge.  It will return to the original position between each probing operation.  (This may be inefficient in terms of machine use but it makes the application much easier to maintain.)
+Before executing the GCode, the machine operator should jog the machine to the approximate location immediately above the chosen corner of the workpiece.  NOTE: The selection of which corner MUST have been chosen within the probing operation's parameters.  The machine will move out, back and down before probing into an edge.  It will return to the original position between each probing operation.
 
 When both edges have been probed, the machine's position will be returned to the original Z height but at the X,Y intersection of the two probed edges.
 
@@ -34,7 +34,7 @@ As with the other edge probing operation, this option writes the probed point lo
 
 == Measure an edge's rotation ==
 
-Before executing the GCode, the machine operator should jog the machine to the approximate location immediately above the work piece's edge.  The machine then moves out, back and down before probing back towards the workpiece's edge.  NOTE: The machine will return to the original location between each of the two probing operations.  This is for the ease of the application rather than machine efficiency.
+Before executing the GCode, the machine operator should jog the machine to the approximate location immediately above the work piece's edge.  The machine then moves out, back and down before probing back towards the workpiece's edge.  NOTE: The machine will return to the original location between each of the two probing operations.
 
 When complete, the GCode will generate an XML file with the probed point locations stored within it.  This XML file may be imported into a Fixture object so as to set the workpiece's rotation from its nearest axis.
 
