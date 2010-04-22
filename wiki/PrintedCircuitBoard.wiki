@@ -6,11 +6,13 @@ HeeksCAD and HeeksCNC support the import of two Gerber file formats for use in g
 
 == Gerber (RS274X) file import ==
 
-The HeeksCAD application supports the import of Gerber (RS274X) format data into sketch elements representing the boundaries of each individual trace.  The idea is to allow PCB artwork production using an external application.  Use the PCB application to export the PCB production files in Gerber (RS274X and Excellon drill file) format.  Use the Import function of HeeksCAD to select the RS274X format files.  These are identified by HeeksCAD by their extension of (.GBR).  The import utility makes use of both the aperture and trace information when producing sketch objects representing the boundaries of each trace.
+The HeeksCAD application supports the import of Gerber (RS274X) format data into sketch elements representing either the boundaries of each individual trace or the centre-lines of each individual trace.  The idea is to allow PCB artwork production using an external application.  Use the PCB application to export the PCB production files in Gerber (RS274X and Excellon drill file) format.  Use the Import function of HeeksCAD to select the RS274X format files.  These are identified by their extension of either (.GBR) or (.PHO).
+
+When the RS274X file is imported, Heeks asks whether the trace outlines or the trace centre-lines should be generated.  The trace outlines option uses both the aperture and trace information to produce closed sketch objects that surround individually connected traces.  These would be used to machine an electrical boundary into the copper layers.  The trace centre-line option uses only the trace information (not the apertures) to produce line and arc graphics along the path's centre-lines specified by the trace details.  The idea here is to generate sketch objects that can be used to engrave silk-screen information into the top-side of a single sided PCB.  eg: Reference designator (R1, U1 etc.) as well as component outlines.  These would serve as an aid when populating the resultant PCB.
 
 == Excellon Drill file import ==
 
-The HeeksCNC application supports the importing of Excellon drill files into a combination of ToolTable entries and Drilling Operations.  This feature is available beneath the right mouse click of the Operations icon.  When selected, the Import Excellon Drill File menu option prompts the user for a file while giving preference to files whose extension is "CNC".  
+The HeeksCNC application also supports the importing of Excellon drill files into a combination of ToolTable entries and Drilling Operations.  The Import function interprets files as Excellon Drill files when their filename's extension is one of (.CNC) (.DRL) or (.DRILL).  
 
 Where the drill file specifies a tool definition (T1C0.050), the import utility will look for existing drill bits that are of the same diameter. If none can be found, new CuttingTool definitions are made.
 
