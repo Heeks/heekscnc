@@ -210,6 +210,7 @@ void COp::ReadDefaultValues()
         case LocatingType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
+		case ProbeGridType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
 			break;
         case ChamferType:
@@ -259,6 +260,7 @@ bool COp::IsAnOperation(int object_type)
 		case LocatingType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
+		case ProbeGridType:
 		case ChamferType:
 		case ContourType:
 		case InlayType:

@@ -243,7 +243,42 @@ class CreatorEMC2(iso.CreatorIso):
 		self.write_blocknum()
 		self.write('(LOGCLOSE)\n')
 			
+	def open_log_file(self, xml_file_name=None ):
+		self.write_blocknum()
+		self.write('(LOGOPEN,')
+		self.write(xml_file_name)
+		self.write(')\n')
+			
+	def close_log_file(self):
+		self.write_blocknum()
+		self.write('(LOGCLOSE)\n')
+			
+	def log_coordinate(self, x=None, y=None, z=None):
+		if ((x != None) or (y != None) or (z != None)):
+			self.write_blocknum()
+			self.write('(LOG,<POINT>)\n')
 
+		if (x != None):
+			self.write_blocknum()
+			self.write('#<_value>=[' + x + ']\n')
+			self.write_blocknum()
+			self.write('(LOG,<X>#<_value></X>)\n')
+
+		if (y != None):
+			self.write_blocknum()
+			self.write('#<_value>=[' + y + ']\n')
+			self.write_blocknum()
+			self.write('(LOG,<Y>#<_value></Y>)\n')
+
+		if (z != None):
+			self.write_blocknum()
+			self.write('#<_value>=[' + z + ']\n')
+			self.write_blocknum()
+			self.write('(LOG,<Z>#<_value></Z>)\n')
+
+		if ((x != None) or (y != None) or (z != None)):
+			self.write_blocknum()
+			self.write('(LOG,</POINT>)\n')
 
 nc.creator = CreatorEMC2()
 
