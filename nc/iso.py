@@ -505,6 +505,15 @@ class CreatorIso(nc.Creator):
     def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
 	pass
 
+    def open_log_file(self, xml_file_name=None ):
+	pass
+
+    def log_coordinate(self, x=None, y=None, z=None):
+	pass
+
+    def close_log_file(self):
+	pass
+
     # Rapid movement to the midpoint between the two points specified.
     # NOTE: The points are specified either as strings representing numbers or as strings
     # representing variable names.  This allows the HeeksCNC module to determine which

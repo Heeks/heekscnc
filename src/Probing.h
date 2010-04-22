@@ -128,6 +128,8 @@ public:
 	wxString GetOutputFileName(const wxString extension, const bool filename_only);
 	void GeneratePythonPreamble();
 
+	virtual void GenerateMeaningfullName();
+
 	double m_depth;			// How far to drop down from the current position before starting to probe inwards.
 	double m_distance;	// Distance from starting point outwards before dropping down and probing in.
 
@@ -305,7 +307,44 @@ public:
 };
 
 
+class CProbe_Grid: public CProbing {
+public:
+	//	Constructors.
+	CProbe_Grid(const int cutting_tool_number = 0) : CProbing(_("Probe Grid"), cutting_tool_number, ProbeGridType )
+	{
+		m_num_x_points = 2;
+		m_num_y_points = 2;
+		GenerateMeaningfullName();
+	}
 
+	CProbe_Grid( const CProbe_Grid & rhs );
+	CProbe_Grid & operator= ( const CProbe_Grid & rhs );
+
+	// HeeksObj's virtual functions
+	int GetType()const{return ProbeGridType;}
+	void WriteXML(TiXmlNode *root);
+	const wxChar* GetTypeString(void)const{return _T("ProbeGrid");}
+
+	void GetProperties(std::list<Property *> *list);
+	HeeksObj *MakeACopy(void)const;
+	void CopyFrom(const HeeksObj* object);
+
+	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
+	// program whose job is to generate RS-274 GCode.
+	void AppendTextToProgram( const CFixture *pFixture );
+
+	void glCommands(bool select, bool marked, bool no_color);
+
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	void GenerateMeaningfullName();
+
+	CProbing::PointsList_t GetPoints() const;
+
+public:
+	int	m_num_x_points;
+	int m_num_y_points;
+};
 
 
 

@@ -248,6 +248,15 @@ class Creator:
     def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
         pass
 
+    def open_log_file(self, xml_file_name=None ):
+        pass
+
+    def log_coordinate(self, x=None, y=None, z=None):
+        pass
+
+    def close_log_file(self):
+        pass
+
     def rapid_to_midpoint(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
 	pass
 
@@ -440,6 +449,15 @@ def probe_downward_point(x=None, y=None, depth=None, intersection_variable_z=Non
 
 def report_probe_results(x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
     creator.report_probe_results(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6, xml_file_name)
+
+def open_log_file(xml_file_name=None ):
+    creator.open_log_file(xml_file_name)
+
+def log_coordinate(x=None, y=None, z=None):
+    creator.log_coordinate(x, y, z)
+
+def close_log_file():
+    creator.close_log_file()
 
 def rapid_to_midpoint(x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
     creator.rapid_to_midpoint(x1, y1, z1, x2, y2, z2)

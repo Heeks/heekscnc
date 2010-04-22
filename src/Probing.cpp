@@ -43,14 +43,14 @@ extern CHeeksCADInterface* heeksCAD;
 static void on_set_distance(double value, HeeksObj* object)
 {
 	((CProbing*)object)->m_distance = value;
-	((CProbe_Centre*)object)->GenerateMeaningfullName();
+	((CProbing*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
 static void on_set_depth(double value, HeeksObj* object)
 {
 	((CProbing*)object)->m_depth = value;
-	((CProbe_Centre*)object)->GenerateMeaningfullName();
+	((CProbing*)object)->GenerateMeaningfullName();
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
@@ -228,6 +228,67 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 		ss.str(_T(""));
 	} // End if - then
 }
+
+
+void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
+{
+	CSpeedOp::AppendTextToProgram( pFixture );
+
+#ifdef UNICODE
+	std::wostringstream ss;
+#else
+	std::ostringstream ss;
+#endif
+	ss.imbue(std::locale("C"));
+	ss<<std::setprecision(10);
+
+	// We're going to be working in relative coordinates based on the assumption
+	// that the operator has first jogged the machine to the approximate starting point.
+	CNCPoint last_point(0,0,0);
+
+	ss << _T("open_log_file(xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true ).c_str()).c_str() << _T(")\n");
+
+	CProbing::PointsList_t points = GetPoints();
+	for (CProbing::PointsList_t::const_iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
+	{
+		switch (l_itPoint->first)
+		{
+		case eRapid:
+			ss << _T("rapid(x=") << l_itPoint->second.X(true) << _T(", y=") << l_itPoint->second.Y(true) << _T(", z=") << l_itPoint->second.Z(true) << _T(")\n");
+			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+			ss.str(_T(""));
+			break;
+
+		case eProbe:
+			{
+				// We've already moved to this point ourselves so tell the AppendTextForDownwardProbingOperation()
+				// method that the X,Y coordinate is 0,0.  We're only interested in the Z point anyway and this
+				// will avoid extra rapid movements.
+				AppendTextForDownwardProbingOperation( _T("0"), _T("0"), m_depth, _T("1001") );
+
+				ss << "log_coordinate( "
+					<< "x='[" << l_itPoint->second.X(true) << "]', "
+					<< "y='[" << l_itPoint->second.Y(true) << "]', "
+					<< "z='[#1001]')\n";
+				theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+				ss.str(_T(""));
+			}
+			break;
+
+		case eEndOfData:
+			break;
+		} // End switch
+
+		last_point = l_itPoint->second;
+	} // End for
+
+	ss << _T("close_log_file()\n");
+
+	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	ss.str(_T(""));
+
+}
+
 
 
 /**
@@ -876,6 +937,30 @@ void CProbe_Centre::GetProperties(std::list<Property *> *list)
 	CProbing::GetProperties(list);
 }
 
+static void on_set_num_x_points(int value, HeeksObj* object)
+{
+	((CProbe_Grid*)object)->m_num_x_points = value;
+	((CProbe_Grid*)object)->GenerateMeaningfullName();
+	heeksCAD->Changed();
+}
+
+static void on_set_num_y_points(int value, HeeksObj* object)
+{
+	((CProbe_Grid*)object)->m_num_y_points = value;
+	((CProbe_Grid*)object)->GenerateMeaningfullName();
+	heeksCAD->Changed();
+}
+
+void CProbe_Grid::GetProperties(std::list<Property *> *list)
+{
+	list->push_back(new PropertyInt(_("Num points along X"), m_num_x_points, this, on_set_num_x_points));
+	list->push_back(new PropertyInt(_("Num points along Y"), m_num_y_points, this, on_set_num_y_points));
+
+	CProbing::GetProperties(list);
+}
+
+
+
 static void on_set_number_of_edges(int zero_based_offset, HeeksObj* object)
 {
 	((CProbe_Edge*)object)->m_number_of_edges = zero_based_offset + 1;
@@ -1012,6 +1097,17 @@ void CProbe_Centre::CopyFrom(const HeeksObj* object)
 	operator=(*((CProbe_Centre *)object));
 }
 
+HeeksObj *CProbe_Grid::MakeACopy(void)const
+{
+	return new CProbe_Grid(*this);
+}
+
+void CProbe_Grid::CopyFrom(const HeeksObj* object)
+{
+	operator=(*((CProbe_Grid *)object));
+}
+
+
 bool CProbing::CanAddTo(HeeksObj* owner)
 {
 	return owner->GetType() == OperationsType;
@@ -1051,6 +1147,24 @@ CProbe_Centre & CProbe_Centre::operator= ( const CProbe_Centre & rhs )
 		m_direction = rhs.m_direction;
 		m_number_of_points = rhs.m_number_of_points;
 		m_alignment = rhs.m_alignment;
+	}
+
+	return(*this);
+}
+
+CProbe_Grid::CProbe_Grid( const CProbe_Grid & rhs ) : CProbing(rhs)
+{
+	*this = rhs;	// Call the assignment operator.
+}
+
+CProbe_Grid & CProbe_Grid::operator= ( const CProbe_Grid & rhs )
+{
+	if (this != &rhs)
+	{
+		CProbing::operator =(rhs);
+
+		m_num_x_points = rhs.m_num_x_points;
+		m_num_y_points = rhs.m_num_y_points;
 	}
 
 	return(*this);
@@ -1160,6 +1274,31 @@ HeeksObj* CProbe_Centre::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
+void CProbe_Grid::WriteXML(TiXmlNode *root)
+{
+	TiXmlElement * element = new TiXmlElement( Ttc(GetTypeString()) );
+	root->LinkEndChild( element );
+
+	element->SetAttribute("num_x_points", m_num_x_points);
+	element->SetAttribute("num_y_points", m_num_y_points);
+
+	WriteBaseXML(element);
+}
+
+// static member function
+HeeksObj* CProbe_Grid::ReadFromXMLElement(TiXmlElement* element)
+{
+	CProbe_Grid* new_object = new CProbe_Grid();
+
+	if (element->Attribute("num_x_points")) new_object->m_num_x_points = atoi(element->Attribute("num_x_points"));
+	if (element->Attribute("num_y_points")) new_object->m_num_y_points = atoi(element->Attribute("num_y_points"));
+
+	new_object->ReadBaseXML(element);
+
+	return new_object;
+}
+
+
 void CProbing::WriteBaseXML(TiXmlElement *element)
 {
 	element->SetDoubleAttribute("depth", m_depth);
@@ -1250,6 +1389,43 @@ void CProbe_Centre::glCommands(bool select, bool marked, bool no_color)
 
 	CProbing::glCommands(select,marked,no_color);
 }
+
+
+void CProbe_Grid::glCommands(bool select, bool marked, bool no_color)
+{
+	CNCPoint last_point(0,0,0);
+
+	CProbing::PointsList_t points = GetPoints();
+	for (CProbing::PointsList_t::const_iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
+	{
+		switch (l_itPoint->first)
+		{
+		case eRapid:
+			CNCCode::Color(ColorRapidType).glColor();
+			glBegin(GL_LINE_STRIP);
+			glVertex3d( last_point.X(), last_point.Y(), last_point.Z() );
+			glVertex3d( l_itPoint->second.X(), l_itPoint->second.Y(), l_itPoint->second.Z() );
+			glEnd();
+			break;
+
+		case eProbe:
+			CNCCode::Color(ColorFeedType).glColor();
+			glBegin(GL_LINE_STRIP);
+			glVertex3d( last_point.X(), last_point.Y(), last_point.Z() );
+			glVertex3d( l_itPoint->second.X(), l_itPoint->second.Y(), l_itPoint->second.Z() );
+			glEnd();
+			break;
+
+		case eEndOfData:
+			break;
+		} // End switch
+
+		last_point = l_itPoint->second;
+	} // End for
+
+	CProbing::glCommands(select,marked,no_color);
+}
+
 
 
 wxString CProbing::GetOutputFileName(const wxString extension, const bool filename_only)
@@ -1386,7 +1562,56 @@ void CProbe_Centre::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	CProbing::GetTools( t_list, p );
 }
 
+class Probe_Grid_GenerateGCode: public Tool
+{
 
+CProbe_Grid *m_pThis;
+
+public:
+	Probe_Grid_GenerateGCode() { m_pThis = NULL; }
+
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Generate GCode");}
+
+	void Run()
+	{
+		// We must setup the theApp.m_program_canvas->m_textCtrl variable before
+		// calling the HeeksPyPostProcess() routine.  That's the python script
+		// that will be executed.
+
+		theApp.m_program_canvas->m_textCtrl->Clear();
+
+		m_pThis->GeneratePythonPreamble();
+
+		CFixture default_fixture(NULL, CFixture::G54 );
+		m_pThis->AppendTextToProgram( &default_fixture );
+
+		theApp.m_program_canvas->AppendText(_T("program_end()\n"));
+
+		{
+			// clear the output file
+			wxFile f(m_pThis->GetOutputFileName(_T(".tap"), false).c_str(), wxFile::write);
+			if(f.IsOpened())f.Write(_T("\n"));
+		}
+
+		HeeksPyPostProcess(theApp.m_program, m_pThis->GetOutputFileName(_T(".tap"), false), false );
+	}
+	wxString BitmapPath(){ return _T("export");}
+	wxString previous_path;
+	void Set( CProbe_Grid *pThis ) { m_pThis = pThis; }
+};
+
+static Probe_Grid_GenerateGCode generate_grid_gcode;
+
+void CProbe_Grid::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+
+	generate_grid_gcode.Set( this );
+
+	t_list->push_back( &generate_grid_gcode );
+
+	CProbing::GetTools( t_list, p );
+}
 
 
 class Probe_Edge_GenerateGCode: public Tool
@@ -1745,6 +1970,28 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 } // End SetPoints() method
 
 
+CProbing::PointsList_t CProbe_Grid::GetPoints() const
+{
+	CProbing::PointsList_t points;
+
+	for (int x_hole = 0; x_hole < m_num_x_points; x_hole++)
+	{
+		for (int y_hole = 0; y_hole < m_num_y_points; y_hole++)
+		{
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(x_hole * m_distance, y_hole * m_distance, 0) ) );
+			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(x_hole * m_distance, y_hole * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(x_hole * m_distance, y_hole * m_distance, 0) ) );
+		}
+	}
+	points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
+
+	return(points);
+
+} // End SetPoints() method
+
+
+
+
 void CProbe_Edge::GenerateMeaningfullName()
 {
 	if (m_number_of_edges == 1)
@@ -1803,6 +2050,32 @@ void CProbe_Centre::GenerateMeaningfullName()
 		} // End if - else
 	} // End if - then
 }
+
+void CProbe_Grid::GenerateMeaningfullName()
+{
+	m_title = _("Probe ");
+	m_title << this->m_num_x_points << _T(" x ") << m_num_y_points << _T(" ") << _("grid");
+}
+
+void CProbing::GenerateMeaningfullName()
+{
+    switch(m_operation_type)
+    {
+        case ProbeGridType:
+            ((CProbe_Grid*)this)->GenerateMeaningfullName();
+            break;
+
+        case ProbeEdgeType:
+            ((CProbe_Edge*)this)->GenerateMeaningfullName();
+            break;
+
+        case ProbeCentreType:
+            ((CProbe_Centre*)this)->GenerateMeaningfullName();
+            break;
+    }
+}
+
+
 
 void CProbing::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
