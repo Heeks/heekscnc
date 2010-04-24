@@ -177,6 +177,9 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 
 		int choice = int(m_sort_sketches);
 		list->push_back(new PropertyChoice(_("sort_sketches"), choices, choice, parent, on_set_sort_sketches));
+
+		// roll on radius
+		list->push_back(new PropertyLength(_("roll radius"), m_auto_roll_radius, parent, on_set_roll_radius));
 	} // End if - else
 
 	list->push_back(new PropertyInt(_("number of tags"), m_num_tags, parent, on_set_num_tags));
