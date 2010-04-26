@@ -1021,7 +1021,7 @@ static void UnitsChangedHandler( const double units )
         response = wxMessageBox( _("Would you like to change the NC code generation units too?"), _("Change Units"), wxYES_NO );
         if (response == wxYES)
         {
-            theApp.m_program->m_units = units;
+            theApp.m_program->ChangeUnits( units );
         }
     }
 }

@@ -2007,7 +2007,7 @@ void CProbe_Edge::GenerateMeaningfullName()
 		m_title << eCorners_t(m_corner) << _(" corner");
 	} // End if - else
 
-	m_title << _T(" at ") << m_distance / theApp.m_program->m_units;
+	m_title << _T(" at ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 	if (theApp.m_program->m_units > 1) m_title << _T(" inch intervals");
 	else m_title << _T(" mm intervals");
 
@@ -2019,7 +2019,7 @@ void CProbe_Centre::GenerateMeaningfullName()
 	{
 		m_title = _("Probe protrusion along ");
 		m_title << eAlignment_t(m_alignment);
-		m_title << _T(" min ") << m_distance / theApp.m_program->m_units;
+		m_title << _T(" min ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 		else m_title << _T(" mm");
 	} // End if - then
@@ -2027,7 +2027,7 @@ void CProbe_Centre::GenerateMeaningfullName()
 	{
 		m_title = _("Probe hole along ");
 		m_title << eAlignment_t(m_alignment);
-		m_title << _T(" max ") << m_distance / theApp.m_program->m_units;
+		m_title << _T(" max ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 		else m_title << _T(" mm");
 	} // End if - else
@@ -2037,14 +2037,14 @@ void CProbe_Centre::GenerateMeaningfullName()
 		if (m_direction == eOutside)
 		{
 			m_title = _("Probe protrusion");
-			m_title << _T(" min ") << m_distance / theApp.m_program->m_units;
+			m_title << _T(" min ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 			else m_title << _T(" mm");
 		} // End if - then
 		else
 		{
 			m_title = _("Probe hole");
-			m_title << _T(" max ") << m_distance / theApp.m_program->m_units;
+			m_title << _T(" max ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 			else m_title << _T(" mm");
 		} // End if - else
@@ -2080,4 +2080,19 @@ void CProbing::GenerateMeaningfullName()
 void CProbing::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     CSpeedOp::GetTools( t_list, p );
+}
+
+void CProbe_Edge::OnChangeUnits(const double units)
+{
+    GenerateMeaningfullName();
+}
+
+void CProbe_Centre::OnChangeUnits(const double units)
+{
+    GenerateMeaningfullName();
+}
+
+void CProbe_Grid::OnChangeUnits(const double units)
+{
+    GenerateMeaningfullName();
 }

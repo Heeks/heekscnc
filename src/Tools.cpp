@@ -23,6 +23,7 @@ HeeksObj *CTools::MakeACopy(void) const
 
 CTools::CTools() {}
 
+
 CTools::CTools( const CTools & rhs )
 {
     *this = rhs;    // Call the assignment operator.
@@ -172,4 +173,21 @@ void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	CHeeksCNCApp::GetNewCuttingToolTools(t_list);
 
 	ObjList::GetTools(t_list, p);
+}
+
+
+void CTools::OnChangeUnits(const double units)
+{
+    std::list<HeeksObj *> cutting_tools;
+    for (HeeksObj *cutting_tool = theApp.m_program->Tools()->GetFirstChild();
+        cutting_tool != NULL;
+        cutting_tool = theApp.m_program->Tools()->GetNextChild() )
+    {
+        cutting_tools.push_back( cutting_tool );
+    } // End for
+
+    for (std::list<HeeksObj *>::iterator l_itObject = cutting_tools.begin(); l_itObject != cutting_tools.end(); l_itObject++)
+    {
+        ((CCuttingTool *) *l_itObject)->ResetTitle();
+    } // End for
 }
