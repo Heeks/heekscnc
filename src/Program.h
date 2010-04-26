@@ -99,4 +99,6 @@ public:
 	static void GetMachines(std::vector<CMachine> &machines);
 	static CMachine GetMachine(const wxString& file_name);
 	void AddMissingChildren();
+
+	void ChangeUnits( const double units );
 };

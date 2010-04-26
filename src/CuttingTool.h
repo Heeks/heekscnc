@@ -222,7 +222,7 @@ public:
 	static std::vector< std::pair< int, wxString > > FindAllCuttingTools();
 	wxString GenerateMeaningfulName() const;
 	wxString ResetTitle();
-	wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 ) const;
+	static wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 );
 
 	TopoDS_Shape GetShape() const;
 	TopoDS_Face  GetSideProfile() const;

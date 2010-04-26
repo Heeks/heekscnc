@@ -903,20 +903,16 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
 	    1.125 -> "1 1/8"
 	    0.109375 -> "7/64"
  */
-wxString CCuttingTool::FractionalRepresentation( const double original_value, const int max_denominator /* = 64 */ ) const
+/* static */ wxString CCuttingTool::FractionalRepresentation( const double original_value, const int max_denominator /* = 64 */ )
 {
-#ifdef UNICODE
-	std::wostringstream l_ossValue;
-#else
-    std::ostringstream l_ossValue;
-#endif
 
+    wxString result;
 	double _value(original_value);
 	double near_enough = 0.00001;
 
 	if (floor(_value) > 0)
 	{
-		l_ossValue << floor(_value) << " ";
+		result << floor(_value) << _T(" ");
 		_value -= floor(_value);
 	} // End if - then
 
@@ -930,15 +926,15 @@ wxString CCuttingTool::FractionalRepresentation( const double original_value, co
 			     ((_value < fraction) && ((fraction - _value) < near_enough)) ||
 			     (_value == fraction) )
 			{
-				l_ossValue << numerator << "/" << denominator;
-				return(l_ossValue.str().c_str());
+				result << numerator << _T("/") << denominator;
+				return(result);
 			} // End if - then
 		} // End for
 	} // End for
 
-	l_ossValue.str(_T(""));	// Delete any floor(value) data we had before.
-	l_ossValue << original_value;
-	return(l_ossValue.str().c_str());
+	result = _T("");	// Delete any floor(value) data we had before.
+	result << original_value;
+	return(result);
 } // End FractionalRepresentation() method
 
 
