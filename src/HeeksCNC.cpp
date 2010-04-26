@@ -1010,6 +1010,23 @@ static void ImportExcellonDrillFile( const wxChar *file_path )
     drill.Read( Ttc(file_path) );
 }
 
+static void UnitsChangedHandler( const double units )
+{
+    // The view units have changed.  See if the user wants the NC output units to change
+    // as well.
+
+    if (units != theApp.m_program->m_units)
+    {
+        int response;
+        response = wxMessageBox( _("Would you like to change the NC code generation units too?"), _("Change Units"), wxYES_NO );
+        if (response == wxYES)
+        {
+            theApp.m_program->m_units = units;
+        }
+    }
+}
+
+
 void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 {
 	m_dll_path = dll_path;
@@ -1199,6 +1216,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
             printf("Failed to register handler for Speed References files\n");
         }
 	}
+
+	heeksCAD->RegisterUnitsChangeHandler( UnitsChangedHandler );
 }
 
 std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
