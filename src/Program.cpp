@@ -156,11 +156,22 @@ static void on_set_output_file(const wxChar* value, HeeksObj* object)
 static void on_set_units(int value, HeeksObj* object)
 {
 	((CProgram*)object)->m_units = (value == 0) ? 1.0:25.4;
+
 	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("ProgramUnits"), ((CProgram*)object)->m_units);
 
-	// also change HeeksCAD's view units automatically
-	heeksCAD->SetViewUnits(((CProgram*)object)->m_units, true);
+    if (heeksCAD->GetViewUnits() != ((CProgram*)object)->m_units)
+    {
+        int response;
+        response = wxMessageBox( _("Would you like to change the HeeksCAD view units too?"), _("Change Units"), wxYES_NO );
+        if (response == wxYES)
+        {
+            heeksCAD->SetViewUnits(((CProgram*)object)->m_units, true);
+            heeksCAD->RefreshOptions();
+        }
+    }
+
+
 }
 
 static void on_set_output_file_name_follows_data_file_name(int zero_based_choice, HeeksObj *object)
