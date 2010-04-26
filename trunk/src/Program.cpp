@@ -155,7 +155,7 @@ static void on_set_output_file(const wxChar* value, HeeksObj* object)
 
 static void on_set_units(int value, HeeksObj* object)
 {
-	((CProgram*)object)->m_units = (value == 0) ? 1.0:25.4;
+	((CProgram*)object)->ChangeUnits((value == 0) ? 1.0:25.4);
 
 	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("ProgramUnits"), ((CProgram*)object)->m_units);
@@ -170,8 +170,7 @@ static void on_set_units(int value, HeeksObj* object)
             heeksCAD->RefreshOptions();
         }
     }
-
-
+    heeksCAD->RefreshProperties();
 }
 
 static void on_set_output_file_name_follows_data_file_name(int zero_based_choice, HeeksObj *object)
@@ -861,4 +860,11 @@ void CProgram::AddMissingChildren()
 	if(m_operations == NULL){m_operations = new COperations; Add( m_operations, NULL );}
 	if(m_speed_references == NULL){m_speed_references = new CSpeedReferences; Add( m_speed_references, NULL );}
 	if(m_nc_code == NULL){m_nc_code = new CNCCode; Add( m_nc_code, NULL );}
+}
+
+void CProgram::ChangeUnits( const double units )
+{
+    m_units = units;
+    Tools()->OnChangeUnits(units);
+    Operations()->OnChangeUnits(units);
 }

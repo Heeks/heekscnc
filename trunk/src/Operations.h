@@ -32,4 +32,5 @@ public:
 	void ReloadPointers();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void OnChangeUnits(const double units);
 };
