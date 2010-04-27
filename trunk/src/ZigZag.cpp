@@ -16,6 +16,7 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include "PythonStuff.h"
+#include "../kurve/geometry/geometry.h"
 
 #include <sstream>
 
@@ -193,7 +194,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 	theApp.m_program_canvas->AppendText(_T("corner_radius = float("));
 	double cr = pCuttingTool->m_params.m_corner_radius - pCuttingTool->m_params.m_flat_radius;
 	if(cr<0)cr = 0.0;
-	theApp.m_program_canvas->AppendText( cr );
+	theApp.m_program_canvas->AppendText( cr / theApp.m_program->m_units );
 	theApp.m_program_canvas->AppendText(_T(")\n"));
 
 	heeksCAD->CreateUndoPoint();
@@ -202,7 +203,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 	std::list<HeeksObj*> solids;
 	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
 	{
-	    if (object->GetType() != SolidType)
+	    if (object->GetType() != SolidType && object->GetType() != StlSolidType)
 	    {
 	        continue;
 	    }
@@ -227,7 +228,10 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
     wxFileName filepath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("zigzag%d.stl"), number_for_stl_file).c_str() );
 	number_for_stl_file++;
 
-	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
+	bool mm = fabs(theApp.m_program->m_units - 1.0) < 0.00000001;
+	double scale = 1/theApp.m_program->m_units;
+
+	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01, mm ? NULL: (&scale));
 
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
@@ -247,7 +251,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
 			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
-	ss << "ocl_funcs.zigzag(" << PythonString(filepath.GetFullPath()).c_str() << ", tool_diameter, corner_radius, " << m_params.m_step_over << ", " << min.X() << ", " << max.X() << ", " << min.Y() << ", " << max.Y() << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance << ", " << m_params.m_style << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
+	ss << "ocl_funcs.zigzag(" << PythonString(filepath.GetFullPath()).c_str() << ", tool_diameter, corner_radius, " << m_params.m_step_over / theApp.m_program->m_units << ", " << min.X() / theApp.m_program->m_units << ", " << max.X() / theApp.m_program->m_units << ", " << min.Y() / theApp.m_program->m_units << ", " << max.Y() / theApp.m_program->m_units << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance / theApp.m_program->m_units << ", " << m_params.m_style << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
