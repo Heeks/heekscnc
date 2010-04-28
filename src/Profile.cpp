@@ -1064,7 +1064,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points,
 #endif
 	l_ossPythonCode.imbue(std::locale("C"));
 	l_ossPythonCode<<std::setprecision(10);
-	l_ossPythonCode<<_T("offset_extra = ")<<m_profile_params.m_offset_extra<<_T("\n");
+	l_ossPythonCode << _T("offset_extra = ") << m_profile_params.m_offset_extra << _T("\n");
 
 	// Make a local copy so that we can either sort it or leave it alone.  We don't want
 	// to affect the member list itself.

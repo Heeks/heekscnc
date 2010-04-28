@@ -321,7 +321,7 @@ wxString CPocket::GenerateGCode(const CFixture *pFixture)
 			gcode << _T(", step_down, ");
 			gcode << m_pocket_params.m_round_corner_factor;
 			gcode << _T(", clearance, ");
-			gcode << m_pocket_params.m_starting_place <<_T(")\n");
+			gcode << m_pocket_params.m_starting_place << _T(")\n");
 
 			// rapid back up to clearance plane
 			gcode << _T("rapid(z = clearance)\n");
