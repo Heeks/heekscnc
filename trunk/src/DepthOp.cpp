@@ -249,14 +249,20 @@ void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches
 
 void CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 {
-    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture));
+    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture).c_str());
 }
 
 wxString CDepthOp::GenerateGCode( const CFixture *pFixture )
 {
-    wxString gcode;
+    #ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode<<std::setprecision(10);
 
-    gcode << CSpeedOp::GenerateGCode(pFixture);
+    gcode << CSpeedOp::GenerateGCode(pFixture).c_str();
 
 	gcode << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 	gcode << _T("rapid_down_to_height = float(") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
@@ -270,7 +276,7 @@ wxString CDepthOp::GenerateGCode( const CFixture *pFixture )
 		gcode << _T("tool_diameter = float(") << (pCuttingTool->CuttingRadius(true) * 2.0) << _T(")\n");
 	} // End if - then
 
-	return(gcode);
+	return(wxString(gcode.str().c_str()));
 }
 
 

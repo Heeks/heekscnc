@@ -270,14 +270,20 @@ void CSpeedOp::GetProperties(std::list<Property *> *list)
 
 void CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
 {
-    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture));
+    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture).c_str());
 }
 
 wxString CSpeedOp::GenerateGCode(const CFixture *pFixture)
 {
-    wxString gcode;
+    #ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode<<std::setprecision(10);
 
-	gcode << COp::GenerateGCode(pFixture);
+	gcode << COp::GenerateGCode(pFixture).c_str();
 
 	if (m_speed_op_params.m_spindle_speed != 0)
 	{
@@ -288,7 +294,7 @@ wxString CSpeedOp::GenerateGCode(const CFixture *pFixture)
     gcode << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
     gcode << _T("flush_nc()\n");
 
-    return(gcode);
+    return(wxString(gcode.str().c_str()));
 }
 
 static void on_set_auto_speeds(bool value, HeeksObj* object){CSpeedOp::m_auto_set_speeds_feeds = value;}

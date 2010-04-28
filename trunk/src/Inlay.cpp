@@ -173,6 +173,324 @@ void CInlay::AppendTextToProgram( const CFixture *pFixture )
 
 
 /**
+    This method finds the maximum offset possible for this wire up to the value specified.
+ */
+double CInlay::FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const
+{
+    // We will do a 'binary chop' algorithm to minimise the number of offsets we need to
+    // calculate.
+    double min_offset = 0.0;        // This value will work.
+    double max_offset = max_offset_required;     // This value 'may' work.
+
+    try {
+        BRepOffsetAPI_MakeOffset offset_wire(wire);
+        offset_wire.Perform(max_offset * -1.0);
+        if (offset_wire.IsDone())
+        {
+            TopoDS_Wire extract_the_wire_to_make_sure = TopoDS::Wire(offset_wire.Shape());
+
+            // The maximum offset is possible.
+            return(max_offset);
+        }
+    } // End try
+    catch (Standard_Failure & error) {
+        (void) error;	// Avoid the compiler warning.
+        Handle_Standard_Failure e = Standard_Failure::Caught();
+    } // End catch
+
+    // At this point we know that the min_offset will work and the max_offset
+    // will not work.  Try half way between and repeat until we're splitting hairs.
+
+    double offset = ((max_offset - min_offset) / 2.0) + min_offset;
+    while ((offset > tolerance) && ((max_offset - min_offset) > tolerance))
+    {
+        printf("Trying at offset %lf\n", offset);
+        try {
+            BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
+            offset_wire.Perform(offset * -1.0);
+            if (! offset_wire.IsDone())
+            {
+                // It never seems to get here but it sounded nice anyway.
+                // This offset did not work.  Try moving towards min_offset;
+                max_offset = offset;
+                offset = ((offset - min_offset) / 2.0) + min_offset;
+            }
+            else
+            {
+                TopoDS_Wire extract_the_wire_to_make_sure = TopoDS::Wire(offset_wire.Shape());
+
+                // The offset shape was generated fine.
+                min_offset = offset;
+                offset = ((max_offset - offset) / 2.0) + offset;
+            }
+        } // End try
+        catch (Standard_Failure & error) {
+            (void) error;	// Avoid the compiler warning.
+            Handle_Standard_Failure e = Standard_Failure::Caught();
+            // This offset did not work.  Try moving towards min_offset;
+            max_offset = offset;
+            offset = ((offset - min_offset) / 2.0) + min_offset;
+        } // End catch
+    } // End while
+
+    printf("Found offset %lf\n", offset);
+    return(offset);
+}
+
+
+/**
+	This method finds the angle that the corner-forming vector would form.  It's 180 degrees
+	from the mid-angle between the two CNCVectors passed in.
+ */
+double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
+{
+	if (_vectors.size() == 2)
+	{
+		gp_Vec reference(0,0,-1);
+		std::vector<CNCVector> vectors;
+		std::copy( _vectors.begin(), _vectors.end(), std::inserter( vectors, vectors.begin() ) );
+
+		double angle = vectors[0].AngleWithRef( vectors[1], reference ) / (2.0 * PI) * 360.0;
+
+		// We should be able to project a vector at half the angle between these two vectors (plus 180 degrees)
+		// and up at the angle of the cutting tool.  We should find a known coordinate in this direction (in fact
+		// there may be many).  This vector is the toolpath we want to follow to sharpen the corners.
+
+		double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
+		double angle2 = vectors[1].AngleWithRef( gp_Vec(1,0,0), reference );
+
+		while (angle1 < 0) angle1 += (2.0 * PI);
+		while (angle2 < 0) angle2 += (2.0 * PI);
+
+		double mid_angle;
+		if (angle1 < angle2)
+		{
+			mid_angle = ((angle2 - angle1) / 2.0) + angle1;
+			if ((angle2 - angle1) > PI) mid_angle += PI;
+		}
+		else
+		{
+			mid_angle = ((angle1 - angle2) / 2.0) + angle2;
+			if ((angle1 - angle2) > PI) mid_angle += PI;
+		}
+
+		// At this point mid_angle points back towards the centre of the shape half way
+		// between the two edges at this point.  We actually want to look back towards
+		// a larger shape so add PI to this mid_angle to point back out away from the
+		// middle.
+
+		mid_angle += PI;
+		while (mid_angle > (2.0 * PI)) mid_angle -= (2.0 * PI);
+
+		return(mid_angle);
+	} // End if - then
+
+	return(0.0);
+
+} // End Angle() method
+
+
+
+CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners ) const
+{
+	const double tolerance = 0.000001;
+
+	{
+		std::set<CNCVector> vs;
+		vs.insert( gp_Vec(1,0,0) ); vs.insert( gp_Vec(0,1,0) );
+		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
+		if (fabs(angle - (45.0 + 180.0)) > tolerance)
+		{
+			int i=3;
+		}
+	}
+
+	{
+		std::set<CNCVector> vs;
+		vs.insert( gp_Vec(-1,0,0) ); vs.insert( gp_Vec(0,1,0) );
+		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
+		if (fabs(angle - (135.0 + 180.0)) > tolerance)
+		{
+			int i=3;
+		}
+	}
+
+	{
+		std::set<CNCVector> vs;
+		vs.insert( gp_Vec(1,0,0) ); vs.insert( gp_Vec(0,-1,0) );
+		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
+		if (fabs(angle - 135.0) > tolerance)
+		{
+			int i=3;
+		}
+	}
+
+	{
+		std::set<CNCVector> vs;
+		vs.insert( gp_Vec(-1,0,0) ); vs.insert( gp_Vec(0,-1,0) );
+		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
+		if (fabs(angle - 45.0) > tolerance)
+		{
+			int i=3;
+		}
+	}
+
+	Corners_t results;
+
+	if (corners.find(coordinate) == corners.end())
+	{
+		return(results);	// Empty set.
+	}
+
+	if (corners[coordinate].size() == 2)
+	{
+		double reference_angle = CornerAngle(corners[coordinate]);
+
+		// Look for all corners whose mid-angle is similar to this one and whose
+		// coordinates lay along this same vector.
+
+		for (Corners_t::const_iterator itCorner = corners.begin(); itCorner != corners.end(); itCorner++)
+		{
+			double tolerance = heeksCAD->GetTolerance();
+			double angle = CornerAngle(itCorner->second);
+			if ((angle >= reference_angle) && ((angle - reference_angle) < tolerance))
+			{
+				results.insert(*itCorner);
+			}
+			else if ((angle <= reference_angle) && ((reference_angle - angle) < tolerance))
+			{
+				results.insert(*itCorner);
+			}
+		}
+	} // End if - then
+
+	return(results);
+}
+
+
+
+
+/**
+    We need to move from the bottom-most wire to the corresponding corners
+    of each wire above it.  This will sharpen the concave corners formed
+    between adjacent edges.
+ */
+wxString CInlay::FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) const
+{
+#ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode<<std::setprecision(10);
+
+    // Gather a list of all corner coordinates and the angles formed there for each wire.
+	Corners_t corners;
+    typedef std::set<CNCPoint> Coordinates_t;
+    Coordinates_t coordinates;
+
+	double theta = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
+	double max_plunge_depth = (pChamferingBit->m_params.m_diameter / 2.0) * tan(theta);
+
+    for (Wires_t::iterator itWire = wires.begin(); itWire != wires.end(); itWire++)
+    {
+        for(BRepTools_WireExplorer expEdge(TopoDS::Wire(itWire->second)); expEdge.More(); expEdge.Next())
+        {
+            BRepAdaptor_Curve curve(TopoDS_Edge(expEdge.Current()));
+
+            double uStart = curve.FirstParameter();
+            double uEnd = curve.LastParameter();
+            gp_Pnt PS;
+            gp_Vec VS;
+            curve.D1(uStart, PS, VS);
+            gp_Pnt PE;
+            gp_Vec VE;
+            curve.D1(uEnd, PE, VE);
+
+			// The vectors indicate the direction from the start of the curve to the end.  We want
+			// them to always be with respect to their corresponding point.  To this end, reverse
+			// the vector at the end so that it starts at the endpoint and points back towards
+			// the curve.  This way, all the points and their vectors are consistent.
+
+			VE *= -1.0;
+
+			if (corners.find(CNCPoint(PS)) == corners.end())
+			{
+				std::set<CNCVector> start_set; start_set.insert( VS );
+				corners.insert( std::make_pair( CNCPoint(PS), start_set ));
+			}
+			else
+			{
+				corners[CNCPoint(PS)].insert( VS );
+			}
+
+			if (corners.find(CNCPoint(PE)) == corners.end())
+			{
+				std::set<CNCVector> end_set; end_set.insert( VE );
+				corners.insert( std::make_pair( CNCPoint(PE), end_set ));
+			}
+			else
+			{
+				corners[CNCPoint(PE)].insert( VE );
+			}
+
+            coordinates.insert( CNCPoint(PS) );
+            coordinates.insert( CNCPoint(PE) );
+        } // End for
+    } // End for
+
+    // We now have all the coordinates and vectors of all the edges in the wire.  Look at
+    // each coordinate, discard duplicate vectors and find the angle between the two
+    // vectors formed at each coordinate.
+
+    gp_Vec reference( 0, 0, -1 );    // Looking from the top down.
+    for (Coordinates_t::iterator itCoordinate = coordinates.begin(); itCoordinate != coordinates.end(); itCoordinate++)
+    {
+		if (corners[*itCoordinate].size() == 2)
+		{
+			Corners_t similar = FindSimilarCorners(*itCoordinate, corners);
+
+			// Sort the corner coordinates in Z order and move between them.
+			std::list<CNCPoint> points;
+			for (Corners_t::iterator itSimilar = similar.begin(); itSimilar != similar.end(); itSimilar++)
+			{
+				points.push_back(itSimilar->first);
+			}
+
+			// All these corners lay along the same vector (when viewed from the top down)
+			// as this corner.  Look for the one with the highest Z value and move up
+			// to that one.
+
+			CNCPoint top_corner(*itCoordinate);
+			for (Corners_t::iterator itCorner = similar.begin(); itCorner != similar.end(); itCorner++)
+			{
+				if (itCorner->first.Z() > top_corner.Z())
+				{
+					top_corner = itCorner->first;
+				} // End if - then
+			} // End for
+
+			if ((top_corner.Z() > itCoordinate->Z()) && ((top_corner.Z() - itCoordinate->Z()) <= max_plunge_depth))
+			{
+				// Move to the top corner and back again.
+				gcode << _T("comment('sharpen corner')\n");
+				gcode << _T("rapid(x=") << itCoordinate->X(true) << _T(", y=") << itCoordinate->Y(true) << _T(", z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+				gcode << _T("rapid(x=") << itCoordinate->X(true) << _T(", y=") << itCoordinate->Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+				gcode << _T("feed(x=") << itCoordinate->X(true) << _T(", y=") << itCoordinate->Y(true) << _T(", z=") << itCoordinate->Z(true) << _T(")\n");
+				gcode << _T("feed(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << top_corner.Z(true) << _T(")\n");
+				gcode << _T("rapid(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+			} // End if - then
+		} // End if - then
+    }
+
+	return(wxString(gcode.str().c_str()));
+}
+
+
+
+
+/**
     This routine performs two separate functions.  The first is to produce the GCode requied to
     drive the chamfering bit around the material to produce both the male and female halves
     of the inlay operation.  The second function is to generate a set of mirrored sketch
@@ -211,7 +529,14 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 {
 	ReloadPointers();
 
-	wxString gcode;
+#ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode<<std::setprecision(10);
+
 	CDepthOp::AppendTextToProgram( pFixture );
 
 	unsigned int number_of_bad_sketches = 0;
@@ -233,13 +558,18 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 	// pass occurs BEFORE the male pass.
 	std::list<CInlayParams::eInlayPass_t> passes;
 
+	passes.push_back( CInlayParams::eFemale );	// Always.  We need this whether we want to keep the gcode or not.
+
 	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eFemale))
 	{
 		passes.push_back( CInlayParams::eFemalePocket );	// Add this in before the female pass.
 	}
 
-	passes.push_back( CInlayParams::eFemale );	// Always.  We need this whether we want to keep the gcode or not.
-	passes.push_back( CInlayParams::eMale );
+	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eMale))
+	{
+		passes.push_back( CInlayParams::eMale );
+	}
+
 
     // Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
@@ -259,6 +589,9 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 	// a starting_depth of 0 would be assigned a depth value of '5'.
 	double max_depth_in_female_pass = 0.0;
 
+	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+	CCuttingTool *pClearanceTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_params.m_clearance_tool );
+
 	CCuttingTool::ToolNumber_t current_tool = this->m_cutting_tool_number;	// The chamfering bit.
 
     // We need to run through the female pass even if we don't want its gcode output.  This pass generates
@@ -270,11 +603,9 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 			if (current_tool != m_cutting_tool_number)
 			{
 				// Change tool to the chamfering bit.
-
-				CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-				if (pCuttingTool != NULL)
+				if (pChamferingBit != NULL)
 				{
-					gcode << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title).c_str() << _T(")\n");
+					gcode << _T("comment(") << PythonString(_T("tool change to ") + pChamferingBit->m_title).c_str() << _T(")\n");
 				} // End if - then
 
 				gcode << _T("tool_change( id=") << m_cutting_tool_number << _T(")\n");
@@ -286,11 +617,9 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 			if (current_tool != m_params.m_clearance_tool)
 			{
 				// Change tool to the endmill for pocket operations.
-
-				CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_params.m_clearance_tool );
-				if (pCuttingTool != NULL)
+				if (pClearanceTool != NULL)
 				{
-					gcode << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title).c_str() << _T(")\n");
+					gcode << _T("comment(") << PythonString(_T("tool change to ") + pClearanceTool->m_title).c_str() << _T(")\n");
 				} // End if - then
 
 				gcode << _T("tool_change( id=") << m_params.m_clearance_tool << _T(")\n");
@@ -319,7 +648,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 
 				if ((object->GetShortString() != NULL) && ((*itPass == m_params.m_pass) || (m_params.m_pass == CInlayParams::eBoth)))
 				{
-					gcode << _T("comment(") << PythonString(object->GetShortString()) << _T(")\n");
+					gcode << _T("comment(") << PythonString(object->GetShortString()).c_str() << _T(")\n");
 				}
 
 				try {
@@ -371,8 +700,138 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
                             }
                         } // End if - then
 
-						// For all the depths this DepthOp object is configured for...
-						std::list<double> depths = GetDepths();
+                        // We want to figure out what the maximum offset is at the maximum depth atainable
+                        // by the chamfering bit.  Within this smallest of wires, we need to pocket with
+                        // the clearance tool.  From this point outwards (or inwards for male operations)
+                        // we need to move sideways by half the chamfering bit's diameter until we hit the
+                        // outer edge.
+
+                        double angle = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
+                        double max_offset = (m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth) * tan(angle);
+
+                        // If this is too far for this sketch's geometry, figure out what the maximum offset is.
+                        max_offset = FindMaxOffset( max_offset, TopoDS::Wire(wire), m_depth_op_params.m_step_down * tan(angle) / 10.0 );
+
+                        double max_plunge_possible = max_offset * tan(angle);
+
+                        // We know how far down the bit could be plunged based on the bit's geometry as well
+                        // as the sketech's geometry.  See if this is too deep for our use.
+                        double max_plunge_for_chamfering_bit = pChamferingBit->m_params.m_cutting_edge_height * cos(angle);
+                        double plunge = max_plunge_possible;
+                        if (plunge > max_plunge_for_chamfering_bit)
+                        {
+                            plunge = max_plunge_for_chamfering_bit;
+                        }
+
+                        // We need to keep a record of the wires we've machined so that we can figure out what
+                        // shapenning moves (clearing out the corners) we need to make at the end.  These will
+                        // be between concave corners of adjacent edges and will move up to the corresponding
+                        // corners of the edge shape immediately above.
+
+                        Wires_t all_toolpath_wires;
+
+                        // Even though we didn't machine this top wire, we need to use it to generate the
+                        // corner movements.
+                        all_toolpath_wires.insert( std::make_pair( m_depth_op_params.m_start_depth, TopoDS::Wire(wire)));
+
+                        // What offset would this maximum plunge require?
+                        double offset_at_plunge = plunge * tan(angle);
+
+						typedef double Depth_t;
+						typedef std::list< Depth_t > Depths_t;
+						Depths_t depths;
+
+                        // machine at this depth around the wire in ever increasing loops until we hit the outside wire (offset = 0)
+                        for (double offset = offset_at_plunge; offset >= tolerance; /* increment within loop */ )
+                        {
+                            double max_depth = offset / tan(angle) * -1.0;
+                            double step_down = m_depth_op_params.m_step_down;
+                            if (m_depth_op_params.m_step_down > (-1.0 * max_depth))
+                            {
+                                step_down = max_depth * -1.0;
+                            }
+                            else
+                            {
+                                step_down = m_depth_op_params.m_step_down;
+                            }
+
+                            for (double depth = m_depth_op_params.m_start_depth - step_down; ((step_down > tolerance) && (depth >= max_depth)); /* increment within loop */ )
+                            {
+								if (std::find(depths.begin(), depths.end(), depth) == depths.end()) depths.push_back( depth );
+
+								if (*itPass == CInlayParams::eFemale)
+								{
+									// Machine here with the chamfering bit.
+									try {
+										BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
+										offset_wire.Perform(offset * -1.0);
+										if (offset_wire.IsDone())
+										{
+											TopoDS_Wire toolpath = TopoDS::Wire(offset_wire.Shape());
+											gp_Trsf translation;
+											translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,depth)));
+											BRepBuilderAPI_Transform translate(translation);
+											translate.Perform(toolpath, false);
+											toolpath = TopoDS::Wire(translate.Shape());
+
+											 gcode << CContour::GeneratePathFromWire(toolpath,
+																				last_position,
+																				pFixture,
+																				m_depth_op_params.m_clearance_height,
+																				m_depth_op_params.m_rapid_down_to_height ).c_str();
+
+											all_toolpath_wires.insert( std::make_pair( depth, toolpath ));
+										}
+									} // End try
+									catch (Standard_Failure & error) {
+										(void) error;	// Avoid the compiler warning.
+										Handle_Standard_Failure e = Standard_Failure::Caught();
+									} // End catch
+								} // End if - then
+
+                                if ((depth - step_down) > max_depth)
+                                {
+                                    depth -= step_down;
+                                }
+                                else
+                                {
+                                    if (depth > max_depth)
+                                    {
+                                        depth = max_depth;
+                                    }
+                                    else
+                                    {
+                                        depth = max_depth - 1.0;  // Force exit from loop
+                                    }
+                                }
+                            } // End for
+
+                            if ((offset - (pChamferingBit->m_params.m_diameter / 4.0)) > tolerance)
+                            {
+                                offset -= (pChamferingBit->m_params.m_diameter / 4.0);
+                            }
+                            else
+                            {
+                                if (offset > tolerance)
+                                {
+                                    offset = tolerance;
+                                }
+                                else
+                                {
+                                    offset = tolerance / 2.0;
+                                    break;
+                                }
+                            }
+                        } // End for
+
+						if (*itPass == CInlayParams::eFemale)
+						{
+							// Now run through the wires map and generate the toolpaths that will sharpen
+							// the concave corners formed between adjacent edges.
+							gcode << FormCorners( all_toolpath_wires, pChamferingBit );
+						} // End if - then
+
+                        // return(wxString(gcode.str().c_str()));
 
 						// If we're machining the male half, we need to start from the deepest setting and move back towards
 						// the top.  This doesn't make sense until you realise that the wire we're going to follow will have
@@ -384,7 +843,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
                         // For each depth value (with respect to the m_depth_op_params.m_start_depth value).  Consider this
                         // to be the value 'down' for each female machining operation.  The rotation to produce the male
                         // half makes all this work out correctly.
-						for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); previous_depth = *itDepth, itDepth++)
+						for (Depths_t::iterator itDepth = depths.begin(); itDepth != depths.end(); previous_depth = *itDepth, itDepth++)
 						{
 						    // What radius does this tapered cutting tool have at this depth of cut.  This is how we can
 						    // get right up to the lines in the corners during shallow cuts.
@@ -460,6 +919,9 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 									BRepBuilderAPI_Transform translate(translation);
 									translate.Perform(tool_path_wire, false);
 									tool_path_wire = TopoDS::Wire(translate.Shape());
+
+									double d1 = *itDepth;
+									double d2 = max_depth_in_female_pass;
 								}
 
 								if (*itPass == CInlayParams::eFemalePocket)
@@ -480,7 +942,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 										pPocket->m_depth_op_params.m_start_depth = previous_depth;
 										pPocket->m_depth_op_params.m_final_depth = *itDepth;
 										pPocket->m_speed_op_params = m_speed_op_params;
-										gcode << pPocket->GenerateGCode(pFixture);
+										gcode << pPocket->GenerateGCode(pFixture).c_str();
 										delete pPocket;		// We don't need it any more.
 									}
 								}
@@ -516,7 +978,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
                                                                             last_position,
                                                                             pFixture,
                                                                             m_depth_op_params.m_clearance_height,
-                                                                            m_depth_op_params.m_rapid_down_to_height );
+                                                                            m_depth_op_params.m_rapid_down_to_height ).c_str();
                                 } // End if - then
 							} // End if - then
 						} // End for
@@ -673,7 +1135,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 		} // End if - then
 	} // End for
 
-	return(gcode);
+	return(wxString(gcode.str().c_str()));
 }
 
 
