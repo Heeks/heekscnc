@@ -329,7 +329,14 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	const double clearance_height,
 	const double rapid_down_to_height )
 {
-	wxString gcode;
+#ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode<<std::setprecision(10);
+
 	double tolerance = heeksCAD->GetTolerance();
 
     std::vector<TopoDS_Edge> edges = SortEdges(wire);
@@ -636,7 +643,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
 	last_position.SetZ( clearance_height );
 
-	return(gcode);
+	return(wxString(gcode.str().c_str()));
 }
 
 
@@ -650,7 +657,14 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 {
 	ReloadPointers();
 
-	wxString gcode;
+#ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode<<std::setprecision(10);
+
 	CDepthOp::AppendTextToProgram( pFixture );
 
 	unsigned int number_of_bad_sketches = 0;
@@ -676,7 +690,7 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
             // The wire(s) represent the sketch objects for a tool path.
             if (object->GetShortString() != NULL)
             {
-                gcode << _T("comment(") << PythonString(object->GetShortString()) << _T(")\n");
+                gcode << _T("comment(") << PythonString(object->GetShortString()).c_str() << _T(")\n");
             }
 
             try {
@@ -734,7 +748,7 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
                                                             last_position,
                                                             pFixture,
                                                             m_depth_op_params.m_clearance_height,
-                                                            m_depth_op_params.m_rapid_down_to_height );
+                                                            m_depth_op_params.m_rapid_down_to_height ).c_str();
                         } // End if - then
                     } // End for
                 } // End for
@@ -747,7 +761,7 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
         } // End if - else
     } // End for
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(gcode.c_str());
+	theApp.m_program_canvas->m_textCtrl->AppendText(gcode.str().c_str());
 }
 
 
