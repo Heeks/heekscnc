@@ -524,10 +524,10 @@ void CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->AppendText(_T("import sys\n"));
 
 #ifndef WIN32
-	theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,") + PythonString(_T("/usr/local/lib/heekscnc/")) + wxString(_T(")\n")));
+	theApp.m_program_canvas->AppendText(wxString(wxString(_T("sys.path.insert(0,")) + PythonString(_T("/usr/local/lib/heekscnc/")) + wxString(_T(")\n"))).c_str());
 #endif
 
-	theApp.m_program_canvas->AppendText(wxString(_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()) + wxString(_T(")\n")));
+	theApp.m_program_canvas->AppendText(wxString(_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()).c_str() + wxString(_T(")\n")));
 	theApp.m_program_canvas->AppendText(_T("import math\n"));
 
 	// kurve related things
@@ -591,10 +591,10 @@ void CProgram::RewritePythonProgram()
 	} // End if - else
 
 	// output file
-	theApp.m_program_canvas->AppendText(wxString(_T("output(")) + PythonString(GetOutputFileName()) + wxString(_T(")\n")));
+	theApp.m_program_canvas->AppendText(wxString(_T("output(")) + PythonString(GetOutputFileName()).c_str() + wxString(_T(")\n")));
 
 	// begin program
-	theApp.m_program_canvas->AppendText(wxString(_T("program_begin(123, ")) + PythonString(_T("Test program")) + wxString(_T(")\n")));
+	theApp.m_program_canvas->AppendText(wxString((_T("program_begin(123, ")) + PythonString(_T("Test program")) + wxString(_T(")\n"))).c_str());
 	theApp.m_program_canvas->AppendText(_T("absolute()\n"));
 	if(m_units > 25.0)
 	{
@@ -670,6 +670,8 @@ void CProgram::RewritePythonProgram()
 #else
 						std::ostringstream l_ossValue;
 #endif
+                        l_ossValue.imbue(std::locale("C"));
+                        l_ossValue<<std::setprecision(10);
 
 						CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
 						if (pCuttingTool != NULL)
@@ -678,8 +680,8 @@ void CProgram::RewritePythonProgram()
 						} // End if - then
 
 
-						l_ossValue << "tool_change( id=" << ((COp *) object)->m_cutting_tool_number << ")\n";
-						theApp.m_program_canvas->AppendText(wxString(l_ossValue.str().c_str()).c_str());
+						l_ossValue << _T("tool_change( id=") << ((COp *) object)->m_cutting_tool_number << _T(")\n");
+						theApp.m_program_canvas->AppendText(l_ossValue.str().c_str());
 						current_tool = ((COp *) object)->m_cutting_tool_number;
 					} // End if - then
 

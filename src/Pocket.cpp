@@ -107,9 +107,15 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 
 static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_to_use = 0)
 {
-	wxString gcode;
+#ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode << std::setprecision(10);
 
-	gcode << wxString::Format(_T("a%d = area.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id);
+	gcode << wxString::Format(_T("a%d = area.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id).c_str();
 
 	bool started = false;
 
@@ -208,11 +214,11 @@ static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int 
 					{
 						CNCPoint pnt = pFixture->Adjustment( l_itPoint->second );
 
-						gcode << (_T("area.add_point(a"));
+						gcode << _T("area.add_point(a");
 						gcode << (id_to_use > 0 ? id_to_use : sketch->m_id);
 						gcode << _T(", ") << l_itPoint->first << _T(", ");
 						gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
-						gcode << (_T(", ")) << centre.X(true) << (_T(", ")) << centre.Y(true) << (_T(")\n"));
+						gcode << _T(", ") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")\n");
 					} // End for
 				}
 			} // End if - else
@@ -227,7 +233,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int 
 	}
 
 	gcode << _T("\n");
-	return(gcode);
+	return(wxString(gcode.str().c_str()));
 }
 
 void CPocket::AppendTextToProgram(const CFixture *pFixture)
@@ -238,7 +244,13 @@ void CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 wxString CPocket::GenerateGCode(const CFixture *pFixture)
 {
-	wxString gcode;
+#ifdef UNICODE
+	std::wostringstream gcode;
+#else
+    std::ostringstream gcode;
+#endif
+    gcode.imbue(std::locale("C"));
+	gcode<<std::setprecision(10);
 
     ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
 
@@ -249,7 +261,7 @@ wxString CPocket::GenerateGCode(const CFixture *pFixture)
 		return(_T(""));
 	} // End if - then
 
-	gcode << CDepthOp::GenerateGCode(pFixture);
+	gcode << CDepthOp::GenerateGCode(pFixture).c_str();
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
@@ -321,7 +333,7 @@ wxString CPocket::GenerateGCode(const CFixture *pFixture)
 		}
 	} // End for
 
-	return(gcode);
+	return(wxString(gcode.str().c_str()));
 
 } // End GenerateGCode() method
 

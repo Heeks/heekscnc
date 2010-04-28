@@ -14,6 +14,7 @@
 #include "CuttingTool.h"
 #include <list>
 #include <vector>
+#include <map>
 #include "CNCPoint.h"
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Edge.hxx>
@@ -88,6 +89,10 @@ public:
 	typedef std::pair< SymbolType_t, SymbolId_t > Symbol_t;
 	typedef std::list< Symbol_t > Symbols_t;
 
+	typedef double Depth_t;
+    typedef std::map<Depth_t, TopoDS_Wire> Wires_t;
+	typedef std::map<CNCPoint, std::set<CNCVector> > Corners_t;
+
 public:
 	//	These are references to the CAD elements whose position indicate where the Drilling Cycle begins.
 	//	If the m_params.m_sort_drilling_locations is false then the order of symbols in this list should
@@ -152,6 +157,10 @@ public:
 
 	static std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire );
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
+	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
+	wxString FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) const;
+	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners ) const;
+	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);

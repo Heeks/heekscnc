@@ -187,7 +187,7 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 			ss << "comment(" << PythonString(_("immediately above the protrusion we are finding the centre of.")).c_str() << ")\n";
 			ss << "comment(" << PythonString(_("This program then jogs out and down in two opposite directions")).c_str() << ")\n";
 			ss << "comment(" << PythonString(_("before probing back towards the centre point looking for the")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("protrusion.")) << ")\n";
+			ss << "comment(" << PythonString(_("protrusion.")).c_str() << ")\n";
 			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 			ss.str(_T(""));
 
@@ -388,8 +388,8 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate centre point.
 
-	ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")) << ")\n";
-	ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")) << ")\n";
+	ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
+	ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
 	ss << "comment('immediately above the ";
 
 	if (m_number_of_edges == 1)
@@ -1474,7 +1474,7 @@ void CProbing::GeneratePythonPreamble()
         theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
     #endif
 
-        theApp.m_program_canvas->AppendText(wxString(_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()) + wxString(_T(")\n")));
+        theApp.m_program_canvas->AppendText(wxString((_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()) + wxString(_T(")\n"))).c_str());
         theApp.m_program_canvas->AppendText(_T("import math\n"));
 
 
@@ -1492,8 +1492,12 @@ void CProbing::GeneratePythonPreamble()
 			theApp.m_program_canvas->AppendText(_T("\n"));
 		} // End if - else
 
-		// output file
-		theApp.m_program_canvas->AppendText(_T("output(") + PythonString( this->GetOutputFileName(_T(".tap"), false)) + _T(")\n"));
+        {
+            // output file
+            wxString temp;
+            temp << _T("output(") << PythonString( this->GetOutputFileName(_T(".tap"), false)).c_str() << _T(")\n");
+            theApp.m_program_canvas->AppendText(temp.c_str());
+        }
 
 		// begin program
 		theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
