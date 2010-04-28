@@ -828,7 +828,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 						{
 							// Now run through the wires map and generate the toolpaths that will sharpen
 							// the concave corners formed between adjacent edges.
-							gcode << FormCorners( all_toolpath_wires, pChamferingBit );
+							gcode << FormCorners( all_toolpath_wires, pChamferingBit ).c_str();
 						} // End if - then
 
                         // return(wxString(gcode.str().c_str()));

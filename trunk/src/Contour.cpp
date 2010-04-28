@@ -559,7 +559,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                     }
 
 					gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-                    gcode <<_T( "rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
+                    gcode << _T("rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
                     gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
                     gcode << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
 
@@ -627,7 +627,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 							CNCPoint end(p);
 
 							gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-                            gcode <<_T( "rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
+                            gcode << _T("rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
                             gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
                             gcode << _T("feed(z=") << end.Z(true) << _T(")\n");
 
