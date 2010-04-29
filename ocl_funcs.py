@@ -2,7 +2,24 @@ import ocl
 import math
 from nc.nc import *
 
-def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0):
+def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0):
+   mm = True
+   if math.fabs(units)>0.000000001:
+      # ocl works in mm, so convert all values to mm
+      mm = False
+      tool_diameter *= units
+      corner_radius *= units
+      step_over *= units
+      x0 *= units
+      x1 *= units
+      y0 *= units
+      y1 *= units
+      mat_allowance *= units
+      clearance *= units
+      rapid_down_to_height *= units
+      start_depth *= units
+      step_down *= units
+      final_depth *= units
    s = ocl.STLSurf(filepath)
    dcf = ocl.PathDropCutterFinish(s)
    cutter = ocl.CylCutter()
@@ -60,17 +77,36 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
             p.z = p.z + mat_allowance
             if i == 0 or style == 0:
                if n == 0:
-                  rapid(p.x, p.y)
+                  if mm: rapid(p.x, p.y)
+                  else: rapid(p.x / units, p.y / units)
                   rz = rapid_to
                   if p.z > z1: rz = p.z + incremental_rapid_to
-                  rapid(z = rz)
-                  feed(z = p.z)
+                  if mm:
+                     rapid(z = rz)
+                     feed(z = p.z)
+                  else:
+                     rapid(z = rz / units)
+                     feed(z = p.z / units)
                else:
-                  feed(p.x, p.y, p.z)
+                  if mm:
+                     feed(p.x, p.y, p.z)
+                  else:
+                     feed(p.x / units, p.y / units, p.z / units)
             else:
-               if n > 0: feed(p.x, p.y, p.z)
+               if n > 0:
+                  if mm:
+                     feed(p.x, p.y, p.z)
+                  else:
+                     feed(p.x / units, p.y / units, p.z / units)
             n = n + 1
          if style == 0: # one way
-            rapid(z = clearance)
+            if mm:
+               rapid(z = clearance)
+            else:
+               rapid(z = clearance / units)
       if style != 0: # back and forth
-         rapid(z = clearance)
+         if mm:
+            rapid(z = clearance)
+         else:
+            rapid(z = clearance / units)
+

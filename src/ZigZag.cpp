@@ -228,10 +228,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
     wxFileName filepath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("zigzag%d.stl"), number_for_stl_file).c_str() );
 	number_for_stl_file++;
 
-	bool mm = fabs(theApp.m_program->m_units - 1.0) < 0.00000001;
-	double scale = 1/theApp.m_program->m_units;
-
-	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01, mm ? NULL: (&scale));
+	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
 
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
@@ -251,7 +248,7 @@ void CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
 			gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
-	ss << "ocl_funcs.zigzag(" << PythonString(filepath.GetFullPath()).c_str() << ", tool_diameter, corner_radius, " << m_params.m_step_over / theApp.m_program->m_units << ", " << min.X() / theApp.m_program->m_units << ", " << max.X() / theApp.m_program->m_units << ", " << min.Y() / theApp.m_program->m_units << ", " << max.Y() / theApp.m_program->m_units << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance / theApp.m_program->m_units << ", " << m_params.m_style << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth)\n";
+	ss << "ocl_funcs.zigzag(" << PythonString(filepath.GetFullPath()).c_str() << ", tool_diameter, corner_radius, " << m_params.m_step_over / theApp.m_program->m_units << ", " << min.X() / theApp.m_program->m_units << ", " << max.X() / theApp.m_program->m_units << ", " << min.Y() / theApp.m_program->m_units << ", " << max.Y() / theApp.m_program->m_units << ", " << ((m_params.m_direction == 0) ? "'X'" : "'Y'") << ", " << m_params.m_material_allowance / theApp.m_program->m_units << ", " << m_params.m_style << ", clearance, rapid_down_to_height, start_depth, step_down, final_depth, "<<theApp.m_program->m_units<<")\n";
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
