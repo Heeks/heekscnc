@@ -27,8 +27,7 @@ public:
     typedef enum {
 		eFemale,		// No mirroring and take depths from DepthOp settings.
 		eMale,			// Reverse depth values (bottom up measurement)
-		eBoth,
-		eFemalePocket,	// Just the pockets part (before the chamfering bit is used).
+		eBoth
 	} eInlayPass_t;
 
 	typedef enum {
@@ -90,7 +89,9 @@ public:
 	typedef std::list< Symbol_t > Symbols_t;
 
 	typedef double Depth_t;
-    typedef std::map<Depth_t, TopoDS_Wire> Wires_t;
+    typedef std::map<Depth_t, TopoDS_Wire> Valley_t;
+	typedef std::list< Valley_t > Valleys_t;
+
 	typedef std::map<CNCPoint, std::set<CNCVector> > Corners_t;
 
 public:
@@ -158,10 +159,17 @@ public:
 	static std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire );
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
 	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
-	wxString FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) const;
+	wxString FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) const;
 	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
+	Valleys_t DefineValleys(const CFixture *pFixture);
+
+	wxString FormValleyWalls( Valleys_t valleys, const CFixture *pFixture  );
+	wxString FormValleyPockets( Valleys_t valleys, const CFixture *pFixture  );
+	wxString FormMountainWalls( Valleys_t valleys, const CFixture *pFixture  );
+	wxString FormMountainPockets( Valleys_t mouvalleysntains, const CFixture *pFixture, const bool only_above_mountains  );
+	
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);
     static gp_Pnt GetEnd(const TopoDS_Edge &edge);

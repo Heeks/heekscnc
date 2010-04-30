@@ -51,7 +51,7 @@ extern CHeeksCADInterface* heeksCAD;
 void CInlayParams::set_initial_values()
 {
 	CNCConfig config(ConfigPrefix());
-	config.Read(_T("BoarderWidth"), (double *) &m_boarder_width, 25.4);
+	config.Read(_T("BoarderWidth"), (double *) &m_boarder_width, 0.0);
 	config.Read(_T("ClearanceTool"), &m_clearance_tool, 0);
 	config.Read(_T("Pass"), (int *) &m_pass, (int) eBoth );
 	config.Read(_T("MirrorAxis"), (int *) &m_mirror_axis, (int) eXAxis );
@@ -250,8 +250,6 @@ double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
 		std::vector<CNCVector> vectors;
 		std::copy( _vectors.begin(), _vectors.end(), std::inserter( vectors, vectors.begin() ) );
 
-		double angle = vectors[0].AngleWithRef( vectors[1], reference ) / (2.0 * PI) * 360.0;
-
 		// We should be able to project a vector at half the angle between these two vectors (plus 180 degrees)
 		// and up at the angle of the cutting tool.  We should find a known coordinate in this direction (in fact
 		// there may be many).  This vector is the toolpath we want to follow to sharpen the corners.
@@ -293,15 +291,15 @@ double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
 
 CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners ) const
 {
-	const double tolerance = 0.000001;
-
+	/*
+	// Test cases.
 	{
 		std::set<CNCVector> vs;
 		vs.insert( gp_Vec(1,0,0) ); vs.insert( gp_Vec(0,1,0) );
 		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
 		if (fabs(angle - (45.0 + 180.0)) > tolerance)
 		{
-			int i=3;
+			bool badthings = true;
 		}
 	}
 
@@ -311,7 +309,7 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
 		if (fabs(angle - (135.0 + 180.0)) > tolerance)
 		{
-			int i=3;
+			bool badthings = true;
 		}
 	}
 
@@ -321,7 +319,7 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
 		if (fabs(angle - 135.0) > tolerance)
 		{
-			int i=3;
+			bool badthings = true;
 		}
 	}
 
@@ -331,9 +329,10 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 		double angle = CornerAngle( vs ) / (2.0 * PI) * 360.0;
 		if (fabs(angle - 45.0) > tolerance)
 		{
-			int i=3;
+			bool badthings = true;
 		}
 	}
+	*/
 
 	Corners_t results;
 
@@ -355,10 +354,12 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 			double angle = CornerAngle(itCorner->second);
 			if ((angle >= reference_angle) && ((angle - reference_angle) < tolerance))
 			{
+				// Todo, check that the corners lay along the same line as the reference corner's mid-angle.
 				results.insert(*itCorner);
 			}
 			else if ((angle <= reference_angle) && ((reference_angle - angle) < tolerance))
 			{
+				// Todo, check that the corners lay along the same line as the reference corner's mid-angle.
 				results.insert(*itCorner);
 			}
 		}
@@ -375,7 +376,7 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
     of each wire above it.  This will sharpen the concave corners formed
     between adjacent edges.
  */
-wxString CInlay::FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) const
+wxString CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) const
 {
 #ifdef UNICODE
 	std::wostringstream gcode;
@@ -393,7 +394,7 @@ wxString CInlay::FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) co
 	double theta = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
 	double max_plunge_depth = (pChamferingBit->m_params.m_diameter / 2.0) * tan(theta);
 
-    for (Wires_t::iterator itWire = wires.begin(); itWire != wires.end(); itWire++)
+    for (Valley_t::iterator itWire = wires.begin(); itWire != wires.end(); itWire++)
     {
         for(BRepTools_WireExplorer expEdge(TopoDS::Wire(itWire->second)); expEdge.More(); expEdge.Next())
         {
@@ -463,21 +464,28 @@ wxString CInlay::FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) co
 			// to that one.
 
 			CNCPoint top_corner(*itCoordinate);
+			CNCPoint bottom_corner(*itCoordinate);
+
 			for (Corners_t::iterator itCorner = similar.begin(); itCorner != similar.end(); itCorner++)
 			{
 				if (itCorner->first.Z() > top_corner.Z())
 				{
 					top_corner = itCorner->first;
 				} // End if - then
+
+				if (itCorner->first.Z() < bottom_corner.Z())
+				{
+					bottom_corner = itCorner->first;
+				} // End if - then
 			} // End for
 
-			if ((top_corner.Z() > itCoordinate->Z()) && ((top_corner.Z() - itCoordinate->Z()) <= max_plunge_depth))
+			if ((top_corner.Z() > bottom_corner.Z()) && ((top_corner.Z() - bottom_corner.Z()) <= max_plunge_depth))
 			{
 				// Move to the top corner and back again.
 				gcode << _T("comment('sharpen corner')\n");
-				gcode << _T("rapid(x=") << itCoordinate->X(true) << _T(", y=") << itCoordinate->Y(true) << _T(", z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-				gcode << _T("rapid(x=") << itCoordinate->X(true) << _T(", y=") << itCoordinate->Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-				gcode << _T("feed(x=") << itCoordinate->X(true) << _T(", y=") << itCoordinate->Y(true) << _T(", z=") << itCoordinate->Z(true) << _T(")\n");
+				gcode << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+				gcode << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+				gcode << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
 				gcode << _T("feed(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << top_corner.Z(true) << _T(")\n");
 				gcode << _T("rapid(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 			} // End if - then
@@ -488,6 +496,575 @@ wxString CInlay::FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) co
 }
 
 
+/**
+	This method returns the toolpath wires for all valleys of all sketches.  Each valley
+	includes a set of closed wires that surround the valley at a particular depth (height)
+	setting.
+ */
+CInlay::Valleys_t CInlay::DefineValleys(const CFixture *pFixture)
+{
+	Valleys_t valleys;
+
+	ReloadPointers();
+
+	double tolerance = heeksCAD->GetTolerance();
+
+	typedef double Depth_t;
+
+	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+
+    // For all selected sketches.
+	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
+	{
+	    // Convert them to a list of wire objects.
+		std::list<TopoDS_Shape> wires;
+		if (heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
+		{
+			// The wire(s) represent the sketch objects for a tool path.
+			try {
+			    // For all wires in this sketch...
+				for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
+				{
+					TopoDS_Shape& wire_to_fix = *It2;
+					ShapeFix_Wire fix;
+					fix.Load( TopoDS::Wire(wire_to_fix) );
+					fix.FixReorder();
+
+					TopoDS_Shape wire = fix.Wire();
+
+                    // Rotate to align with the fixture.
+					BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
+					transform.Perform(wire, false);
+					wire = transform.Shape();
+    
+                    // We want to figure out what the maximum offset is at the maximum depth atainable
+                    // by the chamfering bit.  Within this smallest of wires, we need to pocket with
+                    // the clearance tool.  From this point outwards (or inwards for male operations)
+                    // we need to move sideways by half the chamfering bit's diameter until we hit the
+                    // outer edge.
+
+                    double angle = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
+                    double max_offset = (m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth) * tan(angle);
+
+                    // If this is too far for this sketch's geometry, figure out what the maximum offset is.
+                    max_offset = FindMaxOffset( max_offset, TopoDS::Wire(wire), m_depth_op_params.m_step_down * tan(angle) / 10.0 );
+
+                    double max_plunge_possible = max_offset * tan(angle);
+
+                    // We know how far down the bit could be plunged based on the bit's geometry as well
+                    // as the sketech's geometry.  See if this is too deep for our use.
+                    double max_plunge_for_chamfering_bit = pChamferingBit->m_params.m_cutting_edge_height * cos(angle);
+                    double plunge = max_plunge_possible;
+                    if (plunge > max_plunge_for_chamfering_bit)
+                    {
+                        plunge = max_plunge_for_chamfering_bit;
+                    }
+
+                    // We need to keep a record of the wires we've machined so that we can figure out what
+                    // shapenning moves (clearing out the corners) we need to make at the end.  These will
+                    // be between concave corners of adjacent edges and will move up to the corresponding
+                    // corners of the edge shape immediately above.
+
+                    Valley_t valley;
+
+                    // Even though we didn't machine this top wire, we need to use it to generate the
+                    // corner movements.
+                    valley.insert( std::make_pair( m_depth_op_params.m_start_depth, TopoDS::Wire(wire)));
+
+                    // What offset would this maximum plunge require?
+                    double offset_at_plunge = plunge * tan(angle);
+
+					typedef double Depth_t;
+					typedef std::list< Depth_t > Depths_t;
+					Depths_t depths;
+
+                    // machine at this depth around the wire in ever increasing loops until we hit the outside wire (offset = 0)
+                    for (double offset = offset_at_plunge; offset >= tolerance; /* increment within loop */ )
+                    {
+                        double max_depth = offset / tan(angle) * -1.0;
+                        double step_down = m_depth_op_params.m_step_down;
+                        if (m_depth_op_params.m_step_down > (-1.0 * max_depth))
+                        {
+                            step_down = max_depth * -1.0;
+                        }
+                        else
+                        {
+                            step_down = m_depth_op_params.m_step_down;
+                        }
+
+                        for (double depth = m_depth_op_params.m_start_depth - step_down; ((step_down > tolerance) && (depth >= max_depth)); /* increment within loop */ )
+                        {
+							if (std::find(depths.begin(), depths.end(), depth) == depths.end()) depths.push_back( depth );
+
+							// Machine here with the chamfering bit.
+							try {
+								BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
+								offset_wire.Perform(offset * -1.0);
+								if (offset_wire.IsDone())
+								{
+									TopoDS_Wire toolpath = TopoDS::Wire(offset_wire.Shape());
+									gp_Trsf translation;
+									translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,depth)));
+									BRepBuilderAPI_Transform translate(translation);
+									translate.Perform(toolpath, false);
+									toolpath = TopoDS::Wire(translate.Shape());
+
+									valley.insert( std::make_pair( depth, toolpath ));
+								} // End if - then
+							} // End try
+							catch (Standard_Failure & error) {
+								(void) error;	// Avoid the compiler warning.
+								Handle_Standard_Failure e = Standard_Failure::Caught();
+							} // End catch
+
+                            if ((depth - step_down) > max_depth)
+                            {
+                                depth -= step_down;
+                            }
+                            else
+                            {
+                                if (depth > max_depth)
+                                {
+                                    depth = max_depth;
+                                }
+                                else
+                                {
+                                    depth = max_depth - 1.0;  // Force exit from loop
+                                }
+                            }
+                        } // End for
+
+                        if ((offset - (pChamferingBit->m_params.m_diameter / 4.0)) > tolerance)
+                        {
+                            offset -= (pChamferingBit->m_params.m_diameter / 4.0);
+                        }
+                        else
+                        {
+                            if (offset > tolerance)
+                            {
+                                offset = tolerance;
+                            }
+                            else
+                            {
+                                offset = tolerance / 2.0;
+                                break;
+                            }
+                        }
+                    } // End for
+
+					valleys.push_back(valley);
+				} // End for
+			} // End try
+			catch (Standard_Failure & error) {
+					(void) error;	// Avoid the compiler warning.
+					Handle_Standard_Failure e = Standard_Failure::Caught();
+			} // End catch
+		} // End if - then
+	} // End for
+
+	return(valleys);
+
+} // End DefineValleys() method
+
+
+wxString CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+{
+	wxString gcode;
+
+	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+	
+	CNCPoint last_position(0,0,0);
+	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
+	{
+		std::list<double> depths;
+		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		{
+			depths.push_back(itContour->first);
+		} // End for
+
+		depths.sort();
+		depths.reverse();
+
+		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
+		{
+			gcode << CContour::GeneratePathFromWire((*itValley)[*itDepth],
+													last_position,
+													pFixture,
+													m_depth_op_params.m_clearance_height,
+													m_depth_op_params.m_rapid_down_to_height ).c_str();
+		} // End for
+
+		// Now run through the wires map and generate the toolpaths that will sharpen
+		// the concave corners formed between adjacent edges.
+		gcode << FormCorners( *itValley, pChamferingBit ).c_str();
+	} // End for
+
+	return(gcode);
+
+} // End FormValleyWalls() method
+
+
+wxString CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+{
+	wxString gcode;
+
+	CNCPoint last_position(0,0,0);
+	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
+	{
+		std::list<double> depths;
+		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		{
+			depths.push_back(itContour->first);
+		} // End for
+
+		depths.sort();
+		depths.reverse();
+
+		double previous_depth = m_depth_op_params.m_start_depth;
+		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
+		{
+			// We need to generate a pocket operation based on this tool_path_wire
+			// and using the Clearance Tool.  Without this, the chamfering bit would need
+			// to machine out the centre of the valley as well as the walls.
+
+			HeeksObj *pBoundary = heeksCAD->NewSketch();
+			if (heeksCAD->ConvertWireToSketch(TopoDS::Wire((*itValley)[*itDepth]), pBoundary, heeksCAD->GetTolerance()))
+			{
+				std::list<HeeksObj *> objects;
+				objects.push_back(pBoundary);
+
+				CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
+				pPocket->m_depth_op_params = m_depth_op_params;
+				pPocket->m_depth_op_params.m_rapid_down_to_height = previous_depth + 1;
+				pPocket->m_depth_op_params.m_start_depth = previous_depth;
+				pPocket->m_depth_op_params.m_final_depth = *itDepth;
+				pPocket->m_speed_op_params = m_speed_op_params;
+				gcode << pPocket->GenerateGCode(pFixture).c_str();
+				delete pPocket;		// We don't need it any more.
+			}
+		} // End for
+	} // End for
+
+	return(gcode);
+
+} // End FormValleyPockets() method
+
+
+wxString CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *pFixture, const bool only_above_mountains  )
+{
+	wxString gcode;
+
+	// Use the parameters to determine if we're going to mirror the selected
+    // sketches around the X or Y axis.
+	gp_Ax1 mirror_axis;
+	if (m_params.m_mirror_axis == CInlayParams::eXAxis)
+	{
+        mirror_axis = gp_Ax1(gp_Pnt(0,0,0), gp_Dir(1,0,0));
+	}
+	else
+	{
+	    mirror_axis = gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,1,0));
+	}
+
+	// Find the maximum valley depth for all valleys.  Once the valleys are rotated (upside-down), this
+	// will become the maximum mountain height.  This, in turn, will be used as the top-most surface
+	// of the male half.  i.e. the '0' height when machining the male half.
+	double max_valley_depth = 0.0;
+	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
+	{
+		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		{
+			if (itContour->first < max_valley_depth)
+			{
+				max_valley_depth = itContour->first;
+			} // End if - then
+		} // End for
+	} // End for
+
+	double max_mountain_height = max_valley_depth * -1.0;
+
+	typedef std::list<HeeksObj *> MirroredSketches_t;
+	MirroredSketches_t mirrored_sketches;
+
+	std::list<HeeksObj *> pockets;
+
+	CBox bounding_box;
+
+	// For all valleys.
+	CNCPoint last_position(0,0,0);
+	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
+	{
+		// For this valley, see if it's shorter than the tallest valley.  If it is, we need to pocket
+		// out the material directly above the valley (down to this valley's peak).  This clears the way
+		// to start forming this valley's walls.
+
+		std::list<double> depths;
+		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		{
+			depths.push_back(itContour->first);
+		} // End for
+
+		depths.sort();
+
+		double mountain_height = *(depths.begin()) * -1.0;
+
+		depths.reverse();
+		double base_height = *(depths.begin()) * -1.0;
+
+		// We need to generate a pocket operation based on this tool_path_wire
+		// and using the Clearance Tool.  Without this, the chamfering bit would need
+		// to machine out the centre of the valley as well as the walls.
+
+		// It's the male half we're generating.  Rotate the wire around one
+	    // of the two axes so that we end up machining the reverse of the
+	    // female half.
+		gp_Trsf rotation;
+		TopoDS_Wire tool_path_wire((*itValley)[base_height * -1.0]);
+
+		rotation.SetRotation( mirror_axis, PI );
+		BRepBuilderAPI_Transform rotate(rotation);
+		rotate.Perform(tool_path_wire, false);
+		tool_path_wire = TopoDS::Wire(rotate.Shape());
+
+		HeeksObj *pBoundary = heeksCAD->NewSketch();
+		if (heeksCAD->ConvertWireToSketch(tool_path_wire, pBoundary, heeksCAD->GetTolerance()))
+		{
+			// Make sure this sketch is oriented counter-clockwise.  We will ensure the
+			// bounding sketch is oriented clockwise so that the pocket operation
+			// removes the intervening material.
+			for (int i=0; (heeksCAD->GetSketchOrder(pBoundary) != SketchOrderTypeCloseCCW) && (i<4); i++)
+			{
+				// At least try to make them all consistently oriented.
+				heeksCAD->ReOrderSketch( pBoundary, SketchOrderTypeCloseCCW );
+			} // End for
+
+			std::list<HeeksObj *> objects;
+			objects.push_back(pBoundary);
+
+			CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
+			pPocket->m_depth_op_params = m_depth_op_params;
+			pPocket->m_depth_op_params.m_start_depth = 0.0;
+			pPocket->m_depth_op_params.m_final_depth = (-1.0 * (max_mountain_height - mountain_height));
+			pPocket->m_speed_op_params = m_speed_op_params;
+
+			if (only_above_mountains)
+			{
+				gcode << pPocket->GenerateGCode(pFixture).c_str();
+			}
+
+			CBox box;
+			pBoundary->GetBox(box);
+			bounding_box.Insert(box);
+
+			mirrored_sketches.push_back(pBoundary);
+			pockets.push_back(pPocket);
+		}
+	} // End for
+
+
+	if (! only_above_mountains)
+	{
+		// Make sure the bounding box is one tool radius larger than all the sketches that
+		// have been mirrored.  We need to create one large sketch with the bounding box
+		// 'order' in one direction and all the mirrored sketch's orders in the other
+		// direction.  We can then create a pocket operation to remove the material between
+		// the mirrored sketches down to the inverted 'top surface' depth.
+
+		double boarder_width = m_params.m_boarder_width;
+		if ((CCuttingTool::Find(m_params.m_clearance_tool) != NULL) &&
+			(boarder_width <= (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius())))
+		{
+			boarder_width = (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius());
+			boarder_width += 1; // Make sure there really is room.  Add 1mm to be sure.
+		}
+		HeeksObj* bounding_sketch = heeksCAD->NewSketch();
+
+		double start[3];
+		double end[3];
+
+		// left edge
+		start[0] = bounding_box.MinX() - boarder_width;
+		start[1] = bounding_box.MinY() - boarder_width;
+		start[2] = bounding_box.MinZ();
+
+		end[0] = bounding_box.MinX() - boarder_width;
+		end[1] = bounding_box.MaxY() + boarder_width;
+		end[2] = bounding_box.MinZ();
+
+		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
+
+		// top edge
+		start[0] = bounding_box.MinX() - boarder_width;
+		start[1] = bounding_box.MaxY() + boarder_width;
+		start[2] = bounding_box.MinZ();
+
+		end[0] = bounding_box.MaxX() + boarder_width;
+		end[1] = bounding_box.MaxY() + boarder_width;
+		end[2] = bounding_box.MinZ();
+
+		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
+
+		// right edge
+		start[0] = bounding_box.MaxX() + boarder_width;
+		start[1] = bounding_box.MaxY() + boarder_width;
+		start[2] = bounding_box.MinZ();
+
+		end[0] = bounding_box.MaxX() + boarder_width;
+		end[1] = bounding_box.MinY() - boarder_width;
+		end[2] = bounding_box.MinZ();
+
+		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
+
+		// bottom edge
+		start[0] = bounding_box.MaxX() + boarder_width;
+		start[1] = bounding_box.MinY() - boarder_width;
+		start[2] = bounding_box.MinZ();
+
+		end[0] = bounding_box.MinX() - boarder_width;
+		end[1] = bounding_box.MinY() - boarder_width;
+		end[2] = bounding_box.MinZ();
+
+		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
+
+		// Make sure this boarder sketch is oriented clockwise.  We will ensure the
+		// enclosed sketches are oriented counter-clockwise so that the pocket operation
+		// removes the intervening material.
+		for (int i=0; (heeksCAD->GetSketchOrder(bounding_sketch) != SketchOrderTypeCloseCW) && (i<4); i++)
+		{
+			// At least try to make them all consistently oriented.
+			heeksCAD->ReOrderSketch( bounding_sketch, SketchOrderTypeCloseCW );
+		} // End for
+
+		for (MirroredSketches_t::iterator itObject = mirrored_sketches.begin(); itObject != mirrored_sketches.end(); itObject++)
+		{
+			std::list<HeeksObj*> new_lines_and_arcs;
+			for (HeeksObj *child = (*itObject)->GetFirstChild(); child != NULL; child = (*itObject)->GetNextChild())
+			{
+				new_lines_and_arcs.push_back(child);
+			}
+
+			((ObjList *)bounding_sketch)->Add( new_lines_and_arcs );
+		} // End for
+
+		// This bounding_sketch is now in a form that is suitable for machining with a pocket operation.  We need
+		// to reduce the areas between the mirrored sketches down to a level that will eventually mate with the
+		// female section's top surface.
+
+		std::list<HeeksObj *> bounding_sketch_list;
+		bounding_sketch_list.push_back( bounding_sketch );
+
+		CPocket *bounding_sketch_pocket = new CPocket(bounding_sketch_list, m_params.m_clearance_tool);
+		bounding_sketch_pocket->m_pocket_params.m_material_allowance = 0.0;
+		bounding_sketch_pocket->m_depth_op_params = m_depth_op_params;
+		bounding_sketch_pocket->m_depth_op_params.m_start_depth = 0.0;
+		bounding_sketch_pocket->m_depth_op_params.m_final_depth = -1.0 * max_mountain_height;
+
+		gcode << bounding_sketch_pocket->GenerateGCode(pFixture).c_str();
+
+		pockets.push_back(bounding_sketch_pocket);
+	} // End if - then
+
+	// We don't need these objects any more.  Deleting the pocket will also delete the sketch (its child).
+	for (std::list<HeeksObj *>::iterator itPocket = pockets.begin(); itPocket != pockets.end(); itPocket++)
+	{
+		delete *itPocket;		// We don't need it any more.
+	} // End for
+
+	return(gcode);
+
+} // End FormMountainPockets() method
+
+
+
+wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+{
+	wxString gcode;
+
+	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+	
+	// Use the parameters to determine if we're going to mirror the selected
+    // sketches around the X or Y axis.
+	gp_Ax1 mirror_axis;
+	if (m_params.m_mirror_axis == CInlayParams::eXAxis)
+	{
+        mirror_axis = gp_Ax1(gp_Pnt(0,0,0), gp_Dir(1,0,0));
+	}
+	else
+	{
+	    mirror_axis = gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,1,0));
+	}
+
+	// Find the maximum valley depth for all valleys.  Once the valleys are rotated (upside-down), this
+	// will become the maximum mountain height.  This, in turn, will be used as the top-most surface
+	// of the male half.  i.e. the '0' height when machining the male half.
+	double max_valley_depth = 0.0;
+	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
+	{
+		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		{
+			if (itContour->first < max_valley_depth)
+			{
+				max_valley_depth = itContour->first;
+			} // End if - then
+		} // End for
+	} // End for
+
+	CNCPoint last_position(0,0,0);
+	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
+	{
+		std::list<double> depths;
+		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		{
+			depths.push_back(itContour->first);
+		} // End for
+
+		depths.sort();
+		depths.reverse();
+
+		
+
+		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
+		{
+			// It's the male half we're generating.  Rotate the wire around one
+			// of the two axes so that we end up machining the reverse of the
+			// female half.
+			gp_Trsf rotation;
+			TopoDS_Wire tool_path_wire((*itValley)[*itDepth]);
+
+			rotation.SetRotation( mirror_axis, PI );
+			BRepBuilderAPI_Transform rotate(rotation);
+			rotate.Perform(tool_path_wire, false);
+			tool_path_wire = TopoDS::Wire(rotate.Shape());
+
+			// And offset the wire 'down' so that the maximum depth reached during the
+            // female half's processing ends up being at the 'top-most' surface of the
+            // male half we're producing.
+			gp_Trsf translation;
+			translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,max_valley_depth)));
+			BRepBuilderAPI_Transform translate(translation);
+			translate.Perform(tool_path_wire, false);
+			tool_path_wire = TopoDS::Wire(translate.Shape());
+
+			gcode << CContour::GeneratePathFromWire(tool_path_wire,
+													last_position,
+													pFixture,
+													m_depth_op_params.m_clearance_height,
+													m_depth_op_params.m_rapid_down_to_height ).c_str();
+		} // End for
+
+		// Now run through the wires map and generate the toolpaths that will sharpen
+		// the concave corners formed between adjacent edges.
+		gcode << FormCorners( *itValley, pChamferingBit ).c_str();
+	} // End for
+
+	return(gcode);
+
+} // End FormMountainWalls() method
+
+
+
+
+	
 
 
 /**
@@ -525,6 +1102,7 @@ wxString CInlay::FormCorners( Wires_t & wires, CCuttingTool *pChamferingBit ) co
     occurs, the 'keep_mirrored_sketches' flag is false so that only the female, male or
     both halves are generated.
  */
+
 wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirrored_sketches )
 {
 	ReloadPointers();
@@ -539,604 +1117,40 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 
 	CDepthOp::AppendTextToProgram( pFixture );
 
-	unsigned int number_of_bad_sketches = 0;
-	double tolerance = heeksCAD->GetTolerance();
-
 	typedef double Depth_t;
 	typedef std::map<HeeksObj *, Depth_t> MirroredSketches_t;
 	MirroredSketches_t mirrored_sketches;
 	CBox	bounding_box;
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (! pCuttingTool)
+	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+
+	if (! pChamferingBit)
 	{
 	    // No shirt, no shoes, no service.
 		return(_T(""));
 	}
 
-	// NOTE: The determination of the 'max_depth_in_female_pass' assumes that the female
-	// pass occurs BEFORE the male pass.
-	std::list<CInlayParams::eInlayPass_t> passes;
-
-	passes.push_back( CInlayParams::eFemale );	// Always.  We need this whether we want to keep the gcode or not.
+	Valleys_t valleys = DefineValleys(pFixture);
 
 	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eFemale))
 	{
-		passes.push_back( CInlayParams::eFemalePocket );	// Add this in before the female pass.
+		// Form the walls before the pockets so that the pockets cleanup the fury edge left
+		// by the tip of the chamfering bit.
+		gcode << FormValleyWalls(valleys, pFixture).c_str();
+		gcode << FormValleyPockets(valleys, pFixture).c_str();
 	}
 
 	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eMale))
 	{
-		passes.push_back( CInlayParams::eMale );
+		gcode << FormMountainPockets(valleys, pFixture, true).c_str();
+		gcode << FormMountainWalls(valleys, pFixture).c_str();
+		gcode << FormMountainPockets(valleys, pFixture, false).c_str();
 	}
-
-
-    // Use the parameters to determine if we're going to mirror the selected
-    // sketches around the X or Y axis.
-	gp_Ax1 mirror_axis;
-	if (m_params.m_mirror_axis == CInlayParams::eXAxis)
-	{
-        mirror_axis = gp_Ax1(gp_Pnt(0,0,0), gp_Dir(1,0,0));
-	}
-	else
-	{
-	    mirror_axis = gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,1,0));
-	}
-
-	// Record the maximum achieved depth (not the asking depth) for all operations in the female
-	// pass of an inlay operation.  When we machine the male part, we will set this as the 'top surface'
-	// height and machine from there down.  (NOTE: This is a relative value so a Z value of -5 and
-	// a starting_depth of 0 would be assigned a depth value of '5'.
-	double max_depth_in_female_pass = 0.0;
-
-	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-	CCuttingTool *pClearanceTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_params.m_clearance_tool );
-
-	CCuttingTool::ToolNumber_t current_tool = this->m_cutting_tool_number;	// The chamfering bit.
-
-    // We need to run through the female pass even if we don't want its gcode output.  This pass generates
-    // shapes and statistics that are required when generating the male pass.
-	for (std::list<CInlayParams::eInlayPass_t>::const_iterator itPass = passes.begin(); itPass != passes.end(); itPass++)
-	{
-		if ((*itPass == CInlayParams::eFemale) || (*itPass == CInlayParams::eMale))
-		{
-			if (current_tool != m_cutting_tool_number)
-			{
-				// Change tool to the chamfering bit.
-				if (pChamferingBit != NULL)
-				{
-					gcode << _T("comment(") << PythonString(_T("tool change to ") + pChamferingBit->m_title).c_str() << _T(")\n");
-				} // End if - then
-
-				gcode << _T("tool_change( id=") << m_cutting_tool_number << _T(")\n");
-				current_tool = m_cutting_tool_number;
-			}
-		}
-		else if (*itPass == CInlayParams::eFemalePocket)
-		{
-			if (current_tool != m_params.m_clearance_tool)
-			{
-				// Change tool to the endmill for pocket operations.
-				if (pClearanceTool != NULL)
-				{
-					gcode << _T("comment(") << PythonString(_T("tool change to ") + pClearanceTool->m_title).c_str() << _T(")\n");
-				} // End if - then
-
-				gcode << _T("tool_change( id=") << m_params.m_clearance_tool << _T(")\n");
-				current_tool = m_params.m_clearance_tool;
-			}
-		}
-
-        // Required for the Contour operation's toolpath generation (which we will use here as well)
-		CNCPoint last_position(0.0, 0.0, 0.0);
-
-        // For all selected sketches.
-		for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
-		{
-		    // Convert them to a list of wire objects.
-			std::list<TopoDS_Shape> wires;
-			if (! heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
-			{
-				number_of_bad_sketches++;
-			} // End if - then
-			else
-			{
-				// The wire(s) represent the sketch objects for a tool path.
-				CBox box;
-				object->GetBox(box);
-				bounding_box.Insert(box);
-
-				if ((object->GetShortString() != NULL) && ((*itPass == m_params.m_pass) || (m_params.m_pass == CInlayParams::eBoth)))
-				{
-					gcode << _T("comment(") << PythonString(object->GetShortString()).c_str() << _T(")\n");
-				}
-
-				try {
-				    // For all wires in this sketch...
-					for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
-					{
-						TopoDS_Shape& wire_to_fix = *It2;
-						ShapeFix_Wire fix;
-						fix.Load( TopoDS::Wire(wire_to_fix) );
-						fix.FixReorder();
-
-						TopoDS_Shape wire = fix.Wire();
-
-                        // Rotate to align with the fixture.
-						BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
-						transform.Perform(wire, false);
-						wire = transform.Shape();
-
-                        // If we're going to produce an inlay toolpath then we're going to need to
-                        // create a pocket operation for the areas between the sketches passed in.
-                        // (Actually, it will be based on the mirrored version of the sketch passed in)
-
-                        TopoDS_Wire mirrored_wire( TopoDS::Wire(wire) );
-                        gp_Trsf rotation;
-
-                        rotation.SetRotation( mirror_axis, PI );
-                        BRepBuilderAPI_Transform rotate(rotation);
-                        rotate.Perform(mirrored_wire, false); // notice false as second parameter
-
-                        HeeksObj *sketch = NULL;
-
-                        if (*itPass == CInlayParams::eFemale)
-                        {
-                            // Create a sketch that represents the mirrored sketch and add it to a map.  The
-                            // HeeksObj* pointer is the key while the second argument is the maximum depth
-                            // achieved during the machining of the female pocket for this sketch.  We will need
-                            // this value later when we need to machine to corresponding male half.
-                            sketch = heeksCAD->NewSketch();
-                            if (heeksCAD->ConvertWireToSketch(TopoDS::Wire(rotate.Shape()), sketch, heeksCAD->GetTolerance()))
-                            {
-                                for (int i=0; (heeksCAD->GetSketchOrder(sketch) != SketchOrderTypeCloseCCW) && (i<4); i++)
-                                {
-                                    // At least try to make them all consistently oriented.
-                                    heeksCAD->ReOrderSketch( sketch, SketchOrderTypeCloseCCW );
-                                } // End for
-
-                                // mirrored_sketches.insert( std::make_pair(sketch, (m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth)));
-                                mirrored_sketches.insert( std::make_pair(sketch, 0));
-                            }
-                        } // End if - then
-
-                        // We want to figure out what the maximum offset is at the maximum depth atainable
-                        // by the chamfering bit.  Within this smallest of wires, we need to pocket with
-                        // the clearance tool.  From this point outwards (or inwards for male operations)
-                        // we need to move sideways by half the chamfering bit's diameter until we hit the
-                        // outer edge.
-
-                        double angle = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
-                        double max_offset = (m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth) * tan(angle);
-
-                        // If this is too far for this sketch's geometry, figure out what the maximum offset is.
-                        max_offset = FindMaxOffset( max_offset, TopoDS::Wire(wire), m_depth_op_params.m_step_down * tan(angle) / 10.0 );
-
-                        double max_plunge_possible = max_offset * tan(angle);
-
-                        // We know how far down the bit could be plunged based on the bit's geometry as well
-                        // as the sketech's geometry.  See if this is too deep for our use.
-                        double max_plunge_for_chamfering_bit = pChamferingBit->m_params.m_cutting_edge_height * cos(angle);
-                        double plunge = max_plunge_possible;
-                        if (plunge > max_plunge_for_chamfering_bit)
-                        {
-                            plunge = max_plunge_for_chamfering_bit;
-                        }
-
-                        // We need to keep a record of the wires we've machined so that we can figure out what
-                        // shapenning moves (clearing out the corners) we need to make at the end.  These will
-                        // be between concave corners of adjacent edges and will move up to the corresponding
-                        // corners of the edge shape immediately above.
-
-                        Wires_t all_toolpath_wires;
-
-                        // Even though we didn't machine this top wire, we need to use it to generate the
-                        // corner movements.
-                        all_toolpath_wires.insert( std::make_pair( m_depth_op_params.m_start_depth, TopoDS::Wire(wire)));
-
-                        // What offset would this maximum plunge require?
-                        double offset_at_plunge = plunge * tan(angle);
-
-						typedef double Depth_t;
-						typedef std::list< Depth_t > Depths_t;
-						Depths_t depths;
-
-                        // machine at this depth around the wire in ever increasing loops until we hit the outside wire (offset = 0)
-                        for (double offset = offset_at_plunge; offset >= tolerance; /* increment within loop */ )
-                        {
-                            double max_depth = offset / tan(angle) * -1.0;
-                            double step_down = m_depth_op_params.m_step_down;
-                            if (m_depth_op_params.m_step_down > (-1.0 * max_depth))
-                            {
-                                step_down = max_depth * -1.0;
-                            }
-                            else
-                            {
-                                step_down = m_depth_op_params.m_step_down;
-                            }
-
-                            for (double depth = m_depth_op_params.m_start_depth - step_down; ((step_down > tolerance) && (depth >= max_depth)); /* increment within loop */ )
-                            {
-								if (std::find(depths.begin(), depths.end(), depth) == depths.end()) depths.push_back( depth );
-
-								if (*itPass == CInlayParams::eFemale)
-								{
-									// Machine here with the chamfering bit.
-									try {
-										BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
-										offset_wire.Perform(offset * -1.0);
-										if (offset_wire.IsDone())
-										{
-											TopoDS_Wire toolpath = TopoDS::Wire(offset_wire.Shape());
-											gp_Trsf translation;
-											translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,depth)));
-											BRepBuilderAPI_Transform translate(translation);
-											translate.Perform(toolpath, false);
-											toolpath = TopoDS::Wire(translate.Shape());
-
-											 gcode << CContour::GeneratePathFromWire(toolpath,
-																				last_position,
-																				pFixture,
-																				m_depth_op_params.m_clearance_height,
-																				m_depth_op_params.m_rapid_down_to_height ).c_str();
-
-											all_toolpath_wires.insert( std::make_pair( depth, toolpath ));
-										}
-									} // End try
-									catch (Standard_Failure & error) {
-										(void) error;	// Avoid the compiler warning.
-										Handle_Standard_Failure e = Standard_Failure::Caught();
-									} // End catch
-								} // End if - then
-
-                                if ((depth - step_down) > max_depth)
-                                {
-                                    depth -= step_down;
-                                }
-                                else
-                                {
-                                    if (depth > max_depth)
-                                    {
-                                        depth = max_depth;
-                                    }
-                                    else
-                                    {
-                                        depth = max_depth - 1.0;  // Force exit from loop
-                                    }
-                                }
-                            } // End for
-
-                            if ((offset - (pChamferingBit->m_params.m_diameter / 4.0)) > tolerance)
-                            {
-                                offset -= (pChamferingBit->m_params.m_diameter / 4.0);
-                            }
-                            else
-                            {
-                                if (offset > tolerance)
-                                {
-                                    offset = tolerance;
-                                }
-                                else
-                                {
-                                    offset = tolerance / 2.0;
-                                    break;
-                                }
-                            }
-                        } // End for
-
-						if (*itPass == CInlayParams::eFemale)
-						{
-							// Now run through the wires map and generate the toolpaths that will sharpen
-							// the concave corners formed between adjacent edges.
-							gcode << FormCorners( all_toolpath_wires, pChamferingBit ).c_str();
-						} // End if - then
-
-                        // return(wxString(gcode.str().c_str()));
-
-						// If we're machining the male half, we need to start from the deepest setting and move back towards
-						// the top.  This doesn't make sense until you realise that the wire we're going to follow will have
-						// been moved up the corresponding amount.  i.e. we are still going to machine from the top-down
-						// but our depth values will need to be reversed here.
-						if (*itPass == CInlayParams::eMale) depths.reverse();
-
-						double previous_depth = m_depth_op_params.m_start_depth;
-                        // For each depth value (with respect to the m_depth_op_params.m_start_depth value).  Consider this
-                        // to be the value 'down' for each female machining operation.  The rotation to produce the male
-                        // half makes all this work out correctly.
-						for (Depths_t::iterator itDepth = depths.begin(); itDepth != depths.end(); previous_depth = *itDepth, itDepth++)
-						{
-						    // What radius does this tapered cutting tool have at this depth of cut.  This is how we can
-						    // get right up to the lines in the corners during shallow cuts.
-							double radius = pCuttingTool->CuttingRadius(false,m_depth_op_params.m_start_depth - *itDepth);
-
-                            // By default, use the wire we generated earlier.
-							TopoDS_Wire tool_path_wire = TopoDS::Wire(wire);
-
-							if (radius > tolerance)
-							{
-                                try {
-                                    // The radius is non-zero.  Try to create an offset wire that is 'radius * -1.0'
-                                    // smaller than the original wire.  If this radius is too small, we will end up
-                                    // throwing a Standard_Failure exception. In this case, we just assign an empty
-                                    // wire and check for this later on.  If the offset shape can be generated, replace
-                                    // the original wire with this generated one (our copy of it anyway) and generate
-                                    // the toolpath using this instead.
-                                    BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
-                                    offset_wire.Perform(radius * -1.0);
-                                    if (! offset_wire.IsDone())
-                                    {
-                                        // It never seems to get here but it sounded nice anyway.
-                                        tool_path_wire = TopoDS_Wire(); // Empty wire.
-                                    }
-                                    else
-                                    {
-                                        // The offset shape was generated fine.  Use it.
-                                        tool_path_wire = TopoDS::Wire(offset_wire.Shape());
-                                    }
-                                } // End try
-                                catch (Standard_Failure & error) {
-                                    (void) error;	// Avoid the compiler warning.
-                                    Handle_Standard_Failure e = Standard_Failure::Caught();
-                                    tool_path_wire = TopoDS_Wire(); // Empty wire.
-                                } // End catch
-							}
-
-                            // Make sure the wire we ended up with has something inside it.  If it's empty then just
-                            // move along to the next depth.
-                            int num_edges = 0;
-                            for(BRepTools_WireExplorer expEdge(TopoDS::Wire(tool_path_wire)); expEdge.More(); expEdge.Next())
-                            {
-                                num_edges++;
-                            } // End for
-
-							if ((radius > tolerance) && (num_edges > 0))
-							{
-								gp_Trsf matrix;
-
-                                // Translate this wire down to the depth we're looking at right now.
-								matrix.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,*itDepth)));
-								BRepBuilderAPI_Transform transform(matrix);
-								transform.Perform(tool_path_wire, false);
-								tool_path_wire = TopoDS::Wire(transform.Shape());
-
-								if (*itPass == CInlayParams::eMale)
-								{
-								    // It's the male half we're generating.  Rotate the wire around one
-								    // of the two axes so that we end up machining the reverse of the
-								    // female half.
-									gp_Trsf rotation;
-
-									rotation.SetRotation( mirror_axis, PI );
-									BRepBuilderAPI_Transform rotate(rotation);
-									rotate.Perform(tool_path_wire, false);
-									tool_path_wire = TopoDS::Wire(rotate.Shape());
-
-                                    // And offset the wire 'down' so that the maximum depth reached during the
-                                    // female half's processing ends up being at the 'top-most' surface of the
-                                    // male half we're producing.
-									gp_Trsf translation;
-									translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,-1.0 * max_depth_in_female_pass)));
-									BRepBuilderAPI_Transform translate(translation);
-									translate.Perform(tool_path_wire, false);
-									tool_path_wire = TopoDS::Wire(translate.Shape());
-
-									double d1 = *itDepth;
-									double d2 = max_depth_in_female_pass;
-								}
-
-								if (*itPass == CInlayParams::eFemalePocket)
-								{
-									// We need to generate a pocket operation based on this tool_path_wire
-									// and using the Clearance Tool.  Without this, the chamfering bit would need
-									// to machine out the centre of the valley as well as the walls.
-
-									HeeksObj *pBoundary = heeksCAD->NewSketch();
-									if (heeksCAD->ConvertWireToSketch(TopoDS::Wire(tool_path_wire), pBoundary, heeksCAD->GetTolerance()))
-									{
-										std::list<HeeksObj *> objects;
-										objects.push_back(pBoundary);
-
-										CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
-										pPocket->m_depth_op_params = m_depth_op_params;
-                                        pPocket->m_depth_op_params.m_rapid_down_to_height = previous_depth + 1;
-										pPocket->m_depth_op_params.m_start_depth = previous_depth;
-										pPocket->m_depth_op_params.m_final_depth = *itDepth;
-										pPocket->m_speed_op_params = m_speed_op_params;
-										gcode << pPocket->GenerateGCode(pFixture).c_str();
-										delete pPocket;		// We don't need it any more.
-									}
-								}
-
-								if (*itPass == CInlayParams::eFemale)
-								{
-									// We only want to remember those depths for which a tool path was actually
-									// generated.  It's possible that the m_depth_op_params.m_final_depth value is
-									// too deep (and hence too large a radius) for a chamfering tool to produce
-									// a parallel shape.  For these operations, we don't actually generate a toolpath.
-									if ((m_depth_op_params.m_start_depth - *itDepth) > max_depth_in_female_pass)
-									{
-									    // This is the deepest we went for all shapes.
-										max_depth_in_female_pass = m_depth_op_params.m_start_depth - *itDepth;
-									}
-
-                                    // Remember which depth we ended up with for this sketch.
-									if ((sketch != NULL) && ((m_depth_op_params.m_start_depth - *itDepth) > mirrored_sketches[sketch]))
-									{
-										mirrored_sketches[sketch] = (m_depth_op_params.m_start_depth - *itDepth);
-									}
-								}
-
-
-                                if ((*itPass == m_params.m_pass) || (m_params.m_pass == CInlayParams::eBoth))
-                                {
-                                    // Actually generate the toolpath from this correctly positioned wire.  We use the
-                                    // 'last_position' value to figure out whether we need to raise up and rapidly move
-                                    // or just 'stay down' and feed through the material.  At this stage it's just
-                                    // GCode that follows a wire so we're just going to use the Contour class's method
-                                    // instead of having our own.
-                                    gcode << CContour::GeneratePathFromWire(tool_path_wire,
-                                                                            last_position,
-                                                                            pFixture,
-                                                                            m_depth_op_params.m_clearance_height,
-                                                                            m_depth_op_params.m_rapid_down_to_height ).c_str();
-                                } // End if - then
-							} // End if - then
-						} // End for
-					} // End for
-				} // End try
-				catch (Standard_Failure & error) {
-					(void) error;	// Avoid the compiler warning.
-					Handle_Standard_Failure e = Standard_Failure::Caught();
-					number_of_bad_sketches++;
-				} // End catch
-			} // End if - else
-		} // End for
-
-		if ((*itPass == CInlayParams::eMale) && (keep_mirrored_sketches))
-		{
-			// Make sure the bounding box is one tool radius larger than all the sketches that
-			// have been mirrored.  We need to create one large sketch with the bounding box
-			// 'order' in one direction and all the mirrored sketch's orders in the other
-			// direction.  We can then create a pocket operation to remove the material between
-			// the mirrored sketches down to the inverted 'top surface' depth.
-
-            double boarder_width = m_params.m_boarder_width;
-            if ((CCuttingTool::Find(m_params.m_clearance_tool) != NULL) &&
-                (boarder_width <= (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius())))
-            {
-                boarder_width = (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius());
-                boarder_width += 1; // Make sure there really is room.  Add 1mm to be sure.
-            }
-			HeeksObj* bounding_sketch = heeksCAD->NewSketch();
-
-			double start[3];
-			double end[3];
-
-			// left edge
-			start[0] = bounding_box.MinX() - boarder_width;
-            start[1] = bounding_box.MinY() - boarder_width;
-			start[2] = bounding_box.MinZ();
-
-			end[0] = bounding_box.MinX() - boarder_width;
-			end[1] = bounding_box.MaxY() + boarder_width;
-			end[2] = bounding_box.MinZ();
-
-			bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
-
-			// top edge
-			start[0] = bounding_box.MinX() - boarder_width;
-			start[1] = bounding_box.MaxY() + boarder_width;
-			start[2] = bounding_box.MinZ();
-
-			end[0] = bounding_box.MaxX() + boarder_width;
-			end[1] = bounding_box.MaxY() + boarder_width;
-			end[2] = bounding_box.MinZ();
-
-			bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
-
-			// right edge
-			start[0] = bounding_box.MaxX() + boarder_width;
-			start[1] = bounding_box.MaxY() + boarder_width;
-			start[2] = bounding_box.MinZ();
-
-			end[0] = bounding_box.MaxX() + boarder_width;
-			end[1] = bounding_box.MinY() - boarder_width;
-			end[2] = bounding_box.MinZ();
-
-			bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
-
-			// bottom edge
-			start[0] = bounding_box.MaxX() + boarder_width;
-			start[1] = bounding_box.MinY() - boarder_width;
-			start[2] = bounding_box.MinZ();
-
-			end[0] = bounding_box.MinX() - boarder_width;
-			end[1] = bounding_box.MinY() - boarder_width;
-			end[2] = bounding_box.MinZ();
-
-			bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
-
-            {
-                // Mirror the bounding sketch about the nominated axis so that it surrounds the
-                // mirrored sketches we've collected.
-                gp_Trsf rotation;
-
-                rotation.SetRotation( mirror_axis, PI );
-                double m[16];	// A different form of the transformation matrix.
-                CFixture::extract( rotation, m );
-                bounding_sketch->ModifyByMatrix(m);
-            }
-
-            // Make sure this boarder sketch is oriented clockwise.  We will ensure the
-            // enclosed sketches are oriented counter-clockwise so that the pocket operation
-            // removes the intervening material.
-            for (int i=0; (heeksCAD->GetSketchOrder(bounding_sketch) != SketchOrderTypeCloseCW) && (i<4); i++)
-            {
-                // At least try to make them all consistently oriented.
-                heeksCAD->ReOrderSketch( bounding_sketch, SketchOrderTypeCloseCW );
-            } // End for
-
-			for (MirroredSketches_t::iterator itObject = mirrored_sketches.begin(); itObject != mirrored_sketches.end(); itObject++)
-			{
-			    std::list<HeeksObj*> new_lines_and_arcs;
-			    for (HeeksObj *child = itObject->first->GetFirstChild(); child != NULL; child = itObject->first->GetNextChild())
-			    {
-					new_lines_and_arcs.push_back(child);
-				}
-
-                ((ObjList *)bounding_sketch)->Add( new_lines_and_arcs );
-			} // End for
-
-            // This bounding_sketch is now in a form that is suitable for machining with a pocket operation.  We need
-            // to reduce the areas between the mirrored sketches down to a level that will eventually mate with the
-            // female section's top surface.
-
-            // The pocket operation needs this sketch to be in the main branch so that we can refer to it by
-            // ID.  Add it now.
-            heeksCAD->Add( bounding_sketch, NULL );
-
-            std::list<int> bounding_sketch_list;
-            bounding_sketch_list.push_back( bounding_sketch->m_id );
-
-            CPocket *bounding_sketch_pocket = new CPocket(bounding_sketch_list, m_params.m_clearance_tool);
-            bounding_sketch_pocket->m_pocket_params.m_material_allowance = 0.0;
-            bounding_sketch_pocket->m_depth_op_params = m_depth_op_params;
-            bounding_sketch_pocket->m_depth_op_params.m_start_depth = 0.0;
-            bounding_sketch_pocket->m_depth_op_params.m_final_depth = -1.0 * max_depth_in_female_pass;
-            bounding_sketch_pocket->m_execution_order = m_execution_order - 1;  // Pocket before inlay
-            theApp.m_program->Operations()->Add(bounding_sketch_pocket, NULL);
-
-            // Look through the depths achieved for the individual sketches.  If any of them didn't make
-            // the maximum depth then add a pocketing operation to remove material above their peaks
-            // so that the chamfering bit can cut from the peak down to the base of the mountain.  The
-            // reference depth is the 'max_depth_in_female_pass' as this represents the tallest
-            // 'mountain' required in the male half.
-            for (MirroredSketches_t::iterator itMirroredSketch = mirrored_sketches.begin();
-                    itMirroredSketch != mirrored_sketches.end(); itMirroredSketch++)
-            {
-                if ((itMirroredSketch->second > tolerance) && ((max_depth_in_female_pass - itMirroredSketch->second) > tolerance))
-                {
-                    // The pocket operation needs this sketch to be in the main branch so that we can refer to it by
-                    // ID.  Add it now.
-                    heeksCAD->Add( itMirroredSketch->first, NULL );
-
-                    std::list<int> sketch_list;
-                    sketch_list.push_back( itMirroredSketch->first->m_id );
-
-                    CPocket *sketch_pocket = new CPocket(sketch_list, m_params.m_clearance_tool);
-                    sketch_pocket->m_pocket_params.m_material_allowance = 0.0;
-                    sketch_pocket->m_depth_op_params = m_depth_op_params;
-                    sketch_pocket->m_depth_op_params.m_start_depth = 0.0;
-                    sketch_pocket->m_depth_op_params.m_final_depth = -1.0 * (max_depth_in_female_pass - itMirroredSketch->second);
-                    sketch_pocket->m_execution_order = m_execution_order - 1;  // Pocket before inlay
-                    theApp.m_program->Operations()->Add(sketch_pocket, NULL);
-                } // End if - then
-            } // End for
-		} // End if - then
-	} // End for
-
+	
 	return(wxString(gcode.str().c_str()));
 }
+
+
 
 
 
