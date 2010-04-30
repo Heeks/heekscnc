@@ -1306,7 +1306,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 
 		wxStandardPaths standard_paths;
 		directories.push_back( standard_paths.GetUserConfigDir() );	// Look for a user-specific file first
-		directories.push_back( _T(".") );	// And then look in the application-delivered directory
+		directories.push_back( GetDllFolder() );	// And then look in the application-delivered directory
 
 		bool tool_table_found = false;
 		bool speed_references_found = false;
