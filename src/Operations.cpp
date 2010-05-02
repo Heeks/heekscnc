@@ -31,6 +31,13 @@ COperations::COperations( const COperations & rhs ) : ObjList(rhs)
 	*this = rhs;	// Call the assignment operator.
 }
 
+const wxBitmap &COperations::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/operations.png")));
+	return *icon;
+}
+
 /**
 	This is ALMOST the same as the assignment operator.  The difference is that
 	this method augments its local list of operations with those passed in rather

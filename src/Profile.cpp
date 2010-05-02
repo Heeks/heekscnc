@@ -392,6 +392,13 @@ void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
 	}
 }
 
+const wxBitmap &CProfile::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/profile.png")));
+	return *icon;
+}
 
 /**
 	This is the duplicate of the kurve_funcs.py->make_smaller() method.  It's the one we can

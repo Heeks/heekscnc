@@ -21,6 +21,13 @@ CTrsfNCCode::~CTrsfNCCode()
 
 }
 
+const wxBitmap &CTrsfNCCode::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/program.png")));
+	return *icon;
+}
+
 HeeksObj *CTrsfNCCode::MakeACopy(void)const
 {
 	return new CTrsfNCCode(*this);

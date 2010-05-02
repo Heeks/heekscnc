@@ -21,6 +21,13 @@
 #include <iterator>
 #include <vector>
 
+const wxBitmap& COp::GetInactiveIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/noentry.png")));
+	return *icon;
+}
+
 void COp::WriteBaseXML(TiXmlElement *element)
 {
 	if(m_comment.Len() > 0)element->SetAttribute("comment", Ttc(m_comment.c_str()));

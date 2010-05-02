@@ -81,6 +81,14 @@ void CTurnRoughParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("clearance", &m_clearance);
 }
 
+const wxBitmap &CTurnRough::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/turnrough.png")));
+	return *icon;
+}
+
 void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture)
 {
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))

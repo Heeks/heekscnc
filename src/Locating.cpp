@@ -94,6 +94,13 @@ void CLocatingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("sort_locations")) m_sort_locations = atoi(pElem->Attribute("sort_locations"));
 }
 
+const wxBitmap &CLocating::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/locating.png")));
+	return *icon;
+}
+
 /**
 	This method is called when the CAD operator presses the Python button.  This method generates
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that

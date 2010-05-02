@@ -57,7 +57,8 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(4, 1);}
-        const wxChar* GetShortString(void)const{return m_title.c_str();}
+ 	const wxBitmap &GetIcon();
+       const wxChar* GetShortString(void)const{return m_title.c_str();}
 
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);

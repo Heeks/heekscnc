@@ -236,6 +236,14 @@ static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int 
 	return(wxString(gcode.str().c_str()));
 }
 
+const wxBitmap &CPocket::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/pocket.png")));
+	return *icon;
+}
+
 void CPocket::AppendTextToProgram(const CFixture *pFixture)
 {
 	wxString gcode = GenerateGCode(pFixture);

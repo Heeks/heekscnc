@@ -78,6 +78,7 @@ public:
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("Program");}
 	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(1, 1);}
+	const wxBitmap &GetIcon();
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void GetProperties(std::list<Property *> *list);

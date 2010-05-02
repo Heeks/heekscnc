@@ -732,39 +732,69 @@ bool CCuttingTool::CanAddTo(HeeksObj* owner)
 	return owner->GetType() == ToolsType;
 }
 
-void CCuttingTool::GetIcon(int& texture_number, int& x, int& y)
+const wxBitmap &CCuttingTool::GetIcon()
 {
 	switch(m_params.m_type){
 		case CCuttingToolParams::eDrill:
-			GET_ICON(5, 0);
-			return;
+			{
+				static wxBitmap* drillIcon = NULL;
+				if(drillIcon == NULL)drillIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/drill.png")));
+				return *drillIcon;
+			}
 		case CCuttingToolParams::eCentreDrill:
-			GET_ICON(2, 0);
-			return;
+			{
+				static wxBitmap* centreDrillIcon = NULL;
+				if(centreDrillIcon == NULL)centreDrillIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/centredrill.png")));
+				return *centreDrillIcon;
+			}
 		case CCuttingToolParams::eEndmill:
-			GET_ICON(7, 0);
-			return;
+			{
+				static wxBitmap* endmillIcon = NULL;
+				if(endmillIcon == NULL)endmillIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/endmill.png")));
+				return *endmillIcon;
+			}
 		case CCuttingToolParams::eSlotCutter:
-			GET_ICON(2, 1);
-			return;
+			{
+				static wxBitmap* slotCutterIcon = NULL;
+				if(slotCutterIcon == NULL)slotCutterIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/slotdrill.png")));
+				return *slotCutterIcon;
+			}
 		case CCuttingToolParams::eBallEndMill:
-			GET_ICON(1, 0);
-			return;
+			{
+				static wxBitmap* ballEndMillIcon = NULL;
+				if(ballEndMillIcon == NULL)ballEndMillIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons//ballmill.png")));
+				return *ballEndMillIcon;
+			}
 		case CCuttingToolParams::eChamfer:
-			GET_ICON(3, 0);
-			return;
+			{
+				static wxBitmap* chamferIcon = NULL;
+				if(chamferIcon == NULL)chamferIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/chamfmill.png")));
+				return *chamferIcon;
+			}
 		case CCuttingToolParams::eTurningTool:
-			GET_ICON(7, 1);
-			return;
+			{
+				static wxBitmap* turningToolIcon = NULL;
+				if(turningToolIcon == NULL)turningToolIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/turntool.png")));
+				return *turningToolIcon;
+			}
 		case CCuttingToolParams::eTouchProbe:
-			GET_ICON(15, 0);
-			return;
+			{
+				static wxBitmap* touchProbeIcon = NULL;
+				if(touchProbeIcon == NULL)touchProbeIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/probe.png")));
+				return *touchProbeIcon;
+			}
 		case CCuttingToolParams::eToolLengthSwitch:
-			GET_ICON(15, 0);
-			return;
+			{
+				static wxBitmap* toolLengthSwitchIcon = NULL;
+				if(toolLengthSwitchIcon == NULL)toolLengthSwitchIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/probe.png")));
+				return *toolLengthSwitchIcon;
+			}
 		default:
-			GET_ICON(4, 1);
-			return;
+			{
+				static wxBitmap* toolIcon = NULL;
+				if(toolIcon == NULL)toolIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/tool.png")));
+				return *toolIcon;
+			}
 	}
 }
 

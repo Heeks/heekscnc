@@ -21,6 +21,7 @@ public:
 	CTools & operator= ( const CTools & rhs );
 
 	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(5, 1);}
+	const wxBitmap &GetIcon();
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object);
 	bool CanBeRemoved(){return false;}

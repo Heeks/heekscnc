@@ -351,6 +351,14 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 
 
 
+const wxBitmap &CProbing::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/probe.png")));
+	return *icon;
+}
+
 /**
 	Generate the Python script that will move in the setup direction, retract out away from the workpiece,
 	plunge down and probe back towards the workpiece.  Once found, it should store the results in the

@@ -15,6 +15,7 @@ public:
 	const wxChar* GetTypeString(void)const{return _("Fixtures");}
 	HeeksObj *MakeACopy(void)const{ return new CFixtures(*this);}
 	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(9, 0);}
+	const wxBitmap &GetIcon();
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object) {	return(object->GetType() == FixtureType); }
 	bool CanBeRemoved(){return false;}

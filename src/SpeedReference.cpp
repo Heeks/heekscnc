@@ -66,6 +66,13 @@ static void on_set_surface_speed(double value, HeeksObj* object)
 static void on_set_material_name(const wxChar *value, HeeksObj* object){((CSpeedReference*)object)->m_material_name = value; ((CSpeedReference*)object)->ResetTitle(); }
 
 
+const wxBitmap &CSpeedReference::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/speeds.png")));
+	return *icon;
+}
+
 void CSpeedReference::GetProperties(std::list<Property *> *list)
 {
 	{

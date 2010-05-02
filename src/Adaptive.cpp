@@ -572,6 +572,14 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
 
+const wxBitmap &CAdaptive::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/adapt.png")));
+	return *icon;
+}
+
 void CAdaptive::glCommands(bool select, bool marked, bool no_color)
 {
 	COp::glCommands(select, marked, no_color);
