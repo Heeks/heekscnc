@@ -311,6 +311,7 @@ public:
 	//	Constructors.
 	CProbe_Grid(const int cutting_tool_number = 0) : CProbing(_("Probe Grid"), cutting_tool_number, ProbeGridType )
 	{
+	    m_for_fixture_measurement = true;
 		m_num_x_points = 2;
 		m_num_y_points = 2;
 		GenerateMeaningfullName();
@@ -344,6 +345,7 @@ public:
 public:
 	int	m_num_x_points;
 	int m_num_y_points;
+	bool m_for_fixture_measurement;
 };
 
 

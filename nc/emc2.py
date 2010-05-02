@@ -73,11 +73,12 @@ class CreatorEMC2(iso.CreatorIso):
 			self.write( ((iso_codes.codes.WORKPLANE() % (6 + iso_codes.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6))) + '\t (Select Relative Coordinate System)\n')
 
 	def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
-		self.comment('Generate an XML document describing the probed coordinates found');
-		self.write_blocknum()
-		self.write('(LOGOPEN,')
-		self.write(xml_file_name)
-		self.write(')\n')
+		if (xml_file_name != None):
+			self.comment('Generate an XML document describing the probed coordinates found');
+			self.write_blocknum()
+			self.write('(LOGOPEN,')
+			self.write(xml_file_name)
+			self.write(')\n')
 
 		self.write_blocknum()
 		self.write('(LOG,<POINTS>)\n')
@@ -240,8 +241,10 @@ class CreatorEMC2(iso.CreatorIso):
 
 		self.write_blocknum()
 		self.write('(LOG,</POINTS>)\n')
-		self.write_blocknum()
-		self.write('(LOGCLOSE)\n')
+
+		if (xml_file_name != None):
+			self.write_blocknum()
+			self.write('(LOGCLOSE)\n')
 			
 	def open_log_file(self, xml_file_name=None ):
 		self.write_blocknum()
@@ -279,6 +282,10 @@ class CreatorEMC2(iso.CreatorIso):
 		if ((x != None) or (y != None) or (z != None)):
 			self.write_blocknum()
 			self.write('(LOG,</POINT>)\n')
+
+	def log_message(self, message=None ):
+		self.write_blocknum()
+		self.write('(LOG,' + message + ')\n')
 
 nc.creator = CreatorEMC2()
 

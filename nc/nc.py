@@ -254,6 +254,9 @@ class Creator:
     def log_coordinate(self, x=None, y=None, z=None):
         pass
 
+    def log_message(self, message=None):
+        pass
+
     def close_log_file(self):
         pass
 
@@ -455,6 +458,9 @@ def open_log_file(xml_file_name=None ):
 
 def log_coordinate(x=None, y=None, z=None):
     creator.log_coordinate(x, y, z)
+
+def log_message(message=None):
+    creator.log_message(message)
 
 def close_log_file():
     creator.close_log_file()
