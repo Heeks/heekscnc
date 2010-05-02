@@ -244,9 +244,12 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate starting point.
-	CNCPoint last_point(0,0,0);
+	int variable = 1001;
+	bool first_probed_point = true;
+	std::list<gp_Pnt> probed_points;
 
 	ss << _T("open_log_file(xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true ).c_str()).c_str() << _T(")\n");
+	ss << _T("log_message('<POINTS>')\n");
 
 	CProbing::PointsList_t points = GetPoints();
 	for (CProbing::PointsList_t::const_iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
@@ -254,9 +257,6 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 		switch (l_itPoint->first)
 		{
 		case eRapid:
-			ss << _T("rapid(x=") << l_itPoint->second.X(true) << _T(", y=") << l_itPoint->second.Y(true) << _T(", z=") << l_itPoint->second.Z(true) << _T(")\n");
-			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-			ss.str(_T(""));
 			break;
 
 		case eProbe:
@@ -264,14 +264,24 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 				// We've already moved to this point ourselves so tell the AppendTextForDownwardProbingOperation()
 				// method that the X,Y coordinate is 0,0.  We're only interested in the Z point anyway and this
 				// will avoid extra rapid movements.
-				AppendTextForDownwardProbingOperation( _T("0"), _T("0"), m_depth, _T("1001") );
+				wxString var;
+				var << variable;
 
-				ss << "log_coordinate( "
-					<< "x='[" << l_itPoint->second.X(true) << "]', "
-					<< "y='[" << l_itPoint->second.Y(true) << "]', "
-					<< "z='[#1001]')\n";
-				theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-				ss.str(_T(""));
+				AppendTextForDownwardProbingOperation( PythonString(l_itPoint->second.X(true)).c_str(), PythonString(l_itPoint->second.Y(true)).c_str(), m_depth, var.c_str() );
+                probed_points.push_back( gp_Pnt( l_itPoint->second.X(true), l_itPoint->second.Y(true), variable ) );
+
+                if (! m_for_fixture_measurement)
+                {
+                    ss << "log_coordinate(x='[" << l_itPoint->second.X(true) << "]', "
+                                        "y='[" << l_itPoint->second.Y(true) << "]', "
+                                        "z='[#" << var.c_str() << "]')\n";
+
+                    theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+                    ss.str(_T(""));
+                }
+
+                first_probed_point = false;
+                variable++;
 			}
 			break;
 
@@ -279,10 +289,60 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 			break;
 		} // End switch
 
-		last_point = l_itPoint->second;
+
 	} // End for
 
-	ss << _T("close_log_file()\n");
+    if (m_for_fixture_measurement)
+    {
+        // Now report on the sets of probed points along each axis.
+        gp_Pnt top_left(*probed_points.begin());
+        gp_Pnt top_right(*probed_points.begin());
+        gp_Pnt bottom_left(*probed_points.begin());
+        gp_Pnt bottom_right(*probed_points.begin());
+
+        for (std::list<gp_Pnt>::iterator itPoint = probed_points.begin(); itPoint != probed_points.end(); itPoint++)
+        {
+           if ((itPoint->X() <= top_left.X()) && (itPoint->Y() >= top_left.Y())) top_left = *itPoint;
+           if ((itPoint->X() >= top_right.X()) && (itPoint->Y() >= top_right.Y())) top_right = *itPoint;
+           if ((itPoint->X() <= bottom_left.X()) && (itPoint->Y() <= bottom_left.Y())) bottom_left = *itPoint;
+           if ((itPoint->X() >= bottom_right.X()) && (itPoint->Y() <= bottom_right.Y())) bottom_right = *itPoint;
+        }
+
+        // Log the longest two edges along the X and Y axes in a form that will be suitable
+        // for reading back into the Fixture object.
+        ss << "log_coordinate( "
+            << "x='[" << bottom_left.X() << "]', "
+            << "y='[" << bottom_left.Y() << "]', "
+            << "z='[#" << bottom_left.Z() << "]')\n";
+
+        ss << "log_coordinate( "
+            << "x='[" << top_left.X() << "]', "
+            << "y='[" << top_left.Y() << "]', "
+            << "z='[#" << top_left.Z() << "]')\n";
+
+        ss << "log_coordinate( "
+            << "x='[" << top_left.X() - bottom_left.X() << "]', "
+            << "y='[" << top_left.Y() - bottom_left.Y() << "]', "
+            << "z='0.0' )\n";
+
+        ss << "log_coordinate( "
+            << "x='[" << bottom_left.X() << "]', "
+            << "y='[" << bottom_left.Y() << "]', "
+            << "z='[#" << bottom_left.Z() << "]')\n";
+
+        ss << "log_coordinate( "
+            << "x='[" << bottom_right.X() << "]', "
+            << "y='[" << bottom_right.Y() << "]', "
+            << "z='[#" << bottom_right.Z() << "]')\n";
+
+        ss << "log_coordinate( "
+            << "x='[" << bottom_right.X() - bottom_left.X() << "]', "
+            << "y='[" << bottom_right.Y() - bottom_left.Y() << "]', "
+            << "z='0.0' )\n";
+    }
+
+    ss << _T("log_message('</POINTS>')\n");
+    ss << _T("close_log_file()\n");
 
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 	ss.str(_T(""));
@@ -363,6 +423,7 @@ void CProbing::AppendTextForDownwardProbingOperation(
 	ss << "comment('Begin probing operation for a single point.')\n";
 	ss << "comment('The results will be stored with respect to the current location of the machine')\n";
 	ss << "comment('The machine will be returned to this original position following this single probe operation')\n";
+
 	ss << "probe_downward_point("
 		<< "x='" << setup_point_x.c_str() << "', "
 			<< "y='" << setup_point_y.c_str() << "', "
@@ -951,10 +1012,25 @@ static void on_set_num_y_points(int value, HeeksObj* object)
 	heeksCAD->Changed();
 }
 
+static void on_set_reason(int value, HeeksObj* object)
+{
+	((CProbe_Grid*)object)->m_for_fixture_measurement = (value != 0);
+	((CProbe_Grid*)object)->GenerateMeaningfullName();
+	heeksCAD->Changed();
+}
+
 void CProbe_Grid::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyInt(_("Num points along X"), m_num_x_points, this, on_set_num_x_points));
-	list->push_back(new PropertyInt(_("Num points along Y"), m_num_y_points, this, on_set_num_y_points));
+    if (! m_for_fixture_measurement)
+    {
+        list->push_back(new PropertyInt(_("Num points along X"), m_num_x_points, this, on_set_num_x_points));
+        list->push_back(new PropertyInt(_("Num points along Y"), m_num_y_points, this, on_set_num_y_points));
+    }
+
+    std::list< wxString > choices;
+	choices.push_back ( wxString ( _("Point Cloud") ) );
+	choices.push_back ( wxString ( _("Fixture Measurement") ) );
+	list->push_back ( new PropertyChoice ( _("Point Data Format"),  choices, (m_for_fixture_measurement?1:0), this, on_set_reason ) );
 
 	CProbing::GetProperties(list);
 }
@@ -1165,6 +1241,7 @@ CProbe_Grid & CProbe_Grid::operator= ( const CProbe_Grid & rhs )
 
 		m_num_x_points = rhs.m_num_x_points;
 		m_num_y_points = rhs.m_num_y_points;
+		m_for_fixture_measurement = rhs.m_for_fixture_measurement;
 	}
 
 	return(*this);
@@ -1281,6 +1358,7 @@ void CProbe_Grid::WriteXML(TiXmlNode *root)
 
 	element->SetAttribute("num_x_points", m_num_x_points);
 	element->SetAttribute("num_y_points", m_num_y_points);
+	element->SetAttribute("for_fixture_measurement", (m_for_fixture_measurement?1:0));
 
 	WriteBaseXML(element);
 }
@@ -1292,6 +1370,7 @@ HeeksObj* CProbe_Grid::ReadFromXMLElement(TiXmlElement* element)
 
 	if (element->Attribute("num_x_points")) new_object->m_num_x_points = atoi(element->Attribute("num_x_points"));
 	if (element->Attribute("num_y_points")) new_object->m_num_y_points = atoi(element->Attribute("num_y_points"));
+	if (element->Attribute("for_fixture_measurement")) new_object->m_for_fixture_measurement = (atoi(element->Attribute("for_fixture_measurement")) != 0);
 
 	new_object->ReadBaseXML(element);
 
@@ -1453,6 +1532,8 @@ wxString CProbing::GetOutputFileName(const wxString extension, const bool filena
 			file_name = tokens[tokens.size()-1];
 		}
 	}
+
+	while (file_name.Find(_T(" ")) != -1) file_name.Replace(_T(" "), _T("_"));
 
 	return(file_name);
 }
@@ -1978,15 +2059,33 @@ CProbing::PointsList_t CProbe_Grid::GetPoints() const
 {
 	CProbing::PointsList_t points;
 
-	for (int x_hole = 0; x_hole < m_num_x_points; x_hole++)
-	{
-		for (int y_hole = 0; y_hole < m_num_y_points; y_hole++)
-		{
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(x_hole * m_distance, y_hole * m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(x_hole * m_distance, y_hole * m_distance, -1.0 * m_depth) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(x_hole * m_distance, y_hole * m_distance, 0) ) );
-		}
-	}
+    if (m_for_fixture_measurement)
+    {
+        points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+        points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0, -1.0 * m_depth) ) );
+        points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
+
+        points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+        points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, 0, -1.0 * m_depth) ) );
+        points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
+
+        points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
+        points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
+        points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
+    }
+    else
+    {
+        for (int x_hole = 0; x_hole < m_num_x_points; x_hole++)
+        {
+            for (int y_hole = 0; y_hole < m_num_y_points; y_hole++)
+            {
+                points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(x_hole * m_distance, y_hole * m_distance, 0) ) );
+                points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(x_hole * m_distance, y_hole * m_distance, -1.0 * m_depth) ) );
+                points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(x_hole * m_distance, y_hole * m_distance, 0) ) );
+            }
+        }
+    }
+
 	points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 	return(points);
@@ -2057,8 +2156,15 @@ void CProbe_Centre::GenerateMeaningfullName()
 
 void CProbe_Grid::GenerateMeaningfullName()
 {
-	m_title = _("Probe ");
-	m_title << this->m_num_x_points << _T(" x ") << m_num_y_points << _T(" ") << _("grid");
+    if (m_for_fixture_measurement)
+    {
+        m_title = _("Probe Fixture Tilt");
+    }
+    else
+    {
+        m_title = _("Probe ");
+        m_title << this->m_num_x_points << _T(" x ") << m_num_y_points << _T(" ") << _("grid");
+    }
 }
 
 void CProbing::GenerateMeaningfullName()

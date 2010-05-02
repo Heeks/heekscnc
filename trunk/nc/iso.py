@@ -511,6 +511,9 @@ class CreatorIso(nc.Creator):
     def log_coordinate(self, x=None, y=None, z=None):
 	pass
 
+    def log_message(self, message=None):
+	pass
+
     def close_log_file(self):
 	pass
 
