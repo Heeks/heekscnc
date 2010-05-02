@@ -142,7 +142,3 @@ If a corner probing operation is being used then two optional coordinate values 
 === Point Data Format ===
 
 For a grid probing operation, this parameter may be set to either 'Point Cloud' or 'Fixture Measurement'.  If 'Point Cloud' is selected, the 'Num points along X' and 'Num points along Y' parameters will be available.  If the 'Fixture Measurement' setting is chosen then the number of points will implicitly be three.  The first straight down from the probe's initial position and the other two at 'distance' along the X and Y axes respectively.  If the 'Fixture Measurement' option is chosen, the XML point data will include vector point coordinates for each pair of points probed.  This third vector point is used when reading back into the Fixture object to indicate what nominal direction the previous two points were expected to conform to.  Their deviation from this vector indicates the rotation.
-
-choices.push_back ( wxString ( _("Point Cloud") ) );
-	choices.push_back ( wxString ( _("Fixture Measurement") ) );
-	list->push_back ( new PropertyChoice ( _("Point Data Format"),  choices, (m_for_fixture_measurement?1:0), this, on_set_reason ) );
