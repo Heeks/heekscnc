@@ -39,6 +39,13 @@ CTools & CTools::operator= ( const CTools & rhs )
 }
 
 
+const wxBitmap &CTools::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/tools.png")));
+	return *icon;
+}
+
 /**
 	We need to copy the tools from the CTools object passed in into our own
 	list.  We don't want to duplicate tools that are already in our local tool table.

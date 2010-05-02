@@ -208,6 +208,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	void GetIcon(int& texture_number, int& x, int& y);
+	const wxBitmap &GetIcon();
     const wxChar* GetShortString(void)const{return m_title.c_str();}
 	void glCommands(bool select, bool marked, bool no_color);
 	void KillGLLists(void);

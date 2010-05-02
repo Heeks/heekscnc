@@ -99,6 +99,14 @@ static double drawing_units( const double value )
 	return(value / theApp.m_program->m_units);
 }
 
+const wxBitmap &CCounterBore::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/drilling.png")));
+	return *icon;
+}
+
 /**
 	Before we call this routine, we're sure that the tool's diameter is <= counterbore's diameter.  To
 	this end, we need to spiral down to each successive cutting depth and then spiral out to the

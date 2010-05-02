@@ -39,6 +39,7 @@ public:
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
 	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(12, 0);}
+	const wxBitmap& GetInactiveIcon();
 	const wxChar* GetShortString(void)const{return m_title.c_str();}
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wxChar* str);

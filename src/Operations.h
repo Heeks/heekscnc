@@ -21,6 +21,7 @@ public:
 	const wxChar* GetTypeString(void)const{return _("Operations");}
 	HeeksObj *MakeACopy(void)const{ return new COperations(*this);}
 	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(13, 0);}
+	const wxBitmap &GetIcon();
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object);
 	bool CanBeRemoved(){return false;}

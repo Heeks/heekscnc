@@ -512,6 +512,13 @@ std::map<std::string,ColorEnum> CNCCode::m_colors_s_i;
 std::map<ColorEnum,std::string> CNCCode::m_colors_i_s;
 std::vector<HeeksColor> CNCCode::m_colors;
 
+const wxBitmap &CNCCode::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/nccode.png")));
+	return *icon;
+}
+
 void CNCCode::ClearColors(void)
 {
 	CNCCode::m_colors_s_i.clear();

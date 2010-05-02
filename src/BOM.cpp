@@ -28,6 +28,13 @@ CBOM::~CBOM()
 
 }
 
+const wxBitmap &CBOM::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/program.png")));
+	return *icon;
+}
+
 void CBOM::Load(wxString path)
 {
 	wxTextFile f(path);
