@@ -152,6 +152,14 @@ void CContourParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 }
 
 
+const wxBitmap &CContour::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/drilling.png")));
+	return *icon;
+}
+
 /* static */ bool CContour::Clockwise( const gp_Circ & circle )
 {
 	return(circle.Axis().Direction().Z() <= 0);

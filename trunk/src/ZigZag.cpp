@@ -148,6 +148,14 @@ CZigZag & CZigZag::operator= ( const CZigZag & rhs )
 	return(*this);
 }
 
+const wxBitmap &CZigZag::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/zigzag.png")));
+	return *icon;
+}
+
 /**
 	The old version of the CZigZag object stored references to graphics as type/id pairs
 	that get read into the m_solids list.  The new version stores these graphics references

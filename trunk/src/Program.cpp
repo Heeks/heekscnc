@@ -56,6 +56,13 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 }
 
+const wxBitmap &CProgram::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/program.png")));
+	return *icon;
+}
+
 HeeksObj *CProgram::MakeACopy(void)const
 {
 	return new CProgram(*this);

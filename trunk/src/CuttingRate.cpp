@@ -42,6 +42,13 @@ static void on_set_brinell_hardness_of_raw_material(int zero_based_choice, Heeks
 	((CCuttingRate*)object)->ResetTitle(); 
 }
 
+const wxBitmap &CCuttingRate::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/cutting_rate.png")));
+	return *icon;
+}
+
 static void on_set_max_material_removal_rate(double value, HeeksObj* object){((CCuttingRate*)object)->m_max_material_removal_rate = value; ((CCuttingRate*)object)->ResetTitle(); }
 
 void CCuttingRate::GetProperties(std::list<Property *> *list)

@@ -106,6 +106,13 @@ class ImportSpeedReferences: public Tool{
 	wxString previous_path;
 };
 
+const wxBitmap &CSpeedReferences::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/speeds.png")));
+	return *icon;
+}
+
 static ImportSpeedReferences import_speed_references;
 
 void CSpeedReferences::GetTools(std::list<Tool*>* t_list, const wxPoint* p)

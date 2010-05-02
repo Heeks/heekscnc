@@ -106,6 +106,7 @@ public:
 	void ReadBaseXML(TiXmlElement* element);
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(15, 0);}else COp::GetIcon(texture_number, x, y);}
+	const wxBitmap &GetIcon();
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 

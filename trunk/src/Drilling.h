@@ -114,6 +114,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 
 	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(6, 0);}else COp::GetIcon(texture_number, x, y);}
+	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

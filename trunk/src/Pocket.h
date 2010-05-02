@@ -45,6 +45,7 @@ public:
 	const wxChar* GetTypeString(void)const{return _T("Pocket");}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(14, 0);}else CDepthOp::GetIcon(texture_number, x, y);}
+	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

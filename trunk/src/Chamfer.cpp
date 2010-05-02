@@ -68,6 +68,13 @@ CChamfer & CChamfer::operator= ( const CChamfer & rhs )
 	return(*this);
 }
 
+const wxBitmap &CChamfer::GetIcon()
+{
+	if(!m_active)return GetInactiveIcon();
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/chamfmill.png")));
+	return *icon;
+}
 
 void CChamfer::glCommands(bool select, bool marked, bool no_color)
 {

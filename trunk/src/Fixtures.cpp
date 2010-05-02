@@ -9,6 +9,13 @@
 #include "interface/Tool.h"
 #include <wx/stdpaths.h>
 
+const wxBitmap &CFixtures::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/fixtures.png")));
+	return *icon;
+}
+
 void CFixtures::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
