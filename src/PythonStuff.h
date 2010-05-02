@@ -6,3 +6,4 @@ bool HeeksPyBackplot(const CProgram* program, HeeksObj* into, const wxString &fi
 void HeeksPyCancel(void);
 
 wxString PythonString( const wxString value );
+wxString PythonString( const double value );

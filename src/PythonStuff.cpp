@@ -271,3 +271,17 @@ wxString PythonString( const wxString value )
 	return(result);
 }
 
+wxString PythonString( const double value )
+{
+	#ifdef UNICODE
+        std::wostringstream _value;
+    #else
+        std::ostringstream _value;
+    #endif
+        _value.imbue(std::locale("C"));
+        _value<<std::setprecision(10);
+        _value << value;
+
+        return(_value.str().c_str());
+}
+
