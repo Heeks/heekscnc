@@ -50,6 +50,7 @@ CProfileParams::CProfileParams()
 	m_end[0] = m_end[1] = m_end[2] = 0.0;
 	m_sort_sketches = 1;
 	m_num_tags = 0;
+	m_tag_at_start = true;
 	m_tag_width = 5;
 	m_tag_angle = 45;
 	m_offset_extra = 0.0;
@@ -92,6 +93,7 @@ static void on_set_sort_sketches(const int value, HeeksObj* object)
 	((CProfile*)object)->WriteDefaultValues();
 }
 static void on_set_num_tags(const int value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_num_tags = value;}
+static void on_set_tag_at_start(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_tag_at_start = value;}
 static void on_set_tag_width(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_tag_width = value;}
 static void on_set_tag_angle(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_tag_angle = value;}
 static void on_set_offset_extra(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_offset_extra = value;}
@@ -187,6 +189,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 	{
 		list->push_back(new PropertyLength(_("tag width"), m_tag_width, parent, on_set_tag_width));
 		list->push_back(new PropertyDouble(_("tag angle"), m_tag_angle, parent, on_set_tag_angle));
+		list->push_back(new PropertyCheck(_("tag at start"), m_tag_at_start, parent, on_set_tag_at_start));
 	}
 	list->push_back(new PropertyLength(_("offset_extra"), m_offset_extra, parent, on_set_offset_extra));
 }
@@ -240,6 +243,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 		element->SetAttribute("num_tags", m_num_tags);
 		element->SetDoubleAttribute("tag_width", m_tag_width);
 		element->SetDoubleAttribute("tag_angle", m_tag_angle);
+		element->SetAttribute("tag_at_start", m_tag_at_start ? 1:0);
 	}
 
 	element->SetDoubleAttribute("offset_extra", m_offset_extra);
@@ -286,6 +290,7 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("num_tags", &m_num_tags);
 	pElem->Attribute("tag_width", &m_tag_width);
 	pElem->Attribute("tag_angle", &m_tag_angle);
+	pElem->Attribute("tag_at_start", &int_for_bool); m_tag_at_start = (int_for_bool != 0);
 	pElem->Attribute("offset_extra", &m_offset_extra);
 }
 
@@ -869,6 +874,10 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 		{
 			l_ossPythonCode << _T("tag_width = ") << m_profile_params.m_tag_width / theApp.m_program->m_units << _T("\n");
 			l_ossPythonCode << _T("tag_angle = ") << m_profile_params.m_tag_angle * PI/180 << _T("\n");
+			l_ossPythonCode << _T("tag_at_start = ");
+			if(m_profile_params.m_tag_at_start)l_ossPythonCode << _T("True");
+			else l_ossPythonCode << _T("False");
+			l_ossPythonCode << _T("\n");
 			l_ossPythonCode << _T("tag_height = float(tag_width)/2 * math.tan(tag_angle)\n");
 			l_ossPythonCode << _T("tag_depth = final_depth + tag_height\n");
 			l_ossPythonCode << _T("if tag_depth > start_depth: tag_depth = start_depth\n");
@@ -884,7 +893,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 			// rapid across to roll on point
 			l_ossPythonCode << wxString::Format(_T(" if step != 0:\n  rapid(%s)\n"), roll_on_string.c_str()).c_str();
-			if(m_profile_params.m_num_tags > 0)
+			if(m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start)
 			{
 				// rapid down to just above the material, which might be at the top of the tag
 				l_ossPythonCode << wxString(_T(" mat_depth = prev_depth\n")).c_str();
@@ -911,7 +920,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 				l_ossPythonCode << _T(" sub_tag_height = tag_height - ( depth - final_depth )\n");
 				l_ossPythonCode << _T(" if sub_tag_height < 0: sub_tag_height = 0\n");
 				l_ossPythonCode << _T(" sub_tag_width = 2.0 * float(sub_tag_height) / math.tan (tag_angle) \n");
-				l_ossPythonCode << _T(" tag = ") << m_profile_params.m_num_tags << ", sub_tag_width, tag_angle\n");
+				l_ossPythonCode << _T(" tag = ") << m_profile_params.m_num_tags << ", sub_tag_width, tag_angle, tag_at_start\n");
 				tag_string = _T(", start_depth, depth, tag");
 			}
 
@@ -930,16 +939,15 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			l_ossPythonCode << wxString(_T("rapid(z = rapid_down_to_height)\n")).c_str();
 
 			// feed down to final depth
-			l_ossPythonCode << wxString::Format(_T("feed(z = final_depth%s)\n"), (m_profile_params.m_num_tags > 0) ? _T(" + tag_height") : _T("")).c_str();
+			l_ossPythonCode << wxString::Format(_T("feed(z = final_depth%s)\n"), (m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start) ? _T(" + tag_height") : _T("")).c_str();
 
 			// set up the tag parameters
 			wxString tag_string;
 
 			if(m_profile_params.m_num_tags > 0)
 			{
-			    l_ossPythonCode << wxString::Format(_T("depth_of_cut = ( start_depth - final_depth )\n")).c_str();
-				l_ossPythonCode << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle\n");
-				tag_string = _T(", start_depth, depth_of_cut, tag");
+				l_ossPythonCode << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle, tag_at_start\n");
+				tag_string = _T(", start_depth, final_depth, tag");
 			}
 
 			// profile the kurve
