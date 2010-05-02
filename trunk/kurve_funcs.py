@@ -21,7 +21,7 @@ def make_smaller( k, startx = None, starty = None, finishx = None, finishy = Non
         kurve.change_end(k, finishx, finishy)
 
 def split_for_tags( k, radius, start_depth, depth, tag ):
-    num_tags, tag_width, tag_angle = tag
+    num_tags, tag_width, tag_angle, tag_at_start = tag
     tag_height = tag_width/2 * math.tan(tag_angle)
     perim = kurve.perim(k)
     sub_perim = perim / num_tags
@@ -33,6 +33,7 @@ def split_for_tags( k, radius, start_depth, depth, tag ):
 
     for i in range(0, num_tags):
         d = sub_perim * i
+        if tag_at_start == False: d += sub_perim / 2
 
         d0 = d - half_flat_top
         while d0 < 0: d0 += perim
@@ -61,13 +62,14 @@ def split_for_tags( k, radius, start_depth, depth, tag ):
             kurve.kbreak(k, px, py)
 
 def get_tag_z_for_span(current_perim, k, radius, start_depth, depth, tag):
-    num_tags, tag_width, tag_angle = tag
+    num_tags, tag_width, tag_angle, tag_at_start = tag
     tag_height = tag_width/2 * math.tan(tag_angle)
     perim = kurve.perim(k)
     sub_perim = perim / num_tags
     max_z = depth
     for i in range(0, num_tags + 1):
         d = sub_perim * i
+        if (tag_at_start == False) and (i != num_tags + 1): d += sub_perim / 2
         dist_from_d = math.fabs(current_perim - d) - radius
         if dist_from_d < 0: dist_from_d = 0
         z = (depth + tag_height) - (dist_from_d / ( tag_width / 2 )) * tag_height
@@ -100,7 +102,7 @@ def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, rollstartx = 
             raise "couldn't offset kurve %d" % (k)
 
     if tag != None:
-        num_tags, tag_width, tag_angle = tag
+        num_tags, tag_width, tag_angle, tag_at_start = tag
         if tag_width < 0.00001:
             tag = None
         else:

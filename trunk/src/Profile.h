@@ -43,6 +43,7 @@ public:
 	double m_end[3];
 	int m_sort_sketches;
 	int m_num_tags;
+	bool m_tag_at_start;
 	double m_tag_width; // in mm
 	double m_tag_angle; // in degrees
 	double m_offset_extra; // in mm
