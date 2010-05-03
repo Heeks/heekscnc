@@ -60,6 +60,7 @@ class Codes():
 	def PECK_DRILL(self): return(self.SPACE() + 'G83')
 	def PECK_DEPTH(self, format, depth): return(self.SPACE() + 'Q' + (format % depth))
 	def RETRACT(self, format, height): return(self.SPACE() + 'R' + (format % height))
+	def END_CANNED_CYCLE(self): return(self.SPACE() + 'G80')
 
 	def X(self): return(self.SPACE() + 'X')
 	def Y(self): return(self.SPACE() + 'Y')

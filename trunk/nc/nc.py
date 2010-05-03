@@ -221,6 +221,9 @@ class Creator:
         """Boring routines"""
         pass
 
+    def end_canned_cycle(self):
+        pass
+
     ############################################################################
     ##  Misc
 
@@ -422,6 +425,9 @@ def tap(x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_
 
 def bore(x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, feed_in=None, feed_out=None, stoppos=None, shift_back=None, shift_right=None, backbore=False, stop=False):
     creator.bore(x, y, z, zretract, depth, standoff, dwell_Bottom, feed_in, feed_out, stoppos, shift_back, shift_right, backbore, stop)
+
+def end_canned_cycle():
+    creator.end_canned_cycle()
 
 def peck(count, first, last=None, step=0.0):
     pecks = []

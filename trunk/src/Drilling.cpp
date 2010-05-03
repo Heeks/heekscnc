@@ -194,6 +194,8 @@ void CDrilling::AppendTextToProgram( const CFixture *pFixture )
 			<< ")\n";
 	} // End for
 
+	ss << "end_canned_cycle()\n";
+
 	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 }
 
