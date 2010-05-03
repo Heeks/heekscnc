@@ -212,7 +212,6 @@ double CInlay::FindMaxOffset( const double max_offset_required, TopoDS_Wire wire
     double offset = ((max_offset - min_offset) / 2.0) + min_offset;
     while ((offset > tolerance) && ((max_offset - min_offset) > tolerance))
     {
-        printf("Trying at offset %lf\n", offset);
         try {
             BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
             offset_wire.Perform(offset * -1.0);
@@ -225,6 +224,8 @@ double CInlay::FindMaxOffset( const double max_offset_required, TopoDS_Wire wire
             }
             else
             {
+                // If we don't consult the result (by calling the Shape() method), it never
+                // tells us if it actually worked or not.
                 TopoDS_Wire extract_the_wire_to_make_sure = TopoDS::Wire(offset_wire.Shape());
 
                 // The offset shape was generated fine.
@@ -241,7 +242,6 @@ double CInlay::FindMaxOffset( const double max_offset_required, TopoDS_Wire wire
         } // End catch
     } // End while
 
-    printf("Found offset %lf\n", offset);
     return(offset);
 }
 
@@ -491,11 +491,12 @@ wxString CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) c
 			{
 				// Move to the top corner and back again.
 				gcode << _T("comment('sharpen corner')\n");
-				gcode << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+				gcode << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+				gcode << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(")\n");
 				gcode << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
 				gcode << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
 				gcode << _T("feed(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << top_corner.Z(true) << _T(")\n");
-				gcode << _T("rapid(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+				gcode << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 			} // End if - then
 		} // End if - then
     }
@@ -544,7 +545,7 @@ CInlay::Valleys_t CInlay::DefineValleys(const CFixture *pFixture)
 					BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
 					transform.Perform(wire, false);
 					wire = transform.Shape();
-    
+
                     // We want to figure out what the maximum offset is at the maximum depth atainable
                     // by the chamfering bit.  Within this smallest of wires, we need to pocket with
                     // the clearance tool.  From this point outwards (or inwards for male operations)
@@ -680,7 +681,7 @@ wxString CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFi
 	wxString gcode;
 
 	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-	
+
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
 	{
@@ -989,7 +990,7 @@ wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *p
 	wxString gcode;
 
 	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-	
+
 	// Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
 	gp_Ax1 mirror_axis;
@@ -1029,7 +1030,7 @@ wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *p
 		depths.sort();
 		depths.reverse();
 
-		
+
 
 		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
 		{
@@ -1072,7 +1073,7 @@ wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *p
 
 
 
-	
+
 
 
 /**
@@ -1154,7 +1155,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 		gcode << FormMountainWalls(valleys, pFixture).c_str();
 		gcode << FormMountainPockets(valleys, pFixture, false).c_str();
 	}
-	
+
 	return(wxString(gcode.str().c_str()));
 }
 
