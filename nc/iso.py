@@ -412,6 +412,10 @@ class CreatorIso(nc.Creator):
     def bore(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, feed_in=None, feed_out=None, stoppos=None, shift_back=None, shift_right=None, backbore=False, stop=False):
         pass
 
+    def end_canned_cycle(self):
+        self.write_blocknum()
+	self.write(iso.codes.END_CANNED_CYCLE() + '\n')
+
     ############################################################################
     ##  Misc
 
