@@ -380,14 +380,14 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 				gp_Vec VE;
 				curve.D1(uEnd, PE, VE);
 
-				if (last_position.Distance(PS) < tolerance)
+				if (last_position == CNCPoint(PS))
 				{
 					// We're heading towards the PE point.
 					CNCPoint point(PE);
 					gcode << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 					last_position = point;
 				} // End if - then
-				else if (last_position.Distance(PE) < tolerance)
+				else if (last_position == CNCPoint(PE))
 				{
 					CNCPoint point(PS);
 					gcode << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
@@ -446,7 +446,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
                 // It's an Arc.
 
-                if (last_position.Distance(PS) < tolerance)
+                if (last_position == CNCPoint(PS))
                 {
                     // Arc towards PE
                     CNCPoint point(PE);
@@ -463,7 +463,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         curve.D1(u, p, v);
                         points.push_back( p );
                     }
-                    if (points.rbegin()->Distance( CNCPoint(PE) ) > tolerance)
+                    if (*points.rbegin() != CNCPoint(PE))
                     {
                         points.push_back( CNCPoint(PE) );
                     }
@@ -481,7 +481,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         }
                     } // End for
                 }
-                else if (last_position.Distance(PE) < tolerance)
+                else if (last_position == CNCPoint(PE))
                 {
                     // Arc towards PS
                     CNCPoint point(PS);
@@ -497,7 +497,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         curve.D1(u, p, v);
                         points.push_back( p );
                     }
-                    if (points.rbegin()->Distance( CNCPoint(PS) ) > tolerance)
+                    if (*points.rbegin() != CNCPoint(PS))
                     {
                         points.push_back( CNCPoint(PS) );
                     }
@@ -534,7 +534,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         curve.D1(u, p, v);
                         points.push_back( p );
                     }
-                    if (points.rbegin()->Distance( CNCPoint(PE) ) > tolerance)
+                    if (*points.rbegin() != CNCPoint(PE))
                     {
                         points.push_back( CNCPoint(PE) );
                     }
@@ -559,7 +559,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                                 curve.D1(u, p, v);
                                 points.push_back( p );
                             }
-                            if (points.rbegin()->Distance( CNCPoint(PS) ) > tolerance)
+                            if (*points.rbegin() != CNCPoint(PS))
                             {
                                 points.push_back( CNCPoint(PS) );
                             }
@@ -619,28 +619,45 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 					const TColgp_Array1OfPnt& Points = Polyg->Nodes();
 					Standard_Integer po;
 					int i = 0;
+					std::list<CNCPoint> interpolated_points;
 					for (po = Points.Lower(); po <= Points.Upper(); po++, i++) {
 						CNCPoint p = (Points.Value(po)).Transformed(L);
+						interpolated_points.push_back(p);
+					} // End for
 
-						if (i > 0)
+					// See if we should go from the start to the end or the end to the start.
+					if (*interpolated_points.rbegin() == last_position)
+					{
+						// We need to go from the end to the start.  Reverse the point locations to
+						// make this easier.
+
+						interpolated_points.reverse();
+					} // End if - then
+
+					if (*interpolated_points.begin() != last_position)
+					{
+						// This curve is not nearby to the last_position.  Rapid to the start
+						// point to start this off.
+
+						// We need to move to the start BEFORE machining this line.
+						CNCPoint start(last_position);
+						CNCPoint end(*interpolated_points.begin());
+
+						gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
+						gcode << _T("rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
+						gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+						gcode << _T("feed(z=") << end.Z(true) << _T(")\n");
+
+						last_position = end;
+					}
+
+					for (std::list<CNCPoint>::iterator itPoint = interpolated_points.begin(); itPoint != interpolated_points.end(); itPoint++)
+					{
+						if (*itPoint != last_position)
 						{
-							CNCPoint point(p);
-							gcode << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
-							last_position = point;
-						}
-						else if (last_position.Distance(p) > tolerance)
-						{
-							// We need to move to the start BEFORE machining this line.
-							CNCPoint start(last_position);
-							CNCPoint end(p);
-
-							gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-                            gcode << _T("rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
-                            gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-                            gcode << _T("feed(z=") << end.Z(true) << _T(")\n");
-
-							last_position = end;
-						}
+							gcode << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
+							last_position = *itPoint;							
+						} // End if - then
 					} // End for
 				} // End if - then
 			}

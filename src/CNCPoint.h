@@ -23,19 +23,19 @@ class CNCPoint : public gp_Pnt {
 public:
 	CNCPoint() : gp_Pnt(0.0, 0.0, 0.0)
 	{
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+		tolerance = heeksCAD->GetTolerance();
 	}
 	CNCPoint( const double *xyz ) : gp_Pnt(xyz[0], xyz[1], xyz[2])
 	{
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+		tolerance = heeksCAD->GetTolerance();
 	}
 	CNCPoint( const double &x, const double &y, const double &z ) : gp_Pnt(x,y,z)
-	{ 
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+	{
+		tolerance = heeksCAD->GetTolerance();
 	}
 	CNCPoint( const gp_Pnt & rhs ) : gp_Pnt(rhs)
 	{
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+		tolerance = heeksCAD->GetTolerance();
 	}
 
 	double X(const bool in_drawing_units = false) const
@@ -77,7 +77,8 @@ public:
 
 	bool operator==( const CNCPoint & rhs ) const
 	{
-		return(Distance(rhs) < tolerance);
+		// We use the sum of both point's tolerance values.
+		return(Distance(rhs) < (tolerance + rhs.tolerance));
 	} // End equivalence operator
 
 	bool operator!=( const CNCPoint & rhs ) const
@@ -179,23 +180,23 @@ struct sort_points_by_z : public std::binary_function< const CNCPoint &, const C
  */
 class CNCVector : public gp_Vec {
 public:
-	CNCVector() : gp_Vec(0.0, 0.0, 0.0) 
+	CNCVector() : gp_Vec(0.0, 0.0, 0.0)
 	{
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+		tolerance = heeksCAD->GetTolerance();
 	}
 
 	CNCVector( const double *xyz ) : gp_Vec(xyz[0], xyz[1], xyz[2])
 	{
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+		tolerance = heeksCAD->GetTolerance();
 	}
 	CNCVector( const double &x, const double &y, const double &z ) : gp_Vec(x,y,z)
-	{ 
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+	{
+		tolerance = heeksCAD->GetTolerance();
 	}
 
 	CNCVector( const gp_Vec & rhs ) : gp_Vec(rhs)
 	{
-		tolerance = heeksCAD->GetTolerance() * 10.0;
+		tolerance = heeksCAD->GetTolerance();
 	}
 
 	bool operator==( const CNCVector & rhs ) const
@@ -210,7 +211,6 @@ public:
 
 	bool operator<( const CNCVector & rhs ) const
 	{
-		
 		for (int offset=1; offset <=3; offset++)
 		{
 			if (fabs(Coord(offset) - rhs.Coord(offset)) < tolerance) continue;
