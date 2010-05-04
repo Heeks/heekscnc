@@ -34,6 +34,10 @@ class CreatorIso(nc.Creator):
         self.x = 0
         self.y = 0
         self.z = 500
+        self.f_modal = False
+        self.g0123_modal = False
+        self.prev_f = ''
+        self.prev_g0123 = ''
 
         self.fmt = iso.codes.FORMAT_MM()
 
@@ -41,8 +45,13 @@ class CreatorIso(nc.Creator):
     ##  Internals
 
     def write_feedrate(self):
-        self.write(self.f)
-        self.f = ''
+        if self.f_modal:
+            if self.f != self.prev_f:
+                self.write(self.f)
+                self.prev_f = self.f
+        else:
+            self.write(self.f)
+            self.f = ''
 
     def write_preps(self):
         self.write(self.g)
@@ -226,7 +235,12 @@ class CreatorIso(nc.Creator):
 
     def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
         self.write_blocknum()
-        self.write(iso.codes.RAPID())
+        if self.g0123_modal:
+            if self.prev_g0123 != iso.codes.RAPID():
+                self.write(iso.codes.RAPID())
+                self.prev_g0123 = iso.codes.RAPID()
+        else:
+            self.write(iso.codes.RAPID())
         self.write_preps()
         if (x != None):
             dx = x - self.x
@@ -250,7 +264,12 @@ class CreatorIso(nc.Creator):
     def feed(self, x=None, y=None, z=None):
         if self.same_xyz(x, y, z): return
         self.write_blocknum()
-        self.write(iso.codes.FEED())
+        if self.g0123_modal:
+            if self.prev_g0123 != iso.codes.FEED():
+                self.write(iso.codes.FEED())
+                self.prev_g0123 = iso.codes.FEED()
+        else:
+            self.write(iso.codes.FEED())
         self.write_preps()
         dx = dy = dz = 0
         if (x != None):
@@ -287,8 +306,15 @@ class CreatorIso(nc.Creator):
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         if self.same_xyz(x, y, z): return
         self.write_blocknum()
-        if cw: self.write(iso.codes.ARC_CW())
-        else: self.write(iso.codes.ARC_CCW())
+        arc_g_code = ''
+        if cw: arc_g_code = iso.codes.ARC_CW()
+        else: arc_g_code = iso.codes.ARC_CCW()
+        if self.g0123_modal:
+            if self.prev_g0123 != arc_g_code:
+                self.write(arc_g_code)
+                self.prev_g0123 = arc_g_code
+        else:
+            self.write(arc_g_code)
         self.write_preps()
         if (x != None):
             self.write(iso.codes.X() + (self.fmt % x))

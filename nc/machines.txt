@@ -1,5 +1,6 @@
 emc2 Linux Enhanced Machine Controller 0
 iso Standard ISO output 0
+iso_modal Standard ISO modal output 0
 iso_with_spaces Standard ISO with spaces 0
 siegkx1 Sieg KX1 machine 0
 hpgl2d 2.5D HPGL 0.01mm 0
