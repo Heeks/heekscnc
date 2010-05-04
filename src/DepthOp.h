@@ -63,7 +63,7 @@ public:
 	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	void AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(const CFixture *pFixture);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void glCommands(bool select, bool marked, bool no_color);
 
@@ -72,7 +72,7 @@ public:
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 	std::list<double> GetDepths() const;
-	wxString GenerateGCode( const CFixture *pFixture );
+	Python GenerateGCode( const CFixture *pFixture );
 };
 
 #endif

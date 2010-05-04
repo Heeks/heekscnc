@@ -173,10 +173,9 @@ const wxBitmap &CInlay::GetIcon()
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CInlay::AppendTextToProgram( const CFixture *pFixture )
+Python CInlay::AppendTextToProgram( const CFixture *pFixture )
 {
-    wxString gcode = GenerateGCode( pFixture, false );
-    theApp.m_program_canvas->m_textCtrl->AppendText(gcode.c_str());
+    return(GenerateGCode( pFixture, false ));
 }
 
 
@@ -676,9 +675,9 @@ CInlay::Valleys_t CInlay::DefineValleys(const CFixture *pFixture)
 } // End DefineValleys() method
 
 
-wxString CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
 {
-	wxString gcode;
+	Python python;
 
 	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
 
@@ -696,26 +695,26 @@ wxString CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFi
 
 		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
 		{
-			gcode << CContour::GeneratePathFromWire((*itValley)[*itDepth],
+			python << CContour::GeneratePathFromWire((*itValley)[*itDepth],
 													last_position,
 													pFixture,
 													m_depth_op_params.m_clearance_height,
-													m_depth_op_params.m_rapid_down_to_height ).c_str();
+													m_depth_op_params.m_rapid_down_to_height );
 		} // End for
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
 		// the concave corners formed between adjacent edges.
-		gcode << FormCorners( *itValley, pChamferingBit ).c_str();
+		python << FormCorners( *itValley, pChamferingBit ).c_str();
 	} // End for
 
-	return(gcode);
+	return(python);
 
 } // End FormValleyWalls() method
 
 
-wxString CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *pFixture  )
 {
-	wxString gcode;
+	Python python;
 
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
@@ -748,20 +747,20 @@ wxString CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *p
 				pPocket->m_depth_op_params.m_start_depth = previous_depth;
 				pPocket->m_depth_op_params.m_final_depth = *itDepth;
 				pPocket->m_speed_op_params = m_speed_op_params;
-				gcode << pPocket->GenerateGCode(pFixture).c_str();
+				python << pPocket->GenerateGCode(pFixture).c_str();
 				delete pPocket;		// We don't need it any more.
 			}
 		} // End for
 	} // End for
 
-	return(gcode);
+	return(python);
 
 } // End FormValleyPockets() method
 
 
-wxString CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *pFixture, const bool only_above_mountains  )
+Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *pFixture, const bool only_above_mountains  )
 {
-	wxString gcode;
+	Python python;
 
 	// Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
@@ -858,7 +857,7 @@ wxString CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture 
 
 			if (only_above_mountains)
 			{
-				gcode << pPocket->GenerateGCode(pFixture).c_str();
+				python << pPocket->GenerateGCode(pFixture).c_str();
 			}
 
 			CBox box;
@@ -968,7 +967,7 @@ wxString CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture 
 		bounding_sketch_pocket->m_depth_op_params.m_start_depth = 0.0;
 		bounding_sketch_pocket->m_depth_op_params.m_final_depth = -1.0 * max_mountain_height;
 
-		gcode << bounding_sketch_pocket->GenerateGCode(pFixture).c_str();
+		python << bounding_sketch_pocket->GenerateGCode(pFixture).c_str();
 
 		pockets.push_back(bounding_sketch_pocket);
 	} // End if - then
@@ -979,15 +978,15 @@ wxString CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture 
 		delete *itPocket;		// We don't need it any more.
 	} // End for
 
-	return(gcode);
+	return(python);
 
 } // End FormMountainPockets() method
 
 
 
-wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
 {
-	wxString gcode;
+	Python python;
 
 	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
 
@@ -1030,8 +1029,6 @@ wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *p
 		depths.sort();
 		depths.reverse();
 
-
-
 		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
 		{
 			// It's the male half we're generating.  Rotate the wire around one
@@ -1054,19 +1051,19 @@ wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *p
 			translate.Perform(tool_path_wire, false);
 			tool_path_wire = TopoDS::Wire(translate.Shape());
 
-			gcode << CContour::GeneratePathFromWire(tool_path_wire,
+			python << CContour::GeneratePathFromWire(tool_path_wire,
 													last_position,
 													pFixture,
 													m_depth_op_params.m_clearance_height,
-													m_depth_op_params.m_rapid_down_to_height ).c_str();
+													m_depth_op_params.m_rapid_down_to_height );
 		} // End for
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
 		// the concave corners formed between adjacent edges.
-		gcode << FormCorners( *itValley, pChamferingBit ).c_str();
+		python << FormCorners( *itValley, pChamferingBit ).c_str();
 	} // End for
 
-	return(gcode);
+	return(python);
 
 } // End FormMountainWalls() method
 
@@ -1112,17 +1109,11 @@ wxString CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *p
     both halves are generated.
  */
 
-wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirrored_sketches )
+Python CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirrored_sketches )
 {
-	ReloadPointers();
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream gcode;
-#else
-    std::ostringstream gcode;
-#endif
-    gcode.imbue(std::locale("C"));
-	gcode<<std::setprecision(10);
+	ReloadPointers();
 
 	CDepthOp::AppendTextToProgram( pFixture );
 
@@ -1136,7 +1127,7 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 	if (! pChamferingBit)
 	{
 	    // No shirt, no shoes, no service.
-		return(_T(""));
+		return(python);
 	}
 
 	Valleys_t valleys = DefineValleys(pFixture);
@@ -1145,18 +1136,18 @@ wxString CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirror
 	{
 		// Form the walls before the pockets so that the pockets cleanup the fury edge left
 		// by the tip of the chamfering bit.
-		gcode << FormValleyWalls(valleys, pFixture).c_str();
-		gcode << FormValleyPockets(valleys, pFixture).c_str();
+		python << FormValleyWalls(valleys, pFixture).c_str();
+		python << FormValleyPockets(valleys, pFixture).c_str();
 	}
 
 	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eMale))
 	{
-		gcode << FormMountainPockets(valleys, pFixture, true).c_str();
-		gcode << FormMountainWalls(valleys, pFixture).c_str();
-		gcode << FormMountainPockets(valleys, pFixture, false).c_str();
+		python << FormMountainPockets(valleys, pFixture, true).c_str();
+		python << FormMountainWalls(valleys, pFixture).c_str();
+		python << FormMountainPockets(valleys, pFixture, false).c_str();
 	}
 
-	return(wxString(gcode.str().c_str()));
+	return(python);
 }
 
 

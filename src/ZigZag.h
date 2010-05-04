@@ -49,7 +49,7 @@ public:
 
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	void AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(const CFixture *pFixture);
 	void ReloadPointers();
 	void SetDepthOpParamsFromBox();
 

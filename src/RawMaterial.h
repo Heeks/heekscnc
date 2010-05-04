@@ -3,6 +3,7 @@
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyDouble.h"
 #include "tinyxml/tinyxml.h"
+#include "PythonStuff.h"
 
 #include <wx/string.h>
 #include <sstream>
@@ -33,7 +34,7 @@ public:
 
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
-	void AppendTextToProgram();
+	Python AppendTextToProgram();
 
 	static wxString ConfigScope() { return(_T("RawMaterial")); }
 

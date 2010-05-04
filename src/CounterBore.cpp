@@ -112,15 +112,9 @@ const wxBitmap &CCounterBore::GetIcon()
 	this end, we need to spiral down to each successive cutting depth and then spiral out to the
 	outside diameter.  Repeat these operations until we've cut the full depth and the full width.
  */
-void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const CCuttingTool *pCuttingTool ) const
+Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const CCuttingTool *pCuttingTool ) const
 {
-
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
+	Python python;
 
 	double cutting_depth = m_depth_op_params.m_start_depth;
 	double final_depth   = m_depth_op_params.m_final_depth;
@@ -130,18 +124,18 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 
 	// Rapid to above the starting point (up at clearance height)
 	point.SetZ( m_depth_op_params.m_clearance_height );
-	ss << "rapid( x=" << point.X(true) << ", y=" << point.Y(true) << ", z=" << point.Z(true) << ")\n";
+	python << _T("rapid( x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 
 	// Feed (slowly) to the starting point at the centre of the material
 	point.SetZ(m_depth_op_params.m_start_depth);
-	ss << "feed( x=" << point.X(true) << ", y=" << point.Y(true) << ", z=" << point.Z(true) << ")\n";
+	python << _T("feed( x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 
 	double tolerance = heeksCAD->GetTolerance();
 	double max_radius_of_spiral = (m_params.m_diameter / 2.0) - pCuttingTool->CuttingRadius(false);
 
 	while ((cutting_depth - final_depth) > tolerance)
 	{
-		ss << "comment('Spiral down half a circle until we get to the cutting depth')\n";
+		python << _T("comment('Spiral down half a circle until we get to the cutting depth')\n");
 
 		double step_down = m_depth_op_params.m_step_down;
 		if ((cutting_depth - step_down) < final_depth)
@@ -164,49 +158,49 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 
 		// Now spiral down using the width_of_spiral to the cutting_depth.
 		// Move to 12 O'Clock.
-		ss << "feed( x=" << centre.X(true) << ", "
-					"y=" << drawing_units(centre.Y() + radius_of_spiral) << ", "
-					"z=" << drawing_units(cutting_depth) << ")\n";
+		python << _T("feed( x=") << centre.X(true) << _T(", ")
+					_T("y=") << drawing_units(centre.Y() + radius_of_spiral) << _T(", ")
+					_T("z=") << drawing_units(cutting_depth) << _T(")\n");
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) + radius_of_spiral );
 
 		// First quadrant (12 O'Clock to 9 O'Clock)
-		ss << "arc_ccw( x=" << drawing_units(centre.X(false) - radius_of_spiral) << ", " <<
-					"y=" << centre.Y(true) << ", " <<
-					"z=" << drawing_units(cutting_depth - (0.5 * step_down)) << ", " <<
-					"i=" << drawing_units(centre.X(false) - point.X()) << ", " <<
-					"j=" << drawing_units(centre.Y(false) - point.Y()) << ")\n";
+		python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
+					_T("y=") << centre.Y(true) << _T(", ") <<
+					_T("z=") << drawing_units(cutting_depth - (0.5 * step_down)) << _T(", ") <<
+					_T("i=") << drawing_units(centre.X(false) - point.X()) << _T(", ") <<
+					_T("j=") << drawing_units(centre.Y(false) - point.Y()) << _T(")\n");
 		point.SetX( centre.X(false) - radius_of_spiral );
 		point.SetY( centre.Y(false) );
 
 		// Second quadrant (9 O'Clock to 6 O'Clock)
-		ss << "arc_ccw( x=" << centre.X(true) << ", " <<
-					"y=" << drawing_units(centre.Y(false) - radius_of_spiral) << ", " <<
-					"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ", " <<	// full depth now
-					"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-					"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+		python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+					_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
+					_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
+					_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+					_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) - radius_of_spiral );
 
 		// Third quadrant (6 O'Clock to 3 O'Clock)
-		ss << "arc_ccw( x=" << drawing_units(centre.X(false) + radius_of_spiral) << ", " <<
-					"y=" << centre.Y(true) << ", " <<
-					"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ", " <<	// full depth now
-					"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-					"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+		python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
+					_T("y=") << centre.Y(true) << _T(", ") <<
+					_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
+					_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+					_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 		point.SetX( centre.X(false) + radius_of_spiral );
 		point.SetY( centre.Y(false) );
 
 		// Fourth quadrant (3 O'Clock to 12 O'Clock)
-		ss << "arc_ccw( x=" << centre.X(true) << ", " <<
-					"y=" << drawing_units(centre.Y(false) + radius_of_spiral) << ", " <<
-					"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ", " <<	// full depth now
-					"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-					"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+		python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+					_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
+					_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
+					_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+					_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) + radius_of_spiral );
 
-		ss << "comment(" << PythonString(_T("Now spiral outwards to the counterbore perimeter")).c_str() << ")\n";
+		python << _T("comment('Now spiral outwards to the counterbore perimeter')\n");
 
 		do {
 			radius_of_spiral += (pCuttingTool->CuttingRadius(false) * 0.75);
@@ -217,45 +211,45 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 			} // End if - then
 
 			// Move to 12 O'Clock.
-			ss << "feed( x=" << centre.X(true) << ", "
-						"y=" << drawing_units(centre.Y(false) + radius_of_spiral) << ", "
-						"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ")\n";
+			python << _T("feed( x=") << centre.X(true) << _T(", ")
+						_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ")
+						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(")\n");
 			point.SetX( centre.X(false) );
 			point.SetY( centre.Y(false) + radius_of_spiral );
 
 			// First quadrant (12 O'Clock to 9 O'Clock)
-			ss << "arc_ccw( x=" << drawing_units(centre.X(false) - radius_of_spiral) << ", " <<
-						"y=" << centre.Y(true) << ", " <<
-						"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ", " <<	// full depth
-						"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-						"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
+						_T("y=") << centre.Y(true) << _T(", ") <<
+						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth
+						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) - radius_of_spiral );
 			point.SetY( centre.Y(false) );
 
 			// Second quadrant (9 O'Clock to 6 O'Clock)
-			ss << "arc_ccw( x=" << centre.X(true) << ", " <<
-						"y=" << drawing_units(centre.Y(false) - radius_of_spiral) << ", " <<
-						"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ", " <<	// full depth now
-						"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-						"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+						_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
+						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
+						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) );
 			point.SetY( centre.Y(false) - radius_of_spiral );
 
 			// Third quadrant (6 O'Clock to 3 O'Clock)
-			ss << "arc_ccw( x=" << drawing_units(centre.X(false) + radius_of_spiral) << ", " <<
-						"y=" << centre.Y(true) << ", " <<
-						"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ", " <<	// full depth now
-						"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-						"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
+						_T("y=") << centre.Y(true) << _T(", ") <<
+						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
+						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) + radius_of_spiral );
 			point.SetY( centre.Y(false) );
 
 			// Fourth quadrant (3 O'Clock to 12 O'Clock)
-			ss << "arc_ccw( x=" << centre.X(true) << ", " <<
-						"y=" << drawing_units(centre.Y(false) + radius_of_spiral) << ", " <<
-						"z=" << drawing_units(cutting_depth - (1.0 * step_down)) << ", " <<	// full depth now
-						"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-						"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+						_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
+						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
+						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) );
 			point.SetY( centre.Y(false) + radius_of_spiral );
 		} while ((max_radius_of_spiral - radius_of_spiral) > tolerance);
@@ -273,13 +267,13 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 
 	// Rapid back to the centre of the hole (at the bottom) so we don't hit the
 	// sides on the way up.
-	ss << "rapid( x=" << centre.X(true) << ", y=" << centre.Y(true) << ", z=" << drawing_units(final_depth) << ")\n";
+	python << _T("rapid( x=") << centre.X(true) << _T(", y=") << centre.Y(true) << _T(", z=") << drawing_units(final_depth) << _T(")\n");
 
 	// Rapid to above the starting point (up at clearance height)
 	point.SetZ( m_depth_op_params.m_clearance_height );
-	ss << "rapid( x=" << centre.X(true) << ", y=" << centre.Y(true) << ", z=" << point.Z(true) << ")\n";
+	python << _T("rapid( x=") << centre.X(true) << _T(", y=") << centre.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 
 } // End GenerateGCodeForOneLocation() method
 
@@ -290,16 +284,11 @@ void CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
+Python CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 {
-	CDepthOp::AppendTextToProgram(pFixture);
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
+	python << CDepthOp::AppendTextToProgram(pFixture);
 
 	if (m_cutting_tool_number > 0)
 	{
@@ -314,17 +303,15 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 					 << "in counter bore operation.  "
 					 << "Skipping this counter bore operation (ID=" << m_id << ")";
 				wxMessageBox(Ctt(l_ossMsg.str().c_str()));
-				return;
+				return(python);
 			} // End if - then
 
 			std::vector<CNCPoint> locations = FindAllLocations( NULL );
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point( pFixture->Adjustment(*l_itLocation) );
-				GenerateGCodeForOneLocation( point, pCuttingTool );
+				python << GenerateGCodeForOneLocation( point, pCuttingTool );
 			} // End for
-
-			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
 		} // End if - then
 		else
 		{
@@ -343,6 +330,7 @@ void CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 		wxMessageBox(Ctt(l_ossMsg.str().c_str()));
 	} // End if - else
 
+	return(python);
 }
 
 

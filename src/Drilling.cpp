@@ -166,37 +166,31 @@ const wxBitmap &CDrilling::GetIcon()
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CDrilling::AppendTextToProgram( const CFixture *pFixture )
+Python CDrilling::AppendTextToProgram( const CFixture *pFixture )
 {
-	CSpeedOp::AppendTextToProgram( pFixture );
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	python << CSpeedOp::AppendTextToProgram( pFixture );
 
 	std::vector<CNCPoint> locations = FindAllLocations();
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		gp_Pnt point = pFixture->Adjustment( *l_itLocation );
 
-		ss << "drill("
-			<< "x=" << point.X()/theApp.m_program->m_units << ", "
-			<< "y=" << point.Y()/theApp.m_program->m_units << ", "
-			<< "z=" << point.Z()/theApp.m_program->m_units << ", "
-			<< "depth=" << m_params.m_depth/theApp.m_program->m_units << ", "
-			<< "standoff=" << m_params.m_standoff/theApp.m_program->m_units << ", "
-			<< "dwell=" << m_params.m_dwell << ", "
-			<< "peck_depth=" << m_params.m_peck_depth/theApp.m_program->m_units // << ", "
-			<< ")\n";
+		python << _T("drill(")
+			<< _T("x=") << point.X()/theApp.m_program->m_units << _T(", ")
+			<< _T("y=") << point.Y()/theApp.m_program->m_units << _T(", ")
+			<< _T("z=") << point.Z()/theApp.m_program->m_units << _T(", ")
+			<< _T("depth=") << m_params.m_depth/theApp.m_program->m_units << _T(", ")
+			<< _T("standoff=") << m_params.m_standoff/theApp.m_program->m_units << _T(", ")
+			<< _T("dwell=") << m_params.m_dwell << _T(", ")
+			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units // << ", "
+			<< _T(")\n");
 	} // End for
 
-	ss << "end_canned_cycle()\n";
+	python << _T("end_canned_cycle()\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 

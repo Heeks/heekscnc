@@ -53,7 +53,7 @@ public:
 	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	void AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(const CFixture *pFixture);
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();
@@ -63,7 +63,7 @@ public:
 	void ReloadPointers() { COp::ReloadPointers(); }
 
 	static wxString ConfigScope() { return(_T("SpeedOp")); }
-	wxString GenerateGCode( const CFixture *pFixture );
+	Python GenerateGCode( const CFixture *pFixture );
 };
 
 #endif

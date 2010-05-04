@@ -164,7 +164,7 @@ static bool write_python_file(const wxString& python_file_path)
 	wxFile ofs(python_file_path.c_str(), wxFile::write);
 	if(!ofs.IsOpened())return false;
 
-	ofs.Write(theApp.m_program_canvas->m_textCtrl->GetValue());
+	ofs.Write(theApp.m_program->m_python_program.c_str());
 
 	return true;
 }
@@ -284,4 +284,32 @@ wxString PythonString( const double value )
 
         return(_value.str().c_str());
 }
+
+Python & Python::operator<<( const double value )
+{
+	wxString::operator<<(PythonString(value));
+	return(*this);
+}
+
+Python & Python::operator<< ( const Python & value )
+{
+	wxString::operator<<(value);
+	return(*this);
+}
+
+
+Python & Python::operator<< ( const wxChar *value )
+{
+	wxString::operator<<(value);
+	return(*this);
+}
+
+
+Python & Python::operator<< ( const int value )
+{
+	wxString::operator<<(value);
+	return(*this);
+
+}
+
 

@@ -55,14 +55,14 @@ public:
 	void ReloadPointers();
 
 	// COp's virtual functions
-	void AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(const CFixture *pFixture);
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
-	wxString GenerateGCode(const CFixture *pFixture);
+	Python GenerateGCode(const CFixture *pFixture);
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();

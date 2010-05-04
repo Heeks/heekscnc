@@ -244,32 +244,25 @@ const wxBitmap &CPocket::GetIcon()
 	return *icon;
 }
 
-void CPocket::AppendTextToProgram(const CFixture *pFixture)
+Python CPocket::AppendTextToProgram(const CFixture *pFixture)
 {
-	wxString gcode = GenerateGCode(pFixture);
-	theApp.m_program_canvas->AppendText(gcode.c_str());
+	return(GenerateGCode(pFixture));
 }
 
-wxString CPocket::GenerateGCode(const CFixture *pFixture)
+Python CPocket::GenerateGCode(const CFixture *pFixture)
 {
-#ifdef UNICODE
-	std::wostringstream gcode;
-#else
-    std::ostringstream gcode;
-#endif
-    gcode.imbue(std::locale("C"));
-	gcode<<std::setprecision(10);
+	Python python;
 
-    ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
+	ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool == NULL)
 	{
 		wxMessageBox(_T("Cannot generate GCode for pocket without a cutting tool assigned"));
-		return(_T(""));
+		return(python);
 	} // End if - then
 
-	gcode << CDepthOp::GenerateGCode(pFixture).c_str();
+	python << CDepthOp::GenerateGCode(pFixture).c_str();
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
@@ -317,22 +310,22 @@ wxString CPocket::GenerateGCode(const CFixture *pFixture)
 
 		if(object)
 		{
-			gcode << WriteSketchDefn(object, pFixture, object->m_id).c_str();
+			python << WriteSketchDefn(object, pFixture, object->m_id);
 
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
-			gcode << _T("area_funcs.pocket(a") << object->m_id << _T(", tool_diameter/2 + ");
-			gcode << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
-			gcode << _T(", rapid_down_to_height, start_depth, final_depth, ");
-			gcode << m_pocket_params.m_step_over / theApp.m_program->m_units;
-			gcode << _T(", step_down, ");
-			gcode << m_pocket_params.m_round_corner_factor;
-			gcode << _T(", clearance, ");
-			gcode << m_pocket_params.m_starting_place << _T(")\n");
+			python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2 + ");
+			python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
+			python << _T(", rapid_down_to_height, start_depth, final_depth, ");
+			python << m_pocket_params.m_step_over / theApp.m_program->m_units;
+			python << _T(", step_down, ");
+			python << m_pocket_params.m_round_corner_factor;
+			python << _T(", clearance, ");
+			python << m_pocket_params.m_starting_place << _T(")\n");
 
 			// rapid back up to clearance plane
-			gcode << _T("rapid(z = clearance)\n");
+			python << _T("rapid(z = clearance)\n");
 		}
 
 		if(re_ordered_sketch)
@@ -341,7 +334,7 @@ wxString CPocket::GenerateGCode(const CFixture *pFixture)
 		}
 	} // End for
 
-	return(wxString(gcode.str().c_str()));
+	return(python);
 
 } // End GenerateGCode() method
 

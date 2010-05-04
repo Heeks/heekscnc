@@ -11,6 +11,7 @@
 #include "RawMaterial.h"
 #include "HeeksCNC.h"
 #include "SpeedReferences.h"
+#include "PythonStuff.h"
 
 class CNCCode;
 class CProgram;
@@ -66,6 +67,7 @@ public:
 
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches
+	Python m_python_program;
 
 	CProgram();
 	CProgram( const CProgram & rhs );
@@ -93,7 +95,7 @@ public:
 	bool AutoExpand(){return true;}
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
-	void RewritePythonProgram();
+	Python RewritePythonProgram();
 	ProgramUserType GetUserType();
 	void UpdateFromUserType();
 

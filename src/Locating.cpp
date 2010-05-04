@@ -106,17 +106,11 @@ const wxBitmap &CLocating::GetIcon()
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CLocating::AppendTextToProgram( const CFixture *pFixture )
+Python CLocating::AppendTextToProgram( const CFixture *pFixture )
 {
-	COp::AppendTextToProgram( pFixture );
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	python << COp::AppendTextToProgram( pFixture );
 
 	std::vector<CNCPoint> locations = FindAllLocations();
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
@@ -129,14 +123,14 @@ void CLocating::AppendTextToProgram( const CFixture *pFixture )
 		// Rotate the point to align it with the fixture
 		CNCPoint point( pFixture->Adjustment( location ) );
 
-		ss << "rapid("
-			<< "x=" << point.X(true) << ", "
-			<< "y=" << point.Y(true) << ", "
-			<< "z=" << point.Z(true) << ")\n";
-		ss << "program_stop(optional=False)\n";
+		python << _T("rapid(")
+			<< _T("x=") << point.X(true) << _T(", ")
+			<< _T("y=") << point.Y(true) << _T(", ")
+			<< _T("z=") << point.Z(true) << _T(")\n");
+		python << _T("program_stop(optional=False)\n");
 	} // End for
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 
