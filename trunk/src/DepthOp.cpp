@@ -247,36 +247,30 @@ void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches
 	} // End if - then
 }
 
-void CDepthOp::AppendTextToProgram(const CFixture *pFixture)
+Python CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 {
-    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture).c_str());
+    return(GenerateGCode(pFixture));
 }
 
-wxString CDepthOp::GenerateGCode( const CFixture *pFixture )
+Python CDepthOp::GenerateGCode( const CFixture *pFixture )
 {
-    #ifdef UNICODE
-	std::wostringstream gcode;
-#else
-    std::ostringstream gcode;
-#endif
-    gcode.imbue(std::locale("C"));
-	gcode<<std::setprecision(10);
+	Python python;
 
-    gcode << CSpeedOp::GenerateGCode(pFixture).c_str();
+    python << CSpeedOp::GenerateGCode(pFixture).c_str();
 
-	gcode << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-	gcode << _T("rapid_down_to_height = float(") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-    gcode << _T("start_depth = float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")\n");
-    gcode << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
-    gcode << _T("final_depth = float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")\n");
+	python << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+	python << _T("rapid_down_to_height = float(") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+    python << _T("start_depth = float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")\n");
+    python << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
+    python << _T("final_depth = float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")\n");
 
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool != NULL)
 	{
-		gcode << _T("tool_diameter = float(") << (pCuttingTool->CuttingRadius(true) * 2.0) << _T(")\n");
+		python << _T("tool_diameter = float(") << (pCuttingTool->CuttingRadius(true) * 2.0) << _T(")\n");
 	} // End if - then
 
-	return(wxString(gcode.str().c_str()));
+	return(python);
 }
 
 

@@ -103,12 +103,12 @@ public:
 
 	wxString WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed );
 	wxString AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, const CFixture *pFixture);
-	wxString AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture );
+	Python AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture );
 	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
 	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 
 	// COp's virtual functions
-	void AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(const CFixture *pFixture);
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 

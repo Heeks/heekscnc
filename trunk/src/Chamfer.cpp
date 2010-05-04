@@ -131,18 +131,12 @@ static double drawing_units( const double value )
 	return(value / theApp.m_program->m_units);
 }
 
-void CChamfer::AppendTextToProgram(const CFixture *pFixture)
+Python CChamfer::AppendTextToProgram(const CFixture *pFixture)
 {
-	// Look at the child operations objects and generate a toolpath as appropriate.
-	CDepthOp::AppendTextToProgram( pFixture );
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	// Look at the child operations objects and generate a toolpath as appropriate.
+	python << CDepthOp::AppendTextToProgram( pFixture );
 
 	// Whatever underlying sharp edges we're going to cleanup, we need to know how deep
 	// we need to plunge the chamfering bit into the work before we can get the chamfering
@@ -155,7 +149,7 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 	if (pChamferingBit == NULL)
 	{
 		// No socks, no shirt, no service.
-		return;
+		return(python);
 	} // End if - then
 
 	if (pChamferingBit->m_params.m_type != CCuttingToolParams::eChamfer)
@@ -165,7 +159,7 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 		// mathematics (at least I can't).
 
 		printf("Only chamfering bits are supported for chamfer operations\n");
-		return;
+		return(python);
 	}
 
 	if (m_params.m_chamfer_width > pChamferingBit->m_params.m_cutting_edge_height)
@@ -174,7 +168,7 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 		printf("Chamfer width %lf is too large for a single pass of the chamfering bit's edge (%lf)\n",
 				m_params.m_chamfer_width / theApp.m_program->m_units,
 				pChamferingBit->m_params.m_cutting_edge_height / theApp.m_program->m_units );
-		return;
+		return(python);
 	}
 
 	// How deep do we have to plunge in order to cut this width of chamfer?
@@ -281,15 +275,15 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 
                 CNCPoint point(l_itCircle->Location());
 
-				ss << "drill("
-					<< "x=" << point.X(true) << ", "
-					<< "y=" << point.Y(true) << ", "
-					<< "z=" << drawing_units(point.Z(false) - gap_closure_depth) << ", "
-					<< "depth=" << drawing_units(required_bit_plunge_depth) << ", "
-					<< "standoff=" << drawing_units(m_depth_op_params.m_clearance_height) << ", "
-					<< "dwell=" << 0 << ", "
-					<< "peck_depth=" << 0 // << ", "
-					<< ")\n";
+				python << _T("drill(")
+					<< _T("x=") << point.X(true) << _T(", ")
+					<< _T("y=") << point.Y(true) << _T(", ")
+					<< _T("z=") << drawing_units(point.Z(false) - gap_closure_depth) << _T(", ")
+					<< _T("depth=") << drawing_units(required_bit_plunge_depth) << _T(", ")
+					<< _T("standoff=") << drawing_units(m_depth_op_params.m_clearance_height) << _T(", ")
+					<< _T("dwell=") << 0.0 << _T(", ")
+					<< _T("peck_depth=") << 0.0 // << ", "
+					<< _T(")\n");
 			}
 			else
 			{
@@ -301,61 +295,61 @@ void CChamfer::AppendTextToProgram(const CFixture *pFixture)
 
 				double radius_of_spiral = hole_radius - bit_radius_at_plunge_depth + (m_params.m_chamfer_width * sin(theta));
 
-				ss << "rapid( x=" << centre.X(true) << ", "
-							<< "y=" << centre.Y(true) << ", "
-							<< "z=" << m_depth_op_params.m_clearance_height/theApp.m_program->m_units << ")\n";
+				python << _T("rapid( x=") << centre.X(true) << _T(", ")
+							<< _T("y=") << centre.Y(true) << _T(", ")
+							<< _T("z=") << m_depth_op_params.m_clearance_height/theApp.m_program->m_units << _T(")\n");
 
 				double cutting_depth = point.Z(false) - plunge_depth;
 
 				// Move to 12 O'Clock.
-				ss << "feed( x=" << centre.X(true) << ", "
-							"y=" << drawing_units(centre.Y(false) + radius_of_spiral) << ", "
-							"z=" << drawing_units(cutting_depth) << ")\n";
+				python << _T("feed( x=") << centre.X(true) << _T(", ")
+							_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ")
+							_T("z=") << drawing_units(cutting_depth) << _T(")\n");
 				point.SetX( centre.X(false) );
 				point.SetY( centre.Y(false) + radius_of_spiral );
 
 				// First quadrant (12 O'Clock to 9 O'Clock)
-				ss << "arc_ccw( x=" << drawing_units(centre.X(false) - radius_of_spiral) << ", " <<
-							"y=" << centre.Y(true) << ", " <<
-							"z=" << drawing_units(cutting_depth) << ", " <<	// full depth
-							"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-							"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+				python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
+							_T("y=") << centre.Y(true) << _T(", ") <<
+							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth
+							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) - radius_of_spiral );
 				point.SetY( centre.Y(false) );
 
 				// Second quadrant (9 O'Clock to 6 O'Clock)
-				ss << "arc_ccw( x=" << centre.X(true) << ", " <<
-							"y=" << drawing_units(centre.Y(false) - radius_of_spiral) << ", " <<
-							"z=" << drawing_units(cutting_depth) << ", " <<	// full depth now
-							"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-							"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+				python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+							_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
+							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth now
+							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) );
 				point.SetY( centre.Y(false) - radius_of_spiral );
 
 				// Third quadrant (6 O'Clock to 3 O'Clock)
-				ss << "arc_ccw( x=" << drawing_units(centre.X(false) + radius_of_spiral) << ", " <<
-							"y=" << centre.Y(true) << ", " <<
-							"z=" << drawing_units(cutting_depth) << ", " <<	// full depth now
-							"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-							"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+				python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
+							_T("y=") << centre.Y(true) << _T(", ") <<
+							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth now
+							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) + radius_of_spiral );
 				point.SetY( centre.Y(false) );
 
 				// Fourth quadrant (3 O'Clock to 12 O'Clock)
-				ss << "arc_ccw( x=" << centre.X(true) << ", " <<
-							"y=" << drawing_units(centre.Y(false) + radius_of_spiral) << ", " <<
-							"z=" << drawing_units(cutting_depth) << ", " <<	// full depth now
-							"i=" << drawing_units(centre.X(false) - point.X(false)) << ", " <<
-							"j=" << drawing_units(centre.Y(false) - point.Y(false)) << ")\n";
+				python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+							_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
+							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth now
+							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) );
 				point.SetY( centre.Y(false) + radius_of_spiral );
 
-				ss << "rapid( z=" << drawing_units(m_depth_op_params.m_clearance_height) << ")\n";
+				python << _T("rapid( z=") << drawing_units(m_depth_op_params.m_clearance_height) << _T(")\n");
 			}
 		} // End for
 	} // End for
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 void CChamfer::WriteXML(TiXmlNode *root)

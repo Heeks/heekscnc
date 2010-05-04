@@ -54,17 +54,11 @@ static void on_set_depth(double value, HeeksObj* object)
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
-void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
+Python CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 {
-	CSpeedOp::AppendTextToProgram( pFixture );
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-	std::ostringstream ss;
-#endif
-	ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	python << CSpeedOp::AppendTextToProgram( pFixture );
 
 	double probe_offset_x = 0.0;
 	double probe_offset_y = 0.0;
@@ -89,90 +83,78 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 
 	if (m_direction == eOutside)
 	{
-		ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("immediately above the protrusion we are finding the centre of.")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("This program then jogs out and down in two opposite directions")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("before probing back towards the centre point looking for the")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("protrusion.")).c_str() << ")\n";
-		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_T(""));
+		python << _T("comment(") << PythonString(_("This program assumes that the machine operator has jogged")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("the machine to approximatedly the correct location")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("immediately above the protrusion we are finding the centre of.")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("This program then jogs out and down in two opposite directions")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("before probing back towards the centre point looking for the")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("protrusion.")) << _T(")\n");
 
 		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 								       	_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 										_T("1003"), _T("1004"), +1.0 * probe_radius, 0 );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
-            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
-            ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-            ss << "rapid_to_midpoint(" << _T("x1='[#1001 + ") << probe_offset_x << "]'," << _T("x2='[#1003 + ") << probe_offset_x << "]')\n";
-            ss << "remove_temporary_origin()\n";
-            theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-            ss.str(_T(""));
+            python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
+            python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
+            python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+            python << _T("rapid_to_midpoint(") << _T("x1='[#1001 + ") << probe_offset_x << _T("]',") << _T("x2='[#1003 + ") << probe_offset_x << _T("]')\n");
+            python << _T("remove_temporary_origin()\n");
 		} // End if - then
 		else
 		{
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1003"), _T("1004"), 0, +1.0 * probe_radius );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
-            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
-            ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-            ss << "rapid_to_midpoint(" << _T("y1='[#1002 + ") << probe_offset_y << "]'," << _T("y2='[#1004 + ") << probe_offset_y << "]')\n";
-            ss << "remove_temporary_origin()\n";
-            theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-            ss.str(_T(""));
+            python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
+            python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
+            python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+            python << _T("rapid_to_midpoint(") << _T("y1='[#1002 + ") << probe_offset_y << _T("]',") << _T("y2='[#1004 + ") << probe_offset_y << _T("]')\n");
+            python << _T("remove_temporary_origin()\n");
 		} // End if - else
 	} // End if - then
 	else
 	{
-		ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("immediately above the hole we are finding the centre of.")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("This program then jogs down and probes out in two opposite directions")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("looking for the workpiece")).c_str() << ")\n";
-		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_T(""));
+		python << _T("comment(") << PythonString(_("This program assumes that the machine operator has jogged")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("the machine to approximatedly the correct location")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("immediately above the hole we are finding the centre of.")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("This program then jogs down and probes out in two opposite directions")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("looking for the workpiece")) << _T(")\n");
 
 		if ((m_alignment == eXAxis) || (m_number_of_points == 4))
 		{
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1003"), _T("1004"), -1.0 * probe_radius, 0 );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
-            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
-            ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-            ss << "rapid_to_midpoint(" << _T("x1='[#1001 + ") << probe_offset_x << "]'," << _T("x2='[#1003 + ") << probe_offset_x << "]')\n";
-            ss << "remove_temporary_origin()\n";
-            theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-            ss.str(_T(""));
+            python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
+            python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
+            python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+            python << _T("rapid_to_midpoint(") << _T("x1='[#1001 + ") << probe_offset_x << _T("]',") << _T("x2='[#1003 + ") << probe_offset_x << _T("]')\n");
+            python << _T("remove_temporary_origin()\n");
 		} // End if - then
 		else
 		{
 			// eYAxis:
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1003"), _T("1004"), 0, -1.0 * probe_radius  );
 
             // Now move to the centre of these two intersection points.
-            ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
-            ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
-            ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-            ss << "rapid_to_midpoint(" << _T("y1='[#1002 + ") << probe_offset_y << "]'," << _T("y2='[#1004 + ") << probe_offset_y << "]')\n";
-            ss << "remove_temporary_origin()\n";
-            theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-            ss.str(_T(""));
+            python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
+            python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
+            python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+            python << _T("rapid_to_midpoint(") << _T("y1='[#1002 + ") << probe_offset_y << _T("]',") << _T("y2='[#1004 + ") << probe_offset_y << _T("]')\n");
+            python << _T("remove_temporary_origin()\n");
 		} // End if - else
 	} // End if - else
 
@@ -182,65 +164,54 @@ void CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 	{
 		if (m_direction == eOutside)
 		{
-			ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("immediately above the protrusion we are finding the centre of.")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("This program then jogs out and down in two opposite directions")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("before probing back towards the centre point looking for the")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("protrusion.")).c_str() << ")\n";
-			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-			ss.str(_T(""));
+			python << _T("comment(") << PythonString(_("This program assumes that the machine operator has jogged")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("the machine to approximatedly the correct location")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("immediately above the protrusion we are finding the centre of.")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("This program then jogs out and down in two opposite directions")).c_str() << _T(")\n");
+			python << _T("comment(") << PythonString(_("before probing back towards the centre point looking for the")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("protrusion.")) << _T(")\n");
 
-			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			python << AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1005"), _T("1006"), 0, -1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
+			python << AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
 									_T("1007"), _T("1008"), 0, +1.0 * probe_radius );
 		} // End if - then
 		else
 		{
-			ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("immediately above the hole we are finding the centre of.")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("This program then jogs down and probes out in two opposite directions")).c_str() << ")\n";
-			ss << "comment(" << PythonString(_("looking for the workpiece")).c_str() << ")\n";
-			theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-			ss.str(_T(""));
+			python << _T("comment(") << PythonString(_("This program assumes that the machine operator has jogged")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("the machine to approximatedly the correct location")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("immediately above the hole we are finding the centre of.")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("This program then jogs down and probes out in two opposite directions")) << _T(")\n");
+			python << _T("comment(") << PythonString(_("looking for the workpiece")) << _T(")\n");
 
-			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			python << AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1005"), _T("1006"), 0, +1.0 * probe_radius );
-			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
+			python << AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
 									_T("1007"), _T("1008"), 0, -1.0 * probe_radius );
 		} // End if - else
 
 		// Now move to the centre of these two intersection points.
-		ss << "comment(" << PythonString(_("Move back to the intersection points")).c_str() << ")\n";
-		ss << "comment(" << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")).c_str() << ")\n";
-		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-		ss << "rapid_to_midpoint(" << _T("y1='[#1006 + ") << probe_offset_y << "]'," << _T("y2='[#1008 + ") << probe_offset_y << "]')\n";
-		ss << "remove_temporary_origin()\n";
+		python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
+		python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
+		python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+		python << _T("rapid_to_midpoint(") << _T("y1='[#1006 + ") << probe_offset_y << _T("]',") << _T("y2='[#1008 + ") << probe_offset_y << _T("]')\n");
+		python << _T("remove_temporary_origin()\n");
 
-		ss << "report_probe_results( "
-				<< "x1='[[[[#1001-#1003]/2.0]+#1003] + " << probe_offset_x << "]', "
-				<< "y1='[[[[#1006-#1008]/2.0]+#1008] + " << probe_offset_y << "]', ";
-		ss << "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
-
-		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_T(""));
+		python << _T("report_probe_results( ")
+				<< _T("x1='[[[[#1001-#1003]/2.0]+#1003] + ") << probe_offset_x << _T("]', ")
+				<< _T("y1='[[[[#1006-#1008]/2.0]+#1008] + ") << probe_offset_y << _T("]', ");
+		python << _T("xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true )) << _T(")\n");
 	} // End if - then
+
+	return(python);
 }
 
 
-void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
+Python CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 {
-	CSpeedOp::AppendTextToProgram( pFixture );
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-	std::ostringstream ss;
-#endif
-	ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	python << CSpeedOp::AppendTextToProgram( pFixture );
 
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate starting point.
@@ -248,8 +219,8 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 	bool first_probed_point = true;
 	std::list<gp_Pnt> probed_points;
 
-	ss << _T("open_log_file(xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true ).c_str()).c_str() << _T(")\n");
-	ss << _T("log_message('<POINTS>')\n");
+	python << _T("open_log_file(xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true ).c_str()).c_str() << _T(")\n");
+	python << _T("log_message('<POINTS>')\n");
 
 	CProbing::PointsList_t points = GetPoints();
 	for (CProbing::PointsList_t::const_iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
@@ -267,17 +238,14 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 				wxString var;
 				var << variable;
 
-				AppendTextForDownwardProbingOperation( PythonString(l_itPoint->second.X(true)).c_str(), PythonString(l_itPoint->second.Y(true)).c_str(), m_depth, var.c_str() );
+				python << AppendTextForDownwardProbingOperation( PythonString(l_itPoint->second.X(true)).c_str(), PythonString(l_itPoint->second.Y(true)).c_str(), m_depth, var.c_str() );
                 probed_points.push_back( gp_Pnt( l_itPoint->second.X(true), l_itPoint->second.Y(true), variable ) );
 
                 if (! m_for_fixture_measurement)
                 {
-                    ss << "log_coordinate(x='[" << l_itPoint->second.X(true) << "]', "
-                                        "y='[" << l_itPoint->second.Y(true) << "]', "
-                                        "z='[#" << var.c_str() << "]')\n";
-
-                    theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-                    ss.str(_T(""));
+                    python << _T("log_coordinate(x='[") << l_itPoint->second.X(true) << _T("]', ")
+                                        _T("y='[") << l_itPoint->second.Y(true) << _T("]', ")
+                                        _T("z='[#") << var.c_str() << _T("]')\n");
                 }
 
                 first_probed_point = false;
@@ -310,43 +278,41 @@ void CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
 
         // Log the longest two edges along the X and Y axes in a form that will be suitable
         // for reading back into the Fixture object.
-        ss << "log_coordinate( "
-            << "x='[" << bottom_left.X() << "]', "
-            << "y='[" << bottom_left.Y() << "]', "
-            << "z='[#" << bottom_left.Z() << "]')\n";
+        python << _T("log_coordinate( ")
+            << _T("x='[") << bottom_left.X() << _T("]', ")
+            << _T("y='[") << bottom_left.Y() << _T("]', ")
+            << _T("z='[#") << bottom_left.Z() << _T("]')\n");
 
-        ss << "log_coordinate( "
-            << "x='[" << top_left.X() << "]', "
-            << "y='[" << top_left.Y() << "]', "
-            << "z='[#" << top_left.Z() << "]')\n";
+        python << _T("log_coordinate( ")
+            << _T("x='[") << top_left.X() << _T("]', ")
+            << _T("y='[") << top_left.Y() << _T("]', ")
+            << _T("z='[#") << top_left.Z() << _T("]')\n");
 
-        ss << "log_coordinate( "
-            << "x='[" << top_left.X() - bottom_left.X() << "]', "
-            << "y='[" << top_left.Y() - bottom_left.Y() << "]', "
-            << "z='0.0' )\n";
+        python << _T("log_coordinate( ")
+            << _T("x='[") << top_left.X() - bottom_left.X() << _T("]', ")
+            << _T("y='[") << top_left.Y() - bottom_left.Y() << _T("]', ")
+            << _T("z='0.0' )\n");
 
-        ss << "log_coordinate( "
-            << "x='[" << bottom_left.X() << "]', "
-            << "y='[" << bottom_left.Y() << "]', "
-            << "z='[#" << bottom_left.Z() << "]')\n";
+        python << _T("log_coordinate( ")
+            << _T("x='[") << bottom_left.X() << _T("]', ")
+            << _T("y='[") << bottom_left.Y() << _T("]', ")
+            << _T("z='[#") << bottom_left.Z() << _T("]')\n");
 
-        ss << "log_coordinate( "
-            << "x='[" << bottom_right.X() << "]', "
-            << "y='[" << bottom_right.Y() << "]', "
-            << "z='[#" << bottom_right.Z() << "]')\n";
+        python << _T("log_coordinate( ")
+            << _T("x='[") << bottom_right.X() << _T("]', ")
+            << _T("y='[") << bottom_right.Y() << _T("]', ")
+            << _T("z='[#") << bottom_right.Z() << _T("]')\n");
 
-        ss << "log_coordinate( "
-            << "x='[" << bottom_right.X() - bottom_left.X() << "]', "
-            << "y='[" << bottom_right.Y() - bottom_left.Y() << "]', "
-            << "z='0.0' )\n";
+        python << _T("log_coordinate( ")
+            << _T("x='[") << bottom_right.X() - bottom_left.X() << _T("]', ")
+            << _T("y='[") << bottom_right.Y() - bottom_left.Y() << _T("]', ")
+            << _T("z='0.0' )\n");
     }
 
-    ss << _T("log_message('</POINTS>')\n");
-    ss << _T("close_log_file()\n");
+    python << _T("log_message('</POINTS>')\n");
+    python << _T("close_log_file()\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
-
+	return(python);
 }
 
 
@@ -364,7 +330,7 @@ const wxBitmap &CProbing::GetIcon()
 	plunge down and probe back towards the workpiece.  Once found, it should store the results in the
 	variables specified.
  */
-void CProbing::AppendTextForSingleProbeOperation(
+Python CProbing::AppendTextForSingleProbeOperation(
 	const CNCPoint setup_point,
 	const CNCPoint retract_point,
 	const double depth,
@@ -374,35 +340,29 @@ void CProbing::AppendTextForSingleProbeOperation(
         const double probe_offset_x_component,
 	const double probe_offset_y_component	) const
 {
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-	std::ostringstream ss;
-#endif
-	ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	Python python;
 
 	// Make sure it's negative as we're stepping down.  There is no option
 	// to specify a starting height so this can only be a relative distance.
 	double relative_depth = (depth > 0)?(-1.0 * depth):depth;
 
-	ss << "comment('Begin probing operation for a single point.')\n";
-	ss << "comment('The results will be stored with respect to the current location of the machine')\n";
-	ss << "comment('The machine will be returned to this original position following this single probe operation')\n";
-	ss << "probe_single_point("
-		<< "point_along_edge_x=" << setup_point.X(true) << ", "
-			<< "point_along_edge_y=" << setup_point.Y(true) << ", "
-			<< "depth=" << relative_depth / theApp.m_program->m_units << ", "
-			<< "retracted_point_x=" << retract_point.X(true) << ", "
-			<< "retracted_point_y=" << retract_point.Y(true) << ", "
-			<< "destination_point_x=" << probe_point.X(true) << ", "
-			<< "destination_point_y=" << probe_point.Y(true) << ", "
-			<< "intersection_variable_x='" << intersection_variable_x.c_str() << "', "
-			<< "intersection_variable_y='" << intersection_variable_y.c_str() << "', "
-		        << "probe_offset_x_component='" << probe_offset_x_component << "', "
-			<< "probe_offset_y_component='" << probe_offset_y_component << "' )\n";
+	python << _T("comment('Begin probing operation for a single point.')\n");
+	python << _T("comment('The results will be stored with respect to the current location of the machine')\n");
+	python << _T("comment('The machine will be returned to this original position following this single probe operation')\n");
+	python << _T("probe_single_point(")
+		<< _T("point_along_edge_x=") << setup_point.X(true) << _T(", ")
+			<< _T("point_along_edge_y=") << setup_point.Y(true) << _T(", ")
+			<< _T("depth=") << relative_depth / theApp.m_program->m_units << _T(", ")
+			<< _T("retracted_point_x=") << retract_point.X(true) << _T(", ")
+			<< _T("retracted_point_y=") << retract_point.Y(true) << _T(", ")
+			<< _T("destination_point_x=") << probe_point.X(true) << _T(", ")
+			<< _T("destination_point_y=") << probe_point.Y(true) << _T(", ")
+			<< _T("intersection_variable_x='") << intersection_variable_x.c_str() << _T("', ")
+			<< _T("intersection_variable_y='") << intersection_variable_y.c_str() << _T("', ")
+            << _T("probe_offset_x_component='") << probe_offset_x_component << _T("', ")
+			<< _T("probe_offset_y_component='") << probe_offset_y_component << _T("' )\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 /**
@@ -410,64 +370,52 @@ void CProbing::AppendTextForSingleProbeOperation(
 	find the Z coordinate at that point.  Once found, it should store the results in the
 	variable specified.
  */
-void CProbing::AppendTextForDownwardProbingOperation(
+Python CProbing::AppendTextForDownwardProbingOperation(
 	const wxString setup_point_x,
 	const wxString setup_point_y,
 	const double depth,
 	const wxString &intersection_variable_z ) const
 {
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-	std::ostringstream ss;
-#endif
-	ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	Python python;
 
 	// Make sure it's negative as we're stepping down.  There is no option
 	// to specify a starting height so this can only be a relative distance.
 	double relative_depth = (depth > 0)?(-1.0 * depth):depth;
 
-	ss << "comment('Begin probing operation for a single point.')\n";
-	ss << "comment('The results will be stored with respect to the current location of the machine')\n";
-	ss << "comment('The machine will be returned to this original position following this single probe operation')\n";
+	python << _T("comment('Begin probing operation for a single point.')\n");
+	python << _T("comment('The results will be stored with respect to the current location of the machine')\n");
+	python << _T("comment('The machine will be returned to this original position following this single probe operation')\n");
 
-	ss << "probe_downward_point("
-		<< "x='" << setup_point_x.c_str() << "', "
-			<< "y='" << setup_point_y.c_str() << "', "
-			<< "depth=" << relative_depth / theApp.m_program->m_units << ", "
-			<< "intersection_variable_z='" << intersection_variable_z.c_str() << "' )\n";
+	python << _T("probe_downward_point(")
+		<< _T("x='") << setup_point_x.c_str() << _T("', ")
+			<< _T("y='") << setup_point_y.c_str() << _T("', ")
+			<< _T("depth=") << relative_depth / theApp.m_program->m_units << _T(", ")
+			<< _T("intersection_variable_z='") << intersection_variable_z.c_str() << _T("' )\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 
-void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
+Python CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 {
-	CSpeedOp::AppendTextToProgram( pFixture );
+	Python python;
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-	std::ostringstream ss;
-#endif
-	ss.imbue(std::locale("C"));
-	ss<<std::setprecision(10);
+	python << CSpeedOp::AppendTextToProgram( pFixture );
 
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate centre point.
 
-	ss << "comment(" << PythonString(_("This program assumes that the machine operator has jogged")).c_str() << ")\n";
-	ss << "comment(" << PythonString(_("the machine to approximatedly the correct location")).c_str() << ")\n";
-	ss << "comment('immediately above the ";
+	python << _T("comment(") << PythonString(_("This program assumes that the machine operator has jogged")) << _T(")\n");
+	python << _T("comment(") << PythonString(_("the machine to approximatedly the correct location")) << _T(")\n");
+	python << _T("comment('immediately above the ");
 
 	if (m_number_of_edges == 1)
 	{
-		ss << eEdges_t(m_edge) << " edge of the workpiece.')\n";
+		python << eEdges_t(m_edge) << _T(" edge of the workpiece.')\n");
 	}
 	else
 	{
-		ss << eCorners_t(m_corner) << " corner of the workpiece.')\n";
+		python << eCorners_t(m_corner) << _T(" corner of the workpiece.')\n");
 	}
 
 	double probe_offset_x = 0.0;
@@ -485,9 +433,6 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		} // End if - then
 	} // End if - then
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-	ss.str(_T(""));
-
 	gp_Dir z_direction(0,0,1);
 
 	CProbing::PointsList_t points = GetPoints();
@@ -499,7 +444,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 		{
 		case eBottom:
 			reference_vector = gp_Vec( 1, 0, 0 );
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 								       	_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -508,9 +453,9 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 ]");
 				setup_point_y << _T("[ #1002 + ") << probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 										_T("1004"), _T("1005"), 0, +1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -519,13 +464,13 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 ]");
 				setup_point_y << _T("[ #1005 + ") << probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 			break;
 
 		case eTop:
 			reference_vector = gp_Vec( 1, 0, 0 );
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 										_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -534,10 +479,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 ]");
 				setup_point_y << _T("[ #1002 + ") << -1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 										_T("1004"), _T("1005"), 0, -1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -546,13 +491,13 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 ]");
 				setup_point_y << _T("[ #1005 + ") << -1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 			break;
 
 		case eLeft:
 			reference_vector = gp_Vec( 0, 1, 0 );
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), +1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -561,10 +506,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 + ") << +1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1002 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1004"), _T("1005"), +1.0 * probe_radius,0 );
 			if (m_check_levels)
 			{
@@ -573,13 +518,13 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 + ") << +1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1005 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 			break;
 
 		case eRight:
 			reference_vector = gp_Vec( 0, 1, 0 );
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), -1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -588,9 +533,9 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 + ") << -1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1002 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1004"), _T("1005"), -1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -599,31 +544,28 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 + ") << -1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1005 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 			break;
 		} // End switch
 
 		// Combine the two probed points into an edge and generate an XML document describing the angle they form.
-		ss << "report_probe_results( "
-				<< "x1='[#1001 + " << probe_offset_x << "]', "
-				<< "y1='[#1002 + " << probe_offset_y << "]', "
-				<< "x2='[#1004 + " << probe_offset_x << "]', "
-				<< "y2='[#1005 + " << probe_offset_y << "]', "
-				<< "x3='" << reference_vector.X() << "', "
-				<< "y3='" << reference_vector.Y() << "', ";
+		python << _T("report_probe_results( ")
+				<< _T("x1='[#1001 + ") << probe_offset_x << _T("]', ")
+				<< _T("y1='[#1002 + ") << probe_offset_y << _T("]', ")
+				<< _T("x2='[#1004 + ") << probe_offset_x << _T("]', ")
+				<< _T("y2='[#1005 + ") << probe_offset_y << _T("]', ")
+				<< _T("x3='") << reference_vector.X() << _T("', ")
+				<< _T("y3='") << reference_vector.Y() << _T("', ");
 
 		if (m_check_levels)
 		{
-			ss << "z1='#1003', ";
-			ss << "z2='#1006', ";
-			ss << "z3='" << reference_vector.Z() << "', ";
+			python << _T("z1='#1003', ");
+			python << _T("z2='#1006', ");
+			python << _T("z3='") << reference_vector.Z() << _T("', ");
 		} // End if - then
 
-		ss << "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
-
-		theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-		ss.str(_T(""));
+		python << _T("xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true )) << _T(")\n");
 	} // End if - then
 	else
 	{
@@ -637,7 +579,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			// Bottom
 			ref1 = gp_Vec(1,0,0);
 			ref2 = gp_Vec(0,1,0);
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -646,10 +588,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 ]");
 				setup_point_y << _T("[ #1002 + ") << +1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1004"), _T("1005"), 0, +1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -658,11 +600,11 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 ]");
 				setup_point_y << _T("[ #1005 + ") << +1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 
 			// Left
-			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			python << AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1007"), _T("1008"), +1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -671,9 +613,9 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1007 + ") << +1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1008 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
 			} // End if - then
-			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
+			python << AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
 									_T("1010"), _T("1011"), +1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -682,7 +624,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1010 + ") << +1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1011 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
 			} // End if - then
 			break;
 
@@ -690,7 +632,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			ref1 = gp_Vec(-1,0,0);
 			ref2 = gp_Vec(0,1,0);
 			// Bottom
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, +1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -699,10 +641,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 ]");
 				setup_point_y << _T("[ #1002 + ") << +1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1004"), _T("1005"), 0, +1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -711,11 +653,11 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 ]");
 				setup_point_y << _T("[ #1005 + ") << +1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 
 			// Right
-			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			python << AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -724,10 +666,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1007 + ") << -1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1008 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
+			python << AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
 									_T("1010"), _T("1011"), -1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -736,7 +678,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1010 + ") << -1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1011 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
 			} // End if - then
 
 
@@ -746,7 +688,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			ref1 = gp_Vec(1,0,0);
 			ref2 = gp_Vec(0,-1,0);
 			// Top
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -755,10 +697,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 ]");
 				setup_point_y << _T("[ #1002 + ") << -1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1004"), _T("1005"), 0, -1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -767,11 +709,11 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 ]");
 				setup_point_y << _T("[ #1005 + ") << -1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 
 			// Left
-			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			python << AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1007"), _T("1008"), +1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -780,10 +722,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1007 + ") << +1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1008 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
+			python << AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
 									_T("1010"), _T("1011"), +1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -792,7 +734,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1010 + ") << +1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1011 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
 			} // End if - then
 			break;
 
@@ -800,7 +742,7 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 			ref1 = gp_Vec(-1,0,0);
 			ref2 = gp_Vec(0,-1,0);
 			// Top
-			AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
+			python << AppendTextForSingleProbeOperation( points[0].second, points[1].second, points[2].second.Z(false), points[3].second,
 									_T("1001"), _T("1002"), 0, -1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -809,10 +751,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1001 ]");
 				setup_point_y << _T("[ #1002 + ") << -1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1003") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
+			python << AppendTextForSingleProbeOperation( points[5].second, points[6].second, points[7].second.Z(false), points[8].second,
 									_T("1004"), _T("1005"), 0, -1.0 * probe_radius );
 			if (m_check_levels)
 			{
@@ -821,11 +763,11 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1004 ]");
 				setup_point_y << _T("[ #1005 + ") << -1.0 * probe_radius << _T(" ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1006") );
 			} // End if - then
 
 			// Right
-			AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
+			python << AppendTextForSingleProbeOperation( points[10].second, points[11].second, points[12].second.Z(false), points[13].second,
 									_T("1007"), _T("1008"), -1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -834,10 +776,10 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1007 + ") << -1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1008 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1009") );
 			} // End if - then
 
-			AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
+			python << AppendTextForSingleProbeOperation( points[15].second, points[16].second, points[17].second.Z(false), points[18].second,
 									_T("1010"), _T("1011"), -1.0 * probe_radius, 0 );
 			if (m_check_levels)
 			{
@@ -846,81 +788,81 @@ void CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
 				setup_point_x << _T("[ #1010 + ") << -1.0 * probe_radius << _T(" ]");
 				setup_point_y << _T("[ #1011 ]");
 
-				AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
+				python << AppendTextForDownwardProbingOperation( setup_point_x, setup_point_y, m_depth, _T("1012") );
 			} // End if - then
 			break;
 		} // End switch
 
 		// Now report the angle of rotation
-		ss << "report_probe_results( "
-				<< "x1='[#1001 + " << probe_offset_x << "]', "
-				<< "y1='[#1002 + " << probe_offset_y << "]', "
-				<< "x2='[#1004 + " << probe_offset_x << "]', "
-				<< "y2='[#1005 + " << probe_offset_y << "]', "
-				<< "x3='" << ref1.X() << "', "
-				<< "y3='" << ref1.Y() << "', "
-				<< "x4='[#1007 + " << probe_offset_x << "]', "
-				<< "y4='[#1008 + " << probe_offset_y << "]', "
-				<< "x5='[#1010 + " << probe_offset_x << "]', "
-				<< "y5='[#1011 + " << probe_offset_y << "]', "
-				<< "x6='" << ref2.X() << "', "
-				<< "y6='" << ref2.Y() << "', ";
+		python << _T("report_probe_results( ")
+				<< _T("x1='[#1001 + ") << probe_offset_x << _T("]', ")
+				<< _T("y1='[#1002 + ") << probe_offset_y << _T("]', ")
+				<< _T("x2='[#1004 + ") << probe_offset_x << _T("]', ")
+				<< _T("y2='[#1005 + ") << probe_offset_y << _T("]', ")
+				<< _T("x3='") << ref1.X() << _T("', ")
+				<< _T("y3='") << ref1.Y() << _T("', ")
+				<< _T("x4='[#1007 + ") << probe_offset_x << _T("]', ")
+				<< _T("y4='[#1008 + ") << probe_offset_y << _T("]', ")
+				<< _T("x5='[#1010 + ") << probe_offset_x << _T("]', ")
+				<< _T("y5='[#1011 + ") << probe_offset_y << _T("]', ")
+				<< _T("x6='") << ref2.X() << _T("', ")
+				<< _T("y6='") << ref2.Y() << _T("', ");
 		if (m_check_levels)
 		{
-			ss << "z1='#1003', ";
-			ss << "z2='#1006', ";
-			ss << "z3='" << ref1.Z() << "', ";
-			ss << "z4='#1009', ";
-			ss << "z5='#1012', ";
-			ss << "z6='" << ref2.Z() << "', ";
+			python << _T("z1='#1003', ");
+			python << _T("z2='#1006', ");
+			python << _T("z3='") << ref1.Z() << _T("', ");
+			python << _T("z4='#1009', ");
+			python << _T("z5='#1012', ");
+			python << _T("z6='") << ref2.Z() << _T("', ");
 		}
 
-		ss << "xml_file_name='" << this->GetOutputFileName( _T(".xml"), true ).c_str() << "')\n";
+		python << _T("xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true )) << _T("')\n");
 
 		// And position the cutting tool at the intersection of the two lines.
 		// This should be safe as the 'probe_single_point() call made in the AppendTextForSingleOperation() routine returns
 		// the machine's position to the originally jogged position.  This is expected to be above the workpiece
 		// at a same movement height.
-		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-		ss << "rapid_to_intersection( "
-				<< "x1='[#1001 + " << probe_offset_x << "]', "
-				<< "y1='[#1002 + " << probe_offset_y << "]', "
-				<< "x2='[#1004 + " << probe_offset_x << "]', "
-				<< "y2='[#1005 + " << probe_offset_y << "]', "
-				<< "x3='[#1007 + " << probe_offset_x << "]', "
-				<< "y3='[#1008 + " << probe_offset_y << "]', "
-				<< "x4='[#1010 + " << probe_offset_x << "]', "
-				<< "y4='[#1011 + " << probe_offset_y << "]', "
-				<< "intersection_x='#1013', "
-				<< "intersection_y='#1014', "
-				<< "ua_numerator='#1015', "
-				<< "ua_denominator='#1016', "
-				<< "ub_numerator='#1017', "
-				<< "ua='#1018', "
-				<< "ub='#1019' )\n";
-		ss << "remove_temporary_origin()\n";
+		python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+		python << _T("rapid_to_intersection( ")
+				<< _T("x1='[#1001 + ") << probe_offset_x << _T("]', ")
+				<< _T("y1='[#1002 + ") << probe_offset_y << _T("]', ")
+				<< _T("x2='[#1004 + ") << probe_offset_x << _T("]', ")
+				<< _T("y2='[#1005 + ") << probe_offset_y << _T("]', ")
+				<< _T("x3='[#1007 + ") << probe_offset_x << _T("]', ")
+				<< _T("y3='[#1008 + ") << probe_offset_y << _T("]', ")
+				<< _T("x4='[#1010 + ") << probe_offset_x << _T("]', ")
+				<< _T("y4='[#1011 + ") << probe_offset_y << _T("]', ")
+				<< _T("intersection_x='#1013', ")
+				<< _T("intersection_y='#1014', ")
+				<< _T("ua_numerator='#1015', ")
+				<< _T("ua_denominator='#1016', ")
+				<< _T("ub_numerator='#1017', ")
+				<< _T("ua='#1018', ")
+				<< _T("ub='#1019' )\n");
+		python << _T("remove_temporary_origin()\n");
 
 		// We're now sitting at the corner.  If this position represents the m_corner_coordinate
 		// then we need to calculate where the m_final_coordinate lays (along these rotated axes)
 		// and move there.
 
-		ss << "set_temporary_origin( x=0, y=0, z=0 )\n";
-		ss << "rapid_to_rotated_coordinate( "
-				<< "x1='[#1001 + " << probe_offset_x << "]', "
-				<< "y1='[#1002 + " << probe_offset_y << "]', "
-				<< "x2='[#1004 + " << probe_offset_x << "]', "
-				<< "y2='[#1005 + " << probe_offset_y << "]', "
-				<< "ref_x='" << ref1.X() << "', "
-				<< "ref_y='" << ref1.Y() << "', "
-				<< "x_current=" << m_corner_coordinate.X(true) << ", "
-				<< "y_current=" << m_corner_coordinate.Y(true) << ", "
-				<< "x_final=" << m_final_coordinate.X(true) << ", "
-				<< "y_final=" << m_final_coordinate.Y(true) << ")\n";
-		ss << "remove_temporary_origin()\n";
+		python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+		python << _T("rapid_to_rotated_coordinate( ")
+				<< _T("x1='[#1001 + ") << probe_offset_x << _T("]', ")
+				<< _T("y1='[#1002 + ") << probe_offset_y << _T("]', ")
+				<< _T("x2='[#1004 + ") << probe_offset_x << _T("]', ")
+				<< _T("y2='[#1005 + ") << probe_offset_y << _T("]', ")
+				<< _T("ref_x='") << ref1.X() << _T("', ")
+				<< _T("ref_y='") << ref1.Y() << _T("', ")
+				<< _T("x_current=") << m_corner_coordinate.X(true) << _T(", ")
+				<< _T("y_current=") << m_corner_coordinate.Y(true) << _T(", ")
+				<< _T("x_final=") << m_final_coordinate.X(true) << _T(", ")
+				<< _T("y_final=") << m_final_coordinate.Y(true) << _T(")\n");
+		python << _T("remove_temporary_origin()\n");
 
 	} // End if - else
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 
@@ -1547,8 +1489,10 @@ wxString CProbing::GetOutputFileName(const wxString extension, const bool filena
 }
 
 
-void CProbing::GeneratePythonPreamble()
+Python CProbing::GeneratePythonPreamble()
 {
+	Python python;
+
 	// We must setup the theApp.m_program_canvas->m_textCtrl variable before
 		// calling the HeeksPyPostProcess() routine.  That's the python script
 		// that will be executed.
@@ -1557,51 +1501,51 @@ void CProbing::GeneratePythonPreamble()
 
 		// add standard stuff at the top
 		//hackhack, make it work on unix with FHS
-        theApp.m_program_canvas->AppendText(_T("import sys\n"));
+        python << _T("import sys\n");
 
     #ifndef WIN32
-        theApp.m_program_canvas->AppendText(_T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n"));
+        python << _T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n");
     #endif
 
-        theApp.m_program_canvas->AppendText(wxString((_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()) + wxString(_T(")\n"))).c_str());
-        theApp.m_program_canvas->AppendText(_T("import math\n"));
+    python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");
+    python << _T("import math\n");
 
 
-		// machine general stuff
-		theApp.m_program_canvas->AppendText(_T("from nc.nc import *\n"));
+	// machine general stuff
+	python << _T("from nc.nc import *\n");
 
-		// specific machine
-		if (theApp.m_program->m_machine.file_name == _T("not found"))
-		{
-			wxMessageBox(_T("Machine name (defined in Program Properties) not found"));
-		} // End if - then
-		else
-		{
-			theApp.m_program_canvas->AppendText(_T("import nc.") + theApp.m_program->m_machine.file_name + _T("\n"));
-			theApp.m_program_canvas->AppendText(_T("\n"));
-		} // End if - else
+	// specific machine
+	if (theApp.m_program->m_machine.file_name == _T("not found"))
+	{
+		wxMessageBox(_T("Machine name (defined in Program Properties) not found"));
+	} // End if - then
+	else
+	{
+		python << _T("import nc.") << theApp.m_program->m_machine.file_name << _T("\n");
+		python << _T("\n");
+	} // End if - else
 
-        {
-            // output file
-            wxString temp;
-            temp << _T("output(") << PythonString( this->GetOutputFileName(_T(".tap"), false)).c_str() << _T(")\n");
-            theApp.m_program_canvas->AppendText(temp.c_str());
-        }
+    {
+        // output file
+        python << _T("output(") << PythonString( this->GetOutputFileName(_T(".tap"), false)).c_str() << _T(")\n");
+    }
 
-		// begin program
-		theApp.m_program_canvas->AppendText(_T("program_begin(123, 'Test program')\n"));
-		theApp.m_program_canvas->AppendText(_T("absolute()\n"));
+	// begin program
+	python << _T("program_begin(123, 'Test program')\n");
+	python << _T("absolute()\n");
 
-		if(theApp.m_program->m_units > 25.0)
-		{
-			theApp.m_program_canvas->AppendText(_T("imperial()\n"));
-		}
-		else
-		{
-			theApp.m_program_canvas->AppendText(_T("metric()\n"));
-		}
-		theApp.m_program_canvas->AppendText(_T("set_plane(0)\n"));
-		theApp.m_program_canvas->AppendText(_T("\n"));
+	if(theApp.m_program->m_units > 25.0)
+	{
+		python << _T("imperial()\n");
+	}
+	else
+	{
+		python << _T("metric()\n");
+	}
+	python << _T("set_plane(0)\n");
+	python << _T("\n");
+
+	return(python);
 }
 
 class Probe_Centre_GenerateGCode: public Tool
@@ -1620,15 +1564,16 @@ public:
 		// We must setup the theApp.m_program_canvas->m_textCtrl variable before
 		// calling the HeeksPyPostProcess() routine.  That's the python script
 		// that will be executed.
+		Python python;
 
 		theApp.m_program_canvas->m_textCtrl->Clear();
 
-		m_pThis->GeneratePythonPreamble();
+		python << m_pThis->GeneratePythonPreamble();
 
 		CFixture default_fixture(NULL, CFixture::G54 );
-		m_pThis->AppendTextToProgram( &default_fixture );
+		python << m_pThis->AppendTextToProgram( &default_fixture );
 
-		theApp.m_program_canvas->AppendText(_T("program_end()\n"));
+		python << _T("program_end()\n");
 
 		{
 			// clear the output file
@@ -1647,7 +1592,6 @@ static Probe_Centre_GenerateGCode generate_gcode;
 
 void CProbe_Centre::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-
 	generate_gcode.Set( this );
 
 	t_list->push_back( &generate_gcode );
@@ -1672,14 +1616,16 @@ public:
 		// calling the HeeksPyPostProcess() routine.  That's the python script
 		// that will be executed.
 
+		Python python;
+
 		theApp.m_program_canvas->m_textCtrl->Clear();
 
-		m_pThis->GeneratePythonPreamble();
+		python << m_pThis->GeneratePythonPreamble();
 
 		CFixture default_fixture(NULL, CFixture::G54 );
-		m_pThis->AppendTextToProgram( &default_fixture );
+		python << m_pThis->AppendTextToProgram( &default_fixture );
 
-		theApp.m_program_canvas->AppendText(_T("program_end()\n"));
+		python << _T("program_end()\n");
 
 		{
 			// clear the output file
@@ -1723,15 +1669,16 @@ public:
 		// We must setup the theApp.m_program_canvas->m_textCtrl variable before
 		// calling the HeeksPyPostProcess() routine.  That's the python script
 		// that will be executed.
+		Python python;
 
 		theApp.m_program_canvas->m_textCtrl->Clear();
 
-		m_pThis->GeneratePythonPreamble();
+		python << m_pThis->GeneratePythonPreamble();
 
 		CFixture default_fixture(NULL, CFixture::G54 );
-		m_pThis->AppendTextToProgram( &default_fixture );
+		python << m_pThis->AppendTextToProgram( &default_fixture );
 
-		theApp.m_program_canvas->AppendText(_T("program_end()\n"));
+		python << _T("program_end()\n");
 
 		{
 			// clear the output file

@@ -11,6 +11,7 @@
 #include "interface/ObjList.h"
 #include "Fixture.h"
 #include "HeeksCNCTypes.h"
+#include "PythonStuff.h"
 
 class CFixture;	// Forward declaration.
 
@@ -48,7 +49,7 @@ public:
 
 	virtual void WriteDefaultValues();
 	virtual void ReadDefaultValues();
-	virtual void AppendTextToProgram( const CFixture *pFixture );
+	virtual Python AppendTextToProgram( const CFixture *pFixture );
 
 	void ReloadPointers() { ObjList::ReloadPointers(); }
 
@@ -61,7 +62,7 @@ public:
 	// The list of strings provides a description of what was changed.
 	virtual std::list<wxString> DesignRulesAdjustment(const bool apply_changes) { std::list<wxString> empty; return(empty); }
 
-	wxString GenerateGCode(const CFixture *pFixture);
+	Python GenerateGCode(const CFixture *pFixture);
 };
 
 #endif

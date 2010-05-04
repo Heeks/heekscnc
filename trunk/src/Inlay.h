@@ -138,8 +138,8 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	void AppendTextToProgram( const CFixture *pFixture );
-	wxString GenerateGCode( const CFixture *pFixture, const bool keep_mirrored_sketches );
+	Python AppendTextToProgram( const CFixture *pFixture );
+	Python GenerateGCode( const CFixture *pFixture, const bool keep_mirrored_sketches );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
@@ -166,10 +166,10 @@ public:
 
 	Valleys_t DefineValleys(const CFixture *pFixture);
 
-	wxString FormValleyWalls( Valleys_t valleys, const CFixture *pFixture  );
-	wxString FormValleyPockets( Valleys_t valleys, const CFixture *pFixture  );
-	wxString FormMountainWalls( Valleys_t valleys, const CFixture *pFixture  );
-	wxString FormMountainPockets( Valleys_t mouvalleysntains, const CFixture *pFixture, const bool only_above_mountains  );
+	Python FormValleyWalls( Valleys_t valleys, const CFixture *pFixture  );
+	Python FormValleyPockets( Valleys_t valleys, const CFixture *pFixture  );
+	Python FormMountainWalls( Valleys_t valleys, const CFixture *pFixture  );
+	Python FormMountainPockets( Valleys_t mouvalleysntains, const CFixture *pFixture, const bool only_above_mountains  );
 	
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);

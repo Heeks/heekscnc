@@ -235,21 +235,21 @@ void COp::ReadDefaultValues()
 	} // End if - then
 }
 
-void COp::AppendTextToProgram(const CFixture *pFixture)
+Python COp::AppendTextToProgram(const CFixture *pFixture)
 {
-    theApp.m_program_canvas->m_textCtrl->AppendText(GenerateGCode(pFixture).c_str());
+    return(GenerateGCode(pFixture));
 }
 
-wxString COp::GenerateGCode(const CFixture *pFixture)
+Python COp::GenerateGCode(const CFixture *pFixture)
 {
-    wxString gcode;
+    Python python;
 
 	if(m_comment.Len() > 0)
 	{
-		gcode << wxString(wxString((_T("comment("))) + PythonString(m_comment).c_str() + _T(")\n")).c_str();
+		python << _T("comment(") << PythonString(m_comment) << _T(")\n");
 	}
 
-	return(gcode);
+	return(python);
 }
 
 //static

@@ -611,15 +611,9 @@ CCuttingTool::~CCuttingTool()
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CCuttingTool::AppendTextToProgram()
+Python CCuttingTool::AppendTextToProgram()
 {
-
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
+	Python python;
 
 	// The G10 command can be used (within EMC2) to add a tool to the tool
         // table from within a program.
@@ -633,41 +627,41 @@ void CCuttingTool::AppendTextToProgram()
 
 	if (m_title.size() > 0)
 	{
-		ss << "#(" << m_title.c_str() << ")\n";
+		python << _T("#(") << m_title.c_str() << _T(")\n");
 	} // End if - then
 
-	ss << "tool_defn( id=" << m_tool_number << ", ";
+	python << _T("tool_defn( id=") << m_tool_number << _T(", ");
 
 	if (m_title.size() > 0)
 	{
-		ss << "name=" << PythonString(m_title).c_str() << ", ";
+		python << _T("name=") << PythonString(m_title).c_str() << _T(", ");
 	} // End if - then
 	else
 	{
-		ss << "name=None, ";
+		python << _T("name=None, ");
 	} // End if - else
 
 	if (m_params.m_diameter > 0)
 	{
-		ss << "radius=" << m_params.m_diameter / 2 /theApp.m_program->m_units << ", ";
+		python << _T("radius=") << m_params.m_diameter / 2 /theApp.m_program->m_units << _T(", ");
 	} // End if - then
 	else
 	{
-		ss << "radius=None, ";
+		python << _T("radius=None, ");
 	} // End if - else
 
 	if (m_params.m_tool_length_offset > 0)
 	{
-		ss << "length=" << m_params.m_tool_length_offset /theApp.m_program->m_units;
+		python << _T("length=") << m_params.m_tool_length_offset /theApp.m_program->m_units;
 	} // End if - then
 	else
 	{
-		ss << "length=None";
+		python << _T("length=None");
 	} // End if - else
 
-	ss << ")\n";
+	python << _T(")\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 

@@ -30,7 +30,7 @@ CProgramCanvas::CProgramCanvas(wxWindow* parent)
                            wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE)
 {
 	m_textCtrl = new wxTextCtrl( this, 100, _T(""),	wxPoint(180,170), wxSize(200,70), wxTE_MULTILINE | wxTE_DONTWRAP);
-
+	m_textCtrl->SetMaxLength(0);	// Ensure the length is as long as this operating system supports.  (It may be only 32kb or 64kb)
 	Resize();
 }
 

@@ -329,20 +329,14 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
 
 
-/* static */ wxString CContour::GeneratePathFromWire(
+/* static */ Python CContour::GeneratePathFromWire(
 	const TopoDS_Wire & wire,
 	CNCPoint & last_position,
 	const CFixture *pFixture,
 	const double clearance_height,
 	const double rapid_down_to_height )
 {
-#ifdef UNICODE
-	std::wostringstream gcode;
-#else
-    std::ostringstream gcode;
-#endif
-    gcode.imbue(std::locale("C"));
-	gcode<<std::setprecision(10);
+	Python python;
 
 	double tolerance = heeksCAD->GetTolerance();
 
@@ -383,13 +377,13 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 				{
 					// We're heading towards the PE point.
 					CNCPoint point(PE);
-					gcode << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
+					python << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 					last_position = point;
 				} // End if - then
 				else if (last_position == CNCPoint(PE))
 				{
 					CNCPoint point(PS);
-					gcode << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
+					python << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 					last_position = point;
 				}
 				else
@@ -411,12 +405,12 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         }
 					}
 
-					gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-					gcode << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
-					gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-					gcode << _T("feed(z=") << start.Z(true) << _T(")\n");
+					python << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
+					python << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
+					python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+					python << _T("feed(z=") << start.Z(true) << _T(")\n");
 
-					gcode << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
+					python << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
 					last_position = end;
 				}
 			}
@@ -472,10 +466,10 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         if (itPoint->Distance(last_position) > tolerance)
                         {
                             CNCPoint offset = centre - last_position;
-                            gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
+                            python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
                                 << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
-                            if (offset.Z(true) > tolerance) gcode << _T(", k=") << offset.Z(true);
-                            gcode << _T(")\n");
+                            if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
+                            python << _T(")\n");
                             last_position = *itPoint;
                         }
                     } // End for
@@ -507,10 +501,10 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         {
                             CNCPoint offset = centre - last_position;
 
-                            gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
+                            python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
                                 << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
-                            if (offset.Z(true) > tolerance) gcode << _T(", k=") << offset.Z(true);
-                            gcode << _T(")\n");
+                            if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
+                            python << _T(")\n");
                             last_position = *itPoint;
                         }
                     } // End for
@@ -565,10 +559,10 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         }
                     }
 
-					gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-                    gcode << _T("rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
-                    gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-                    gcode << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
+					python << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
+                    python << _T("rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
+                    python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+                    python << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
 
                     last_position = *(points.begin());
 
@@ -578,10 +572,10 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                         {
                             CNCPoint offset = centre - last_position;
 
-                            gcode << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
+                            python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
                                 << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
-                            if (offset.Z(true) > tolerance) gcode << _T(", k=") << offset.Z(true);
-                            gcode << _T(")\n");
+                            if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
+                            python << _T(")\n");
                             last_position = *itPoint;
                         }
                     } // End for
@@ -642,10 +636,10 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 						CNCPoint start(last_position);
 						CNCPoint end(*interpolated_points.begin());
 
-						gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-						gcode << _T("rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
-						gcode << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-						gcode << _T("feed(z=") << end.Z(true) << _T(")\n");
+						python << _T("rapid(z=") << PythonString(clearance_height / theApp.m_program->m_units).c_str() << _T(")\n");
+						python << _T("rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
+						python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+						python << _T("feed(z=") << end.Z(true) << _T(")\n");
 
 						last_position = end;
 					}
@@ -654,7 +648,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 					{
 						if (*itPoint != last_position)
 						{
-							gcode << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
+							python << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
 							last_position = *itPoint;							
 						} // End if - then
 					} // End for
@@ -664,10 +658,10 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 		} // End switch
 	}
 
-	gcode << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-	last_position.SetZ( clearance_height );
+	python << _T("rapid(z=") << PythonString(clearance_height / theApp.m_program->m_units).c_str() << _T(")\n");
+	last_position.SetZ( clearance_height );	
 
-	return(wxString(gcode.str().c_str()));
+	return(python);
 }
 
 
@@ -677,19 +671,13 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CContour::AppendTextToProgram( const CFixture *pFixture )
+Python CContour::AppendTextToProgram( const CFixture *pFixture )
 {
+	Python python;
+
 	ReloadPointers();
 
-#ifdef UNICODE
-	std::wostringstream gcode;
-#else
-    std::ostringstream gcode;
-#endif
-    gcode.imbue(std::locale("C"));
-	gcode<<std::setprecision(10);
-
-	CDepthOp::AppendTextToProgram( pFixture );
+	python << CDepthOp::AppendTextToProgram( pFixture );
 
 	unsigned int number_of_bad_sketches = 0;
 	double tolerance = heeksCAD->GetTolerance();
@@ -697,7 +685,7 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (! pCuttingTool)
 	{
-		return;
+		return(python);
 	}
 
     CNCPoint last_position(0.0, 0.0, 0.0);
@@ -714,7 +702,7 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
             // The wire(s) represent the sketch objects for a tool path.
             if (object->GetShortString() != NULL)
             {
-                gcode << _T("comment(") << PythonString(object->GetShortString()).c_str() << _T(")\n");
+                python << _T("comment(") << PythonString(object->GetShortString()).c_str() << _T(")\n");
             }
 
             try {
@@ -768,11 +756,11 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
                             transform.Perform(tool_path_wire, false); // notice false as second parameter
                             tool_path_wire = TopoDS::Wire(transform.Shape());
 
-                            gcode << GeneratePathFromWire(	tool_path_wire,
+                            python << GeneratePathFromWire(	tool_path_wire,
                                                             last_position,
                                                             pFixture,
                                                             m_depth_op_params.m_clearance_height,
-                                                            m_depth_op_params.m_rapid_down_to_height ).c_str();
+                                                            m_depth_op_params.m_rapid_down_to_height );
                         } // End if - then
                     } // End for
                 } // End for
@@ -785,7 +773,7 @@ void CContour::AppendTextToProgram( const CFixture *pFixture )
         } // End if - else
     } // End for
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(gcode.str().c_str());
+	return(python);
 }
 
 

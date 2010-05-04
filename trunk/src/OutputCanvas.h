@@ -33,6 +33,7 @@ public:
 	void Clear();
 
     void OnSize(wxSizeEvent& event);
+	void OnLengthExceeded(wxCommandEvent& event);
  
     DECLARE_NO_COPY_CLASS(COutputCanvas)
 	DECLARE_EVENT_TABLE()

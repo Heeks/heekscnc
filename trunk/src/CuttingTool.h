@@ -202,7 +202,7 @@ public:
         static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	// program whose job is to generate RS-274 GCode.
-	void AppendTextToProgram();
+	Python AppendTextToProgram();
 
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);

@@ -153,18 +153,12 @@ void CRawMaterial::ReadBaseXML(TiXmlElement* element)
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-void CRawMaterial::AppendTextToProgram()
+Python CRawMaterial::AppendTextToProgram()
 {
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
+	Python python;
 
-	ss << _T("comment(") << PythonString(wxString(_("Feeds and Speeds set for machining ")) + m_material_name).c_str() << _T(")\n");
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
-
+	python << _T("comment(") << PythonString(wxString(_("Feeds and Speeds set for machining ")) + m_material_name) << _T(")\n");
+	return(python);
 }
 
 

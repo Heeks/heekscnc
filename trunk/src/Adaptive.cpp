@@ -391,9 +391,11 @@ double CAdaptive::GetMaxHeight( const int object_type, const std::list<int> & ob
 } // End GetMaxHeight() method
 
 
-void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
+Python CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 {
-	COp::AppendTextToProgram(pFixture);
+	Python python;
+
+	python << COp::AppendTextToProgram(pFixture);
 
 	heeksCAD->CreateUndoPoint();
 
@@ -441,27 +443,20 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 		heeksCAD->Remove( *l_itSolid );
 	} // End for
 
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
-
-	ss << "rapid(z=" << m_params.m_retractzheight << ")\n";
+	python << _T("rapid(z=") << m_params.m_retractzheight << _T(")\n");
 
 	gp_Pnt start = pFixture->Adjustment( gp_Pnt( m_params.m_startpoint_x, m_params.m_startpoint_y, m_params.m_retractzheight ) );
-	ss << "rapid(x=" << start.X() << ", y=" << start.Y() << ")\n";
+	python << _T("rapid(x=") << start.X() << _T(", y=") << start.Y() << _T(")\n");
 
-	ss << "actp.setleadoffdz(" << m_params.m_leadoffdz << ")\n";
+	python << _T("actp.setleadoffdz(") << m_params.m_leadoffdz << _T(")\n");
 
-	ss << "actp.setleadofflen(" << m_params.m_leadofflen << ")\n";
+	python << _T("actp.setleadofflen(") << m_params.m_leadofflen << _T(")\n");
 
-	ss << "actp.setleadoffrad(" << m_params.m_leadoffrad << ")\n";
+	python << _T("actp.setleadoffrad(") << m_params.m_leadoffrad << _T(")\n");
 
-	ss << "actp.setretractzheight(" << m_params.m_retractzheight << ")\n";
+	python << _T("actp.setretractzheight(") << m_params.m_retractzheight << _T(")\n");
 
-	ss << "actp.setleadoffsamplestep(" << m_params.m_leadoffsamplestep << ")\n";
+	python << _T("actp.setleadoffsamplestep(") << m_params.m_leadoffsamplestep << _T(")\n");
 
 	if ((((COp *)this)->m_cutting_tool_number > 0) &&
 	    (CCuttingTool::FindCuttingTool( ((COp *)this)->m_cutting_tool_number ) > 0) )
@@ -471,8 +466,8 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 		CCuttingTool *pCuttingTool = (CCuttingTool *) CCuttingTool::Find( ((COp *)this)->m_cutting_tool_number );
 		if (pCuttingTool != NULL)
 		{
-			ss << "actp.settoolcornerrad(" << pCuttingTool->m_params.m_corner_radius << ")\n";
-			ss << "actp.settoolflatrad(" << pCuttingTool->m_params.m_flat_radius << ")\n";
+			python << _T("actp.settoolcornerrad(") << pCuttingTool->m_params.m_corner_radius << _T(")\n");
+			python << _T("actp.settoolflatrad(") << pCuttingTool->m_params.m_flat_radius << _T(")\n");
 		} // End if - then
 	} // End if - then
 	else
@@ -480,41 +475,41 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 		// This object has values and/or we don't have a cutting tool number to refer to.
 		// Use these values instead.
 
-		ss << "actp.settoolcornerrad(" << m_params.m_toolcornerrad << ")\n";
-		ss << "actp.settoolflatrad(" << m_params.m_toolflatrad << ")\n";
+		python << _T("actp.settoolcornerrad(") << m_params.m_toolcornerrad << _T(")\n");
+		python << _T("actp.settoolflatrad(") << m_params.m_toolflatrad << _T(")\n");
 	} // End if - else
 
-	ss << "actp.setsamplestep(" << m_params.m_samplestep << ")\n";
+	python << _T("actp.setsamplestep(") << m_params.m_samplestep << _T(")\n");
 
-	ss << "actp.setstepdown(" << m_params.m_stepdown << ")\n";
+	python << _T("actp.setstepdown(") << m_params.m_stepdown << _T(")\n");
 
-	ss << "actp.setclearcuspheight(" << m_params.m_clearcuspheight << ")\n";
+	python << _T("actp.setclearcuspheight(") << m_params.m_clearcuspheight << _T(")\n");
 
-	ss << "actp.settriangleweaveres(" << m_params.m_triangleweaveres << ")\n";
+	python << _T("actp.settriangleweaveres(") << m_params.m_triangleweaveres << _T(")\n");
 
-	ss << "actp.setflatradweaveres(" << m_params.m_flatradweaveres << ")\n";
+	python << _T("actp.setflatradweaveres(") << m_params.m_flatradweaveres << _T(")\n");
 
-	ss << "actp.setdchangright(" << m_params.m_dchangright << ")\n";
+	python << _T("actp.setdchangright(") << m_params.m_dchangright << _T(")\n");
 
-	ss << "actp.setdchangrightoncontour(" << m_params.m_dchangrightoncontour << ")\n";
+	python << _T("actp.setdchangrightoncontour(") << m_params.m_dchangrightoncontour << _T(")\n");
 
-	ss << "actp.setdchangleft(" << m_params.m_dchangleft << ")\n";
+	python << _T("actp.setdchangleft(") << m_params.m_dchangleft << _T(")\n");
 
-	ss << "actp.setdchangefreespace(" << m_params.m_dchangefreespace << ")\n";
+	python << _T("actp.setdchangefreespace(") << m_params.m_dchangefreespace << _T(")\n");
 
-	ss << "actp.setsidecutdisplch(" << m_params.m_sidecutdisplch << ")\n";
+	python << _T("actp.setsidecutdisplch(") << m_params.m_sidecutdisplch << _T(")\n");
 
-	ss << "actp.setfcut(" << m_params.m_fcut << ")\n";
+	python << _T("actp.setfcut(") << m_params.m_fcut << _T(")\n");
 
-	ss << "actp.setfretract(" << m_params.m_fretract << ")\n";
+	python << _T("actp.setfretract(") << m_params.m_fretract << _T(")\n");
 
-	ss << "actp.setthintol(" << m_params.m_thintol << ")\n";
+	python << _T("actp.setthintol(") << m_params.m_thintol << _T(")\n");
 
-	ss << "actp.setstartpoint(" << start.X() << ", " << start.Y() << ", " << m_params.m_startvel_x << ", " << m_params.m_startvel_y << ")\n";
+	python << _T("actp.setstartpoint(") << start.X() << _T(", ") << start.Y() << _T(", ") << m_params.m_startvel_x << _T(", ") << m_params.m_startvel_y << _T(")\n");
 
-	ss << "actp.setminz(" << m_params.m_minz << ")\n";
+	python << _T("actp.setminz(") << m_params.m_minz << _T(")\n");
 
-	ss << "actp.boundaryclear(" << m_params.m_boundaryclear << ")\n";
+	python << _T("actp.boundaryclear(") << m_params.m_boundaryclear << _T(")\n");
 
 	if(!m_sketches.empty())
 	{
@@ -538,13 +533,13 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 							span_object->GetEndPoint(e);
 							pFixture->Adjustment(e);
 
-							ss << "actp.boundaryadd(" << s[0] << ", " << s[1] << ")\n";
-							ss << "actp.boundaryadd(" << e[0] << ", " << e[1] << ")\n";
+							python << _T("actp.boundaryadd(") << s[0] << _T(", ") << s[1] << _T(")\n");
+							python << _T("actp.boundaryadd(") << e[0] << _T(", ") << e[1] << _T(")\n");
 						}
 					}
 				}
 			}
-			ss << "actp.boundarybreak()\n";
+			python << _T("actp.boundarybreak()\n");
 		}
 	}
 	else
@@ -553,23 +548,23 @@ void CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 		boundary[0] = pFixture->Adjustment( gp_Pnt( m_params.m_boundary_x0, m_params.m_boundary_y0, 0.0 ) );
 		boundary[1] = pFixture->Adjustment( gp_Pnt( m_params.m_boundary_x1, m_params.m_boundary_y1, 0.0 ) );
 
-		ss << "actp.boundaryadd(" << boundary[0].X() << ", " << boundary[0].Y() << ")\n";
+		python << _T("actp.boundaryadd(") << boundary[0].X() << _T(", ") << boundary[0].Y() << _T(")\n");
 
-		ss << "actp.boundaryadd(" << boundary[0].X() << ", " << boundary[1].Y() << ")\n";
+		python << _T("actp.boundaryadd(") << boundary[0].X() << _T(", ") << boundary[1].Y() << _T(")\n");
 
-		ss << "actp.boundaryadd(" << boundary[1].X() << ", " << boundary[1].Y() << ")\n";
+		python << _T("actp.boundaryadd(") << boundary[1].X() << _T(", ") << boundary[1].Y() << _T(")\n");
 
-		ss << "actp.boundaryadd(" << boundary[1].X() << ", " << boundary[0].Y() << ")\n";
+		python << _T("actp.boundaryadd(") << boundary[1].X() << _T(", ") << boundary[0].Y() << _T(")\n");
 
-		ss << "actp.boundarybreak()\n";
+		python << _T("actp.boundarybreak()\n");
 
 	}
 
-	ss << "actp_funcs.cut(" << PythonString(filepath.GetFullPath()).c_str() << ")\n";
+	python << _T("actp_funcs.cut(") << PythonString(filepath.GetFullPath()) << _T(")\n");
 
-	ss << "rapid(z=" << m_params.m_retractzheight << ")\n";
+	python << _T("rapid(z=") << m_params.m_retractzheight << _T(")\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 const wxBitmap &CAdaptive::GetIcon()
