@@ -140,7 +140,7 @@ public:
 		wxFileName path( standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 #ifdef WIN32
-        Execute(theApp.GetDllFolder() + wxString(_T("\\post.bat \"")) + path.GetFullPath() + wxString(_T("\"")));
+        Execute(wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("\\post.bat\" \"")) + path.GetFullPath() + wxString(_T("\"")));
 #else
 
 		Execute(wxString(_T("python ")) + path.GetFullPath());

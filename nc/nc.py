@@ -195,6 +195,21 @@ class Creator:
         pass
 
     ############################################################################
+    ##  Cutter radius compensation
+    
+    def use_CRC(self, x=None, y=None, z=None, a=None, b=None, c=None):
+        """CRC"""
+        return False
+
+    def start_CRC(self, left = True, radius = 0.0):
+        """start_CRC"""
+        pass
+
+    def end_CRC(self):
+        """end_CRC"""
+        pass
+
+    ############################################################################
     ##  Cycles
 
     def pattern(self):
