@@ -7,15 +7,15 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
 AppName=HeeksCNC
-AppVerName=HeeksCNC 0.12.0
+AppVerName=HeeksCNC 0.13.0
 AppPublisher=Heeks Software
-AppPublisherURL=http://code.google.com/p/heekscnc/
+AppPublisherURL=http://heeks.net/
 AppSupportURL=http://code.google.com/p/heekscnc/
 AppUpdatesURL=http://code.google.com/p/heekscnc/
 DefaultDirName={pf}\HeeksCNC
 DefaultGroupName=HeeksCNC
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.12.0
+OutputBaseFilename=HeeksCNC 0.13.0
 Compression=lzma
 SolidCompression=yes
 

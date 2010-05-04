@@ -38,6 +38,8 @@ class CreatorIso(nc.Creator):
         self.g0123_modal = False
         self.prev_f = ''
         self.prev_g0123 = ''
+        self.use_CRC = False
+        self.gCRC = ''
 
         self.fmt = iso.codes.FORMAT_MM()
 
@@ -353,6 +355,21 @@ class CreatorIso(nc.Creator):
         pass
 
     def rapid_unhome(self):
+        pass
+
+    ############################################################################
+    ##  CRC
+    
+    def use_CRC(self):
+        """CRC"""
+        return self.use_CRC
+
+    def start_CRC(self, left = True, radius = 0.0):
+        """start_CRC"""
+        pass
+
+    def end_CRC(self):
+        """end_CRC"""
         pass
 
     ############################################################################
