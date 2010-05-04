@@ -452,8 +452,10 @@ struct sort_operations : public std::binary_function< bool, COp *, COp * >
 	} // End operator
 };
 
-void CProgram::RewritePythonProgram()
+Python CProgram::RewritePythonProgram()
 {
+	Python python;
+
 	theApp.m_program_canvas->m_textCtrl->Clear();
 	CZigZag::number_for_stl_file = 1;
 	CAdaptive::number_for_stl_file = 1;
@@ -474,7 +476,7 @@ void CProgram::RewritePythonProgram()
 	{
 		// If there are no operations then there is no GCode.
 		// No socks, no shirt, no service.
-		return;
+		return(python);
 	} // End if - then
 
 	for(HeeksObj* object = m_operations->GetFirstChild(); object; object = m_operations->GetNextChild())
@@ -528,63 +530,61 @@ void CProgram::RewritePythonProgram()
 
 	// add standard stuff at the top
 	//hackhack, make it work on unix with FHS
-	theApp.m_program_canvas->AppendText(_T("import sys\n"));
+	python << _T("import sys\n");
 
 #ifndef WIN32
-	theApp.m_program_canvas->AppendText(wxString(wxString(_T("sys.path.insert(0,")) + PythonString(_T("/usr/local/lib/heekscnc/")) + wxString(_T(")\n"))).c_str());
+	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/")) << _T(")\n");
 #endif
 
-	theApp.m_program_canvas->AppendText(wxString(_T("sys.path.insert(0,")) + PythonString(theApp.GetDllFolder()).c_str() + wxString(_T(")\n")));
-	theApp.m_program_canvas->AppendText(_T("import math\n"));
+	python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");
+	python << _T("import math\n");
 
 	// kurve related things
 	if(kurve_module_needed)
 	{
-		theApp.m_program_canvas->AppendText(_T("import kurve\n"));
+		python << _T("import kurve\n");
 	}
 
 	if(kurve_funcs_needed)
 	{
-		theApp.m_program_canvas->AppendText(_T("import kurve_funcs\n"));
+		python << _T("import kurve_funcs\n");
 	}
 
 	// area related things
 	if(area_module_needed)
 	{
-		theApp.m_program_canvas->AppendText(_T("import area\n"));
-		theApp.m_program_canvas->AppendText(_T("area.set_units("));
-		theApp.m_program_canvas->AppendText(m_units);
-		theApp.m_program_canvas->AppendText(_T(")\n"));
+		python << _T("import area\n");
+		python << _T("area.set_units(") << m_units << _T(")\n");
 	}
 
 	if(area_funcs_needed)
 	{
-		theApp.m_program_canvas->AppendText(_T("import area_funcs\n"));
+		python << _T("import area_funcs\n");
 	}
 
 	// OpenCamLib stuff
 	if(ocl_funcs_needed)
 	{
-		theApp.m_program_canvas->AppendText(_T("import ocl_funcs\n"));
+		python << _T("import ocl_funcs\n");
 	}
 
 	// actp
 	if(adaptive_op_exists)
 	{
-		theApp.m_program_canvas->AppendText(_T("import actp_funcs\n"));
-		theApp.m_program_canvas->AppendText(_T("import actp\n"));
-		theApp.m_program_canvas->AppendText(_T("\n"));
+		python << _T("import actp_funcs\n");
+		python << _T("import actp\n");
+		python << _T("\n");
 	}
 
 	if(rough_turning_op_exists)
 	{
-		theApp.m_program_canvas->AppendText(_T("import turning\n"));
-		theApp.m_program_canvas->AppendText(_T("\n"));
+		python << _T("import turning\n");
+		python << _T("\n");
 	}
 
 
 	// machine general stuff
-	theApp.m_program_canvas->AppendText(_T("from nc.nc import *\n"));
+	python << _T("from nc.nc import *\n");
 
 	// specific machine
 	if (m_machine.file_name == _T("not found"))
@@ -593,28 +593,28 @@ void CProgram::RewritePythonProgram()
 	} // End if - then
 	else
 	{
-		theApp.m_program_canvas->AppendText(_T("import nc.") + m_machine.file_name + _T("\n"));
-		theApp.m_program_canvas->AppendText(_T("\n"));
+		python << _T("import nc.") + m_machine.file_name + _T("\n");
+		python << _T("\n");
 	} // End if - else
 
 	// output file
-	theApp.m_program_canvas->AppendText(wxString(_T("output(")) + PythonString(GetOutputFileName()).c_str() + wxString(_T(")\n")));
+	python << _T("output(") << PythonString(GetOutputFileName()) << _T(")\n");
 
 	// begin program
-	theApp.m_program_canvas->AppendText(wxString((_T("program_begin(123, ")) + PythonString(_T("Test program")) + wxString(_T(")\n"))).c_str());
-	theApp.m_program_canvas->AppendText(_T("absolute()\n"));
+	python << _T("program_begin(123, ") << PythonString(_T("Test program")) << _T(")\n");
+	python << _T("absolute()\n");
 	if(m_units > 25.0)
 	{
-		theApp.m_program_canvas->AppendText(_T("imperial()\n"));
+		python << _T("imperial()\n");
 	}
 	else
 	{
-		theApp.m_program_canvas->AppendText(_T("metric()\n"));
+		python << _T("metric()\n");
 	}
-	theApp.m_program_canvas->AppendText(_T("set_plane(0)\n"));
-	theApp.m_program_canvas->AppendText(_T("\n"));
+	python << _T("set_plane(0)\n");
+	python << _T("\n");
 
-	m_raw_material.AppendTextToProgram();
+	python << m_raw_material.AppendTextToProgram();
 
 	// write the tools setup code.
 	if (m_tools != NULL)
@@ -625,7 +625,7 @@ void CProgram::RewritePythonProgram()
 			switch(object->GetType())
 			{
 			case CuttingToolType:
-				((CCuttingTool*)object)->AppendTextToProgram();
+				python << ((CCuttingTool*)object)->AppendTextToProgram();
 				break;
 			}
 		} // End for
@@ -656,7 +656,7 @@ void CProgram::RewritePythonProgram()
 
 	for (std::list<CFixture *>::const_iterator l_itFixture = fixtures.begin(); l_itFixture != fixtures.end(); l_itFixture++)
 	{
-		(*l_itFixture)->AppendTextToProgram();
+		python << (*l_itFixture)->AppendTextToProgram();
 
 		// And then all the rest of the operations.
 		int current_tool = 0;
@@ -672,33 +672,44 @@ void CProgram::RewritePythonProgram()
 					if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
 					{
 						// Select the right tool.
-#ifdef UNICODE
-						std::wostringstream l_ossValue;
-#else
-						std::ostringstream l_ossValue;
-#endif
-                        l_ossValue.imbue(std::locale("C"));
-                        l_ossValue<<std::setprecision(10);
-
 						CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
 						if (pCuttingTool != NULL)
 						{
-							l_ossValue << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title).c_str() << ")\n";
+							python << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title) << _T(")\n");
 						} // End if - then
 
 
-						l_ossValue << _T("tool_change( id=") << ((COp *) object)->m_cutting_tool_number << _T(")\n");
-						theApp.m_program_canvas->AppendText(l_ossValue.str().c_str());
+						python << _T("tool_change( id=") << ((COp *) object)->m_cutting_tool_number << _T(")\n");
 						current_tool = ((COp *) object)->m_cutting_tool_number;
 					} // End if - then
 
-					((COp*)object)->AppendTextToProgram( *l_itFixture );
+					python << ((COp*)object)->AppendTextToProgram( *l_itFixture );
 				}
 			}
 		} // End for - operation
 	} // End for - fixture
 
-	theApp.m_program_canvas->AppendText(_T("program_end()\n"));
+	python << _T("program_end()\n");
+	m_python_program = python;
+	theApp.m_program_canvas->m_textCtrl->AppendText(python);
+	if (python.Length() > theApp.m_program_canvas->m_textCtrl->GetValue().Length())
+	{
+		// The python program is longer than the text control object can handle.  The maximum
+		// length of the text control objects changes depending on the operating system (and its
+		// implementation of wxWidgets).  Rather than showing the truncated program, tell the
+		// user that it has been truncated and where to find it.
+
+		wxStandardPaths standard_paths;
+		wxFileName file_str( standard_paths.GetTempDir().c_str(), _T("post.py"));
+
+		theApp.m_program_canvas->m_textCtrl->Clear();
+		theApp.m_program_canvas->m_textCtrl->AppendText(_("The Python program is too long \n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_("to display in this window.\n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(_("Please edit the python program directly at \n"));
+		theApp.m_program_canvas->m_textCtrl->AppendText(file_str.GetFullPath());
+	}
+
+	return(python);
 }
 
 ProgramUserType CProgram::GetUserType()

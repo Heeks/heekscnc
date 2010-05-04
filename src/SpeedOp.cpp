@@ -268,33 +268,27 @@ void CSpeedOp::GetProperties(std::list<Property *> *list)
 	COp::GetProperties(list);
 }
 
-void CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
+Python CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
 {
-    theApp.m_program_canvas->AppendText(GenerateGCode(pFixture).c_str());
+    return(GenerateGCode(pFixture));
 }
 
-wxString CSpeedOp::GenerateGCode(const CFixture *pFixture)
+Python CSpeedOp::GenerateGCode(const CFixture *pFixture)
 {
-    #ifdef UNICODE
-	std::wostringstream gcode;
-#else
-    std::ostringstream gcode;
-#endif
-    gcode.imbue(std::locale("C"));
-	gcode<<std::setprecision(10);
+	Python python;
 
-	gcode << COp::GenerateGCode(pFixture).c_str();
+	python << COp::GenerateGCode(pFixture).c_str();
 
 	if (m_speed_op_params.m_spindle_speed != 0)
 	{
-		gcode << _T("spindle(") << m_speed_op_params.m_spindle_speed << _T(")\n");
+		python << _T("spindle(") << m_speed_op_params.m_spindle_speed << _T(")\n");
 	} // End if - then
 
-	gcode << _T("feedrate_hv(") << m_speed_op_params.m_horizontal_feed_rate / theApp.m_program->m_units << _T(", ");
-    gcode << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
-    gcode << _T("flush_nc()\n");
+	python << _T("feedrate_hv(") << m_speed_op_params.m_horizontal_feed_rate / theApp.m_program->m_units << _T(", ");
+    python << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
+    python << _T("flush_nc()\n");
 
-    return(wxString(gcode.str().c_str()));
+    return(python);
 }
 
 static void on_set_auto_speeds(bool value, HeeksObj* object){CSpeedOp::m_auto_set_speeds_feeds = value;}

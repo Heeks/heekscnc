@@ -89,14 +89,16 @@ const wxBitmap &CTurnRough::GetIcon()
 	return *icon;
 }
 
-void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture)
+Python CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture)
 {
+	Python python;
+
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
-		theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("comment(R'%s')\n"), wxString(sketch->GetShortString()).c_str()));
+		python << wxString::Format(_T("comment(R'%s')\n"), wxString(sketch->GetShortString()).c_str());
 	}
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
+	python << wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id);
 
 	bool started = false;
 	int sketch_id = (id_to_use > 0 ? id_to_use : sketch->m_id);
@@ -115,26 +117,16 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 				{
 					span_object->GetStartPoint(s);
 					pFixture->Adjustment(s);
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(s[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(s[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", 0.0, 0.0)\n"));
+					python << _T("kurve.add_point(k") << sketch_id << _T(", 0, ") << (double) s[0] / theApp.m_program->m_units;
+					python << _T(", ") << s[1] / theApp.m_program->m_units << _T(", 0.0, 0.0)\n");
 					started = true;
 				}
 				span_object->GetEndPoint(e);
 				pFixture->Adjustment(e);
 				if(type == LineType)
 				{
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", 0.0, 0.0)\n"));
+					python << _T("kurve.add_point(k") << sketch_id << _T(", 0, ");
+					python << e[0] / theApp.m_program->m_units << _T(", ") << e[1] / theApp.m_program->m_units << _T(", 0.0, 0.0)\n");
 				}
 				else if(type == ArcType)
 				{
@@ -143,19 +135,11 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(span_type);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(e[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
+					python << _T("kurve.add_point(k") << sketch_id << _T(", ") << span_type;
+					python << _T(", ") << e[0] / theApp.m_program->m_units << _T(", ");
+					python << e[1] / theApp.m_program->m_units << _T(", ");
+					python << c[0] / theApp.m_program->m_units << _T(", ");
+					python << c[1] / theApp.m_program->m_units << _T(")\n");
 				}
 				else if(type == CircleType)
 				{
@@ -178,80 +162,66 @@ void CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture
 					pFixture->Adjustment(centre_plus_radius);
 					pFixture->Adjustment(centre_minus_radius);
 
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 0, "));
-					theApp.m_program_canvas->AppendText(centre_plus_radius[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(centre_plus_radius[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 1, "));
-					theApp.m_program_canvas->AppendText(centre_minus_radius[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(centre_minus_radius[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
-					theApp.m_program_canvas->AppendText(_T("kurve.add_point(k"));
-					theApp.m_program_canvas->AppendText(sketch_id);
-					theApp.m_program_canvas->AppendText(_T(", 1, "));
-					theApp.m_program_canvas->AppendText(centre_plus_radius[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(centre_plus_radius[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[0] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(", "));
-					theApp.m_program_canvas->AppendText(c[1] / theApp.m_program->m_units);
-					theApp.m_program_canvas->AppendText(_T(")\n"));
+					python << _T("kurve.add_point(k") << sketch_id << _T(", 0, ");
+					python << centre_plus_radius[0] / theApp.m_program->m_units << _T(", ");
+					python << centre_plus_radius[1] / theApp.m_program->m_units << _T(", ");
+					python << c[0] / theApp.m_program->m_units << _T(", ");
+					python << c[1] / theApp.m_program->m_units << _T(")\n");
+	
+					python << _T("kurve.add_point(k") << sketch_id << _T(", 1, ");
+					python << centre_minus_radius[0] / theApp.m_program->m_units << _T(", ");
+					python << centre_minus_radius[1] / theApp.m_program->m_units << _T(", ");
+					python << c[0] / theApp.m_program->m_units << _T(", ");
+					python << c[1] / theApp.m_program->m_units << _T(")\n");
+					
+					python << _T("kurve.add_point(k") << sketch_id << _T(", 1, ");
+					python << centre_plus_radius[0] / theApp.m_program->m_units << _T(", ");
+					python << centre_plus_radius[1] / theApp.m_program->m_units << _T(", ");
+					python << c[0] / theApp.m_program->m_units << _T(", ");
+					python << c[1] / theApp.m_program->m_units << _T(")\n");
 				}
 			}
 		}
 	}
 
-	theApp.m_program_canvas->AppendText(_T("\n"));
+	python << _T("\n");
+	return(python);
 }
 
-void CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, const CFixture *pFixture)
+Python CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, const CFixture *pFixture)
 {
+	Python python;
+
 	if(object)
 	{
-		WriteSketchDefn(object, sketch, pFixture);
+		python << WriteSketchDefn(object, sketch, pFixture);
 
 		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 
 		// add the machining command
-		theApp.m_program_canvas->AppendText(wxString::Format(_T("turning.rough(k%d, "), sketch));
-		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_corner_radius / theApp.m_program->m_units);
-		theApp.m_program_canvas->AppendText(_T(", "));
-		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_tool_angle);
-		theApp.m_program_canvas->AppendText(_T(", "));
-		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_front_angle);
-		theApp.m_program_canvas->AppendText(_T(", "));
-		theApp.m_program_canvas->AppendText(pCuttingTool->m_params.m_back_angle);
-		theApp.m_program_canvas->AppendText(_T(", "));
-		theApp.m_program_canvas->AppendText(m_turn_rough_params.m_clearance);
-		theApp.m_program_canvas->AppendText(_T(")\n"));
+		python << wxString::Format(_T("turning.rough(k%d, "), sketch);
+		python << pCuttingTool->m_params.m_corner_radius / theApp.m_program->m_units << _T(", ");
+		python << pCuttingTool->m_params.m_tool_angle << _T(", ");
+		python << pCuttingTool->m_params.m_front_angle << _T(", ");
+		python << pCuttingTool->m_params.m_back_angle << _T(", ");
+		python << m_turn_rough_params.m_clearance << _T(")\n");
 	}
+
+	return(python);
 }
 
-void CTurnRough::AppendTextToProgram(const CFixture *pFixture)
+Python CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 {
+	Python python;
+
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool == NULL)
 	{
 		wxMessageBox(_T("Cannot generate GCode for profile without a cutting tool assigned"));
-		return;
+		return(python);
 	} // End if - then
 
-	CSpeedOp::AppendTextToProgram(pFixture);
+	python << CSpeedOp::AppendTextToProgram(pFixture);
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -277,13 +247,13 @@ void CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				AppendTextForOneSketch(one_curve_sketch, sketch, pFixture);
+				python << AppendTextForOneSketch(one_curve_sketch, sketch, pFixture);
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			AppendTextForOneSketch(object, sketch, pFixture);
+			python << AppendTextForOneSketch(object, sketch, pFixture);
 		}
 
 		if(re_ordered_sketch)
@@ -291,6 +261,8 @@ void CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 			delete re_ordered_sketch;
 		}
 	}
+
+	return(python);
 }
 
 void CTurnRough::glCommands(bool select, bool marked, bool no_color)

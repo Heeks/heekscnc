@@ -111,7 +111,7 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
-	void AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(const CFixture *pFixture);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	static double GetMaxHeight( const int object_type, const std::list<int> & object_ids );

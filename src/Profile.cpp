@@ -993,13 +993,15 @@ void CProfile::ReadDefaultValues()
 
 
 
-void CProfile::AppendTextToProgram(const CFixture *pFixture)
+Python CProfile::AppendTextToProgram(const CFixture *pFixture)
 {
+	Python python;
+
 	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 	if (pCuttingTool == NULL)
 	{
 		wxMessageBox(_T("Cannot generate GCode for profile without a cutting tool assigned"));
-		return;
+		return(python);
 	} // End if - then
 
 	for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
@@ -1011,13 +1013,13 @@ void CProfile::AppendTextToProgram(const CFixture *pFixture)
 	}
 
 	std::vector<CNCPoint> starting_points;
-	wxString python_code = AppendTextToProgram( starting_points, pFixture );
+	python << AppendTextToProgram( starting_points, pFixture );
 
-	CDepthOp::AppendTextToProgram(pFixture);
-	theApp.m_program_canvas->m_textCtrl->AppendText( python_code.c_str() );
+	python << CDepthOp::AppendTextToProgram(pFixture);
 
 	m_sketches.clear();
 
+	return(python);
 } // End AppendTextToProgram() method
 
 struct sort_sketches : public std::binary_function< const int, const int, bool >
@@ -1057,23 +1059,18 @@ struct sort_sketches : public std::binary_function< const int, const int, bool >
 
 
 
-wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture )
+Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture )
 {
+	Python python;
+
 	if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
 	{
-		theApp.m_program_canvas->AppendText(_T("roll_radius = float("));
-		theApp.m_program_canvas->AppendText(m_profile_params.m_auto_roll_radius / theApp.m_program->m_units);
-		theApp.m_program_canvas->AppendText(_T(")\n"));
+		python << _T("roll_radius = float(");
+		python << m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
+		python << _T(")\n");
 	}
 
-#ifdef UNICODE
-	std::wostringstream l_ossPythonCode;
-#else
-	std::ostringstream l_ossPythonCode;
-#endif
-	l_ossPythonCode.imbue(std::locale("C"));
-	l_ossPythonCode<<std::setprecision(10);
-	l_ossPythonCode << _T("offset_extra = ") << m_profile_params.m_offset_extra << _T("\n");
+	python << _T("offset_extra = ") << m_profile_params.m_offset_extra << _T("\n");
 
 	// Make a local copy so that we can either sort it or leave it alone.  We don't want
 	// to affect the member list itself.
@@ -1144,7 +1141,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points,
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				l_ossPythonCode << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
+				python << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
 				CBox bbox;
 				one_curve_sketch->GetBox(bbox);
 				starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
@@ -1153,7 +1150,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points,
 		}
 		else
 		{
-			l_ossPythonCode << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
+			python << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
 			CBox bbox;
 			object->GetBox(bbox);
 			starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
@@ -1165,7 +1162,7 @@ wxString CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points,
 		}
 	}
 
-	return( l_ossPythonCode.str().c_str() );
+	return(python);
 }
 
 static unsigned char cross16[32] = {0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80, 0x01, 0x80, 0x02, 0x40, 0x04, 0x20, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01};

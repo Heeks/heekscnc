@@ -110,7 +110,7 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
-	void AppendTextForSingleProbeOperation( const CNCPoint setup_point,
+	Python AppendTextForSingleProbeOperation( const CNCPoint setup_point,
 						const CNCPoint retract_point,
 						const double depth,
 						const CNCPoint probe_point,
@@ -119,7 +119,7 @@ public:
 						const double probe_radius_x_component,
 						const double probe_radius_y_component	 ) const;
 
-	void AppendTextForDownwardProbingOperation(
+	Python AppendTextForDownwardProbingOperation(
 						const wxString setup_point_x,
 						const wxString setup_point_y,
 						const double depth,
@@ -127,7 +127,7 @@ public:
 
 
 	wxString GetOutputFileName(const wxString extension, const bool filename_only);
-	void GeneratePythonPreamble();
+	Python GeneratePythonPreamble();
 
 	virtual void GenerateMeaningfullName();
 
@@ -155,7 +155,26 @@ public:
 		return(ss);
 	}
 
+	/*
 	friend wxString & operator << ( wxString & ss, const eMovement_t & movement )
+	{
+		switch (movement)
+		{
+		case eRapid:	ss << _("Rapid");
+			break;
+
+		case eProbe:	ss << _("Probe");
+			break;
+
+		case eEndOfData: ss << _("End Of Data");
+			break;
+		} // End switch()
+
+		return(ss);
+	}
+	*/
+
+	friend Python & operator << ( Python & ss, const eMovement_t & movement )
 	{
 		switch (movement)
 		{
@@ -185,7 +204,33 @@ public:
 		return(ss);
 	}
 
+	/*
 	friend wxString & operator << ( wxString & ss, const eCorners_t & corner )
+	{
+		switch (corner)
+		{
+		case eBottomLeft:
+			ss << _("Bottom Left");
+			break;
+
+		case eBottomRight:
+			ss << _("Bottom Right");
+			break;
+
+		case eTopLeft:
+			ss << _("Top Left");
+			break;
+
+		case eTopRight:
+			ss << _("Top Right");
+			break;
+		} // End switch
+
+		return(ss);
+	}
+	*/
+
+	friend Python & operator << ( Python & ss, const eCorners_t & corner )
 	{
 		switch (corner)
 		{
@@ -223,7 +268,33 @@ public:
 		return(ss);
 	}
 
+	/*
 	friend wxString & operator << (wxString & ss, const eEdges_t & edge)
+	{
+		switch (edge)
+		{
+		case eBottom:
+			ss << _("Bottom");
+			break;
+
+		case eTop:
+			ss << _("Top");
+			break;
+
+		case eLeft:
+			ss << _("Left");
+			break;
+
+		case eRight:
+			ss << _("Right");
+			break;
+		} // End switch
+
+		return(ss);
+	}
+	*/
+
+	friend Python & operator << (Python & ss, const eEdges_t & edge)
 	{
 		switch (edge)
 		{
@@ -332,7 +403,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	void AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( const CFixture *pFixture );
 
 	void glCommands(bool select, bool marked, bool no_color);
 
@@ -381,7 +452,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	void AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( const CFixture *pFixture );
 
 	void glCommands(bool select, bool marked, bool no_color);
 
@@ -450,7 +521,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	void AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( const CFixture *pFixture );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);

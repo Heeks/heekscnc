@@ -146,24 +146,18 @@ const wxBitmap &CFixture::GetIcon()
 
 	This class should just select the appropriate coordinate system.
  */
-void CFixture::AppendTextToProgram() const
+Python CFixture::AppendTextToProgram() const
 {
-
-#ifdef UNICODE
-	std::wostringstream ss;
-#else
-    std::ostringstream ss;
-#endif
-    ss.imbue(std::locale("C"));
+	Python python;
 
 	if (m_title.size() > 0)
 	{
-		ss << "comment(" << PythonString(m_title).c_str() << ")\n";
+		python << _T("comment(") << PythonString(m_title) << _T(")\n");
 	} // End if - then
 
-	ss << "workplane(" << m_coordinate_system_number << ")\n";
+	python << _T("workplane(") << m_coordinate_system_number << _T(")\n");
 
-	theApp.m_program_canvas->m_textCtrl->AppendText(ss.str().c_str());
+	return(python);
 }
 
 
