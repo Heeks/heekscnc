@@ -254,43 +254,30 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	int int_for_bool;
 	int int_for_enum;;
 
-	int_for_enum = m_tool_on_side;
-	pElem->Attribute("side", &int_for_enum);
-	m_tool_on_side = (eSide)int_for_enum;
-
-	int_for_enum = m_cut_mode;
-	pElem->Attribute("cut_mode", &int_for_enum);
-	m_cut_mode = (eCutMode)int_for_enum;
-
-	pElem->Attribute("auto_roll_on", &int_for_bool); m_auto_roll_on = (int_for_bool != 0);
+	if(pElem->Attribute("side", &int_for_enum))m_tool_on_side = (eSide)int_for_enum;
+	if(pElem->Attribute("cut_mode", &int_for_enum))m_cut_mode = (eCutMode)int_for_enum;
+	if(pElem->Attribute("auto_roll_on", &int_for_bool))m_auto_roll_on = (int_for_bool != 0);
 	pElem->Attribute("roll_onx", &m_roll_on_point[0]);
 	pElem->Attribute("roll_ony", &m_roll_on_point[1]);
 	pElem->Attribute("roll_onz", &m_roll_on_point[2]);
-	pElem->Attribute("auto_roll_off", &int_for_bool); m_auto_roll_off = (int_for_bool != 0);
+	if(pElem->Attribute("auto_roll_off", &int_for_bool))m_auto_roll_off = (int_for_bool != 0);
 	pElem->Attribute("roll_offx", &m_roll_off_point[0]);
 	pElem->Attribute("roll_offy", &m_roll_off_point[1]);
 	pElem->Attribute("roll_offz", &m_roll_off_point[2]);
 	pElem->Attribute("roll_radius", &m_auto_roll_radius);
-	pElem->Attribute("start_given", &int_for_bool); m_start_given = (int_for_bool != 0);
+	if(pElem->Attribute("start_given", &int_for_bool))m_start_given = (int_for_bool != 0);
 	pElem->Attribute("startx", &m_start[0]);
 	pElem->Attribute("starty", &m_start[1]);
 	pElem->Attribute("startz", &m_start[2]);
-	pElem->Attribute("end_given", &int_for_bool); m_end_given = (int_for_bool != 0);
+	if(pElem->Attribute("end_given", &int_for_bool))m_end_given = (int_for_bool != 0);
 	pElem->Attribute("endx", &m_end[0]);
 	pElem->Attribute("endy", &m_end[1]);
 	pElem->Attribute("endz", &m_end[2]);
-	if (pElem->Attribute("sort_sketches"))
-	{
-		m_sort_sketches = atoi(pElem->Attribute("sort_sketches"));
-	} // End if - then
-	else
-	{
-		m_sort_sketches = 1;	// Default.
-	} // End if - else
+	if(pElem->Attribute("sort_sketches"))m_sort_sketches = atoi(pElem->Attribute("sort_sketches"));
 	pElem->Attribute("num_tags", &m_num_tags);
 	pElem->Attribute("tag_width", &m_tag_width);
 	pElem->Attribute("tag_angle", &m_tag_angle);
-	pElem->Attribute("tag_at_start", &int_for_bool); m_tag_at_start = (int_for_bool != 0);
+	if(pElem->Attribute("tag_at_start", &int_for_bool))m_tag_at_start = (int_for_bool != 0);
 	pElem->Attribute("offset_extra", &m_offset_extra);
 }
 
@@ -946,7 +933,14 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			l_ossPythonCode << wxString(_T("rapid(z = rapid_down_to_height)\n")).c_str();
 
 			// feed down to final depth
-			l_ossPythonCode << wxString::Format(_T("feed(z = final_depth%s)\n"), (m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start) ? _T(" + tag_height") : _T("")).c_str();
+			if(m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start)
+			{
+				l_ossPythonCode << wxString(_T("feed(z = tag_depth)\n")).c_str();
+			}
+			else
+			{
+				l_ossPythonCode << wxString(_T("feed(z = final_depth)\n")).c_str();
+			}
 
 			// set up the tag parameters
 			wxString tag_string;

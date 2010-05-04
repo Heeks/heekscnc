@@ -75,9 +75,9 @@ void CTurnRoughParams::WriteXMLAttributes(TiXmlNode *root)
 void CTurnRoughParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	int int_for_bool;
-	pElem->Attribute("outside", &int_for_bool); m_outside = (int_for_bool != 0);
-	pElem->Attribute("front", &int_for_bool); m_front = (int_for_bool != 0);
-	pElem->Attribute("facing", &int_for_bool); m_facing = (int_for_bool != 0);
+	if(pElem->Attribute("outside", &int_for_bool))m_outside = (int_for_bool != 0);
+	if(pElem->Attribute("front", &int_for_bool))m_front = (int_for_bool != 0);
+	if(pElem->Attribute("facing", &int_for_bool))m_facing = (int_for_bool != 0);
 	pElem->Attribute("clearance", &m_clearance);
 }
 

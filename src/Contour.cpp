@@ -146,9 +146,8 @@ void CContourParams::WriteXMLAttributes(TiXmlNode *root)
 
 void CContourParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-    int int_for_enum = m_tool_on_side;
-	pElem->Attribute("side", &int_for_enum);
-	m_tool_on_side = (eSide)int_for_enum;
+	int int_for_enum;
+	if(pElem->Attribute("side", &int_for_enum))m_tool_on_side = (eSide)int_for_enum;
 }
 
 
