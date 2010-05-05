@@ -1272,9 +1272,7 @@ bool CInlay::CanAdd( HeeksObj *object )
 {
     switch (object->GetType())
     {
-        case CircleType:
         case SketchType:
-		case LineType:
             return(true);
 
         default:
@@ -1283,45 +1281,8 @@ bool CInlay::CanAdd( HeeksObj *object )
 }
 
 
-
-
-// This tool uses a side-effect of the GenerateGCode() method to
-// add the mirrored sketches as well as pocketing operations
-// to the main tree.  It discards the GCode that is generated
-// but the same process is used for both as the same calculations
-// are required for both.
-//
-// We make the generation of these mirrored sketches and pocket
-// operations a manual step so that we don't end up with duplicate
-// operations in the model.  It also allows the user to control
-// the setup and machining of the male half more easily.
-class Inlay_GenerateMalePocket: public Tool
-{
-CInlay *m_pThis;
-
-public:
-	Inlay_GenerateMalePocket() { m_pThis = NULL; }
-
-	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Generate Male Pocket");}
-
-	void Run()
-	{
-	    CFixture fixture( NULL, CFixture::G54 );
-	    m_pThis->GenerateGCode( &fixture, true );
-	}
-	wxString BitmapPath(){ return _T("opinlay");}
-	void Set( CInlay *pThis ) { m_pThis = pThis; }
-};
-
-static Inlay_GenerateMalePocket generate_male_pocket;
-
 void CInlay::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-    generate_male_pocket.Set( this );
-
-	t_list->push_back( &generate_male_pocket );
-
     CDepthOp::GetTools( t_list, p );
 }
 
