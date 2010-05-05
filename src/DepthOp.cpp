@@ -256,7 +256,7 @@ Python CDepthOp::GenerateGCode( const CFixture *pFixture )
 {
 	Python python;
 
-    python << CSpeedOp::GenerateGCode(pFixture).c_str();
+    python << CSpeedOp::GenerateGCode(pFixture);
 
 	python << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 	python << _T("rapid_down_to_height = float(") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");

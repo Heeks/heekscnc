@@ -262,7 +262,7 @@ Python CPocket::GenerateGCode(const CFixture *pFixture)
 		return(python);
 	} // End if - then
 
-	python << CDepthOp::GenerateGCode(pFixture).c_str();
+	python << CDepthOp::GenerateGCode(pFixture);
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
