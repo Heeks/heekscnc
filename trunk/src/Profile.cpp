@@ -467,23 +467,17 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
 
 } // End roll_on_point() method
 
-wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed )
+Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed )
 {
 	// write the python code for the sketch
-#ifdef UNICODE
-	std::wostringstream l_ossPythonCode;
-#else
-	std::ostringstream l_ossPythonCode;
-#endif
-	l_ossPythonCode.imbue(std::locale("C"));
-	l_ossPythonCode<<std::setprecision(10);
+	Python python;
 
 	if ((sketch->GetShortString() != NULL) && (wxString(sketch->GetShortString()).size() > 0))
 	{
-		l_ossPythonCode << (wxString::Format(_T("comment(%s)\n"), PythonString(sketch->GetShortString()).c_str())).c_str();
+		python << (wxString::Format(_T("comment(%s)\n"), PythonString(sketch->GetShortString()).c_str()));
 	}
 
-	l_ossPythonCode << (wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id)).c_str();
+	python << (wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
 
 	bool started = false;
 	int sketch_id = (id_to_use > 0 ? id_to_use : sketch->m_id);
@@ -535,13 +529,13 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					else span_object->GetStartPoint(s);
 					CNCPoint start(pFixture->Adjustment(s));
 
-					l_ossPythonCode << _T("kurve.add_point(k");
-					l_ossPythonCode << sketch_id;
-					l_ossPythonCode << _T(", " << LINEAR << ", ");
-					l_ossPythonCode << start.X(true);
-					l_ossPythonCode << _T(", ");
-					l_ossPythonCode << start.Y(true);
-					l_ossPythonCode << _T(", 0.0, 0.0)\n");
+					python << _T("kurve.add_point(k");
+					python << sketch_id;
+					python << _T(", ") << LINEAR << _T(", ");
+					python << start.X(true);
+					python << _T(", ");
+					python << start.Y(true);
+					python << _T(", 0.0, 0.0)\n");
 					started = true;
 
 					geoff_geometry::kurve_add_point(pKurve,
@@ -556,13 +550,13 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 
 				if(type == LineType)
 				{
-					l_ossPythonCode << _T("kurve.add_point(k");
-					l_ossPythonCode << sketch_id;
-					l_ossPythonCode << _T(", " << LINEAR << ", ");
-					l_ossPythonCode << end.X(true);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << end.Y(true);
-					l_ossPythonCode << (_T(", 0.0, 0.0)\n"));
+					python << _T("kurve.add_point(k");
+					python << sketch_id;
+					python << _T(", ") << LINEAR << _T(", ");
+					python << end.X(true);
+					python << (_T(", "));
+					python << end.Y(true);
+					python << (_T(", 0.0, 0.0)\n"));
 
 					geoff_geometry::kurve_add_point(pKurve,
 									0,
@@ -578,19 +572,19 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = ((pos[2] >=0) != reversed) ? ACW: CW;
-					l_ossPythonCode << (_T("kurve.add_point(k"));
-					l_ossPythonCode << (sketch_id);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << (span_type);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << end.X(true);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << end.Y(true);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << centre.X(true);
-					l_ossPythonCode << (_T(", "));
-					l_ossPythonCode << centre.Y(true);
-					l_ossPythonCode << (_T(")\n"));
+					python << (_T("kurve.add_point(k"));
+					python << (sketch_id);
+					python << (_T(", "));
+					python << (span_type);
+					python << (_T(", "));
+					python << end.X(true);
+					python << (_T(", "));
+					python << end.Y(true);
+					python << (_T(", "));
+					python << centre.X(true);
+					python << (_T(", "));
+					python << centre.Y(true);
+					python << (_T(")\n"));
 
 					geoff_geometry::kurve_add_point(pKurve,
 									span_type,
@@ -634,17 +628,17 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 					{
 						CNCPoint pnt = pFixture->Adjustment( l_itPoint->second );
 
-						l_ossPythonCode << (_T("kurve.add_point(k"));
-						l_ossPythonCode << (sketch_id);
-						l_ossPythonCode << _T(", ") << l_itPoint->first << _T(", ");
-						l_ossPythonCode << pnt.X(true);
-						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << pnt.Y(true);
-						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << centre.X(true);
-						l_ossPythonCode << (_T(", "));
-						l_ossPythonCode << centre.Y(true);
-						l_ossPythonCode << (_T(")\n"));
+						python << (_T("kurve.add_point(k"));
+						python << (sketch_id);
+						python << _T(", ") << l_itPoint->first << _T(", ");
+						python << pnt.X(true);
+						python << (_T(", "));
+						python << pnt.Y(true);
+						python << (_T(", "));
+						python << centre.X(true);
+						python << (_T(", "));
+						python << centre.Y(true);
+						python << (_T(")\n"));
 
 						geoff_geometry::kurve_add_point(pKurve,
 										l_itPoint->first,
@@ -665,7 +659,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 		delete span;
 	}
 
-	l_ossPythonCode << _T("\n");
+	python << _T("\n");
 
 	if(GetNumChildren() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
 	{
@@ -720,7 +714,7 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 			finish_string = ss.str().c_str();
 		}
 
-		l_ossPythonCode << (wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str())).c_str();
+		python << (wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str())).c_str();
 		make_smaller( 	pKurve,
 				(m_profile_params.m_start_given)?&startx:NULL,
 				(m_profile_params.m_start_given)?&starty:NULL,
@@ -728,16 +722,12 @@ wxString CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geomet
 				(m_profile_params.m_end_given)?&finishy:NULL );
 	}
 
-	return(l_ossPythonCode.str().c_str());
+	return(python);
 }
 
-wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPointX, double *pRollOnPointY, const CFixture *pFixture)
+Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPointX, double *pRollOnPointY, const CFixture *pFixture)
 {
-#ifdef UNICODE
-	std::wostringstream l_ossPythonCode;
-#else
-	std::ostringstream l_ossPythonCode;
-#endif
+    Python python;
 
 	if(object)
 	{
@@ -757,7 +747,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 		// write the kurve definition
 		geoff_geometry::Kurve *pKurve = geoff_geometry::kurve_new();
-		l_ossPythonCode << WriteSketchDefn(object, sketch, pKurve, pFixture, initially_ccw != reversed).c_str();
+		python << WriteSketchDefn(object, sketch, pKurve, pFixture, initially_ccw != reversed);
 
 		double total_to_cut = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
 		int num_step_downs = (int)(total_to_cut / fabs(m_depth_op_params.m_step_down) + 1.0 - heeksCAD->GetTolerance());
@@ -792,7 +782,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			{
 				if(m_profile_params.m_auto_roll_on || (GetNumChildren() > 1))
 				{
-					l_ossPythonCode << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
+					python << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
 
 					if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
 					{
@@ -823,14 +813,14 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			break;
 		default:
 			{
-				l_ossPythonCode << wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch).c_str();
+				python << wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch);
 				roll_on_string = _T("span1sx, span1sy");
 			}
 			break;
 		}
 
 		// rapid across to it
-		l_ossPythonCode << wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str()).c_str();
+		python << wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str());
 
 		wxString roll_off_string;
 		switch(m_profile_params.m_tool_on_side)
@@ -840,7 +830,7 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			{
 			if(m_profile_params.m_auto_roll_off || (GetNumChildren() > 1))
 			{
-				l_ossPythonCode << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
+				python << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
 				roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
 			}
 			else
@@ -859,51 +849,51 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 			break;
 		default:
 		{
-			l_ossPythonCode << wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch).c_str();
+			python << wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch);
 			roll_off_string = _T("ex, ey");
 		}
 		}
 
 		if(m_profile_params.m_num_tags > 0)
 		{
-			l_ossPythonCode << _T("tag_width = ") << m_profile_params.m_tag_width / theApp.m_program->m_units << _T("\n");
-			l_ossPythonCode << _T("tag_angle = ") << m_profile_params.m_tag_angle * PI/180 << _T("\n");
-			l_ossPythonCode << _T("tag_at_start = ");
-			if(m_profile_params.m_tag_at_start)l_ossPythonCode << _T("True");
-			else l_ossPythonCode << _T("False");
-			l_ossPythonCode << _T("\n");
-			l_ossPythonCode << _T("tag_height = float(tag_width)/2 * math.tan(tag_angle)\n");
-			l_ossPythonCode << _T("tag_depth = final_depth + tag_height\n");
-			l_ossPythonCode << _T("if tag_depth > start_depth: tag_depth = start_depth\n");
+			python << _T("tag_width = ") << m_profile_params.m_tag_width / theApp.m_program->m_units << _T("\n");
+			python << _T("tag_angle = ") << m_profile_params.m_tag_angle * PI/180 << _T("\n");
+			python << _T("tag_at_start = ");
+			if(m_profile_params.m_tag_at_start)python << _T("True");
+			else python << _T("False");
+			python << _T("\n");
+			python << _T("tag_height = float(tag_width)/2 * math.tan(tag_angle)\n");
+			python << _T("tag_depth = final_depth + tag_height\n");
+			python << _T("if tag_depth > start_depth: tag_depth = start_depth\n");
 		}
 
 		if(num_step_downs > 1)
 		{
-			l_ossPythonCode << wxString(_T("incremental_rapid_height = rapid_down_to_height - start_depth\n")).c_str();
-			l_ossPythonCode << _T("prev_depth = start_depth\n");
-			l_ossPythonCode << wxString::Format(_T("for step in range(0, %d):\n"), num_step_downs).c_str();
-			l_ossPythonCode << wxString::Format(_T(" depth_of_cut = ( start_depth - final_depth ) * ( step + 1 ) / %d\n"), num_step_downs).c_str();
-			l_ossPythonCode << _T(" depth = start_depth - depth_of_cut\n";
+			python << wxString(_T("incremental_rapid_height = rapid_down_to_height - start_depth\n")).c_str();
+			python << _T("prev_depth = start_depth\n");
+			python << wxString::Format(_T("for step in range(0, %d):\n"), num_step_downs).c_str();
+			python << wxString::Format(_T(" depth_of_cut = ( start_depth - final_depth ) * ( step + 1 ) / %d\n"), num_step_downs).c_str();
+			python << _T(" depth = start_depth - depth_of_cut\n");
 
 			// rapid across to roll on point
-			l_ossPythonCode << wxString::Format(_T(" if step != 0:\n  rapid(%s)\n"), roll_on_string.c_str()).c_str();
+			python << wxString::Format(_T(" if step != 0:\n  rapid(%s)\n"), roll_on_string.c_str()).c_str();
 			if(m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start)
 			{
 				// rapid down to just above the material, which might be at the top of the tag
-				l_ossPythonCode << wxString(_T(" mat_depth = prev_depth\n")).c_str();
-				l_ossPythonCode << wxString(_T(" if tag_depth > mat_depth: mat_depth = tag_depth\n")).c_str();
-				l_ossPythonCode << wxString(_T(" rapid(z = mat_depth + incremental_rapid_height)\n")).c_str();
+				python << _T(" mat_depth = prev_depth\n");
+				python << _T(" if tag_depth > mat_depth: mat_depth = tag_depth\n");
+				python << _T(" rapid(z = mat_depth + incremental_rapid_height)\n");
 				// feed down to depth
-				l_ossPythonCode << wxString(_T(" mat_depth = depth\n")).c_str();
-				l_ossPythonCode << wxString(_T(" if tag_depth > mat_depth: mat_depth = tag_depth\n")).c_str();
-				l_ossPythonCode << wxString(_T(" feed(z = mat_depth)\n")).c_str();
+				python << _T(" mat_depth = depth\n");
+				python << _T(" if tag_depth > mat_depth: mat_depth = tag_depth\n");
+				python << _T(" feed(z = mat_depth)\n");
 			}
 			else
 			{
 				// rapid down to just above the material
-				l_ossPythonCode << wxString(_T(" rapid(z = prev_depth + incremental_rapid_height)\n")).c_str();
+				python << _T(" rapid(z = prev_depth + incremental_rapid_height)\n");
 				// feed down to depth
-				l_ossPythonCode << wxString(_T(" feed(z = depth)\n")).c_str();
+				python << _T(" feed(z = depth)\n");
 			}
 
 			// set up the tag parameters
@@ -911,35 +901,35 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 			if(m_profile_params.m_num_tags > 0)
 			{
-				l_ossPythonCode << _T(" sub_tag_height = tag_height - ( depth - final_depth )\n");
-				l_ossPythonCode << _T(" if sub_tag_height < 0: sub_tag_height = 0\n");
-				l_ossPythonCode << _T(" sub_tag_width = 2.0 * float(sub_tag_height) / math.tan (tag_angle) \n");
-				l_ossPythonCode << _T(" tag = ") << m_profile_params.m_num_tags << ", sub_tag_width, tag_angle, tag_at_start\n");
+				python << _T(" sub_tag_height = tag_height - ( depth - final_depth )\n");
+				python << _T(" if sub_tag_height < 0: sub_tag_height = 0\n");
+				python << _T(" sub_tag_width = 2.0 * float(sub_tag_height) / math.tan (tag_angle) \n");
+				python << _T(" tag = ") << m_profile_params.m_num_tags << _T(", sub_tag_width, tag_angle, tag_at_start\n");
 				tag_string = _T(", start_depth, depth, tag");
 			}
 
 			// profile the kurve
-			l_ossPythonCode << wxString::Format(_T(" kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, %s, %s%s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str(), tag_string.c_str()).c_str();
+			python << wxString::Format(_T(" kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, %s, %s%s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str(), tag_string.c_str()).c_str();
 
 			// rapid back up to clearance plane
-			l_ossPythonCode << wxString(_T(" rapid(z = clearance)\n")).c_str();
+			python << wxString(_T(" rapid(z = clearance)\n")).c_str();
 
 			// set prev_depth
-			l_ossPythonCode << _T(" prev_depth = depth\n");
+			python << _T(" prev_depth = depth\n");
 		}
 		else
 		{
 			// rapid down to just above the material
-			l_ossPythonCode << wxString(_T("rapid(z = rapid_down_to_height)\n")).c_str();
+			python << wxString(_T("rapid(z = rapid_down_to_height)\n")).c_str();
 
 			// feed down to final depth
 			if(m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start)
 			{
-				l_ossPythonCode << wxString(_T("feed(z = tag_depth)\n")).c_str();
+				python << wxString(_T("feed(z = tag_depth)\n")).c_str();
 			}
 			else
 			{
-				l_ossPythonCode << wxString(_T("feed(z = final_depth)\n")).c_str();
+				python << wxString(_T("feed(z = final_depth)\n")).c_str();
 			}
 
 			// set up the tag parameters
@@ -947,19 +937,19 @@ wxString CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *
 
 			if(m_profile_params.m_num_tags > 0)
 			{
-				l_ossPythonCode << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle, tag_at_start\n");
+				python << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle, tag_at_start\n");
 				tag_string = _T(", start_depth, final_depth, tag");
 			}
 
 			// profile the kurve
-			l_ossPythonCode << (wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, %s, %s%s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str(), tag_string.c_str()).c_str());
+			python << (wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, %s, %s%s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str(), tag_string.c_str()).c_str());
 
 			// rapid back up to clearance plane
-			l_ossPythonCode << (wxString(_T("rapid(z = clearance)\n"))).c_str();
+			python << (wxString(_T("rapid(z = clearance)\n"))).c_str();
 		}
 	}
 
-	return(l_ossPythonCode.str().c_str());
+	return(python);
 }
 
 void CProfile::WriteDefaultValues()
@@ -1012,10 +1002,10 @@ Python CProfile::AppendTextToProgram(const CFixture *pFixture)
 	    }
 	}
 
+	python << CDepthOp::AppendTextToProgram(pFixture);
+
 	std::vector<CNCPoint> starting_points;
 	python << AppendTextToProgram( starting_points, pFixture );
-
-	python << CDepthOp::AppendTextToProgram(pFixture);
 
 	m_sketches.clear();
 
