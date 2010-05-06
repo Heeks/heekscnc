@@ -270,14 +270,9 @@ void CSpeedOp::GetProperties(std::list<Property *> *list)
 
 Python CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
 {
-    return(GenerateGCode(pFixture));
-}
-
-Python CSpeedOp::GenerateGCode(const CFixture *pFixture)
-{
 	Python python;
 
-	python << COp::GenerateGCode(pFixture).c_str();
+	python << COp::AppendTextToProgram(pFixture);
 
 	if (m_speed_op_params.m_spindle_speed != 0)
 	{
