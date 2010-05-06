@@ -246,11 +246,6 @@ const wxBitmap &CPocket::GetIcon()
 
 Python CPocket::AppendTextToProgram(const CFixture *pFixture)
 {
-	return(GenerateGCode(pFixture));
-}
-
-Python CPocket::GenerateGCode(const CFixture *pFixture)
-{
 	Python python;
 
 	ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
@@ -262,7 +257,7 @@ Python CPocket::GenerateGCode(const CFixture *pFixture)
 		return(python);
 	} // End if - then
 
-	python << CDepthOp::GenerateGCode(pFixture);
+	python << CDepthOp::AppendTextToProgram(pFixture);
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
@@ -336,7 +331,7 @@ Python CPocket::GenerateGCode(const CFixture *pFixture)
 
 	return(python);
 
-} // End GenerateGCode() method
+} // End AppendTextToProgram() method
 
 
 void CPocket::WriteDefaultValues()

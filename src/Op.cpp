@@ -237,11 +237,6 @@ void COp::ReadDefaultValues()
 
 Python COp::AppendTextToProgram(const CFixture *pFixture)
 {
-    return(GenerateGCode(pFixture));
-}
-
-Python COp::GenerateGCode(const CFixture *pFixture)
-{
     Python python;
 
 	if(m_comment.Len() > 0)

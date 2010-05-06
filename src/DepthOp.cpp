@@ -249,14 +249,9 @@ void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches
 
 Python CDepthOp::AppendTextToProgram(const CFixture *pFixture)
 {
-    return(GenerateGCode(pFixture));
-}
-
-Python CDepthOp::GenerateGCode( const CFixture *pFixture )
-{
 	Python python;
 
-    python << CSpeedOp::GenerateGCode(pFixture);
+    python << CSpeedOp::AppendTextToProgram(pFixture);
 
 	python << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 	python << _T("rapid_down_to_height = float(") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");

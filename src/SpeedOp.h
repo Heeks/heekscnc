@@ -63,7 +63,6 @@ public:
 	void ReloadPointers() { COp::ReloadPointers(); }
 
 	static wxString ConfigScope() { return(_T("SpeedOp")); }
-	Python GenerateGCode( const CFixture *pFixture );
 };
 
 #endif

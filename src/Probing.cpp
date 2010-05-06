@@ -1574,6 +1574,7 @@ public:
 		python << m_pThis->AppendTextToProgram( &default_fixture );
 
 		python << _T("program_end()\n");
+		theApp.m_program->m_python_program = python;
 
 		{
 			// clear the output file
@@ -1626,6 +1627,7 @@ public:
 		python << m_pThis->AppendTextToProgram( &default_fixture );
 
 		python << _T("program_end()\n");
+		theApp.m_program->m_python_program = python;
 
 		{
 			// clear the output file
@@ -1679,6 +1681,7 @@ public:
 		python << m_pThis->AppendTextToProgram( &default_fixture );
 
 		python << _T("program_end()\n");
+		theApp.m_program->m_python_program = python;
 
 		{
 			// clear the output file
