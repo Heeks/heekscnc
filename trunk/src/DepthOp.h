@@ -72,7 +72,6 @@ public:
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 	std::list<double> GetDepths() const;
-	Python GenerateGCode( const CFixture *pFixture );
 };
 
 #endif

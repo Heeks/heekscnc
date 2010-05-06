@@ -62,7 +62,6 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
-	Python GenerateGCode(const CFixture *pFixture);
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();

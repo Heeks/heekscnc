@@ -169,13 +169,80 @@ const wxBitmap &CInlay::GetIcon()
 
 
 /**
-	This method is called when the CAD operator presses the Python button.  This method generates
-	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
-	the Python code can be configured to generate GCode suitable for various CNC interpreters.
+    This routine performs two separate functions.  The first is to produce the GCode requied to
+    drive the chamfering bit around the material to produce both the male and female halves
+    of the inlay operation.  The second function is to generate a set of mirrored sketch
+    objects along with their pocketing operations.  These pocket operations are required when
+    we generate the male half of the inlay.  We need to machine some material down so that, when
+    it is turned upside-down and placed on top of the female piece, the two halves line up
+    correctly.  The idea is that these two halves will be glued together and, when the glue
+    is dry, the remainder of the male half will be machined off leaving just those sections
+    that remain within the female half.
+
+    All this means that the peaks of the male half need to be no higher than the valleys in
+    the female half.  This is done on a per-sketch basis because the combination of the
+    sketche's geometry and the chamfering tool's geometry means that each sketch may produce
+    a pocket whose depth is less than the inlay operation's nominated depth.  In these cases
+    we need to create a pocket operation that is bounded by this sketch but will remove most
+    of the material directly above the sketch down to the depth that corresponds to the
+    depth of the pocket in the female half.
+
+    The other pocket that is produced is a combination of a square boarder sketch and the
+    mirrored versions of all the selected sketches.  This module ensures that the boarder
+    sketch is oriented clockwise and all the internal sketches are oriented counter-clockwise.
+    This will allow the pocket to remove all the material between the selected sketches
+    down to a height that will mate with the top-most surface of the female half.
+
+    The boarder is generated based on the bounding box of all the selected sketches as
+    well as the boarder width found in the InlayParams object.
+
+    The two functions of this method are enabled by the 'keep_mirrored_sketches' flag.  When
+    this flag is true, the extra mirrored sketches and their corresponding pocket operations
+    are generated and added to the data model.  This occurs when the right mouse menu option
+    (generate male pocket) is manually chosen.  When the normal GCode generation process
+    occurs, the 'keep_mirrored_sketches' flag is false so that only the female, male or
+    both halves are generated.
  */
+
 Python CInlay::AppendTextToProgram( const CFixture *pFixture )
 {
-    return(GenerateGCode( pFixture, false ));
+    Python python;
+
+	ReloadPointers();
+
+	CDepthOp::AppendTextToProgram( pFixture );
+
+	typedef double Depth_t;
+	typedef std::map<HeeksObj *, Depth_t> MirroredSketches_t;
+	MirroredSketches_t mirrored_sketches;
+	CBox	bounding_box;
+
+	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+
+	if (! pChamferingBit)
+	{
+	    // No shirt, no shoes, no service.
+		return(python);
+	}
+
+	Valleys_t valleys = DefineValleys(pFixture);
+
+	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eFemale))
+	{
+		// Form the walls before the pockets so that the pockets cleanup the fury edge left
+		// by the tip of the chamfering bit.
+		python << FormValleyWalls(valleys, pFixture).c_str();
+		python << FormValleyPockets(valleys, pFixture).c_str();
+	}
+
+	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eMale))
+	{
+		python << FormMountainPockets(valleys, pFixture, true).c_str();
+		python << FormMountainWalls(valleys, pFixture).c_str();
+		python << FormMountainPockets(valleys, pFixture, false).c_str();
+	}
+
+	return(python);
 }
 
 
@@ -383,15 +450,9 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
     of each wire above it.  This will sharpen the concave corners formed
     between adjacent edges.
  */
-wxString CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) const
+Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) const
 {
-#ifdef UNICODE
-	std::wostringstream gcode;
-#else
-    std::ostringstream gcode;
-#endif
-    gcode.imbue(std::locale("C"));
-	gcode<<std::setprecision(10);
+	Python python;
 
     // Gather a list of all corner coordinates and the angles formed there for each wire.
 	Corners_t corners;
@@ -489,18 +550,18 @@ wxString CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) c
 			if ((top_corner.Z() > bottom_corner.Z()) && ((top_corner.Z() - bottom_corner.Z()) <= max_plunge_depth))
 			{
 				// Move to the top corner and back again.
-				gcode << _T("comment('sharpen corner')\n");
-				gcode << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-				gcode << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(")\n");
-				gcode << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-				gcode << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
-				gcode << _T("feed(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << top_corner.Z(true) << _T(")\n");
-				gcode << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+				python << _T("comment('sharpen corner')\n");
+				python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+				python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(")\n");
+				python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+				python << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
+				python << _T("feed(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << top_corner.Z(true) << _T(")\n");
+				python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 			} // End if - then
 		} // End if - then
     }
 
-	return(wxString(gcode.str().c_str()));
+	return(python);
 }
 
 
@@ -704,7 +765,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFixt
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
 		// the concave corners formed between adjacent edges.
-		python << FormCorners( *itValley, pChamferingBit ).c_str();
+		python << FormCorners( *itValley, pChamferingBit );
 	} // End for
 
 	return(python);
@@ -747,7 +808,7 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *pFi
 				pPocket->m_depth_op_params.m_start_depth = previous_depth;
 				pPocket->m_depth_op_params.m_final_depth = *itDepth;
 				pPocket->m_speed_op_params = m_speed_op_params;
-				python << pPocket->GenerateGCode(pFixture).c_str();
+				python << pPocket->AppendTextToProgram(pFixture);
 				delete pPocket;		// We don't need it any more.
 			}
 		} // End for
@@ -857,7 +918,7 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *p
 
 			if (only_above_mountains)
 			{
-				python << pPocket->GenerateGCode(pFixture).c_str();
+				python << pPocket->AppendTextToProgram(pFixture);
 			}
 
 			CBox box;
@@ -967,7 +1028,7 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *p
 		bounding_sketch_pocket->m_depth_op_params.m_start_depth = 0.0;
 		bounding_sketch_pocket->m_depth_op_params.m_final_depth = -1.0 * max_mountain_height;
 
-		python << bounding_sketch_pocket->GenerateGCode(pFixture).c_str();
+		python << bounding_sketch_pocket->AppendTextToProgram(pFixture);
 
 		pockets.push_back(bounding_sketch_pocket);
 	} // End if - then
@@ -1060,7 +1121,7 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFi
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
 		// the concave corners formed between adjacent edges.
-		python << FormCorners( *itValley, pChamferingBit ).c_str();
+		python << FormCorners( *itValley, pChamferingBit );
 	} // End for
 
 	return(python);
@@ -1073,82 +1134,7 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFi
 
 
 
-/**
-    This routine performs two separate functions.  The first is to produce the GCode requied to
-    drive the chamfering bit around the material to produce both the male and female halves
-    of the inlay operation.  The second function is to generate a set of mirrored sketch
-    objects along with their pocketing operations.  These pocket operations are required when
-    we generate the male half of the inlay.  We need to machine some material down so that, when
-    it is turned upside-down and placed on top of the female piece, the two halves line up
-    correctly.  The idea is that these two halves will be glued together and, when the glue
-    is dry, the remainder of the male half will be machined off leaving just those sections
-    that remain within the female half.
 
-    All this means that the peaks of the male half need to be no higher than the valleys in
-    the female half.  This is done on a per-sketch basis because the combination of the
-    sketche's geometry and the chamfering tool's geometry means that each sketch may produce
-    a pocket whose depth is less than the inlay operation's nominated depth.  In these cases
-    we need to create a pocket operation that is bounded by this sketch but will remove most
-    of the material directly above the sketch down to the depth that corresponds to the
-    depth of the pocket in the female half.
-
-    The other pocket that is produced is a combination of a square boarder sketch and the
-    mirrored versions of all the selected sketches.  This module ensures that the boarder
-    sketch is oriented clockwise and all the internal sketches are oriented counter-clockwise.
-    This will allow the pocket to remove all the material between the selected sketches
-    down to a height that will mate with the top-most surface of the female half.
-
-    The boarder is generated based on the bounding box of all the selected sketches as
-    well as the boarder width found in the InlayParams object.
-
-    The two functions of this method are enabled by the 'keep_mirrored_sketches' flag.  When
-    this flag is true, the extra mirrored sketches and their corresponding pocket operations
-    are generated and added to the data model.  This occurs when the right mouse menu option
-    (generate male pocket) is manually chosen.  When the normal GCode generation process
-    occurs, the 'keep_mirrored_sketches' flag is false so that only the female, male or
-    both halves are generated.
- */
-
-Python CInlay::GenerateGCode( const CFixture *pFixture, const bool keep_mirrored_sketches )
-{
-	Python python;
-
-	ReloadPointers();
-
-	CDepthOp::AppendTextToProgram( pFixture );
-
-	typedef double Depth_t;
-	typedef std::map<HeeksObj *, Depth_t> MirroredSketches_t;
-	MirroredSketches_t mirrored_sketches;
-	CBox	bounding_box;
-
-	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-
-	if (! pChamferingBit)
-	{
-	    // No shirt, no shoes, no service.
-		return(python);
-	}
-
-	Valleys_t valleys = DefineValleys(pFixture);
-
-	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eFemale))
-	{
-		// Form the walls before the pockets so that the pockets cleanup the fury edge left
-		// by the tip of the chamfering bit.
-		python << FormValleyWalls(valleys, pFixture).c_str();
-		python << FormValleyPockets(valleys, pFixture).c_str();
-	}
-
-	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eMale))
-	{
-		python << FormMountainPockets(valleys, pFixture, true).c_str();
-		python << FormMountainWalls(valleys, pFixture).c_str();
-		python << FormMountainPockets(valleys, pFixture, false).c_str();
-	}
-
-	return(python);
-}
 
 
 
