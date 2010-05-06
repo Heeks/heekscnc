@@ -1049,8 +1049,6 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFi
 {
 	Python python;
 
-	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-
 	// Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
 	gp_Ax1 mirror_axis;
@@ -1118,10 +1116,6 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFi
 													m_depth_op_params.m_clearance_height,
 													m_depth_op_params.m_rapid_down_to_height );
 		} // End for
-
-		// Now run through the wires map and generate the toolpaths that will sharpen
-		// the concave corners formed between adjacent edges.
-		python << FormCorners( *itValley, pChamferingBit );
 	} // End for
 
 	return(python);
