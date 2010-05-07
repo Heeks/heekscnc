@@ -36,8 +36,12 @@ class CreatorIso(nc.Creator):
         self.z = 500
         self.f_modal = False
         self.g0123_modal = False
+        self.drill_modal = False
         self.prev_f = ''
         self.prev_g0123 = ''
+        self.prev_drill = ''
+        self.prev_retract = ''
+        self.prev_z = ''
         self.use_CRC = False
         self.gCRC = ''
 
@@ -402,51 +406,86 @@ class CreatorIso(nc.Creator):
 	# sense to the end-machine.
 	#
     def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
-	if (standoff == None):
-		# This is a bad thing.  All the drilling cycles need a retraction (and starting) height.
-		return
-
-	if (z == None): return	# We need a Z value as well.  This input parameter represents the top of the hole
-
-        self.write_blocknum()
+        if (standoff == None):        
+        # This is a bad thing.  All the drilling cycles need a retraction (and starting) height.        
+            return
+           
+        if (z == None): 
+            return	# We need a Z value as well.  This input parameter represents the top of the hole    	          
         self.write_preps()
+        self.write_blocknum()                
+        
+        if (peck_depth != 0):        
+            # We're pecking.  Let's find a tree. 
+                if self.drill_modal:       
+                    if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
+                        self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
+                        self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
+                else:       
+                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
+                           
+        else:        
+            # We're either just drilling or drilling with dwell.        
+            if (dwell == 0):        
+                # We're just drilling. 
+                if self.drill_modal:       
+                    if  iso.codes.DRILL() != self.prev_drill:
+                        self.write(iso.codes.DRILL())  
+                        self.prev_drill = iso.codes.DRILL()
+                else:
+                        self.write(iso.codes.DRILL())
+      
+            else:        
+                # We're drilling with dwell.
 
-	if (peck_depth != 0):
-		# We're pecking.  Let's find a tree.
-		self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))
-	else:
-		# We're either just drilling or drilling with dwell.
-		if (dwell == 0):
-			# We're just drilling.
-			self.write(iso.codes.DRILL())
-		else:
-			# We're drilling with dwell.
-			self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))
+                if self.drill_modal:       
+                    if  iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell) != self.prev_drill:
+                        self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))  
+                        self.prev_drill = iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell)
+                else:
+                        self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))
 
-	# Set the retraction point to the 'standoff' distance above the starting z height.
-	retract_height = z + standoff
-        if (x != None):
-            dx = x - self.x
-            self.write(iso.codes.X() + (self.fmt % x))
-            self.x = x
-        if (y != None):
-            dy = y - self.y
-            self.write(iso.codes.Y() + (self.fmt % y))
+        
+                #self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))                
+    
+    # Set the retraction point to the 'standoff' distance above the starting z height.        
+        retract_height = z + standoff        
+        if (x != None):        
+            dx = x - self.x        
+            self.write(iso.codes.X() + (self.fmt % x))        
+            self.x = x 
+       
+        if (y != None):        
+            dy = y - self.y        
+            self.write(iso.codes.Y() + (self.fmt % y))        
             self.y = y
-
-	dz = (z + standoff) - self.z
+                      
+        dz = (z + standoff) - self.z
 			# In the end, we will be standoff distance above the z value passed in.
 	self.write(iso.codes.Z() + (self.fmt % (z - depth)))	# This is the 'z' value for the bottom of the hole.
-	self.z = (z + standoff)				# We want to remember where z is at the end (at the top of the hole)
-	self.write(iso.codes.RETRACT(self.fmt, retract_height))
+	self.z = (z + standoff)			# We want to remember where z is at the end (at the top of the hole)
 
-        if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
-        self.write( iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )
+        if self.drill_modal:
+            if iso.codes.RETRACT(self.fmt, retract_height) != self.prev_retract:
+                self.write(iso.codes.RETRACT(self.fmt, retract_height))               
+                self.prev_retract = iso.codes.RETRACT(self.fmt, retract_height)
+        else:              
+            self.write(iso.codes.RETRACT(self.fmt, retract_height)) 
+           
+        if (self.fhv) : 
+            self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
 
-        self.write_spindle()
-
-        self.write_misc()
+        if self.drill_modal:
+            if ( iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )!= self.prev_f:
+               self.write(iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )        
+               self.prev_f = iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE()
+        else: 
+            self.write( iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )            
+        self.write_spindle()            
+        self.write_misc()    
         self.write('\n')
+        
+
 
 
     def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):

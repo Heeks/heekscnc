@@ -15,10 +15,12 @@ class ParserIso(nc.Parser):
     def __init__(self):
         nc.Parser.__init__(self)
 
-        self.pattern_main = re.compile('(!.*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
+        self.pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
 
-        #if(at least one space or a letter followed by some character or not followed by a +/- followed by decimal, with a possible decimal point
+        #if ( or ! or ; at least one space or a letter followed by some character or not followed by a +/- followed by decimal, with a possible decimal point
          #  followed by a possible deimcal, or a letter followed by # with a decimal . deimcal
+        # add your character here > [(!;] for comments char
+        # then look for the 'comment' function towards the end of the file and add another elif
 
     def Parse(self, name, oname=None):
         self.files_open(name,oname)
@@ -167,6 +169,7 @@ class ParserIso(nc.Parser):
                     move = True
                 elif (word[0] == '(') : (col, cdata) = ("comment", True)
                 elif (word[0] == '!') : (col, cdata) = ("comment", True)
+                elif (word[0] == ';') : (col, cdata) = ("comment", True)
                 elif (word[0] == '#') : col = "variable"
                 elif (word[0] == ':') : col = "blocknum"
                 elif (ord(word[0]) <= 32) : cdata = True
