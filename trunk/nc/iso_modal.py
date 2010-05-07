@@ -17,7 +17,7 @@ class CreatorIsoModal(iso.CreatorIso):
         iso.CreatorIso.__init__(self)
         self.f_modal = True
         self.g0123_modal = True
-
+        self.drill_modal = True
 ################################################################################
 
 nc.creator = CreatorIsoModal()
