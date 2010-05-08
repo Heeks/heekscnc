@@ -417,12 +417,12 @@ class CreatorIso(nc.Creator):
         
         if (peck_depth != 0):        
             # We're pecking.  Let's find a tree. 
-                if self.drill_modal:       
-                    if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
-                        self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
-                        self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
-                else:       
-                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
+            if self.drill_modal:       
+                if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
+                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
+                    self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
+            else:       
+                self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
                            
         else:        
             # We're either just drilling or drilling with dwell.        
