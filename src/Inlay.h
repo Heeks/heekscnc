@@ -38,7 +38,7 @@ public:
 public:
 	CInlayParams()
 	{
-		m_boarder_width = 25.4; // 1 inch.
+		m_border_width = 25.4; // 1 inch.
 		m_clearance_tool = 0;
 		m_pass = eBoth;
 	}
@@ -51,7 +51,7 @@ public:
 
 	const wxString ConfigPrefix(void)const{return _T("Inlay");}
 
-	double m_boarder_width;
+	double m_border_width;
 	CCuttingTool::ToolNumber_t  m_clearance_tool;
 	eInlayPass_t    m_pass;
 	eAxis_t         m_mirror_axis;
@@ -169,7 +169,7 @@ public:
 	Python FormValleyPockets( Valleys_t valleys, const CFixture *pFixture  );
 	Python FormMountainWalls( Valleys_t valleys, const CFixture *pFixture  );
 	Python FormMountainPockets( Valleys_t mouvalleysntains, const CFixture *pFixture, const bool only_above_mountains  );
-	
+
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);
     static gp_Pnt GetEnd(const TopoDS_Edge &edge);

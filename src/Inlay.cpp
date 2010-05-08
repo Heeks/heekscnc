@@ -51,7 +51,7 @@ extern CHeeksCADInterface* heeksCAD;
 void CInlayParams::set_initial_values()
 {
 	CNCConfig config(ConfigPrefix());
-	config.Read(_T("BoarderWidth"), (double *) &m_boarder_width, 0.0);
+	config.Read(_T("BorderWidth"), (double *) &m_border_width, 0.0);
 	config.Read(_T("ClearanceTool"), &m_clearance_tool, 0);
 	config.Read(_T("Pass"), (int *) &m_pass, (int) eBoth );
 	config.Read(_T("MirrorAxis"), (int *) &m_mirror_axis, (int) eXAxis );
@@ -60,15 +60,15 @@ void CInlayParams::set_initial_values()
 void CInlayParams::write_values_to_config()
 {
 	CNCConfig config(ConfigPrefix());
-	config.Write(_T("BoarderWidth"), m_boarder_width);
+	config.Write(_T("BorderWidth"), m_border_width);
 	config.Write(_T("ClearanceTool"), m_clearance_tool);
 	config.Write(_T("Pass"), (int) m_pass );
 	config.Write(_T("MirrorAxis"), (int) m_mirror_axis );
 }
 
-static void on_set_boarder_width(double value, HeeksObj* object)
+static void on_set_border_width(double value, HeeksObj* object)
 {
-	((CInlay*)object)->m_params.m_boarder_width = value;
+	((CInlay*)object)->m_params.m_border_width = value;
 	((CInlay*)object)->WriteDefaultValues();
 }
 
@@ -92,7 +92,7 @@ static void on_set_mirror_axis(int value, HeeksObj* object)
 
 void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 {
-    list->push_back(new PropertyLength(_("Boarder Width"), m_boarder_width, parent, on_set_boarder_width));
+    list->push_back(new PropertyLength(_("Border Width"), m_border_width, parent, on_set_border_width));
 
     {
 		std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
@@ -143,7 +143,7 @@ void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );
 
-	element->SetAttribute("boarder", m_boarder_width);
+	element->SetAttribute("border", m_border_width);
 	element->SetAttribute("clearance_tool", m_clearance_tool);
 	element->SetAttribute("pass", (int) m_pass);
 	element->SetAttribute("mirror_axis", (int) m_mirror_axis);
@@ -151,7 +151,7 @@ void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
 
 void CInlayParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	pElem->Attribute("boarder", &m_boarder_width);
+	pElem->Attribute("border", &m_border_width);
 	pElem->Attribute("clearance_tool", &m_clearance_tool);
 	pElem->Attribute("pass", (int *) &m_pass);
 	pElem->Attribute("mirror_axis", (int *) &m_mirror_axis);
@@ -187,14 +187,14 @@ const wxBitmap &CInlay::GetIcon()
     of the material directly above the sketch down to the depth that corresponds to the
     depth of the pocket in the female half.
 
-    The other pocket that is produced is a combination of a square boarder sketch and the
-    mirrored versions of all the selected sketches.  This module ensures that the boarder
+    The other pocket that is produced is a combination of a square border sketch and the
+    mirrored versions of all the selected sketches.  This module ensures that the border
     sketch is oriented clockwise and all the internal sketches are oriented counter-clockwise.
     This will allow the pocket to remove all the material between the selected sketches
     down to a height that will mate with the top-most surface of the female half.
 
-    The boarder is generated based on the bounding box of all the selected sketches as
-    well as the boarder width found in the InlayParams object.
+    The border is generated based on the bounding box of all the selected sketches as
+    well as the border width found in the InlayParams object.
 
     The two functions of this method are enabled by the 'keep_mirrored_sketches' flag.  When
     this flag is true, the extra mirrored sketches and their corresponding pocket operations
@@ -939,12 +939,12 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *p
 		// direction.  We can then create a pocket operation to remove the material between
 		// the mirrored sketches down to the inverted 'top surface' depth.
 
-		double boarder_width = m_params.m_boarder_width;
+		double border_width = m_params.m_border_width;
 		if ((CCuttingTool::Find(m_params.m_clearance_tool) != NULL) &&
-			(boarder_width <= (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius())))
+			(border_width <= (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius())))
 		{
-			boarder_width = (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius());
-			boarder_width += 1; // Make sure there really is room.  Add 1mm to be sure.
+			border_width = (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius());
+			border_width += 1; // Make sure there really is room.  Add 1mm to be sure.
 		}
 		HeeksObj* bounding_sketch = heeksCAD->NewSketch();
 
@@ -952,50 +952,50 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *p
 		double end[3];
 
 		// left edge
-		start[0] = bounding_box.MinX() - boarder_width;
-		start[1] = bounding_box.MinY() - boarder_width;
+		start[0] = bounding_box.MinX() - border_width;
+		start[1] = bounding_box.MinY() - border_width;
 		start[2] = bounding_box.MinZ();
 
-		end[0] = bounding_box.MinX() - boarder_width;
-		end[1] = bounding_box.MaxY() + boarder_width;
+		end[0] = bounding_box.MinX() - border_width;
+		end[1] = bounding_box.MaxY() + border_width;
 		end[2] = bounding_box.MinZ();
 
 		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
 
 		// top edge
-		start[0] = bounding_box.MinX() - boarder_width;
-		start[1] = bounding_box.MaxY() + boarder_width;
+		start[0] = bounding_box.MinX() - border_width;
+		start[1] = bounding_box.MaxY() + border_width;
 		start[2] = bounding_box.MinZ();
 
-		end[0] = bounding_box.MaxX() + boarder_width;
-		end[1] = bounding_box.MaxY() + boarder_width;
+		end[0] = bounding_box.MaxX() + border_width;
+		end[1] = bounding_box.MaxY() + border_width;
 		end[2] = bounding_box.MinZ();
 
 		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
 
 		// right edge
-		start[0] = bounding_box.MaxX() + boarder_width;
-		start[1] = bounding_box.MaxY() + boarder_width;
+		start[0] = bounding_box.MaxX() + border_width;
+		start[1] = bounding_box.MaxY() + border_width;
 		start[2] = bounding_box.MinZ();
 
-		end[0] = bounding_box.MaxX() + boarder_width;
-		end[1] = bounding_box.MinY() - boarder_width;
+		end[0] = bounding_box.MaxX() + border_width;
+		end[1] = bounding_box.MinY() - border_width;
 		end[2] = bounding_box.MinZ();
 
 		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
 
 		// bottom edge
-		start[0] = bounding_box.MaxX() + boarder_width;
-		start[1] = bounding_box.MinY() - boarder_width;
+		start[0] = bounding_box.MaxX() + border_width;
+		start[1] = bounding_box.MinY() - border_width;
 		start[2] = bounding_box.MinZ();
 
-		end[0] = bounding_box.MinX() - boarder_width;
-		end[1] = bounding_box.MinY() - boarder_width;
+		end[0] = bounding_box.MinX() - border_width;
+		end[1] = bounding_box.MinY() - border_width;
 		end[2] = bounding_box.MinZ();
 
 		bounding_sketch->Add( heeksCAD->NewLine( start, end ), NULL );
 
-		// Make sure this boarder sketch is oriented clockwise.  We will ensure the
+		// Make sure this border sketch is oriented clockwise.  We will ensure the
 		// enclosed sketches are oriented counter-clockwise so that the pocket operation
 		// removes the intervening material.
 		for (int i=0; (heeksCAD->GetSketchOrder(bounding_sketch) != SketchOrderTypeCloseCW) && (i<4); i++)
