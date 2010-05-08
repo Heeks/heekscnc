@@ -1,6 +1,6 @@
 class Codes():
 	def SPACE(self): return('')
-
+	def FORMAT_FEEDRATE(self): return('%.2f') 
 	def FORMAT_IN(self): return('%.5f')
 	def FORMAT_MM(self): return('%.3f')
 	def FORMAT_ANG(self): return('%.1f')
