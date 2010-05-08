@@ -417,12 +417,12 @@ class CreatorIso(nc.Creator):
         
         if (peck_depth != 0):        
             # We're pecking.  Let's find a tree. 
-            if self.drill_modal:       
-                if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
-                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
-                    self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
-            else:       
-                self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
+                if self.drill_modal:       
+                    if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
+                        self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
+                        self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
+                else:       
+                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
                            
         else:        
             # We're either just drilling or drilling with dwell.        
@@ -433,7 +433,7 @@ class CreatorIso(nc.Creator):
                         self.write(iso.codes.DRILL())  
                         self.prev_drill = iso.codes.DRILL()
                 else:
-                        self.write(iso.codes.DRILL())
+                    self.write(iso.codes.DRILL())
       
             else:        
                 # We're drilling with dwell.
@@ -443,7 +443,7 @@ class CreatorIso(nc.Creator):
                         self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))  
                         self.prev_drill = iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell)
                 else:
-                        self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))
+                    self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))
 
         
                 #self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))                
@@ -460,9 +460,14 @@ class CreatorIso(nc.Creator):
             self.write(iso.codes.Y() + (self.fmt % y))        
             self.y = y
                       
-        dz = (z + standoff) - self.z
-			# In the end, we will be standoff distance above the z value passed in.
-	self.write(iso.codes.Z() + (self.fmt % (z - depth)))	# This is the 'z' value for the bottom of the hole.
+        dz = (z + standoff) - self.z # In the end, we will be standoff distance above the z value passed in.
+
+        if self.drill_modal:
+            if z != self.prev_z:
+                self.write(iso.codes.Z() + (self.fmt % (z - depth)))
+                self.prev_z=z
+        else: 			
+	    self.write(iso.codes.Z() + (self.fmt % (z - depth)))	# This is the 'z' value for the bottom of the hole.
 	self.z = (z + standoff)			# We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
