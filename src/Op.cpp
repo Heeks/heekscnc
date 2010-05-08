@@ -31,7 +31,7 @@ const wxBitmap& COp::GetInactiveIcon()
 void COp::WriteBaseXML(TiXmlElement *element)
 {
 	if(m_comment.Len() > 0)element->SetAttribute("comment", Ttc(m_comment.c_str()));
-	if(!m_active)element->SetAttribute("active", 0);
+	element->SetAttribute("active", m_active);
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 	element->SetAttribute("execution_order", m_execution_order);
 	element->SetAttribute("cutting_tool_number", m_cutting_tool_number);
@@ -50,6 +50,11 @@ void COp::ReadBaseXML(TiXmlElement* element)
 		element->Attribute("active", &int_active);
 		m_active = (int_active != 0);
 	}
+	else
+	{
+        m_active = true;
+	}
+
 	const char* title = element->Attribute("title");
 	if(title)m_title = wxString(Ctt(title));
 
