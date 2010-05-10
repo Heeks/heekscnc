@@ -260,7 +260,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 		if (ob->GetType() == FixtureType)
 		{
 			CFixture *pFixture = (CFixture *) ob;
-			pMachineState->Fixture(*pFixture);		// Change fixtures.
+			python << pMachineState->Fixture(*pFixture);		// Change fixtures.
 			break;
 		}
 	}
