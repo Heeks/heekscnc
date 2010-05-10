@@ -6,13 +6,23 @@ The fixture object allows the generated GCode to be aligned with one or more fix
 
 By measuring the exact alignment of a physical fixture (vice) and entering this value into the Fixture object, the resultant GCode will be rotated to align itself with the fixture's rotation.
 
-It allows the NC operation's GCode to be repeated for each local coordinate system (G54, G55 ... G59.3).  Each of these coordinate systems may have a rotation defined such that the generated GCode will also be rotated.  The idea is that a piece of material can be affixed to the milling machine and a probe used to measure how far off square the part is.  The user can then enter the part's rotation angle into the coordinate system object before re-generating the GCode.  The resultant GCode should align with the piece of material.
+There are two places in the data model where fixtures may be added.  The first is into the 'Fixtures' (plural) group alongside the Tools etc.  The fixtures listed in here are considered to be 'public' fixtures.  These fixtures will be used to generate one set of gcode each.  The machining operations these apply to include all machining operations that do not have their own private fixture objects.
+
+To this end, the second place a fixture may be added is within an individual machining operation.  This is referred to as a 'private' fixture.  This means that this machining operation will have its gcode generated once only for this private fixture.  It will not be repeated at all for any of the public fixtures that are defined.
+
+The public fixtures allow the NC operation's GCode to be repeated for each local coordinate system (G54, G55 ... G59.3).  Each of these coordinate systems may have a rotation defined such that the generated GCode will also be rotated.  The idea is that a piece of material can be affixed to the milling machine and a probe used to measure how far off square the part is.  The user can then enter the part's rotation angle into the coordinate system object before re-generating the GCode.  The resultant GCode should align with the piece of material.
 
 If multiple pieces of material are affixed, they may be setup (manually) so that their origin is defined in separate coordinate systems (G54, G55 etc.).  Their rotation can then be entered into the data model's Fixture object before the GCode is re-generated.
 
 A separate set of GCode will be generated for each Fixture object defined.  This could also lend itself to the idea of duplicating machine operations with a separate starting point.
 
 The HeeksCNC Probing operations also support (for EMC2-based machines) the generation of an XML data file representing coordinate pairs of probed 'edges'.  These XML data files may be imported into a Fixture object from the 'Import Probe Data' menu item beneath the right mouse button.  This import sets the axis rotations based on the probed point locations.
+
+= Private Fixtures =
+
+Fixture objects that are attached to individual machine operation objects are considered private to that machine operation.  i.e. that machine operation's gcode is generated for that fixture ONLY.  It is not generated for any of the public fixtures defined.
+
+If a small group of many machine operations are required to operate on one particular fixture, a common private fixture may be assigned to each of them.  The workflow for this is to right click on the first machine operation and select the 'Add Fixture' menu option.  Update this fixture's properties so that the appropriate coordinate system is selected.  If this process is repeated for other private fixtures, the system will merge fixture objects that refer to the same coordinate system.  i.e. if two private fixtures are defined and both updated to reflect G55, they will both point to the same fixture object internally.  This means that any rotation values applied to one will automatically reflect in the other.
 
 
 = Example Workflow - without importing XML data =
