@@ -171,7 +171,7 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
-	python << CSpeedOp::AppendTextToProgram( pMachineState );
+	python << CSpeedOp::AppendTextToProgram( pMachineState );   // Set any private fixtures and change tools (if necessary)
 
 	std::vector<CNCPoint> locations = FindAllLocations();
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
