@@ -7,6 +7,8 @@
 #include "tinyxml/tinyxml.h"
 #include "Program.h"
 #include "interface/Tool.h"
+#include "Operations.h"
+
 #include <wx/stdpaths.h>
 
 const wxBitmap &CFixtures::GetIcon()
@@ -159,3 +161,60 @@ void CFixtures::CopyFrom(const HeeksObj* object)
         } // End for
     } // End if - then
 }
+
+
+/**
+	The fixture objects may be in the 'theApp.m_program->Fixtures()' tree (for globally applied fixtures) but
+	they may also be children of operations 'theApp.m_program->Operations()'.
+ */
+CFixture *CFixtures::Find( const CFixture::eCoordinateSystemNumber_t coordinate_system_number )
+{
+    for(HeeksObj* ob = GetFirstChild(); ob; ob = GetNextChild())
+    {
+        if (ob->GetType() != FixtureType) continue;
+
+        if (ob != NULL)
+        {
+            if (((CFixture *)ob)->m_coordinate_system_number == coordinate_system_number)
+            {
+                return( (CFixture *) ob );
+            } // End if - then
+        } // End if - then
+    } // End for
+
+	for(HeeksObj* operation = theApp.m_program->Operations()->GetFirstChild(); operation; operation = theApp.m_program->Operations()->GetNextChild())
+    {
+		for (HeeksObj *ob = operation->GetFirstChild(); ob != NULL; ob = operation->GetNextChild())
+		{
+			if (ob->GetType() != FixtureType) continue;
+
+			if (ob != NULL)
+			{
+				if (((CFixture *)ob)->m_coordinate_system_number == coordinate_system_number)
+				{
+					return( (CFixture *) ob );
+				} // End if - then
+			} // End if - then
+		} // End for
+	} // End for
+
+	return(NULL);
+
+} // End Find() method
+
+
+/**
+	The fixture objects may be in the 'theApp.m_program->Fixtures()' tree (for globally applied fixtures) but
+	they may also be children of operations 'theApp.m_program->Operations()'.
+ */
+int CFixtures::GetNextFixture()
+{
+    // Now run through and find one that's not already used.
+	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
+    {
+		if (Find(CFixture::eCoordinateSystemNumber_t(fixture)) == NULL) return(fixture);
+    } // End for
+
+	return(-1);	// None available.
+} // End GetNextFixture() method
+

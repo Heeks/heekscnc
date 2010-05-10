@@ -166,11 +166,11 @@ class Creator:
     ############################################################################
     ##  Moves
     
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
         """Rapid move"""
         pass
 
-    def feed(self, x=None, y=None, z=None):
+    def feed(self, x=None, y=None, z=None, machine_coordinates=False):
         """Feed move"""
         pass
 
@@ -399,11 +399,11 @@ def gearrange(gear=0):
 ############################################################################
 ##  Moves
 
-def rapid(x=None, y=None, z=None, a=None, b=None, c=None):
-    creator.rapid(x, y, z, a, b, c)
+def rapid(x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
+    creator.rapid(x, y, z, a, b, c, machine_coordinates)
 
-def feed(x=None, y=None, z=None):
-    creator.feed(x, y, z)
+def feed(x=None, y=None, z=None, machine_coordinates=False):
+    creator.feed(x, y, z, machine_coordinates)
 
 def arc_cw(x=None, y=None, z=None, i=None, j=None, k=None, r=None):
     creator.arc_cw(x, y, z, i, j, k, r)

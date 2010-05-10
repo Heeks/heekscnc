@@ -30,6 +30,8 @@
 #include "Fixtures.h"
 #include "Tools.h"
 #include "interface/strconv.h"
+#include "MachineState.h"
+
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 
@@ -639,7 +641,7 @@ Python CProgram::RewritePythonProgram()
 
 	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
 	{
-		CFixture *pFixture = CFixture::Find( CFixture::eCoordinateSystemNumber_t( fixture ) );
+		CFixture *pFixture = theApp.m_program->Fixtures()->Find( CFixture::eCoordinateSystemNumber_t( fixture ) );
 		if (pFixture != NULL)
 		{
 			fixtures.push_back( pFixture );
@@ -654,12 +656,12 @@ Python CProgram::RewritePythonProgram()
 		fixtures.push_back( default_fixture.get() );
 	} // End if - then
 
+    CMachineState machine;
 	for (std::list<CFixture *>::const_iterator l_itFixture = fixtures.begin(); l_itFixture != fixtures.end(); l_itFixture++)
 	{
-		python << (*l_itFixture)->AppendTextToProgram();
+	    python << machine.Fixture(*(*l_itFixture));
 
 		// And then all the rest of the operations.
-		int current_tool = 0;
 		for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 		{
 			HeeksObj *object = (HeeksObj *) *l_itOperation;
@@ -667,23 +669,30 @@ Python CProgram::RewritePythonProgram()
 
 			if(COp::IsAnOperation(object->GetType()))
 			{
-				if(((COp*)object)->m_active)
+			    bool already_processed = false;
+			    std::list<CFixture> private_fixtures = ((COp *) object)->PrivateFixtures();
+			    for (std::list<CFixture>::iterator itFix = private_fixtures.begin();
+                        itFix != private_fixtures.end(); itFix++)
+                {
+                    if (machine.AlreadyProcessed(object->GetType(), object->m_id, *itFix)) already_processed = true;
+                }
+
+				if ((! already_processed) &&
+                    (((COp*)object)->m_active) &&
+                    (! machine.AlreadyProcessed(object->GetType(), object->m_id, machine.Fixture())))
 				{
-					if ((((COp *) object)->m_cutting_tool_number > 0) && (current_tool != ((COp *) object)->m_cutting_tool_number))
+				    CFixture save_fixture = machine.Fixture();
+					python << ((COp*)object)->AppendTextToProgram( &machine );
+
+					machine.MarkAsProcessed(object->GetType(), object->m_id, machine.Fixture());
+
+					if (machine.Fixture() != save_fixture)
 					{
-						// Select the right tool.
-						CCuttingTool *pCuttingTool = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, ((COp *) object)->m_cutting_tool_number );
-						if (pCuttingTool != NULL)
-						{
-							python << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title) << _T(")\n");
-						} // End if - then
+					    // The fixture was modified by this machine operation.  Re-instate the global fixture
+					    // so that the global fixtures functionality still works.
 
-
-						python << _T("tool_change( id=") << ((COp *) object)->m_cutting_tool_number << _T(")\n");
-						current_tool = ((COp *) object)->m_cutting_tool_number;
-					} // End if - then
-
-					python << ((COp*)object)->AppendTextToProgram( *l_itFixture );
+					    python << machine.Fixture(save_fixture);
+					}
 				}
 			}
 		} // End for - operation

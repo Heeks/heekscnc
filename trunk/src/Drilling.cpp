@@ -20,6 +20,7 @@
 #include "Profile.h"
 #include "Fixture.h"
 #include "CNCPoint.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <iomanip>
@@ -166,16 +167,16 @@ const wxBitmap &CDrilling::GetIcon()
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-Python CDrilling::AppendTextToProgram( const CFixture *pFixture )
+Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
-	python << CSpeedOp::AppendTextToProgram( pFixture );
+	python << CSpeedOp::AppendTextToProgram( pMachineState );
 
 	std::vector<CNCPoint> locations = FindAllLocations();
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
-		gp_Pnt point = pFixture->Adjustment( *l_itLocation );
+		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );
 
 		python << _T("drill(")
 			<< _T("x=") << point.X()/theApp.m_program->m_units << _T(", ")
@@ -378,6 +379,24 @@ void CDrilling::CopyFrom(const HeeksObj* object)
 		operator=(*((CDrilling*)object));
 	}
 }
+
+CDrilling::CDrilling(	const Symbols_t &symbols,
+        const int cutting_tool_number,
+        const double depth )
+    : CSpeedOp(GetTypeString(), cutting_tool_number, DrillingType), m_symbols(symbols)
+{
+    m_params.set_initial_values(depth, cutting_tool_number);
+    for (Symbols_t::iterator itSymbol = m_symbols.begin(); itSymbol != m_symbols.end(); itSymbol++)
+    {
+        HeeksObj *obj = heeksCAD->GetIDObject(itSymbol->first, itSymbol->second);
+        if (obj != NULL)
+        {
+            Add(obj, NULL);
+        }
+    } // End for
+    m_symbols.clear();	// We don't want to convert them twice.
+}
+
 
 CDrilling::CDrilling( const CDrilling & rhs ) : CSpeedOp( rhs )
 {
@@ -613,8 +632,10 @@ std::vector<CNCPoint> CDrilling::FindAllLocations()
 			{
 				std::vector<CNCPoint> starting_points;
 				CFixture perfectly_aligned_fixture(NULL,CFixture::G54);
+				CMachineState machine;
+				machine.Fixture(perfectly_aligned_fixture);
 
-				((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &perfectly_aligned_fixture );
+				((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &machine );
 
 				// Copy the results in ONLY if each point doesn't already exist.
 				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
@@ -861,6 +882,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
         case DrillingType:
         case ProfileType:
         case PocketType:
+		case FixtureType:
             return(true);
 
         default:

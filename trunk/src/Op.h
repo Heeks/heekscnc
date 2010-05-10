@@ -14,6 +14,7 @@
 #include "PythonStuff.h"
 
 class CFixture;	// Forward declaration.
+class CMachineState;
 
 class COp : public ObjList
 {
@@ -49,7 +50,8 @@ public:
 
 	virtual void WriteDefaultValues();
 	virtual void ReadDefaultValues();
-	virtual Python AppendTextToProgram( const CFixture *pFixture );
+	virtual Python AppendTextToProgram( CMachineState *pMachineState );
+	virtual std::list<CFixture> PrivateFixtures();
 
 	void ReloadPointers() { ObjList::ReloadPointers(); }
 

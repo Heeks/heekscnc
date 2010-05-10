@@ -60,9 +60,9 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
-	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture );
-	Python AppendTextForOneSketch(HeeksObj* object, int sketch, const CFixture *pFixture);
-	Python AppendTextToProgram(const CFixture *pFixture);
+	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState );
+	Python AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState);
+	Python AppendTextToProgram(CMachineState *pMachineState);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

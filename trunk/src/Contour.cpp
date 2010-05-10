@@ -19,8 +19,10 @@
 #include "CuttingTool.h"
 #include "Profile.h"
 #include "Fixture.h"
+#include "Fixtures.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <iomanip>
@@ -332,7 +334,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 /* static */ Python CContour::GeneratePathFromWire(
 	const TopoDS_Wire & wire,
 	CNCPoint & last_position,
-	const CFixture *pFixture,
+	const CFixture fixture,
 	const double clearance_height,
 	const double rapid_down_to_height )
 {
@@ -424,7 +426,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
 
 			case GeomAbs_Circle:
-			if ((pFixture->m_params.m_xz_plane == 0.0) && (pFixture->m_params.m_yz_plane == 0.0))
+			if ((fixture.m_params.m_xz_plane == 0.0) && (fixture.m_params.m_yz_plane == 0.0))
 			{
 				double uStart = curve.FirstParameter();
 				double uEnd = curve.LastParameter();
@@ -649,7 +651,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 						if (*itPoint != last_position)
 						{
 							python << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
-							last_position = *itPoint;							
+							last_position = *itPoint;
 						} // End if - then
 					} // End for
 				} // End if - then
@@ -659,7 +661,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	}
 
 	python << _T("rapid(z=") << PythonString(clearance_height / theApp.m_program->m_units).c_str() << _T(")\n");
-	last_position.SetZ( clearance_height );	
+	last_position.SetZ( clearance_height );
 
 	return(python);
 }
@@ -671,13 +673,13 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-Python CContour::AppendTextToProgram( const CFixture *pFixture )
+Python CContour::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
 	ReloadPointers();
 
-	python << CDepthOp::AppendTextToProgram( pFixture );
+	python << CDepthOp::AppendTextToProgram( pMachineState );
 
 	unsigned int number_of_bad_sketches = 0;
 	double tolerance = heeksCAD->GetTolerance();
@@ -715,7 +717,7 @@ Python CContour::AppendTextToProgram( const CFixture *pFixture )
 
                     TopoDS_Shape wire = fix.Wire();
 
-                    BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
+                    BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
                     transform.Perform(wire, false);
                     wire = transform.Shape();
 
@@ -758,7 +760,7 @@ Python CContour::AppendTextToProgram( const CFixture *pFixture )
 
                             python << GeneratePathFromWire(	tool_path_wire,
                                                             last_position,
-                                                            pFixture,
+                                                            pMachineState->Fixture(),
                                                             m_depth_op_params.m_clearance_height,
                                                             m_depth_op_params.m_rapid_down_to_height );
                         } // End if - then
@@ -899,6 +901,7 @@ bool CContour::CanAdd( HeeksObj *object )
         case CircleType:
         case SketchType:
 		case LineType:
+		case FixtureType:
             return(true);
 
         default:

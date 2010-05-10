@@ -19,6 +19,8 @@ class COperations;
 class CFixtures;
 class CTools;
 
+class CFixture;
+
 enum ProgramUserType{
 	ProgramUserTypeUnkown,
 	ProgramUserTypeTree,

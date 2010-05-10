@@ -7,6 +7,7 @@
 #include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
 #include "HeeksCNC.h"
+#include "Op.h"
 
 class CTrsfNCCode;
 

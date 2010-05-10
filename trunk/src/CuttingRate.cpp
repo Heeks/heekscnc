@@ -39,7 +39,7 @@ static void on_set_brinell_hardness_of_raw_material(int zero_based_choice, Heeks
 			break;
 		} // End if - then
 	} // End for
-	((CCuttingRate*)object)->ResetTitle(); 
+	((CCuttingRate*)object)->ResetTitle();
 }
 
 const wxBitmap &CCuttingRate::GetIcon()
@@ -101,7 +101,7 @@ bool CCuttingRate::CanAddTo(HeeksObj* owner)
 void CCuttingRate::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "CuttingRate" );
-	root->LinkEndChild( element );  
+	root->LinkEndChild( element );
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 
 	std::ostringstream l_ossValue;
@@ -119,11 +119,11 @@ void CCuttingRate::WriteXML(TiXmlNode *root)
 HeeksObj* CCuttingRate::ReadFromXMLElement(TiXmlElement* element)
 {
 	double brinell_hardness_of_raw_material = 15.0;
-	if (element->Attribute("brinell_hardness_of_raw_material")) 
+	if (element->Attribute("brinell_hardness_of_raw_material"))
 		brinell_hardness_of_raw_material = atof(element->Attribute("brinell_hardness_of_raw_material"));
 
 	double max_material_removal_rate = 1.0;
-	if (element->Attribute("max_material_removal_rate")) 
+	if (element->Attribute("max_material_removal_rate"))
 		max_material_removal_rate = atof(element->Attribute("max_material_removal_rate"));
 
 	wxString title(Ctt(element->Attribute("title")));

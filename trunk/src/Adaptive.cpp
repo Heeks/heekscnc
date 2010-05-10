@@ -21,6 +21,8 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include "PythonStuff.h"
+#include "Op.h"
+#include "MachineState.h"
 
 int CAdaptive::number_for_stl_file = 1;
 
@@ -391,11 +393,11 @@ double CAdaptive::GetMaxHeight( const int object_type, const std::list<int> & ob
 } // End GetMaxHeight() method
 
 
-Python CAdaptive::AppendTextToProgram(const CFixture *pFixture)
+Python CAdaptive::AppendTextToProgram(CMachineState *pMachineState )
 {
 	Python python;
 
-	python << COp::AppendTextToProgram(pFixture);
+	python << COp::AppendTextToProgram(pMachineState);
 
 	heeksCAD->CreateUndoPoint();
 
@@ -411,7 +413,7 @@ Python CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 			if (copy != NULL)
 			{
 				double m[16];	// A different form of the transformation matrix.
-				CFixture::extract( pFixture->GetMatrix(), m );
+				CFixture::extract( pMachineState->Fixture().GetMatrix(), m );
 				copy->ModifyByMatrix(m);
 				solids.push_back(copy);
 			} // End if - then
@@ -445,7 +447,7 @@ Python CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 
 	python << _T("rapid(z=") << m_params.m_retractzheight << _T(")\n");
 
-	gp_Pnt start = pFixture->Adjustment( gp_Pnt( m_params.m_startpoint_x, m_params.m_startpoint_y, m_params.m_retractzheight ) );
+	gp_Pnt start = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_startpoint_x, m_params.m_startpoint_y, m_params.m_retractzheight ) );
 	python << _T("rapid(x=") << start.X() << _T(", y=") << start.Y() << _T(")\n");
 
 	python << _T("actp.setleadoffdz(") << m_params.m_leadoffdz << _T(")\n");
@@ -528,10 +530,10 @@ Python CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 						if(type == LineType)
 						{
 							span_object->GetStartPoint(s);
-							pFixture->Adjustment(s);
+							pMachineState->Fixture().Adjustment(s);
 
 							span_object->GetEndPoint(e);
-							pFixture->Adjustment(e);
+							pMachineState->Fixture().Adjustment(e);
 
 							python << _T("actp.boundaryadd(") << s[0] << _T(", ") << s[1] << _T(")\n");
 							python << _T("actp.boundaryadd(") << e[0] << _T(", ") << e[1] << _T(")\n");
@@ -545,8 +547,8 @@ Python CAdaptive::AppendTextToProgram(const CFixture *pFixture)
 	else
 	{
 		gp_Pnt boundary[2];
-		boundary[0] = pFixture->Adjustment( gp_Pnt( m_params.m_boundary_x0, m_params.m_boundary_y0, 0.0 ) );
-		boundary[1] = pFixture->Adjustment( gp_Pnt( m_params.m_boundary_x1, m_params.m_boundary_y1, 0.0 ) );
+		boundary[0] = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_boundary_x0, m_params.m_boundary_y0, 0.0 ) );
+		boundary[1] = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_boundary_x1, m_params.m_boundary_y1, 0.0 ) );
 
 		python << _T("actp.boundaryadd(") << boundary[0].X() << _T(", ") << boundary[0].Y() << _T(")\n");
 
@@ -621,6 +623,10 @@ CAdaptive & CAdaptive::operator= ( const CAdaptive & rhs )
 	return(*this);
 }
 
+bool CAdaptive::CanAdd(HeeksObj* object)
+{
+	return(COp::CanAdd(object) || (object->GetType() == FixtureType));
+}
 
 
 bool CAdaptive::CanAddTo(HeeksObj* owner)

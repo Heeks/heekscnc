@@ -19,6 +19,7 @@
 #include "Drilling.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <algorithm>
@@ -284,11 +285,11 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-Python CCounterBore::AppendTextToProgram(const CFixture *pFixture)
+Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
-	python << CDepthOp::AppendTextToProgram(pFixture);
+	python << CDepthOp::AppendTextToProgram(pMachineState);
 
 	if (m_cutting_tool_number > 0)
 	{
@@ -309,7 +310,7 @@ Python CCounterBore::AppendTextToProgram(const CFixture *pFixture)
 			std::vector<CNCPoint> locations = FindAllLocations( NULL );
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
-				CNCPoint point( pFixture->Adjustment(*l_itLocation) );
+				CNCPoint point( pMachineState->Fixture().Adjustment(*l_itLocation) );
 				python << GenerateGCodeForOneLocation( point, pCuttingTool );
 			} // End for
 		} // End if - then
@@ -765,6 +766,7 @@ bool CCounterBore::CanAdd(HeeksObj* object)
         case SketchType:
         case DrillingType:
         case LineType:
+		case FixtureType:
             return(true);
 
         default:
@@ -777,5 +779,41 @@ void CCounterBore::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
     CDepthOp::GetTools( t_list, p );
 }
 
+
+CCounterBore::CCounterBore(	const Symbols_t &symbols,
+			const int cutting_tool_number )
+		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, CounterBoreType), m_symbols(symbols)
+{
+    for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
+    {
+        HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+        if (object != NULL)
+        {
+            Add(object,NULL);
+        } // End if - then
+    } // End for
+    m_symbols.clear();
+
+    m_params.set_initial_values( cutting_tool_number );
+
+    std::list<int> drillbits;
+    std::vector<CNCPoint> locations = FindAllLocations( &drillbits );
+    if (drillbits.size() > 0)
+    {
+        // We found some drilling objects amongst the symbols. Use the diameter of
+        // any tools they used to help decide what size cap screw we're trying to cater for.
+
+        for (std::list<int>::const_iterator drillbit = drillbits.begin(); drillbit != drillbits.end(); drillbit++)
+        {
+            HeeksObj *object = heeksCAD->GetIDObject( CuttingToolType, *drillbit );
+            if (object != NULL)
+            {
+                std::pair< double, double > screw_size = SelectSizeForHead( ((CCuttingTool *) object)->m_params.m_diameter );
+                m_depth_op_params.m_final_depth = screw_size.first;
+                m_params.m_diameter = screw_size.second;
+            } // End if - then
+        } // End for
+    } // End if - then
+}
 
 

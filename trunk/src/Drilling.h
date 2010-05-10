@@ -90,20 +90,7 @@ public:
 	CDrilling():CSpeedOp(GetTypeString(), 0){}
 	CDrilling(	const Symbols_t &symbols,
 			const int cutting_tool_number,
-			const double depth )
-		: CSpeedOp(GetTypeString(), cutting_tool_number, DrillingType), m_symbols(symbols)
-	{
-		m_params.set_initial_values(depth, cutting_tool_number);
-		for (Symbols_t::iterator itSymbol = m_symbols.begin(); itSymbol != m_symbols.end(); itSymbol++)
-		{
-			HeeksObj *obj = heeksCAD->GetIDObject(itSymbol->first, itSymbol->second);
-			if (obj != NULL)
-			{
-				Add(obj, NULL);
-			}
-		} // End for
-		m_symbols.clear();	// We don't want to convert them twice.
-	}
+			const double depth );
 
 	CDrilling( const CDrilling & rhs );
 	CDrilling & operator= ( const CDrilling & rhs );
@@ -126,7 +113,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( CMachineState *pMachineState );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

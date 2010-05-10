@@ -63,7 +63,7 @@ public:
 	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	Python AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(CMachineState *pMachineState);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void glCommands(bool select, bool marked, bool no_color);
 

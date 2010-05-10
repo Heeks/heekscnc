@@ -28,6 +28,7 @@
 #include "interface/HeeksColor.h"
 #include "NCCode.h"
 #include "PythonStuff.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <iomanip>
@@ -54,11 +55,11 @@ static void on_set_depth(double value, HeeksObj* object)
 	heeksCAD->Changed();	// Force a re-draw from glCommands()
 }
 
-Python CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
+Python CProbe_Centre::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
-	python << CSpeedOp::AppendTextToProgram( pFixture );
+	python << CSpeedOp::AppendTextToProgram( pMachineState );
 
 	double probe_offset_x = 0.0;
 	double probe_offset_y = 0.0;
@@ -207,11 +208,11 @@ Python CProbe_Centre::AppendTextToProgram( const CFixture *pFixture )
 }
 
 
-Python CProbe_Grid::AppendTextToProgram( const CFixture *pFixture )
+Python CProbe_Grid::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
-	python << CSpeedOp::AppendTextToProgram( pFixture );
+	python << CSpeedOp::AppendTextToProgram( pMachineState );
 
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate starting point.
@@ -396,11 +397,11 @@ Python CProbing::AppendTextForDownwardProbingOperation(
 }
 
 
-Python CProbe_Edge::AppendTextToProgram( const CFixture *pFixture )
+Python CProbe_Edge::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
-	python << CSpeedOp::AppendTextToProgram( pFixture );
+	python << CSpeedOp::AppendTextToProgram( pMachineState );
 
 	// We're going to be working in relative coordinates based on the assumption
 	// that the operator has first jogged the machine to the approximate centre point.
@@ -1571,7 +1572,10 @@ public:
 		python << m_pThis->GeneratePythonPreamble();
 
 		CFixture default_fixture(NULL, CFixture::G54 );
-		python << m_pThis->AppendTextToProgram( &default_fixture );
+		CMachineState machine;
+		machine.Fixture(default_fixture);
+
+		python << m_pThis->AppendTextToProgram( &machine );
 
 		python << _T("program_end()\n");
 		theApp.m_program->m_python_program = python;
@@ -1624,7 +1628,10 @@ public:
 		python << m_pThis->GeneratePythonPreamble();
 
 		CFixture default_fixture(NULL, CFixture::G54 );
-		python << m_pThis->AppendTextToProgram( &default_fixture );
+		CMachineState machine;
+		machine.Fixture(default_fixture);
+
+		python << m_pThis->AppendTextToProgram( &machine );
 
 		python << _T("program_end()\n");
 		theApp.m_program->m_python_program = python;
@@ -1678,7 +1685,10 @@ public:
 		python << m_pThis->GeneratePythonPreamble();
 
 		CFixture default_fixture(NULL, CFixture::G54 );
-		python << m_pThis->AppendTextToProgram( &default_fixture );
+		CMachineState machine;
+		machine.Fixture(default_fixture);
+
+		python << m_pThis->AppendTextToProgram( &machine );
 
 		python << _T("program_end()\n");
 		theApp.m_program->m_python_program = python;

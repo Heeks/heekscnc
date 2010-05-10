@@ -18,6 +18,7 @@
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 #include "CuttingTool.h"
+#include "MachineState.h"
 
 CSpeedOpParams::CSpeedOpParams()
 {
@@ -268,11 +269,11 @@ void CSpeedOp::GetProperties(std::list<Property *> *list)
 	COp::GetProperties(list);
 }
 
-Python CSpeedOp::AppendTextToProgram(const CFixture *pFixture)
+Python CSpeedOp::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
-	python << COp::AppendTextToProgram(pFixture);
+	python << COp::AppendTextToProgram(pMachineState);
 
 	if (m_speed_op_params.m_spindle_speed != 0)
 	{
