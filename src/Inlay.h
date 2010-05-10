@@ -138,7 +138,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( CMachineState *pMachineState );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
@@ -148,7 +148,7 @@ public:
 
 	static wxString GeneratePathFromWire( 	const TopoDS_Wire & wire,
 											CNCPoint & last_position,
-											const CFixture *pFixture,
+											const CFixture fixture,
 											const double clearance_height,
 											const double rapid_down_to_height );
 
@@ -163,12 +163,12 @@ public:
 	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
-	Valleys_t DefineValleys(const CFixture *pFixture);
+	Valleys_t DefineValleys(CMachineState *pMachineState);
 
-	Python FormValleyWalls( Valleys_t valleys, const CFixture *pFixture  );
-	Python FormValleyPockets( Valleys_t valleys, const CFixture *pFixture  );
-	Python FormMountainWalls( Valleys_t valleys, const CFixture *pFixture  );
-	Python FormMountainPockets( Valleys_t mouvalleysntains, const CFixture *pFixture, const bool only_above_mountains  );
+	Python FormValleyWalls( Valleys_t valleys, CMachineState *pMachineState  );
+	Python FormValleyPockets( Valleys_t valleys, CMachineState *pMachineState  );
+	Python FormMountainWalls( Valleys_t valleys, CMachineState *pMachineState  );
+	Python FormMountainPockets( Valleys_t mouvalleysntains, CMachineState *pMachineState, const bool only_above_mountains  );
 
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);

@@ -4,6 +4,7 @@
 
 #include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
+#include "Fixture.h"
 
 #pragma once
 
@@ -26,5 +27,8 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+
+	CFixture *Find( const CFixture::eCoordinateSystemNumber_t coordinate_system_number );
+	int GetNextFixture();
 
 };

@@ -76,22 +76,7 @@ public:
 
 	//	Constructors.
 	CLocating():COp(GetTypeString(), 0, LocatingType){}
-	CLocating(	const Symbols_t &symbols )
-		: COp(GetTypeString(), 0, LocatingType), m_symbols(symbols)
-	{
-		m_params.set_initial_values();
-
-		for (Symbols_t::const_iterator symbol = symbols.begin(); symbol != symbols.end(); symbol++)
-		{
-			HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
-			if (object != NULL)
-			{
-				Add( object, NULL );
-			} // End if - then
-		} // End for
-
-		m_symbols.clear();	// we don't want to do this twice.
-	}
+	CLocating(	const Symbols_t &symbols );
 
 	CLocating( const CLocating & rhs );
 	CLocating & operator= ( const CLocating & rhs );
@@ -115,7 +100,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( CMachineState *pMachineState );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

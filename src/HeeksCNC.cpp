@@ -533,9 +533,9 @@ static void NewProbe_Edge_MenuCallback(wxCommandEvent &event)
 
 static void NewFixtureMenuCallback(wxCommandEvent &event)
 {
-	if (CFixture::GetNextFixture() > 0)
+	if (theApp.m_program->Fixtures()->GetNextFixture() > 0)
 	{
-		CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(CFixture::GetNextFixture());
+		CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(theApp.m_program->Fixtures()->GetNextFixture());
 
 		CFixture *new_object = new CFixture( NULL, coordinate_system_number );
 		theApp.m_program->Fixtures()->Add(new_object, NULL);

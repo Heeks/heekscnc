@@ -22,6 +22,7 @@
 #include "CNCPoint.h"
 #include "Reselect.h"
 #include "PythonStuff.h"
+#include "MachineState.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -286,6 +287,24 @@ CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
 	*this = rhs;	 // Call the assignment operator.
 }
 
+
+CProfile::CProfile(const std::list<int> &sketches, const int cutting_tool_number )
+		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number, ProfileType),
+			m_sketches(sketches)
+{
+    ReadDefaultValues();
+    for (std::list<int>::iterator id = m_sketches.begin(); id != m_sketches.end(); id++)
+    {
+        HeeksObj *object = heeksCAD->GetIDObject( SketchType, *id );
+        if (object != NULL)
+        {
+            Add( object, NULL );
+        }
+    }
+
+    m_sketches.clear();
+} // End constructor
+
 CProfile & CProfile::operator= ( const CProfile & rhs )
 {
 	if (this != &rhs)
@@ -467,7 +486,7 @@ bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &dir
 
 } // End roll_on_point() method
 
-Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed )
+Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, CMachineState *pMachineState, bool reversed )
 {
 	// write the python code for the sketch
 	Python python;
@@ -527,7 +546,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 				{
 					if(reversed)span_object->GetEndPoint(s);
 					else span_object->GetStartPoint(s);
-					CNCPoint start(pFixture->Adjustment(s));
+					CNCPoint start(pMachineState->Fixture().Adjustment(s));
 
 					python << _T("kurve.add_point(k");
 					python << sketch_id;
@@ -546,7 +565,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 				}
 				if(reversed)span_object->GetStartPoint(e);
 				else span_object->GetEndPoint(e);
-				CNCPoint end(pFixture->Adjustment( e ));
+				CNCPoint end(pMachineState->Fixture().Adjustment( e ));
 
 				if(type == LineType)
 				{
@@ -567,7 +586,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
-					CNCPoint centre(pFixture->Adjustment(c));
+					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
@@ -621,12 +640,12 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 						points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 					}
 
-					pFixture->Adjustment(c);
+					pMachineState->Fixture().Adjustment(c);
 					CNCPoint centre(c);
 
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
-						CNCPoint pnt = pFixture->Adjustment( l_itPoint->second );
+						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
 
 						python << (_T("kurve.add_point(k"));
 						python << (sketch_id);
@@ -678,7 +697,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 					m_profile_params.m_start[1] / theApp.m_program->m_units,
 					0.0 );
 
-			starting = pFixture->Adjustment( starting );
+			starting = pMachineState->Fixture().Adjustment( starting );
 
 			startx = starting.X();
 			starty = starting.Y();
@@ -703,7 +722,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 					m_profile_params.m_end[1] / theApp.m_program->m_units,
 					0.0 );
 
-			finish = pFixture->Adjustment( finish );
+			finish = pMachineState->Fixture().Adjustment( finish );
 
 			finishx = finish.X();
 			finishy = finish.Y();
@@ -725,7 +744,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 	return(python);
 }
 
-Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPointX, double *pRollOnPointY, const CFixture *pFixture)
+Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPointX, double *pRollOnPointY, CMachineState *pMachineState)
 {
     Python python;
 
@@ -747,7 +766,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pR
 
 		// write the kurve definition
 		geoff_geometry::Kurve *pKurve = geoff_geometry::kurve_new();
-		python << WriteSketchDefn(object, sketch, pKurve, pFixture, initially_ccw != reversed);
+		python << WriteSketchDefn(object, sketch, pKurve, pMachineState, initially_ccw != reversed);
 
 		double total_to_cut = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
 		int num_step_downs = (int)(total_to_cut / fabs(m_depth_op_params.m_step_down) + 1.0 - heeksCAD->GetTolerance());
@@ -983,7 +1002,7 @@ void CProfile::ReadDefaultValues()
 
 
 
-Python CProfile::AppendTextToProgram(const CFixture *pFixture)
+Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
@@ -1002,10 +1021,10 @@ Python CProfile::AppendTextToProgram(const CFixture *pFixture)
 	    }
 	}
 
-	python << CDepthOp::AppendTextToProgram(pFixture);
+	python << CDepthOp::AppendTextToProgram(pMachineState);
 
 	std::vector<CNCPoint> starting_points;
-	python << AppendTextToProgram( starting_points, pFixture );
+	python << AppendTextToProgram( starting_points, pMachineState );
 
 	m_sketches.clear();
 
@@ -1049,7 +1068,7 @@ struct sort_sketches : public std::binary_function< const int, const int, bool >
 
 
 
-Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture )
+Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, CMachineState *pMachineState )
 {
 	Python python;
 
@@ -1131,7 +1150,7 @@ Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, c
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				python << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
+				python << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y, pMachineState).c_str();
 				CBox bbox;
 				one_curve_sketch->GetBox(bbox);
 				starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
@@ -1140,7 +1159,7 @@ Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, c
 		}
 		else
 		{
-			python << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y, pFixture).c_str();
+			python << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y, pMachineState).c_str();
 			CBox bbox;
 			object->GetBox(bbox);
 			starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );

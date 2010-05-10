@@ -13,7 +13,7 @@
 
 bool COperations::CanAdd(HeeksObj* object)
 {
-	return 	COp::IsAnOperation(object->GetType());
+	return 	(COp::IsAnOperation(object->GetType()));
 }
 
 COperations & COperations::operator= ( const COperations & rhs )

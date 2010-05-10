@@ -15,6 +15,7 @@
 
 class CProfile;
 
+
 class CProfileParams{
 public:
 	typedef enum {
@@ -66,22 +67,7 @@ public:
 	static double max_deviation_for_spline_to_arc;
 
 	CProfile():CDepthOp(GetTypeString(), 0, ProfileType){}
-	CProfile(const std::list<int> &sketches, const int cutting_tool_number )
-		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number, ProfileType),
-			m_sketches(sketches)
-	{
-		ReadDefaultValues();
-		for (std::list<int>::iterator id = m_sketches.begin(); id != m_sketches.end(); id++)
-		{
-			HeeksObj *object = heeksCAD->GetIDObject( SketchType, *id );
-			if (object != NULL)
-			{
-				Add( object, NULL );
-			}
-		}
-
-		m_sketches.clear();
-	} // End constructor
+	CProfile(const std::list<int> &sketches, const int cutting_tool_number );
 
 	CProfile( const CProfile & rhs );
 	CProfile & operator= ( const CProfile & rhs );
@@ -101,14 +87,14 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	void ReloadPointers();
 
-	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, const CFixture *pFixture, bool reversed );
-	Python AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, const CFixture *pFixture);
-	Python AppendTextToProgram( std::vector<CNCPoint> & starting_points, const CFixture *pFixture );
+	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, CMachineState *pMachineState, bool reversed );
+	Python AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, CMachineState *pMachineState);
+	Python AppendTextToProgram( std::vector<CNCPoint> & starting_points, CMachineState *pMachineState );
 	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
 	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
 
 	// COp's virtual functions
-	Python AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(CMachineState *pMachineState);
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 

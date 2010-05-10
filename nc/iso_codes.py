@@ -79,4 +79,6 @@ class Codes():
 	def PROBE_AWAY_WITH_SIGNAL(self): return('G38.4' + self.SPACE())
 	def PROBE_AWAY_WITHOUT_SIGNAL(self): return('G38.5' + self.SPACE())
 
+	def MACHINE_COORDINATES(self): return('G53' + self.SPACE())
+
 codes = Codes()

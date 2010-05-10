@@ -20,6 +20,7 @@
 #include "DropCutter.h"
 #include "GTri.h"
 
+
 Cutter::Cutter(double Rset, double rset)
 {
 	if (Rset > 0)
@@ -56,12 +57,12 @@ double DropCutter::VertexTest(const Cutter &c, const double *e, const double *p)
 	double q = sqrt(pow(e[0] - p[0], 2) + pow((e[1] - p[1]), 2));
 
 	if (q > c.R + heeksCAD->GetTolerance())
-	{ 
+	{
 		// vertex is outside cutter. no need to do anything!
 		return -10000000.0;
 	}
 	else if (q <= (c.R - c.r) + heeksCAD->GetTolerance())
-	{ 
+	{
 		// vertex is in the cylindical/flat part of the cutter
 		return p[2];
 	}
@@ -219,7 +220,7 @@ double DropCutter::EdgeTest(const Cutter &cu, const double *e, const double *p1,
 	// check if segment is below cutter
 
 	if (start[1] > 0)
-	{   
+	{
 		alfa = alfa+3.1415926535897932;
 		start[0] = sx * cos(alfa) + sy * sin(alfa);
 		start[1] = -sx * sin(alfa) + sy * cos(alfa);
@@ -236,9 +237,9 @@ double DropCutter::EdgeTest(const Cutter &cu, const double *e, const double *p1,
 	double l = -start[1]; // distance from cutter to edge
 	if (l < -heeksCAD->GetTolerance())
 		wxMessageBox(_T("EdgeTest ERROR! l<0 !"));
-            
+
 	// System.Console.WriteLine("l=" + l+" start.y="+start.y+" end.y="+end.y);
-            
+
 
 	// now we have two different algorithms depending on the cutter:
 	if (fabs(cu.r) < heeksCAD->GetTolerance())
@@ -311,7 +312,7 @@ double DropCutter::EdgeTest(const Cutter &cu, const double *e, const double *p1,
 		// the segment is horziontal, i.e. start.z==end.z  so we need to catch that here
 		if (fabs(start[2] - end[2]) < heeksCAD->GetTolerance())
 		{
-			if ((cu.R-cu.r)<l - heeksCAD->GetTolerance()) 
+			if ((cu.R-cu.r)<l - heeksCAD->GetTolerance())
 			{
 				// half-ellipse case
 				xc=0;
@@ -362,7 +363,7 @@ double DropCutter::EdgeTest(const Cutter &cu, const double *e, const double *p1,
 
 		}
 		else
-		{ 
+		{
 			// quarter ellipse case
 			double xc1 = xd1 + fabs(w * cos(theta));
 			double xc2 = xd2 - fabs(w * cos(theta));

@@ -17,6 +17,8 @@
 #include <wx/filename.h>
 #include "PythonStuff.h"
 #include "../kurve/geometry/geometry.h"
+#include "CuttingTool.h"
+#include "MachineState.h"
 
 #include <sstream>
 
@@ -186,7 +188,7 @@ void CZigZag::SetDepthOpParamsFromBox()
 	m_depth_op_params.m_step_down = m_params.m_box.Depth(); // set it to a finishing pass
 }
 
-Python CZigZag::AppendTextToProgram(const CFixture *pFixture)
+Python CZigZag::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
@@ -198,7 +200,7 @@ Python CZigZag::AppendTextToProgram(const CFixture *pFixture)
 		return(python);
 	}
 
-	python << CDepthOp::AppendTextToProgram(pFixture);
+	python << CDepthOp::AppendTextToProgram(pMachineState);
 
 	// write the corner radius
 	python << _T("corner_radius = float(");
@@ -224,7 +226,7 @@ Python CZigZag::AppendTextToProgram(const CFixture *pFixture)
 			if (copy != NULL)
 			{
 				double m[16];	// A different form of the transformation matrix.
-				CFixture::extract( pFixture->GetMatrix(), m );
+				CFixture::extract( pMachineState->Fixture().GetMatrix(), m );
 
                 copy->ModifyByMatrix(m);
                 solids.push_back(copy);
@@ -248,8 +250,8 @@ Python CZigZag::AppendTextToProgram(const CFixture *pFixture)
 
 
 	// Rotate the coordinates to align with the fixture.
-	gp_Pnt min = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
-	gp_Pnt max = pFixture->Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
+	gp_Pnt min = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
+	gp_Pnt max = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
 	python << _T("ocl_funcs.zigzag(") << PythonString(filepath.GetFullPath()) << _T(", tool_diameter, corner_radius, ") << m_params.m_step_over / theApp.m_program->m_units << _T(", ") << min.X() / theApp.m_program->m_units << _T(", ") << max.X() / theApp.m_program->m_units << _T(", ") << min.Y() / theApp.m_program->m_units << _T(", ") << max.Y() / theApp.m_program->m_units << _T(", ") << ((m_params.m_direction == 0) ? _T("'X'") : _T("'Y'")) << _T(", ") << m_params.m_material_allowance / theApp.m_program->m_units << _T(", ") << m_params.m_style << _T(", clearance, rapid_down_to_height, start_depth, step_down, final_depth, ") << theApp.m_program->m_units << _T(")\n");
 
@@ -345,6 +347,7 @@ bool CZigZag::CanAdd(HeeksObj* object)
 	{
 	case SolidType:
 	case SketchType:
+	case FixtureType:
 		return(true);
 
 	default:

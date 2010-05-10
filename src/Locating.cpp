@@ -19,6 +19,7 @@
 #include "Profile.h"
 #include "Fixture.h"
 #include "Drilling.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <iomanip>
@@ -106,11 +107,11 @@ const wxBitmap &CLocating::GetIcon()
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-Python CLocating::AppendTextToProgram( const CFixture *pFixture )
+Python CLocating::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
-	python << COp::AppendTextToProgram( pFixture );
+	python << COp::AppendTextToProgram( pMachineState );
 
 	std::vector<CNCPoint> locations = FindAllLocations();
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
@@ -121,7 +122,7 @@ Python CLocating::AppendTextToProgram( const CFixture *pFixture )
 		location.SetZ( location.Z() + m_params.m_standoff );
 
 		// Rotate the point to align it with the fixture
-		CNCPoint point( pFixture->Adjustment( location ) );
+		CNCPoint point( pMachineState->Fixture().Adjustment( location ) );
 
 		python << _T("rapid(")
 			<< _T("x=") << point.X(true) << _T(", ")
@@ -173,6 +174,24 @@ CLocating::CLocating( const CLocating & rhs ) : COp(rhs)
 {
 	*this = rhs;	// Call the assignment operator.
 }
+
+CLocating::CLocating(	const Symbols_t &symbols )
+		: COp(GetTypeString(), 0, LocatingType), m_symbols(symbols)
+{
+    m_params.set_initial_values();
+
+    for (Symbols_t::const_iterator symbol = symbols.begin(); symbol != symbols.end(); symbol++)
+    {
+        HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+        if (object != NULL)
+        {
+            Add( object, NULL );
+        } // End if - then
+    } // End for
+
+    m_symbols.clear();	// we don't want to do this twice.
+}
+
 
 CLocating & CLocating::operator= ( const CLocating & rhs )
 {

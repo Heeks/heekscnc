@@ -24,6 +24,7 @@
 #include "PythonStuff.h"
 #include "Contour.h"
 #include "Pocket.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <iomanip>
@@ -204,13 +205,13 @@ const wxBitmap &CInlay::GetIcon()
     both halves are generated.
  */
 
-Python CInlay::AppendTextToProgram( const CFixture *pFixture )
+Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 {
     Python python;
 
 	ReloadPointers();
 
-	CDepthOp::AppendTextToProgram( pFixture );
+	python << CDepthOp::AppendTextToProgram( pMachineState );
 
 	typedef double Depth_t;
 	typedef std::map<HeeksObj *, Depth_t> MirroredSketches_t;
@@ -225,21 +226,21 @@ Python CInlay::AppendTextToProgram( const CFixture *pFixture )
 		return(python);
 	}
 
-	Valleys_t valleys = DefineValleys(pFixture);
+	Valleys_t valleys = DefineValleys(pMachineState);
 
 	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eFemale))
 	{
 		// Form the walls before the pockets so that the pockets cleanup the fury edge left
 		// by the tip of the chamfering bit.
-		python << FormValleyWalls(valleys, pFixture).c_str();
-		python << FormValleyPockets(valleys, pFixture).c_str();
+		python << FormValleyWalls(valleys, pMachineState).c_str();
+		python << FormValleyPockets(valleys, pMachineState).c_str();
 	}
 
 	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eMale))
 	{
-		python << FormMountainPockets(valleys, pFixture, true).c_str();
-		python << FormMountainWalls(valleys, pFixture).c_str();
-		python << FormMountainPockets(valleys, pFixture, false).c_str();
+		python << FormMountainPockets(valleys, pMachineState, true).c_str();
+		python << FormMountainWalls(valleys, pMachineState).c_str();
+		python << FormMountainPockets(valleys, pMachineState, false).c_str();
 	}
 
 	return(python);
@@ -570,7 +571,7 @@ Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) con
 	includes a set of closed wires that surround the valley at a particular depth (height)
 	setting.
  */
-CInlay::Valleys_t CInlay::DefineValleys(const CFixture *pFixture)
+CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 {
 	Valleys_t valleys;
 
@@ -602,7 +603,7 @@ CInlay::Valleys_t CInlay::DefineValleys(const CFixture *pFixture)
 					TopoDS_Shape wire = fix.Wire();
 
                     // Rotate to align with the fixture.
-					BRepBuilderAPI_Transform transform(pFixture->GetMatrix());
+					BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
 					transform.Perform(wire, false);
 					wire = transform.Shape();
 
@@ -736,11 +737,13 @@ CInlay::Valleys_t CInlay::DefineValleys(const CFixture *pFixture)
 } // End DefineValleys() method
 
 
-Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachineState  )
 {
 	Python python;
 
 	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+
+	python << pMachineState->CuttingTool(m_cutting_tool_number);  // Change tools.
 
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
@@ -758,7 +761,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFixt
 		{
 			python << CContour::GeneratePathFromWire((*itValley)[*itDepth],
 													last_position,
-													pFixture,
+													pMachineState->Fixture(),
 													m_depth_op_params.m_clearance_height,
 													m_depth_op_params.m_rapid_down_to_height );
 		} // End for
@@ -773,7 +776,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, const CFixture *pFixt
 } // End FormValleyWalls() method
 
 
-Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMachineState  )
 {
 	Python python;
 
@@ -802,14 +805,29 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *pFi
 				std::list<HeeksObj *> objects;
 				objects.push_back(pBoundary);
 
+				// Save the fixture and pass in one that has no rotation.  The sketch has already
+                // been rotated.  We don't want to apply the rotations twice.
+                CFixture save_fixture(pMachineState->Fixture());
+
+                CFixture straight(pMachineState->Fixture());
+                straight.m_params.m_yz_plane = 0.0;
+                straight.m_params.m_xz_plane = 0.0;
+                straight.m_params.m_xy_plane = 0.0;
+                straight.m_params.m_pivot_point = gp_Pnt(0.0, 0.0, 0.0);
+                pMachineState->Fixture(straight);    // Replace with a straight fixture.
+
 				CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
 				pPocket->m_depth_op_params = m_depth_op_params;
 				pPocket->m_depth_op_params.m_rapid_down_to_height = previous_depth + 1;
 				pPocket->m_depth_op_params.m_start_depth = previous_depth;
 				pPocket->m_depth_op_params.m_final_depth = *itDepth;
 				pPocket->m_speed_op_params = m_speed_op_params;
-				python << pPocket->AppendTextToProgram(pFixture);
+				python << pPocket->AppendTextToProgram(pMachineState);
 				delete pPocket;		// We don't need it any more.
+
+				// Reinstate the original fixture.
+                pMachineState->Fixture(save_fixture);
+
 			}
 		} // End for
 	} // End for
@@ -819,7 +837,7 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, const CFixture *pFi
 } // End FormValleyPockets() method
 
 
-Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *pFixture, const bool only_above_mountains  )
+Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pMachineState, const bool only_above_mountains  )
 {
 	Python python;
 
@@ -918,7 +936,20 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *p
 
 			if (only_above_mountains)
 			{
-				python << pPocket->AppendTextToProgram(pFixture);
+			    // Save the fixture and pass in one that has no rotation.  The sketch has already
+                // been rotated.  We don't want to apply the rotations twice.
+                CFixture save_fixture(pMachineState->Fixture());
+
+                CFixture straight(pMachineState->Fixture());
+                straight.m_params.m_yz_plane = 0.0;
+                straight.m_params.m_xz_plane = 0.0;
+                straight.m_params.m_xy_plane = 0.0;
+                straight.m_params.m_pivot_point = gp_Pnt(0.0, 0.0, 0.0);
+                pMachineState->Fixture(straight);    // Replace with a straight fixture.
+
+				python << pPocket->AppendTextToProgram(pMachineState);
+
+				pMachineState->Fixture(save_fixture);
 			}
 
 			CBox box;
@@ -1028,7 +1059,21 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *p
 		bounding_sketch_pocket->m_depth_op_params.m_start_depth = 0.0;
 		bounding_sketch_pocket->m_depth_op_params.m_final_depth = -1.0 * max_mountain_height;
 
-		python << bounding_sketch_pocket->AppendTextToProgram(pFixture);
+        // Save the fixture and pass in one that has no rotation.  The sketch has already
+        // been rotated.  We don't want to apply the rotations twice.
+        CFixture save_fixture(pMachineState->Fixture());
+
+        CFixture straight(pMachineState->Fixture());
+        straight.m_params.m_yz_plane = 0.0;
+        straight.m_params.m_xz_plane = 0.0;
+        straight.m_params.m_xy_plane = 0.0;
+        straight.m_params.m_pivot_point = gp_Pnt(0.0, 0.0, 0.0);
+        pMachineState->Fixture(straight);    // Replace with a straight fixture.
+
+		python << bounding_sketch_pocket->AppendTextToProgram(pMachineState);
+
+		// Reinstate the original fixture.
+		pMachineState->Fixture(save_fixture);
 
 		pockets.push_back(bounding_sketch_pocket);
 	} // End if - then
@@ -1045,7 +1090,7 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, const CFixture *p
 
 
 
-Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFixture  )
+Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMachineState  )
 {
 	Python python;
 
@@ -1110,9 +1155,11 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, const CFixture *pFi
 			translate.Perform(tool_path_wire, false);
 			tool_path_wire = TopoDS::Wire(translate.Shape());
 
+			python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the chamfering bit.
+
 			python << CContour::GeneratePathFromWire(tool_path_wire,
 													last_position,
-													pFixture,
+													pMachineState->Fixture(),
 													m_depth_op_params.m_clearance_height,
 													m_depth_op_params.m_rapid_down_to_height );
 		} // End for
@@ -1253,6 +1300,7 @@ bool CInlay::CanAdd( HeeksObj *object )
     switch (object->GetType())
     {
         case SketchType:
+		case FixtureType:
             return(true);
 
         default:

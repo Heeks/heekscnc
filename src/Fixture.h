@@ -1,7 +1,4 @@
 
-#ifndef FIXTURE_CLASS_DEFINTION
-#define FIXTURE_CLASS_DEFINTION
-
 // Fixture.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
@@ -9,15 +6,20 @@
  * details.
  */
 
-#include "Program.h"
-#include "Op.h"
+ #pragma once
+
+#include "tinyxml/tinyxml.h"
 #include "HeeksCNCTypes.h"
+#include "interface/Property.h"
+
 #include <gp_Pnt.hxx>
 
+#include <list>
 #include <vector>
 #include <algorithm>
 
 class CFixture;
+class Python;
 
 class CFixtureParams {
 public:
@@ -27,6 +29,9 @@ public:
 
 	gp_Pnt m_pivot_point;	// Fixture's pivot point for rotation.
 
+	bool m_safety_height_defined;
+	double m_safety_height;
+
 	CFixtureParams()
 	{
 		m_yz_plane = 0.0;
@@ -34,6 +39,9 @@ public:
 		m_xy_plane = 0.0;
 
 		m_pivot_point = gp_Pnt( 0.0, 0.0, 0.0 );
+
+		m_safety_height_defined = false;
+		m_safety_height = 0.0;
 	} // End constructor.
 
 	void set_initial_values();
@@ -98,6 +106,11 @@ public:
 		} // End if - else
 	} // End constructor
 
+	bool operator< ( const CFixture & rhs ) const
+	{
+	    return(m_coordinate_system_number < rhs.m_coordinate_system_number);
+	}
+
 	 // HeeksObj's virtual functions
         int GetType()const{return FixtureType;}
 	const wxChar* GetTypeString(void) const{ return _T("Fixture"); }
@@ -117,11 +130,11 @@ public:
     const wxChar* GetShortString(void)const{return m_title.c_str();}
 	void glCommands(bool select, bool marked, bool no_color);
 
-        bool CanEditString(void)const{return true;}
-        void OnEditString(const wxChar* str);
+    bool CanEditString(void)const{return true;}
+    void OnEditString(const wxChar* str);
 
-	static CFixture *Find( const eCoordinateSystemNumber_t coordinate_system_number );
-	static int GetNextFixture();
+	// static CFixture *Find( const eCoordinateSystemNumber_t coordinate_system_number );
+	// static int GetNextFixture();
 
 	wxString GenerateMeaningfulName() const;
 	wxString ResetTitle();
@@ -137,10 +150,8 @@ public:
 	double AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec & pivot, const gp_Vec & axis ) const;
 
 	bool operator== ( const CFixture & rhs ) const;
+	bool operator!= ( const CFixture & rhs ) const;
 
 }; // End CFixture class definition.
 
 
-
-
-#endif // FIXTURE_CLASS_DEFINTION

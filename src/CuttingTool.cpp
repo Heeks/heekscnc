@@ -20,6 +20,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <string>
@@ -605,6 +606,9 @@ CCuttingTool::~CCuttingTool()
 {
 	DeleteSolid();
 }
+
+
+
 
 /**
 	This method is called when the CAD operator presses the Python button.  This method generates

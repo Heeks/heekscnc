@@ -141,7 +141,7 @@ int CBOM::FillBoundedArea(int xmin, int xmax, int ymin, int ymax,
 {
 	// See if every rectangle has been positioned.
     if (num_unpositioned <= 0) return xmin;
-	
+
 	if(level > m_max_levels && test)
 		return xmin;
 
@@ -345,7 +345,7 @@ void CBOM::Pack(double bin_width, double height, int gap)
 
 	// Sort by height.
 	std::sort(best_rects.begin(),best_rects.end(),ByHeight());
-    
+
 
 	// Make variables to track and record the best solution.
 	bool* is_positioned = new bool[best_rects.size()];
@@ -377,7 +377,7 @@ void CBOM::Pack(double bin_width, double height, int gap)
 
      // Save the best solution.
      rects = best_rects;
-     
+
 	 //Apply to the NCCODE
 	 for(unsigned int i=0; i < rects.size(); i++)
 	 {
@@ -396,7 +396,7 @@ void CBOM::Regurgitate()
 	// bool remove_unknown_nc_codes = true;
 
 	//First sorts the rects by nearest neighbor. Don't have a TSP solver yet.
-	
+
 	//storage for the ordered rects
 	Rectangles_t ordered_rects;
 

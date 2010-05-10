@@ -13,6 +13,8 @@
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
 #include "CNCPoint.h"
+#include "MachineState.h"
+
 #include <list>
 #include <vector>
 
@@ -107,20 +109,7 @@ public:
 	//	Constructors.
 	CChamfer():CDepthOp(GetTypeString(), NULL, 0, ChamferType){}
 	CChamfer(	const Symbols_t &symbols,
-			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ChamferType), m_symbols(symbols)
-	{
-		for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
-		{
-			HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
-			if (object != NULL)
-			{
-				if (CanAdd(object)) Add(object,NULL);
-			} // End if - then
-		} // End for
-		m_symbols.clear();
-		m_params.set_initial_values();
-	}
+			const int cutting_tool_number );
 
 	CChamfer( const CChamfer & rhs );
 	CChamfer & operator= ( const CChamfer & rhs );
@@ -144,7 +133,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(CMachineState *pMachineState);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
