@@ -79,3 +79,21 @@ The application also has the ability to load a series of fixture data automatica
 A default fixtures table may be configured by saving a HeeksCNC data file that already contains a set of fixture definitions into a file called 'default.fixtures'. The process involves adding fixtures to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Fixtures icon. This allows the fixture definitions to be saved to a file. If the file is called 'default.fixtures' and is located in one of the two possible directories then these fixtures will be automatically added to all new data files.
 
 The default.fixtures file may come from either the user's default configuration directory (HOME directory on Linux and "c:\Documents and Settings\username\Application Data" on Windows) or it must be located in the same directory as the HeeksCNC.so or HeeksCNC.DLL file.
+
+= Properties =
+
+== Coordinate System ==
+
+This represents which coordinate system the generated GCode is aligned with.  The values include G54, G55, G56, G57, G58, G59, G59.1, G59.2 and G59.3
+
+== Plane Rotations ==
+
+The YZ, XZ and XY plane rotation values are measure in degrees.  These values determine the rotations that are applied to the generated GCode.
+
+== Pivot Point ==
+
+When a rotation is applied, this is the pivot point used.  A default value of 0,0,0 is used.
+
+== Safety Height Defined ==
+
+If this is checked 'true' then a Safety Height property is also included.  This Safety Height value is a Z value in machine coordinates (G53).  This value represents the safe height that ensures movement without hitting this fixture.  When the gcode switches from one coordinate system (and hence fixture) to another, it moves to the highest value of both fixture's Safety Height settings.
