@@ -83,7 +83,7 @@ Python CMachineState::Fixture( CFixture new_fixture )
         if (m_fixture.m_params.m_safety_height_defined && new_fixture.m_params.m_safety_height_defined)
         {
             double safety_height = (m_fixture.m_params.m_safety_height > new_fixture.m_params.m_safety_height)?m_fixture.m_params.m_safety_height:new_fixture.m_params.m_safety_height;
-            python << _T("rapid(z='") << safety_height / theApp.m_program->m_units << _T("', machine_coordinates='True')\n");
+            python << _T("rapid(z=") << safety_height / theApp.m_program->m_units << _T(", machine_coordinates='True')\n");
         }
 
 		python << new_fixture.AppendTextToProgram();
