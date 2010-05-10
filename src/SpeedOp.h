@@ -53,7 +53,7 @@ public:
 	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	Python AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(CMachineState *pMachineState);
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();

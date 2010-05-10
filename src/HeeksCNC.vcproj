@@ -377,6 +377,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\CNCPoint.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\kurve\geometry\Construction.cpp"
 			>
 			<FileConfiguration
@@ -630,6 +634,14 @@
 		</File>
 		<File
 			RelativePath=".\Locating.h"
+			>
+		</File>
+		<File
+			RelativePath=".\MachineState.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\MachineState.h"
 			>
 		</File>
 		<File

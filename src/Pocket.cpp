@@ -22,6 +22,7 @@
 #include "geometry.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
+#include "MachineState.h"
 
 #include <sstream>
 
@@ -105,7 +106,7 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("from_center", &m_starting_place);
 }
 
-static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int id_to_use = 0)
+static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, int id_to_use = 0)
 {
 #ifdef UNICODE
 	std::wostringstream gcode;
@@ -148,7 +149,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int 
 			if(type == LineType || type == ArcType)
 			{
 				span_object->GetStartPoint(s);
-				CNCPoint start(pFixture->Adjustment(s));
+				CNCPoint start(pMachineState->Fixture().Adjustment(s));
 
 				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
 				{
@@ -166,7 +167,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int 
 					started = true;
 				}
 				span_object->GetEndPoint(e);
-				CNCPoint end(pFixture->Adjustment(e));
+				CNCPoint end(pMachineState->Fixture().Adjustment(e));
 
 				if(type == LineType)
 				{
@@ -177,7 +178,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int 
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
-					CNCPoint centre(pFixture->Adjustment(c));
+					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
@@ -208,11 +209,11 @@ static wxString WriteSketchDefn(HeeksObj* sketch, const CFixture *pFixture, int 
 					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
 					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
 
-					CNCPoint centre(pFixture->Adjustment(c));
+					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
 
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
-						CNCPoint pnt = pFixture->Adjustment( l_itPoint->second );
+						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
 
 						gcode << _T("area.add_point(a");
 						gcode << (id_to_use > 0 ? id_to_use : sketch->m_id);
@@ -244,7 +245,7 @@ const wxBitmap &CPocket::GetIcon()
 	return *icon;
 }
 
-Python CPocket::AppendTextToProgram(const CFixture *pFixture)
+Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
@@ -257,7 +258,8 @@ Python CPocket::AppendTextToProgram(const CFixture *pFixture)
 		return(python);
 	} // End if - then
 
-	python << CDepthOp::AppendTextToProgram(pFixture);
+
+	python << CDepthOp::AppendTextToProgram(pMachineState);
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
@@ -305,7 +307,7 @@ Python CPocket::AppendTextToProgram(const CFixture *pFixture)
 
 		if(object)
 		{
-			python << WriteSketchDefn(object, pFixture, object->m_id);
+			python << WriteSketchDefn(object, pMachineState, object->m_id);
 
 			// start - assume we are at a suitable clearance height
 

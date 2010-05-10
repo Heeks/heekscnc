@@ -6,6 +6,7 @@
 #include "Drilling.h"
 #include "CounterBore.h"
 #include "ProgramCanvas.h"
+#include "MachineState.h"
 
 void CChamferParams::set_initial_values()
 {
@@ -50,6 +51,22 @@ void CChamferParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("m_chamfer_width")) m_chamfer_width = atof(pElem->Attribute("m_chamfer_width"));
 }
 
+
+CChamfer::CChamfer(	const Symbols_t &symbols,
+			const int cutting_tool_number )
+		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ChamferType), m_symbols(symbols)
+{
+    for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
+    {
+        HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+        if (object != NULL)
+        {
+            if (CanAdd(object)) Add(object,NULL);
+        } // End if - then
+    } // End for
+    m_symbols.clear();
+    m_params.set_initial_values();
+}
 
 CChamfer::CChamfer( const CChamfer & rhs ) : CDepthOp(rhs)
 {
@@ -107,9 +124,12 @@ bool CChamfer::CanAdd(HeeksObj* object)
 	{
 		case PocketType:
 		case CounterBoreType:
-		case DrillingType:	return(true);
+		case DrillingType:
+		case FixtureType:
+			return(true);
 
-		default:			return(false);
+		default:
+			return(false);
 	} // End switch
 }
 
@@ -131,12 +151,12 @@ static double drawing_units( const double value )
 	return(value / theApp.m_program->m_units);
 }
 
-Python CChamfer::AppendTextToProgram(const CFixture *pFixture)
+Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
 	// Look at the child operations objects and generate a toolpath as appropriate.
-	python << CDepthOp::AppendTextToProgram( pFixture );
+	python << CDepthOp::AppendTextToProgram( pMachineState );
 
 	// Whatever underlying sharp edges we're going to cleanup, we need to know how deep
 	// we need to plunge the chamfering bit into the work before we can get the chamfering
@@ -215,7 +235,7 @@ Python CChamfer::AppendTextToProgram(const CFixture *pFixture)
 			std::vector<CNCPoint> locations = pDrilling->FindAllLocations();
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
-				CNCPoint point = pFixture->Adjustment( *l_itLocation );
+				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
 				circles.push_back( Circle( point, hole_diameter, pDrilling->m_params.m_depth ) );
 			} // End for
 		} // End if - then
@@ -228,7 +248,7 @@ Python CChamfer::AppendTextToProgram(const CFixture *pFixture)
 			std::vector<CNCPoint> locations = pCounterBore->FindAllLocations(&unused);
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
-				CNCPoint point = pFixture->Adjustment( *l_itLocation );
+				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
 				double max_depth = pCounterBore->m_depth_op_params.m_start_depth - pCounterBore->m_depth_op_params.m_final_depth;
 				circles.push_back( Circle( point, pCounterBore->m_params.m_diameter, max_depth ) );
 			} // End for

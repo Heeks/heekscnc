@@ -7,6 +7,7 @@
 
 #include "HeeksCNCTypes.h"
 #include "DepthOp.h"
+#include "CuttingTool.h"
 
 class CPocket;
 
@@ -55,7 +56,7 @@ public:
 	void ReloadPointers();
 
 	// COp's virtual functions
-	Python AppendTextToProgram(const CFixture *pFixture);
+	Python AppendTextToProgram(CMachineState *pMachineState);
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 

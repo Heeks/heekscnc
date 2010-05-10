@@ -403,7 +403,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( CMachineState *pMachineState );
 
 	void glCommands(bool select, bool marked, bool no_color);
 
@@ -452,7 +452,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( CMachineState *pMachineState );
 
 	void glCommands(bool select, bool marked, bool no_color);
 
@@ -521,7 +521,7 @@ public:
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram( const CFixture *pFixture );
+	Python AppendTextToProgram( CMachineState *pMachineState );
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);

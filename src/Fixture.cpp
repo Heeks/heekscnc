@@ -18,10 +18,13 @@
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyVertex.h"
+#include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
-#include "Op.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
+#include "interface/Tool.h"
+#include "MachineState.h"
+#include "Program.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -30,6 +33,8 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+
+class CProgram;
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -47,6 +52,9 @@ void CFixtureParams::set_initial_values()
 	config.Read(_T("pivot_point_z"), &pivot_point_z, 0.0);
 
 	m_pivot_point = gp_Pnt( pivot_point_x, pivot_point_y, pivot_point_z );
+
+	config.Read(_T("safety_height_defined"), &m_safety_height_defined, false);
+	config.Read(_T("safety_height"), &m_safety_height, 0.0);
 }
 
 void CFixtureParams::write_values_to_config()
@@ -63,6 +71,9 @@ void CFixtureParams::write_values_to_config()
 	config.Write(_T("pivot_point_x"), m_pivot_point.X());
 	config.Write(_T("pivot_point_y"), m_pivot_point.Y());
 	config.Write(_T("pivot_point_z"), m_pivot_point.Z());
+
+	config.Write(_T("safety_height_defined"), m_safety_height_defined);
+	config.Write(_T("safety_height"), m_safety_height);
 }
 
 static void on_set_yz_plane(double value, HeeksObj* object)
@@ -89,6 +100,18 @@ static void on_set_pivot_point(const double *vt, HeeksObj* object){
 	((CFixture *)object)->m_params.m_pivot_point.SetZ( vt[2] );
 }
 
+static void on_set_safety_height_defined(const bool value, HeeksObj *object)
+{
+    ((CFixture *)object)->m_params.m_safety_height_defined = value;
+    heeksCAD->Changed();
+}
+
+static void on_set_safety_height(const double value, HeeksObj *object)
+{
+    ((CFixture *)object)->m_params.m_safety_height = value;
+    heeksCAD->Changed();
+}
+
 void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("YZ plane (around X) rotation"), m_yz_plane, parent, on_set_yz_plane));
@@ -101,6 +124,13 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
 	pivot_point[2] = m_pivot_point.Z();
 
 	list->push_back(new PropertyVertex(_("Pivot Point"), pivot_point, parent, on_set_pivot_point));
+
+    list->push_back(new PropertyCheck(_("Safety Height Defined"), m_safety_height_defined, parent, on_set_safety_height_defined));
+
+    if (m_safety_height_defined)
+    {
+        list->push_back(new PropertyDouble(_("Safety Height (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
+    }
 }
 
 void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
@@ -116,6 +146,9 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("pivot_point_x", m_pivot_point.X());
 	element->SetDoubleAttribute("pivot_point_y", m_pivot_point.Y());
 	element->SetDoubleAttribute("pivot_point_z", m_pivot_point.Z());
+
+	element->SetAttribute("safety_height_defined", m_safety_height_defined);
+	element->SetDoubleAttribute("safety_height", m_safety_height);
 }
 
 void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -130,6 +163,10 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("pivot_point_y")) m_pivot_point.SetY( atof(pElem->Attribute("pivot_point_y")) );
 	if (pElem->Attribute("pivot_point_z")) m_pivot_point.SetZ( atof(pElem->Attribute("pivot_point_z")) );
 
+	int flag;
+	if (pElem->Attribute("safety_height_defined")) pElem->Attribute("safety_height_defined", &flag);
+	m_safety_height_defined = (flag != 0);
+	if (pElem->Attribute("safety_height")) m_safety_height = atof(pElem->Attribute("safety_height"));
 }
 
 const wxBitmap &CFixture::GetIcon()
@@ -169,6 +206,20 @@ static void on_set_coordinate_system_number(const int zero_based_choice, HeeksOb
 
 	pFixture->m_coordinate_system_number = CFixture::eCoordinateSystemNumber_t(zero_based_choice + 1);	// Change from zero-based to one-based offset
 	pFixture->ResetTitle();
+
+	// See if we already have a fixture for this coordinate system.  If so, merge with it.
+	CFixture *pExistingFixture = theApp.m_program->Fixtures()->Find( pFixture->m_coordinate_system_number );
+	if ((pExistingFixture != NULL) && (pExistingFixture != pFixture))
+	{
+        // There is a pre-existing fixture for this coordinate system.  Use the pre-existing one and
+        // throw this one away.
+
+        for (HeeksObj *parent = pFixture->GetFirstOwner(); parent != NULL; parent = pFixture->GetNextOwner())
+        {
+            parent->Remove(pFixture);
+            parent->Add( pExistingFixture, NULL );
+        } // End for
+	}
 } // End on_set_coordinate_system_number
 
 /**
@@ -210,7 +261,7 @@ void CFixture::CopyFrom(const HeeksObj* object)
 
 bool CFixture::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == FixturesType;
+	return ((owner->GetType() == FixturesType) || (COp::IsAnOperation(owner->GetType())));
 }
 
 void CFixture::WriteXML(TiXmlNode *root)
@@ -259,6 +310,7 @@ void CFixture::OnEditString(const wxChar* str){
 	heeksCAD->Changed();
 }
 
+/*
 CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_number )
 {
 	if (theApp.m_program->Fixtures())
@@ -285,7 +337,8 @@ CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_numb
 	return(NULL);
 
 } // End Find() method
-
+*/
+/*
 int CFixture::GetNextFixture()
 {
 	std::set< int > existing_fixtures;
@@ -318,7 +371,7 @@ int CFixture::GetNextFixture()
 
 	return(-1);	// None available.
 } // End GetNextFixture() method
-
+*/
 
 
 /**
@@ -740,6 +793,11 @@ void CFixture::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 bool CFixture::operator== ( const CFixture & rhs ) const
 {
     return(m_coordinate_system_number == rhs.m_coordinate_system_number);
+}
+
+bool CFixture::operator!= ( const CFixture & rhs ) const
+{
+    return(! (m_coordinate_system_number == rhs.m_coordinate_system_number));
 }
 
 

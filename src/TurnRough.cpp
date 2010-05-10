@@ -18,6 +18,7 @@
 #include "interface/Tool.h"
 #include "CuttingTool.h"
 #include "Reselect.h"
+#include "MachineState.h"
 
 #include <sstream>
 #include <iomanip>
@@ -89,7 +90,7 @@ const wxBitmap &CTurnRough::GetIcon()
 	return *icon;
 }
 
-Python CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixture *pFixture)
+Python CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState )
 {
 	Python python;
 
@@ -116,13 +117,13 @@ Python CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixtu
 				if(!started && type != CircleType)
 				{
 					span_object->GetStartPoint(s);
-					pFixture->Adjustment(s);
+					pMachineState->Fixture().Adjustment(s);
 					python << _T("kurve.add_point(k") << sketch_id << _T(", 0, ") << (double) s[0] / theApp.m_program->m_units;
 					python << _T(", ") << s[1] / theApp.m_program->m_units << _T(", 0.0, 0.0)\n");
 					started = true;
 				}
 				span_object->GetEndPoint(e);
-				pFixture->Adjustment(e);
+				pMachineState->Fixture().Adjustment(e);
 				if(type == LineType)
 				{
 					python << _T("kurve.add_point(k") << sketch_id << _T(", 0, ");
@@ -131,7 +132,7 @@ Python CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixtu
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
-					pFixture->Adjustment(c);
+					pMachineState->Fixture().Adjustment(c);
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
@@ -158,22 +159,22 @@ Python CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixtu
 					centre_plus_radius[1] = c[1];
 					centre_plus_radius[2] = c[2];
 
-					pFixture->Adjustment(c);
-					pFixture->Adjustment(centre_plus_radius);
-					pFixture->Adjustment(centre_minus_radius);
+					pMachineState->Fixture().Adjustment(c);
+					pMachineState->Fixture().Adjustment(centre_plus_radius);
+					pMachineState->Fixture().Adjustment(centre_minus_radius);
 
 					python << _T("kurve.add_point(k") << sketch_id << _T(", 0, ");
 					python << centre_plus_radius[0] / theApp.m_program->m_units << _T(", ");
 					python << centre_plus_radius[1] / theApp.m_program->m_units << _T(", ");
 					python << c[0] / theApp.m_program->m_units << _T(", ");
 					python << c[1] / theApp.m_program->m_units << _T(")\n");
-	
+
 					python << _T("kurve.add_point(k") << sketch_id << _T(", 1, ");
 					python << centre_minus_radius[0] / theApp.m_program->m_units << _T(", ");
 					python << centre_minus_radius[1] / theApp.m_program->m_units << _T(", ");
 					python << c[0] / theApp.m_program->m_units << _T(", ");
 					python << c[1] / theApp.m_program->m_units << _T(")\n");
-					
+
 					python << _T("kurve.add_point(k") << sketch_id << _T(", 1, ");
 					python << centre_plus_radius[0] / theApp.m_program->m_units << _T(", ");
 					python << centre_plus_radius[1] / theApp.m_program->m_units << _T(", ");
@@ -188,13 +189,13 @@ Python CTurnRough::WriteSketchDefn(HeeksObj* sketch, int id_to_use, const CFixtu
 	return(python);
 }
 
-Python CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, const CFixture *pFixture)
+Python CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachine)
 {
 	Python python;
 
 	if(object)
 	{
-		python << WriteSketchDefn(object, sketch, pFixture);
+		python << WriteSketchDefn(object, sketch, pMachine);
 
 		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 
@@ -210,7 +211,7 @@ Python CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, const CF
 	return(python);
 }
 
-Python CTurnRough::AppendTextToProgram(const CFixture *pFixture)
+Python CTurnRough::AppendTextToProgram(CMachineState *pMachine)
 {
 	Python python;
 
@@ -221,7 +222,7 @@ Python CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 		return(python);
 	} // End if - then
 
-	python << CSpeedOp::AppendTextToProgram(pFixture);
+	python << CSpeedOp::AppendTextToProgram(pMachine);
 
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -247,13 +248,13 @@ Python CTurnRough::AppendTextToProgram(const CFixture *pFixture)
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				python << AppendTextForOneSketch(one_curve_sketch, sketch, pFixture);
+				python << AppendTextForOneSketch(one_curve_sketch, sketch, pMachine);
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			python << AppendTextForOneSketch(object, sketch, pFixture);
+			python << AppendTextForOneSketch(object, sketch, pMachine);
 		}
 
 		if(re_ordered_sketch)

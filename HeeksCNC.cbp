@@ -58,6 +58,7 @@
 		<Unit filename="src/BOM.cpp" />
 		<Unit filename="src/BOM.h" />
 		<Unit filename="src/CNCConfig.h" />
+		<Unit filename="src/CNCPoint.cpp" />
 		<Unit filename="src/CNCPoint.h" />
 		<Unit filename="src/Chamfer.cpp" />
 		<Unit filename="src/Chamfer.h" />
@@ -95,6 +96,8 @@
 		<Unit filename="src/Interface.h" />
 		<Unit filename="src/Locating.cpp" />
 		<Unit filename="src/Locating.h" />
+		<Unit filename="src/MachineState.cpp" />
+		<Unit filename="src/MachineState.h" />
 		<Unit filename="src/NCCode.cpp" />
 		<Unit filename="src/NCCode.h" />
 		<Unit filename="src/Op.cpp" />

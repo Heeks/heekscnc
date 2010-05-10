@@ -13,7 +13,6 @@
 #include "gp_Pnt.hxx"
 #include "gp_Vec.hxx"
 
-extern CHeeksCADInterface* heeksCAD;
 
 /**
 	This is simply a wrapper around the gp_Pnt class from the OpenCascade library
@@ -21,102 +20,23 @@ extern CHeeksCADInterface* heeksCAD;
  */
 class CNCPoint : public gp_Pnt {
 public:
-	CNCPoint() : gp_Pnt(0.0, 0.0, 0.0)
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
-	CNCPoint( const double *xyz ) : gp_Pnt(xyz[0], xyz[1], xyz[2])
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
-	CNCPoint( const double &x, const double &y, const double &z ) : gp_Pnt(x,y,z)
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
-	CNCPoint( const gp_Pnt & rhs ) : gp_Pnt(rhs)
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
+	CNCPoint();
+	CNCPoint( const double *xyz );
+	CNCPoint( const double &x, const double &y, const double &z );
+	CNCPoint( const gp_Pnt & rhs );
 
-	double X(const bool in_drawing_units = false) const
-	{
-		if (in_drawing_units == false) return(gp_Pnt::X());
-		else return(gp_Pnt::X() / theApp.m_program->m_units);
-	}
+	double X(const bool in_drawing_units = false) const;
+	double Y(const bool in_drawing_units = false) const;
+	double Z(const bool in_drawing_units = false) const;
 
-	double Y(const bool in_drawing_units = false) const
-	{
-		if (in_drawing_units == false) return(gp_Pnt::Y());
-		else return(gp_Pnt::Y() / theApp.m_program->m_units);
-	}
+	CNCPoint & operator+= ( const CNCPoint & rhs );
+	CNCPoint operator- ( const CNCPoint & rhs ) const;
 
-	double Z(const bool in_drawing_units = false) const
-	{
-		if (in_drawing_units == false) return(gp_Pnt::Z());
-		else return(gp_Pnt::Z() / theApp.m_program->m_units);
-	}
+	bool operator==( const CNCPoint & rhs ) const;
+	bool operator!=( const CNCPoint & rhs ) const;
+	bool operator<( const CNCPoint & rhs ) const;
 
-	CNCPoint & operator+= ( const CNCPoint & rhs )
-	{
-		SetX( X() + rhs.X() );
-		SetY( Y() + rhs.Y() );
-		SetZ( Z() + rhs.Z() );
-
-		return(*this);
-	}
-
-	CNCPoint operator- ( const CNCPoint & rhs ) const
-	{
-		CNCPoint result(*this);
-		result.SetX( X() - rhs.X() );
-		result.SetY( Y() - rhs.Y() );
-		result.SetZ( Z() - rhs.Z() );
-
-		return(result);
-	}
-
-	bool operator==( const CNCPoint & rhs ) const
-	{
-		// We use the sum of both point's tolerance values.
-		return(Distance(rhs) < (tolerance + rhs.tolerance));
-	} // End equivalence operator
-
-	bool operator!=( const CNCPoint & rhs ) const
-	{
-		return(! (*this == rhs));
-	} // End not-equal operator
-
-	bool operator<( const CNCPoint & rhs ) const
-	{
-		if (*this == rhs) return(false);
-
-		if (fabs(X() - rhs.X()) > tolerance)
-		{
-			if (X() > rhs.X()) return(false);
-			if (X() < rhs.X()) return(true);
-		}
-
-		if (fabs(Y() - rhs.Y()) > tolerance)
-		{
-			if (Y() > rhs.Y()) return(false);
-			if (Y() < rhs.Y()) return(true);
-		}
-
-		if (fabs(Z() - rhs.Z()) > tolerance)
-		{
-			if (Z() > rhs.Z()) return(false);
-			if (Z() < rhs.Z()) return(true);
-		}
-
-		return(false);	// They're equal
-	} // End equivalence operator
-
-	void ToDoubleArray( double *pArrayOfThree ) const
-	{
-		pArrayOfThree[0] = X();
-		pArrayOfThree[1] = Y();
-		pArrayOfThree[2] = Z();
-	} // End ToDoubleArray() method
+	void ToDoubleArray( double *pArrayOfThree ) const;
 
 private:
 	double tolerance;
@@ -180,48 +100,14 @@ struct sort_points_by_z : public std::binary_function< const CNCPoint &, const C
  */
 class CNCVector : public gp_Vec {
 public:
-	CNCVector() : gp_Vec(0.0, 0.0, 0.0)
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
+	CNCVector();
+	CNCVector( const double *xyz );
+	CNCVector( const double &x, const double &y, const double &z );
+	CNCVector( const gp_Vec & rhs );
 
-	CNCVector( const double *xyz ) : gp_Vec(xyz[0], xyz[1], xyz[2])
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
-	CNCVector( const double &x, const double &y, const double &z ) : gp_Vec(x,y,z)
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
-
-	CNCVector( const gp_Vec & rhs ) : gp_Vec(rhs)
-	{
-		tolerance = heeksCAD->GetTolerance();
-	}
-
-	bool operator==( const CNCVector & rhs ) const
-	{
-		return(this->IsEqual(rhs, tolerance, tolerance) == Standard_True);
-	} // End equivalence operator
-
-	bool operator!=( const CNCVector & rhs ) const
-	{
-		return(! (*this == rhs));
-	} // End not-equal operator
-
-	bool operator<( const CNCVector & rhs ) const
-	{
-		for (int offset=1; offset <=3; offset++)
-		{
-			if (fabs(Coord(offset) - rhs.Coord(offset)) < tolerance) continue;
-
-			if (Coord(offset) > rhs.Coord(offset)) return(false);
-			if (Coord(offset) < rhs.Coord(offset)) return(true);
-		}
-
-		return(false);	// They're equal
-	} // End equivalence operator
-
+	bool operator==( const CNCVector & rhs ) const;
+	bool operator!=( const CNCVector & rhs ) const;
+	bool operator<( const CNCVector & rhs ) const;
 private:
 	double tolerance;
 }; // End CNCVector class definition.
