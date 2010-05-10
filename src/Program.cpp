@@ -639,13 +639,10 @@ Python CProgram::RewritePythonProgram()
 	std::list<CFixture *> fixtures;
 	std::auto_ptr<CFixture> default_fixture = std::auto_ptr<CFixture>(new CFixture( NULL, CFixture::G54 ) );
 
-	for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
+    for (HeeksObj *publicFixture = theApp.m_program->Fixtures()->GetFirstChild(); publicFixture != NULL;
+        publicFixture = theApp.m_program->Fixtures()->GetNextChild())
 	{
-		CFixture *pFixture = theApp.m_program->Fixtures()->Find( CFixture::eCoordinateSystemNumber_t( fixture ) );
-		if (pFixture != NULL)
-		{
-			fixtures.push_back( pFixture );
-		} // End if - then
+			fixtures.push_back( ((CFixture *) publicFixture) );
 	} // End for
 
 	if (fixtures.size() == 0)
@@ -659,9 +656,7 @@ Python CProgram::RewritePythonProgram()
     CMachineState machine;
 	for (std::list<CFixture *>::const_iterator l_itFixture = fixtures.begin(); l_itFixture != fixtures.end(); l_itFixture++)
 	{
-	    python << machine.Fixture(*(*l_itFixture));
-
-		// And then all the rest of the operations.
+        // And then all the rest of the operations.
 		for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 		{
 			HeeksObj *object = (HeeksObj *) *l_itOperation;
@@ -677,22 +672,18 @@ Python CProgram::RewritePythonProgram()
                     if (machine.AlreadyProcessed(object->GetType(), object->m_id, *itFix)) already_processed = true;
                 }
 
+                if (private_fixtures.size() == 0)
+                {
+                    // Make sure the public fixture is in place.
+                    python << machine.Fixture(*(*l_itFixture));
+                }
+
 				if ((! already_processed) &&
                     (((COp*)object)->m_active) &&
-                    (! machine.AlreadyProcessed(object->GetType(), object->m_id, machine.Fixture())))
+                    (! machine.AlreadyProcessed(object->GetType(), object->m_id, *(*l_itFixture))))
 				{
-				    CFixture save_fixture = machine.Fixture();
 					python << ((COp*)object)->AppendTextToProgram( &machine );
-
 					machine.MarkAsProcessed(object->GetType(), object->m_id, machine.Fixture());
-
-					if (machine.Fixture() != save_fixture)
-					{
-					    // The fixture was modified by this machine operation.  Re-instate the global fixture
-					    // so that the global fixtures functionality still works.
-
-					    python << machine.Fixture(save_fixture);
-					}
 				}
 			}
 		} // End for - operation
