@@ -51,6 +51,9 @@ bool CMachineState::operator== ( const CMachineState & rhs ) const
     return(true);
 }
 
+/**
+    The machine's cutting tool has changed.  Issue the appropriate GCode if necessary.
+ */
 Python CMachineState::CuttingTool( const int new_cutting_tool )
 {
     Python python;
@@ -71,6 +74,13 @@ Python CMachineState::CuttingTool( const int new_cutting_tool )
     return(python);
 }
 
+
+/**
+    If the machine is changing fixtures, we may need to move up to a safety height before moving on to the
+    next fixture.  If it is, indeed, a different fixture then issue the appropriate GCode to make the switch.  This
+    routine should not add the GCode unless it's necessary.  We want the AppendTextToProgram() methods to be
+    able to call this routine repeatedly without worrying about unnecessary movements.
+ */
 Python CMachineState::Fixture( CFixture new_fixture )
 {
     Python python;

@@ -243,6 +243,10 @@ void COp::ReadDefaultValues()
 	} // End if - then
 }
 
+
+/**
+    Change tools (if necessary) and assign any private fixtures.
+ */
 Python COp::AppendTextToProgram(CMachineState *pMachineState )
 {
     Python python;
