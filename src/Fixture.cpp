@@ -20,7 +20,7 @@
 #include "interface/PropertyVertex.h"
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "PythonStuff.h"
 #include "interface/Tool.h"
 #include "MachineState.h"
@@ -163,7 +163,7 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("pivot_point_y")) m_pivot_point.SetY( atof(pElem->Attribute("pivot_point_y")) );
 	if (pElem->Attribute("pivot_point_z")) m_pivot_point.SetZ( atof(pElem->Attribute("pivot_point_z")) );
 
-	int flag;
+	int flag = 0;
 	if (pElem->Attribute("safety_height_defined")) pElem->Attribute("safety_height_defined", &flag);
 	m_safety_height_defined = (flag != 0);
 	if (pElem->Attribute("safety_height")) m_safety_height = atof(pElem->Attribute("safety_height"));

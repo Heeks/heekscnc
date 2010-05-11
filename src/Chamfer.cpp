@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Chamfer.h"
 #include "interface/PropertyLength.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "Drilling.h"
 #include "CounterBore.h"
 #include "ProgramCanvas.h"

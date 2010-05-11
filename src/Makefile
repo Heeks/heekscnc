@@ -462,9 +462,9 @@ Inlay.o: Inlay.cpp \
 		Inlay.h
 	$(CC) -c Inlay.cpp ${CCFLAGS} -o $@
 
-CNCPoint.o: CNCPoint.cpp \
-		CNCPoint.h
-	$(CC) -c CNCPoint.cpp ${CCFLAGS} -o $@
+CNCPoint.o: ${HEEKSCADPATH}/interface/CNCPoint.cpp \
+		${HEEKSCADPATH}/interface/CNCPoint.h
+	$(CC) -c ${HEEKSCADPATH}/interface/CNCPoint.cpp ${CCFLAGS} -o $@
 
 MachineState.o: MachineState.cpp \
 		MachineState.h
