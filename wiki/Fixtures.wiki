@@ -39,9 +39,13 @@ When a machine operation's GCode is generated, the software first checks to see 
 Each time the 'add fixture' command is issued, independent of whether it's public or private, the HeeksCNC software assigns the next available coordinate system to the new fixture.  If the operator wants the same fixture assigned privately to two or more machine operations, they must update the newly added fixture's coordinate system in its properties window.  A sample workflow might be;
 
  - Right click on the first machine operation and select the 'Add Fixture' menu item.
+
  - Right click on the second machine operation and select the 'Add Fixture' menu item.
+
  - Select the private fixture just added to the second machine operation.
+
  - Update that fixture's properties such that the same coordinate system as the first opertion's fixture is chosen.  When the same coordinate system is chosen, the software searches for pre-existing fixture objects associated with that same coordinate system.  If found, it merges both fixture objects so that they represent the same fixture in memory.  The bennefit of this is that, if any axis rotation values are applied to that fixture, they will be used in all fixtures that share the same coordinate system number.
+
 
 == Measuring a Fixture's rotation ==
 
