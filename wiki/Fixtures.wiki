@@ -46,6 +46,7 @@ Each time the 'add fixture' command is issued, independent of whether it's publi
 
  - Update that fixture's properties such that the same coordinate system as the first opertion's fixture is chosen.  When the same coordinate system is chosen, the software searches for pre-existing fixture objects associated with that same coordinate system.  If found, it merges both fixture objects so that they represent the same fixture in memory.  The bennefit of this is that, if any axis rotation values are applied to that fixture, they will be used in all fixtures that share the same coordinate system number.
 
+For a video introduction to public and private fixtures, see http://www.youtube.com/watch?v=9LbniTlnWLI
 
 == Measuring a Fixture's rotation ==
 
