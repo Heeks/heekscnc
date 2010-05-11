@@ -90,10 +90,25 @@ Python CMachineState::Fixture( CFixture new_fixture )
         m_fixture_has_been_set = true;
 
         // The fixture has been changed.  Move to the highest safety-height between the two fixtures.
-        if (m_fixture.m_params.m_safety_height_defined && new_fixture.m_params.m_safety_height_defined)
+        if (m_fixture.m_params.m_safety_height_defined)
         {
-            double safety_height = (m_fixture.m_params.m_safety_height > new_fixture.m_params.m_safety_height)?m_fixture.m_params.m_safety_height:new_fixture.m_params.m_safety_height;
-            python << _T("rapid(z=") << safety_height / theApp.m_program->m_units << _T(", machine_coordinates='True')\n");
+			if (new_fixture.m_params.m_safety_height_defined)
+			{
+				// Both fixtures have a safety height defined.  Move the highest of the two.
+				if (m_fixture.m_params.m_safety_height > new_fixture.m_params.m_safety_height)
+				{
+					python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / theApp.m_program->m_units << _T(", machine_coordinates='True')\n");
+				} // End if - then
+				else
+				{
+					python << _T("rapid(z=") << new_fixture.m_params.m_safety_height / theApp.m_program->m_units << _T(", machine_coordinates='True')\n");
+				} // End if - else
+			} // End if - then
+			else
+			{
+				// The old fixture has a safety height but the new one doesn't
+				python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / theApp.m_program->m_units << _T(", machine_coordinates='True')\n");
+			} // End if - else            
         }
 
 		python << new_fixture.AppendTextToProgram();
@@ -103,6 +118,9 @@ Python CMachineState::Fixture( CFixture new_fixture )
     return(python);
 }
 
+/**
+	Look to see if this object has been handled for this fixture already.
+ */
 bool CMachineState::AlreadyProcessed( const int object_type, const unsigned int object_id, const CFixture fixture )
 {
     Instance instance;
@@ -113,6 +131,9 @@ bool CMachineState::AlreadyProcessed( const int object_type, const unsigned int 
     return(m_already_processed.find(instance) != m_already_processed.end());
 }
 
+/**
+	Remember which objects have been processed for which fixtures.
+ */
 void CMachineState::MarkAsProcessed( const int object_type, const unsigned int object_id, const CFixture fixture )
 {
     Instance instance;

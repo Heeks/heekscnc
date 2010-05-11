@@ -18,7 +18,7 @@
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
 

@@ -16,7 +16,7 @@ for isolation milling.
 #include <iostream>
 
 #include "Drilling.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "CuttingTool.h"
 
 #include <gp_Pnt.hxx>

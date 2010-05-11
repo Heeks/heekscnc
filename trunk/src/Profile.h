@@ -9,7 +9,7 @@
 #include "DepthOp.h"
 #include "geometry.h"
 #include "Drilling.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 
 #include <vector>
 

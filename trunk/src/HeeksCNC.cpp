@@ -42,7 +42,7 @@
 #include "Tools.h"
 #include "CuttingTool.h"
 #include "interface/strconv.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "BOM.h"
 #include "Probing.h"
 #include "Excellon.h"

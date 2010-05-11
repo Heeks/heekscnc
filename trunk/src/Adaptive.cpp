@@ -15,7 +15,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "Drilling.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "Reselect.h"
 #include <sstream>
 #include <wx/stdpaths.h>
