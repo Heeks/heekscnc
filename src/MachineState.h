@@ -27,10 +27,20 @@ class CFixture;
     Location values returned also allow subsequent gcode generation routines
     to sort their objects so that starting points can be selected based on
     previous operation's ending points.
+
+	This class also keeps track of which objects have had their gcode generated
+	for which fixtures.  We need to know this so that we don't double-up while
+	we are handling the various private and public fixture settings.
  */
 class CMachineState
 {
 private:
+	/**
+		This class remembers an individual machine operation along with
+		the fixture used for gcode generation.  It's really just a placeholder
+		for a tuple of three values so we can keep track of what we've already
+		processed.
+	 */
     class Instance
     {
     public:

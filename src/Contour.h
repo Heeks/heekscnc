@@ -13,7 +13,7 @@
 #include "HeeksCNCTypes.h"
 #include <list>
 #include <vector>
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Edge.hxx>
 

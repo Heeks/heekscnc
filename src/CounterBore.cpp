@@ -17,7 +17,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "Drilling.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
 

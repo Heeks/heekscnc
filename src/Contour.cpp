@@ -20,7 +20,7 @@
 #include "Profile.h"
 #include "Fixture.h"
 #include "Fixtures.h"
-#include "CNCPoint.h"
+#include "interface/CNCPoint.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
 
