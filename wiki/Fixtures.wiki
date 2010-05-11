@@ -64,7 +64,7 @@ The HeeksCNC Probing operations also support (for EMC2-based machines) the gener
 - Run the program.
 
 
-= Example Workflow - using a touch probe =
+=== Example Workflow - using a touch probe ===
 
 - Add an Edge Probing operation and set its various parameters.
 
