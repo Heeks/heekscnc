@@ -87,11 +87,8 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	void ReloadPointers();
 
-	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, CMachineState *pMachineState, bool reversed );
-	Python AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPoint_x, double *pRollOnPointY, CMachineState *pMachineState);
-	Python AppendTextToProgram( std::vector<CNCPoint> & starting_points, CMachineState *pMachineState );
-	void GetRollOnPos(HeeksObj* sketch, double &x, double &y);
-	void GetRollOffPos(HeeksObj* sketch, double &x, double &y);
+	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState, bool reversed );
+	Python AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState);
 
 	// COp's virtual functions
 	Python AppendTextToProgram(CMachineState *pMachineState);
@@ -99,9 +96,6 @@ public:
 	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-
-	void make_smaller( geoff_geometry::Kurve *pKurve, double *pStartx, double *pStarty, double *pFinishx, double *pFinishy ) const;
-	bool roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, const double roll_radius, double *pRoll_on_x, double *pRoll_on_y) const;
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	std::list<wxString> ConfirmAutoRollRadius(const bool apply_changes);

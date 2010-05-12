@@ -635,7 +635,8 @@ std::vector<CNCPoint> CDrilling::FindAllLocations()
 				CMachineState machine;
 				machine.Fixture(perfectly_aligned_fixture);
 
-				((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &machine );
+				// to do, make this get the starting point again
+				//((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &machine );
 
 				// Copy the results in ONLY if each point doesn't already exist.
 				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
