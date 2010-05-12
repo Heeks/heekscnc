@@ -42,7 +42,7 @@ class CreatorIso(nc.Creator):
         self.prev_drill = ''
         self.prev_retract = ''
         self.prev_z = ''
-        self.use_CRC = False
+        self.useCrc = False
         self.gCRC = ''
 
         self.fmt = iso.codes.FORMAT_MM()
@@ -161,6 +161,7 @@ class CreatorIso(nc.Creator):
     def tool_change(self, id):
         self.write_blocknum()
         self.write((iso.codes.TOOL() % id) + '\n')
+        self.t = id
 
     def tool_defn(self, id, name='', radius=None, length=None):
         self.write_blocknum()
@@ -371,16 +372,20 @@ class CreatorIso(nc.Creator):
     ##  CRC
     
     def use_CRC(self):
-        """CRC"""
-        return self.use_CRC
+        return self.useCrc
 
     def start_CRC(self, left = True, radius = 0.0):
-        """start_CRC"""
-        pass
+        # set up prep code, to be output on next line
+        if self.t == None:
+            raise "No tool specified for start_CRC()"
+        self.g = ('G41' + iso.codes.SPACE() + 'D%i') % self.t
 
     def end_CRC(self):
-        """end_CRC"""
-        pass
+        self.g = 'G40'
+        self.write_blocknum()
+        self.write_preps()
+        self.write_misc()
+        self.write('\n')
 
     ############################################################################
     ##  Cycles

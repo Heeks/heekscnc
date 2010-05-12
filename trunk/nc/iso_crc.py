@@ -1,7 +1,7 @@
 ################################################################################
-# iso_modal.py
+# iso_crc.py
 #
-# a class derived from iso machine, but with XYZF G1, G2 etc modal to reduce the size of the file.
+# a class derived from iso machine, with Cutter Radius Compensation turned on.
 #
 # Dan Heeks, 4th May 2010
 
@@ -10,13 +10,12 @@ import iso
 import math
 
 ################################################################################
-class CreatorIsoModal(iso.CreatorIso):
+class CreatorIsoCrc(iso.CreatorIso):
 
     def __init__(self):
         iso.CreatorIso.__init__(self)
-        self.f_modal = True
-        self.g0123_modal = True
-        self.drill_modal = True
+        self.useCrc = True
+
 ################################################################################
 
-nc.creator = CreatorIsoModal()
+nc.creator = CreatorIsoCrc()

@@ -321,83 +321,6 @@ CProfile & CProfile::operator= ( const CProfile & rhs )
 	return(*this);
 }
 
-
-void CProfile::GetRollOnPos(HeeksObj* sketch, double &x, double &y)
-{
-	// roll on
-	if(m_profile_params.m_auto_roll_on)
-	{
-		if(sketch)
-		{
-			HeeksObj* first_child = sketch->GetAtIndex(0);
-			if(first_child)
-			{
-				double s[3];
-				if(!(first_child->GetStartPoint(s)))return;
-				x = s[0];
-				y = s[1];
-				if(m_profile_params.m_tool_on_side == CProfileParams::eOn)return;
-				double v[3];
-				if(heeksCAD->GetSegmentVector(first_child, 0.0, v))
-				{
-					double off_vec[3] = {-v[1], v[0], 0.0};
-					if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
-
-					CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-					if (pCuttingTool != NULL)
-					{
-						x = s[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) - v[0] * m_profile_params.m_auto_roll_radius;
-						y = s[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) - v[1] * m_profile_params.m_auto_roll_radius;
-					} // End if - then
-				}
-			}
-		}
-	}
-	else
-	{
-		x = m_profile_params.m_roll_on_point[0];
-		y = m_profile_params.m_roll_on_point[1];
-	}
-}
-
-void CProfile::GetRollOffPos(HeeksObj* sketch, double &x, double &y)
-{
-	// roll off
-	if(m_profile_params.m_auto_roll_off)
-	{
-			int num_spans = sketch->GetNumChildren();
-			if(num_spans > 0)
-			{
-				HeeksObj* last_child = sketch->GetAtIndex(num_spans - 1);
-				if(last_child)
-				{
-					double e[3];
-					if(!(last_child->GetEndPoint(e)))return;
-					x = e[0];
-					y = e[1];
-					if(m_profile_params.m_tool_on_side == CProfileParams::eOn)return;
-					double v[3];
-					if(heeksCAD->GetSegmentVector(last_child, 0.0, v))
-					{
-						CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-						if (pCuttingTool != NULL)
-						{
-							double off_vec[3] = {-v[1], v[0], 0.0};
-							if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside){off_vec[0] = -off_vec[0]; off_vec[1] = -off_vec[1];}
-							x = e[0] + off_vec[0] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) + v[0] * m_profile_params.m_auto_roll_radius;
-							y = e[1] + off_vec[1] * (pCuttingTool->CuttingRadius() + m_profile_params.m_auto_roll_radius) + v[1] * m_profile_params.m_auto_roll_radius;
-						} // End if - then
-					}
-				}
-			}
-	}
-	else
-	{
-		x = m_profile_params.m_roll_off_point[0];
-		y = m_profile_params.m_roll_off_point[1];
-	}
-}
-
 const wxBitmap &CProfile::GetIcon()
 {
 	if(!m_active)return GetInactiveIcon();
@@ -406,87 +329,7 @@ const wxBitmap &CProfile::GetIcon()
 	return *icon;
 }
 
-/**
-	This is the duplicate of the kurve_funcs.py->make_smaller() method.  It's the one we can
-	call from C++
- */
-void CProfile::make_smaller( geoff_geometry::Kurve *pKurve, double *pStartx, double *pStarty, double *pFinishx, double *pFinishy ) const
-{
-	if (pStartx && pStarty)
-	{
-		int sp;
-		double sx, sy, ex, ey, cx, cy;
-		geoff_geometry::kurve_get_span(pKurve, 0, sp, sx, sy, ex, ey, cx, cy);
-
-		if (pStartx) *pStartx = sx;
-		if (pStarty) *pStarty = sy;
-
-		geoff_geometry::kurve_change_start(pKurve, *pStartx, *pStarty);
-	} // End if - then
-
-	if (pFinishx && pFinishy)
-	{
-		int sp;
-		double sx, sy, ex, ey, cx, cy;
-		geoff_geometry::kurve_get_span(pKurve, 0, sp, sx, sy, ex, ey, cx, cy);
-
-		if (pFinishx) *pFinishx = sx;
-		if (pFinishy) *pFinishy = sy;
-
-		geoff_geometry::kurve_change_start(pKurve, *pFinishx, *pFinishy);
-	} // End if - then
-
-} // End of make_smaller() method
-
-
-
-/**
-	This is the duplicate of the kurve_funcs.py->roll_on_point() method.  It's the one we can
-	call from C++
- */
-bool CProfile::roll_on_point( geoff_geometry::Kurve *pKurve, const wxString &direction, const double tool_radius, const double roll_radius, double *pRoll_on_x, double *pRoll_on_y) const
-{
-	*pRoll_on_x = double(0.0);
-	*pRoll_on_y = double(0.0);
-
-	double offset = tool_radius;
-	if (direction == _T("right")) offset = -offset;
-	Kurve *offset_k = geoff_geometry::kurve_new();
-
-	bool offset_success = geoff_geometry::kurve_offset(pKurve, offset_k, offset);
-	if (offset_success == false)
-	{
-       		// raise "couldn't offset kurve %d" % (k)
-		return(false);
-	} // End if - then
-
-	int sp;
-	double sx, sy, ex, ey, cx, cy;
-	double vx, vy;
-	double off_vx, off_vy;
-
-	if (geoff_geometry::kurve_num_spans(offset_k) > 0)
-	{
-		geoff_geometry::kurve_get_span(offset_k, 0, sp, sx, sy, ex, ey, cx, cy);
-		geoff_geometry::kurve_get_span_dir(offset_k, 0, 0, vx, vy); // get start direction
-		off_vx = -vy;
-		off_vy = vx;
-
-		if (direction == _T("right"))
-		{
-			off_vx = -off_vx;
-			off_vy = -off_vy;
-		} // End if - then
-
-	        *pRoll_on_x = sx + off_vx * roll_radius - vx * roll_radius;
-        	*pRoll_on_y = sy + off_vy * roll_radius - vy * roll_radius;
-	} // End if - then
-
-	return(true);
-
-} // End roll_on_point() method
-
-Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry::Kurve *pKurve, CMachineState *pMachineState, bool reversed )
+Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState, bool reversed )
 {
 	// write the python code for the sketch
 	Python python;
@@ -556,12 +399,6 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 					python << start.Y(true);
 					python << _T(", 0.0, 0.0)\n");
 					started = true;
-
-					geoff_geometry::kurve_add_point(pKurve,
-									0,
-									start.X(true),
-									start.Y(true),
-									0.0, 0.0);
 				}
 				if(reversed)span_object->GetStartPoint(e);
 				else span_object->GetEndPoint(e);
@@ -576,12 +413,6 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 					python << (_T(", "));
 					python << end.Y(true);
 					python << (_T(", 0.0, 0.0)\n"));
-
-					geoff_geometry::kurve_add_point(pKurve,
-									0,
-									end.X(true),
-									end.Y(true),
-									0.0, 0.0);
 				}
 				else if(type == ArcType)
 				{
@@ -604,13 +435,6 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 					python << (_T(", "));
 					python << centre.Y(true);
 					python << (_T(")\n"));
-
-					geoff_geometry::kurve_add_point(pKurve,
-									span_type,
-									end.X(true),
-									end.Y(true),
-									centre.X(true),
-									centre.Y(true) );
 				}
 				else if(type == CircleType)
 				{
@@ -658,13 +482,6 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 						python << (_T(", "));
 						python << centre.Y(true);
 						python << (_T(")\n"));
-
-						geoff_geometry::kurve_add_point(pKurve,
-										l_itPoint->first,
-										pnt.X(true),
-										pnt.Y(true),
-										centre.X(true),
-										centre.Y(true) );
 					} // End for
 				}
 			}
@@ -734,17 +551,12 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, geoff_geometry
 		}
 
 		python << (wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str())).c_str();
-		make_smaller( 	pKurve,
-				(m_profile_params.m_start_given)?&startx:NULL,
-				(m_profile_params.m_start_given)?&starty:NULL,
-				(m_profile_params.m_end_given)?&finishx:NULL,
-				(m_profile_params.m_end_given)?&finishy:NULL );
 	}
 
 	return(python);
 }
 
-Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pRollOnPointX, double *pRollOnPointY, CMachineState *pMachineState)
+Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState)
 {
     Python python;
 
@@ -756,7 +568,6 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pR
 		if(m_profile_params.m_tool_on_side != CProfileParams::eOn)
 		{
 			SketchOrderType order = SketchOrderTypeUnknown;
-			HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
 			if(object)order = heeksCAD->GetSketchOrder(object);
 			if(order == SketchOrderTypeCloseCCW)initially_ccw = true;
 			if(m_speed_op_params.m_spindle_speed<0)reversed = !reversed;
@@ -765,11 +576,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pR
 		}
 
 		// write the kurve definition
-		geoff_geometry::Kurve *pKurve = geoff_geometry::kurve_new();
-		python << WriteSketchDefn(object, sketch, pKurve, pMachineState, initially_ccw != reversed);
-
-		double total_to_cut = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
-		int num_step_downs = (int)(total_to_cut / fabs(m_depth_op_params.m_step_down) + 1.0 - heeksCAD->GetTolerance());
+		python << WriteSketchDefn(object, sketch, pMachineState, initially_ccw != reversed);
 
 		// start - assume we are at a suitable clearance height
 
@@ -792,8 +599,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pR
 
 		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 
-		// get roll on string
-		wxString roll_on_string;
+		// roll on
 		switch(m_profile_params.m_tool_on_side)
 		{
 		case CProfileParams::eLeftOrOutside:
@@ -801,76 +607,44 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pR
 			{
 				if(m_profile_params.m_auto_roll_on || (GetNumChildren() > 1))
 				{
-					python << wxString::Format(_T("roll_on_x, roll_on_y = kurve_funcs.roll_on_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
-
-					if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL) && (pCuttingTool != NULL))
-					{
-						roll_on_point( pKurve, side_string.c_str(), pCuttingTool->CuttingRadius(), m_profile_params.m_auto_roll_radius, pRollOnPointX, pRollOnPointY);
-					} // End if - then
-
-					roll_on_string = wxString(_T("roll_on_x, roll_on_y"));
+					python << wxString(_T("roll_on = 'auto'\n"));
 				}
 				else
 				{
-#ifdef UNICODE
-					std::wostringstream ss;
-#else
-					std::ostringstream ss;
-#endif
-					ss.imbue(std::locale("C"));
-					ss<<std::setprecision(10);
-					ss << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units;
-					roll_on_string = ss.str().c_str();
-
-					if ((pRollOnPointX != NULL) && (pRollOnPointY != NULL))
-					{
-						*pRollOnPointX = m_profile_params.m_roll_on_point[0];
-						*pRollOnPointY = m_profile_params.m_roll_on_point[1];
-					}
+					python << wxString(_T("roll_on = [")) << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << wxString(_T(", ")) << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units << wxString(_T("]\n"));
 				}
 			}
 			break;
 		default:
 			{
-				python << wxString::Format(_T("sp, span1sx, span1sy, ex, ey, cx, cy = kurve.get_span(k%d, 0)\n"), sketch);
-				roll_on_string = _T("span1sx, span1sy");
+				python << _T("roll_on = None\n");
 			}
 			break;
 		}
 
 		// rapid across to it
-		python << wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str());
+		//python << wxString::Format(_T("rapid(%s)\n"), roll_on_string.c_str()).c_str();
 
-		wxString roll_off_string;
 		switch(m_profile_params.m_tool_on_side)
 		{
 		case CProfileParams::eLeftOrOutside:
 		case CProfileParams::eRightOrInside:
 			{
-			if(m_profile_params.m_auto_roll_off || (GetNumChildren() > 1))
-			{
-				python << wxString::Format(_T("roll_off_x, roll_off_y = kurve_funcs.roll_off_point(k%d, '%s', tool_diameter/2 + offset_extra, roll_radius)\n"), sketch, side_string.c_str()).c_str();
-				roll_off_string = wxString(_T("roll_off_x, roll_off_y"));
+				if(m_profile_params.m_auto_roll_off || (GetNumChildren() > 1))
+				{
+					python << wxString(_T("roll_off = 'auto'\n"));
+				}
+				else
+				{
+					python << wxString(_T("roll_off = [")) << m_profile_params.m_roll_off_point[0] / theApp.m_program->m_units << wxString(_T(", ")) << m_profile_params.m_roll_off_point[1] / theApp.m_program->m_units << wxString(_T("]\n"));
+				}
 			}
-			else
-			{
-#ifdef UNICODE
-				std::wostringstream ss;
-#else
-				std::ostringstream ss;
-#endif
-				ss.imbue(std::locale("C"));
-				ss<<std::setprecision(10);
-				ss << m_profile_params.m_roll_off_point[0] / theApp.m_program->m_units << ", " << m_profile_params.m_roll_off_point[1] / theApp.m_program->m_units;
-				roll_off_string = ss.str().c_str();
-			}
-		}
 			break;
 		default:
-		{
-			python << wxString::Format(_T("sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k%d, kurve.num_spans(k%d) - 1)\n"), sketch, sketch);
-			roll_off_string = _T("ex, ey");
-		}
+			{
+				python << _T("roll_off = None\n");
+			}
+			break;
 		}
 
 		if(m_profile_params.m_num_tags > 0)
@@ -886,86 +660,21 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, double *pR
 			python << _T("if tag_depth > start_depth: tag_depth = start_depth\n");
 		}
 
-		if(num_step_downs > 1)
+		// set up the tag parameters
+		if(m_profile_params.m_num_tags > 0)
 		{
-			python << wxString(_T("incremental_rapid_height = rapid_down_to_height - start_depth\n")).c_str();
-			python << _T("prev_depth = start_depth\n");
-			python << wxString::Format(_T("for step in range(0, %d):\n"), num_step_downs).c_str();
-			python << wxString::Format(_T(" depth_of_cut = ( start_depth - final_depth ) * ( step + 1 ) / %d\n"), num_step_downs).c_str();
-			python << _T(" depth = start_depth - depth_of_cut\n");
-
-			// rapid across to roll on point
-			python << wxString::Format(_T(" if step != 0:\n  rapid(%s)\n"), roll_on_string.c_str()).c_str();
-			if(m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start)
-			{
-				// rapid down to just above the material, which might be at the top of the tag
-				python << _T(" mat_depth = prev_depth\n");
-				python << _T(" if tag_depth > mat_depth: mat_depth = tag_depth\n");
-				python << _T(" rapid(z = mat_depth + incremental_rapid_height)\n");
-				// feed down to depth
-				python << _T(" mat_depth = depth\n");
-				python << _T(" if tag_depth > mat_depth: mat_depth = tag_depth\n");
-				python << _T(" feed(z = mat_depth)\n");
-			}
-			else
-			{
-				// rapid down to just above the material
-				python << _T(" rapid(z = prev_depth + incremental_rapid_height)\n");
-				// feed down to depth
-				python << _T(" feed(z = depth)\n");
-			}
-
-			// set up the tag parameters
-			wxString tag_string;
-
-			if(m_profile_params.m_num_tags > 0)
-			{
-				python << _T(" sub_tag_height = tag_height - ( depth - final_depth )\n");
-				python << _T(" if sub_tag_height < 0: sub_tag_height = 0\n");
-				python << _T(" sub_tag_width = 2.0 * float(sub_tag_height) / math.tan (tag_angle) \n");
-				python << _T(" tag = ") << m_profile_params.m_num_tags << _T(", sub_tag_width, tag_angle, tag_at_start\n");
-				tag_string = _T(", start_depth, depth, tag");
-			}
-
-			// profile the kurve
-			python << wxString::Format(_T(" kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, %s, %s%s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str(), tag_string.c_str()).c_str();
-
-			// rapid back up to clearance plane
-			python << wxString(_T(" rapid(z = clearance)\n")).c_str();
-
-			// set prev_depth
-			python << _T(" prev_depth = depth\n");
+			python << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle, tag_at_start\n");
 		}
 		else
 		{
-			// rapid down to just above the material
-			python << wxString(_T("rapid(z = rapid_down_to_height)\n")).c_str();
-
-			// feed down to final depth
-			if(m_profile_params.m_num_tags > 0 && m_profile_params.m_tag_at_start)
-			{
-				python << wxString(_T("feed(z = tag_depth)\n")).c_str();
-			}
-			else
-			{
-				python << wxString(_T("feed(z = final_depth)\n")).c_str();
-			}
-
-			// set up the tag parameters
-			wxString tag_string;
-
-			if(m_profile_params.m_num_tags > 0)
-			{
-				python << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle, tag_at_start\n");
-				tag_string = _T(", start_depth, final_depth, tag");
-			}
-
-			// profile the kurve
-			python << (wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, %s, %s%s)\n"), sketch, side_string.c_str(), roll_on_string.c_str(), roll_off_string.c_str(), tag_string.c_str()).c_str());
-
-			// rapid back up to clearance plane
-			python << (wxString(_T("rapid(z = clearance)\n"))).c_str();
+			python << _T("tag = None\n");
 		}
+
+		// profile the kurve
+		python << wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, tag, rapid_down_to_height, start_depth, step_down, final_depth)\n"), sketch, side_string.c_str());
+
+		// rapid back up to clearance plane
+		python << wxString(_T("rapid(z = clearance)\n"));
 	}
 
 	return(python);
@@ -998,10 +707,6 @@ void CProfile::ReadDefaultValues()
 
 }
 
-
-
-
-
 Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
@@ -1013,64 +718,7 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 		return(python);
 	} // End if - then
 
-	for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
-	{
-	    if (child->GetType() == SketchType)
-	    {
-	        m_sketches.push_back( child->m_id );
-	    }
-	}
-
 	python << CDepthOp::AppendTextToProgram(pMachineState);
-
-	std::vector<CNCPoint> starting_points;
-	python << AppendTextToProgram( starting_points, pMachineState );
-
-	m_sketches.clear();
-
-	return(python);
-} // End AppendTextToProgram() method
-
-struct sort_sketches : public std::binary_function< const int, const int, bool >
-{
-	CNCPoint m_reference_point;
-	CProfile *m_pThis;
-
-	sort_sketches( CProfile *pThis, const CNCPoint & reference_point )
-	{
-		m_reference_point = reference_point;
-		m_pThis = pThis;
-	} // End constructor
-
-	// Return true if dist(lhs to ref) < dist(rhs to ref)
-	bool operator()( const int lhs, const int rhs ) const
-	{
-		HeeksObj *lhsPtr = heeksCAD->GetIDObject( SketchType, lhs );
-		HeeksObj *rhsPtr = heeksCAD->GetIDObject( SketchType, rhs );
-
-		if ((lhsPtr != NULL) && (rhsPtr != NULL))
-		{
-			double x,y;
-			m_pThis->GetRollOnPos(lhsPtr, x, y );
-			CNCPoint lhsPoint( x, y, 0.0 );
-
-			m_pThis->GetRollOnPos(rhsPtr, x, y );
-			CNCPoint rhsPoint( x, y, 0.0 );
-
-			return( lhsPoint.Distance( m_reference_point ) < rhsPoint.Distance( m_reference_point ) );
-		} // End if - then
-		else
-		{
-			return(false);
-		} // End if - else
-	} // End operator() method
-}; // End sort_sketches() method
-
-
-
-Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, CMachineState *pMachineState )
-{
-	Python python;
 
 	if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
 	{
@@ -1081,57 +729,11 @@ Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, C
 
 	python << _T("offset_extra = ") << m_profile_params.m_offset_extra << _T("\n");
 
-	// Make a local copy so that we can either sort it or leave it alone.  We don't want
-	// to affect the member list itself.
-
-	std::list<int> sketches;
-	std::copy( m_sketches.begin(), m_sketches.end(), std::inserter( sketches, sketches.begin() ) );
-
-	if (m_profile_params.m_sort_sketches)
+	for(std::list<HeeksObj*>::iterator It = m_objects.begin(); It != m_objects.end(); It++)
 	{
-		std::vector<int> sorted;
-		std::copy( m_sketches.begin(), m_sketches.end(), std::inserter( sorted, sorted.begin() ) );
-		for (std::vector<int>::iterator l_itSketch = sorted.begin(); l_itSketch != sorted.end(); l_itSketch++)
-		{
-			if (l_itSketch == sorted.begin())
-			{
-				HeeksObj *ref = heeksCAD->GetIDObject( SketchType, *l_itSketch );
-				if (ref != NULL)
-				{
-					sort_sketches compare( this, CNCPoint( 0.0, 0.0, 0.0 ) );
-					std::sort( l_itSketch, sorted.end(), compare );
-				} // End if - then
-			} // End if - then
-			else
-			{
-				std::vector<int>::iterator l_itNextSketch = l_itSketch;
-				l_itNextSketch++;
-
-				if (l_itNextSketch != sorted.end())
-				{
-					HeeksObj *ref = heeksCAD->GetIDObject( SketchType, *l_itSketch );
-					if (ref != NULL)
-					{
-						double x,y;
-						GetRollOffPos( ref, x, y );
-						sort_sketches compare( this, CNCPoint( x, y, 0.0 ) );
-						std::sort( l_itNextSketch, sorted.end(), compare );
-					} // End if - then
-				} // End if - then
-			} // End if - else
-		} // End for
-
-		sketches.erase( sketches.begin(), sketches.end() );
-		std::copy( sorted.begin(), sorted.end(), std::inserter( sketches, sketches.begin() ) );
-	} // End if - then
-
-	for(std::list<int>::iterator It = sketches.begin(); It != sketches.end(); It++)
-	{
-		int sketch = *It;
-
 		// write a kurve definition
-		HeeksObj* object = heeksCAD->GetIDObject(SketchType, sketch);
-		if(object == NULL || object->GetNumChildren() == 0)continue;
+		HeeksObj* object = *It;
+		if((object == NULL) || (object->GetType() != SketchType) || (object->GetNumChildren() == 0))continue;
 
 		HeeksObj* re_ordered_sketch = NULL;
 		SketchOrderType sketch_order = heeksCAD->GetSketchOrder(object);
@@ -1142,7 +744,6 @@ Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, C
 			object = re_ordered_sketch;
 		}
 
-		double roll_on_point_x, roll_on_point_y;
 		if(sketch_order == SketchOrderTypeMultipleCurves || sketch_order == SketchOrderHasCircles)
 		{
 			std::list<HeeksObj*> new_separate_sketches;
@@ -1150,19 +751,13 @@ Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, C
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				python << AppendTextForOneSketch(one_curve_sketch, sketch, &roll_on_point_x, &roll_on_point_y, pMachineState).c_str();
-				CBox bbox;
-				one_curve_sketch->GetBox(bbox);
-				starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
+				python << AppendTextForOneSketch(one_curve_sketch, object->m_id, pMachineState).c_str();
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			python << AppendTextForOneSketch(object, sketch, &roll_on_point_x, &roll_on_point_y, pMachineState).c_str();
-			CBox bbox;
-			object->GetBox(bbox);
-			starting_points.push_back( CNCPoint( roll_on_point_x, roll_on_point_y, bbox.MaxZ() ) );
+			python << AppendTextForOneSketch(object, object->m_id, pMachineState).c_str();
 		}
 
 		if(re_ordered_sketch)
@@ -1171,8 +766,8 @@ Python CProfile::AppendTextToProgram( std::vector<CNCPoint> & starting_points, C
 		}
 	}
 
-	return(python);
-}
+	return python;
+} // End AppendTextToProgram() method
 
 static unsigned char cross16[32] = {0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80, 0x01, 0x80, 0x02, 0x40, 0x04, 0x20, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01};
 
