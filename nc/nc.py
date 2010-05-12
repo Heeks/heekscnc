@@ -197,7 +197,7 @@ class Creator:
     ############################################################################
     ##  Cutter radius compensation
     
-    def use_CRC(self, x=None, y=None, z=None, a=None, b=None, c=None):
+    def use_CRC(self):
         """CRC"""
         return False
 
@@ -419,6 +419,21 @@ def rapid_home(x=None, y=None, z=None, a=None, b=None, c=None):
 
 def rapid_unhome():
     creator.rapid_unhome()
+
+############################################################################
+##  Cutter radius compensation
+
+def use_CRC():
+    return creator.use_CRC()
+
+def CRC_nominal_path():
+    return creator.CRC_nominal_path()
+
+def start_CRC(left = True, radius = 0.0):
+    creator.start_CRC(left, radius)
+
+def end_CRC():
+    creator.end_CRC()
 
 ############################################################################
 ##  Cycles
