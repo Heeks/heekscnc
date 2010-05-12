@@ -377,11 +377,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\interface\CNCPoint.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\CNCPoint.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\interface\CNCPoint.h"
+			RelativePath="$(HEEKSCADPATH)\interface\CNCPoint.h"
 			>
 		</File>
 		<File
