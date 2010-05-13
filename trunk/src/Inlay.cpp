@@ -20,7 +20,7 @@
 #include "CuttingTool.h"
 #include "Profile.h"
 #include "Fixture.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "Contour.h"
 #include "Pocket.h"
@@ -759,11 +759,15 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 
 		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
 		{
-			python << CContour::GeneratePathFromWire((*itValley)[*itDepth],
-													last_position,
-													pMachineState->Fixture(),
-													m_depth_op_params.m_clearance_height,
-													m_depth_op_params.m_rapid_down_to_height );
+		    // We don't want a toolpath at the top surface.
+		    if (fabs(*itDepth - m_depth_op_params.m_start_depth) > heeksCAD->GetTolerance())
+		    {
+                python << CContour::GeneratePathFromWire((*itValley)[*itDepth],
+                                                        last_position,
+                                                        pMachineState->Fixture(),
+                                                        m_depth_op_params.m_clearance_height,
+                                                        m_depth_op_params.m_rapid_down_to_height );
+		    } // End if - then
 		} // End for
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
@@ -1131,10 +1135,12 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 		} // End for
 
 		depths.sort();
-		depths.reverse();
 
 		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
 		{
+		    // Skip the top-most cut as it's along the surface.
+		    if (fabs(*itDepth - max_valley_depth) < heeksCAD->GetTolerance()) continue;
+
 			// It's the male half we're generating.  Rotate the wire around one
 			// of the two axes so that we end up machining the reverse of the
 			// female half.

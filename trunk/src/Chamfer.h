@@ -12,7 +12,7 @@
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "MachineState.h"
 
 #include <list>

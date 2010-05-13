@@ -42,7 +42,7 @@
 #include "Tools.h"
 #include "CuttingTool.h"
 #include "interface/strconv.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "BOM.h"
 #include "Probing.h"
 #include "Excellon.h"
@@ -51,12 +51,6 @@
 #include "Inlay.h"
 
 #include <sstream>
-
-// static
-double CNCPoint::Units() const
-{
-	return theApp.m_program->m_units;
-}
 
 CHeeksCADInterface* heeksCAD = NULL;
 
