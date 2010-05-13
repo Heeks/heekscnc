@@ -20,7 +20,7 @@
 #include "interface/PropertyVertex.h"
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "interface/Tool.h"
 #include "MachineState.h"

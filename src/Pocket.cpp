@@ -20,7 +20,7 @@
 #include "tinyxml/tinyxml.h"
 #include "CuttingTool.h"
 #include "geometry.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "Reselect.h"
 #include "MachineState.h"
 

@@ -22,7 +22,7 @@
 #include "CuttingTool.h"
 #include "Profile.h"
 #include "Fixture.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "CuttingTool.h"
 #include "interface/HeeksColor.h"
