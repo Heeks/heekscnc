@@ -52,6 +52,12 @@
 
 #include <sstream>
 
+// static
+double CNCPoint::Units() const
+{
+	return theApp.m_program->m_units;
+}
+
 CHeeksCADInterface* heeksCAD = NULL;
 
 CHeeksCNCApp theApp;
