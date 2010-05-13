@@ -21,9 +21,6 @@ else
   heekspathmessage = 
 endif
 
-# Find the name of the HeeksCNC source area (case insensitive - with -iname)
-HEEKSCNCPATH=$(shell find $(HEEKSCADPATH) -iname 'heekscnc' -print)
-
 KURVE_DIR=../kurve
 KURVE_FLAGS=-DOPEN_SOURCE_GEOMETRY -I$(KURVE_DIR)/geometry -I$(KURVE_DIR)/messages
 
@@ -38,7 +35,7 @@ else
   RIP= 
 endif
 
-CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DHAVE_LIMITS ${RIP} ${KURVE_FLAGS} -I "${OPENCASCADE_DIR}" -I $(HEEKSCNCPATH) -I $(HEEKSCNCPATH)/src
+CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DHAVE_LIMITS ${RIP} ${KURVE_FLAGS} -I "${OPENCASCADE_DIR}"
 
 OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Construction.o Finite.o kurve.o  Matrix.o offset.o PythonInterface.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o
 
@@ -465,9 +462,9 @@ Inlay.o: Inlay.cpp \
 		Inlay.h
 	$(CC) -c Inlay.cpp ${CCFLAGS} -o $@
 
-CNCPoint.o: ${HEEKSCADPATH}/interface/CNCPoint.cpp \
-		${HEEKSCADPATH}/interface/CNCPoint.h
-	$(CC) -c ${HEEKSCADPATH}/interface/CNCPoint.cpp ${CCFLAGS} -o $@
+CNCPoint.o: CNCPoint.cpp \
+		CNCPoint.h
+	$(CC) -c CNCPoint.cpp ${CCFLAGS} -o $@
 
 MachineState.o: MachineState.cpp \
 		MachineState.h

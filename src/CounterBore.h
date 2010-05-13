@@ -14,7 +14,7 @@
 #include "CuttingTool.h"
 #include <list>
 #include <vector>
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 
 class CCounterBore;
 

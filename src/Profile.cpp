@@ -19,7 +19,7 @@
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 #include "CuttingTool.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "Reselect.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
@@ -596,8 +596,6 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 			side_string = _T("on");
 			break;
 		}
-
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
 
 		// roll on
 		switch(m_profile_params.m_tool_on_side)

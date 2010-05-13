@@ -19,7 +19,7 @@
 #include "CuttingTool.h"
 #include "Profile.h"
 #include "Fixture.h"
-#include "interface/CNCPoint.h"
+#include "CNCPoint.h"
 #include "MachineState.h"
 
 #include <sstream>
