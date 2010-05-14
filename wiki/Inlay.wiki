@@ -16,16 +16,19 @@ HeeksCNC supports the generation of toolpaths that allow both halves of an inlay
 
  - Adjust the start depth, step down and final depth settings.
 
- - Select 'Female Half' for the 'GCode Generation' property of the Inlay operation.
+ - Use the right mouse button above the new Inlay operation and select the 'Add Fixture' menu option.  Repeat this so that we end up with two private fixtures assigned to this Inlay operation.
 
- - Generate GCode for the 'female' half of the operation.  These will be the valleys machined into the base material.
+ - Update the Inlay operation's properties so that each of the two private fixtures are assigned to the male and female halves as appropriate.
 
- - Use the right mouse button on the Inlay operation so as to find the 'Make Male Pocket' option.
+ - Set the 'GCode Generation' property to 'Both Halves' so that both the male and female halves of the GCode program are generated.  If the two private fixtures were defined in the previous step, each portion of the GCode program will be applied to their respective fixture.
 
- - Select the 'Male Half' for the 'GCode Generation' property of the Inlay operation.
+ - Update the 'touch-off' point values of each of the private fixtures based on the machining locations of the male and female halves.
 
- - Generate GCode for the 'male' half of the operation.  These will be the mountains machined into another piece of, normally contrasting, material.
+ - Fix one workpiece to the NC mill and touch-off that part using the 'touch-off' point entered into the fixture. (Make sure the correct coordinate systems are selected on the NC mill when touching off)
 
+ - Fix another workpiece to the NC mill and touch-off that part to the 'touch-off' point entered into the second fixture.  (Make sure the correct coordinate systems are selected on the NC mill when touching off)
+
+ - Generate the GCode and run it on the mill.  Changing tools as appropriate.
 
 = Details =
 
