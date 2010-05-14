@@ -41,6 +41,7 @@ public:
 		m_border_width = 25.4; // 1 inch.
 		m_clearance_tool = 0;
 		m_pass = eBoth;
+		m_female_before_male_fixtures = true;
 	}
 
 	void set_initial_values();
@@ -55,6 +56,7 @@ public:
 	CCuttingTool::ToolNumber_t  m_clearance_tool;
 	eInlayPass_t    m_pass;
 	eAxis_t         m_mirror_axis;
+	bool			m_female_before_male_fixtures;
 };
 
 /**
@@ -169,6 +171,11 @@ public:
 	Python FormValleyPockets( Valleys_t valleys, CMachineState *pMachineState  );
 	Python FormMountainWalls( Valleys_t valleys, CMachineState *pMachineState  );
 	Python FormMountainPockets( Valleys_t mouvalleysntains, CMachineState *pMachineState, const bool only_above_mountains  );
+
+	// Overloaded from COp class.
+	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(2); }
+
+	Python SelectFixture( CMachineState *pMachineState, const bool female_half );
 
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);

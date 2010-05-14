@@ -25,6 +25,7 @@
 #include "interface/Tool.h"
 #include "MachineState.h"
 #include "Program.h"
+#include "interface/strconv.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -55,6 +56,14 @@ void CFixtureParams::set_initial_values()
 
 	config.Read(_T("safety_height_defined"), &m_safety_height_defined, false);
 	config.Read(_T("safety_height"), &m_safety_height, 0.0);
+
+	double touch_off_point_x, touch_off_point_y, touch_off_point_z;
+	config.Read(_T("touch_off_point_x"), &touch_off_point_x, 0.0);
+	config.Read(_T("touch_off_point_y"), &touch_off_point_y, 0.0);
+	config.Read(_T("touch_off_point_z"), &touch_off_point_z, 0.0);
+	m_touch_off_point = gp_Pnt( touch_off_point_x, touch_off_point_y, touch_off_point_z );
+
+	config.Read(_T("touch_off_description"), &m_touch_off_description, _T(""));
 }
 
 void CFixtureParams::write_values_to_config()
@@ -74,6 +83,12 @@ void CFixtureParams::write_values_to_config()
 
 	config.Write(_T("safety_height_defined"), m_safety_height_defined);
 	config.Write(_T("safety_height"), m_safety_height);
+
+	config.Write(_T("touch_off_point_x"), m_touch_off_point.X());
+	config.Write(_T("touch_off_point_y"), m_touch_off_point.Y());
+	config.Write(_T("touch_off_point_z"), m_touch_off_point.Z());
+
+	config.Write(_T("touch_off_description"), m_touch_off_description);
 }
 
 static void on_set_yz_plane(double value, HeeksObj* object)
@@ -98,6 +113,16 @@ static void on_set_pivot_point(const double *vt, HeeksObj* object){
 	((CFixture *)object)->m_params.m_pivot_point.SetX( vt[0] );
 	((CFixture *)object)->m_params.m_pivot_point.SetY( vt[1] );
 	((CFixture *)object)->m_params.m_pivot_point.SetZ( vt[2] );
+}
+
+static void on_set_touch_off_point(const double *vt, HeeksObj* object){
+	((CFixture *)object)->m_params.m_touch_off_point.SetX( vt[0] );
+	((CFixture *)object)->m_params.m_touch_off_point.SetY( vt[1] );
+	((CFixture *)object)->m_params.m_touch_off_point.SetZ( vt[2] );
+}
+
+static void on_set_touch_off_description(const wxChar *value, HeeksObj* object){
+	((CFixture *)object)->m_params.m_touch_off_description = value;
 }
 
 static void on_set_safety_height_defined(const bool value, HeeksObj *object)
@@ -131,6 +156,17 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
     {
         list->push_back(new PropertyDouble(_("Safety Height (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
     }
+
+	double touch_off_point[3];
+	touch_off_point[0] = m_touch_off_point.X();
+	touch_off_point[1] = m_touch_off_point.Y();
+	touch_off_point[2] = m_touch_off_point.Z();
+
+	wxString title;
+	title << _("Touch-off Point (in ") << parent->m_coordinate_system_number << _T(" coordinates)");
+	list->push_back(new PropertyVertex(title, touch_off_point, parent, on_set_touch_off_point));
+	list->push_back(new PropertyString(_("Touch-off Description"), m_touch_off_description, parent, on_set_touch_off_description));
+
 }
 
 void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
@@ -149,6 +185,12 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 
 	element->SetAttribute("safety_height_defined", m_safety_height_defined);
 	element->SetDoubleAttribute("safety_height", m_safety_height);
+
+	element->SetDoubleAttribute("touch_off_point_x", m_touch_off_point.X());
+	element->SetDoubleAttribute("touch_off_point_y", m_touch_off_point.Y());
+	element->SetDoubleAttribute("touch_off_point_z", m_touch_off_point.Z());
+
+	element->SetAttribute("touch_off_description", Ttc(m_touch_off_description.c_str()));
 }
 
 void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -167,6 +209,12 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("safety_height_defined")) pElem->Attribute("safety_height_defined", &flag);
 	m_safety_height_defined = (flag != 0);
 	if (pElem->Attribute("safety_height")) m_safety_height = atof(pElem->Attribute("safety_height"));
+
+	if (pElem->Attribute("touch_off_point_x")) m_touch_off_point.SetX( atof(pElem->Attribute("touch_off_point_x")) );
+	if (pElem->Attribute("touch_off_point_y")) m_touch_off_point.SetY( atof(pElem->Attribute("touch_off_point_y")) );
+	if (pElem->Attribute("touch_off_point_z")) m_touch_off_point.SetZ( atof(pElem->Attribute("touch_off_point_z")) );
+
+	if (pElem->Attribute("touch_off_description")) m_touch_off_description = Ctt(pElem->Attribute("touch_off_description"));
 }
 
 const wxBitmap &CFixture::GetIcon()
@@ -192,7 +240,7 @@ Python CFixture::AppendTextToProgram() const
 		python << _T("comment(") << PythonString(m_title) << _T(")\n");
 	} // End if - then
 
-	python << _T("workplane(") << m_coordinate_system_number << _T(")\n");
+	python << _T("workplane(") << int(m_coordinate_system_number) << _T(")\n");
 
 	return(python);
 }

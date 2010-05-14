@@ -58,6 +58,8 @@
 		<Unit filename="src/BOM.cpp" />
 		<Unit filename="src/BOM.h" />
 		<Unit filename="src/CNCConfig.h" />
+		<Unit filename="src/CNCPoint.cpp" />
+		<Unit filename="src/CNCPoint.h" />
 		<Unit filename="src/Chamfer.cpp" />
 		<Unit filename="src/Chamfer.h" />
 		<Unit filename="src/Contour.cpp" />
@@ -137,8 +139,6 @@
 		<Unit filename="src/ZigZag.h" />
 		<Unit filename="src/stdafx.cpp" />
 		<Unit filename="src/stdafx.h" />
-		<Unit filename="../interface/CNCPoint.cpp" />
-		<Unit filename="../interface/CNCPoint.h" />
 		<Unit filename="../interface/HeeksColor.cpp" />
 		<Unit filename="../interface/HeeksColor.h" />
 		<Unit filename="../interface/HeeksObj.cpp" />

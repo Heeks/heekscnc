@@ -333,18 +333,19 @@ public:
 static AddFixture add_fixture;
 
 
+
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     ObjList::GetTools( t_list, p );
 
 	// See if this operation already has a child fixture.  If so, don't add a second one.
-	bool found = false;
-	for (HeeksObj *child = GetFirstChild(); ((child != NULL) && (! found)); child = GetNextChild())
+	unsigned int num_private_fixtures = 0;
+	for (HeeksObj *child = GetFirstChild(); (child != NULL); child = GetNextChild())
 	{
-		if (child->GetType() == FixtureType) found = true;
+		if (child->GetType() == FixtureType) num_private_fixtures++;
 	} // End for
 
-	if (! found)
+	if (num_private_fixtures < MaxNumberOfPrivateFixtures())
 	{
 		add_fixture.Set(this);
 		t_list->push_back(&add_fixture);
