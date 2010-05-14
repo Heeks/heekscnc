@@ -59,5 +59,10 @@ The geometry and location of the sketches must be mirrored when generating toolp
 
 The Inlay operation is based on both the Depth Operation and the Speed Operation so the start depth, step down, final depth and all related settings are the same as for other such machine operations.  These values are specified in absolute values.  i.e the 'start depth' must be a larger number than the 'final depth' etc.
 
+=== Use of private fixtures ===
 
+The Inlay operation supports either one or two private fixture objects.  If only one private fixture is defined then both the male and female NC operations will be generated for that fixture.
 
+If, on the other hand, a pair of private fixtures are added to the Inlay operation, the user may use the 'Female Op Fixture' and 'Male Op Fixture' properties to determine which of the two fixtures is used for each half of the NC code's generation.
+
+If no private fixtures are defined for the Inlay operation then both the female and male half gcode will be repeated for each public fixture defined in the model.
