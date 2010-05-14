@@ -124,3 +124,11 @@ When a rotation is applied, this is the pivot point used.  A default value of 0,
 == Safety Height Defined ==
 
 If this is checked 'true' then a Safety Height property is also included.  This Safety Height value is a Z value in machine coordinates (G53).  This value represents the safe height that ensures movement without hitting this fixture.  When the gcode switches from one coordinate system (and hence fixture) to another, it moves to the highest value of both fixture's Safety Height settings.
+
+== Touch-Off Point ==
+
+The touch-off point is the coordinate that should be used by the operator when they manually touch-off the material in the fixture.  HeeksCNC uses the X and Y values in this coordinate as a valid location somewhere above this fixture.
+
+When a GCode program moves from one fixture to another, it uses the common safety height values as an appropriate 'Z' coordinate (in G53 - machine coordinates).  Once up at this safe height, it rapidly moves to the X,Y coordinate of this touch-off point in the new fixture's coordinate system.  The idea is to move to some place physically above the new fixture so that, if the first movement is down to some clearance height, the tool won't bump into either the previous fixture or this new fixture.
+
+Along with the touch-off point, the operator may enter a 'touch-off description'.  This is entered as a comment in the resultant gcode.  The idea is that the machining operations are setup on the assumption that the machine operator will touch-off the tool to something like the bottom left corner of the workpiece.  This 'touch-off description' allows such instructions (and/or assumptions) to be included in the gcode file.
