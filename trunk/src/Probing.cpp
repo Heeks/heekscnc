@@ -818,7 +818,7 @@ Python CProbe_Edge::AppendTextToProgram( CMachineState *pMachineState )
 			python << _T("z6='") << ref2.Z() << _T("', ");
 		}
 
-		python << _T("xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true )) << _T("')\n");
+		python << _T("xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true )) << _T(")\n");
 
 		// And position the cutting tool at the intersection of the two lines.
 		// This should be safe as the 'probe_single_point() call made in the AppendTextForSingleOperation() routine returns

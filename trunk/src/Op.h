@@ -52,6 +52,7 @@ public:
 	virtual void ReadDefaultValues();
 	virtual Python AppendTextToProgram( CMachineState *pMachineState );
 	virtual std::list<CFixture> PrivateFixtures();
+	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(1); }
 
 	void ReloadPointers() { ObjList::ReloadPointers(); }
 

@@ -32,6 +32,11 @@ public:
 	bool m_safety_height_defined;
 	double m_safety_height;
 
+	gp_Pnt m_touch_off_point;	// Coordinate in the local coordinate system for safe starting point
+								// when switching to this fixture.
+	wxString m_touch_off_description;	// Tell the operator what to do when setting up this fixture.
+										// eg: "touch off 0,0,0 at bottom left corner".
+
 	CFixtureParams()
 	{
 		m_yz_plane = 0.0;
@@ -42,6 +47,9 @@ public:
 
 		m_safety_height_defined = false;
 		m_safety_height = 0.0;
+
+		m_touch_off_point = gp_Pnt(0.0, 0.0, 0.0);
+		m_touch_off_description = _T("");
 	} // End constructor.
 
 	void set_initial_values();
@@ -90,10 +98,45 @@ public:
 		G59_3
 	} eCoordinateSystemNumber_t;
 
+	friend wxString & operator << ( wxString & ss, const eCoordinateSystemNumber_t & coordinate_system )
+	{
+		switch (coordinate_system)
+		{
+		case G54:	ss << _T("G54");
+			break;
+
+		case G55:	ss << _T("G55");
+			break;
+
+		case G56:	ss << _T("G56");
+			break;
+
+		case G57:	ss << _T("G57");
+			break;
+
+		case G58:	ss << _T("G58");
+			break;
+
+		case G59:	ss << _T("G59");
+			break;
+
+		case G59_1:	ss << _T("G59.1");
+			break;
+
+		case G59_2:	ss << _T("G59.2");
+			break;
+
+		case G59_3:	ss << _T("G59.3");
+			break;
+		} // End switch()
+
+		return(ss);
+	}
+
 	eCoordinateSystemNumber_t m_coordinate_system_number;
 
 	//	Constructors.
-        CFixture(const wxChar *title, const eCoordinateSystemNumber_t coordinate_system_number) : m_coordinate_system_number(coordinate_system_number)
+	CFixture(const wxChar *title, const eCoordinateSystemNumber_t coordinate_system_number) : m_coordinate_system_number(coordinate_system_number)
 	{
 		m_params.set_initial_values();
 		if (title != NULL)

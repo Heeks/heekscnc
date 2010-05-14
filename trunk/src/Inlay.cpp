@@ -91,6 +91,39 @@ static void on_set_mirror_axis(int value, HeeksObj* object)
 	((CInlay*)object)->WriteDefaultValues();
 }
 
+
+
+static void on_set_female_fixture(int value, HeeksObj* object)
+{
+	if (value == 0)
+	{
+		((CInlay*)object)->m_params.m_female_before_male_fixtures = true;
+	}
+	else
+	{
+		((CInlay*)object)->m_params.m_female_before_male_fixtures = false;
+	}
+
+	((CInlay*)object)->WriteDefaultValues();
+	heeksCAD->Changed();
+}
+
+static void on_set_male_fixture(int value, HeeksObj* object)
+{
+	if (value == 0)
+	{
+		((CInlay*)object)->m_params.m_female_before_male_fixtures = false;
+	}
+	else
+	{
+		((CInlay*)object)->m_params.m_female_before_male_fixtures = true;
+	}
+
+	((CInlay*)object)->WriteDefaultValues();
+	heeksCAD->Changed();
+}
+
+
 void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 {
     list->push_back(new PropertyLength(_("Border Width"), m_border_width, parent, on_set_border_width));
@@ -121,7 +154,6 @@ void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 		choices.push_back(_("Female half"));
 		choices.push_back(_("Male half"));
 		choices.push_back(_("Both halves"));
-		// choices.push_back(_("Female pocket only"));
 
 		list->push_back(new PropertyChoice(_("GCode generation"), choices, choice, parent, on_set_pass));
 	}
@@ -136,6 +168,38 @@ void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 		list->push_back(new PropertyChoice(_("Mirror Axis"), choices, choice, parent, on_set_mirror_axis));
 	}
 
+	std::list<CFixture> fixtures = parent->PrivateFixtures();
+	if (fixtures.size() == 2)
+	{
+		// The user has defined two private fixtures.  Add parameters asking which is to be used for
+		// the female half and which for the male half.
+
+		{
+			int female_choice = 0;
+			int male_choice = 1;
+
+			std::list<wxString> choices;
+			for (std::list<CFixture>::iterator itFixture = fixtures.begin(); itFixture != fixtures.end(); itFixture++)
+			{
+				choices.push_back(itFixture->m_title);
+			}
+
+			if (m_female_before_male_fixtures)
+			{
+				female_choice = 0;
+				male_choice = 1;
+			}
+			else
+			{
+				female_choice = 1;
+				male_choice = 0;
+			}
+			
+			list->push_back(new PropertyChoice(_("Female Op Fixture"), choices, female_choice, parent, on_set_female_fixture));
+			list->push_back(new PropertyChoice(_("Male Op Fixture"), choices, male_choice, parent, on_set_male_fixture));
+		}
+	}
+
 }
 
 void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
@@ -148,6 +212,7 @@ void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("clearance_tool", m_clearance_tool);
 	element->SetAttribute("pass", (int) m_pass);
 	element->SetAttribute("mirror_axis", (int) m_mirror_axis);
+	element->SetAttribute("female_before_male_fixtures", (int) (m_female_before_male_fixtures?1:0));
 }
 
 void CInlayParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -156,6 +221,10 @@ void CInlayParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("clearance_tool", &m_clearance_tool);
 	pElem->Attribute("pass", (int *) &m_pass);
 	pElem->Attribute("mirror_axis", (int *) &m_mirror_axis);
+
+	int temp;
+	pElem->Attribute("female_before_male_fixtures", (int *) &temp);
+	m_female_before_male_fixtures = (temp != 0);
 }
 
 
@@ -213,11 +282,6 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << CDepthOp::AppendTextToProgram( pMachineState );
 
-	typedef double Depth_t;
-	typedef std::map<HeeksObj *, Depth_t> MirroredSketches_t;
-	MirroredSketches_t mirrored_sketches;
-	CBox	bounding_box;
-
 	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
 
 	if (! pChamferingBit)
@@ -228,23 +292,82 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 
 	Valleys_t valleys = DefineValleys(pMachineState);
 
-	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eFemale))
+	switch (m_params.m_pass)
 	{
-		// Form the walls before the pockets so that the pockets cleanup the fury edge left
-		// by the tip of the chamfering bit.
-		python << FormValleyWalls(valleys, pMachineState).c_str();
-		python << FormValleyPockets(valleys, pMachineState).c_str();
-	}
+	case CInlayParams::eBoth:
+		python << FormValleyWalls(valleys, pMachineState).c_str();				// chamfer
+		python << FormValleyPockets(valleys, pMachineState).c_str();			// clearance
+		python << FormMountainPockets(valleys, pMachineState, true).c_str();	// clearance
+		python << FormMountainPockets(valleys, pMachineState, false).c_str();	// clearance
+		python << FormMountainWalls(valleys, pMachineState).c_str();			// chamfer
+		break;
 
-	if ((m_params.m_pass == CInlayParams::eBoth) || (m_params.m_pass == CInlayParams::eMale))
-	{
-		python << FormMountainPockets(valleys, pMachineState, true).c_str();
-		python << FormMountainWalls(valleys, pMachineState).c_str();
-		python << FormMountainPockets(valleys, pMachineState, false).c_str();
-	}
+	case CInlayParams::eFemale:
+		python << FormValleyWalls(valleys, pMachineState).c_str();				// chamfer
+		python << FormValleyPockets(valleys, pMachineState).c_str();			// clearance
+		break;
+
+	case CInlayParams::eMale:
+		python << FormMountainPockets(valleys, pMachineState, true).c_str();	// clearance
+		python << FormMountainPockets(valleys, pMachineState, false).c_str();	// clearance
+		python << FormMountainWalls(valleys, pMachineState).c_str();			// chamfer
+		break;
+	} // End switch
 
 	return(python);
 }
+
+
+Python CInlay::SelectFixture( CMachineState *pMachineState, const bool female_half )
+{
+	Python python;
+
+	std::list<CFixture> fixtures = PrivateFixtures();
+	switch (fixtures.size())
+	{
+	case 2:
+		if (female_half)
+		{
+			if (m_params.m_female_before_male_fixtures)
+			{
+				// Select the first of the two fixtues.
+				python << pMachineState->Fixture(*(fixtures.begin()));
+			}
+			else
+			{
+				// Select the second of the two fixtures.
+				python << pMachineState->Fixture(*(fixtures.rbegin()));
+			}
+		} // End if - then
+		else
+		{
+			// We're doing the male half.
+			if (m_params.m_female_before_male_fixtures)
+			{
+				// Select the first of the two fixtues.
+				python << pMachineState->Fixture(*(fixtures.rbegin()));
+			}
+			else
+			{
+				// Select the second of the two fixtures.
+				python << pMachineState->Fixture(*(fixtures.begin()));
+			}
+		} // End if - else
+		break;
+
+	case 1:
+		python << pMachineState->Fixture(*fixtures.begin());
+		break;
+
+	default:
+		// No private fixtures have been defined.  Just let the normal fixture
+		// selection processing occur.  Nothing to do here.
+		break;
+	} // End if - then
+
+	return(python);
+} // End SelectFixture() method
+
 
 
 /**
@@ -741,9 +864,9 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 {
 	Python python;
 
-	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-
-	python << pMachineState->CuttingTool(m_cutting_tool_number);  // Change tools.
+	python << _T("comment(") << PythonString(_("Form valley walls")) << _T(")\n");
+	python << pMachineState->CuttingTool(m_cutting_tool_number);  // select the chamfering bit.
+	python << SelectFixture(pMachineState, true);	// Select female fixture (if appropriate)
 
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
@@ -772,7 +895,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
 		// the concave corners formed between adjacent edges.
-		python << FormCorners( *itValley, pChamferingBit );
+		python << FormCorners( *itValley, CCuttingTool::Find(m_cutting_tool_number) );
 	} // End for
 
 	return(python);
@@ -783,6 +906,11 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMachineState  )
 {
 	Python python;
+
+	python << _T("comment(") << PythonString(_("Form valley pockets")) << _T(")\n");
+
+	python << SelectFixture(pMachineState, true);	// Select female fixture (if appropriate)
+	python << pMachineState->CuttingTool(m_params.m_clearance_tool);	// Select the clearance tool.
 
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
@@ -831,7 +959,6 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMac
 
 				// Reinstate the original fixture.
                 pMachineState->Fixture(save_fixture);
-
 			}
 		} // End for
 	} // End for
@@ -844,6 +971,18 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMac
 Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pMachineState, const bool only_above_mountains  )
 {
 	Python python;
+
+	if (only_above_mountains)
+	{
+		python << _T("comment(") << PythonString(_("Form mountain pockets above short mountains")) << _T(")\n");
+	}
+	else
+	{
+		python << _T("comment(") << PythonString(_("Form mountains")) << _T(")\n");
+	}
+
+	python << SelectFixture(pMachineState, false);	// Select male fixture (if appropriate)
+	python << pMachineState->CuttingTool(m_params.m_clearance_tool);	// Select the clearance tool.
 
 	// Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
@@ -1097,6 +1236,11 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMachineState  )
 {
 	Python python;
+
+	python << _T("comment(") << PythonString(_("Form mountain walls")) << _T(")\n");
+
+	python << SelectFixture(pMachineState, false);	// Select male fixture (if appropriate)
+	python << pMachineState->CuttingTool(m_cutting_tool_number);	// Select the chamfering bit.
 
 	// Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
@@ -1370,5 +1514,6 @@ CInlay & CInlay::operator= ( const CInlay & rhs )
 
 	return(*this);
 }
+
 
 
