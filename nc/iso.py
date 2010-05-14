@@ -84,8 +84,13 @@ class CreatorIso(nc.Creator):
 
     def program_stop(self, optional=False):
         self.write_blocknum()
-        if (optional) : self.write(iso.codes.STOP_OPTIONAL() + '\n')
-        else : self.write(iso.codes.STOP() + '\n')
+        if (optional) : 
+            self.write(iso.codes.STOP_OPTIONAL() + '\n')
+            self.prev_g0123 = ''
+        else : 
+            self.write(iso.codes.STOP() + '\n')
+            self.prev_g0123 = ''
+
 
     def program_end(self):
         self.write_blocknum()
@@ -194,10 +199,10 @@ class CreatorIso(nc.Creator):
     # This is the coordinate system we're using.  G54->G59, G59.1, G59.2, G59.3
     # These are selected by values from 1 to 9 inclusive.
     def workplane(self, id):
-	if ((id >= 1) and (id <= 6)):
-		self.g += iso.codes.WORKPLANE() % (id + iso.codes.WORKPLANE_BASE())
-	if ((id >= 7) and (id <= 9)):
-		self.g += ((iso.codes.WORKPLANE() % (6 + iso.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6)))
+        if ((id >= 1) and (id <= 6)):
+            self.g += iso.codes.WORKPLANE() % (id + iso.codes.WORKPLANE_BASE())
+        if ((id >= 7) and (id <= 9)):
+            self.g += ((iso.codes.WORKPLANE() % (6 + iso.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6)))
 
     ############################################################################
     ##  Rates + Modes
@@ -242,9 +247,9 @@ class CreatorIso(nc.Creator):
 
     def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False ):
         self.write_blocknum()
-	if (machine_coordinates):
-		self.write(iso.codes.MACHINE_COORDINATES())
-
+        if (machine_coordinates != False):
+            self.write(iso.codes.MACHINE_COORDINATES())
+            self.prev_g0123 != iso.codes.RAPID()
         if self.g0123_modal:
             if self.prev_g0123 != iso.codes.RAPID():
                 self.write(iso.codes.RAPID())
@@ -274,9 +279,9 @@ class CreatorIso(nc.Creator):
     def feed(self, x=None, y=None, z=None, machine_coordinates=False):
         if self.same_xyz(x, y, z): return
         self.write_blocknum()
-	if (machine_coordinates != False):
-		self.write(iso.codes.MACHINE_COORDINATES())
-
+        if (machine_coordinates != False):
+            self.write(iso.codes.MACHINE_COORDINATES())
+            self.prev_g0123 = ''
         if self.g0123_modal:
             if self.prev_g0123 != iso.codes.FEED():
                 self.write(iso.codes.FEED())
