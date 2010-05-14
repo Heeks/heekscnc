@@ -133,7 +133,7 @@ Python CMachineState::Fixture( CFixture new_fixture )
 			wxString comment;
 			comment << _("Move above touch-off point for ") << new_fixture.m_coordinate_system_number;
 			python << _T("comment(") << PythonString(comment) << _T(")\n");
-			python << _T("rapid(x=") << new_fixture.m_params.m_touch_off_point.X() << _T(", y=") << new_fixture.m_params.m_touch_off_point.Y() << _T(")\n");
+			python << _T("rapid(x=") << new_fixture.m_params.m_touch_off_point.X()/theApp.m_program->m_units << _T(", y=") << new_fixture.m_params.m_touch_off_point.Y()/theApp.m_program->m_units << _T(")\n");
 		} // End if - then
 
 		m_fixture_has_been_set = true;
