@@ -20,13 +20,3 @@ http://code.google.com/p/heekscnc/wiki/ToolTable
 
 ===execution order===
 This is a property of all NC operation objects.  It is used to sort the various NC operation objects prior to generating the GCode.
-
-= Import Excellon Drill File =
-
-An Excellon drill file may be imported via the standard 'Import' option beneath File menu.  Where the drill file specifies a tool definition (T1C0.050), the import utility will look for existing drill bits that are of the same diameter.  If none can be found, new CuttingTool definitions are made.
-
-Similarly, the import utility aims to place Point objects at the starting locations of all drilling cycles.  It looks for existing Point objects at each location so as to avoid adding duplicate Point objects.
-
-Finally, the import utility generates a Drilling operation using the appropriate drill bit (CuttingTool) and its corresponding Point objects.
-
-This import utility goes hand-in-hand with the RS274X import function that is part of the HeeksCAD application.  The only reason they are not together is that the Excellon drill file import utility creates NC-specific objects within the data model.
