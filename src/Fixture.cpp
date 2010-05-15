@@ -154,7 +154,7 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
 
     if (m_safety_height_defined)
     {
-        list->push_back(new PropertyDouble(_("Safety Height (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
+        list->push_back(new PropertyLength(_("Safety Height (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
     }
 
 	double touch_off_point[3];
@@ -358,68 +358,6 @@ void CFixture::OnEditString(const wxChar* str){
 	heeksCAD->Changed();
 }
 
-/*
-CFixture *CFixture::Find( const eCoordinateSystemNumber_t coordinate_system_number )
-{
-	if (theApp.m_program->Fixtures())
-	{
-		//CHeeksCNCApp::Symbols_t all_symbols = CHeeksCNCApp::GetAllSymbols();
-		// the above line was very slow for me ( when I had thousands of lines in the drawing )
-
-		HeeksObj* fixtures = theApp.m_program->Fixtures();
-
-		for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
-		{
-			if (ob->GetType() != FixtureType) continue;
-
-			if (ob != NULL)
-			{
-				if (((CFixture *)ob)->m_coordinate_system_number == coordinate_system_number)
-				{
-					return( (CFixture *) ob );
-				} // End if - then
-			} // End if - then
-		} // End for
-	} // End if - then
-
-	return(NULL);
-
-} // End Find() method
-*/
-/*
-int CFixture::GetNextFixture()
-{
-	std::set< int > existing_fixtures;
-
-	if (theApp.m_program->Fixtures() != NULL)
-	{
-		HeeksObj* fixtures = theApp.m_program->Fixtures();
-
-		for(HeeksObj* ob = fixtures->GetFirstChild(); ob; ob = fixtures->GetNextChild())
-		{
-			if (ob->GetType() != FixtureType) continue;
-
-			if (ob != NULL)
-			{
-				existing_fixtures.insert( int(((CFixture *)ob)->m_coordinate_system_number) );
-			} // End if - then
-		} // End for
-
-		// Now run through and find one that's not already used.
-		for (int fixture = int(CFixture::G54); fixture <= int(CFixture::G59_3); fixture++)
-		{
-			if (std::find( existing_fixtures.begin(), existing_fixtures.end(), fixture ) == existing_fixtures.end())
-			{
-				// This one is free.
-
-				return(fixture);
-			} // End if - then
-		} // End for
-	} // End if - then
-
-	return(-1);	// None available.
-} // End GetNextFixture() method
-*/
 
 
 /**
@@ -434,60 +372,26 @@ int CFixture::GetNextFixture()
  */
 wxString CFixture::GenerateMeaningfulName() const
 {
-#ifdef UNICODE
-	std::wostringstream l_ossName;
-#else
-    std::ostringstream l_ossName;
-#endif
+    wxString name;
 
-	switch (m_coordinate_system_number)
+    name << m_coordinate_system_number;
+
+	if (fabs(m_params.m_yz_plane) > heeksCAD->GetTolerance())
 	{
-		case CFixture::G54:		l_ossName << "G54";
-							break;
-
-		case CFixture::G55:		l_ossName << "G55";
-							break;
-
-		case CFixture::G56:		l_ossName << "G56";
-							break;
-
-		case CFixture::G57:		l_ossName << "G57";
-							break;
-
-		case CFixture::G58:		l_ossName << "G58";
-							break;
-
-		case CFixture::G59:		l_ossName << "G59";
-							break;
-
-		case CFixture::G59_1:		l_ossName << "G59.1";
-							break;
-
-		case CFixture::G59_2:		l_ossName << "G59.2";
-							break;
-
-		case CFixture::G59_3:		l_ossName << "G59.3";
-							break;
-
-		default:				break;
-	} // End switch
-
-	if (fabs(m_params.m_yz_plane) > 0.0000001)
-	{
-		l_ossName << " rotated " << m_params.m_yz_plane << " degrees in YZ plane";
+		name << _(" rotated ") << m_params.m_yz_plane << _(" degrees in YZ plane");
 	} // End if - then
 
-	if (fabs(m_params.m_xz_plane) > 0.0000001)
+	if (fabs(m_params.m_xz_plane) > heeksCAD->GetTolerance())
 	{
-		l_ossName << " rotated " << m_params.m_xz_plane << " degrees in XZ plane";
+		name << _(" rotated ") << m_params.m_xz_plane << _(" degrees in XZ plane");
 	} // End if - then
 
-	if (fabs(m_params.m_xy_plane) > 0.0000001)
+	if (fabs(m_params.m_xy_plane) > heeksCAD->GetTolerance())
 	{
-		l_ossName << " rotated " << m_params.m_xy_plane << " degrees in XY plane";
+		name << _(" rotated ") << m_params.m_xy_plane << _(" degrees in XY plane");
 	} // End if - then
 
-	return( l_ossName.str().c_str() );
+	return(name);
 } // End GenerateMeaningfulName() method
 
 
@@ -500,12 +404,6 @@ wxString CFixture::GenerateMeaningfulName() const
  */
 wxString CFixture::ResetTitle()
 {
-#ifdef UNICODE
-	std::wostringstream l_ossUnits;
-#else
-    std::ostringstream l_ossUnits;
-#endif
-
 	if ( (m_title == GetTypeString()) ||
 	     ((m_title.Find( _T("G5") ) != -1)))
 	{
@@ -513,13 +411,9 @@ wxString CFixture::ResetTitle()
 		m_title = GenerateMeaningfulName();
 		heeksCAD->Changed();
 
-#ifdef UNICODE
-		std::wostringstream l_ossChange;
-#else
-		std::ostringstream l_ossChange;
-#endif
-		l_ossChange << "Changing name to " << m_title.c_str() << "\n";
-		return( l_ossChange.str().c_str() );
+        wxString change;
+		change << _("Changing name to ") << m_title << _T("\n");
+		return( change );
 	} // End if - then
 
 	// Nothing changed, nothing to report
