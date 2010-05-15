@@ -118,7 +118,12 @@ static void on_set_pivot_point(const double *vt, HeeksObj* object){
 static void on_set_touch_off_point(const double *vt, HeeksObj* object){
 	((CFixture *)object)->m_params.m_touch_off_point.SetX( vt[0] );
 	((CFixture *)object)->m_params.m_touch_off_point.SetY( vt[1] );
-	((CFixture *)object)->m_params.m_touch_off_point.SetZ( vt[2] );
+	// ((CFixture *)object)->m_params.m_touch_off_point.SetZ( vt[2] ); /* We're not using the Z value for this */
+
+	if (fabs(vt[2]) > heeksCAD->GetTolerance())
+	{
+	    wxMessageBox(_("Warning: The 'Z' coordinate is not used for this.  Set the 'z' in the 'safety height' property instead (Don't forget to express it in machine - G53 - coordinates)"));
+	}
 }
 
 static void on_set_touch_off_description(const wxChar *value, HeeksObj* object){
