@@ -126,8 +126,7 @@ public:
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 	static Python GeneratePathFromWire( 	const TopoDS_Wire & wire,
-											CNCPoint & last_position,
-											const CFixture fixture,
+											CMachineState *pMachineState,
 											const double clearance_height,
 											const double rapid_down_to_height );
 

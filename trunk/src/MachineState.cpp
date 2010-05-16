@@ -8,12 +8,14 @@
 #include "stdafx.h"
 #include "MachineState.h"
 #include "CuttingTool.h"
+#include "CNCPoint.h"
+
 
 class CFixture;
 
 CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54)
 {
-        m_location = gp_Pnt(0.0, 0.0, 0.0);
+        m_location = CNCPoint(0.0, 0.0, 0.0);
         m_cutting_tool_number = 0;  // No tool assigned.
         m_fixture_has_been_set = false;
 }
@@ -114,7 +116,7 @@ Python CMachineState::Fixture( CFixture new_fixture )
 			{
 				// The old fixture has a safety height but the new one doesn't
 				python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / theApp.m_program->m_units << _T(", machine_coordinates='True')\n");
-			} // End if - else            
+			} // End if - else
         }
 
 		// Invoke new coordinate system.

@@ -42,6 +42,7 @@ public:
 		m_clearance_tool = 0;
 		m_pass = eBoth;
 		m_female_before_male_fixtures = true;
+		m_min_cornering_angle = 30.0;   // degrees.
 	}
 
 	void set_initial_values();
@@ -57,6 +58,7 @@ public:
 	eInlayPass_t    m_pass;
 	eAxis_t         m_mirror_axis;
 	bool			m_female_before_male_fixtures;
+	double          m_min_cornering_angle;
 };
 
 /**
@@ -161,7 +163,7 @@ public:
 	static std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire );
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
 	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
-	Python FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) const;
+	Python FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMachineState *pMachineState ) const;
 	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
