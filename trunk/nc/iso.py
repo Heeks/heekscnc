@@ -488,11 +488,11 @@ class CreatorIso(nc.Creator):
 	self.z = (z + standoff)			# We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
-            if iso.codes.RETRACT(self.fmt, retract_height) != self.prev_retract:
+            if self.prev_retract  != iso.codes.RETRACT(self.fmt, retract_height) :
                 self.write(iso.codes.RETRACT(self.fmt, retract_height))               
                 self.prev_retract = iso.codes.RETRACT(self.fmt, retract_height)
         else:              
-            self.write(iso.codes.RETRACT(self.fmt, retract_height)) 
+            self.write(iso.codes.RETRACT(self.fmt, retract_height))
            
         if (self.fhv) : 
             self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
