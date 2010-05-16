@@ -80,6 +80,7 @@ public:
 	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(0, 1);}else CDepthOp::GetIcon(texture_number, x, y);}
 	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);
+	ObjectCanvas* GetDialog(wxWindow* parent);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
