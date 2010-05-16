@@ -39,6 +39,7 @@ extern "C" {
 #include "HeeksCNC.h"
 #include "interface/strconv.h"
 #include "interface/HeeksObj.h"
+#include "interface/ObjectCanvas.h"
 
 // TODO: reference additional headers your program requires here
 
