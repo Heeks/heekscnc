@@ -203,6 +203,7 @@ class CreatorIso(nc.Creator):
             self.g += iso.codes.WORKPLANE() % (id + iso.codes.WORKPLANE_BASE())
         if ((id >= 7) and (id <= 9)):
             self.g += ((iso.codes.WORKPLANE() % (6 + iso.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6)))
+        
 
     ############################################################################
     ##  Rates + Modes
@@ -517,8 +518,11 @@ class CreatorIso(nc.Creator):
 
     def end_canned_cycle(self):
         self.write_blocknum()
-	self.write(iso.codes.END_CANNED_CYCLE() + '\n')
-
+        self.write(iso.codes.END_CANNED_CYCLE() + '\n')
+        self.prev_drill = ''
+        self.prev_g0123 = ''
+        self.prev_z = ''   
+        self.prev_f = ''     
     ############################################################################
     ##  Misc
 
