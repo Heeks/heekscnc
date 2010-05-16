@@ -333,8 +333,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
 /* static */ Python CContour::GeneratePathFromWire(
 	const TopoDS_Wire & wire,
-	CNCPoint & last_position,
-	const CFixture fixture,
+	CMachineState *pMachineState,       // for both fixture and last_position.
 	const double clearance_height,
 	const double rapid_down_to_height )
 {
@@ -375,18 +374,18 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 				gp_Vec VE;
 				curve.D1(uEnd, PE, VE);
 
-				if (last_position == CNCPoint(PS))
+				if (pMachineState->Location() == CNCPoint(PS))
 				{
 					// We're heading towards the PE point.
 					CNCPoint point(PE);
 					python << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
-					last_position = point;
+					pMachineState->Location(point);
 				} // End if - then
-				else if (last_position == CNCPoint(PE))
+				else if (pMachineState->Location() == CNCPoint(PE))
 				{
 					CNCPoint point(PS);
 					python << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
-					last_position = point;
+					pMachineState->Location(point);
 				}
 				else
 				{
@@ -413,7 +412,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 					python << _T("feed(z=") << start.Z(true) << _T(")\n");
 
 					python << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
-					last_position = end;
+					pMachineState->Location(end);
 				}
 			}
 			break;
@@ -426,7 +425,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
 
 			case GeomAbs_Circle:
-			if ((fixture.m_params.m_xz_plane == 0.0) && (fixture.m_params.m_yz_plane == 0.0))
+			if ((pMachineState->Fixture().m_params.m_xz_plane == 0.0) && (pMachineState->Fixture().m_params.m_yz_plane == 0.0))
 			{
 				double uStart = curve.FirstParameter();
 				double uEnd = curve.LastParameter();
@@ -441,7 +440,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
                 // It's an Arc.
 
-                if (last_position == CNCPoint(PS))
+                if (pMachineState->Location() == CNCPoint(PS))
                 {
                     // Arc towards PE
                     CNCPoint point(PE);
@@ -465,18 +464,18 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
                     for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
                     {
-                        if (itPoint->Distance(last_position) > tolerance)
+                        if (itPoint->Distance(pMachineState->Location()) > tolerance)
                         {
-                            CNCPoint offset = centre - last_position;
+                            CNCPoint offset = centre - pMachineState->Location();
                             python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
                                 << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
                             if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
                             python << _T(")\n");
-                            last_position = *itPoint;
+                            pMachineState->Location(*itPoint);
                         }
                     } // End for
                 }
-                else if (last_position == CNCPoint(PE))
+                else if (pMachineState->Location() == CNCPoint(PE))
                 {
                     // Arc towards PS
                     CNCPoint point(PS);
@@ -499,15 +498,15 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
                     for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
                     {
-                        if (itPoint->Distance(last_position) > tolerance)
+                        if (itPoint->Distance(pMachineState->Location()) > tolerance)
                         {
-                            CNCPoint offset = centre - last_position;
+                            CNCPoint offset = centre - pMachineState->Location();
 
                             python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
                                 << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
                             if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
                             python << _T(")\n");
-                            last_position = *itPoint;
+                            pMachineState->Location(*itPoint);
                         }
                     } // End for
                 }
@@ -566,19 +565,19 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                     python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
                     python << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
 
-                    last_position = *(points.begin());
+                    pMachineState->Location(*(points.begin()));
 
                     for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
                     {
-                        if (itPoint->Distance(last_position) > tolerance)
+                        if (itPoint->Distance(pMachineState->Location()) > tolerance)
                         {
-                            CNCPoint offset = centre - last_position;
+                            CNCPoint offset = centre - pMachineState->Location();
 
                             python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
                                 << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
                             if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
                             python << _T(")\n");
-                            last_position = *itPoint;
+                            pMachineState->Location(*itPoint);
                         }
                     } // End for
                 }
@@ -621,7 +620,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 					} // End for
 
 					// See if we should go from the start to the end or the end to the start.
-					if (*interpolated_points.rbegin() == last_position)
+					if (*interpolated_points.rbegin() == pMachineState->Location())
 					{
 						// We need to go from the end to the start.  Reverse the point locations to
 						// make this easier.
@@ -629,13 +628,13 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 						interpolated_points.reverse();
 					} // End if - then
 
-					if (*interpolated_points.begin() != last_position)
+					if (*interpolated_points.begin() != pMachineState->Location())
 					{
 						// This curve is not nearby to the last_position.  Rapid to the start
 						// point to start this off.
 
 						// We need to move to the start BEFORE machining this line.
-						CNCPoint start(last_position);
+						CNCPoint start(pMachineState->Location());
 						CNCPoint end(*interpolated_points.begin());
 
 						python << _T("rapid(z=") << PythonString(clearance_height / theApp.m_program->m_units).c_str() << _T(")\n");
@@ -643,15 +642,15 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 						python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
 						python << _T("feed(z=") << end.Z(true) << _T(")\n");
 
-						last_position = end;
+						pMachineState->Location(end);
 					}
 
 					for (std::list<CNCPoint>::iterator itPoint = interpolated_points.begin(); itPoint != interpolated_points.end(); itPoint++)
 					{
-						if (*itPoint != last_position)
+						if (*itPoint != pMachineState->Location())
 						{
 							python << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
-							last_position = *itPoint;
+							pMachineState->Location(*itPoint);
 						} // End if - then
 					} // End for
 				} // End if - then
@@ -661,7 +660,9 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	}
 
 	python << _T("rapid(z=") << PythonString(clearance_height / theApp.m_program->m_units).c_str() << _T(")\n");
-	last_position.SetZ( clearance_height );
+	CNCPoint temp = pMachineState->Location();
+	temp.SetZ( clearance_height );
+	pMachineState->Location(temp);
 
 	return(python);
 }
@@ -759,8 +760,7 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
                             tool_path_wire = TopoDS::Wire(transform.Shape());
 
                             python << GeneratePathFromWire(	tool_path_wire,
-                                                            last_position,
-                                                            pMachineState->Fixture(),
+                                                            pMachineState,
                                                             m_depth_op_params.m_clearance_height,
                                                             m_depth_op_params.m_rapid_down_to_height );
                         } // End if - then

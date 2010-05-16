@@ -8,14 +8,15 @@
 #pragma once
 
 #include "stdafx.h"
-#include <gp_Pnt.hxx>
 #include "Fixture.h"
 #include "PythonStuff.h"
+#include "CNCPoint.h"
 
 #include <map>
 
 class Python;
 class CFixture;
+class CNCPoint;
 
 /**
     The CMachineState class stores information about the machine for use
@@ -74,8 +75,8 @@ public:
     CFixture Fixture() const { return(m_fixture); }
     Python Fixture( CFixture fixture );
 
-    gp_Pnt Location() const { return(m_location); }
-    void Location( const gp_Pnt rhs ) { m_location = rhs; }
+    CNCPoint Location() const { return(m_location); }
+    void Location( const CNCPoint rhs ) { m_location = rhs; }
 
     bool operator== ( const CMachineState & rhs ) const;
     bool operator!= ( const CMachineState & rhs ) const { return(! (*this == rhs)); }
@@ -86,7 +87,7 @@ public:
 private:
     int         m_cutting_tool_number;
     CFixture    m_fixture;
-    gp_Pnt      m_location;
+    CNCPoint      m_location;
     bool        m_fixture_has_been_set;
 
 	std::set<Instance> m_already_processed;
