@@ -56,6 +56,8 @@ void CInlayParams::set_initial_values()
 	config.Read(_T("ClearanceTool"), &m_clearance_tool, 0);
 	config.Read(_T("Pass"), (int *) &m_pass, (int) eBoth );
 	config.Read(_T("MirrorAxis"), (int *) &m_mirror_axis, (int) eXAxis );
+	config.Read(_T("MinCorneringAngle"), (double *) &m_min_cornering_angle, 30.0);
+
 }
 
 void CInlayParams::write_values_to_config()
@@ -65,11 +67,18 @@ void CInlayParams::write_values_to_config()
 	config.Write(_T("ClearanceTool"), m_clearance_tool);
 	config.Write(_T("Pass"), (int) m_pass );
 	config.Write(_T("MirrorAxis"), (int) m_mirror_axis );
+	config.Write(_T("MinCorneringAngle"), m_min_cornering_angle);
 }
 
 static void on_set_border_width(double value, HeeksObj* object)
 {
 	((CInlay*)object)->m_params.m_border_width = value;
+	((CInlay*)object)->WriteDefaultValues();
+}
+
+static void on_set_min_cornering_angle(double value, HeeksObj* object)
+{
+	((CInlay*)object)->m_params.m_min_cornering_angle = value;
 	((CInlay*)object)->WriteDefaultValues();
 }
 
@@ -194,12 +203,13 @@ void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 				female_choice = 1;
 				male_choice = 0;
 			}
-			
+
 			list->push_back(new PropertyChoice(_("Female Op Fixture"), choices, female_choice, parent, on_set_female_fixture));
 			list->push_back(new PropertyChoice(_("Male Op Fixture"), choices, male_choice, parent, on_set_male_fixture));
 		}
 	}
 
+	list->push_back(new PropertyLength(_("Min Cornering Angle (degrees)"), m_min_cornering_angle, parent, on_set_min_cornering_angle));
 }
 
 void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
@@ -213,6 +223,7 @@ void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("pass", (int) m_pass);
 	element->SetAttribute("mirror_axis", (int) m_mirror_axis);
 	element->SetAttribute("female_before_male_fixtures", (int) (m_female_before_male_fixtures?1:0));
+	element->SetAttribute("min_cornering_angle", m_min_cornering_angle);
 }
 
 void CInlayParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -225,6 +236,8 @@ void CInlayParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	int temp;
 	pElem->Attribute("female_before_male_fixtures", (int *) &temp);
 	m_female_before_male_fixtures = (temp != 0);
+
+	if (pElem->Attribute("min_cornering_angle")) pElem->Attribute("min_cornering_angle", &m_min_cornering_angle);
 }
 
 
@@ -344,12 +357,12 @@ Python CInlay::SelectFixture( CMachineState *pMachineState, const bool female_ha
 			// We're doing the male half.
 			if (m_params.m_female_before_male_fixtures)
 			{
-				// Select the first of the two fixtues.
+				// Select the second of the two fixtues.
 				python << pMachineState->Fixture(*(fixtures.rbegin()));
 			}
 			else
 			{
-				// Select the second of the two fixtures.
+				// Select the first of the two fixtures.
 				python << pMachineState->Fixture(*(fixtures.begin()));
 			}
 		} // End if - else
@@ -567,20 +580,19 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 }
 
 
-
-
 /**
     We need to move from the bottom-most wire to the corresponding corners
     of each wire above it.  This will sharpen the concave corners formed
     between adjacent edges.
  */
-Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) const
+Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMachineState *pMachineState ) const
 {
 	Python python;
 
     // Gather a list of all corner coordinates and the angles formed there for each wire.
 	Corners_t corners;
     typedef std::set<CNCPoint> Coordinates_t;
+    typedef std::vector<CNCPoint> SortedCoordinates_t;
     Coordinates_t coordinates;
 
 	double theta = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
@@ -636,9 +648,33 @@ Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) con
     // We now have all the coordinates and vectors of all the edges in the wire.  Look at
     // each coordinate, discard duplicate vectors and find the angle between the two
     // vectors formed at each coordinate.
+    SortedCoordinates_t sorted_coordinates;
+
+    std::copy( coordinates.begin(), coordinates.end(), std::inserter( sorted_coordinates, sorted_coordinates.begin() ));
+
+    for (SortedCoordinates_t::iterator l_itPoint = sorted_coordinates.begin(); l_itPoint != sorted_coordinates.end(); l_itPoint++)
+    {
+        if (l_itPoint == sorted_coordinates.begin())
+        {
+            sort_points_by_distance compare( pMachineState->Location() );
+            std::sort( sorted_coordinates.begin(), sorted_coordinates.end(), compare );
+        } // End if - then
+        else
+        {
+            // We've already begun.  Just sort based on the previous point's location.
+            SortedCoordinates_t::iterator l_itNextPoint = l_itPoint;
+            l_itNextPoint++;
+
+            if (l_itNextPoint != sorted_coordinates.end())
+            {
+                sort_points_by_distance compare( *l_itPoint );
+                std::sort( l_itNextPoint, sorted_coordinates.end(), compare );
+            } // End if - then
+        } // End if - else
+    } // End for
 
     gp_Vec reference( 0, 0, -1 );    // Looking from the top down.
-    for (Coordinates_t::iterator itCoordinate = coordinates.begin(); itCoordinate != coordinates.end(); itCoordinate++)
+    for (SortedCoordinates_t::iterator itCoordinate = sorted_coordinates.begin(); itCoordinate != sorted_coordinates.end(); itCoordinate++)
     {
 		if (corners[*itCoordinate].size() == 2)
 		{
@@ -650,6 +686,34 @@ Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit ) con
 			{
 				points.push_back(itSimilar->first);
 			}
+
+			// We don't want to form corners on two intersecting edges if the angle of intersection
+            // is too shallow.  i.e. if there are two lines that are mostly pointing in the same
+            // direction, we don't want to waste time forming the corners at their intersection.
+
+            gp_Vec reference(0,0,-1);
+            std::vector<CNCVector> vectors;
+            std::copy( similar[*itCoordinate].begin(), similar[*itCoordinate].end(), std::inserter( vectors, vectors.begin() ) );
+
+            double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
+            double angle2 = vectors[1].AngleWithRef( gp_Vec(1,0,0), reference );
+
+            while (angle1 < 0) angle1 += (2.0 * PI);
+            while (angle2 < 0) angle2 += (2.0 * PI);
+
+            double min_cornering_angle_in_radians = (m_params.m_min_cornering_angle / 360.0) * (2.0 * PI);
+            if (fabs(angle1 - angle2) < min_cornering_angle_in_radians) continue;
+            if (angle1 < angle2)
+            {
+                if (fabs((angle1+PI) - angle2) < min_cornering_angle_in_radians) continue;
+            }
+            else
+            {
+                if (fabs(angle1 - (angle2+PI)) < min_cornering_angle_in_radians) continue;
+            }
+
+
+
 
 			// All these corners lay along the same vector (when viewed from the top down)
 			// as this corner.  Look for the one with the highest Z value and move up
@@ -886,8 +950,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 		    if (fabs(*itDepth - m_depth_op_params.m_start_depth) > heeksCAD->GetTolerance())
 		    {
                 python << CContour::GeneratePathFromWire((*itValley)[*itDepth],
-                                                        last_position,
-                                                        pMachineState->Fixture(),
+                                                        pMachineState,
                                                         m_depth_op_params.m_clearance_height,
                                                         m_depth_op_params.m_rapid_down_to_height );
 		    } // End if - then
@@ -895,7 +958,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
 		// the concave corners formed between adjacent edges.
-		python << FormCorners( *itValley, CCuttingTool::Find(m_cutting_tool_number) );
+		python << FormCorners( *itValley, CCuttingTool::Find(m_cutting_tool_number), pMachineState );
 	} // End for
 
 	return(python);
@@ -1308,8 +1371,7 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 			python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the chamfering bit.
 
 			python << CContour::GeneratePathFromWire(tool_path_wire,
-													last_position,
-													pMachineState->Fixture(),
+													pMachineState,
 													m_depth_op_params.m_clearance_height,
 													m_depth_op_params.m_rapid_down_to_height );
 		} // End for
