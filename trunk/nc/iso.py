@@ -522,7 +522,8 @@ class CreatorIso(nc.Creator):
         self.prev_drill = ''
         self.prev_g0123 = ''
         self.prev_z = ''   
-        self.prev_f = ''     
+        self.prev_f = '' 
+        self.prev_retract = ''    
     ############################################################################
     ##  Misc
 
