@@ -817,6 +817,13 @@ void CProfile::GetProperties(std::list<Property *> *list)
 	CDepthOp::GetProperties(list);
 }
 
+ObjectCanvas* CProfile::GetDialog(wxWindow* parent)
+{
+	static ObjectCanvas* object_canvas = NULL;
+	if(object_canvas == NULL)object_canvas = new PictureCanvas(parent, wxImage(theApp.GetResFolder() + _T("/bitmaps/dlgprofile.png")));
+	return object_canvas;
+}
+
 static CProfile* object_for_pick = NULL;
 
 class PickStart: public Tool{

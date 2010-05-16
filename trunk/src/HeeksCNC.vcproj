@@ -769,6 +769,14 @@
 			>
 		</File>
 		<File
+			RelativePath="$(HEEKSCADPATH)\interface\PictureFrame.cpp"
+			>
+		</File>
+		<File
+			RelativePath="$(HEEKSCADPATH)\interface\PictureFrame.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Pocket.cpp"
 			>
 		</File>
