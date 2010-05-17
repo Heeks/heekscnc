@@ -500,7 +500,7 @@ double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
 
 	return(0.0);
 
-} // End Angle() method
+} // End CornerAngle() method
 
 
 /**
@@ -666,42 +666,27 @@ bool CInlay::CornerNeedsSharpenning(Corners_t::iterator itCorner) const
 		return(false);
 	}
 
-	double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
+    double min_cornering_angle_in_radians = (m_params.m_min_cornering_angle / 360.0) * (2.0 * PI);
+
+    double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
 	double angle2 = vectors[1].AngleWithRef( gp_Vec(1,0,0), reference );
 
 	while (angle1 < 0) angle1 += (2.0 * PI);
 	while (angle2 < 0) angle2 += (2.0 * PI);
 
-	double min_cornering_angle_in_radians = (m_params.m_min_cornering_angle / 360.0) * (2.0 * PI);
+    if (angle1 < angle2)
+    {
+        double angle = angle2 - angle1;
+        if (angle > PI) angle -= PI;
+        return(angle < min_cornering_angle_in_radians);
+    }
+    else
+    {
+        double angle = angle1 - angle2;
+        if (angle > PI) angle -= PI;
+        return(angle < min_cornering_angle_in_radians);
+    }
 
-	if (angle1 < angle2)
-	{
-		if ((angle2 - angle1) < min_cornering_angle_in_radians)
-		{
-			return(true);
-		}
-
-		// These two edges are close enough to colinear that we shouldn't spend time sharpenning the corner formed between them.
-		if (fabs((angle1+PI) - angle2) < min_cornering_angle_in_radians)
-		{
-			return(false);
-		}
-	}
-	else
-	{
-		if ((angle1 - angle2) < min_cornering_angle_in_radians)
-		{
-			return(true);
-		}
-
-		// These two edges are close enough to colinear that we shouldn't spend time sharpenning the corner formed between them.
-		if (fabs(angle1 - (angle2+PI)) < min_cornering_angle_in_radians)
-		{
-			return(false);
-		}
-	}
-
-	return(true);
 } // End of CornerNeedsSharpenning() method
 
 
