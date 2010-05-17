@@ -82,6 +82,58 @@ public:
 
 class CInlay: public CDepthOp {
 private:
+	class CDouble
+	{
+	public:
+		CDouble(const double value)
+		{
+			m_value = value;
+		}
+
+		~CDouble() { }
+
+		CDouble( const CDouble & rhs )
+		{
+			*this = rhs;
+		}
+
+		CDouble & operator= ( const CDouble & rhs )
+		{
+			if (this != &rhs)
+			{
+				m_value = rhs.m_value;
+			}
+
+			return(*this);
+		}
+
+		bool operator==( const CDouble & rhs ) const
+		{
+			if (fabs(m_value - rhs.m_value) < (2.0 * heeksCAD->GetTolerance())) return(true);
+			return(false);
+		}
+
+		bool operator< (const CDouble & rhs ) const
+		{
+			if (*this == rhs) return(false);
+			return(m_value < rhs.m_value);
+		}
+
+		bool operator<= (const CDouble & rhs ) const
+		{
+			if (*this == rhs) return(true);
+			return(m_value < rhs.m_value);
+		}
+
+		bool operator> (const CDouble & rhs ) const
+		{
+			if (*this == rhs) return(false);
+			return(m_value > rhs.m_value);
+		}
+
+	private:
+		double	m_value;
+	};
 
 public:
 	/**
@@ -164,7 +216,7 @@ public:
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
 	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
 	Python FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMachineState *pMachineState ) const;
-	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners ) const;
+	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners, const double max_height ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
 	Valleys_t DefineValleys(CMachineState *pMachineState);
@@ -178,6 +230,7 @@ public:
 	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(2); }
 
 	Python SelectFixture( CMachineState *pMachineState, const bool female_half );
+	bool CornerNeedsSharpenning(Corners_t::iterator itCorner) const;
 
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);

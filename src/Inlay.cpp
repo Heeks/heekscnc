@@ -44,6 +44,7 @@
 #include <BRepTools.hxx>
 #include <BRepMesh.hxx>
 #include <Poly_Polygon3D.hxx>
+#include <gp_Lin.hxx>
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -56,7 +57,7 @@ void CInlayParams::set_initial_values()
 	config.Read(_T("ClearanceTool"), &m_clearance_tool, 0);
 	config.Read(_T("Pass"), (int *) &m_pass, (int) eBoth );
 	config.Read(_T("MirrorAxis"), (int *) &m_mirror_axis, (int) eXAxis );
-	config.Read(_T("MinCorneringAngle"), (double *) &m_min_cornering_angle, 30.0);
+	config.Read(_T("MinCorneringAngle"), (double *) &m_min_cornering_angle, 135.0);
 
 }
 
@@ -305,6 +306,9 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 
 	Valleys_t valleys = DefineValleys(pMachineState);
 
+	// NOTE: These valleys are NOT aligned with the fixtures yet.  This needs to be done
+	// individually for each of the different fixtures later on.
+
 	switch (m_params.m_pass)
 	{
 	case CInlayParams::eBoth:
@@ -499,8 +503,14 @@ double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
 } // End Angle() method
 
 
+/**
+    Find the two vectors associated with this coordinate.  These represent the two edges joining at
+    this coordinate.  If we draw a line at the mid-angle between these two vectors and then we rotate
+    that line down at the cutting tool's angle then we will be able to find other corners that are
+    made below this one.
+ */
 
-CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners ) const
+CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners, const double max_height ) const
 {
 	/*
 	// Test cases.
@@ -546,38 +556,153 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 	*/
 
 	Corners_t results;
+	typedef std::map<CDouble, CNCPoint > ClosestVertices_t;
+	ClosestVertices_t closest_vertices;
 
 	if (corners.find(coordinate) == corners.end())
 	{
 		return(results);	// Empty set.
 	}
 
+	// Get a distinct set of depth values from all the valley lines.
+	for (Corners_t::iterator itCorner = corners.begin(); itCorner != corners.end(); itCorner++)
+	{
+		closest_vertices.insert(std::make_pair(itCorner->first.Z(), itCorner->first));
+	} // End for
+
 	if (corners[coordinate].size() == 2)
 	{
 		double reference_angle = CornerAngle(corners[coordinate]);
 
-		// Look for all corners whose mid-angle is similar to this one and whose
-		// coordinates lay along this same vector.
+		// This reference_angle is the angle of the line coming from the corner half way
+		// between the two connected edges.  i.e. it bisects the angle formed by the
+		// two edges.
+		//
+		// Form a line that extends along the positive X axis (to start with)
+		gp_Pnt endpoint(50,0,0); // Along the X axis.
 
-		for (Corners_t::const_iterator itCorner = corners.begin(); itCorner != corners.end(); itCorner++)
+		// Rotate that line down (around the Y axis) so that it aligns with the cutting edge
+		// of the chamfering bit.
+        double cutting_tool_angle = 45.0;
+		gp_Trsf rotate_to_match_cutting_tool;
+		rotate_to_match_cutting_tool.SetRotation( gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,-1,0)), (-90.0 - cutting_tool_angle) / 360.0 * 2.0 * PI );
+		endpoint.Transform(rotate_to_match_cutting_tool);
+
+		// Now rotate the line around so that it aligns with the bisecting angle between
+		// the two connected edges.
+		gp_Trsf rotate;
+		rotate.SetRotation( gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), reference_angle );
+		endpoint.Transform(rotate);
+
+		// We have been doing these rotations around the origin so far.  Translate this line out
+		// to this particular corner point.
+		gp_Trsf translate;
+		translate.SetTranslation(gp_Pnt(0,0,0), coordinate);
+		endpoint.Transform(translate);
+
+		// This should now be close to pointing to where the
+		// toolpath wires have their vertices.  It won't be exactly through their vertices
+		// due to the fact that the cutting tool won't be able to get right into the top-most
+		// corner due to its circular shape.  To allow for this, we will find the closes
+		// vertex to this line at each level of depth.  These, together, will form the
+		// toolpath required to sharpen the edges.
+
+		// Draw a line in the graphics file for DEBUG purposes ONLY.
+		double start[3], end[3];
+		CNCPoint s(coordinate); s.ToDoubleArray(start);
+		CNCPoint e(endpoint); e.ToDoubleArray(end);
+		// heeksCAD->Add(heeksCAD->NewLine(start,end), NULL);
+
+		// The endpoint now represents a vector (from the origin) that points half way between
+		// the two edge angles as well as down at the cutting tool's angle.  Find the closest
+		// points to this line at each of the valley's depths.  These points will form the
+		// toolpath we need.
+
+		gp_Lin cutting_line(s, gp_Dir(gp_Vec(s, e)));
+
+		// Now see how far the other coordinates are away from this line.
+		for (Corners_t::iterator itCorner = corners.begin(); itCorner != corners.end(); itCorner++)
 		{
-			double tolerance = heeksCAD->GetTolerance();
-			double angle = CornerAngle(itCorner->second);
-			if ((angle >= reference_angle) && ((angle - reference_angle) < tolerance))
+			CNCPoint coordinate(itCorner->first);
+			double distance = cutting_line.SquareDistance(itCorner->first);
+
+			CNCPoint previous_coordinate(closest_vertices[itCorner->first.Z()]);
+			double previous_distance = cutting_line.SquareDistance(previous_coordinate);
+
+			if (distance < previous_distance)
 			{
-				// Todo, check that the corners lay along the same line as the reference corner's mid-angle.
-				results.insert(*itCorner);
+				closest_vertices[CDouble(itCorner->first.Z())] = itCorner->first;
 			}
-			else if ((angle <= reference_angle) && ((reference_angle - angle) < tolerance))
-			{
-				// Todo, check that the corners lay along the same line as the reference corner's mid-angle.
-				results.insert(*itCorner);
-			}
+		} // End for
+
+		for (ClosestVertices_t::iterator itClosestVertex = closest_vertices.begin(); itClosestVertex != closest_vertices.end();
+				itClosestVertex++)
+		{
+			results.insert(std::make_pair(itClosestVertex->second, corners[itClosestVertex->second]));
 		}
 	} // End if - then
 
 	return(results);
 }
+
+
+/**
+	We don't want to add the corner-shapenning toolpaths for every intersection of every
+	edge.  If the two edges form a sharp corner then we need to do the work but if they
+	lay along mostly the same direction then our chamfering bit will be able to run
+	between the two edges without further clean-out work required.  This routine uses
+	the angles of the two edges to decide whether the cornering work is required.
+ */
+bool CInlay::CornerNeedsSharpenning(Corners_t::iterator itCorner) const
+{
+	gp_Vec reference(0,0,-1);
+	std::vector<CNCVector> vectors;
+	std::copy( itCorner->second.begin(), itCorner->second.end(), std::inserter( vectors, vectors.begin() ) );
+
+	if (vectors.size() != 2)
+	{
+		// There are not exactly two edges coming into this point.  We can't make
+		// a decision based on this geometry.
+		return(false);
+	}
+
+	double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
+	double angle2 = vectors[1].AngleWithRef( gp_Vec(1,0,0), reference );
+
+	while (angle1 < 0) angle1 += (2.0 * PI);
+	while (angle2 < 0) angle2 += (2.0 * PI);
+
+	double min_cornering_angle_in_radians = (m_params.m_min_cornering_angle / 360.0) * (2.0 * PI);
+
+	if (angle1 < angle2)
+	{
+		if ((angle2 - angle1) < min_cornering_angle_in_radians)
+		{
+			return(true);
+		}
+
+		// These two edges are close enough to colinear that we shouldn't spend time sharpenning the corner formed between them.
+		if (fabs((angle1+PI) - angle2) < min_cornering_angle_in_radians)
+		{
+			return(false);
+		}
+	}
+	else
+	{
+		if ((angle1 - angle2) < min_cornering_angle_in_radians)
+		{
+			return(true);
+		}
+
+		// These two edges are close enough to colinear that we shouldn't spend time sharpenning the corner formed between them.
+		if (fabs(angle1 - (angle2+PI)) < min_cornering_angle_in_radians)
+		{
+			return(false);
+		}
+	}
+
+	return(true);
+} // End of CornerNeedsSharpenning() method
 
 
 /**
@@ -594,9 +719,8 @@ Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMac
     typedef std::set<CNCPoint> Coordinates_t;
     typedef std::vector<CNCPoint> SortedCoordinates_t;
     Coordinates_t coordinates;
-
-	double theta = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
-	double max_plunge_depth = (pChamferingBit->m_params.m_diameter / 2.0) * tan(theta);
+    double highest = 0.0;
+    double lowest = 0.0;
 
     for (Valley_t::iterator itWire = wires.begin(); itWire != wires.end(); itWire++)
     {
@@ -642,16 +766,20 @@ Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMac
 
             coordinates.insert( CNCPoint(PS) );
             coordinates.insert( CNCPoint(PE) );
+
+            if (PS.Z() > highest) highest = PS.Z();
+            if (PS.Z() < lowest) lowest = PS.Z();
+
+            if (PE.Z() > highest) highest = PE.Z();
+            if (PE.Z() < lowest) lowest = PE.Z();
         } // End for
     } // End for
 
-    // We now have all the coordinates and vectors of all the edges in the wire.  Look at
-    // each coordinate, discard duplicate vectors and find the angle between the two
-    // vectors formed at each coordinate.
+    // Sort the coordinates of all the edges so that they're arranged geographically from the
+	// current machine location.  We want to minimize rapid movements between these corner-forming
+	// toolpaths.
     SortedCoordinates_t sorted_coordinates;
-
     std::copy( coordinates.begin(), coordinates.end(), std::inserter( sorted_coordinates, sorted_coordinates.begin() ));
-
     for (SortedCoordinates_t::iterator l_itPoint = sorted_coordinates.begin(); l_itPoint != sorted_coordinates.end(); l_itPoint++)
     {
         if (l_itPoint == sorted_coordinates.begin())
@@ -673,84 +801,108 @@ Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMac
         } // End if - else
     } // End for
 
+	// We now have all the coordinates and vectors of all the edges in the wire.  Look at
+    // each coordinate, discard duplicate vectors and find the angle between the two
+    // vectors formed at each coordinate.
+
     gp_Vec reference( 0, 0, -1 );    // Looking from the top down.
     for (SortedCoordinates_t::iterator itCoordinate = sorted_coordinates.begin(); itCoordinate != sorted_coordinates.end(); itCoordinate++)
     {
+		if (CDouble(highest) > CDouble(itCoordinate->Z()))
+		{
+			// This is a corner on one of the lower level wires.  Don't bother forming corners
+			// here as this point will have been picked up when the top-level wire was
+			// processed.
+			continue;
+		}
+
 		if (corners[*itCoordinate].size() == 2)
 		{
-			Corners_t similar = FindSimilarCorners(*itCoordinate, corners);
-
-			// Sort the corner coordinates in Z order and move between them.
-			std::list<CNCPoint> points;
-			for (Corners_t::iterator itSimilar = similar.begin(); itSimilar != similar.end(); itSimilar++)
-			{
-				points.push_back(itSimilar->first);
-			}
+			Corners_t similar = FindSimilarCorners(*itCoordinate, corners, highest - lowest);
 
 			// We don't want to form corners on two intersecting edges if the angle of intersection
             // is too shallow.  i.e. if there are two lines that are mostly pointing in the same
             // direction, we don't want to waste time forming the corners at their intersection.
+			// Discard corners that do not require special attention.
+			for (Corners_t::iterator itSimilar = similar.begin(); itSimilar != similar.end(); /* increment within loop */ )
+			{
+				if (CornerNeedsSharpenning(itSimilar) == false)
+				{
+				    Corners_t::iterator itNext = itSimilar;
+				    itNext++;
+					similar.erase(itSimilar);
+					itSimilar = itNext;
+				}
+				else
+				{
+					itSimilar++;
+				}
+			} // End for
 
-            gp_Vec reference(0,0,-1);
-            std::vector<CNCVector> vectors;
-            std::copy( similar[*itCoordinate].begin(), similar[*itCoordinate].end(), std::inserter( vectors, vectors.begin() ) );
+			if (similar.size() < 2)
+			{
+				// We require at least one top and one bottom point to make a toolpath.
+				continue;
+			}
 
-            double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
-            double angle2 = vectors[1].AngleWithRef( gp_Vec(1,0,0), reference );
-
-            while (angle1 < 0) angle1 += (2.0 * PI);
-            while (angle2 < 0) angle2 += (2.0 * PI);
-
-            double min_cornering_angle_in_radians = (m_params.m_min_cornering_angle / 360.0) * (2.0 * PI);
-            if (fabs(angle1 - angle2) < min_cornering_angle_in_radians) continue;
-            if (angle1 < angle2)
-            {
-                if (fabs((angle1+PI) - angle2) < min_cornering_angle_in_radians) continue;
-            }
-            else
-            {
-                if (fabs(angle1 - (angle2+PI)) < min_cornering_angle_in_radians) continue;
-            }
-
-
-
-
-			// All these corners lay along the same vector (when viewed from the top down)
-			// as this corner.  Look for the one with the highest Z value and move up
-			// to that one.
-
-			CNCPoint top_corner(*itCoordinate);
-			CNCPoint bottom_corner(*itCoordinate);
+			// The path between these corners represents the toolpath required to sharpen the corner.  Move
+			// from the bottom to the top.  The CDouble class is nothing more than a C++ class to handle
+			// the comparison of double values while taking into account the geometry tolerance configured.
+			std::list<CDouble> depths;
 
 			for (Corners_t::iterator itCorner = similar.begin(); itCorner != similar.end(); itCorner++)
 			{
-				if (itCorner->first.Z() > top_corner.Z())
-				{
-					top_corner = itCorner->first;
-				} // End if - then
-
-				if (itCorner->first.Z() < bottom_corner.Z())
-				{
-					bottom_corner = itCorner->first;
-				} // End if - then
+				depths.push_back(itCorner->first.Z());
 			} // End for
 
-			if ((top_corner.Z() > bottom_corner.Z()) && ((top_corner.Z() - bottom_corner.Z()) <= max_plunge_depth))
+			depths.sort();
+
+			CNCPoint top_corner;
+			CNCPoint bottom_corner;
+
+			// Obtain the top-most and bottom-most corner coordinates from these 'similar' corners.
+			for (Corners_t::iterator itCorner = similar.begin(); itCorner != similar.end(); itCorner++)
 			{
-				// Move to the top corner and back again.
-				python << _T("comment('sharpen corner')\n");
-				python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-				python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(")\n");
-				python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-				python << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
-				python << _T("feed(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << top_corner.Z(true) << _T(")\n");
-				python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-			} // End if - then
+				if (itCorner == similar.begin())
+				{
+					top_corner = itCorner->first;
+					bottom_corner = itCorner->first;
+				}
+				else
+				{
+					if (top_corner.Z() < itCorner->first.Z()) top_corner = itCorner->first;
+					if (bottom_corner.Z() > itCorner->first.Z()) bottom_corner = itCorner->first;
+				}
+			}
+
+			// We have done all this processing on un-adjusted coordinates so far.  Adjust the bottom and top
+			// coordinates to align with the fixture.
+			bottom_corner = pMachineState->Fixture().Adjustment(bottom_corner);
+			top_corner = pMachineState->Fixture().Adjustment(top_corner);
+
+			// Rapid into place first.
+			python << _T("comment(") << PythonString(_("sharpen corner")) << _T(")\n");
+			python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+			python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(")\n");
+			python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+			python << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
+			pMachineState->Location(bottom_corner);
+
+			// Top corner
+			python << _T("feed(x=") << top_corner.X(true) << _T(", y=") << top_corner.Y(true) << _T(", z=") << top_corner.Z(true) << _T(")\n");
+			pMachineState->Location(top_corner);
+
+			// Now get back up to clearance height.
+			CNCPoint temp(pMachineState->Location());
+			temp.SetZ(this->m_depth_op_params.m_clearance_height);
+			pMachineState->Location(temp);
+
+			python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 		} // End if - then
     }
 
 	return(python);
-}
+} // End FormCorners() method
 
 
 /**
@@ -789,10 +941,11 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 
 					TopoDS_Shape wire = fix.Wire();
 
-                    // Rotate to align with the fixture.
-					BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-					transform.Perform(wire, false);
-					wire = transform.Shape();
+					// DO NOT align wires with the fixture YET.  When we form
+					// the corners, we will assume the wires are all in the XY plane.
+					// We will rotate the wire later in the process.
+					// We also need to align the male and female halves differently due
+					// to the possible use of two fixtures.
 
                     // We want to figure out what the maximum offset is at the maximum depth atainable
                     // by the chamfering bit.  Within this smallest of wires, we need to pocket with
@@ -949,7 +1102,13 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 		    // We don't want a toolpath at the top surface.
 		    if (fabs(*itDepth - m_depth_op_params.m_start_depth) > heeksCAD->GetTolerance())
 		    {
-                python << CContour::GeneratePathFromWire((*itValley)[*itDepth],
+				// Rotate this wire to align with the fixture.
+				BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+				TopoDS_Wire wire((*itValley)[*itDepth]);
+				transform.Perform(wire, false);
+				wire = TopoDS::Wire(transform.Shape());
+
+                python << CContour::GeneratePathFromWire(wire,
                                                         pMachineState,
                                                         m_depth_op_params.m_clearance_height,
                                                         m_depth_op_params.m_rapid_down_to_height );
@@ -994,8 +1153,14 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMac
 			// and using the Clearance Tool.  Without this, the chamfering bit would need
 			// to machine out the centre of the valley as well as the walls.
 
+			// Rotate this wire to align with the fixture.
+			BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+			TopoDS_Wire wire(TopoDS::Wire((*itValley)[*itDepth]));
+			transform.Perform(wire, false);
+			wire = TopoDS::Wire(transform.Shape());
+
 			HeeksObj *pBoundary = heeksCAD->NewSketch();
-			if (heeksCAD->ConvertWireToSketch(TopoDS::Wire((*itValley)[*itDepth]), pBoundary, heeksCAD->GetTolerance()))
+			if (heeksCAD->ConvertWireToSketch(wire, pBoundary, heeksCAD->GetTolerance()))
 			{
 				std::list<HeeksObj *> objects;
 				objects.push_back(pBoundary);
@@ -1118,6 +1283,11 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 		BRepBuilderAPI_Transform rotate(rotation);
 		rotate.Perform(tool_path_wire, false);
 		tool_path_wire = TopoDS::Wire(rotate.Shape());
+
+		// Rotate this wire to align with the fixture.
+		BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+		transform.Perform(tool_path_wire, false);
+		tool_path_wire = TopoDS::Wire(transform.Shape());
 
 		HeeksObj *pBoundary = heeksCAD->NewSketch();
 		if (heeksCAD->ConvertWireToSketch(tool_path_wire, pBoundary, heeksCAD->GetTolerance()))
@@ -1367,6 +1537,11 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 			BRepBuilderAPI_Transform translate(translation);
 			translate.Perform(tool_path_wire, false);
 			tool_path_wire = TopoDS::Wire(translate.Shape());
+
+			// Rotate this wire to align with the fixture.
+			BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+			transform.Perform(tool_path_wire, false);
+			tool_path_wire = TopoDS::Wire(transform.Shape());
 
 			python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the chamfering bit.
 
