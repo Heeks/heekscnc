@@ -110,6 +110,9 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
+	// Overloaded from COp class.
+	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(0); }
+
 	Python AppendTextForSingleProbeOperation( const CNCPoint setup_point,
 						const CNCPoint retract_point,
 						const double depth,
