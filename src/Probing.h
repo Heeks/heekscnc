@@ -155,7 +155,6 @@ public:
 		return(ss);
 	}
 
-	/*
 	friend wxString & operator << ( wxString & ss, const eMovement_t & movement )
 	{
 		switch (movement)
@@ -172,7 +171,6 @@ public:
 
 		return(ss);
 	}
-	*/
 
 	friend Python & operator << ( Python & ss, const eMovement_t & movement )
 	{
@@ -204,7 +202,6 @@ public:
 		return(ss);
 	}
 
-	/*
 	friend wxString & operator << ( wxString & ss, const eCorners_t & corner )
 	{
 		switch (corner)
@@ -228,7 +225,6 @@ public:
 
 		return(ss);
 	}
-	*/
 
 	friend Python & operator << ( Python & ss, const eCorners_t & corner )
 	{
@@ -268,7 +264,6 @@ public:
 		return(ss);
 	}
 
-	/*
 	friend wxString & operator << (wxString & ss, const eEdges_t & edge)
 	{
 		switch (edge)
@@ -292,7 +287,6 @@ public:
 
 		return(ss);
 	}
-	*/
 
 	friend Python & operator << (Python & ss, const eEdges_t & edge)
 	{

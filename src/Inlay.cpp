@@ -510,7 +510,7 @@ double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
     made below this one.
  */
 
-CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners, const double max_height ) const
+CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners, const CCuttingTool *pChamferingBit ) const
 {
 	/*
 	// Test cases.
@@ -583,9 +583,8 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 
 		// Rotate that line down (around the Y axis) so that it aligns with the cutting edge
 		// of the chamfering bit.
-        double cutting_tool_angle = 45.0;
 		gp_Trsf rotate_to_match_cutting_tool;
-		rotate_to_match_cutting_tool.SetRotation( gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,-1,0)), (-90.0 - cutting_tool_angle) / 360.0 * 2.0 * PI );
+		rotate_to_match_cutting_tool.SetRotation( gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,-1,0)), (-90.0 - pChamferingBit->m_params.m_cutting_edge_angle) / 360.0 * 2.0 * PI );
 		endpoint.Transform(rotate_to_match_cutting_tool);
 
 		// Now rotate the line around so that it aligns with the bisecting angle between
@@ -695,9 +694,11 @@ bool CInlay::CornerNeedsSharpenning(Corners_t::iterator itCorner) const
     of each wire above it.  This will sharpen the concave corners formed
     between adjacent edges.
  */
-Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMachineState *pMachineState ) const
+Python CInlay::FormCorners( Valley_t & wires, CMachineState *pMachineState ) const
 {
 	Python python;
+
+	python << pMachineState->CuttingTool(m_cutting_tool_number);	// Select the chamfering bit.
 
     // Gather a list of all corner coordinates and the angles formed there for each wire.
 	Corners_t corners;
@@ -803,7 +804,7 @@ Python CInlay::FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMac
 
 		if (corners[*itCoordinate].size() == 2)
 		{
-			Corners_t similar = FindSimilarCorners(*itCoordinate, corners, highest - lowest);
+			Corners_t similar = FindSimilarCorners(*itCoordinate, corners, CCuttingTool::Find(pMachineState->CuttingTool()));
 
 			// We don't want to form corners on two intersecting edges if the angle of intersection
             // is too shallow.  i.e. if there are two lines that are mostly pointing in the same
@@ -1102,7 +1103,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 
 		// Now run through the wires map and generate the toolpaths that will sharpen
 		// the concave corners formed between adjacent edges.
-		python << FormCorners( *itValley, CCuttingTool::Find(m_cutting_tool_number), pMachineState );
+		python << FormCorners( *itValley, pMachineState );
 	} // End for
 
 	return(python);
