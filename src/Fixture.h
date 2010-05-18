@@ -32,6 +32,7 @@ public:
 	bool m_safety_height_defined;
 	double m_safety_height;
 
+	bool m_touch_off_point_defined;	// Is the m_touch_off_point valid?
 	gp_Pnt m_touch_off_point;	// Coordinate in the local coordinate system for safe starting point
 								// when switching to this fixture.
 	wxString m_touch_off_description;	// Tell the operator what to do when setting up this fixture.

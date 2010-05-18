@@ -215,8 +215,8 @@ public:
 	static std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire );
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
 	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
-	Python FormCorners( Valley_t & wires, CCuttingTool *pChamferingBit, CMachineState *pMachineState ) const;
-	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners, const double max_height ) const;
+	Python FormCorners( Valley_t & wires, CMachineState *pMachineState ) const;
+	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners, const CCuttingTool *pChamferingBit ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
 	Valleys_t DefineValleys(CMachineState *pMachineState);
