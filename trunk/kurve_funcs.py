@@ -220,11 +220,15 @@ def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius =
         for span in range(0, kurve.num_spans(offset_k)):
             sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, span)
             if span == 0:#first span
-                # rapid across to it
-                rapid(sx, sy)
-                
+                #I changed order of rapids from rapid(sx,sy)>rapid(z = mat_depth + incremental_rapid_height)
+                #to rapid(z = mat_depth + incremental_rapid_height)>rapid(sx,sy)
+                #because tool was rapiding across and through part if profile was open
+                #not sure how this will affect tags because I haven't tried them yet -Dan Falck-
+
                 # rapid down to just above the material, which might be at the top of the tag
                 rapid(z = mat_depth + incremental_rapid_height)
+                # rapid across to it
+                rapid(sx, sy)
 
                 # feed down to depth
                 mat_depth = depth
