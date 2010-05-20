@@ -807,6 +807,11 @@ static void RunPythonScript()
 		wxFile f(backplot_path.c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
+
+	// copy the contents of the program canvas to the string
+	theApp.m_program->m_python_program.clear();
+	theApp.m_program->m_python_program << theApp.m_program_canvas->m_textCtrl->GetValue();
+
 	HeeksPyPostProcess(theApp.m_program, theApp.m_program->GetOutputFileName(), true );
 }
 
