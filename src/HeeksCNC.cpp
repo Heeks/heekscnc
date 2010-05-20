@@ -808,9 +808,21 @@ static void RunPythonScript()
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
 
-	// copy the contents of the program canvas to the string
-	theApp.m_program->m_python_program.clear();
-	theApp.m_program->m_python_program << theApp.m_program_canvas->m_textCtrl->GetValue();
+	// Check to see if someone has modified the contents of the
+	// program canvas manually.  If so, replace the m_python_program
+	// with the edited program.  We don't want to do this without
+	// this check since the maximum size of m_textCtrl is sometimes
+	// a limitation to the size of the python program.  If the first 'n' characters
+	// of m_python_program matches the full contents of the m_textCtrl then
+	// it's likely that the text control holds as much of the python program
+	// as it can hold but more may still exist in m_python_program.
+	unsigned int text_control_length = theApp.m_program_canvas->m_textCtrl->GetLastPosition();
+	if (theApp.m_program->m_python_program.substr(0,text_control_length) != theApp.m_program_canvas->m_textCtrl->GetValue())
+	{
+        // copy the contents of the program canvas to the string
+        theApp.m_program->m_python_program.clear();
+        theApp.m_program->m_python_program << theApp.m_program_canvas->m_textCtrl->GetValue();
+	}
 
 	HeeksPyPostProcess(theApp.m_program, theApp.m_program->GetOutputFileName(), true );
 }
