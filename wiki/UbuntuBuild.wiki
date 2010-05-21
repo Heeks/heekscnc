@@ -1,3 +1,5 @@
+=For more current build instructions for Ubuntu please refer to http://code.google.com/p/heekscad/wiki/UbuntuInstallation=
+
 #summary How to build for Ubuntu
 
 First build HeeksCAD for Ubuntu. ( see http://code.google.com/p/heekscad/wiki/CompilingForUbuntu )
