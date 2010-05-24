@@ -1069,6 +1069,22 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Tag.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Tag.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Tags.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Tags.h"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\tinyxml\tinystr.cpp"
 			>
 			<FileConfiguration

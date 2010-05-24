@@ -19,68 +19,109 @@ def make_smaller( k, startx = None, starty = None, finishx = None, finishy = Non
         if finishy == None: finishy = ey
 
         kurve.change_end(k, finishx, finishy)
+        
+class Tag:
+    def __init__(self, x, y, width, angle, height):
+        self.x = x
+        self.y = y
+        self.width = width # measured at the top of the tag. In the toolpath, the tag width will be this with plus the tool diameter, so that the finished tag has this "width" at it's smallest
+        self.angle = angle # the angle of the ramp in radians. Between 0 and Pi/2; 0 is horizontal, Pi/2 is vertical
+        self.height = height # the height of the tag, always measured above "final_depth"
+        self.ramp_width = self.height / math.tan(self.angle)
+        
+    def split_kurve(self, k, radius, start_depth, depth, final_depth):
+        tag_top_depth = final_depth + self.height
+        if depth > tag_top_depth - 0.0000001:
+            return # kurve is above this tag, so doesn't need splitting
+        
+        height_above_depth = tag_top_depth - depth
+        ramp_width_at_depth = height_above_depth / math.tan(self.angle)
+        cut_depth = start_depth - depth
+        half_flat_top = radius + self.width / 2
 
-def split_for_tags( k, radius, start_depth, depth, tag ):
-    num_tags, tag_width, tag_angle, tag_at_start = tag
-    tag_height = tag_width/2 * math.tan(tag_angle)
-    perim = kurve.perim(k)
-    sub_perim = perim / num_tags
-    half_flat_top = radius
-    if tag_height > (start_depth - depth):
-        # cut the top off the tag
-        chop_off_height = tag_height - (start_depth - depth)
-        half_flat_top += chop_off_height / math.tan(tag_angle)
-
-    for i in range(0, num_tags):
-        d = sub_perim * i
-        if tag_at_start == False: d += sub_perim / 2
-
+        d = kurve.point_to_perim(k, self.x, self.y)
         d0 = d - half_flat_top
-        while d0 < 0: d0 += perim
-        while d0 > perim: d0 -= perim
+        perim = kurve.perim(k)
+        if kurve.is_closed(k):
+            while d0 < 0: d0 += perim
+            while d0 > perim: d0 -= perim
         px, py = kurve.perim_to_point(k, d0)
         kurve.kbreak(k, px, py)
         d1 = d + half_flat_top
-        while d1 < 0: d1 += perim
-        while d1 > perim: d1 -= perim
+        if kurve.is_closed(k):
+            while d1 < 0: d1 += perim
+            while d1 > perim: d1 -= perim
         px, py = kurve.perim_to_point(k, d1)
         kurve.kbreak(k, px, py)
         
-        if tag_width + 2 * radius > sub_perim:
-            px, py = kurve.perim_to_point(k, d + sub_perim/2)
-            kurve.kbreak(k, px, py)
-        else:
-            d0 = d - tag_width/2 - radius
+        d0 = d - half_flat_top - ramp_width_at_depth
+        if kurve.is_closed(k):
             while d0 < 0: d0 += perim
             while d0 > perim: d0 -= perim
-            px, py = kurve.perim_to_point(k, d0)
-            kurve.kbreak(k, px, py)
-            d1 = d + tag_width/2 + radius
+        px, py = kurve.perim_to_point(k, d0)
+        kurve.kbreak(k, px, py)
+        d1 = d + half_flat_top + ramp_width_at_depth
+        if kurve.is_closed(k):
             while d1 < 0: d1 += perim
             while d1 > perim: d1 -= perim
-            px, py = kurve.perim_to_point(k, d1)
-            kurve.kbreak(k, px, py)
+        px, py = kurve.perim_to_point(k, d1)
+        kurve.kbreak(k, px, py)
+        
+    def get_z_at_perim(self, current_perim, k, radius, start_depth, depth, final_depth):
+        # return the z for this position on the kurve ( specified by current_perim ), for this tag
+        # if the position is not within the tag, then depth is returned
+        cut_depth = start_depth - depth
+        half_flat_top = radius + self.width / 2
 
-def get_tag_z_for_span(current_perim, k, radius, start_depth, depth, tag):
-    num_tags, tag_width, tag_angle, tag_at_start = tag
-    tag_height = tag_width/2 * math.tan(tag_angle)
+        z = depth
+        d = kurve.point_to_perim(k, self.x, self.y)
+        dist_from_d = math.fabs(current_perim - d)
+        if dist_from_d < half_flat_top:
+            # on flat top of tag
+            z = final_depth + self.height
+        elif dist_from_d < half_flat_top + self.ramp_width:
+            # on ramp
+            dist_up_ramp = (half_flat_top + self.ramp_width) - dist_from_d
+            z = final_depth + dist_up_ramp * math.tan(self.angle)
+        if z < depth: z = depth
+        return z
+            
+tags = []
+
+def clear_tags():
+    global tags
+    tags = []
+    
+def add_tag(x, y, width, angle, height):
+    global tags
+    tag = Tag(x, y, width, angle, height)
+    tags.append(tag)
+
+def split_for_tags( k, radius, start_depth, depth, final_depth ):
+    global tags
+    for tag in tags:
+        tag.split_kurve(k, radius, start_depth, depth, final_depth)
+
+def get_tag_z_for_span(current_perim, k, radius, start_depth, depth, final_depth):
+    global tags
+    max_z = None
     perim = kurve.perim(k)
-    sub_perim = perim / num_tags
-    max_z = depth
-    for i in range(0, num_tags + 1):
-        d = sub_perim * i
-        if (tag_at_start == False) and (i != num_tags + 1): d += sub_perim / 2
-        dist_from_d = math.fabs(current_perim - d) - radius
-        if dist_from_d < 0: dist_from_d = 0
-        z = (depth + tag_height) - (dist_from_d / ( tag_width / 2 )) * tag_height
-        if z > max_z: max_z = z
-
-    if max_z > start_depth:
-        max_z = start_depth
+    for tag in tags:
+        z = tag.get_z_at_perim(current_perim, k, radius, start_depth, depth, final_depth)
+        if max_z == None or z > max_z:
+            max_z = z
+        if kurve.is_closed(k):
+            # do the same test, wrapped around the closed kurve
+            z = tag.get_z_at_perim(current_perim - perim, k, radius, start_depth, depth, final_depth)
+            if max_z == None or z > max_z:
+                max_z = z
+            z = tag.get_z_at_perim(current_perim + perim, k, radius, start_depth, depth, final_depth)
+            if max_z == None or z > max_z:
+                max_z = z
         
     return max_z
 
-def add_roll_on(k, direction, roll_radius, offset_extra, roll_on):
+def add_roll_on(k, roll_on_k, direction, roll_radius, offset_extra, roll_on):
     if direction == "on": return
     if roll_on == None: return
     num_spans = kurve.num_spans(k)
@@ -100,29 +141,23 @@ def add_roll_on(k, direction, roll_radius, offset_extra, roll_on):
         rollstarty = sy + off_vy * roll_radius - vy * roll_radius
     else:
         rollstartx, rollstarty =  roll_on       
-    copy_kurve = kurve.new()
+
     sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
     if sx == rollstartx and sy == rollstarty: return
     vx, vy = kurve.get_span_dir(k, 0, 0) # get start direction
     rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, rollstartx, rollstarty)
     rdir = -rdir # because the tangential_arc was used in reverse
     
-    kurve.add_point(copy_kurve, 0, rollstartx, rollstarty, 0, 0)
-    kurve.add_point(copy_kurve, rdir, sx, sy, rcx, rcy)
+    # add a start roll on point
+    kurve.add_point(roll_on_k, 0, rollstartx, rollstarty, 0, 0)
+    # add the roll on arc
+    kurve.add_point(roll_on_k, rdir, sx, sy, rcx, rcy)
     
-    # add all the other spans
+    # add the start of the original kurve
+    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
+    kurve.add_point(roll_on_k, sp, ex, ey, cx, cy)
     
-    for span in range(0, num_spans):
-        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, span)
-        kurve.add_point(copy_kurve, sp, ex, ey, cx, cy)
-        
-    # copy back to k
-    kurve.copy(copy_kurve, k)
-    
-    # delete copy
-    kurve.delete(copy_kurve)
-    
-def add_roll_off(k, direction, roll_radius, offset_extra, roll_off):
+def add_roll_off(k, roll_off_k, direction, roll_radius, offset_extra, roll_off):
     if direction == "on": return
     if roll_off == None: return
     num_spans = kurve.num_spans(k)
@@ -143,16 +178,34 @@ def add_roll_off(k, direction, roll_radius, offset_extra, roll_off):
     else:
         rollendx, rollendy =  roll_off  
              
+    # add the end of the original kurve
     sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, num_spans - 1)
+    kurve.add_point(roll_off_k, 0, ex, ey, 0, 0)
     if ex == rollendx and ey == rollendy: return
     vx, vy = kurve.get_span_dir(k, num_spans - 1, 1) # get end direction
     rcx, rcy, rdir = kurve.tangential_arc(ex, ey, vx, vy, rollendx, rollendy)
-    
-    kurve.add_point(k, rdir, rollendx, rollendy, rcx, rcy)
+
+    # add the roll off arc  
+    kurve.add_point(roll_off_k, rdir, rollendx, rollendy, rcx, rcy)
+   
+def cut_kurve(k):
+    for span in range(0, kurve.num_spans(k)):
+        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, span)
+        
+        if sp == 0:#line
+            feed(ex, ey)
+        else:
+            cx = cx - sx # make relative to the start position
+            cy = cy - sy
+            if sp == 1:# anti-clockwise arc
+                arc_ccw(ex, ey, i = cx, j = cy)
+            else:
+                arc_cw(ex, ey, i = cx, j = cy)
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, tag = None, rapid_down_to_height = None, start_depth = None, step_down = None, final_depth = None):
+def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_down_to_height = None, clearance = None, start_depth = None, step_down = None, final_depth = None):
+    global tags
     if kurve.exists(k) == False:
         raise "kurve doesn't exist, number %d" % (k)
 
@@ -178,85 +231,86 @@ def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius =
     if kurve.num_spans(offset_k) == 0:
         raise "sketch has no spans!"
 
-    current_perim = 0.0
-
-    # add the roll on and roll off moves to the kurve
-    add_roll_on(offset_k, direction, roll_radius, offset_extra, roll_on)
-    add_roll_off(offset_k, direction, roll_radius, offset_extra, roll_on)
-    
     # do multiple depths
     total_to_cut = start_depth - final_depth;
     num_step_downs = int(float(total_to_cut) / math.fabs(step_down) + 0.999999)
 
-    # tag
-    if tag != None:
-        num_tags, tag_width, tag_angle, tag_at_start = tag
-        if tag_width < 0.00001:
-            tag = None
-        else:
-            tag_height = float(tag_width)/2 * math.tan(tag_angle)
-            tag_depth = final_depth + tag_height
-            if tag_depth > start_depth: tag_depth = start_depth
-            copy_of_offset_k = kurve.new()
-            kurve.copy(offset_k, copy_of_offset_k)
+    # tags
+    if len(tags) > 0:
+        # make a copy to restore to after each level
+        copy_of_offset_k = kurve.new()
+        kurve.copy(offset_k, copy_of_offset_k)
     
-    incremental_rapid_height = rapid_down_to_height - start_depth
     prev_depth = start_depth
     for step in range(0, num_step_downs):
         depth_of_cut = ( start_depth - final_depth ) * ( step + 1 ) / num_step_downs
         depth = start_depth - depth_of_cut
         mat_depth = prev_depth
-        if tag != None and tag_depth > mat_depth: mat_depth = tag_depth
         
-        if tag != None:
-            tag_height = tag_width/2 * math.tan(tag_angle)
-            perim = kurve.perim(offset_k)
-            sub_perim = perim / num_tags
-            lowest_z = (depth + tag_height) - ((sub_perim / 2) / ( tag_width / 2 )) * tag_height
-            if lowest_z > start_depth:
-                return # the whole layer is tag
-            split_for_tags(offset_k, radius, start_depth, depth, tag)
-            
+        if len(tags) > 0:
+            split_for_tags(offset_k, radius, start_depth, depth, final_depth)
+
+        # make the roll on and roll off kurves
+        roll_on_k = kurve.new()
+        add_roll_on(offset_k, roll_on_k, direction, roll_radius, offset_extra, roll_on)
+        roll_off_k = kurve.new()
+        add_roll_off(offset_k, roll_off_k, direction, roll_radius, offset_extra, roll_on)
+        
+        # get the tag depth at the start
+        start_z = get_tag_z_for_span(0, offset_k, radius, start_depth, depth, final_depth)
+        if start_z > mat_depth: mat_depth = start_z
+
+        # rapid across to the start
+        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(roll_on_k, 0)
+        rapid(sx, sy)
+        
+        # rapid down to just above the material
+        rapid(z = mat_depth + rapid_down_to_height)
+        
+        # feed down to depth
+        mat_depth = depth
+        if start_z > mat_depth: mat_depth = start_z
+        feed(z = mat_depth)
+        
+        # cut the roll on arc
+        cut_kurve(roll_on_k)
+        
+        # cut the main kurve
+        current_perim = 0.0
         for span in range(0, kurve.num_spans(offset_k)):
             sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, span)
-            if span == 0:#first span
-                #I changed order of rapids from rapid(sx,sy)>rapid(z = mat_depth + incremental_rapid_height)
-                #to rapid(z = mat_depth + incremental_rapid_height)>rapid(sx,sy)
-                #because tool was rapiding across and through part if profile was open
-                #not sure how this will affect tags because I haven't tried them yet -Dan Falck-
-
-                # rapid down to just above the material, which might be at the top of the tag
-                rapid(z = mat_depth + incremental_rapid_height)
-                # rapid across to it
-                rapid(sx, sy)
-
-                # feed down to depth
-                mat_depth = depth
-                if tag != None and tag_depth > mat_depth: mat_depth = tag_depth
-                feed(z = mat_depth)
 
             # height for tags
             current_perim += kurve.get_span_length(offset_k, span)
-            ez = None
-            if tag != None:
-                ez = get_tag_z_for_span(current_perim, offset_k, radius, start_depth, depth, tag)
+            ez = get_tag_z_for_span(current_perim, offset_k, radius, start_depth, depth, final_depth)
             
             if sp == 0:#line
-                feed(ex, ey, ez)
+                if len(tags) > 0: feed(ex, ey, ez)
+                else: feed(ex, ey)
             else:
                 cx = cx - sx # make relative to the start position
                 cy = cy - sy
                 if sp == 1:# anti-clockwise arc
-                    arc_ccw(ex, ey, ez, i = cx, j = cy)
+                    if len(tags) > 0: arc_ccw(ex, ey, ez, i = cx, j = cy)
+                    else: arc_ccw(ex, ey, i = cx, j = cy)
                 else:
-                    arc_cw(ex, ey, ez, i = cx, j = cy)
-        if tag != None:
+                    if len(tags) > 0: arc_cw(ex, ey, ez, i = cx, j = cy)
+                    else: arc_cw(ex, ey, i = cx, j = cy)
+                    
+        # cut the roll off arc
+        cut_kurve(roll_off_k)
+                    
+        # restore the unsplit kurve
+        if len(tags) > 0:
             kurve.copy(copy_of_offset_k, offset_k)
+            
+        # rapid up to the clearance height
+        rapid(z = clearance)
                 
     if offset_k != k:
         kurve.delete(offset_k)
 
-    if tag != None:
+    if len(tags) > 0 != None:
         kurve.delete(copy_of_offset_k)
 
     if use_CRC():
