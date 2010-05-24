@@ -682,9 +682,9 @@ Point PerimToPoint(const Kurve& kurve, double perim)
 	int nspans = kurve.nSpans();
 	double kperim = 0.0;
 	Span span;
-	for(int i = 0; i< nspans; i++)
+	for(int i = 1; i <= nspans; i++)
 	{
-		kurve.Get(i + 1, span, true);
+		kurve.Get(i, span, true);
 		if(perim < kperim + span.length)
 		{
 			return span.MidPerim(perim - kperim);
@@ -692,6 +692,33 @@ Point PerimToPoint(const Kurve& kurve, double perim)
 		kperim += span.length;
 	}
 	return span.p1;
+}
+
+double PointToPerim(const Kurve& kurve, const Point& p)
+{
+	Point pNear;
+	double perim = 0.0;
+	double best_dist = 0.0;
+	double point_perim = 0.0;
+
+	for(int i = 1; i <= kurve.nSpans(); i++) {
+		Span sp;
+		kurve.Get(i, sp, true, true);
+		pNear = sp.NearOn(p);
+		double d = pNear.Dist(p);
+		if(i == 1 || d < best_dist)
+		{
+			Span sp2 = sp;
+			sp2.p1 = pNear;
+			sp2.SetProperties(true);
+			point_perim = perim + sp2.length;
+			best_dist = d;
+		}
+
+		perim += sp.length;
+	}
+
+	return point_perim;
 }
 
 #ifdef KURVE_PYTHON_INTERFACE
@@ -736,6 +763,24 @@ void geoff_geometry::kurve_perim_to_point(Kurve *ik, double perim, double &px, d
 	Py_INCREF(pTuple);
 	return pTuple;
 #endif // KURVE_PYTHON_INTERFACE
+}
+
+static PyObject* kurve_point_to_perim(PyObject* self, PyObject* args)
+{
+	int ik;
+	double px, py;
+	if (!PyArg_ParseTuple(args, "idd", &ik, &px, &py)) return NULL;
+
+	Kurve* k = (Kurve*)ik;
+	double perim = 0.0;
+	if(valid_kurves.find(k) != valid_kurves.end())
+	{
+		perim = PointToPerim(*k, Point(px, py));
+	}
+
+	PyObject *pValue = PyFloat_FromDouble(perim);
+	Py_INCREF(pValue);
+	return pValue;
 }
 
 #ifdef KURVE_PYTHON_INTERFACE
@@ -799,6 +844,7 @@ static PyMethodDef KurveMethods[] = {
 	{"get_span_length", kurve_get_span_length, METH_VARARGS , ""},
 	{"tangential_arc", kurve_tangential_arc, METH_VARARGS , ""},
 	{"perim_to_point", kurve_perim_to_point, METH_VARARGS , ""},
+	{"point_to_perim", kurve_point_to_perim, METH_VARARGS , ""},
 	{"perim", kurve_perim, METH_VARARGS , ""},
 	{"kbreak", kurve_kbreak, METH_VARARGS , ""},
 	{NULL, NULL, 0, NULL}

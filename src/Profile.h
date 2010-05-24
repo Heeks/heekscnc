@@ -14,7 +14,7 @@
 #include <vector>
 
 class CProfile;
-
+class CTags;
 
 class CProfileParams{
 public:
@@ -43,10 +43,6 @@ public:
 	double m_start[3];
 	double m_end[3];
 	int m_sort_sketches;
-	int m_num_tags;
-	bool m_tag_at_start;
-	double m_tag_width; // in mm
-	double m_tag_angle; // in degrees
 	double m_offset_extra; // in mm
 
 	CProfileParams();
@@ -59,6 +55,9 @@ public:
 };
 
 class CProfile: public CDepthOp{
+private:
+	CTags* m_tags;				// Access via Tags() method
+
 public:
 	typedef std::list<int> Sketches_t;
 	Sketches_t	m_sketches;
@@ -66,7 +65,7 @@ public:
 
 	static double max_deviation_for_spline_to_arc;
 
-	CProfile():CDepthOp(GetTypeString(), 0, ProfileType){}
+	CProfile():CDepthOp(GetTypeString(), 0, ProfileType), m_tags(NULL) {}
 	CProfile(const std::list<int> &sketches, const int cutting_tool_number );
 
 	CProfile( const CProfile & rhs );
@@ -77,7 +76,6 @@ public:
 	int GetType()const{return ProfileType;}
 	const wxChar* GetTypeString(void)const{return _T("Profile");}
 	void glCommands(bool select, bool marked, bool no_color);
-	void GetIcon(int& texture_number, int& x, int& y){if(m_active){GET_ICON(0, 1);}else CDepthOp::GetIcon(texture_number, x, y);}
 	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);
 	ObjectCanvas* GetDialog(wxWindow* parent);
@@ -85,8 +83,15 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
+	bool Add(HeeksObj* object, HeeksObj* prev_object);
+	void Remove(HeeksObj* object);
+	bool CanBeRemoved(){return false;}
+	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	void ReloadPointers();
+
+	// Data access methods.
+	CTags* Tags(){return m_tags;}
 
 	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState, bool reversed );
 	Python AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState);
@@ -97,6 +102,8 @@ public:
 	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void AddMissingChildren();
+	unsigned int GetNumSketches();
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	std::list<wxString> ConfirmAutoRollRadius(const bool apply_changes);

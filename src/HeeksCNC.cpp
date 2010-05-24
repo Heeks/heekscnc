@@ -49,6 +49,8 @@
 #include "Chamfer.h"
 #include "Contour.h"
 #include "Inlay.h"
+#include "Tags.h"
+#include "Tag.h"
 
 #include <sstream>
 
@@ -204,6 +206,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 		} // End for
 
 		CProfile *new_object = new CProfile(sketches, milling_cutting_tool_number);
+		new_object->AddMissingChildren();
 		theApp.m_program->Operations()->Add(new_object,NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
@@ -1180,6 +1183,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Chamfer", CChamfer::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Contour", CContour::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Inlay", CInlay::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Tags", CTags::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Tag", CTag::ReadFromXMLElement);
 
 #ifdef WIN32
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=147;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=0;pos=448;prop=100000;bestw=116;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=485;floaty=209;floatw=143;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=575;prop=100000;bestw=89;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=479;floaty=236;floatw=116;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=205|dock_size(1,10,0)=33|")));

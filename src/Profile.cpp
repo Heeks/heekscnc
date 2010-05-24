@@ -23,6 +23,8 @@
 #include "Reselect.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
+#include "Tags.h"
+#include "Tag.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -50,10 +52,6 @@ CProfileParams::CProfileParams()
 	m_start[0] = m_start[1] = m_start[2] = 0.0;
 	m_end[0] = m_end[1] = m_end[2] = 0.0;
 	m_sort_sketches = 1;
-	m_num_tags = 0;
-	m_tag_at_start = true;
-	m_tag_width = 5;
-	m_tag_angle = 45;
 	m_offset_extra = 0.0;
 }
 
@@ -93,10 +91,6 @@ static void on_set_sort_sketches(const int value, HeeksObj* object)
 	((CProfile*)object)->m_profile_params.m_sort_sketches = value;
 	((CProfile*)object)->WriteDefaultValues();
 }
-static void on_set_num_tags(const int value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_num_tags = value;}
-static void on_set_tag_at_start(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_tag_at_start = value;}
-static void on_set_tag_width(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_tag_width = value;}
-static void on_set_tag_angle(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_tag_angle = value;}
 static void on_set_offset_extra(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_offset_extra = value;}
 
 void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
@@ -106,7 +100,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 
 		SketchOrderType order = SketchOrderTypeUnknown;
 
-		if(parent->GetNumChildren() == 1)
+		if(parent->GetNumSketches() == 1)
 		{
 			HeeksObj* sketch = parent->GetFirstChild();
 			if((sketch) && (sketch->GetType() == SketchType))
@@ -158,7 +152,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		list->push_back(new PropertyChoice(_("cut mode"), choices, m_cut_mode, parent, on_set_cut_mode));
 	}
 
-	if(parent->GetNumChildren() == 1) // multiple sketches must use auto roll on, and can not have start and end points specified
+	if(parent->GetNumSketches() == 1) // multiple sketches must use auto roll on, and can not have start and end points specified
 	{
 		list->push_back(new PropertyCheck(_("auto roll on"), m_auto_roll_on, parent, on_set_auto_roll_on));
 		if(!m_auto_roll_on)list->push_back(new PropertyVertex(_("roll on point"), m_roll_on_point, parent, on_set_roll_on_point));
@@ -185,13 +179,6 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		list->push_back(new PropertyLength(_("roll radius"), m_auto_roll_radius, parent, on_set_roll_radius));
 	} // End if - else
 
-	list->push_back(new PropertyInt(_("number of tags"), m_num_tags, parent, on_set_num_tags));
-	if(m_num_tags)
-	{
-		list->push_back(new PropertyLength(_("tag width"), m_tag_width, parent, on_set_tag_width));
-		list->push_back(new PropertyDouble(_("tag angle"), m_tag_angle, parent, on_set_tag_angle));
-		list->push_back(new PropertyCheck(_("tag at start"), m_tag_at_start, parent, on_set_tag_at_start));
-	}
 	list->push_back(new PropertyLength(_("offset_extra"), m_offset_extra, parent, on_set_offset_extra));
 }
 
@@ -239,14 +226,6 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	l_ossValue << m_sort_sketches;
 	element->SetAttribute("sort_sketches", l_ossValue.str().c_str());
 
-	if(m_num_tags)
-	{
-		element->SetAttribute("num_tags", m_num_tags);
-		element->SetDoubleAttribute("tag_width", m_tag_width);
-		element->SetDoubleAttribute("tag_angle", m_tag_angle);
-		element->SetAttribute("tag_at_start", m_tag_at_start ? 1:0);
-	}
-
 	element->SetDoubleAttribute("offset_extra", m_offset_extra);
 }
 
@@ -275,22 +254,19 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("endy", &m_end[1]);
 	pElem->Attribute("endz", &m_end[2]);
 	if(pElem->Attribute("sort_sketches"))m_sort_sketches = atoi(pElem->Attribute("sort_sketches"));
-	pElem->Attribute("num_tags", &m_num_tags);
-	pElem->Attribute("tag_width", &m_tag_width);
-	pElem->Attribute("tag_angle", &m_tag_angle);
-	if(pElem->Attribute("tag_at_start", &int_for_bool))m_tag_at_start = (int_for_bool != 0);
 	pElem->Attribute("offset_extra", &m_offset_extra);
 }
 
 CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
 {
+	m_tags = NULL;
 	*this = rhs;	 // Call the assignment operator.
 }
 
 
 CProfile::CProfile(const std::list<int> &sketches, const int cutting_tool_number )
 		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number, ProfileType),
-			m_sketches(sketches)
+			m_tags(NULL), m_sketches(sketches)
 {
     ReadDefaultValues();
     for (std::list<int>::iterator id = m_sketches.begin(); id != m_sketches.end(); id++)
@@ -310,12 +286,11 @@ CProfile & CProfile::operator= ( const CProfile & rhs )
 	if (this != &rhs)
 	{
 		CDepthOp::operator=( rhs );
+		if ((m_tags != NULL) && (rhs.m_tags != NULL)) *m_tags = *(rhs.m_tags);
 		m_sketches.clear();
 		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
 
 		m_profile_params = rhs.m_profile_params;
-
-		// static double max_deviation_for_spline_to_arc;
 	}
 
 	return(*this);
@@ -327,6 +302,26 @@ const wxBitmap &CProfile::GetIcon()
 	static wxBitmap* icon = NULL;
 	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/profile.png")));
 	return *icon;
+}
+
+bool CProfile::Add(HeeksObj* object, HeeksObj* prev_object)
+{
+	switch(object->GetType())
+	{
+	case TagsType:
+		m_tags = (CTags*)object;
+		break;
+	}
+
+	return CDepthOp::Add(object, prev_object);
+}
+
+void CProfile::Remove(HeeksObj* object)
+{
+	// set the m_tags pointer to NULL, when Tags is removed from here
+	if(object == m_tags)m_tags = NULL;
+
+	CDepthOp::Remove(object);
 }
 
 Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState, bool reversed )
@@ -497,7 +492,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 
 	python << _T("\n");
 
-	if(GetNumChildren() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
+	if(GetNumSketches() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
 	{
 		double startx, starty, finishx, finishy;
 
@@ -603,7 +598,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 		case CProfileParams::eLeftOrOutside:
 		case CProfileParams::eRightOrInside:
 			{
-				if(m_profile_params.m_auto_roll_on || (GetNumChildren() > 1))
+				if(m_profile_params.m_auto_roll_on || (GetNumSketches() > 1))
 				{
 					python << wxString(_T("roll_on = 'auto'\n"));
 				}
@@ -628,7 +623,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 		case CProfileParams::eLeftOrOutside:
 		case CProfileParams::eRightOrInside:
 			{
-				if(m_profile_params.m_auto_roll_off || (GetNumChildren() > 1))
+				if(m_profile_params.m_auto_roll_off || (GetNumSketches() > 1))
 				{
 					python << wxString(_T("roll_off = 'auto'\n"));
 				}
@@ -645,31 +640,16 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 			break;
 		}
 
-		if(m_profile_params.m_num_tags > 0)
+		bool tags_cleared = false;
+		for(CTag* tag = (CTag*)(m_tags->GetFirstChild()); tag; tag = (CTag*)(m_tags->GetNextChild()))
 		{
-			python << _T("tag_width = ") << m_profile_params.m_tag_width / theApp.m_program->m_units << _T("\n");
-			python << _T("tag_angle = ") << m_profile_params.m_tag_angle * PI/180 << _T("\n");
-			python << _T("tag_at_start = ");
-			if(m_profile_params.m_tag_at_start)python << _T("True");
-			else python << _T("False");
-			python << _T("\n");
-			python << _T("tag_height = float(tag_width)/2 * math.tan(tag_angle)\n");
-			python << _T("tag_depth = final_depth + tag_height\n");
-			python << _T("if tag_depth > start_depth: tag_depth = start_depth\n");
-		}
-
-		// set up the tag parameters
-		if(m_profile_params.m_num_tags > 0)
-		{
-			python << _T("tag = ") << m_profile_params.m_num_tags << _T(", tag_width, tag_angle, tag_at_start\n");
-		}
-		else
-		{
-			python << _T("tag = None\n");
+			if(!tags_cleared)python << _T("kurve_funcs.clear_tags()\n");
+			tags_cleared = true;
+			python << _T("kurve_funcs.add_tag(") << tag->m_pos[0] << _T(", ") << tag->m_pos[1] << _T(", ") << tag->m_width << _T(", ") << tag->m_angle * PI/180 << _T(", ") << tag->m_height << _T(")\n");
 		}
 
 		// profile the kurve
-		python << wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, tag, rapid_down_to_height, start_depth, step_down, final_depth)\n"), sketch, side_string.c_str());
+		python << wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_down_to_height, clearance, start_depth, step_down, final_depth)\n"), sketch, side_string.c_str());
 
 		// rapid back up to clearance plane
 		python << wxString(_T("rapid(z = clearance)\n"));
@@ -775,7 +755,7 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 
 	if(marked && !no_color)
 	{
-		if(GetNumChildren() == 1)
+		if(GetNumSketches() == 1)
 		{
 			// draw roll on point
 			if(!m_profile_params.m_auto_roll_on)
@@ -824,12 +804,12 @@ ObjectCanvas* CProfile::GetDialog(wxWindow* parent)
 	return object_canvas;
 }
 
-static CProfile* object_for_pick = NULL;
+static CProfile* object_for_tools = NULL;
 
 class PickStart: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick Start");}
-	void Run(){if(heeksCAD->PickPosition(_("Pick new start point"), object_for_pick->m_profile_params.m_start))object_for_pick->m_profile_params.m_start_given = true;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick new start point"), object_for_tools->m_profile_params.m_start))object_for_tools->m_profile_params.m_start_given = true;}
 	wxString BitmapPath(){ return _T("pickstart");}
 };
 
@@ -838,7 +818,7 @@ static PickStart pick_start;
 class PickEnd: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick End");}
-	void Run(){if(heeksCAD->PickPosition(_("Pick new end point"), object_for_pick->m_profile_params.m_end))object_for_pick->m_profile_params.m_end_given = true;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick new end point"), object_for_tools->m_profile_params.m_end))object_for_tools->m_profile_params.m_end_given = true;}
 	wxString BitmapPath(){ return _T("pickend");}
 };
 
@@ -847,7 +827,7 @@ static PickEnd pick_end;
 class PickRollOn: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick roll on point");}
-	void Run(){if(heeksCAD->PickPosition(_("Pick roll on point"), object_for_pick->m_profile_params.m_roll_on_point))object_for_pick->m_profile_params.m_auto_roll_on = false;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick roll on point"), object_for_tools->m_profile_params.m_roll_on_point))object_for_tools->m_profile_params.m_auto_roll_on = false;}
 	wxString BitmapPath(){ return _T("rollon");}
 };
 
@@ -856,7 +836,7 @@ static PickRollOn pick_roll_on;
 class PickRollOff: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick roll off point");}
-	void Run(){if(heeksCAD->PickPosition(_("Pick roll off point"), object_for_pick->m_profile_params.m_roll_off_point))object_for_pick->m_profile_params.m_auto_roll_off = false;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick roll off point"), object_for_tools->m_profile_params.m_roll_off_point))object_for_tools->m_profile_params.m_auto_roll_off = false;}
 	wxString BitmapPath(){ return _T("rolloff");}
 };
 
@@ -864,9 +844,30 @@ static PickRollOff pick_roll_off;
 
 static ReselectSketches reselect_sketches;
 
+class AddTagTool: public Tool
+{
+public:
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Add Tag");}
+
+	void Run()
+	{
+		heeksCAD->CreateUndoPoint();
+		CTag* new_object = new CTag();
+		object_for_tools->Tags()->Add(new_object, NULL);
+		heeksCAD->Changed();
+		heeksCAD->ClearMarkedList();
+		heeksCAD->Mark(new_object);
+	}
+	bool CallChangedOnRun(){return false;}
+	wxString BitmapPath(){ return _T("addtag");}
+};
+
+static AddTagTool add_tag_tool;
+
 void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	object_for_pick = this;
+	object_for_tools = this;
 	t_list->push_back(&pick_start);
 	t_list->push_back(&pick_end);
 	t_list->push_back(&pick_roll_on);
@@ -874,6 +875,7 @@ void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	reselect_sketches.m_sketches = &m_sketches;
 	reselect_sketches.m_object = this;
 	t_list->push_back(&reselect_sketches);
+	t_list->push_back(&add_tag_tool);
 
 	CDepthOp::GetTools(t_list, p);
 }
@@ -889,6 +891,11 @@ void CProfile::CopyFrom(const HeeksObj* object)
 	{
 		operator=(*((CProfile*)object));
 	}
+}
+
+bool CProfile::CanAdd(HeeksObj* object)
+{
+	return object->GetType() == TagsType || object->GetType() == SketchType;
 }
 
 bool CProfile::CanAddTo(HeeksObj* owner)
@@ -957,9 +964,26 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 	// read common parameters
 	new_object->ReadBaseXML(element);
 
+	new_object->AddMissingChildren();
+
 	return new_object;
 }
 
+void CProfile::AddMissingChildren()
+{
+	// make sure "tags" exists
+	if(m_tags == NULL){m_tags = new CTags; Add( m_tags, NULL );}
+}
+
+unsigned int CProfile::GetNumSketches()
+{
+	unsigned int num_sketches = 0;
+	for(HeeksObj* object = GetFirstChild(); object; object = GetNextChild())
+	{
+		if(object->GetType() == SketchType)num_sketches++;
+	}
+	return num_sketches;
+}
 
 /**
 	The old version of the CDrilling object stored references to graphics as type/id pairs
@@ -1080,7 +1104,7 @@ std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
 		} // End for
 	} // End if - then
 
-	if (GetNumChildren() == 0)
+	if (GetNumSketches() == 0)
 	{
 #ifdef UNICODE
 			std::wostringstream l_ossChange;

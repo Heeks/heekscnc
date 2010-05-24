@@ -189,7 +189,6 @@ public:
 	const wxChar* GetTypeString(void)const{return _T("NC Code");}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
-	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(11, 0);}
 	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);

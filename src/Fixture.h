@@ -169,7 +169,6 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(8, 0);}
 	const wxBitmap &GetIcon();
     const wxChar* GetShortString(void)const{return m_title.c_str();}
 	void glCommands(bool select, bool marked, bool no_color);
