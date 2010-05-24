@@ -52,7 +52,6 @@ public:
 	int GetType()const{return ProgramType;}
 	long GetMarkingMask()const{return 0;}
 	const wxChar* GetTypeString(void)const{return _T("BOM");}
-	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(1, 1);}
 	const wxBitmap &GetIcon();
 	HeeksObj *MakeACopy(void)const;
 	void GetProperties(std::list<Property *> *list);

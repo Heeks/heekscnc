@@ -26,9 +26,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="225.37529"
-     inkscape:cy="620.32258"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="299.31094"
+     inkscape:cy="769.44739"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -11601,26 +11601,23 @@
          style="fill:#916f6f;fill-rule:evenodd;stroke:#000000;stroke-width:2.10823894;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
     <g
-       id="g4902"
-       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\rollon.png"
-       inkscape:export-xdpi="226.95653"
-       inkscape:export-ydpi="226.95653">
+       id="g10212">
       <path
          id="path4094"
          d="M 185,312.36218 L 200,312.36218 L 200,312.36218"
-         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          id="path4096"
          d="M 200,307.36218 C 200,307.36218 195,307.36218 185,307.36218 C 175,307.36218 170,297.36218 170,297.36218"
-         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          id="path4098"
          d="M 165,302.36218 L 175,292.36218 L 175,292.36218"
-         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          id="path4100"
          d="M 165,292.36218 L 175,302.36218"
-         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
     <g
        id="g4908"
@@ -12221,6 +12218,95 @@
            inkscape:transform-center-x="-4.7428921"
            inkscape:transform-center-y="7.4517704" />
       </g>
+    </g>
+    <g
+       id="g4298"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\icons\tag.png"
+       inkscape:export-xdpi="45"
+       inkscape:export-ydpi="45">
+      <rect
+         y="342.36218"
+         x="260"
+         height="30"
+         width="30"
+         id="rect4296"
+         style="opacity:0.99591830000000003;fill:#f9f9f9;fill-opacity:1;fill-rule:nonzero;stroke:#f9f9f9;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         id="path4283"
+         d="M 259.77273,357.58945 L 267.95455,349.40763 L 281.59091,349.40763 L 289.77273,357.58945 L 259.77273,357.58945 z"
+         style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.54545456px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+    <g
+       id="g4291"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\icons\tags.png"
+       inkscape:export-xdpi="46.993736"
+       inkscape:export-ydpi="46.993736">
+      <path
+         id="path4285"
+         d="M 336.81818,355.544 L 345,347.36218 L 358.63636,347.36218 L 366.81818,355.544 L 336.81818,355.544 z"
+         style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.54545456px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path4287"
+         d="M 336.81818,365.544 L 345,357.36218 L 358.63636,357.36218 L 366.81818,365.544 L 336.81818,365.544 z"
+         style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.54545456px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path4289"
+         d="M 336.81818,375.544 L 345,367.36218 L 358.63636,367.36218 L 366.81818,375.544 L 336.81818,375.544 z"
+         style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.54545456px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+    <g
+       id="g10244"
+       transform="translate(1.81818,8.1818226)"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\addtag.png"
+       inkscape:export-xdpi="270"
+       inkscape:export-ydpi="270">
+      <rect
+         y="367.36218"
+         x="260"
+         height="30"
+         width="30"
+         id="rect10188"
+         style="opacity:0.9959183;fill:#f9f9f9;fill-opacity:1;fill-rule:nonzero;stroke:#f9f9f9;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         id="path10190"
+         d="M 260,392.36218 L 268.18182,384.18036 L 281.81818,384.18036 L 290,392.36218 L 260,392.36218 z"
+         style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.54545456px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         id="path7513"
+         d="M 285,382.36218 L 290,382.36218 L 290,377.36218 L 285,377.36218 L 285,372.36218 L 280,372.36218 L 280,377.36218 L 275,377.36218 L 275,382.36218 L 280,382.36218 L 280,387.36218 L 285,387.36218 L 285,382.36218 z"
+         style="fill:#80e080;fill-opacity:1;fill-rule:evenodd;stroke:#006000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g10249"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\tagpos.png"
+       inkscape:export-xdpi="270"
+       inkscape:export-ydpi="270">
+      <g
+         transform="translate(60.875724,41.279775)"
+         inkscape:export-ydpi="45"
+         inkscape:export-xdpi="45"
+         inkscape:export-filename="C:\Users\Dan\HeeksCNC\icons\tag.png"
+         id="g10218">
+        <rect
+           style="opacity:0.9959183;fill:#f9f9f9;fill-opacity:1;fill-rule:nonzero;stroke:#f9f9f9;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="rect10220"
+           width="30"
+           height="30"
+           x="260"
+           y="342.36218" />
+        <path
+           style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.54545456px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="M 259.77273,357.58945 L 267.95455,349.40763 L 281.59091,349.40763 L 289.77273,357.58945 L 259.77273,357.58945 z"
+           id="path10222" />
+      </g>
+      <path
+         id="path10208"
+         d="M 330,402.36218 L 340,392.36218 L 340,392.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path10210"
+         d="M 330,392.36218 L 340,402.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>

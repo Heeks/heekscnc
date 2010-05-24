@@ -15,14 +15,13 @@ public:
 	int GetType()const{return FixturesType;}
 	const wxChar* GetTypeString(void)const{return _("Fixtures");}
 	HeeksObj *MakeACopy(void)const{ return new CFixtures(*this);}
-	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(9, 0);}
 	const wxBitmap &GetIcon();
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object) {	return(object->GetType() == FixtureType); }
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
-	bool UsesID() const { return(false); }
+	bool UsesID() { return(false); }
 	void CopyFrom(const HeeksObj* object);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);

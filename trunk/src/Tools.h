@@ -20,14 +20,13 @@ public:
 	CTools( const CTools & rhs );
 	CTools & operator= ( const CTools & rhs );
 
-	void GetIcon(int& texture_number, int& x, int& y){GET_ICON(5, 1);}
 	const wxBitmap &GetIcon();
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object);
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
-	bool UsesID() const { return(false); }
+	bool UsesID() { return(false); }
 	void CopyFrom(const HeeksObj* object);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);

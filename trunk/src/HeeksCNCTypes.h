@@ -30,5 +30,7 @@ enum{
 	ChamferType,
 	InlayType,
 	ProbeGridType,
+	TagsType,
+	TagType,
 	HeeksCNCMaximumType
 };
