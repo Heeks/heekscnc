@@ -8,20 +8,16 @@
 #include "geometry/geometry.h"
 #include <set>
 
-#ifdef KURVE_PYTHON_INTERFACE
-	#if _DEBUG
-		#undef _DEBUG
-		#include <Python.h>
-		#define _DEBUG
-	#else
-		#include <Python.h>
-	#endif
-#endif // KURVE_PYTHON_INTERFACE
-
+#if _DEBUG
+#undef _DEBUG
+#include <Python.h>
+#define _DEBUG
+#else
+#include <Python.h>
+#endif
 
 #ifdef WIN32
 
-#ifdef KURVE_PYTHON_INTERFACE
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -42,7 +38,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	return TRUE;
 }
 
-#endif // KURVE_PYTHON_INTERFACE
 #endif // WIN32
 
  namespace geoff_geometry{
@@ -85,27 +80,17 @@ static void print_kurve(const Kurve &k)
 
 std::set<Kurve*> valid_kurves;
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_new(PyObject* self, PyObject* args)
-#else
-Kurve *geoff_geometry::kurve_new()
-#endif // KURVE_PYTHON_INTERFACE
 {
 	Kurve* new_object = new Kurve();
 	valid_kurves.insert(new_object);
 
-#ifdef KURVE_PYTHON_INTERFACE
 	// return new object cast to an int
 	PyObject *pValue = PyInt_FromLong((long)new_object);
 	Py_INCREF(pValue);
 	return pValue;
-#else
-	return(new_object);
-#endif // KURVE_PYTHON_INTERFACE
 }
 
-
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_exists(PyObject* self, PyObject* args)
 {
 	int ik;
@@ -134,18 +119,12 @@ static PyObject* kurve_delete(PyObject* self, PyObject* args)
 
 	Py_RETURN_NONE;
 }
-#endif // KURVE_PYTHON_INTERFACE
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_add_point(PyObject* self, PyObject* args)
 {
 	double x, y, i, j;
 	int sp, ik;
 	if (!PyArg_ParseTuple(args, "iidddd", &ik, &sp, &x, &y, &i, &j)) return NULL;
-#else
-void geoff_geometry::kurve_add_point(Kurve *ik, int sp, double x, double y, double i, double j)
-{
-#endif // KURVE_PYTHON_INTERFACE
 
 	Kurve* k = (Kurve*)ik;
 	if(valid_kurves.find(k) != valid_kurves.end())
@@ -182,22 +161,15 @@ void geoff_geometry::kurve_add_point(Kurve *ik, int sp, double x, double y, doub
 		k->Add(spv);
 	}
 
-#ifdef KURVE_PYTHON_INTERFACE
 	Py_RETURN_NONE;
-#endif // KURVE_PYTHON_INTERFACE
 }
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_offset(PyObject* self, PyObject* args)
 {
 	int ik;
 	int ik2;
 	double left;
 	if (!PyArg_ParseTuple(args, "iid", &ik, &ik2, &left)) return NULL;
-#else
-bool geoff_geometry::kurve_offset( Kurve *ik, Kurve *ik2, double left )
-{
-#endif // KURVE_PYTHON_INTERFACE
 
 	Kurve* k = (Kurve*)ik;
 	Kurve* k2 = (Kurve*)ik2;
@@ -225,19 +197,12 @@ bool geoff_geometry::kurve_offset( Kurve *ik, Kurve *ik2, double left )
 		} // End if - then
 	} // End if - then
 
-
-#ifdef KURVE_PYTHON_INTERFACE
 	// return success
 	PyObject *pValue = (ret != 0) ? Py_True : Py_False;
 	Py_INCREF(pValue);
 	return pValue;
-#else
-	return( ret != 0 );
-#endif // KURVE_PYTHON_INTERFACE
 }
 
-
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_copy(PyObject* self, PyObject* args)
 {
 	int ik;
@@ -280,18 +245,11 @@ static PyObject* kurve_equal(PyObject* self, PyObject* args)
 	return pValue;
 }
 
-#endif // KURVE_PYTHON_INTERFACE
-
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_change_start(PyObject* self, PyObject* args)
 {
 	int ik;
 	double sx, sy;
 	if (!PyArg_ParseTuple(args, "idd", &ik, &sx, &sy)) return NULL;
-#else
-void geoff_geometry::kurve_change_start(Kurve *ik, double sx, double sy)
-{
-#endif // KURVE_PYTHON_INTERFACE
 	Kurve* k = (Kurve*)ik;
 
 	if(valid_kurves.find(k) != valid_kurves.end())
@@ -302,12 +260,9 @@ void geoff_geometry::kurve_change_start(Kurve *ik, double sx, double sy)
 		k->ChangeStart(&start_p, new_start_span);
 	}
 
-#ifdef KURVE_PYTHON_INTERFACE
 	Py_RETURN_NONE;
-#endif // KURVE_PYTHON_INTERFACE
 }
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_change_end(PyObject* self, PyObject* args)
 {
 	int ik;
@@ -339,17 +294,11 @@ static PyObject* kurve_print_kurve(PyObject* self, PyObject* args)
 
 	Py_RETURN_NONE;
 }
-#endif // KURVE_PYTHON_INTERFACE
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_num_spans(PyObject* self, PyObject* args)
 {
 	int ik;
 	if (!PyArg_ParseTuple(args, "i", &ik)) return NULL;
-#else
-int geoff_geometry::kurve_num_spans(Kurve *ik )
-{
-#endif // KURVE_PYTHON_INTERFACE
 	Kurve* k = (Kurve*)ik;
 
 	int n = 0;
@@ -358,16 +307,11 @@ int geoff_geometry::kurve_num_spans(Kurve *ik )
 		n = k->nSpans();
 	}
 
-#ifdef KURVE_PYTHON_INTERFACE
 	PyObject *pValue = PyInt_FromLong(n);
 	Py_INCREF(pValue);
 	return pValue;
-#else
-	return(n);
-#endif // KURVE_PYTHON_INTERFACE
 }
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_is_closed(PyObject* self, PyObject* args)
 {
 	int ik;
@@ -385,10 +329,6 @@ static PyObject* kurve_is_closed(PyObject* self, PyObject* args)
 	return pValue;
 }
 
-#endif // KURVE_PYTHON_INTERFACE
-
-
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_get_span(PyObject* self, PyObject* args)
 {
 	int ik;
@@ -399,10 +339,6 @@ static PyObject* kurve_get_span(PyObject* self, PyObject* args)
 	double sx = 0.0, sy = 0.0;
 	double ex = 0.0, ey = 0.0;
 	double cx = 0.0, cy = 0.0;
-#else
-void geoff_geometry::kurve_get_span( Kurve *ik, int index, int &sp, double &sx, double &sy, double &ex, double &ey, double &cx, double &cy )
-{
-#endif // KURVE_PYTHON_INTERFACE
 	Kurve* k = (Kurve*)ik;
 
 	sp = -1;
@@ -427,7 +363,6 @@ void geoff_geometry::kurve_get_span( Kurve *ik, int index, int &sp, double &sx, 
 		}
 	}
 
-#ifdef KURVE_PYTHON_INTERFACE
 	// return span data as a tuple
 	PyObject *pTuple = PyTuple_New(7);
 	{
@@ -482,10 +417,8 @@ void geoff_geometry::kurve_get_span( Kurve *ik, int index, int &sp, double &sx, 
 
 	Py_INCREF(pTuple);
 	return pTuple;
-#endif // KURVE_PYTHON_INTERFACE
 }
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_get_span_dir(PyObject *self, PyObject *args)
 {
 	int ik;
@@ -495,12 +428,6 @@ static PyObject* kurve_get_span_dir(PyObject *self, PyObject *args)
 
 	double vx = 1.0;
 	double vy = 0.0;
-#else
-void geoff_geometry::kurve_get_span_dir(Kurve *ik, int index, double fraction, double & vx, double & vy )
-{
-	vx = 1.0;
-	vy = 0.0;
-#endif // KURVE_PYTHON_INTERFACE
 	Kurve* k = (Kurve*)ik;
 
 	if(valid_kurves.find(k) != valid_kurves.end())
@@ -516,7 +443,6 @@ void geoff_geometry::kurve_get_span_dir(Kurve *ik, int index, double fraction, d
 		}
 	}
 
-#ifdef KURVE_PYTHON_INTERFACE
 	// return span data as a tuple
 	PyObject *pTuple = PyTuple_New(2);
 	{
@@ -536,11 +462,8 @@ void geoff_geometry::kurve_get_span_dir(Kurve *ik, int index, double fraction, d
 
 	Py_INCREF(pTuple);
 	return pTuple;
-#endif // KURVE_PYTHON_INTERFACE
 }
 
-
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_get_span_length(PyObject *self, PyObject *args)
 {
 	int ik;
@@ -721,7 +644,6 @@ double PointToPerim(const Kurve& kurve, const Point& p)
 	return point_perim;
 }
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_perim_to_point(PyObject* self, PyObject* args)
 {
 	double perim;
@@ -729,10 +651,6 @@ static PyObject* kurve_perim_to_point(PyObject* self, PyObject* args)
 	if (!PyArg_ParseTuple(args, "id", &ik, &perim)) return NULL;
 
 	double px = 0, py = 0;
-#else
-void geoff_geometry::kurve_perim_to_point(Kurve *ik, double perim, double &px, double &py)
-{
-#endif // KURVE_PYTHON_INTERFACE
 
 	Kurve* k = (Kurve*)ik;
 	if(valid_kurves.find(k) != valid_kurves.end())
@@ -742,7 +660,6 @@ void geoff_geometry::kurve_perim_to_point(Kurve *ik, double perim, double &px, d
 		py = p.y;
 	}
 
-#ifdef KURVE_PYTHON_INTERFACE
 	// return point as a tuple
 	PyObject *pTuple = PyTuple_New(2);
 	{
@@ -762,7 +679,6 @@ void geoff_geometry::kurve_perim_to_point(Kurve *ik, double perim, double &px, d
 
 	Py_INCREF(pTuple);
 	return pTuple;
-#endif // KURVE_PYTHON_INTERFACE
 }
 
 static PyObject* kurve_point_to_perim(PyObject* self, PyObject* args)
@@ -783,7 +699,6 @@ static PyObject* kurve_point_to_perim(PyObject* self, PyObject* args)
 	return pValue;
 }
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_perim(PyObject *self, PyObject *args)
 {
 	int ik;
@@ -801,18 +716,12 @@ static PyObject* kurve_perim(PyObject *self, PyObject *args)
 	Py_INCREF(pValue);
 	return pValue;
 }
-#endif
 
-#ifdef KURVE_PYTHON_INTERFACE
 static PyObject* kurve_kbreak(PyObject* self, PyObject* args)
 {
 	double x, y;
 	int ik;
 	if (!PyArg_ParseTuple(args, "idd", &ik, &x, &y)) return NULL;
-#else
-void geoff_geometry::kurve_kbreak(Kurve *ik, double x, double y)
-{
-#endif // KURVE_PYTHON_INTERFACE
 
 	Kurve* k = (Kurve*)ik;
 	if(valid_kurves.find(k) != valid_kurves.end())
@@ -820,9 +729,7 @@ void geoff_geometry::kurve_kbreak(Kurve *ik, double x, double y)
 		*k = BreakKurve(*k, Point(x, y));
 	}
 
-#ifdef KURVE_PYTHON_INTERFACE
 	Py_RETURN_NONE;
-#endif // KURVE_PYTHON_INTERFACE
 }
 
 
@@ -855,5 +762,3 @@ initkurve(void)
 {
 	Py_InitModule("kurve", KurveMethods);
 }
-
-#endif // KURVE_PYTHON_INTERFACE
