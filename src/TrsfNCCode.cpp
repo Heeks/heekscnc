@@ -86,3 +86,4 @@ void CTrsfNCCode::WriteCode(wxTextFile &f)
 		block->WriteNCCode(f,m_x,m_y);
 	}
 }
+
