@@ -7,10 +7,10 @@ CC      = gcc
 LD      = g++
 LDFLAGS = -shared -rdynamic `python-config --ldflags`
 LIBS    = -lstdc++ `python-config --libs`
-CFLAGS  = -Wall -I/usr/include `python-config --includes` -I./ -g -fPIC -DOPEN_SOURCE_GEOMETRY -DKURVE_PYTHON_INTERFACE
+CFLAGS  = -Wall -I/usr/include `python-config --includes` -I./ -g -fPIC -DOPEN_SOURCE_GEOMETRY
 
 LIBNAME	= kurve
-LIBOBJS	= Construction.o Finite.o kurve.o Matrix.o PythonInterface.o offset.o
+LIBOBJS	= Construction.o Finite.o kurve.o Matrix.o PythonStuff.o offset.o
 LIBDIR	= .libs/
 LIBOUT	= $(LIBDIR)$(LIBNAME).so
 
@@ -45,7 +45,7 @@ kurve.o: geometry/kurve.cpp
 Matrix.o: geometry/Matrix.cpp
 	$(CC) -c $? ${CFLAGS} -o $@
 
-PythonInterface.o: PythonInterface.cpp
+PythonStuff.o: PythonStuff.cpp
 	$(CC) -c $? ${CFLAGS} -o $@
 
 offset.o: geometry/offset.cpp
