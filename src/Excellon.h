@@ -31,7 +31,7 @@ class Excellon
 		Excellon();
 		~Excellon() { }
 
-		bool Read( const char *p_szFileName );
+		bool Read( const char *p_szFileName, const bool force_mirror = false );
 
 	private:
 

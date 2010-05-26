@@ -126,9 +126,14 @@ std::string Excellon::ReadBlock( const char *data, int *pos, const int max_pos )
 	return(l_ossBlock.str());
 } // End ReadBlock() method
 
-bool Excellon::Read( const char *p_szFileName )
+bool Excellon::Read( const char *p_szFileName, const bool force_mirror /* = false */ )
 {
 	printf("Excellon::Read(%s)\n", p_szFileName );
+
+	if (force_mirror)
+	{
+		m_mirror_image_x_axis = true;
+	}
 
 	// First read in existing PointType object locations so that we don't duplicate points.
 	for (HeeksObj *obj = heeksCAD->GetFirstObject(); obj != NULL; obj = heeksCAD->GetNextObject() )
