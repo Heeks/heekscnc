@@ -1027,7 +1027,26 @@ void OnBuildTexture()
 static void ImportExcellonDrillFile( const wxChar *file_path )
 {
     Excellon drill;
-    drill.Read( Ttc(file_path) );
+
+	wxString message(_("Select how the file is to be interpreted"));
+    wxString caption(_("Excellon drill file interpretation"));
+
+    wxArrayString choices;
+
+    choices.Add(_("Produce drill pattern as described"));
+    choices.Add(_("Produce mirrored drill pattern"));
+
+    wxString choice = ::wxGetSingleChoice( message, caption, choices );
+
+    if (choice == choices[0])
+    {
+        drill.Read( Ttc(file_path), false );
+    }
+
+    if (choice == choices[1])
+    {
+        drill.Read( Ttc(file_path), true );
+    }
 }
 
 static void UnitsChangedHandler( const double units )
