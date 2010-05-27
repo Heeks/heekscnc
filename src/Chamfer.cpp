@@ -48,7 +48,7 @@ void CChamferParams::WriteXMLAttributes(TiXmlNode *root)
 
 void CChamferParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	if (pElem->Attribute("m_chamfer_width")) m_chamfer_width = atof(pElem->Attribute("m_chamfer_width"));
+	if (pElem->Attribute("m_chamfer_width")) pElem->Attribute("m_chamfer_width", &m_chamfer_width);
 }
 
 
