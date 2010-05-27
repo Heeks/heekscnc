@@ -90,8 +90,8 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 
 void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
-	if (pElem->Attribute("sort_locations")) m_sort_locations = atoi(pElem->Attribute("sort_locations"));
+	if (pElem->Attribute("diameter")) pElem->Attribute("diameter", &m_diameter);
+	if (pElem->Attribute("sort_locations")) pElem->Attribute("sort_locations", &m_sort_locations);
 }
 
 

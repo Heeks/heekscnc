@@ -83,16 +83,13 @@ void CLocatingParams::WriteXMLAttributes(TiXmlNode *root)
 	root->LinkEndChild( element );
 
 	element->SetDoubleAttribute("standoff", m_standoff);
-
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_sort_locations;
-	element->SetAttribute("sort_locations", l_ossValue.str().c_str());
+	element->SetAttribute("sort_locations", m_sort_locations);
 }
 
 void CLocatingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	if (pElem->Attribute("standoff")) m_standoff = atof(pElem->Attribute("standoff"));
-	if (pElem->Attribute("sort_locations")) m_sort_locations = atoi(pElem->Attribute("sort_locations"));
+	if (pElem->Attribute("standoff")) pElem->Attribute("standoff", &m_standoff);
+	if (pElem->Attribute("sort_locations")) pElem->Attribute("sort_locations", &m_sort_locations);
 }
 
 const wxBitmap &CLocating::GetIcon()

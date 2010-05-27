@@ -120,11 +120,11 @@ HeeksObj* CCuttingRate::ReadFromXMLElement(TiXmlElement* element)
 {
 	double brinell_hardness_of_raw_material = 15.0;
 	if (element->Attribute("brinell_hardness_of_raw_material"))
-		brinell_hardness_of_raw_material = atof(element->Attribute("brinell_hardness_of_raw_material"));
+		 element->Attribute("brinell_hardness_of_raw_material", &brinell_hardness_of_raw_material);
 
 	double max_material_removal_rate = 1.0;
 	if (element->Attribute("max_material_removal_rate"))
-		max_material_removal_rate = atof(element->Attribute("max_material_removal_rate"));
+		 element->Attribute("max_material_removal_rate", &max_material_removal_rate);
 
 	wxString title(Ctt(element->Attribute("title")));
 	CCuttingRate* new_object = new CCuttingRate( 	brinell_hardness_of_raw_material,
