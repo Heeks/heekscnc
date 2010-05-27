@@ -128,17 +128,9 @@ void CSpeedReference::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = new TiXmlElement( "SpeedReference" );
 	root->LinkEndChild( element );
 	element->SetAttribute("title", Ttc(m_title.c_str()));
-
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_surface_speed;
-	element->SetAttribute("surface_speed", l_ossValue.str().c_str() );
-
-	l_ossValue.str(""); l_ossValue << int(m_cutting_tool_material);
-	element->SetAttribute("cutting_tool_material", l_ossValue.str().c_str() );
-
-	l_ossValue.str(""); l_ossValue << m_brinell_hardness_of_raw_material;
-	element->SetAttribute("brinell_hardness_of_raw_material", l_ossValue.str().c_str() );
-
+	element->SetAttribute("surface_speed", m_surface_speed );
+	element->SetAttribute("cutting_tool_material", int(m_cutting_tool_material) );
+	element->SetAttribute("brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
 	element->SetAttribute("raw_material_name", Ttc(m_material_name.c_str()) );
 
 	WriteBaseXML(element);
@@ -149,22 +141,19 @@ HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 {
 	double brinell_hardness_of_raw_material = 15.0;
 	if (element->Attribute("brinell_hardness_of_raw_material"))
-		brinell_hardness_of_raw_material = atof(element->Attribute("brinell_hardness_of_raw_material"));
+		 element->Attribute("brinell_hardness_of_raw_material", &brinell_hardness_of_raw_material);
 
 	double surface_speed = 600.0;
-	if (element->Attribute("surface_speed"))
-		surface_speed = atof(element->Attribute("surface_speed"));
+	if (element->Attribute("surface_speed")) element->Attribute("surface_speed", &surface_speed);
 
-	wxString raw_material_name;
-	if (element->Attribute("raw_material_name"))
-		raw_material_name = Ctt(element->Attribute("raw_material_name"));
+	wxString material_name;
+	if (element->Attribute("raw_material_name")) material_name = Ctt(element->Attribute("raw_material_name"));
 
 	int cutting_tool_material = int(CCuttingToolParams::eCarbide);
-	if (element->Attribute("cutting_tool_material"))
-		cutting_tool_material = atoi(element->Attribute("cutting_tool_material"));
+	if (element->Attribute("cutting_tool_material")) element->Attribute("cutting_tool_material", &cutting_tool_material);
 
 	wxString title(Ctt(element->Attribute("title")));
-	CSpeedReference* new_object = new CSpeedReference( 	raw_material_name,
+	CSpeedReference* new_object = new CSpeedReference( 	material_name,
 								cutting_tool_material,
 								brinell_hardness_of_raw_material,
 								surface_speed );

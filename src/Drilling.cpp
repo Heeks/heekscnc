@@ -140,18 +140,16 @@ void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("depth", m_depth);
 	element->SetDoubleAttribute("peck_depth", m_peck_depth);
 
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_sort_drilling_locations;
-	element->SetAttribute("sort_drilling_locations", l_ossValue.str().c_str());
+	element->SetAttribute("sort_drilling_locations", m_sort_drilling_locations);
 }
 
 void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	if (pElem->Attribute("standoff")) m_standoff = atof(pElem->Attribute("standoff"));
-	if (pElem->Attribute("dwell")) m_dwell = atof(pElem->Attribute("dwell"));
-	if (pElem->Attribute("depth")) m_depth = atof(pElem->Attribute("depth"));
-	if (pElem->Attribute("peck_depth")) m_peck_depth = atof(pElem->Attribute("peck_depth"));
-	if (pElem->Attribute("sort_drilling_locations")) m_sort_drilling_locations = atoi(pElem->Attribute("sort_drilling_locations"));
+	if (pElem->Attribute("standoff")) pElem->Attribute("standoff", &m_standoff);
+	if (pElem->Attribute("dwell")) pElem->Attribute("dwell", &m_dwell);
+	if (pElem->Attribute("depth")) pElem->Attribute("depth", &m_depth);
+	if (pElem->Attribute("peck_depth")) pElem->Attribute("peck_depth", &m_peck_depth);
+	if (pElem->Attribute("sort_drilling_locations")) pElem->Attribute("sort_drilling_locations", &m_sort_drilling_locations);
 }
 
 const wxBitmap &CDrilling::GetIcon()

@@ -139,7 +139,7 @@ void CRawMaterial::ReadBaseXML(TiXmlElement* element)
 {
 	if (element->Attribute("brinell_hardness"))
 	{
-		m_brinell_hardness = atof(element->Attribute("brinell_hardness"));
+		element->Attribute("brinell_hardness", &m_brinell_hardness);
 	} // End if - then
 
 	if (element->Attribute("raw_material_name"))

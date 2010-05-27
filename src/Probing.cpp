@@ -1250,25 +1250,25 @@ HeeksObj* CProbe_Edge::ReadFromXMLElement(TiXmlElement* element)
 {
 	CProbe_Edge* new_object = new CProbe_Edge();
 
-	if (element->Attribute("retract")) new_object->m_retract = atof(element->Attribute("retract"));
-	if (element->Attribute("number_of_edges")) new_object->m_number_of_edges = atoi(element->Attribute("number_of_edges"));
-	if (element->Attribute("edge")) new_object->m_edge = CProbing::eEdges_t(atoi(element->Attribute("edge")));
-	if (element->Attribute("corner")) new_object->m_corner = CProbing::eCorners_t(atoi(element->Attribute("corner")));
-	if (element->Attribute("check_levels")) new_object->m_check_levels = atoi(element->Attribute("check_levels"));
+	if (element->Attribute("retract")) element->Attribute("retract", &(new_object->m_retract) );
+	if (element->Attribute("number_of_edges")) element->Attribute("number_of_edges", (int *) &(new_object->m_number_of_edges) );
+	if (element->Attribute("edge")) { int value; element->Attribute("edge", &value); new_object->m_edge = CProbing::eEdges_t(value); }
+	if (element->Attribute("corner")) { int value; element->Attribute("corner", &value); new_object->m_corner = CProbing::eCorners_t(value); }
+	if (element->Attribute("check_levels")) element->Attribute("check_levels", &(new_object->m_check_levels) );
 
-	if (element->Attribute("corner_coordinate_x"))
-		new_object->m_corner_coordinate.SetX(atof(element->Attribute("corner_coordinate_x")));
-	if (element->Attribute("corner_coordinate_y"))
-		new_object->m_corner_coordinate.SetY(atof(element->Attribute("corner_coordinate_y")));
-	if (element->Attribute("corner_coordinate_z"))
-		new_object->m_corner_coordinate.SetZ(atof(element->Attribute("corner_coordinate_z")));
+	if (element->Attribute("corner_coordinate_x")) {
+		double value; element->Attribute("corner_coordinate_x", &value); new_object->m_corner_coordinate.SetX(value);
+	}
+	if (element->Attribute("corner_coordinate_y")) {
+		double value; element->Attribute("corner_coordinate_y", &value); new_object->m_corner_coordinate.SetY(value);
+	}
+	if (element->Attribute("corner_coordinate_z")) {
+		double value; element->Attribute("corner_coordinate_z", &value); new_object->m_corner_coordinate.SetZ(value);
+	}
 
-	if (element->Attribute("final_coordinate_x"))
-		new_object->m_final_coordinate.SetX(atof(element->Attribute("final_coordinate_x")));
-	if (element->Attribute("final_coordinate_y"))
-		new_object->m_final_coordinate.SetY(atof(element->Attribute("final_coordinate_y")));
-	if (element->Attribute("final_coordinate_z"))
-		new_object->m_final_coordinate.SetZ(atof(element->Attribute("final_coordinate_z")));
+	if (element->Attribute("final_coordinate_x")) { double value; element->Attribute("final_coordinate_x", &value); new_object->m_final_coordinate.SetX(value); }
+	if (element->Attribute("final_coordinate_y")) { double value; element->Attribute("final_coordinate_y", &value); new_object->m_final_coordinate.SetY(value); }
+	if (element->Attribute("final_coordinate_z")) { double value; element->Attribute("final_coordinate_z", &value); new_object->m_final_coordinate.SetZ(value); }
 
 	new_object->ReadBaseXML(element);
 
@@ -1339,8 +1339,8 @@ void CProbing::WriteBaseXML(TiXmlElement *element)
 
 void CProbing::ReadBaseXML(TiXmlElement* element)
 {
-	if (element->Attribute("depth")) m_depth = atof(element->Attribute("depth"));
-	if (element->Attribute("distance")) m_distance = atof(element->Attribute("distance"));
+	if (element->Attribute("depth")) element->Attribute("depth", &m_depth);
+	if (element->Attribute("distance")) element->Attribute("distance", &m_distance);
 
 	CSpeedOp::ReadBaseXML(element);
 }

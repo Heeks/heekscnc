@@ -546,18 +546,10 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("tool_length_offset", m_tool_length_offset);
 	element->SetDoubleAttribute("max_advance_per_revolution", m_max_advance_per_revolution);
 
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_automatically_generate_title;
-	element->SetAttribute("automatically_generate_title", l_ossValue.str().c_str() );
-
-	l_ossValue.str(""); l_ossValue << m_material;
-	element->SetAttribute("material", l_ossValue.str().c_str() );
-
-	l_ossValue.str(""); l_ossValue << m_orientation;
-	element->SetAttribute("orientation", l_ossValue.str().c_str() );
-
-	l_ossValue.str(""); l_ossValue << int(m_type);
-	element->SetAttribute("type", l_ossValue.str().c_str() );
+	element->SetAttribute("automatically_generate_title", m_automatically_generate_title );
+	element->SetAttribute("material", m_material );
+	element->SetAttribute("orientation", m_orientation );
+	element->SetAttribute("type", int(m_type) );
 
 	element->SetDoubleAttribute("corner_radius", m_corner_radius);
 	element->SetDoubleAttribute("flat_radius", m_flat_radius);
@@ -574,32 +566,32 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 
 void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	if (pElem->Attribute("diameter")) m_diameter = atof(pElem->Attribute("diameter"));
-	if (pElem->Attribute("max_advance_per_revolution")) m_max_advance_per_revolution = atof(pElem->Attribute("max_advance_per_revolution"));
-	if (pElem->Attribute("automatically_generate_title")) m_automatically_generate_title = atoi(pElem->Attribute("automatically_generate_title"));
-	if (pElem->Attribute("x_offset")) m_x_offset = atof(pElem->Attribute("x_offset"));
-	if (pElem->Attribute("tool_length_offset")) m_tool_length_offset = atof(pElem->Attribute("tool_length_offset"));
-	if (pElem->Attribute("material")) m_material = atoi(pElem->Attribute("material"));
-	if (pElem->Attribute("orientation")) m_orientation = atoi(pElem->Attribute("orientation"));
-	if (pElem->Attribute("type")) m_type = CCuttingToolParams::eCuttingToolType(atoi(pElem->Attribute("type")));
-	if (pElem->Attribute("corner_radius")) m_corner_radius = atof(pElem->Attribute("corner_radius"));
-	if (pElem->Attribute("flat_radius")) m_flat_radius = atof(pElem->Attribute("flat_radius"));
-	if (pElem->Attribute("cutting_edge_angle")) m_cutting_edge_angle = atof(pElem->Attribute("cutting_edge_angle"));
+	if (pElem->Attribute("diameter")) pElem->Attribute("diameter", &m_diameter);
+	if (pElem->Attribute("max_advance_per_revolution")) pElem->Attribute("max_advance_per_revolution", &m_max_advance_per_revolution);
+	if (pElem->Attribute("automatically_generate_title")) pElem->Attribute("automatically_generate_title", &m_automatically_generate_title);
+	if (pElem->Attribute("x_offset")) pElem->Attribute("x_offset", &m_x_offset);
+	if (pElem->Attribute("tool_length_offset")) pElem->Attribute("tool_length_offset", &m_tool_length_offset);
+	if (pElem->Attribute("material")) pElem->Attribute("material", &m_material);
+	if (pElem->Attribute("orientation")) pElem->Attribute("orientation", &m_orientation);
+	if (pElem->Attribute("type")) { int value; pElem->Attribute("type", &value); m_type = CCuttingToolParams::eCuttingToolType(value); }
+	if (pElem->Attribute("corner_radius")) pElem->Attribute("corner_radius", &m_corner_radius);
+	if (pElem->Attribute("flat_radius")) pElem->Attribute("flat_radius", &m_flat_radius);
+	if (pElem->Attribute("cutting_edge_angle")) pElem->Attribute("cutting_edge_angle", &m_cutting_edge_angle);
 	if (pElem->Attribute("cutting_edge_height"))
 	{
-		m_cutting_edge_height = atof(pElem->Attribute("cutting_edge_height"));
+		 pElem->Attribute("cutting_edge_height", &m_cutting_edge_height);
 	} // End if - then
 	else
 	{
 		m_cutting_edge_height = m_diameter * 4.0;
 	} // End if - else
 
-	if (pElem->Attribute("front_angle")) m_front_angle = atof(pElem->Attribute("front_angle"));
-	if (pElem->Attribute("tool_angle")) m_tool_angle = atof(pElem->Attribute("tool_angle"));
-	if (pElem->Attribute("back_angle")) m_back_angle = atof(pElem->Attribute("back_angle"));
+	if (pElem->Attribute("front_angle")) pElem->Attribute("front_angle", &m_front_angle);
+	if (pElem->Attribute("tool_angle")) pElem->Attribute("tool_angle", &m_tool_angle);
+	if (pElem->Attribute("back_angle")) pElem->Attribute("back_angle", &m_back_angle);
 
-	if (pElem->Attribute( "probe_offset_x" )) m_probe_offset_x = atof(pElem->Attribute("probe_offset_x"));
-	if (pElem->Attribute( "probe_offset_y" )) m_probe_offset_y = atof(pElem->Attribute("probe_offset_y"));
+	if (pElem->Attribute( "probe_offset_x" )) pElem->Attribute("probe_offset_x", &m_probe_offset_x);
+	if (pElem->Attribute( "probe_offset_y" )) pElem->Attribute("probe_offset_y", &m_probe_offset_y);
 }
 
 CCuttingTool::~CCuttingTool()
@@ -802,9 +794,7 @@ void CCuttingTool::WriteXML(TiXmlNode *root)
 	root->LinkEndChild( element );
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_tool_number;
-	element->SetAttribute("tool_number", l_ossValue.str().c_str() );
+	element->SetAttribute("tool_number", m_tool_number );
 
 	m_params.WriteXMLAttributes(element);
 	WriteBaseXML(element);
@@ -815,7 +805,7 @@ HeeksObj* CCuttingTool::ReadFromXMLElement(TiXmlElement* element)
 {
 
 	int tool_number = 0;
-	if (element->Attribute("tool_number")) tool_number = atoi(element->Attribute("tool_number"));
+	if (element->Attribute("tool_number")) element->Attribute("tool_number", &tool_number);
 
 	wxString title(Ctt(element->Attribute("title")));
 	CCuttingTool* new_object = new CCuttingTool( title.c_str(), CCuttingToolParams::eDrill, tool_number);
@@ -1656,9 +1646,9 @@ void CCuttingTool::ImportProbeCalibrationData( const wxString & probed_points_xm
 				{
 					std::string name(pPoint->Value());
 
-					if (name == "X") point.SetX( atof(pPoint->GetText()) / theApp.m_program->m_units );
-					if (name == "Y") point.SetY( atof(pPoint->GetText()) / theApp.m_program->m_units );
-					if (name == "Z") point.SetZ( atof(pPoint->GetText()) / theApp.m_program->m_units );
+					if (name == "X") { double value; pPoint->Attribute("X", &value); point.SetX( value / theApp.m_program->m_units ); }
+					if (name == "Y") { double value; pPoint->Attribute("Y", &value); point.SetY( value / theApp.m_program->m_units ); }
+					if (name == "Z") { double value; pPoint->Attribute("Z", &value); point.SetZ( value / theApp.m_program->m_units ); }
 				} // End for
 
 				points.push_back(point);

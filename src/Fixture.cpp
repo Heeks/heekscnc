@@ -215,25 +215,27 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	set_initial_values();
 
-	if (pElem->Attribute("yz_plane")) m_yz_plane = atof(pElem->Attribute("yz_plane"));
-	if (pElem->Attribute("xz_plane")) m_xz_plane = atof(pElem->Attribute("xz_plane"));
-	if (pElem->Attribute("xy_plane")) m_xy_plane = atof(pElem->Attribute("xy_plane"));
+	if (pElem->Attribute("yz_plane")) pElem->Attribute("yz_plane", &m_yz_plane);
+	if (pElem->Attribute("xz_plane")) pElem->Attribute("xz_plane", &m_xz_plane);
+	if (pElem->Attribute("xy_plane")) pElem->Attribute("xy_plane", &m_xy_plane);
 
-	if (pElem->Attribute("pivot_point_x")) m_pivot_point.SetX( atof(pElem->Attribute("pivot_point_x")) );
-	if (pElem->Attribute("pivot_point_y")) m_pivot_point.SetY( atof(pElem->Attribute("pivot_point_y")) );
-	if (pElem->Attribute("pivot_point_z")) m_pivot_point.SetZ( atof(pElem->Attribute("pivot_point_z")) );
+	if (pElem->Attribute("pivot_point_x")) { double value; pElem->Attribute("pivot_point_x", &value); m_pivot_point.SetX( value ); }
+	if (pElem->Attribute("pivot_point_y")) { double value; pElem->Attribute("pivot_point_y", &value); m_pivot_point.SetY( value ); }
+	if (pElem->Attribute("pivot_point_z")) { double value; pElem->Attribute("pivot_point_z", &value); m_pivot_point.SetZ( value ); }
 
 	int flag = 0;
 	if (pElem->Attribute("safety_height_defined")) pElem->Attribute("safety_height_defined", &flag);
 	m_safety_height_defined = (flag != 0);
-	if (pElem->Attribute("safety_height")) m_safety_height = atof(pElem->Attribute("safety_height"));
+	if (pElem->Attribute("safety_height")) pElem->Attribute("safety_height", &m_safety_height);
 
 	flag = 0;
 	if (pElem->Attribute("touch_off_point_defined")) pElem->Attribute("touch_off_point_defined", &flag);
 	m_touch_off_point_defined = (flag != 0);
-	if (pElem->Attribute("touch_off_point_x")) m_touch_off_point.SetX( atof(pElem->Attribute("touch_off_point_x")) );
-	if (pElem->Attribute("touch_off_point_y")) m_touch_off_point.SetY( atof(pElem->Attribute("touch_off_point_y")) );
-	if (pElem->Attribute("touch_off_point_z")) m_touch_off_point.SetZ( atof(pElem->Attribute("touch_off_point_z")) );
+
+	double value;
+	if (pElem->Attribute("touch_off_point_x")) { pElem->Attribute("touch_off_point_x", &value); m_touch_off_point.SetX( value ); }
+	if (pElem->Attribute("touch_off_point_y")) { pElem->Attribute("touch_off_point_y", &value); m_touch_off_point.SetY( value ); }
+	if (pElem->Attribute("touch_off_point_z")) { pElem->Attribute("touch_off_point_z", &value); m_touch_off_point.SetZ( value ); }
 
 	if (pElem->Attribute("touch_off_description")) m_touch_off_description = Ctt(pElem->Attribute("touch_off_description"));
 }
@@ -339,9 +341,7 @@ void CFixture::WriteXML(TiXmlNode *root)
 	root->LinkEndChild( element );
 	element->SetAttribute("title", Ttc(m_title.c_str()));
 
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_coordinate_system_number;
-	element->SetAttribute("coordinate_system_number", l_ossValue.str().c_str() );
+	element->SetAttribute("coordinate_system_number", m_coordinate_system_number );
 
 	m_params.WriteXMLAttributes(element);
 	WriteBaseXML(element);
@@ -635,9 +635,9 @@ void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_
 				{
 					std::string name(pPoint->Value());
 
-					if (name == "X") point.SetX( atof(pPoint->GetText()) );
-					if (name == "Y") point.SetY( atof(pPoint->GetText()) );
-					if (name == "Z") point.SetZ( atof(pPoint->GetText()) );
+					if (name == "X") { double value; pPoint->Attribute("X", &value); point.SetX( value ); }
+					if (name == "Y") { double value; pPoint->Attribute("Y", &value); point.SetY( value ); }
+					if (name == "Z") { double value; pPoint->Attribute("Z", &value); point.SetZ( value ); }
 				} // End for
 
 				points.push_back(point);
