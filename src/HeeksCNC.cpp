@@ -361,7 +361,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	CDrilling::Symbols_t cuttingToolsThatMatchCircles;
 	CDrilling drill( symbols, -1, -1 );
 
-	intersections = drill.FindAllLocations();
+	intersections = drill.FindAllLocations(NULL);
 
 	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
 	{
@@ -621,7 +621,7 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 
 	CCounterBore::Symbols_t cuttingToolsThatMatchCircles;
 	CCounterBore counterbore( symbols, -1 );
-	intersections = counterbore.FindAllLocations( NULL );
+	intersections = counterbore.FindAllLocations( NULL, NULL );
 
 	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
 	{
