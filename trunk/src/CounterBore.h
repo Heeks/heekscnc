@@ -114,7 +114,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	std::vector<CNCPoint> FindAllLocations( std::list<int> *pToolNumbersReferenced );
+	std::vector<CNCPoint> FindAllLocations( std::list<int> *pToolNumbersReferenced, CMachineState *pMachineState );
 	static bool ValidType( const int object_type );
 
 };

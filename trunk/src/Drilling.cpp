@@ -171,7 +171,7 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << CSpeedOp::AppendTextToProgram( pMachineState );   // Set any private fixtures and change tools (if necessary)
 
-	std::vector<CNCPoint> locations = FindAllLocations();
+	std::vector<CNCPoint> locations = FindAllLocations(pMachineState);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );
@@ -185,6 +185,7 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
 			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units // << ", "
 			<< _T(")\n");
+        pMachineState->Location(point); // Remember where we are.
 	} // End for
 
 	python << _T("end_canned_cycle()\n");
@@ -319,7 +320,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			} // End if - then
 		} // End if - then
 
-		std::vector<CNCPoint> locations = FindAllLocations();
+		std::vector<CNCPoint> locations = FindAllLocations(NULL);
 
 		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
@@ -523,7 +524,7 @@ void CDrilling::ReloadPointers()
  * 	the result set.  Finally, find the intersections of all of these elements and
  * 	add the intersection points to the result vector.
  */
-std::vector<CNCPoint> CDrilling::FindAllLocations()
+std::vector<CNCPoint> CDrilling::FindAllLocations(CMachineState *pMachineState)
 {
 	std::vector<CNCPoint> locations;
 	ReloadPointers();   // Make sure our integer lists have been converted into children first.
@@ -649,7 +650,7 @@ std::vector<CNCPoint> CDrilling::FindAllLocations()
 			if (lhsPtr->GetType() == DrillingType)
 			{
 				std::vector<CNCPoint> starting_points;
-				starting_points = ((CDrilling *)lhsPtr)->FindAllLocations();
+				starting_points = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
 
 				// Copy the results in ONLY if each point doesn't already exist.
 				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
@@ -665,10 +666,7 @@ std::vector<CNCPoint> CDrilling::FindAllLocations()
 
 	if (m_params.m_sort_drilling_locations)
 	{
-		// This drilling cycle has the 'sort' option turned on.  Take the first point (because we don't know any better) and
-		// sort the points in order of distance from each preceding point.  It may not be the most efficient arrangement
-		// but it's better than random.  If we were really eager we would allow the starting point to be based on the
-		// previous NC operation's ending point.
+		// This drilling cycle has the 'sort' option turned on.
 		//
 		// If the sorting option is turned off then the points need to be returned in order of the m_symbols list.  One day,
 		// we will allow the operator to re-order the m_symbols list by using a drag-n-drop operation on the sub-elements
@@ -679,12 +677,14 @@ std::vector<CNCPoint> CDrilling::FindAllLocations()
 		{
 			if (l_itPoint == locations.begin())
 			{
-				// It's the first point.  Reference this to zero so that the order makes some sense.  It would
-				// be nice, eventually, to have this first reference point be the last point produced by the
-				// previous NC operation.  i.e. where the last operation left off, we should start drilling close
-				// by.
+				// It's the first point.
+				CNCPoint reference_location(0.0, 0.0, 0.0);
+				if (pMachineState)
+				{
+				    reference_location = pMachineState->Location();
+				}
 
-				sort_points_by_distance compare( CNCPoint( 0.0, 0.0, 0.0 ) );
+				sort_points_by_distance compare( reference_location );
 				std::sort( locations.begin(), locations.end(), compare );
 			} // End if - then
 			else
@@ -720,7 +720,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 		CCuttingTool *pChamfer = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
 		if (pChamfer != NULL)
 		{
-			std::vector<CNCPoint> these_locations = FindAllLocations();
+			std::vector<CNCPoint> these_locations = FindAllLocations(NULL);
 
 			if (pChamfer->m_params.m_type == CCuttingToolParams::eChamfer)
 			{
@@ -750,7 +750,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 							// with our drilling locations.  If so, we must be
 							// chamfering a previously drilled hole.
 
-							std::vector<CNCPoint> previous_locations = ((CDrilling *)obj)->FindAllLocations();
+							std::vector<CNCPoint> previous_locations = ((CDrilling *)obj)->FindAllLocations(NULL);
 							std::vector<CNCPoint> common_locations;
 							std::set_intersection( previous_locations.begin(), previous_locations.end(),
 										these_locations.begin(), these_locations.end(),
