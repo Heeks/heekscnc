@@ -240,16 +240,7 @@ void CProgram::GetProperties(std::list<Property *> *list)
 
 static void on_set_max_spindle_speed(double value, HeeksObj* object)
 {
-#ifdef UNICODE
-	std::wostringstream l_ossMessage;
-#else
-	std::ostringstream l_ossMessage;
-#endif
-
-	l_ossMessage << _T("This value is read-only.  Settings must be adjusted in the corresponding machine definition file\n")
-			<< ((CProgram *)object)->m_machine.configuration_file_name.c_str();
-
-	wxMessageBox(l_ossMessage.str().c_str());
+    ((CProgram *) object)->m_machine.m_max_spindle_speed = value;
 	heeksCAD->RefreshProperties();
 }
 
@@ -311,6 +302,7 @@ void CProgram::WriteXML(TiXmlNode *root)
 	element->SetDoubleAttribute("units", m_units);
 
 	m_raw_material.WriteBaseXML(element);
+	m_machine.WriteBaseXML(element);
 	WriteBaseXML(element);
 }
 
@@ -384,11 +376,28 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 
 	new_object->ReadBaseXML(pElem);
 	new_object->m_raw_material.ReadBaseXML(pElem);
+	new_object->m_machine.ReadBaseXML(pElem);
 
 	new_object->AddMissingChildren();
 
 	return new_object;
 }
+
+
+void CMachine::WriteBaseXML(TiXmlElement *element)
+{
+	element->SetDoubleAttribute("max_spindle_speed", m_max_spindle_speed);
+} // End WriteBaseXML() method
+
+void CMachine::ReadBaseXML(TiXmlElement* element)
+{
+	if (element->Attribute("max_spindle_speed"))
+	{
+		element->Attribute("max_spindle_speed", &m_max_spindle_speed);
+	} // End if - then
+} // End ReadBaseXML() method
+
+
 
 /**
 	Sort the NC operations by;

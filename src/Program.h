@@ -39,6 +39,10 @@ public:
 	double m_max_spindle_speed;		// in revolutions per minute (RPM)
 
 	void GetProperties(CProgram *parent, std::list<Property *> *list);
+	void WriteBaseXML(TiXmlElement *element);
+	void ReadBaseXML(TiXmlElement* element);
+
+	static wxString ConfigScope() { return(_T("Machine")); }
 };
 
 
