@@ -691,8 +691,6 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
 		return(python);
 	}
 
-    CNCPoint last_position(0.0, 0.0, 0.0);
-
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
         std::list<TopoDS_Shape> wires;

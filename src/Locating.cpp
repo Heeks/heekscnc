@@ -110,7 +110,7 @@ Python CLocating::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << COp::AppendTextToProgram( pMachineState );
 
-	std::vector<CNCPoint> locations = FindAllLocations();
+	std::vector<CNCPoint> locations = FindAllLocations(pMachineState);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		CNCPoint location( *l_itLocation );
@@ -126,6 +126,7 @@ Python CLocating::AppendTextToProgram( CMachineState *pMachineState )
 			<< _T("y=") << point.Y(true) << _T(", ")
 			<< _T("z=") << point.Z(true) << _T(")\n");
 		python << _T("program_stop(optional=False)\n");
+		pMachineState->Location(point); // Remember where we are.
 	} // End for
 
 	return(python);
@@ -296,7 +297,7 @@ void CLocating::ReloadPointers()
  * 	the result set.  Finally, find the intersections of all of these elements and
  * 	add the intersection points to the result vector.
  */
-std::vector<CNCPoint> CLocating::FindAllLocations()
+std::vector<CNCPoint> CLocating::FindAllLocations(CMachineState *pMachineState)
 {
 	std::vector<CNCPoint> locations;
 
@@ -403,7 +404,7 @@ std::vector<CNCPoint> CLocating::FindAllLocations()
 				if (lhsPtr->GetType() == DrillingType)
 				{
 					std::vector<CNCPoint> starting_points;
-					starting_points = ((CDrilling *)lhsPtr)->FindAllLocations();
+					starting_points = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
 
 					// Copy the results in ONLY if each point doesn't already exist.
 					for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
@@ -433,12 +434,14 @@ std::vector<CNCPoint> CLocating::FindAllLocations()
 		{
 			if (l_itPoint == locations.begin())
 			{
-				// It's the first point.  Reference this to zero so that the order makes some sense.  It would
-				// be nice, eventually, to have this first reference point be the last point produced by the
-				// previous NC operation.  i.e. where the last operation left off, we should start locating close
-				// by.
+				// It's the first point.
+				CNCPoint reference_location(0.0, 0.0, 0.0);
+				if (pMachineState)
+				{
+				    reference_location = pMachineState->Location();
+				}
 
-				sort_points_by_distance compare( CNCPoint( 0.0, 0.0, 0.0 ) );
+				sort_points_by_distance compare( reference_location );
 				std::sort( locations.begin(), locations.end(), compare );
 			} // End if - then
 			else

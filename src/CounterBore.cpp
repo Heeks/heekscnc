@@ -307,11 +307,12 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 				return(python);
 			} // End if - then
 
-			std::vector<CNCPoint> locations = FindAllLocations( NULL );
+			std::vector<CNCPoint> locations = FindAllLocations( NULL, pMachineState );
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point( pMachineState->Fixture().Adjustment(*l_itLocation) );
 				python << GenerateGCodeForOneLocation( point, pCuttingTool );
+				pMachineState->Location(*l_itLocation); // Remember where we are.
 			} // End for
 		} // End if - then
 		else
@@ -378,7 +379,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 		// For all coordinates that relate to these reference objects, draw the graphics that represents
 		// both a drilling hole and a counterbore.
 
-		std::vector<CNCPoint> locations = FindAllLocations( NULL );
+		std::vector<CNCPoint> locations = FindAllLocations( NULL, NULL );
 		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
 			std::list< CNCPoint > circle = PointsAround( *l_itLocation, m_params.m_diameter / 2, 10 );
@@ -589,7 +590,7 @@ void CCounterBore::ReloadPointers()
  *	size holes were drilled so that we can make an intellegent selection for the
  *	socket head.
  */
-std::vector<CNCPoint> CCounterBore::FindAllLocations( std::list<int> *pToolNumbersReferenced )
+std::vector<CNCPoint> CCounterBore::FindAllLocations( std::list<int> *pToolNumbersReferenced, CMachineState *pMachineState )
 {
 	std::vector<CNCPoint> locations;
 
@@ -634,7 +635,7 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( std::list<int> *pToolNumbe
 				pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_cutting_tool_number );
 			} // End if - then
 
-			std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations();
+			std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
 			for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
 			{
 				if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
@@ -711,12 +712,17 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( std::list<int> *pToolNumbe
 		{
 			if (l_itPoint == locations.begin())
 			{
-				// It's the first point.  Reference this to zero so that the order makes some sense.  It would
-				// be nice, eventually, to have this first reference point be the last point produced by the
-				// previous NC operation.  i.e. where the last operation left off, we should start drilling close
-				// by.
+				// It's the first point.  Reference this to zero so that the order makes some sense.
+                CNCPoint reference_location(0.0, 0.0, 0.0);
 
-				sort_points_by_distance compare( CNCPoint( 0.0, 0.0, 0.0 ) );
+                if (pMachineState)
+                {
+                    // We do know where the machine is currently positioned.  Sort the locations starting from
+                    // the nearest counterbore to the machine's current location.
+                    reference_location = pMachineState->Location();
+                }
+
+				sort_points_by_distance compare( reference_location );
 				std::sort( locations.begin(), locations.end(), compare );
 			} // End if - then
 			else
@@ -797,7 +803,7 @@ CCounterBore::CCounterBore(	const Symbols_t &symbols,
     m_params.set_initial_values( cutting_tool_number );
 
     std::list<int> drillbits;
-    std::vector<CNCPoint> locations = FindAllLocations( &drillbits );
+    std::vector<CNCPoint> locations = FindAllLocations( &drillbits, NULL );
     if (drillbits.size() > 0)
     {
         // We found some drilling objects amongst the symbols. Use the diameter of

@@ -232,7 +232,7 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 				continue;
 			}
 
-			std::vector<CNCPoint> locations = pDrilling->FindAllLocations();
+			std::vector<CNCPoint> locations = pDrilling->FindAllLocations(pMachineState);
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
@@ -245,7 +245,7 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 			CCounterBore *pCounterBore = ((CCounterBore *) child);
 
 			std::list<int> unused;
-			std::vector<CNCPoint> locations = pCounterBore->FindAllLocations(&unused);
+			std::vector<CNCPoint> locations = pCounterBore->FindAllLocations(&unused, pMachineState);
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
