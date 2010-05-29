@@ -332,6 +332,19 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 		} // End if - then
 	} // End if - then
 
+    if (m_depth_op_params.m_step_down < 0)
+    {
+        wxString change;
+
+        change << _("The step-down value for pocket (id=") << m_id << _(") must be positive");
+        changes.push_back(change);
+
+        if (apply_changes)
+        {
+            m_depth_op_params.m_step_down *= -1.0;
+        }
+    }
+
 	return(changes);
 
 } // End DesignRulesAdjustment() method

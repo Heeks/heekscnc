@@ -532,41 +532,16 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 {
 	std::list<wxString> changes;
 
-	std::list<int> invalid_sketches;
-	for(std::list<int>::iterator l_itSketch = m_sketches.begin(); l_itSketch != m_sketches.end(); l_itSketch++)
+	int num_sketches = 0;
+	for(HeeksObj *obj = GetFirstChild(); obj != NULL; obj = GetNextChild())
 	{
-		HeeksObj *obj = heeksCAD->GetIDObject( SketchType, *l_itSketch );
-		if (obj == NULL)
+		if (obj->GetType() == SketchType)
 		{
-#ifdef UNICODE
-			std::wostringstream l_ossChange;
-#else
-			std::ostringstream l_ossChange;
-#endif
-
-			l_ossChange << _("Invalid reference to sketch") << " id='" << *l_itSketch << "' " << _("in pocket operations") << " id='" << m_id << "'\n";
-			changes.push_back(l_ossChange.str().c_str());
-
-			if (apply_changes)
-			{
-				invalid_sketches.push_back( *l_itSketch );
-			} // End if - then
-		} // End if - then
-	} // End for
-
-	if (apply_changes)
-	{
-		for(std::list<int>::iterator l_itSketch = invalid_sketches.begin(); l_itSketch != invalid_sketches.end(); l_itSketch++)
-		{
-			std::list<int>::iterator l_itToRemove = std::find( m_sketches.begin(), m_sketches.end(), *l_itSketch );
-			if (l_itToRemove != m_sketches.end())
-			{
-				m_sketches.erase(l_itToRemove);
-			} // End while
-		} // End for
+		    num_sketches++;
+		}
 	} // End if - then
 
-	if (m_sketches.size() == 0)
+	if (num_sketches == 0)
 	{
 #ifdef UNICODE
 			std::wostringstream l_ossChange;
