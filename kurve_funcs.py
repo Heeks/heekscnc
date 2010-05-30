@@ -122,13 +122,16 @@ def get_tag_z_for_span(current_perim, k, radius, start_depth, depth, final_depth
     return max_z
 
 def add_roll_on(k, roll_on_k, direction, roll_radius, offset_extra, roll_on):
-    if direction == "on": return
-    if roll_on == None: return
+    if direction == "on": roll_on = None
     num_spans = kurve.num_spans(k)
     if num_spans == 0: return
     
-    if roll_on == 'auto':
-        sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
+    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
+
+    if roll_on == None:
+        rollstartx = sx
+        rollstarty = sy
+    elif roll_on == 'auto':
         vx, vy = kurve.get_span_dir(k, 0, 0) # get start direction
         if direction == 'right':
             off_vx = vy
@@ -140,13 +143,16 @@ def add_roll_on(k, roll_on_k, direction, roll_radius, offset_extra, roll_on):
         rollstartx = sx + off_vx * roll_radius - vx * roll_radius
         rollstarty = sy + off_vy * roll_radius - vy * roll_radius
     else:
-        rollstartx, rollstarty =  roll_on       
+        rollstartx, rollstarty = roll_on       
 
-    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
-    if sx == rollstartx and sy == rollstarty: return
-    vx, vy = kurve.get_span_dir(k, 0, 0) # get start direction
-    rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, rollstartx, rollstarty)
-    rdir = -rdir # because the tangential_arc was used in reverse
+    if sx == rollstartx and sy == rollstarty:
+        rdir = 0
+        rcx = 0
+        rcy = 0
+    else:
+        vx, vy = kurve.get_span_dir(k, 0, 0) # get start direction
+        rcx, rcy, rdir = kurve.tangential_arc(sx, sy, -vx, -vy, rollstartx, rollstarty)
+        rdir = -rdir # because the tangential_arc was used in reverse
     
     # add a start roll on point
     kurve.add_point(roll_on_k, 0, rollstartx, rollstarty, 0, 0)
