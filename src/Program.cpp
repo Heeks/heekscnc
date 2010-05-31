@@ -14,6 +14,7 @@
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
+#include "interface/PropertyCheck.h"
 #include "interface/Tool.h"
 #include "Profile.h"
 #include "Pocket.h"
@@ -145,6 +146,38 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 	return(*this);
 }
 
+
+CMachine::CMachine()
+{ 
+	m_max_spindle_speed = 0.0;
+
+	CNCConfig config(CMachine::ConfigScope());
+	config.Read(_T("safety_height_defined"), &m_safety_height_defined, false );
+	config.Read(_T("safety_height"), &m_safety_height, 0.0 );
+}
+
+CMachine::CMachine( const CMachine & rhs )
+{
+	*this = rhs;	// call the assignment operator
+}
+
+
+CMachine & CMachine::operator= ( const CMachine & rhs )
+{
+	if (this != &rhs)
+	{
+		configuration_file_name = rhs.configuration_file_name;
+		file_name = rhs.file_name;
+		description = rhs.description;
+		m_max_spindle_speed = rhs.m_max_spindle_speed;
+		m_safety_height_defined = rhs.m_safety_height_defined;
+		m_safety_height = rhs.m_safety_height;
+	} // End if - then
+
+	return(*this);
+} // End assignment operator.
+
+
 static void on_set_machine(int value, HeeksObj* object)
 {
 	std::vector<CMachine> machines;
@@ -191,6 +224,7 @@ static void on_set_output_file_name_follows_data_file_name(int zero_based_choice
 	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("OutputFileNameFollowsDataFileName"), pProgram->m_output_file_name_follows_data_file_name );
 }
+
 
 
 void CProgram::GetProperties(std::list<Property *> *list)
@@ -244,9 +278,35 @@ static void on_set_max_spindle_speed(double value, HeeksObj* object)
 	heeksCAD->RefreshProperties();
 }
 
+static void on_set_safety_height_defined(const bool value, HeeksObj *object)
+{
+    ((CProgram *)object)->m_machine.m_safety_height_defined = value;
+
+	CNCConfig config(CMachine::ConfigScope());
+	config.Write(_T("safety_height_defined"), ((CProgram *)object)->m_machine.m_safety_height_defined );
+
+    heeksCAD->Changed();
+}
+
+static void on_set_safety_height(const double value, HeeksObj *object)
+{
+    ((CProgram *)object)->m_machine.m_safety_height = value;
+
+	CNCConfig config(CMachine::ConfigScope());
+	config.Write(_T("safety_height"), ((CProgram *)object)->m_machine.m_safety_height );
+
+    heeksCAD->Changed();
+}
+
 void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("Maximum Spindle Speed (RPM)"), m_max_spindle_speed, parent, on_set_max_spindle_speed));
+	list->push_back(new PropertyCheck(_("Safety Height Defined"), m_safety_height_defined, parent, on_set_safety_height_defined));
+
+    if (m_safety_height_defined)
+    {
+        list->push_back(new PropertyLength(_("Safety Height (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
+    }
 } // End GetProperties() method
 
 
@@ -387,6 +447,8 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 void CMachine::WriteBaseXML(TiXmlElement *element)
 {
 	element->SetDoubleAttribute("max_spindle_speed", m_max_spindle_speed);
+	element->SetAttribute("safety_height_defined", m_safety_height_defined);
+	element->SetDoubleAttribute("safety_height", m_safety_height);
 } // End WriteBaseXML() method
 
 void CMachine::ReadBaseXML(TiXmlElement* element)
@@ -395,6 +457,12 @@ void CMachine::ReadBaseXML(TiXmlElement* element)
 	{
 		element->Attribute("max_spindle_speed", &m_max_spindle_speed);
 	} // End if - then
+
+	int flag = 0;
+	if (element->Attribute("safety_height_defined")) element->Attribute("safety_height_defined", &flag);
+	m_safety_height_defined = (flag != 0);
+	if (element->Attribute("safety_height")) element->Attribute("safety_height", &m_safety_height);
+
 } // End ReadBaseXML() method
 
 
@@ -646,7 +714,7 @@ Python CProgram::RewritePythonProgram()
 
 	// Write all the operations once for each fixture.
 	std::list<CFixture *> fixtures;
-	std::auto_ptr<CFixture> default_fixture = std::auto_ptr<CFixture>(new CFixture( NULL, CFixture::G54 ) );
+	std::auto_ptr<CFixture> default_fixture = std::auto_ptr<CFixture>(new CFixture( NULL, CFixture::G54, false, 0.0 ) );
 
     for (HeeksObj *publicFixture = theApp.m_program->Fixtures()->GetFirstChild(); publicFixture != NULL;
         publicFixture = theApp.m_program->Fixtures()->GetNextChild())
@@ -835,6 +903,11 @@ CMachine CProgram::GetMachine(const wxString& file_name)
 	CMachine machine;
 	machine.file_name = _T("not found");
 	machine.description = _T("not found");
+
+	CNCConfig config(ConfigScope());
+	config.Read(_T("safety_height_defined"), &machine.m_safety_height_defined, false);
+	config.Read(_T("safety_height"), &machine.m_safety_height, 0.0);
+
 	return machine;
 }
 

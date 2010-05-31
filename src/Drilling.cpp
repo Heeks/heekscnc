@@ -630,7 +630,7 @@ std::vector<CNCPoint> CDrilling::FindAllLocations(CMachineState *pMachineState)
 			if (lhsPtr->GetType() == ProfileType)
 			{
 				std::vector<CNCPoint> starting_points;
-				CFixture perfectly_aligned_fixture(NULL,CFixture::G54);
+				CFixture perfectly_aligned_fixture(NULL,CFixture::G54, false, 0.0);
 				CMachineState machine;
 				machine.Fixture(perfectly_aligned_fixture);
 

@@ -31,12 +31,16 @@ enum ProgramUserType{
 class CMachine
 {
 public:
-	CMachine() { m_max_spindle_speed = 0.0; }
+	CMachine();
+	CMachine( const CMachine & rhs );
+	CMachine & operator= ( const CMachine & rhs );
 
 	wxString configuration_file_name;
 	wxString file_name;
 	wxString description;
 	double m_max_spindle_speed;		// in revolutions per minute (RPM)
+	bool m_safety_height_defined;
+	double m_safety_height;
 
 	void GetProperties(CProgram *parent, std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);

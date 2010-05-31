@@ -13,7 +13,7 @@
 
 class CFixture;
 
-CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54)
+CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54, false, 0.0)
 {
         m_location = CNCPoint(0.0, 0.0, 0.0);
         m_cutting_tool_number = 0;  // No tool assigned.
@@ -174,7 +174,7 @@ void CMachineState::MarkAsProcessed( const int object_type, const unsigned int o
 	m_already_processed.insert( instance );
 }
 
-CMachineState::Instance::Instance( const CMachineState::Instance & rhs ) : m_fixture(NULL, CFixture::G54)
+CMachineState::Instance::Instance( const CMachineState::Instance & rhs ) : m_fixture(rhs.m_fixture)
 {
     *this = rhs;
 }

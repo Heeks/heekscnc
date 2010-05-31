@@ -39,7 +39,7 @@ class CProgram;
 
 extern CHeeksCADInterface* heeksCAD;
 
-void CFixtureParams::set_initial_values()
+void CFixtureParams::set_initial_values(const bool safety_height_defined, const double safety_height)
 {
 	CNCConfig config(ConfigScope());
 
@@ -54,15 +54,14 @@ void CFixtureParams::set_initial_values()
 
 	m_pivot_point = gp_Pnt( pivot_point_x, pivot_point_y, pivot_point_z );
 
-	config.Read(_T("safety_height_defined"), &m_safety_height_defined, false);
-	config.Read(_T("safety_height"), &m_safety_height, 0.0);
+	m_safety_height_defined = safety_height_defined;
+	m_safety_height = safety_height;
 
 	config.Read(_T("touch_off_point_defined"), &m_touch_off_point_defined, false);
-	double touch_off_point_x, touch_off_point_y, touch_off_point_z;
+	double touch_off_point_x, touch_off_point_y;
 	config.Read(_T("touch_off_point_x"), &touch_off_point_x, 0.0);
 	config.Read(_T("touch_off_point_y"), &touch_off_point_y, 0.0);
-	config.Read(_T("touch_off_point_z"), &touch_off_point_z, 0.0);
-	m_touch_off_point = gp_Pnt( touch_off_point_x, touch_off_point_y, touch_off_point_z );
+	m_touch_off_point = gp_Pnt( touch_off_point_x, touch_off_point_y, 0.0 );
 
 	config.Read(_T("touch_off_description"), &m_touch_off_description, _T(""));
 }
@@ -88,7 +87,6 @@ void CFixtureParams::write_values_to_config()
 	config.Write(_T("touch_off_point_defined"), m_touch_off_point_defined);
 	config.Write(_T("touch_off_point_x"), m_touch_off_point.X());
 	config.Write(_T("touch_off_point_y"), m_touch_off_point.Y());
-	config.Write(_T("touch_off_point_z"), m_touch_off_point.Z());
 
 	config.Write(_T("touch_off_description"), m_touch_off_description);
 }
@@ -120,12 +118,6 @@ static void on_set_pivot_point(const double *vt, HeeksObj* object){
 static void on_set_touch_off_point(const double *vt, HeeksObj* object){
 	((CFixture *)object)->m_params.m_touch_off_point.SetX( vt[0] );
 	((CFixture *)object)->m_params.m_touch_off_point.SetY( vt[1] );
-	// ((CFixture *)object)->m_params.m_touch_off_point.SetZ( vt[2] ); /* We're not using the Z value for this */
-
-	if (fabs(vt[2]) > heeksCAD->GetTolerance())
-	{
-	    wxMessageBox(_("Warning: The 'Z' coordinate is not used for this.  Set the 'z' in the 'safety height' property instead (Don't forget to express it in machine - G53 - coordinates)"));
-	}
 }
 
 static void on_set_touch_off_point_defined(const bool value, HeeksObj *object)
@@ -173,14 +165,13 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
 	list->push_back(new PropertyCheck(_("Touch Off Point Defined"), m_touch_off_point_defined, parent, on_set_touch_off_point_defined));
 	if (m_touch_off_point_defined)
 	{
-		double touch_off_point[3];
+		double touch_off_point[2];
 		touch_off_point[0] = m_touch_off_point.X();
 		touch_off_point[1] = m_touch_off_point.Y();
-		touch_off_point[2] = m_touch_off_point.Z();
 
 		wxString title;
 		title << _("Touch-off Point (in ") << parent->m_coordinate_system_number << _T(" coordinates)");
-		list->push_back(new PropertyVertex(title, touch_off_point, parent, on_set_touch_off_point));
+		list->push_back(new PropertyVertex2d(title, touch_off_point, parent, on_set_touch_off_point));
 		list->push_back(new PropertyString(_("Touch-off Description"), m_touch_off_description, parent, on_set_touch_off_description));
 	}
 
@@ -206,14 +197,13 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("touch_off_point_defined", m_touch_off_point_defined);
 	element->SetDoubleAttribute("touch_off_point_x", m_touch_off_point.X());
 	element->SetDoubleAttribute("touch_off_point_y", m_touch_off_point.Y());
-	element->SetDoubleAttribute("touch_off_point_z", m_touch_off_point.Z());
 
 	element->SetAttribute("touch_off_description", Ttc(m_touch_off_description.c_str()));
 }
 
 void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	set_initial_values();
+	set_initial_values(false, 0.0);
 
 	if (pElem->Attribute("yz_plane")) pElem->Attribute("yz_plane", &m_yz_plane);
 	if (pElem->Attribute("xz_plane")) pElem->Attribute("xz_plane", &m_xz_plane);
@@ -235,7 +225,6 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	double value;
 	if (pElem->Attribute("touch_off_point_x")) { pElem->Attribute("touch_off_point_x", &value); m_touch_off_point.SetX( value ); }
 	if (pElem->Attribute("touch_off_point_y")) { pElem->Attribute("touch_off_point_y", &value); m_touch_off_point.SetY( value ); }
-	if (pElem->Attribute("touch_off_point_z")) { pElem->Attribute("touch_off_point_z", &value); m_touch_off_point.SetZ( value ); }
 
 	if (pElem->Attribute("touch_off_description")) m_touch_off_description = Ctt(pElem->Attribute("touch_off_description"));
 }
@@ -356,7 +345,7 @@ HeeksObj* CFixture::ReadFromXMLElement(TiXmlElement* element)
 	if (element->Attribute("title"))
 	{
 		wxString title(Ctt(element->Attribute("title")));
-		CFixture* new_object = new CFixture( title.c_str(), CFixture::eCoordinateSystemNumber_t(coordinate_system_number));
+		CFixture* new_object = new CFixture( title.c_str(), CFixture::eCoordinateSystemNumber_t(coordinate_system_number), false, 0.0);
 
 		for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
 		{

@@ -53,7 +53,7 @@ public:
 		m_touch_off_description = _T("");
 	} // End constructor.
 
-	void set_initial_values();
+	void set_initial_values(const bool safety_height_defined, const double safety_height);
 	void write_values_to_config();
 	void GetProperties(CFixture* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -137,9 +137,13 @@ public:
 	eCoordinateSystemNumber_t m_coordinate_system_number;
 
 	//	Constructors.
-	CFixture(const wxChar *title, const eCoordinateSystemNumber_t coordinate_system_number) : m_coordinate_system_number(coordinate_system_number)
+	CFixture(const wxChar *title, 
+			const eCoordinateSystemNumber_t coordinate_system_number,
+			const bool safety_height_defined, 
+			const double safety_height )
+				: m_coordinate_system_number(coordinate_system_number)
 	{
-		m_params.set_initial_values();
+		m_params.set_initial_values(safety_height_defined, safety_height);
 		if (title != NULL)
 		{
 			m_title = title;
