@@ -1571,7 +1571,7 @@ public:
 
 		python << m_pThis->GeneratePythonPreamble();
 
-		CFixture default_fixture(NULL, CFixture::G54 );
+		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		CMachineState machine;
 		machine.Fixture(default_fixture);
 
@@ -1627,7 +1627,7 @@ public:
 
 		python << m_pThis->GeneratePythonPreamble();
 
-		CFixture default_fixture(NULL, CFixture::G54 );
+		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		CMachineState machine;
 		machine.Fixture(default_fixture);
 
@@ -1684,7 +1684,7 @@ public:
 
 		python << m_pThis->GeneratePythonPreamble();
 
-		CFixture default_fixture(NULL, CFixture::G54 );
+		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		CMachineState machine;
 		machine.Fixture(default_fixture);
 

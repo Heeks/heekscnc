@@ -312,7 +312,7 @@ class AddFixture: public Tool{
         {
             CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(theApp.m_program->Fixtures()->GetNextFixture());
 
-            CFixture *new_object = new CFixture( NULL, coordinate_system_number );
+            CFixture *new_object = new CFixture( NULL, coordinate_system_number, theApp.m_program->m_machine.m_safety_height_defined, theApp.m_program->m_machine.m_safety_height );
             m_pThis->Add(new_object, NULL);
             heeksCAD->ClearMarkedList();
             heeksCAD->Mark(new_object);
