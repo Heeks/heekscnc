@@ -58,6 +58,7 @@ class ParserIso(nc.Parser):
             #arc = 0
             #path_col = None
             drill = False
+            no_move = False
 
             words = self.pattern_main.findall(self.line)
             for word in words:
@@ -96,9 +97,9 @@ class ParserIso(nc.Parser):
                     col = "feed"
                     arc = +1
                 elif (word == 'G10' or word == 'g10'):
-		    move = False
+		            no_move = True		            
                 elif (word == 'L1' or word == 'l1'):
-		    move = False
+		            no_move = True
                 elif (word == 'G20' or word == 'G70'):
                     col = "prep"
                     self.set_mode(units=25.4)
@@ -106,18 +107,18 @@ class ParserIso(nc.Parser):
                     col = "prep"
                     self.set_mode(units=1.0)
                 elif (word == 'G81' or word == 'g81'):
-                    drill = True;
-                    move = False;
-                    path_col = "feed";
-                    col = "feed";
+                    drill = True
+                    no_move = True
+                    path_col = "feed"
+                    col = "feed"
                 elif (word == 'G82' or word == 'g82'):
                     drill = True;
-                    move = False;
+                    no_move = True
                     path_col = "feed"
                     col = "feed"
                 elif (word == 'G83' or word == 'g83'):
-                    drill = True;
-                    move = False;
+                    drill = True
+                    no_move = True
                     path_col = "feed"
                     col = "feed"
                 elif (word[0] == 'G') : col = "prep"
@@ -188,7 +189,7 @@ class ParserIso(nc.Parser):
                 self.add_line(x, y, r)
                 self.end_path()
             else:
-                if (move):
+                if (move and not no_move):
                     self.begin_path(path_col)
                     if (arc) : self.add_arc(x, y, z, i, j, k, r, arc)
                     else     : self.add_line(x, y, z, a, b, c)
