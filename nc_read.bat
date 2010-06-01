@@ -1,1 +1,1 @@
-c:\python26\python.exe nc\%1_read.py %2
+%HOMEDRIVE%\python26\python.exe nc\%1_read.py %2
