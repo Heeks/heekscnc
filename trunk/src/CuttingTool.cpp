@@ -950,8 +950,8 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
 		} // End for
 	} // End for
 
-	result = _T("");	// Delete any floor(value) data we had before.
-	result << original_value;
+
+	result = _T("");	// It's not a recognisable fraction.  Return nothing to indicate such.
 	return(result);
 } // End FractionalRepresentation() method
 
@@ -986,7 +986,32 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 		else
 		{
 			// We're using inches.  Find a fractional representation if one matches.
-			l_ossName << FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units).c_str() << " inch ";
+			wxString fraction = FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units);
+			wxString guage = GuageNumberRepresentation( m_params.m_diameter / theApp.m_program->m_units, theApp.m_program->m_units );
+
+			if (fraction.Len() > 0)
+			{
+                l_ossName << fraction.c_str() << " inch ";
+			}
+			else
+			{
+			    if (guage.Len() > 0)
+			    {
+                    l_ossName << guage.c_str() << " ";
+
+                    if ((theApp.m_program) && (theApp.m_program->Tools()))
+                    {
+                        if (theApp.m_program->Tools()->m_title_format == CTools::eIncludeGuageAndSize)
+                        {
+                            l_ossName << "(" << m_params.m_diameter / theApp.m_program->m_units << " inch) ";
+                        }
+                    }
+			    }
+			    else
+			    {
+			        l_ossName << m_params.m_diameter / theApp.m_program->m_units << " inch ";
+			    }
+			}
 		} // End if - else
 	} // End if - then
 
@@ -1662,4 +1687,63 @@ void CCuttingTool::ImportProbeCalibrationData( const wxString & probed_points_xm
 		} // End if - then
 	} // End if - else
 } // End ImportProbeCalibrationData() method
+
+
+/* static */ wxString CCuttingTool::GuageNumberRepresentation( const double size, const double units )
+{
+
+    typedef struct Guages {
+        const wxChar *guage;
+        double imperial;
+        double metric;
+    } Guages_t;
+
+    Guages_t guages[] = {{_T("80"),0.0135,0.343},{_T("79"),0.0145,0.368},{_T("78"),0.016,0.406},{_T("77"),0.018,0.457},{_T("76"),0.020,0.508},
+                         {_T("75"),0.021,0.533},{_T("74"),0.0225,0.572},{_T("73"),0.024,0.610},{_T("72"),0.025,0.635},{_T("71"),0.026,0.660},
+                         {_T("70"),0.028,0.711},{_T("69"),0.0292,0.742},{_T("68"),0.031,0.787},{_T("67"),0.032,0.813},{_T("66"),0.033,0.838},
+                         {_T("65"),0.035,0.889},{_T("64"),0.036,0.914},{_T("63"),0.037,0.940},{_T("62"),0.038,0.965},{_T("61"),0.039,0.991},
+                         {_T("60"),0.040,1.016},{_T("59"),0.041,1.041},{_T("58"),0.042,1.067},{_T("57"),0.043,1.092},{_T("56"),0.0465,1.181},
+                         {_T("55"),0.052,1.321},{_T("54"),0.055,1.397},{_T("53"),0.0595,1.511},{_T("52"),0.0635,1.613},{_T("51"),0.067,1.702},
+                         {_T("50"),0.070,1.778},{_T("49"),0.073,1.854},{_T("48"),0.076,1.930},{_T("47"),0.0785,1.994},{_T("46"),0.081,2.057},
+                         {_T("45"),0.082,2.083},{_T("44"),0.086,2.184},{_T("43"),0.089,2.261},{_T("42"),0.0935,2.375},{_T("41"),0.096,2.438},
+                         {_T("40"),0.098,2.489},{_T("39"),0.0995,2.527},{_T("38"),0.1015,2.578},{_T("37"),0.104,2.642},{_T("36"),0.1065,2.705},
+                         {_T("35"),0.110,2.794},{_T("34"),0.111,2.819},{_T("33"),0.113,2.870},{_T("32"),0.116,2.946},{_T("31"),0.120,3.048},
+                         {_T("30"),0.1285,3.264},{_T("29"),0.136,3.454},{_T("28"),0.1405,3.569},{_T("27"),0.144,3.658},{_T("26"),0.147,3.734},
+                         {_T("25"),0.1495,3.797},{_T("24"),0.152,3.861},{_T("23"),0.154,3.912},{_T("22"),0.157,3.988},{_T("21"),0.159,4.039},
+                         {_T("20"),0.161,4.089},{_T("19"),0.166,4.216},{_T("18"),0.1695,4.305},{_T("17"),0.173,4.394},{_T("16"),0.177,4.496},
+                         {_T("15"),0.180,4.572},{_T("14"),0.182,4.623},{_T("13"),0.185,4.699},{_T("12"),0.189,4.801},{_T("11"),0.191,4.851},
+                         {_T("10"),0.1935,4.915},{_T("9"),0.196,4.978},{_T("8"),0.199,5.055},{_T("7"),0.201,5.105},{_T("6"),0.204,5.182},
+                         {_T("5"),0.2055,5.220},{_T("4"),0.209,5.309},{_T("3"),0.213,5.410},{_T("2"),0.221,5.613},{_T("1"),0.228,5.791},
+                         {_T("A"),0.234,5.944},{_T("B"),0.238,6.045},{_T("C"),0.242,6.147},{_T("D"),0.246,6.248},{_T("E"),0.250,6.350},
+                         {_T("F"),0.257,6.528},{_T("G"),0.261,6.629},{_T("H"),0.266,6.756},{_T("I"),0.272,6.909},{_T("J"),0.277,7.036},
+                         {_T("K"),0.281,7.137},{_T("L"),0.290,7.366},{_T("M"),0.295,7.493},{_T("N"),0.302,7.671},{_T("O"),0.316,8.026},
+                         {_T("P"),0.323,8.204},{_T("Q"),0.332,8.433},{_T("R"),0.339,8.611},{_T("S"),0.348,8.839},{_T("T"),0.358,9.093},
+                         {_T("U"),0.368,9.347},{_T("V"),0.377,9.576},{_T("W"),0.386,9.804},{_T("X"),0.397,10.08},{_T("Y"),0.404,10.26},
+                         {_T("Z"),0.413,10.49}};
+
+    double tolerance = heeksCAD->GetTolerance();
+    for (::size_t offset=0; offset < (sizeof(guages)/sizeof(guages[0])); offset++)
+    {
+        if (units > 25.0)
+        {
+            if (fabs(size - guages[offset].imperial) < tolerance)
+            {
+                wxString result;
+                result << _T("#") << guages[offset].guage;
+                return(result);
+            }
+        }
+        else
+        {
+            if (fabs(size - guages[offset].metric) < tolerance)
+            {
+                wxString result;
+                result << _T("#") << guages[offset].guage;
+                return(result);
+            }
+        }
+    } // End for
+
+    return(_T(""));
+} // End GuageNumberRepresentation() method
 

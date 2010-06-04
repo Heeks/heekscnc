@@ -21,7 +21,11 @@ HeeksObj *CTools::MakeACopy(void) const
 }
 
 
-CTools::CTools() {}
+CTools::CTools()
+{
+    CNCConfig config(CTools::ConfigScope());
+	config.Read(_T("title_format"), (int *) (&m_title_format), int(eGuageReplacesSize) );
+}
 
 
 CTools::CTools( const CTools & rhs )
@@ -34,6 +38,7 @@ CTools & CTools::operator= ( const CTools & rhs )
     if (this != &rhs)
     {
         ObjList::operator=( rhs );
+        m_title_format = rhs.m_title_format;
     }
     return(*this);
 }
@@ -198,3 +203,27 @@ void CTools::OnChangeUnits(const double units)
         ((CCuttingTool *) *l_itObject)->ResetTitle();
     } // End for
 }
+
+
+static void on_set_title_format(int value, HeeksObj* object)
+{
+	((CTools *)object)->m_title_format = CTools::TitleFormat_t(value);
+
+	CNCConfig config(CTools::ConfigScope());
+	config.Write(_T("title_format"), ((CTools *)object)->m_title_format);
+}
+
+void CTools::GetProperties(std::list<Property *> *list)
+{
+	{
+		std::list< wxString > choices;
+		int choice = 0;
+		choices.push_back( _("Guage number replaces size") );
+		choices.push_back( _("Include guage number and size") );
+
+		list->push_back ( new PropertyChoice ( _("Title Format"),  choices, m_title_format, this, on_set_title_format ) );
+	}
+	HeeksObj::GetProperties(list);
+}
+
+
