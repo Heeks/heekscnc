@@ -223,6 +223,7 @@ public:
 	wxString GenerateMeaningfulName() const;
 	wxString ResetTitle();
 	static wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 );
+	static wxString GuageNumberRepresentation( const double size, const double units );
 
 	TopoDS_Shape GetShape() const;
 	TopoDS_Face  GetSideProfile() const;

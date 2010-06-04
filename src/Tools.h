@@ -9,6 +9,14 @@
 
 class CTools: public ObjList{
 public:
+    typedef enum {
+        eGuageReplacesSize = 0,
+        eIncludeGuageAndSize
+	} TitleFormat_t;
+
+    TitleFormat_t m_title_format;
+
+public:
 
 	// HeeksObj's virtual functions
 	bool OneOfAKind(){return true;}
@@ -33,6 +41,10 @@ public:
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	void OnChangeUnits(const double units);
+	void GetProperties(std::list<Property *> *list);
+
+
+	static wxString ConfigScope() { return(_("Tools")); }
 
 };
 
