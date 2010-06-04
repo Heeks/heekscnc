@@ -306,6 +306,7 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 
 	Valleys_t valleys = DefineValleys(pMachineState);
 
+
 	// NOTE: These valleys are NOT aligned with the fixtures yet.  This needs to be done
 	// individually for each of the different fixtures later on.
 
@@ -313,10 +314,11 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 	{
 	case CInlayParams::eBoth:
 		python << FormValleyWalls(valleys, pMachineState).c_str();				// chamfer
+		python << FormMountainWalls(valleys, pMachineState).c_str();			// chamfer
 		python << FormValleyPockets(valleys, pMachineState).c_str();			// clearance
 		python << FormMountainPockets(valleys, pMachineState, true).c_str();	// clearance
 		python << FormMountainPockets(valleys, pMachineState, false).c_str();	// clearance
-		python << FormMountainWalls(valleys, pMachineState).c_str();			// chamfer
+
 		break;
 
 	case CInlayParams::eFemale:
@@ -325,9 +327,10 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 		break;
 
 	case CInlayParams::eMale:
+        python << FormMountainWalls(valleys, pMachineState).c_str();			// chamfer
 		python << FormMountainPockets(valleys, pMachineState, true).c_str();	// clearance
 		python << FormMountainPockets(valleys, pMachineState, false).c_str();	// clearance
-		python << FormMountainWalls(valleys, pMachineState).c_str();			// chamfer
+
 		break;
 	} // End switch
 
@@ -694,7 +697,7 @@ bool CInlay::CornerNeedsSharpenning(Corners_t::iterator itCorner) const
     of each wire above it.  This will sharpen the concave corners formed
     between adjacent edges.
  */
-Python CInlay::FormCorners( Valley_t & wires, CMachineState *pMachineState ) const
+Python CInlay::FormCorners( Valley_t & paths, CMachineState *pMachineState ) const
 {
 	Python python;
 
@@ -708,9 +711,9 @@ Python CInlay::FormCorners( Valley_t & wires, CMachineState *pMachineState ) con
     double highest = 0.0;
     double lowest = 0.0;
 
-    for (Valley_t::iterator itWire = wires.begin(); itWire != wires.end(); itWire++)
+    for (Valley_t::iterator itPath = paths.begin(); itPath != paths.end(); itPath++)
     {
-        for(BRepTools_WireExplorer expEdge(TopoDS::Wire(itWire->second)); expEdge.More(); expEdge.Next())
+        for(BRepTools_WireExplorer expEdge(itPath->Wire()); expEdge.More(); expEdge.Next())
         {
             BRepAdaptor_Curve curve(TopoDS_Edge(expEdge.Current()));
 
@@ -890,7 +893,6 @@ Python CInlay::FormCorners( Valley_t & wires, CMachineState *pMachineState ) con
 	return(python);
 } // End FormCorners() method
 
-
 /**
 	This method returns the toolpath wires for all valleys of all sketches.  Each valley
 	includes a set of closed wires that surround the valley at a particular depth (height)
@@ -965,17 +967,18 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 
                     // Even though we didn't machine this top wire, we need to use it to generate the
                     // corner movements.
-                    valley.insert( std::make_pair( m_depth_op_params.m_start_depth, TopoDS::Wire(wire)));
-
-                    // What offset would this maximum plunge require?
-                    double offset_at_plunge = plunge * tan(angle);
+                    Path path;
+                    path.Depth( m_depth_op_params.m_start_depth );
+                    path.Offset(0.0);
+                    path.Wire(TopoDS::Wire(wire));
+                    valley.push_back(path);
 
 					typedef double Depth_t;
 					typedef std::list< Depth_t > Depths_t;
 					Depths_t depths;
 
                     // machine at this depth around the wire in ever increasing loops until we hit the outside wire (offset = 0)
-                    for (double offset = offset_at_plunge; offset >= tolerance; /* increment within loop */ )
+                    for (double offset = max_offset; offset >= tolerance; /* decrement within loop */ )
                     {
                         double max_depth = offset / tan(angle) * -1.0;
                         double step_down = m_depth_op_params.m_step_down;
@@ -990,12 +993,15 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 
                         for (double depth = m_depth_op_params.m_start_depth - step_down; ((step_down > tolerance) && (depth >= max_depth)); /* increment within loop */ )
                         {
+
+
 							if (std::find(depths.begin(), depths.end(), depth) == depths.end()) depths.push_back( depth );
 
 							// Machine here with the chamfering bit.
 							try {
 								BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
 								offset_wire.Perform(offset * -1.0);
+
 								if (offset_wire.IsDone())
 								{
 									TopoDS_Wire toolpath = TopoDS::Wire(offset_wire.Shape());
@@ -1005,7 +1011,12 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 									translate.Perform(toolpath, false);
 									toolpath = TopoDS::Wire(translate.Shape());
 
-									valley.insert( std::make_pair( depth, toolpath ));
+                                    Path path;
+                                    path.Depth(depth);
+                                    path.Offset(offset);
+									path.Wire(toolpath);
+
+									valley.push_back( path );
 								} // End if - then
 							} // End try
 							catch (Standard_Failure & error) {
@@ -1030,9 +1041,9 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
                             }
                         } // End for
 
-                        if ((offset - (pChamferingBit->m_params.m_diameter / 4.0)) > tolerance)
+                        if ((offset - (pChamferingBit->m_params.m_diameter / 1.0)) > tolerance)
                         {
-                            offset -= (pChamferingBit->m_params.m_diameter / 4.0);
+                            offset -= (pChamferingBit->m_params.m_diameter / 1.0);
                         }
                         else
                         {
@@ -1063,6 +1074,8 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 } // End DefineValleys() method
 
 
+
+
 Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachineState  )
 {
 	Python python;
@@ -1071,44 +1084,67 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 	python << pMachineState->CuttingTool(m_cutting_tool_number);  // select the chamfering bit.
 	python << SelectFixture(pMachineState, true);	// Select female fixture (if appropriate)
 
+    double tolerance = heeksCAD->GetTolerance();
+
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
 	{
-		std::list<double> depths;
-		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+	    // Get a list of depths and offsets for this valley.
+	    std::list<double> depths;
+	    std::list<double> offsets;
+		for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
 		{
-			depths.push_back(itContour->first);
+			if (std::find(depths.begin(), depths.end(), itPath->Depth()) == depths.end()) depths.push_back(itPath->Depth());
+            if (std::find(offsets.begin(), offsets.end(), itPath->Offset()) == offsets.end()) offsets.push_back(itPath->Offset());
 		} // End for
 
 		depths.sort();
 		depths.reverse();
 
-		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
-		{
-		    // We don't want a toolpath at the top surface.
-		    if (fabs(*itDepth - m_depth_op_params.m_start_depth) > heeksCAD->GetTolerance())
-		    {
-				// Rotate this wire to align with the fixture.
-				BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-				TopoDS_Wire wire((*itValley)[*itDepth]);
-				transform.Perform(wire, false);
-				wire = TopoDS::Wire(transform.Shape());
+		offsets.sort();
+		offsets.reverse();
 
-                python << CContour::GeneratePathFromWire(wire,
-                                                        pMachineState,
-                                                        m_depth_op_params.m_clearance_height,
-                                                        m_depth_op_params.m_rapid_down_to_height );
-		    } // End if - then
-		} // End for
+        for (std::list<double>::iterator itOffset = offsets.begin(); itOffset != offsets.end(); itOffset++)
+        {
+            for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
+            {
+                // We don't want a toolpath at the top surface.
+                if (fabs(*itDepth - m_depth_op_params.m_start_depth) > tolerance)
+                {
+                    Path path;
+                    path.Offset(*itOffset);
+                    path.Depth(*itDepth);
 
-		// Now run through the wires map and generate the toolpaths that will sharpen
-		// the concave corners formed between adjacent edges.
-		python << FormCorners( *itValley, pMachineState );
+                    Valley_t::iterator itPath = std::find(itValley->begin(),  itValley->end(), path);
+                    // for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
+                    if (itPath != itValley->end())
+                    {
+
+                        // Rotate this wire to align with the fixture.
+                        BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+                        TopoDS_Wire wire(itPath->Wire());
+                        transform.Perform(wire, false);
+                        wire = TopoDS::Wire(transform.Shape());
+
+                        python << CContour::GeneratePathFromWire(wire,
+                                                                pMachineState,
+                                                                m_depth_op_params.m_clearance_height,
+                                                                m_depth_op_params.m_rapid_down_to_height );
+                    } // End for
+                } // End if - then
+            } // End for
+        } // End for
+
+        // Now run through the wires map and generate the toolpaths that will sharpen
+        // the concave corners formed between adjacent edges.
+        python << FormCorners( *itValley, pMachineState );
 	} // End for
 
 	return(python);
 
 } // End FormValleyWalls() method
+
+
 
 
 Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMachineState  )
@@ -1123,35 +1159,39 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMac
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
 	{
-		std::list<double> depths;
-		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		// Find the largest offset and the largest depth values.
+	    double min_depth = 0.0;
+	    double max_offset = 0.0;
+		for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
 		{
-			depths.push_back(itContour->first);
+			if (itPath->Offset() > max_offset) max_offset = itPath->Offset();
+			if (itPath->Depth() < min_depth) min_depth = itPath->Depth();
 		} // End for
 
-		depths.sort();
-		depths.reverse();
+        Path path;
+        path.Offset(max_offset);
+        path.Depth(min_depth);
 
-		double previous_depth = m_depth_op_params.m_start_depth;
-		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
-		{
-			// We need to generate a pocket operation based on this tool_path_wire
-			// and using the Clearance Tool.  Without this, the chamfering bit would need
-			// to machine out the centre of the valley as well as the walls.
+        Valley_t::iterator itPath = std::find(itValley->begin(),  itValley->end(), path);
+        if (itPath != itValley->end())
+        {
+            // We need to generate a pocket operation based on this tool_path_wire
+            // and using the Clearance Tool.  Without this, the chamfering bit would need
+            // to machine out the centre of the valley as well as the walls.
 
-			// Rotate this wire to align with the fixture.
-			BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-			TopoDS_Wire wire(TopoDS::Wire((*itValley)[*itDepth]));
-			transform.Perform(wire, false);
-			wire = TopoDS::Wire(transform.Shape());
+            // Rotate this wire to align with the fixture.
+            BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+            TopoDS_Wire wire(itPath->Wire());
+            transform.Perform(wire, false);
+            wire = TopoDS::Wire(transform.Shape());
 
-			HeeksObj *pBoundary = heeksCAD->NewSketch();
-			if (heeksCAD->ConvertWireToSketch(wire, pBoundary, heeksCAD->GetTolerance()))
-			{
-				std::list<HeeksObj *> objects;
-				objects.push_back(pBoundary);
+            HeeksObj *pBoundary = heeksCAD->NewSketch();
+            if (heeksCAD->ConvertWireToSketch(wire, pBoundary, heeksCAD->GetTolerance()))
+            {
+                std::list<HeeksObj *> objects;
+                objects.push_back(pBoundary);
 
-				// Save the fixture and pass in one that has no rotation.  The sketch has already
+                // Save the fixture and pass in one that has no rotation.  The sketch has already
                 // been rotated.  We don't want to apply the rotations twice.
                 CFixture save_fixture(pMachineState->Fixture());
 
@@ -1162,19 +1202,20 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMac
                 straight.m_params.m_pivot_point = gp_Pnt(0.0, 0.0, 0.0);
                 pMachineState->Fixture(straight);    // Replace with a straight fixture.
 
-				CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
-				pPocket->m_depth_op_params = m_depth_op_params;
-				pPocket->m_depth_op_params.m_rapid_down_to_height = previous_depth + 1;
-				pPocket->m_depth_op_params.m_start_depth = previous_depth;
-				pPocket->m_depth_op_params.m_final_depth = *itDepth;
-				pPocket->m_speed_op_params = m_speed_op_params;
-				python << pPocket->AppendTextToProgram(pMachineState);
-				delete pPocket;		// We don't need it any more.
+                TopoDS_Wire pocket_area;
+                // DeterminePocketArea(pBoundary, pMachineState, &pocket_area);
 
-				// Reinstate the original fixture.
+                CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
+                pPocket->m_depth_op_params = m_depth_op_params;
+                pPocket->m_depth_op_params.m_final_depth = itPath->Depth();
+                pPocket->m_speed_op_params = m_speed_op_params;
+                python << pPocket->AppendTextToProgram(pMachineState);
+                delete pPocket;		// We don't need it any more.
+
+                // Reinstate the original fixture.
                 pMachineState->Fixture(save_fixture);
-			}
-		} // End for
+            } // End if - then
+        } // End if - then
 	} // End for
 
 	return(python);
@@ -1194,6 +1235,8 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 	{
 		python << _T("comment(") << PythonString(_("Form mountains")) << _T(")\n");
 	}
+
+    double tolerance = heeksCAD->GetTolerance();
 
 	python << SelectFixture(pMachineState, false);	// Select male fixture (if appropriate)
 	python << pMachineState->CuttingTool(m_params.m_clearance_tool);	// Select the clearance tool.
@@ -1216,11 +1259,11 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 	double max_valley_depth = 0.0;
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
 	{
-		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
 		{
-			if (itContour->first < max_valley_depth)
+			if (itPath->Depth() < max_valley_depth)
 			{
-				max_valley_depth = itContour->first;
+				max_valley_depth = itPath->Depth();
 			} // End if - then
 		} // End for
 	} // End for
@@ -1243,9 +1286,9 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 		// to start forming this valley's walls.
 
 		std::list<double> depths;
-		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
 		{
-			depths.push_back(itContour->first);
+			depths.push_back(itPath->Depth());
 		} // End for
 
 		depths.sort();
@@ -1259,68 +1302,80 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 		// and using the Clearance Tool.  Without this, the chamfering bit would need
 		// to machine out the centre of the valley as well as the walls.
 
-		// It's the male half we're generating.  Rotate the wire around one
-	    // of the two axes so that we end up machining the reverse of the
-	    // female half.
-		gp_Trsf rotation;
-		TopoDS_Wire tool_path_wire((*itValley)[base_height * -1.0]);
+		Path path;
+		path.Depth(base_height * -1.0);
+		path.Offset(0.0);
 
-		rotation.SetRotation( mirror_axis, PI );
-		BRepBuilderAPI_Transform rotate(rotation);
-		rotate.Perform(tool_path_wire, false);
-		tool_path_wire = TopoDS::Wire(rotate.Shape());
+		Valley_t::iterator itPath = std::find(itValley->begin(), itValley->end(), path);
+        if (itPath != itValley->end())
+        {
+            // It's the male half we're generating.  Rotate the wire around one
+            // of the two axes so that we end up machining the reverse of the
+            // female half.
+            gp_Trsf rotation;
+            TopoDS_Wire tool_path_wire(itPath->Wire());
 
-		// Rotate this wire to align with the fixture.
-		BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-		transform.Perform(tool_path_wire, false);
-		tool_path_wire = TopoDS::Wire(transform.Shape());
+            rotation.SetRotation( mirror_axis, PI );
+            BRepBuilderAPI_Transform rotate(rotation);
+            rotate.Perform(tool_path_wire, false);
+            tool_path_wire = TopoDS::Wire(rotate.Shape());
 
-		HeeksObj *pBoundary = heeksCAD->NewSketch();
-		if (heeksCAD->ConvertWireToSketch(tool_path_wire, pBoundary, heeksCAD->GetTolerance()))
-		{
-			// Make sure this sketch is oriented counter-clockwise.  We will ensure the
-			// bounding sketch is oriented clockwise so that the pocket operation
-			// removes the intervening material.
-			for (int i=0; (heeksCAD->GetSketchOrder(pBoundary) != SketchOrderTypeCloseCCW) && (i<4); i++)
-			{
-				// At least try to make them all consistently oriented.
-				heeksCAD->ReOrderSketch( pBoundary, SketchOrderTypeCloseCCW );
-			} // End for
+            // Rotate this wire to align with the fixture.
+            BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+            transform.Perform(tool_path_wire, false);
+            tool_path_wire = TopoDS::Wire(transform.Shape());
 
-			std::list<HeeksObj *> objects;
-			objects.push_back(pBoundary);
+            HeeksObj *pBoundary = heeksCAD->NewSketch();
+            if (heeksCAD->ConvertWireToSketch(tool_path_wire, pBoundary, heeksCAD->GetTolerance()))
+            {
+                // Make sure this sketch is oriented counter-clockwise.  We will ensure the
+                // bounding sketch is oriented clockwise so that the pocket operation
+                // removes the intervening material.
+                for (int i=0; (heeksCAD->GetSketchOrder(pBoundary) != SketchOrderTypeCloseCCW) && (i<4); i++)
+                {
+                    // At least try to make them all consistently oriented.
+                    heeksCAD->ReOrderSketch( pBoundary, SketchOrderTypeCloseCCW );
+                } // End for
 
-			CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
-			pPocket->m_depth_op_params = m_depth_op_params;
-			pPocket->m_depth_op_params.m_start_depth = 0.0;
-			pPocket->m_depth_op_params.m_final_depth = (-1.0 * (max_mountain_height - mountain_height));
-			pPocket->m_speed_op_params = m_speed_op_params;
+                std::list<HeeksObj *> objects;
+                objects.push_back(pBoundary);
 
-			if (only_above_mountains)
-			{
-			    // Save the fixture and pass in one that has no rotation.  The sketch has already
-                // been rotated.  We don't want to apply the rotations twice.
-                CFixture save_fixture(pMachineState->Fixture());
+                if ((max_mountain_height - mountain_height) > tolerance)
+                {
+                    CPocket *pPocket = new CPocket( objects, m_params.m_clearance_tool );
+                    pPocket->m_depth_op_params = m_depth_op_params;
+                    pPocket->m_speed_op_params = m_speed_op_params;
+                    pPocket->m_depth_op_params.m_start_depth = 0.0;
+                    pPocket->m_depth_op_params.m_final_depth = (-1.0 * (max_mountain_height - mountain_height));
+                    pPocket->m_speed_op_params = m_speed_op_params;
+                    pockets.push_back(pPocket);
 
-                CFixture straight(pMachineState->Fixture());
-                straight.m_params.m_yz_plane = 0.0;
-                straight.m_params.m_xz_plane = 0.0;
-                straight.m_params.m_xy_plane = 0.0;
-                straight.m_params.m_pivot_point = gp_Pnt(0.0, 0.0, 0.0);
-                pMachineState->Fixture(straight);    // Replace with a straight fixture.
+                    if (only_above_mountains)
+                    {
+                        // Save the fixture and pass in one that has no rotation.  The sketch has already
+                        // been rotated.  We don't want to apply the rotations twice.
+                        CFixture save_fixture(pMachineState->Fixture());
 
-				python << pPocket->AppendTextToProgram(pMachineState);
+                        CFixture straight(pMachineState->Fixture());
+                        straight.m_params.m_yz_plane = 0.0;
+                        straight.m_params.m_xz_plane = 0.0;
+                        straight.m_params.m_xy_plane = 0.0;
+                        straight.m_params.m_pivot_point = gp_Pnt(0.0, 0.0, 0.0);
+                        pMachineState->Fixture(straight);    // Replace with a straight fixture.
 
-				pMachineState->Fixture(save_fixture);
-			}
+                        python << pPocket->AppendTextToProgram(pMachineState);
 
-			CBox box;
-			pBoundary->GetBox(box);
-			bounding_box.Insert(box);
+                        pMachineState->Fixture(save_fixture);
+                    }
+                } // End if - then
 
-			mirrored_sketches.push_back(pBoundary);
-			pockets.push_back(pPocket);
-		}
+                CBox box;
+                pBoundary->GetBox(box);
+                bounding_box.Insert(box);
+
+                mirrored_sketches.push_back(pBoundary);
+            }
+        } // End if - then
 	} // End for
 
 
@@ -1418,6 +1473,7 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 		CPocket *bounding_sketch_pocket = new CPocket(bounding_sketch_list, m_params.m_clearance_tool);
 		bounding_sketch_pocket->m_pocket_params.m_material_allowance = 0.0;
 		bounding_sketch_pocket->m_depth_op_params = m_depth_op_params;
+		bounding_sketch_pocket->m_speed_op_params = m_speed_op_params;
 		bounding_sketch_pocket->m_depth_op_params.m_start_depth = 0.0;
 		bounding_sketch_pocket->m_depth_op_params.m_final_depth = -1.0 * max_mountain_height;
 
@@ -1461,7 +1517,9 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 	python << SelectFixture(pMachineState, false);	// Select male fixture (if appropriate)
 	python << pMachineState->CuttingTool(m_cutting_tool_number);	// Select the chamfering bit.
 
-	// Use the parameters to determine if we're going to mirror the selected
+    double tolerance = heeksCAD->GetTolerance();
+
+    // Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
 	gp_Ax1 mirror_axis;
 	if (m_params.m_mirror_axis == CInlayParams::eXAxis)
@@ -1479,11 +1537,11 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 	double max_valley_depth = 0.0;
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
 	{
-		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
 		{
-			if (itContour->first < max_valley_depth)
+			if (itPath->Depth() < max_valley_depth)
 			{
-				max_valley_depth = itContour->first;
+				max_valley_depth = itPath->Depth();
 			} // End if - then
 		} // End for
 	} // End for
@@ -1492,56 +1550,126 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
 	{
 		std::list<double> depths;
-		for (Valley_t::iterator itContour = itValley->begin(); itContour != itValley->end(); itContour++)
+		std::list<double> offsets;
+		for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
 		{
-			depths.push_back(itContour->first);
+			depths.push_back(itPath->Depth());
+			offsets.push_back(itPath->Offset());
 		} // End for
 
 		depths.sort();
+		depths.unique();
+		depths.reverse();
 
-		for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
+		offsets.sort();
+		offsets.unique();
+		offsets.reverse();  // Go from the largest offset (inside) to the smallest offset (outside)
+
+		for (std::list<double>::iterator itOffset = offsets.begin(); itOffset != offsets.end(); itOffset++)
 		{
-		    // Skip the top-most cut as it's along the surface.
-		    if (fabs(*itDepth - max_valley_depth) < heeksCAD->GetTolerance()) continue;
+            // Find the highest wire for this offset in the valley.  When it's mirrored, this will become
+            // the lowest wire for the mountain.  We will then step down to it from the top level.
+            Valley_t::iterator itPath = itValley->end();
+            for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
+            {
+                Path path;
+                path.Offset(*itOffset);
+                path.Depth(*itDepth);
 
-			// It's the male half we're generating.  Rotate the wire around one
-			// of the two axes so that we end up machining the reverse of the
-			// female half.
-			gp_Trsf rotation;
-			TopoDS_Wire tool_path_wire((*itValley)[*itDepth]);
+                Valley_t::iterator itThisPath = std::find(itValley->begin(), itValley->end(), path);
+                if (itThisPath != itValley->end())
+                {
+                    if (itPath == itValley->end())
+                    {
+                        itPath = itThisPath;
+                    }
+                    else
+                    {
+                        if (itThisPath->Depth() < itPath->Depth())
+                        {
+                            itPath = itThisPath;
+                        }
+                    }
+                }
+            } // End for
 
-			rotation.SetRotation( mirror_axis, PI );
-			BRepBuilderAPI_Transform rotate(rotation);
-			rotate.Perform(tool_path_wire, false);
-			tool_path_wire = TopoDS::Wire(rotate.Shape());
+            // It's the male half we're generating.  Rotate the wire around one
+            // of the two axes so that we end up machining the reverse of the
+            // female half.
+            gp_Trsf rotation;
+            TopoDS_Wire top_level_wire(itPath->Wire());
 
-			// And offset the wire 'down' so that the maximum depth reached during the
-            // female half's processing ends up being at the 'top-most' surface of the
-            // male half we're producing.
-			gp_Trsf translation;
-			translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0,max_valley_depth)));
-			BRepBuilderAPI_Transform translate(translation);
-			translate.Perform(tool_path_wire, false);
-			tool_path_wire = TopoDS::Wire(translate.Shape());
+            rotation.SetRotation( mirror_axis, PI );
+            BRepBuilderAPI_Transform rotate(rotation);
+            rotate.Perform(top_level_wire, false);
+            top_level_wire = TopoDS::Wire(rotate.Shape());
 
-			// Rotate this wire to align with the fixture.
-			BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-			transform.Perform(tool_path_wire, false);
-			tool_path_wire = TopoDS::Wire(transform.Shape());
+            if (fabs(max_valley_depth) > tolerance)
+            {
+                // And offset the wire 'down' so that the maximum depth reached during the
+                // female half's processing ends up being at the 'top-most' surface of the
+                // male half we're producing.
+                gp_Trsf translation;
+                translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0, itPath->Depth())));
+                BRepBuilderAPI_Transform translate(translation);
+                translate.Perform(top_level_wire, false);
+                top_level_wire = TopoDS::Wire(translate.Shape());
+            }
 
-			python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the chamfering bit.
+            double final_depth = max_valley_depth - itPath->Depth();
+            for (double depth = m_depth_op_params.m_start_depth - m_depth_op_params.m_step_down;
+            // for (double depth = m_depth_op_params.m_start_depth;
+                    depth >= final_depth; /* decrement within loop */ )
+            {
+                TopoDS_Wire tool_path_wire(top_level_wire);
 
-			python << CContour::GeneratePathFromWire(tool_path_wire,
-													pMachineState,
-													m_depth_op_params.m_clearance_height,
-													m_depth_op_params.m_rapid_down_to_height );
+                if (fabs(depth) > tolerance)
+                {
+                    // And offset the wire 'down' so that the maximum depth reached during the
+                    // female half's processing ends up being at the 'top-most' surface of the
+                    // male half we're producing.
+                    gp_Trsf translation;
+                    translation.SetTranslation( gp_Vec( gp_Pnt(0,0,0), gp_Pnt( 0,0, depth)));
+                    BRepBuilderAPI_Transform translate(translation);
+                    translate.Perform(tool_path_wire, false);
+                    tool_path_wire = TopoDS::Wire(translate.Shape());
+                }
+
+                // Rotate this wire to align with the fixture.
+                BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
+                transform.Perform(tool_path_wire, false);
+                tool_path_wire = TopoDS::Wire(transform.Shape());
+
+                python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the chamfering bit.
+
+                python << CContour::GeneratePathFromWire(tool_path_wire,
+                                                        pMachineState,
+                                                        m_depth_op_params.m_clearance_height,
+                                                        m_depth_op_params.m_rapid_down_to_height );
+
+                if (depth == final_depth)
+                {
+                    depth -= m_depth_op_params.m_step_down; // break out
+                    break;
+                }
+                else
+                {
+                    if ((depth - final_depth) > m_depth_op_params.m_step_down)
+                    {
+                        depth -= m_depth_op_params.m_step_down;
+                    }
+                    else
+                    {
+                        depth = final_depth;
+                    }
+                } // End if - else
+            } // End for
 		} // End for
 	} // End for
 
 	return(python);
 
 } // End FormMountainWalls() method
-
 
 
 
