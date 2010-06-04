@@ -12,6 +12,7 @@
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
+
 #include <list>
 #include <vector>
 #include <map>
@@ -135,6 +136,69 @@ private:
 		double	m_value;
 	};
 
+private:
+    class Path
+    {
+    public:
+        Path()
+        {
+            m_depth = 0.0;
+            m_offset = 0.0;
+        }
+
+        ~Path() { }
+
+        Path & operator= ( const Path & rhs )
+        {
+            if (this != &rhs)
+            {
+                m_depth = rhs.m_depth;
+                m_offset = rhs.m_offset;
+                m_wire = rhs.m_wire;
+            }
+
+            return(*this);
+        }
+
+        Path( const Path & rhs )
+        {
+            // Call the assignment operato
+            *this = rhs;
+        }
+
+        bool operator== ( const Path & rhs ) const
+        {
+            double tolerance = heeksCAD->GetTolerance();
+            if (fabs(m_depth - rhs.m_depth) > tolerance) return(false);
+            if (fabs(m_offset - rhs.m_offset) > tolerance) return(false);
+            return(true);
+        }
+
+        bool operator< ( const Path & rhs ) const
+        {
+            double tolerance = heeksCAD->GetTolerance();
+            if (m_depth > rhs.m_depth) return(false);
+            if (fabs(m_depth - rhs.m_depth) < tolerance) return(false);
+            if (m_offset > rhs.m_offset) return(false);
+            if (fabs(m_offset - rhs.m_offset) < tolerance) return(false);
+            return(true);
+        }
+
+        double Depth() const { return(m_depth); }
+        void Depth(const double value) { m_depth = value; }
+
+        double Offset() const { return(m_offset); }
+        void Offset(const double value) { m_offset = value; }
+
+        TopoDS_Wire Wire() const { return(m_wire); }
+        void Wire(const TopoDS_Wire wire) { m_wire = wire; }
+
+    private:
+        double m_depth;
+        double m_offset;
+        TopoDS_Wire m_wire;
+    }; // End Path class definition
+
 public:
 	/**
 		Define some data structures to hold references to CAD elements.
@@ -144,8 +208,7 @@ public:
 	typedef std::pair< SymbolType_t, SymbolId_t > Symbol_t;
 	typedef std::list< Symbol_t > Symbols_t;
 
-	typedef double Depth_t;
-    typedef std::map<Depth_t, TopoDS_Wire> Valley_t;
+	typedef std::list<Path> Valley_t;   // All for the same sketch.
 	typedef std::list< Valley_t > Valleys_t;
 
 	typedef std::map<CNCPoint, std::set<CNCVector> > Corners_t;
@@ -172,6 +235,14 @@ public:
 	{
 		m_params.set_initial_values();
 		ReloadPointers();
+		if (CCuttingTool::Find(cutting_tool_number))
+		{
+		    CCuttingTool *pChamferingBit = CCuttingTool::Find(cutting_tool_number);
+		    double theta = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
+		    double radius = pChamferingBit->m_params.m_diameter / 2.0;
+		    m_depth_op_params.m_step_down = radius / tan(theta);
+		}
+
 	}
 
 	CInlay( const CInlay & rhs );
@@ -214,22 +285,25 @@ public:
 	static std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire );
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
 	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
-	Python FormCorners( Valley_t & wires, CMachineState *pMachineState ) const;
+	Python FormCorners( Valley_t & paths, CMachineState *pMachineState ) const;
 	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners, const CCuttingTool *pChamferingBit ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
 	Valleys_t DefineValleys(CMachineState *pMachineState);
+	Valleys_t DefineMountains(CMachineState *pMachineState);
 
 	Python FormValleyWalls( Valleys_t valleys, CMachineState *pMachineState  );
 	Python FormValleyPockets( Valleys_t valleys, CMachineState *pMachineState  );
-	Python FormMountainWalls( Valleys_t valleys, CMachineState *pMachineState  );
-	Python FormMountainPockets( Valleys_t mouvalleysntains, CMachineState *pMachineState, const bool only_above_mountains  );
+	Python FormMountainWalls( Valleys_t mountains, CMachineState *pMachineState  );
+	Python FormMountainPockets( Valleys_t mountains, CMachineState *pMachineState, const bool only_above_mountains  );
 
 	// Overloaded from COp class.
 	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(2); }
 
 	Python SelectFixture( CMachineState *pMachineState, const bool female_half );
 	bool CornerNeedsSharpenning(Corners_t::iterator itCorner) const;
+
+	bool DeterminePocketArea(HeeksObj* sketch, CMachineState *pMachineState, TopoDS_Wire *pPocketArea);
 
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);
