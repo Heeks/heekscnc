@@ -23,3 +23,9 @@ Add a new plugin called "HeeksCNC", and use the button to fill the box with the 
 Close HeeksCAD.
 Run HeeksCAD.exe.
 It should load up HeeksCNC.dll and add the extra windows and menu items. You will have to go to the "View" menu and tick them to make them visible.
+
+kurve.pyd should have been built and be in the same folder as HeeksCNC.dll
+( You will need this for the profile operation )
+
+You also need to go to the Google Code projects "opencamlib", "libarea" and "libactp" and build "ocl.pyd" ( for zig-zag operation ), "area.pyd" ( for pocket operation ) and "actp.pyd" ( for adaptive roughing opeartion ), if you want those operations to work.
+Copy them to the same place as your HeeksCNC.dll
