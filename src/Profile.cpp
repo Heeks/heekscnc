@@ -702,7 +702,7 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 		python << _T(")\n");
 	}
 
-	python << _T("offset_extra = ") << m_profile_params.m_offset_extra << _T("\n");
+	python << _T("offset_extra = ") << m_profile_params.m_offset_extra / theApp.m_program->m_units << _T("\n");
 
 	for(std::list<HeeksObj*>::iterator It = m_objects.begin(); It != m_objects.end(); It++)
 	{
