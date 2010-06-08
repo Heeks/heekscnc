@@ -796,9 +796,13 @@ void CProfile::GetProperties(std::list<Property *> *list)
 
 ObjectCanvas* CProfile::GetDialog(wxWindow* parent)
 {
+#if 0
 	static ObjectCanvas* object_canvas = NULL;
 	if(object_canvas == NULL)object_canvas = new PictureCanvas(parent, wxImage(theApp.GetResFolder() + _T("/bitmaps/dlgprofile.png")));
 	return object_canvas;
+#else
+	return NULL; // the picture was taking up too much space, maybe we should have either properties or dialog, but not both
+#endif
 }
 
 static CProfile* object_for_tools = NULL;
