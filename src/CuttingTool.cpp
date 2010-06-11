@@ -719,7 +719,7 @@ void CCuttingTool::CopyFrom(const HeeksObj* object)
 
 bool CCuttingTool::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == ToolsType;
+	return ((owner != NULL) && (owner->GetType() == ToolsType));
 }
 
 const wxBitmap &CCuttingTool::GetIcon()
@@ -792,7 +792,7 @@ void CCuttingTool::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "CuttingTool" );
 	root->LinkEndChild( element );
-	element->SetAttribute("title", Ttc(m_title.c_str()));
+	element->SetAttribute("title", m_title.utf8_str());
 
 	element->SetAttribute("tool_number", m_tool_number );
 
@@ -1653,7 +1653,7 @@ void CCuttingTool::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 void CCuttingTool::ImportProbeCalibrationData( const wxString & probed_points_xml_file_name )
 {
 	TiXmlDocument xml;
-	if (! xml.LoadFile( Ttc(probed_points_xml_file_name.c_str()) ))
+	if (! xml.LoadFile( probed_points_xml_file_name.utf8_str()) )
 	{
 		printf("Failed to load XML file '%s'\n", Ttc(probed_points_xml_file_name.c_str()) );
 	} // End if - then

@@ -115,11 +115,13 @@ void CChamfer::CopyFrom(const HeeksObj* object)
 
 bool CChamfer::CanAddTo(HeeksObj* owner)
 {
-	return(owner->GetType() == OperationsType);
+	return((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 bool CChamfer::CanAdd(HeeksObj* object)
 {
+    if (object == NULL) return(false);
+
 	switch (object->GetType())
 	{
 		case PocketType:

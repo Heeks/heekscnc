@@ -661,6 +661,8 @@ static void NewContourOpMenuCallback(wxCommandEvent &event)
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
+		if (object == NULL) continue;
+
 		if (object->GetType() == CuttingToolType)
 		{
 			cuttingTools.push_back( CContour::Symbol_t( object->GetType(), object->m_id ) );
@@ -1360,7 +1362,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 
 			// Must be a new file.
 			// Read in any default speed reference or tool table data.
-			std::list<wxString> all_file_names = GetFileNames( Ttc(l_itDirectory->c_str()) );
+			std::list<wxString> all_file_names = GetFileNames( l_itDirectory->utf8_str() );
 			std::list<wxString> seed_file_names;
 
 			for (std::list<wxString>::iterator l_itFileName = all_file_names.begin();

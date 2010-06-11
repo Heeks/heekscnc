@@ -10,7 +10,7 @@
 
 bool CTags::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == TagType;
+	return ((object != NULL) && (object->GetType() == TagType));
 }
 
 CTags & CTags::operator= ( const CTags & rhs )

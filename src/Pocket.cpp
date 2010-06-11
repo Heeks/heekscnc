@@ -402,7 +402,7 @@ CPocket & CPocket::operator= ( const CPocket & rhs )
 
 bool CPocket::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CPocket::WriteXML(TiXmlNode *root)

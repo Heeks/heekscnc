@@ -418,6 +418,8 @@ CDrilling & CDrilling::operator= ( const CDrilling & rhs )
 
 bool CDrilling::CanAddTo(HeeksObj* owner)
 {
+    if (owner == NULL) return(false);
+
 	int type = owner->GetType();
 
 	if (type == OperationsType) return(true);
@@ -836,25 +838,28 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 			case ProfileType:
 				{
 					CProfile *pProfile = (CProfile *) heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-					double depthOp_depth = ((CDepthOp *) pProfile)->m_depth_op_params.m_start_depth  - ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth;
-					if (depthOp_depth != m_params.m_depth)
+					if (pProfile != NULL)
 					{
-#ifdef UNICODE
-				std::wostringstream l_ossChange;
-#else
-				std::ostringstream l_ossChange;
-#endif
+                        double depthOp_depth = ((CDepthOp *) pProfile)->m_depth_op_params.m_start_depth  - ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth;
+                        if (depthOp_depth != m_params.m_depth)
+                        {
+    #ifdef UNICODE
+                    std::wostringstream l_ossChange;
+    #else
+                    std::ostringstream l_ossChange;
+    #endif
 
-						l_ossChange << _("Adjusting depth of drill cycle") << " (id='" << m_id << "') " << _("from") << " '"
-							<< m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " '"
-							<< depthOp_depth  / theApp.m_program->m_units<< "'\n";
-						changes.push_back(l_ossChange.str().c_str());
+                            l_ossChange << _("Adjusting depth of drill cycle") << " (id='" << m_id << "') " << _("from") << " '"
+                                << m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " '"
+                                << depthOp_depth  / theApp.m_program->m_units<< "'\n";
+                            changes.push_back(l_ossChange.str().c_str());
 
-						if (apply_changes)
-						{
-							m_params.m_depth = depthOp_depth;
-						} // End if - then
-					} // End if - then
+                            if (apply_changes)
+                            {
+                                m_params.m_depth = depthOp_depth;
+                            } // End if - then
+                        } // End if - then
+					}
 				}
 				break;
 

@@ -282,7 +282,7 @@ void CZigZag::CopyFrom(const HeeksObj* object)
 
 bool CZigZag::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CZigZag::WriteXML(TiXmlNode *root)
@@ -343,6 +343,8 @@ HeeksObj* CZigZag::ReadFromXMLElement(TiXmlElement* element)
 
 bool CZigZag::CanAdd(HeeksObj* object)
 {
+    if (object == NULL) return(false);
+
 	switch (object->GetType())
 	{
 	case SolidType:

@@ -1137,7 +1137,7 @@ void CProbe_Grid::CopyFrom(const HeeksObj* object)
 
 bool CProbing::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 
@@ -1227,7 +1227,7 @@ CProbe_Edge & CProbe_Edge::operator= ( const CProbe_Edge & rhs )
 
 void CProbe_Edge::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( Ttc(GetTypeString()) );
+	TiXmlElement * element = new TiXmlElement( wxString(GetTypeString()).utf8_str() );
 	root->LinkEndChild( element );
 
 	element->SetDoubleAttribute("retract", m_retract);

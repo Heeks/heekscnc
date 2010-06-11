@@ -58,9 +58,9 @@ void CCuttingRate::GetProperties(std::list<Property *> *list)
 	std::set<double> all_values = CSpeedReferences::GetAllHardnessValues();
 	for (std::set<double>::iterator l_itHardness = all_values.begin(); l_itHardness != all_values.end(); l_itHardness++)
 	{
-		std::ostringstream l_ossValue;
-		l_ossValue << *l_itHardness;
-		choices.push_back( Ctt(l_ossValue.str().c_str()) );
+		wxString message;
+		message << *l_itHardness;
+		choices.push_back( message );
 		if (m_brinell_hardness_of_raw_material == *l_itHardness) choice = std::distance( all_values.begin(), l_itHardness );
 	} // End for
 
@@ -95,22 +95,16 @@ void CCuttingRate::CopyFrom(const HeeksObj* object)
 
 bool CCuttingRate::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == SpeedReferencesType;
+	return ((owner != NULL) && (owner->GetType() == SpeedReferencesType));
 }
 
 void CCuttingRate::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "CuttingRate" );
 	root->LinkEndChild( element );
-	element->SetAttribute("title", Ttc(m_title.c_str()));
-
-	std::ostringstream l_ossValue;
-
-	l_ossValue.str(""); l_ossValue << m_brinell_hardness_of_raw_material;
-	element->SetAttribute("brinell_hardness_of_raw_material", l_ossValue.str().c_str() );
-
-	l_ossValue.str(""); l_ossValue << m_max_material_removal_rate;
-	element->SetAttribute("max_material_removal_rate", l_ossValue.str().c_str() );
+	element->SetAttribute("title", m_title.utf8_str());
+	element->SetDoubleAttribute("brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
+	element->SetDoubleAttribute("max_material_removal_rate", m_max_material_removal_rate );
 
 	WriteBaseXML(element);
 }
