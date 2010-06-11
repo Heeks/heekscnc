@@ -120,18 +120,18 @@ void CSpeedReference::CopyFrom(const HeeksObj* object)
 
 bool CSpeedReference::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == SpeedReferencesType;
+	return ((owner != NULL) && (owner->GetType() == SpeedReferencesType));
 }
 
 void CSpeedReference::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "SpeedReference" );
 	root->LinkEndChild( element );
-	element->SetAttribute("title", Ttc(m_title.c_str()));
+	element->SetAttribute("title", m_title.utf8_str());
 	element->SetAttribute("surface_speed", m_surface_speed );
 	element->SetAttribute("cutting_tool_material", int(m_cutting_tool_material) );
 	element->SetAttribute("brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
-	element->SetAttribute("raw_material_name", Ttc(m_material_name.c_str()) );
+	element->SetAttribute("raw_material_name", m_material_name.utf8_str() );
 
 	WriteBaseXML(element);
 }

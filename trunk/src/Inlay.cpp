@@ -1716,7 +1716,7 @@ void CInlay::CopyFrom(const HeeksObj* object)
 
 bool CInlay::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CInlay::WriteXML(TiXmlNode *root)
@@ -1798,6 +1798,8 @@ std::list<wxString> CInlay::DesignRulesAdjustment(const bool apply_changes)
  */
 bool CInlay::CanAdd( HeeksObj *object )
 {
+    if (object == NULL) return(false);
+
     switch (object->GetType())
     {
         case SketchType:
@@ -1836,7 +1838,7 @@ void CInlay::ReloadPointers()
 	for (Symbols_t::iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 	{
 		HeeksObj *object = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-		if (CanAdd(object))
+		if (object != NULL)
 		{
 			Add( object, NULL );
 		}

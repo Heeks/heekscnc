@@ -314,7 +314,7 @@ CTurnRough & CTurnRough::operator= ( const CTurnRough & rhs )
 
 bool CTurnRough::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CTurnRough::WriteXML(TiXmlNode *root)

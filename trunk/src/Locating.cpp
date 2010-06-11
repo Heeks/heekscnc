@@ -165,7 +165,7 @@ void CLocating::CopyFrom(const HeeksObj* object)
 
 bool CLocating::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 CLocating::CLocating( const CLocating & rhs ) : COp(rhs)
