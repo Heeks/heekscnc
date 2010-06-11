@@ -198,7 +198,7 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("touch_off_point_x", m_touch_off_point.X());
 	element->SetDoubleAttribute("touch_off_point_y", m_touch_off_point.Y());
 
-	element->SetAttribute("touch_off_description", Ttc(m_touch_off_description.c_str()));
+	element->SetAttribute("touch_off_description", m_touch_off_description.utf8_str());
 }
 
 void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -321,14 +321,14 @@ void CFixture::CopyFrom(const HeeksObj* object)
 
 bool CFixture::CanAddTo(HeeksObj* owner)
 {
-	return ((owner->GetType() == FixturesType) || (COp::IsAnOperation(owner->GetType())));
+	return (((owner != NULL) && ((owner->GetType() == FixturesType) || (COp::IsAnOperation(owner->GetType())))));
 }
 
 void CFixture::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element = new TiXmlElement( "Fixture" );
 	root->LinkEndChild( element );
-	element->SetAttribute("title", Ttc(m_title.c_str()));
+	element->SetAttribute("title", m_title.utf8_str());
 
 	element->SetAttribute("coordinate_system_number", m_coordinate_system_number );
 
@@ -606,7 +606,7 @@ double CFixture::AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec
 void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_file_name )
 {
 	TiXmlDocument xml;
-	if (! xml.LoadFile( Ttc(probed_points_xml_file_name.c_str()) ))
+	if (! xml.LoadFile( probed_points_xml_file_name.utf8_str() ))
 	{
 		printf("Failed to load XML file '%s'\n", Ttc(probed_points_xml_file_name.c_str()) );
 	} // End if - then

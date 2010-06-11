@@ -42,7 +42,7 @@ void ColouredText::WriteXML(TiXmlNode *root)
 	root->LinkEndChild( element );
 
 	// add actual text as a child object
-   	TiXmlText* text = new TiXmlText(Ttc(m_str.c_str()));
+   	TiXmlText* text = new TiXmlText(m_str.utf8_str());
    	element->LinkEndChild(text);
 
 	if(m_color_type != ColorDefaultType)element->SetAttribute("col", CNCCode::GetColor(m_color_type));
@@ -62,8 +62,7 @@ double PathObject::m_current_x[3] = {0, 0, 0};
 
 void PathObject::WriteBaseXML(TiXmlElement *pElem)
 {
-	std::ostringstream l_ossValue; l_ossValue << m_cutting_tool_number;
-	pElem->SetAttribute("cutting_tool_number", l_ossValue.str().c_str());
+	pElem->SetAttribute("cutting_tool_number", m_cutting_tool_number);
 
 	pElem->SetDoubleAttribute("x", m_x[0] / CNCCodeBlock::multiplier);
 	pElem->SetDoubleAttribute("y", m_x[1] / CNCCodeBlock::multiplier);
@@ -86,7 +85,7 @@ void PathObject::ReadFromXMLElement(TiXmlElement* pElem)
 
 	if (pElem->Attribute("cutting_tool_number"))
 	{
-		m_cutting_tool_number = atoi(pElem->Attribute("cutting_tool_number"));
+		pElem->Attribute("cutting_tool_number", &m_cutting_tool_number);
 	} // End if - then
 	else
 	{
@@ -897,12 +896,12 @@ void CNCCode::WriteXML(TiXmlNode *root)
 
 bool CNCCode::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == NCCodeBlockType;
+	return ((object != NULL) && (object->GetType() == NCCodeBlockType));
 }
 
 bool CNCCode::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == ProgramType || owner->GetType() == TrsfNCCodeType;
+	return ((owner != NULL) && (owner->GetType() == ProgramType || owner->GetType() == TrsfNCCodeType));
 }
 
 void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction)

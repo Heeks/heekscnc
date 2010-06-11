@@ -82,10 +82,7 @@ void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 	element = new TiXmlElement( "params" );
 	root->LinkEndChild( element );
 	element->SetDoubleAttribute("diameter", m_diameter);
-
-	std::ostringstream l_ossValue;
-	l_ossValue.str(""); l_ossValue << m_sort_locations;
-	element->SetAttribute("sort_locations", l_ossValue.str().c_str());
+	element->SetAttribute("sort_locations", m_sort_locations);
 }
 
 void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -298,12 +295,12 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 		{
 			if ((pCuttingTool->CuttingRadius() * 2.0) >= m_params.m_diameter)
 			{
-				std::ostringstream l_ossMsg;
-				l_ossMsg << "Error: Tool diameter (" << pCuttingTool->m_params.m_diameter << ") "
-					 << ">= hole diameter (" << m_params.m_diameter << ") "
-					 << "in counter bore operation.  "
-					 << "Skipping this counter bore operation (ID=" << m_id << ")";
-				wxMessageBox(Ctt(l_ossMsg.str().c_str()));
+				wxString message;
+				message << _("Error: Tool diameter (") << pCuttingTool->m_params.m_diameter << _T(") ")
+					 << _(">= hole diameter (") << m_params.m_diameter << _T(") ")
+					 << _("in counter bore operation.  ")
+					 << _("Skipping this counter bore operation (ID=") << m_id << _T(")");
+				wxMessageBox(message);
 				return(python);
 			} // End if - then
 
@@ -317,19 +314,19 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 		} // End if - then
 		else
 		{
-			std::ostringstream l_ossMsg;
-			l_ossMsg << "Warning: Counter bore refers to a cutting tool "
-				 << "that can't be found in the model.  "
-				 << "Skipping this counter bore operation (ID=" << m_id << ")";
-			wxMessageBox(Ctt(l_ossMsg.str().c_str()));
+			wxString message;
+			message << _("Warning: Counter bore refers to a cutting tool ")
+				 << _("that can't be found in the model.  ")
+				 << _("Skipping this counter bore operation (ID=") << m_id << _T(")");
+			wxMessageBox(message);
 		} // End if - else
 	} // End if - then
 	else
 	{
-		std::ostringstream l_ossMsg;
-		l_ossMsg << "Warning: Counter bore operations MUST refer to a cutting tool.  "
-			 << "Skipping this counter bore operation (ID=" << m_id << ")";
-		wxMessageBox(Ctt(l_ossMsg.str().c_str()));
+		wxString message;
+		message << _("Warning: Counter bore operations MUST refer to a cutting tool.  ")
+			 << _("Skipping this counter bore operation (ID=") << m_id << _T(")");
+		wxMessageBox(message);
 	} // End if - else
 
 	return(python);
@@ -491,7 +488,7 @@ void CCounterBore::CopyFrom(const HeeksObj* object)
 
 bool CCounterBore::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CCounterBore::WriteXML(TiXmlNode *root)
@@ -757,7 +754,7 @@ std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_
 
 bool CCounterBore::CanAdd(HeeksObj* object)
 {
-	return(CCounterBore::ValidType(object->GetType()));
+	return((object != NULL) && (CCounterBore::ValidType(object->GetType())));
 }
 
 /**

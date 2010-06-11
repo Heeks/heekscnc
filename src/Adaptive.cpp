@@ -631,7 +631,7 @@ bool CAdaptive::CanAdd(HeeksObj* object)
 
 bool CAdaptive::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CAdaptive::WriteXML(TiXmlNode *root)

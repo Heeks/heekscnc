@@ -148,7 +148,7 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 
 
 CMachine::CMachine()
-{ 
+{
 	m_max_spindle_speed = 0.0;
 
 	CNCConfig config(CMachine::ConfigScope());
@@ -313,6 +313,8 @@ void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
 
 bool CProgram::CanAdd(HeeksObj* object)
 {
+    if (object == NULL) return(false);
+
 	return object->GetType() == NCCodeType ||
 		object->GetType() == OperationsType ||
 		object->GetType() == ToolsType ||
@@ -322,7 +324,7 @@ bool CProgram::CanAdd(HeeksObj* object)
 
 bool CProgram::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == DocumentType;
+	return ((owner != NULL) && (owner->GetType() == DocumentType));
 }
 
 void CProgram::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction)
@@ -346,19 +348,11 @@ void CProgram::WriteXML(TiXmlNode *root)
 	TiXmlElement * element;
 	element = new TiXmlElement( "Program" );
 	root->LinkEndChild( element );
-	element->SetAttribute("machine", Ttc(m_machine.file_name.c_str()));
-	element->SetAttribute("output_file", Ttc(m_output_file.c_str()));
+	element->SetAttribute("machine", m_machine.file_name.utf8_str());
+	element->SetAttribute("output_file", m_output_file.utf8_str());
+	element->SetAttribute("output_file_name_follows_data_file_name", (int) (m_output_file_name_follows_data_file_name?1:0));
 
-#ifdef UNICODE
-	std::wostringstream l_ossValue;
-#else
-	std::ostringstream l_ossValue;
-#endif
-
-	l_ossValue << (m_output_file_name_follows_data_file_name?1:0);
-	element->SetAttribute("output_file_name_follows_data_file_name", Ttc(l_ossValue.str().c_str()));
-
-	element->SetAttribute("program", Ttc(theApp.m_program_canvas->m_textCtrl->GetValue()));
+	element->SetAttribute("program", theApp.m_program_canvas->m_textCtrl->GetValue().utf8_str());
 	element->SetDoubleAttribute("units", m_units);
 
 	m_raw_material.WriteBaseXML(element);
@@ -859,23 +853,18 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 			// We may have a material rate value.
 			if (AllNumeric( *tokens.rbegin() ))
 			{
-				m.m_max_spindle_speed = atof( Ttc(tokens.rbegin()->c_str()) );
+				tokens.rbegin()->ToDouble(&(m.m_max_spindle_speed));
 				tokens.resize(tokens.size() - 1);	// Remove last token.
 			} // End if - then
 		} // End if - then
 
 		// Everything else must be a description.
-#ifdef UNICODE
-		std::wostringstream l_ossDescription;
-#else
-		std::ostringstream l_ossDescription;
-#endif
+		m.description.clear();
 		for (std::vector<wxString>::const_iterator l_itToken = tokens.begin(); l_itToken != tokens.end(); l_itToken++)
 		{
-			if (l_itToken != tokens.begin()) l_ossDescription << _T(" ");
-			l_ossDescription << l_itToken->c_str();
+			if (l_itToken != tokens.begin()) m.description << _T(" ");
+			m.description << *l_itToken;
 		} // End for
-		m.description = l_ossDescription.str().c_str();
 
 		if(m.file_name.Length() > 0)
 		{

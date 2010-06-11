@@ -896,12 +896,12 @@ void CProfile::CopyFrom(const HeeksObj* object)
 
 bool CProfile::CanAdd(HeeksObj* object)
 {
-	return object->GetType() == TagsType || object->GetType() == SketchType;
+	return ((object != NULL) && (object->GetType() == TagsType || object->GetType() == SketchType));
 }
 
 bool CProfile::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CProfile::WriteXML(TiXmlNode *root)

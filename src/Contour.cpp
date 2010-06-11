@@ -812,7 +812,7 @@ void CContour::CopyFrom(const HeeksObj* object)
 
 bool CContour::CanAddTo(HeeksObj* owner)
 {
-	return owner->GetType() == OperationsType;
+	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
 void CContour::WriteXML(TiXmlNode *root)
@@ -894,6 +894,8 @@ std::list<wxString> CContour::DesignRulesAdjustment(const bool apply_changes)
  */
 bool CContour::CanAdd( HeeksObj *object )
 {
+    if (object == NULL) return(false);
+
     switch (object->GetType())
     {
         case CircleType:
@@ -930,7 +932,7 @@ void CContour::ReloadPointers()
 	for (Symbols_t::iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 	{
 		HeeksObj *object = heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-		if (CanAdd(object))
+		if (object != NULL)
 		{
 			Add( object, NULL );
 		}

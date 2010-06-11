@@ -11,7 +11,7 @@
 
 bool CTools::CanAdd(HeeksObj* object)
 {
-	return 	(object->GetType() == CuttingToolType);
+	return 	((object != NULL) && (object->GetType() == CuttingToolType));
 }
 
 
@@ -217,7 +217,6 @@ void CTools::GetProperties(std::list<Property *> *list)
 {
 	{
 		std::list< wxString > choices;
-		int choice = 0;
 		choices.push_back( _("Guage number replaces size") );
 		choices.push_back( _("Include guage number and size") );
 
