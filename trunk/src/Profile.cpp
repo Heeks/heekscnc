@@ -722,7 +722,7 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 		if(sketch_order == SketchOrderTypeMultipleCurves || sketch_order == SketchOrderHasCircles)
 		{
 			std::list<HeeksObj*> new_separate_sketches;
-			heeksCAD->ExtractSeparateSketches(object, new_separate_sketches);
+			heeksCAD->ExtractSeparateSketches(object, new_separate_sketches, false);
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
