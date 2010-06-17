@@ -129,6 +129,10 @@ public:
 											const double clearance_height,
 											const double rapid_down_to_height );
 
+    static Python GenerateRampedEntry(      ::size_t starting_edge_offset,
+                                            std::vector<TopoDS_Edge> & edges,
+                                            CMachineState *pMachineState );
+
 	static bool Clockwise( const gp_Circ & circle );
 	void ReloadPointers();
 	static void GetOptions(std::list<Property *> *list);
@@ -139,6 +143,7 @@ public:
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);
     static gp_Pnt GetEnd(const TopoDS_Edge &edge);
+    static double GetLength(const TopoDS_Edge &edge);
 };
 
 

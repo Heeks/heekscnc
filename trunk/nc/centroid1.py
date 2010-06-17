@@ -77,7 +77,7 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
         self.write('G43 H'+ str(id) + 'Z.75 \n')
 
 
-    def tool_defn(self, id, name='', radius=None, length=None):
+    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         #self.write('G43 \n')
         pass
 

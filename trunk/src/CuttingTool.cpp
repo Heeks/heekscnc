@@ -105,6 +105,8 @@ void CCuttingToolParams::set_initial_values()
 	// The following are ONLY for touch probe tools
 	config.Read(_T("probe_offset_x"), &m_probe_offset_x, 0.0);
 	config.Read(_T("probe_offset_y"), &m_probe_offset_y, 0.0);
+
+	config.Read(_T("gradient"), &m_gradient, 0.0);  // Straight plunge by default.
 }
 
 void CCuttingToolParams::write_values_to_config()
@@ -133,8 +135,10 @@ void CCuttingToolParams::write_values_to_config()
 	config.Write(_T("m_back_angle"), m_back_angle);
 
 	// The following are ONLY for touch probe tools
-	config.Read(_T("probe_offset_x"), m_probe_offset_x);
-	config.Read(_T("probe_offset_y"), m_probe_offset_y);
+	config.Write(_T("probe_offset_x"), m_probe_offset_x);
+	config.Write(_T("probe_offset_y"), m_probe_offset_y);
+
+	config.Write(_T("gradient"), m_gradient);
 }
 
 void CCuttingTool::SetDiameter( const double diameter )
@@ -258,6 +262,13 @@ static void on_set_automatically_generate_title(int zero_based_choice, HeeksObj*
 
 } // End on_set_type() routine
 
+static void on_set_gradient(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_gradient = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+	wxMessageBox(_("Warning: The tool's gradient is not yet used for toolpath generation"));
+}
 
 
 static double degrees_to_radians( const double degrees )
@@ -266,12 +277,43 @@ static double degrees_to_radians( const double degrees )
 } // End degrees_to_radians() routine
 
 
+double CCuttingToolParams::ReasonableGradient( const eCuttingToolType type ) const
+{
+    switch(type)
+	{
+	    case CCuttingToolParams::eCentreDrill:
+		case CCuttingToolParams::eDrill:
+				return(0.0);
+
+        case CCuttingToolParams::eSlotCutter:
+		case CCuttingToolParams::eEndmill:
+		case CCuttingToolParams::eBallEndMill:
+				return(-1.0 / 10.0);  // 1 down for 10 across
+
+
+		case CCuttingToolParams::eTouchProbe:
+		case CCuttingToolParams::eToolLengthSwitch:
+				return(0.0);
+
+		case CCuttingToolParams::eChamfer:
+				return(0.0);
+
+		case CCuttingToolParams::eTurningTool:
+				return(0.0);
+
+        default:
+            return(0.0);
+	} // End switch
+}
+
 void CCuttingTool::ResetParametersToReasonableValues()
 {
 	if (m_params.m_type != CCuttingToolParams::eTurningTool)
 	{
 		m_params.m_tool_length_offset = (5 * m_params.m_diameter);
 	} // End if - then
+
+    m_params.m_gradient = m_params.ReasonableGradient(m_params.m_type);
 
 	double height;
 	switch(m_params.m_type)
@@ -522,6 +564,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 			list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
 			list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
 			list->push_back(new PropertyLength(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
+			list->push_back(new PropertyDouble(_("gradient"), m_gradient, parent, on_set_gradient));
 		} // End if - then
 	} // End if - else
 
@@ -562,6 +605,8 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 
 	element->SetDoubleAttribute("probe_offset_x", m_probe_offset_x);
 	element->SetDoubleAttribute("probe_offset_y", m_probe_offset_y);
+
+	element->SetDoubleAttribute("gradient", m_gradient);
 }
 
 void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -592,6 +637,15 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 
 	if (pElem->Attribute( "probe_offset_x" )) pElem->Attribute("probe_offset_x", &m_probe_offset_x);
 	if (pElem->Attribute( "probe_offset_y" )) pElem->Attribute("probe_offset_y", &m_probe_offset_y);
+
+	if (pElem->Attribute( "gradient" ))
+	{
+	     pElem->Attribute("gradient", &m_gradient);
+	}
+	else
+	{
+	    m_gradient = ReasonableGradient(m_type);
+	}
 }
 
 CCuttingTool::~CCuttingTool()
@@ -648,12 +702,14 @@ Python CCuttingTool::AppendTextToProgram()
 
 	if (m_params.m_tool_length_offset > 0)
 	{
-		python << _T("length=") << m_params.m_tool_length_offset /theApp.m_program->m_units;
+		python << _T("length=") << m_params.m_tool_length_offset /theApp.m_program->m_units << _T(", ");
 	} // End if - then
 	else
 	{
-		python << _T("length=None");
+		python << _T("length=None, ");
 	} // End if - else
+
+	python << _T("gradient=") << m_params.m_gradient;
 
 	python << _T(")\n");
 

@@ -70,8 +70,8 @@ class CreatorAttach(nc.Creator):
     def tool_change(self, id):
         self.original.tool_change(id)
 
-    def tool_defn(self, id, name='', radius=None, length=None):
-        self.original.tool_defn(id, name, radius, length)
+    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+        self.original.tool_defn(id, name, radius, length, gradient)
 
     def offset_radius(self, id, radius=None):
         self.original.offset_radius(id, radius)

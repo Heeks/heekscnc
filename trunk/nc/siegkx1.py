@@ -16,7 +16,7 @@ class CreatorSieg(iso_modal.CreatorIsoModal):
     def __init__(self):
         iso_modal.CreatorIsoModal.__init__(self)
 
-    def tool_defn(self, id, name='', radius=None, length=None):
+    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         pass
             
 ################################################################################

@@ -8,7 +8,7 @@ class CreatorGantryRouter(emc2.CreatorEMC2):
     def program_begin(self, id, comment):
 	self.write( ('(' + comment + ')' + '\n') )
 
-    def tool_defn(self, id, name='', radius=None, length=None):
+    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         pass
 
     def spindle(self, s, clockwise):
