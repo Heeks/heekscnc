@@ -168,7 +168,7 @@ class CreatorIso(nc.Creator):
         self.write((iso.codes.TOOL() % id) + '\n')
         self.t = id
 
-    def tool_defn(self, id, name='', radius=None, length=None):
+    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         self.write_blocknum()
 	self.write(iso.codes.TOOL_DEFINITION())
 	self.write(('P%i' % id) + ' ')

@@ -42,6 +42,7 @@
 #include <BRepTools.hxx>
 #include <BRepMesh.hxx>
 #include <Poly_Polygon3D.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -189,6 +190,12 @@ const wxBitmap &CContour::GetIcon()
     return(PE);
 }
 
+/* static */ double CContour::GetLength(const TopoDS_Edge &edge)
+{
+    BRepAdaptor_Curve curve(edge);
+    return(GCPnts_AbscissaPoint::Length(curve));
+}
+
 
 struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS_Edge &, bool >
 {
@@ -326,10 +333,94 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     return(direction);
 }
 
+/**
+    For these edges, plan a path to get the cutting tool from the current
+    depth down to the first edge's depth at no more than the gradient
+    specified for the cutting tool.  This might mean running right around
+    all edges spiralling down until the required depth or it might mean
+    running along part of the wire backwards and forwards until the depth
+    is achieved.
+
+    This routine should ramp the tool down along the edges until the tool's
+    depth is at the starting edge's depth.  At the end of this routine, the
+    tool's location should be at the starting point of the itStartingEdge
+    so that it can progress, at this depth, right around the whole wire.
+ */
+/* static */ Python CContour::GenerateRampedEntry(
+    ::size_t starting_edge_offset,
+    std::vector<TopoDS_Edge> & edges,
+	CMachineState *pMachineState )
+{
+    Python python;
+
+    if (edges.size() == 0) return(python);  // Empty.
+    if (starting_edge_offset == edges.size()-1) starting_edge_offset = 0;  // loop around if necessary.
+
+    double tolerance = heeksCAD->GetTolerance();
+
+    // Get the gradient from the cutting tool's definition.
+    CCuttingTool *pCuttingTool = CCuttingTool::Find( pMachineState->CuttingTool() );
+    if (pCuttingTool == NULL)
+    {
+        return(python); // empty.
+    }
+
+    double gradient = pCuttingTool->Gradient();
+
+    const TopoDS_Shape &first_edge = edges[0];
+    BRepAdaptor_Curve top_curve(TopoDS::Edge(first_edge));
+    gp_Pnt point;
+    top_curve.D0(top_curve.FirstParameter(),point);
+    double edge_depth = point.Z();
+
+    while (pMachineState->Location().Z() > edge_depth)
+    {
+        ::size_t edge_offset = starting_edge_offset;
+        do
+        {
+            const TopoDS_Shape &E = edges[edge_offset];
+            BRepAdaptor_Curve curve(TopoDS::Edge(E));
+            double edge_length = GCPnts_AbscissaPoint::Length (curve);
+            double distance_remaining = pMachineState->Location().Z() - edge_depth;
+
+            // We need to go distance_remaining over the edge_length at no more
+            // than the gradient.  See if we can do that within this edge's length.
+            // If so, figure out what point marks the necessary depth.
+            double depth_possible_with_this_edge = gradient * edge_length * -1.0;   // positive number representing a depth (distance)
+            if (distance_remaining < depth_possible_with_this_edge)
+            {
+                // We don't need to traverse this whole edge before we're at depth.  Find
+                // the point along this edge at which we will be at depth.
+                // The FirstParameter() and the LastParameter() are not always lengths but they
+                // do form a numeric representation of a distance along the element.  For lines
+                // they are lengths and for arcs they are radians.  In any case, we can
+                // use the proportion of the length to come up with a 'U' parameter for
+                // this edge that indicates the point along the edge.
+
+                double proportion = distance_remaining / depth_possible_with_this_edge;
+                double U = (curve.LastParameter() - curve.FirstParameter()) / proportion;
+                gp_Pnt point_at_full_depth;
+                curve.D0(U,point_at_full_depth);
+
+                // The point_at_full_depth indicates where we will be when we are at depth.  Run
+                // along the edge down to this point
+            }
+
+            edge_offset++;
+            if (edge_offset == edges.size()-1) edge_offset = 0;  // Loop around.
+        } while (((pMachineState->Location().Z() - edge_depth) > tolerance) && (edge_offset != starting_edge_offset));
+    } // while
+
+	return(python);
+}
 
 
-
-
+/**
+    The min_gradient is the minimum gradient the toolpath may follow before reaching the required depth.
+    The gradient being a measurement of rise over run.  Since we're moving downwards, the 'rise' value
+    will always be negative; producing a negative gradient.  A min_gradient of STRAIGHT_PLUNGE (special
+    double value) indicates that ramping is not required.
+ */
 
 /* static */ Python CContour::GeneratePathFromWire(
 	const TopoDS_Wire & wire,
@@ -360,7 +451,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 		BRepAdaptor_Curve curve(TopoDS::Edge(E));
 		GeomAbs_CurveType curve_type = curve.GetType();
 
-		switch(curve_type)
+      	switch(curve_type)
 		{
 			case GeomAbs_Line:
 				// make a line
