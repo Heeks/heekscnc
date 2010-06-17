@@ -154,6 +154,15 @@ public:
 	double m_probe_offset_x;
 	double m_probe_offset_y;
 
+	// The gradient is the steepest angle at which this tool can plunge into the material.  Many
+	// cutting tools behave better if they are slowly ramped down into the material.  This gradient
+	// specifies the steepest angle of decsent.  This is expected to be a negative number indicating
+	// the 'rise / run' ratio.  Since the 'rise' will be downward, it will be negative.
+	// By this measurement, a drill bit's straight plunge would have an infinite gradient (all rise, no run).
+	// To cater for this, a value of zero will indicate a straight plunge.
+
+	double m_gradient;
+
 	void set_initial_values();
 	void write_values_to_config();
 	void GetProperties(CCuttingTool* parent, std::list<Property *> *list);
@@ -161,6 +170,7 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	const wxString ConfigScope(void)const{return _T("CuttingToolParam_");}
+	double ReasonableGradient( const eCuttingToolType type ) const;
 };
 
 class CCuttingTool: public HeeksObj {
@@ -235,6 +245,7 @@ public:
 	void SetDiameter( const double diameter );
 	void ResetParametersToReasonableValues();
 	void ImportProbeCalibrationData( const wxString & probed_points_xml_file_name );
+	double Gradient() const { return(m_params.m_gradient); }
 
 private:
 	void DeleteSolid();

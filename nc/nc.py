@@ -113,7 +113,7 @@ class Creator:
         """Change the tool"""
         pass
 
-    def tool_defn(self, id, name='', radius=None, length=None):
+    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         """Define a tool"""
         pass
 
@@ -357,8 +357,8 @@ def remove_temporary_origin():
 def tool_change(id):
     creator.tool_change(id)
 
-def tool_defn(id, name='', radius=None, length=None):
-    creator.tool_defn(id, name, radius, length)
+def tool_defn(id, name='', radius=None, length=None, gradient=None):
+    creator.tool_defn(id, name, radius, length, gradient)
 
 def offset_radius(id, radius=None):
     creator.offset_radius(id, radius)
