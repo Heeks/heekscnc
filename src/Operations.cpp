@@ -28,7 +28,6 @@ COperations & COperations::operator= ( const COperations & rhs )
 
 COperations::COperations( const COperations & rhs ) : ObjList(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
 }
 
 const wxBitmap &COperations::GetIcon()

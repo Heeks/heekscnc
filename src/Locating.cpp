@@ -170,7 +170,9 @@ bool CLocating::CanAddTo(HeeksObj* owner)
 
 CLocating::CLocating( const CLocating & rhs ) : COp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_symbols.clear();
+	std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ));
+	m_params = rhs.m_params;
 }
 
 CLocating::CLocating(	const Symbols_t &symbols )

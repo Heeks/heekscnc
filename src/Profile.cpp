@@ -259,10 +259,13 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 
 CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
 {
-	m_tags = NULL;
-	*this = rhs;	 // Call the assignment operator.
+	m_tags = new CTags;
+	Add( m_tags, NULL );
+	if (rhs.m_tags != NULL) *m_tags = *(rhs.m_tags);
+	m_sketches.clear();
+	std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+	m_profile_params = rhs.m_profile_params;
 }
-
 
 CProfile::CProfile(const std::list<int> &sketches, const int cutting_tool_number )
 		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number, ProfileType),
