@@ -399,7 +399,8 @@ CDrilling::CDrilling(	const Symbols_t &symbols,
 
 CDrilling::CDrilling( const CDrilling & rhs ) : CSpeedOp( rhs )
 {
-	*this = rhs;	// Call the assignment operator.
+	std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ));
+    m_params = rhs.m_params;
 }
 
 CDrilling & CDrilling::operator= ( const CDrilling & rhs )

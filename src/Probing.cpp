@@ -1163,7 +1163,9 @@ CProbing & CProbing::operator= ( const CProbing & rhs )
 
 CProbe_Centre::CProbe_Centre( const CProbe_Centre & rhs ) : CProbing(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_direction = rhs.m_direction;
+	m_number_of_points = rhs.m_number_of_points;
+    m_alignment = rhs.m_alignment;
 }
 
 CProbe_Centre & CProbe_Centre::operator= ( const CProbe_Centre & rhs )
@@ -1182,7 +1184,9 @@ CProbe_Centre & CProbe_Centre::operator= ( const CProbe_Centre & rhs )
 
 CProbe_Grid::CProbe_Grid( const CProbe_Grid & rhs ) : CProbing(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_num_x_points = rhs.m_num_x_points;
+	m_num_y_points = rhs.m_num_y_points;
+    m_for_fixture_measurement = rhs.m_for_fixture_measurement;
 }
 
 CProbe_Grid & CProbe_Grid::operator= ( const CProbe_Grid & rhs )
@@ -1202,7 +1206,14 @@ CProbe_Grid & CProbe_Grid::operator= ( const CProbe_Grid & rhs )
 
 CProbe_Edge::CProbe_Edge( const CProbe_Edge & rhs ) : CProbing(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_retract = rhs.m_retract;
+    m_number_of_edges = rhs.m_number_of_edges;
+    m_edge = rhs.m_edge;
+    m_corner = rhs.m_corner;
+    m_check_levels = rhs.m_check_levels;
+
+    m_corner_coordinate = rhs.m_corner_coordinate;
+    m_final_coordinate = rhs.m_final_coordinate;
 }
 
 CProbe_Edge & CProbe_Edge::operator= ( const CProbe_Edge & rhs )

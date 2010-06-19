@@ -449,7 +449,8 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 }
 CCounterBore::CCounterBore( const CCounterBore & rhs ) : CDepthOp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ) );
+    m_params = rhs.m_params;
 }
 
 CCounterBore & CCounterBore::operator= ( const CCounterBore & rhs )
