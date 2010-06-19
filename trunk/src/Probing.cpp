@@ -1143,7 +1143,8 @@ bool CProbing::CanAddTo(HeeksObj* owner)
 
 CProbing::CProbing( const CProbing & rhs) : CSpeedOp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_depth = rhs.m_depth;
+	m_distance = rhs.m_distance;
 }
 
 CProbing & CProbing::operator= ( const CProbing & rhs )

@@ -41,7 +41,7 @@ CDepthOp & CDepthOp::operator= ( const CDepthOp & rhs )
 
 CDepthOp::CDepthOp( const CDepthOp & rhs ) : CSpeedOp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_depth_op_params = rhs.m_depth_op_params;
 }
 
 void CDepthOp::ReloadPointers()

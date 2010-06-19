@@ -219,7 +219,7 @@ CSpeedOp & CSpeedOp::operator= ( const CSpeedOp & rhs )
 
 CSpeedOp::CSpeedOp( const CSpeedOp & rhs ) : COp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_speed_op_params = rhs.m_speed_op_params;
 }
 
 // static
