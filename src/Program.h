@@ -69,11 +69,11 @@ public:
 	bool m_output_file_name_follows_data_file_name;	// Just change the extension to determine the NC file name
 
 	// Data access methods.
-	CNCCode* NCCode(){return m_nc_code;}
-	COperations* Operations(){return m_operations;}
-	CTools* Tools(){return m_tools;}
-	CSpeedReferences *SpeedReferences(){return m_speed_references;}
-	CFixtures *Fixtures(){return m_fixtures;}
+	CNCCode* NCCode();
+	COperations* Operations();
+	CTools* Tools();
+	CSpeedReferences *SpeedReferences();
+	CFixtures *Fixtures();
 
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches
@@ -113,4 +113,5 @@ public:
 	void AddMissingChildren();
 
 	void ChangeUnits( const double units );
+	void ReloadPointers();
 };

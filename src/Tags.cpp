@@ -25,7 +25,6 @@ CTags & CTags::operator= ( const CTags & rhs )
 
 CTags::CTags( const CTags & rhs ) : ObjList(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
 }
 
 const wxBitmap &CTags::GetIcon()

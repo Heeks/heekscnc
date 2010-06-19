@@ -17,7 +17,10 @@ CTag::CTag(): m_width(10.0),	m_angle(45.0), m_height(4.0){
 
 CTag::CTag( const CTag & rhs ) : HeeksObj(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	for (::size_t i=0; i<sizeof(m_pos)/sizeof(m_pos[0]); i++) m_pos[i] = rhs.m_pos[i];
+	m_width = rhs.m_width;
+	m_angle = rhs.m_angle;
+	m_height = rhs.m_height;
 }
 
 CTag& CTag::operator= ( const CTag & rhs )
@@ -25,6 +28,11 @@ CTag& CTag::operator= ( const CTag & rhs )
 	if (this != &rhs)
 	{
 		HeeksObj::operator=( rhs );
+
+		for (::size_t i=0; i<sizeof(m_pos)/sizeof(m_pos[0]); i++) m_pos[i] = rhs.m_pos[i];
+        m_width = rhs.m_width;
+        m_angle = rhs.m_angle;
+        m_height = rhs.m_height;
 	}
 
 	return(*this);

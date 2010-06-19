@@ -293,7 +293,10 @@ void CTurnRough::CopyFrom(const HeeksObj* object)
 
 CTurnRough::CTurnRough( const CTurnRough & rhs ) : CSpeedOp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_sketches.clear();
+    std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+
+    m_turn_rough_params = rhs.m_turn_rough_params;
 }
 
 CTurnRough & CTurnRough::operator= ( const CTurnRough & rhs )

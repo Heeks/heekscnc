@@ -131,7 +131,11 @@ CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number)
 
 CZigZag::CZigZag( const CZigZag & rhs ) : CDepthOp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_solids.clear();
+    std::copy( rhs.m_solids.begin(), rhs.m_solids.end(), std::inserter( m_solids, m_solids.begin() ) );
+
+    m_params = rhs.m_params;
+    // static int number_for_stl_file;
 }
 
 CZigZag & CZigZag::operator= ( const CZigZag & rhs )

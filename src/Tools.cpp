@@ -28,9 +28,9 @@ CTools::CTools()
 }
 
 
-CTools::CTools( const CTools & rhs )
+CTools::CTools( const CTools & rhs ) : ObjList(rhs)
 {
-    *this = rhs;    // Call the assignment operator.
+    m_title_format = rhs.m_title_format;
 }
 
 CTools & CTools::operator= ( const CTools & rhs )

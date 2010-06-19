@@ -70,7 +70,7 @@ CChamfer::CChamfer(	const Symbols_t &symbols,
 
 CChamfer::CChamfer( const CChamfer & rhs ) : CDepthOp(rhs)
 {
-	*this = rhs;	// Call the assignment operator
+	std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ) );
 }
 
 CChamfer & CChamfer::operator= ( const CChamfer & rhs )
