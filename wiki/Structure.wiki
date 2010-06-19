@@ -7,7 +7,7 @@ kurve.so, actp.so and area.so, are Python modules.
 They should not be added as plugins to HeeksCAD, they are not HeeksCAD plugins.
 They just need to be built and put in the right place.
 At the moment, post.py expects kurve.so and area.so to be copied to HeeksCAD\HeeksCNC.
-If you use the ZigZag operation, it creates script which expects the pycam stuff to be in a structure like this: HeeksCAD\HeeksCNC\PyCam\trunk\pycam\Geometry
+~~If you use the ZigZag operation, it creates script which expects the pycam stuff to be in a structure like this: HeeksCAD\HeeksCNC\PyCam\trunk\pycam\Geometry~~
 
 When post.py is run, it should create the nc file ( test.tap for example ).
 
