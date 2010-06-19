@@ -602,8 +602,13 @@ void CAdaptive::CopyFrom(const HeeksObj* object)
 
 CAdaptive::CAdaptive( const CAdaptive & rhs ) : COp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+    std::copy( rhs.m_solids.begin(), rhs.m_solids.end(), std::inserter( m_solids, m_solids.begin() ) );
+    std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+
+    m_params = rhs.m_params;
+    // static int number_for_stl_file;
 }
+
 CAdaptive & CAdaptive::operator= ( const CAdaptive & rhs )
 {
 	if (this != &rhs)

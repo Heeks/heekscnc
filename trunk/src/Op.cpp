@@ -160,7 +160,9 @@ COp & COp::operator= ( const COp & rhs )
 	return(*this);
 }
 
-COp::COp( const COp & rhs ) : ObjList(rhs)
+// Don't call the ObjList() constructor here as the duplication is
+// handled in an unusual way by the assignment operator.
+COp::COp( const COp & rhs ) // : ObjList(rhs)
 {
 	*this = rhs;	// Call the assignment operator.
 }

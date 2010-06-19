@@ -1035,8 +1035,9 @@ void CContour::ReloadPointers()
 
 CContour::CContour( const CContour & rhs ) : CDepthOp( rhs )
 {
-    m_params.set_initial_values();
-	*this = rhs;	// Call the assignment operator.
+    m_params = rhs.m_params;
+    m_symbols.clear();
+	std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ) );
 }
 
 CContour & CContour::operator= ( const CContour & rhs )

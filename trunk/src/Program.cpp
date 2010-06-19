@@ -72,7 +72,7 @@ HeeksObj *CProgram::MakeACopy(void)const
 }
 
 
-CProgram::CProgram( const CProgram & rhs )
+CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
 {
     m_nc_code = NULL;
     m_operations = NULL;
@@ -81,7 +81,22 @@ CProgram::CProgram( const CProgram & rhs )
     m_fixtures = NULL;
     m_script_edited = false;
 
-	*this = rhs;    // And finish off with the assignment operator.
+    m_raw_material = rhs.m_raw_material;
+    m_machine = rhs.m_machine;
+    m_output_file = rhs.m_output_file;
+    m_output_file_name_follows_data_file_name = rhs.m_output_file_name_follows_data_file_name;
+
+    m_script_edited = rhs.m_script_edited;
+    m_units = rhs.m_units;
+
+    ReloadPointers();
+    AddMissingChildren();
+
+    if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
+    if ((m_operations != NULL) && (rhs.m_operations != NULL)) *m_operations = *(rhs.m_operations);
+    if ((m_tools != NULL) && (rhs.m_tools != NULL)) *m_tools = *(rhs.m_tools);
+    if ((m_speed_references != NULL) && (rhs.m_speed_references != NULL)) *m_speed_references = *(rhs.m_speed_references);
+    if ((m_fixtures != NULL) && (rhs.m_fixtures != NULL)) *m_fixtures = *(rhs.m_fixtures);
 }
 
 CProgram::~CProgram()
@@ -127,6 +142,7 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 	if (this != &rhs)
 	{
 		ObjList::operator=(rhs);
+		ReloadPointers();
 
 		if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
 		if ((m_operations != NULL) && (rhs.m_operations != NULL)) *m_operations = *(rhs.m_operations);
@@ -941,8 +957,53 @@ wxString CProgram::GetOutputFileName() const
 	} // End if - else
 } // End GetOutputFileName() method
 
+CNCCode* CProgram::NCCode()
+{
+    if (m_nc_code == NULL) ReloadPointers();
+    return m_nc_code;
+}
+
+COperations* CProgram::Operations()
+{
+    if (m_operations == NULL) ReloadPointers();
+    return m_operations;
+}
+
+CTools* CProgram::Tools()
+{
+    if (m_tools == NULL) ReloadPointers();
+    return m_tools;
+}
+
+CSpeedReferences *CProgram::SpeedReferences()
+{
+    if (m_speed_references == NULL) ReloadPointers();
+    return m_speed_references;
+}
+
+CFixtures *CProgram::Fixtures()
+{
+    if (m_fixtures == NULL) ReloadPointers();
+    return m_fixtures;
+}
+
+void CProgram::ReloadPointers()
+{
+    for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
+	{
+	    if (child->GetType() == ToolsType) m_tools = (CTools *) child;
+	    if (child->GetType() == FixturesType) m_fixtures = (CFixtures *) child;
+	    if (child->GetType() == OperationsType) m_operations = (COperations *) child;
+	    if (child->GetType() == SpeedReferencesType) m_speed_references = (CSpeedReferences *) child;
+	    if (child->GetType() == NCCodeType) m_nc_code = (CNCCode *) child;
+	} // End for
+}
+
 void CProgram::AddMissingChildren()
 {
+    // Make sure the pointers are not already amongst existing children.
+	ReloadPointers();
+
 	// make sure tools, operations, fixtures, etc. exist
 	if(m_tools == NULL){m_tools = new CTools; Add( m_tools, NULL );}
 	if(m_fixtures == NULL){m_fixtures = new CFixtures; Add( m_fixtures, NULL );}
