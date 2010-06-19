@@ -382,7 +382,9 @@ void CPocket::CopyFrom(const HeeksObj* object)
 
 CPocket::CPocket( const CPocket & rhs ) : CDepthOp(rhs)
 {
-	*this = rhs;	// Call the assignment operator.
+	m_sketches.clear();
+	std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+	m_pocket_params = rhs.m_pocket_params;
 }
 
 CPocket & CPocket::operator= ( const CPocket & rhs )
