@@ -728,3 +728,48 @@ void CAdaptive::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	COp::GetTools(t_list, p);
 }
+
+bool CAdaptiveParams::operator==( const CAdaptiveParams & rhs ) const
+{
+	if (m_leadoffdz != rhs.m_leadoffdz) return(false);
+	if (m_leadofflen != rhs.m_leadofflen) return(false);
+	if (m_leadoffrad != rhs.m_leadoffrad) return(false);
+	if (m_retractzheight != rhs.m_retractzheight) return(false);
+	if (m_leadoffsamplestep != rhs.m_leadoffsamplestep) return(false);
+	if (m_toolcornerrad != rhs.m_toolcornerrad) return(false);
+	if (m_toolflatrad != rhs.m_toolflatrad) return(false);
+	if (m_samplestep != rhs.m_samplestep) return(false);
+	if (m_stepdown != rhs.m_stepdown) return(false);
+	if (m_clearcuspheight != rhs.m_clearcuspheight) return(false);
+	if (m_triangleweaveres != rhs.m_triangleweaveres) return(false);
+	if (m_flatradweaveres != rhs.m_flatradweaveres) return(false);
+	if (m_dchangright != rhs.m_dchangright) return(false);
+	if (m_dchangrightoncontour != rhs.m_dchangrightoncontour) return(false);
+	if (m_dchangleft != rhs.m_dchangleft) return(false);
+	if (m_dchangefreespace != rhs.m_dchangefreespace) return(false);
+	if (m_sidecutdisplch != rhs.m_sidecutdisplch) return(false);
+	if (m_fcut != rhs.m_fcut) return(false);
+	if (m_fretract != rhs.m_fretract) return(false);
+	if (m_thintol != rhs.m_thintol) return(false);
+	if (m_startpoint_x != rhs.m_startpoint_x) return(false);
+	if (m_startpoint_y != rhs.m_startpoint_y) return(false);
+	if (m_startvel_x != rhs.m_startvel_x) return(false);
+	if (m_startvel_y != rhs.m_startvel_y) return(false);
+	if (m_minz != rhs.m_minz) return(false);
+	if (m_boundaryclear != rhs.m_boundaryclear) return(false);
+	if (m_boundary_x0 != rhs.m_boundary_x0) return(false);
+	if (m_boundary_x1 != rhs.m_boundary_x1) return(false);
+	if (m_boundary_y0 != rhs.m_boundary_y0) return(false);
+	if (m_boundary_y1 != rhs.m_boundary_y1) return(false);
+
+	return(true);
+}
+
+
+bool CAdaptive::operator==( const CAdaptive & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	return(COp::operator==(rhs));
+}
+

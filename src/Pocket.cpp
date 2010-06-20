@@ -640,3 +640,19 @@ void CPocket::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
     CDepthOp::GetTools( t_list, p );
 }
+bool CPocketParams::operator==(const CPocketParams & rhs) const
+{
+	if (m_starting_place != rhs.m_starting_place) return(false);
+	if (m_round_corner_factor != rhs.m_round_corner_factor) return(false);
+	if (m_material_allowance != rhs.m_material_allowance) return(false);
+	if (m_step_over != rhs.m_step_over) return(false);
+
+	return(true);
+}
+
+bool CPocket::operator==(const CPocket & rhs) const
+{
+	if (m_pocket_params != rhs.m_pocket_params) return(false);
+
+	return(CDepthOp::operator==(rhs));
+}

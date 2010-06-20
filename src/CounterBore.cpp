@@ -820,4 +820,19 @@ CCounterBore::CCounterBore(	const Symbols_t &symbols,
     } // End if - then
 }
 
+bool CCounterBoreParams::operator== ( const CCounterBoreParams & rhs ) const
+{
+	if (m_diameter != rhs.m_diameter) return(false);
+	if (m_sort_locations != rhs.m_sort_locations) return(false);
+
+	return(true);
+}
+
+
+bool CCounterBore::operator== ( const CCounterBore & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	return(CDepthOp::operator==(rhs));
+}
 

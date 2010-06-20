@@ -24,6 +24,8 @@ public:
 	double m_rapid_down_to_height;
 
 	CDepthOpParams();
+	bool operator== ( const CDepthOpParams & rhs ) const;
+	bool operator!= ( const CDepthOpParams & rhs ) const { return(! (*this == rhs)); }
 
 	void set_initial_values(const std::list<int> *sketches = NULL, const int cutting_tool_number = -1);
 	void write_values_to_config();
@@ -72,6 +74,10 @@ public:
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 	std::list<double> GetDepths() const;
+
+	bool operator== ( const CDepthOp & rhs ) const;
+	bool operator!= ( const CDepthOp & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent(HeeksObj *other) { return(*this != (*((CDepthOp *) other))); }
 };
 
 #endif

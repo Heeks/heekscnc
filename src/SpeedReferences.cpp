@@ -304,3 +304,9 @@ void CSpeedReferences::CopyFrom(const HeeksObj* object)
 }
 
 
+bool CSpeedReferences::operator==( const CSpeedReferences & rhs ) const
+{
+	if (m_estimate_when_possible != rhs.m_estimate_when_possible) return(false);
+
+	return(ObjList::operator==(rhs));
+}

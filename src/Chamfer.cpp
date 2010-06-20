@@ -455,3 +455,9 @@ void CChamfer::ReloadPointers()
 	CDepthOp::ReloadPointers();
 }
 
+bool CChamfer::operator== ( const CChamfer & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	return(CDepthOp::operator==(rhs));
+}

@@ -171,6 +171,9 @@ public:
 
 	const wxString ConfigScope(void)const{return _T("CuttingToolParam_");}
 	double ReasonableGradient( const eCuttingToolType type ) const;
+
+	bool operator== ( const CCuttingToolParams & rhs ) const;
+	bool operator!= ( const CCuttingToolParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 class CCuttingTool: public HeeksObj {
@@ -202,6 +205,11 @@ public:
     CCuttingTool & operator= ( const CCuttingTool & rhs );
 
 	~CCuttingTool();
+
+	bool operator== ( const CCuttingTool & rhs ) const;
+	bool operator!= ( const CCuttingTool & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CCuttingTool *)other)); }
 
 	 // HeeksObj's virtual functions
         int GetType()const{return CuttingToolType;}

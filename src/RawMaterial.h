@@ -38,5 +38,8 @@ public:
 
 	static wxString ConfigScope() { return(_T("RawMaterial")); }
 
+	bool operator== ( const CRawMaterial & rhs ) const;
+	bool operator!= ( const CRawMaterial & rhs ) const { return(! (*this == rhs)); }
+
 }; // End CRawMaterial class definition.
 

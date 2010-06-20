@@ -31,6 +31,9 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	wxString ConfigScope() const { return(_("CounterBore")); }
+
+	bool operator== ( const CCounterBoreParams & rhs ) const;
+	bool operator!= ( const CCounterBoreParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 /**
@@ -116,6 +119,10 @@ public:
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
 	std::vector<CNCPoint> FindAllLocations( std::list<int> *pToolNumbersReferenced, CMachineState *pMachineState );
 	static bool ValidType( const int object_type );
+
+	bool operator== ( const CCounterBore & rhs ) const;
+	bool operator!= ( const CCounterBore & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CCounterBore *)other)); }
 
 };
 

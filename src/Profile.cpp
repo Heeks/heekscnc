@@ -1177,3 +1177,26 @@ void CProfile::WriteToConfig()
 	CNCConfig config(CProfileParams::ConfigScope());
 	config.Write(_T("ProfileSplineDeviation"), max_deviation_for_spline_to_arc);
 }
+bool CProfileParams::operator==( const CProfileParams & rhs ) const
+{
+	if (m_auto_roll_on != rhs.m_auto_roll_on) return(false);
+	if (m_auto_roll_off != rhs.m_auto_roll_off) return(false);
+	if (m_auto_roll_radius != rhs.m_auto_roll_radius) return(false);
+	for (::size_t i=0; i<sizeof(m_roll_on_point)/sizeof(m_roll_on_point[0]); i++) if (m_roll_on_point[i] != rhs.m_roll_on_point[i]) return(false);
+	for (::size_t i=0; i<sizeof(m_roll_off_point)/sizeof(m_roll_off_point[0]); i++) if (m_roll_off_point[i] != rhs.m_roll_off_point[i]) return(false);
+	if (m_start_given != rhs.m_start_given) return(false);
+	if (m_end_given != rhs.m_end_given) return(false);
+	for (::size_t i=0; i<sizeof(m_start)/sizeof(m_start[0]); i++) if (m_start[i] != rhs.m_start[i]) return(false);
+	for (::size_t i=0; i<sizeof(m_end)/sizeof(m_end[0]); i++) if (m_end[i] != rhs.m_end[i]) return(false);
+	if (m_sort_sketches != rhs.m_sort_sketches) return(false);
+	if (m_offset_extra != rhs.m_offset_extra) return(false);
+
+	return(true);
+}
+
+bool CProfile::operator==( const CProfile & rhs ) const
+{
+	if (m_profile_params != rhs.m_profile_params) return(false);
+
+	return(CDepthOp::operator==(rhs));
+}

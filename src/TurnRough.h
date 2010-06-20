@@ -30,6 +30,9 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 
 	static wxString ConfigScope() { return(_T("TurnRough")); }
+
+	bool operator==( const CTurnRoughParams & rhs ) const;
+	bool operator!=( const CTurnRoughParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 class CTurnRough: public CSpeedOp{
@@ -46,6 +49,11 @@ public:
 	} // End constructor
 	CTurnRough( const CTurnRough & rhs );
 	CTurnRough & operator= ( const CTurnRough & rhs );
+
+	bool operator==( const CTurnRough & rhs ) const;
+	bool operator!=( const CTurnRough & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CTurnRough *)other)); }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return TurnRoughType;}

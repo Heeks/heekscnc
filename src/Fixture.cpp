@@ -744,6 +744,8 @@ void CFixture::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 bool CFixture::operator== ( const CFixture & rhs ) const
 {
+	// if (m_params != rhs.m_params) return(false);	// When we're importing data, we only want to compare on coordinate system number.
+
     return(m_coordinate_system_number == rhs.m_coordinate_system_number);
 }
 
@@ -752,4 +754,18 @@ bool CFixture::operator!= ( const CFixture & rhs ) const
     return(! (m_coordinate_system_number == rhs.m_coordinate_system_number));
 }
 
+bool CFixtureParams::operator== ( const CFixtureParams & rhs ) const
+{
+	if (m_yz_plane != rhs.m_yz_plane) return(false);
+	if (m_xz_plane != rhs.m_xz_plane) return(false);
+	if (m_xy_plane != rhs.m_xy_plane) return(false);
+	if (CNCPoint(m_pivot_point) != CNCPoint(rhs.m_pivot_point)) return(false);
+	if (m_safety_height_defined != rhs.m_safety_height_defined) return(false);
+	if (m_safety_height != rhs.m_safety_height) return(false);
+	if (m_touch_off_point_defined != rhs.m_touch_off_point_defined) return(false);
+	if (CNCPoint(m_touch_off_point) != CNCPoint(rhs.m_touch_off_point)) return(false);
+	if (m_touch_off_description != rhs.m_touch_off_description) return(false);
+
+	return(true);
+}
 

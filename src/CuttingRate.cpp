@@ -158,6 +158,15 @@ void CCuttingRate::ResetTitle()
 	OnEditString(l_ossTitle.str().c_str());
 } // End ResetTitle() method
 
+bool CCuttingRate::operator== ( const CCuttingRate & rhs ) const
+{
+	if (m_title != rhs.m_title) return(false);
+	if (m_brinell_hardness_of_raw_material != rhs.m_brinell_hardness_of_raw_material) return(false);
+	if (m_max_material_removal_rate != rhs.m_max_material_removal_rate) return(false);
+
+	// return(HeeksObj::operator==(rhs));
+	return(true);
+}
 
 
 
