@@ -1054,4 +1054,15 @@ CContour & CContour::operator= ( const CContour & rhs )
 	return(*this);
 }
 
+bool CContour::operator==( const CContour & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	return(CDepthOp::operator==(rhs));
+}
+
+bool CContour::IsDifferent(HeeksObj* other)
+{
+	return(! (*this == (*((CContour *) other))));
+}
 

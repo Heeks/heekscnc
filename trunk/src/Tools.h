@@ -28,6 +28,12 @@ public:
 	CTools( const CTools & rhs );
 	CTools & operator= ( const CTools & rhs );
 
+	bool operator==( const CTools & rhs ) const { return(ObjList::operator==(rhs)); }
+	bool operator!=( const CTools & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CTools *)other)); }
+	
+
 	const wxBitmap &GetIcon();
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProgramType;}
 	bool CanAdd(HeeksObj* object);

@@ -501,3 +501,19 @@ void CLocating::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 }
 
 
+bool CLocatingParams::operator== ( const CLocatingParams & rhs ) const
+{
+	if (m_standoff != rhs.m_standoff) return(false);
+	if (m_sort_locations != rhs.m_sort_locations) return(false);
+
+	return(true);
+}
+
+bool CLocating::operator== ( const CLocating & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	return(COp::operator==(rhs));
+}
+
+

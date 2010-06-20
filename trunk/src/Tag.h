@@ -17,6 +17,11 @@ public:
 	CTag();
 	CTag( const CTag & rhs );
 	CTag & operator= ( const CTag & rhs );
+	
+	bool operator==( const CTag & rhs ) const;
+	bool operator!=( const CTag & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CTag *)other)); }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return TagType;}

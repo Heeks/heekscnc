@@ -1803,3 +1803,40 @@ void CCuttingTool::ImportProbeCalibrationData( const wxString & probed_points_xm
     return(_T(""));
 } // End GuageNumberRepresentation() method
 
+
+bool CCuttingToolParams::operator==( const CCuttingToolParams & rhs ) const
+{
+	if (m_material != rhs.m_material) return(false);
+	if (m_diameter != rhs.m_diameter) return(false);
+	if (m_tool_length_offset != rhs.m_tool_length_offset) return(false);
+	if (m_x_offset != rhs.m_x_offset) return(false);
+	if (m_front_angle != rhs.m_front_angle) return(false);
+	if (m_tool_angle != rhs.m_tool_angle) return(false);
+	if (m_back_angle != rhs.m_back_angle) return(false);
+	if (m_orientation != rhs.m_orientation) return(false);
+	if (m_corner_radius != rhs.m_corner_radius) return(false);
+	if (m_flat_radius != rhs.m_flat_radius) return(false);
+	if (m_cutting_edge_angle != rhs.m_cutting_edge_angle) return(false);
+	if (m_cutting_edge_height != rhs.m_cutting_edge_height) return(false);
+	if (m_type != rhs.m_type) return(false);
+	if (m_max_advance_per_revolution != rhs.m_max_advance_per_revolution) return(false);
+	if (m_automatically_generate_title != rhs.m_automatically_generate_title) return(false);
+	if (m_probe_offset_x != rhs.m_probe_offset_x) return(false);
+	if (m_probe_offset_y != rhs.m_probe_offset_y) return(false);
+
+	return(true);
+}
+
+bool CCuttingTool::operator==( const CCuttingTool & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+	if (m_title != rhs.m_title) return(false);
+	if (m_tool_number != rhs.m_tool_number) return(false);
+	// m_pToolSolid;
+
+	// return(HeeksObj::operator==(rhs));
+	return(true);
+}
+
+
+

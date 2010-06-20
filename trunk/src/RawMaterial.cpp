@@ -161,4 +161,11 @@ Python CRawMaterial::AppendTextToProgram()
 	return(python);
 }
 
+bool CRawMaterial::operator==( const CRawMaterial & rhs ) const
+{
+	if (m_material_name != rhs.m_material_name) return(false);
+	if (m_brinell_hardness != rhs.m_brinell_hardness) return(false);
+
+	return(true);
+}
 

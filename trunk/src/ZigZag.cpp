@@ -450,3 +450,22 @@ void CZigZag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	CDepthOp::GetTools( t_list, p );
 }
+bool CZigZagParams::operator==( const CZigZagParams & rhs ) const
+{
+	if (m_box != rhs.m_box) return(false);
+	if (m_step_over != rhs.m_step_over) return(false);
+	if (m_direction != rhs.m_direction) return(false);
+	if (m_material_allowance != rhs.m_material_allowance) return(false);
+	if (m_style != rhs.m_style) return(false);
+
+	return(true);
+}
+
+bool CZigZag::operator==( const CZigZag & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	// std::list<int> m_solids;
+
+	return(CDepthOp::operator==(rhs));
+}

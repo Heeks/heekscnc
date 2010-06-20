@@ -47,6 +47,10 @@ public:
 	void ReadBaseXML(TiXmlElement* element);
 
 	static wxString ConfigScope() { return(_T("Machine")); }
+
+	bool operator==( const CMachine & rhs ) const;
+	bool operator!=( const CMachine & rhs ) const { return(! (*this == rhs)); }
+
 };
 
 
@@ -83,6 +87,11 @@ public:
 	CProgram( const CProgram & rhs );
 	CProgram & operator= ( const CProgram & rhs );
 	~CProgram();
+
+	bool operator== ( const CProgram & rhs ) const;
+	bool operator!= ( const CProgram & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CProgram *)other)); }
 
 	wxString GetOutputFileName() const;
 

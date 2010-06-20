@@ -61,6 +61,10 @@ public:
 
         bool CanEditString(void)const{return true;}
         void OnEditString(const wxChar* str);
+
+	bool operator== ( const CCuttingRate & rhs ) const;
+	bool operator!= ( const CCuttingRate & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CCuttingRate *)other)); }
 }; // End CCuttingRate class definition.
 
 

@@ -13,6 +13,11 @@ public:
 	CTags & operator= ( const CTags & rhs );
 	CTags( const CTags & rhs );
 
+	bool operator==( const CTags & rhs ) const { return(ObjList::operator==(rhs)); }
+	bool operator!=( const CTags & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CTags *)other)); }
+
 	// HeeksObj's virtual functions
 	bool OneOfAKind(){return true;} // only one in each profile operation
 	int GetType()const{return TagsType;}

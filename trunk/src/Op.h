@@ -63,6 +63,10 @@ public:
 	// than the profile operation.
 	// The list of strings provides a description of what was changed.
 	virtual std::list<wxString> DesignRulesAdjustment(const bool apply_changes) { std::list<wxString> empty; return(empty); }
+
+	bool operator==(const COp & rhs) const;
+	bool operator!=(const COp & rhs) const { return(! (*this == rhs)); }
+	bool IsDifferent(HeeksObj *other) { return( *this != (*((COp *)other)) ); }
 };
 
 #endif

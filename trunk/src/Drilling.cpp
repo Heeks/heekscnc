@@ -902,3 +902,21 @@ void CDrilling::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 }
 
 
+bool CDrillingParams::operator==( const CDrillingParams & rhs) const
+{
+	if (m_standoff != rhs.m_standoff) return(false);
+	if (m_dwell != rhs.m_dwell) return(false);
+	if (m_depth != rhs.m_depth) return(false);
+	if (m_peck_depth != rhs.m_peck_depth) return(false);
+	if (m_sort_drilling_locations != rhs.m_sort_drilling_locations) return(false);
+
+	return(true);
+}
+
+
+bool CDrilling::operator==( const CDrilling & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	return(CSpeedOp::operator==(rhs));
+}

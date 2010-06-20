@@ -371,3 +371,22 @@ void CTurnRough::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
     CSpeedOp::GetTools( t_list, p );
 }
+bool CTurnRoughParams::operator==( const CTurnRoughParams & rhs ) const
+{
+	if (m_outside != rhs.m_outside) return(false);
+	if (m_front != rhs.m_front) return(false);
+	if (m_facing != rhs.m_facing) return(false);
+	if (m_clearance != rhs.m_clearance) return(false);
+
+	return(true);
+}
+
+bool CTurnRough::operator==( const CTurnRough & rhs ) const
+{
+	if (m_turn_rough_params != rhs.m_turn_rough_params) return(false);
+	
+	return(CSpeedOp::operator==(rhs));
+}
+
+
+

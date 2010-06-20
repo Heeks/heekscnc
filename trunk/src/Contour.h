@@ -42,6 +42,16 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	const wxString ConfigPrefix(void)const{return _T("Contour");}
+
+	bool operator== ( const CContourParams & rhs ) const
+	{
+		return(m_tool_on_side == rhs.m_tool_on_side);
+	}
+
+	bool operator!= ( const CContourParams & rhs ) const
+	{
+		return(! (*this == rhs));	// Call the equivalence operator.
+	}
 };
 
 /**
@@ -113,6 +123,10 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	bool CanAdd(HeeksObj *object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+
+	bool operator== ( const CContour & rhs ) const;
+	bool operator!= ( const CContour & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent(HeeksObj* other);
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.

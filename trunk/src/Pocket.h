@@ -25,6 +25,9 @@ public:
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 	static wxString ConfigScope() { return(_T("Pocket")); }
+
+	bool operator== ( const CPocketParams & rhs ) const;
+	bool operator!= ( const CPocketParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 class CPocket: public CDepthOp{
@@ -40,6 +43,9 @@ public:
 	CPocket(const std::list<HeeksObj *> &sketches, const int cutting_tool_number );
 	CPocket( const CPocket & rhs );
 	CPocket & operator= ( const CPocket & rhs );
+
+	bool operator== ( const CPocket & rhs ) const;
+	bool operator!= ( const CPocket & rhs ) const { return(! (*this == rhs)); }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return PocketType;}

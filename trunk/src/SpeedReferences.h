@@ -27,6 +27,12 @@ public:
                 m_estimate_when_possible = (value != 0);
 	}
 
+	bool operator==( const CSpeedReferences & rhs ) const;
+	bool operator!=( const CSpeedReferences & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CSpeedReferences *)other)); }
+
+
 	// HeeksObj's virtual functions
 	bool OneOfAKind(){return true;}
 	int GetType()const{return SpeedReferencesType;}
