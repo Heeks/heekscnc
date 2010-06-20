@@ -54,6 +54,9 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 
 	const wxString ConfigScope(void)const{return _T("Adaptive");}
+
+	bool operator==( const CAdaptiveParams & rhs ) const;
+	bool operator!=( const CAdaptiveParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 class CAdaptive: public COp{
@@ -97,6 +100,11 @@ public:
 
 	CAdaptive( const CAdaptive & rhs );
 	CAdaptive & operator= ( const CAdaptive & rhs );
+
+	bool operator==( const CAdaptive & rhs ) const;
+	bool operator!=( const CAdaptive & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CAdaptive *)other)); }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return AdaptiveType;}

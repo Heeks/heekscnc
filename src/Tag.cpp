@@ -139,3 +139,12 @@ void CTag::ReadDefaultValues()
 	config.Read(_T("Height"), &m_height);
 }
 
+bool CTag::operator==( const CTag & rhs ) const
+{
+	for (::size_t i=0; i<sizeof(m_pos)/sizeof(m_pos[0]); i++) if (m_pos[i] != rhs.m_pos[i]) return(false);
+	if (m_width != rhs.m_width) return(false);
+	if (m_angle != rhs.m_width) return(false);
+	if (m_height != rhs.m_width) return(false);
+	// return(HeeksObj::operator==(rhs));
+	return(true);
+}

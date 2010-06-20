@@ -34,6 +34,9 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	const wxString ConfigScope(void)const{return _T("Chamfer");}
+
+	bool operator== ( const CChamferParams & rhs ) const { return( m_chamfer_width == rhs.m_chamfer_width ); }
+	bool operator!= ( const CChamferParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 /**
@@ -137,6 +140,10 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
+
+	bool operator== ( const CChamfer & rhs ) const;
+	bool operator!= ( const CChamfer & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent( HeeksObj *other) { return( *this != (*(CChamfer *)other) ); }
 };
 
 

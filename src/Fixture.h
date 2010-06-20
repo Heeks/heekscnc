@@ -60,6 +60,9 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	wxString ConfigScope() const { return(_("Fixture")); }
+
+	bool operator== ( const CFixtureParams & rhs ) const;
+	bool operator!= ( const CFixtureParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 /**

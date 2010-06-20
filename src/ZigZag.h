@@ -20,6 +20,9 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 
 	const wxString ConfigScope(void)const{return _T("ZigZag");}
+
+	bool operator==( const CZigZagParams & rhs ) const;
+	bool operator!=( const CZigZagParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 class CZigZag: public CDepthOp{
@@ -32,6 +35,11 @@ public:
 	CZigZag(const std::list<int> &solids, const int cutting_tool_number = -1);
 	CZigZag( const CZigZag & rhs );
 	CZigZag & operator= ( const CZigZag & rhs );
+
+	bool operator==( const CZigZag & rhs ) const;
+	bool operator!=( const CZigZag & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CZigZag *)other)); }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ZigZagType;}

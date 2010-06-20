@@ -13,6 +13,10 @@ public:
 	COperations & operator= ( const COperations & rhs );
 	COperations( const COperations & rhs );
 
+	bool operator==( const COperations & rhs ) const { return(ObjList::operator==(rhs)); }
+	bool operator!=( const COperations & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(COperations *)other)); }
+
 	// HeeksObj's virtual functions
 	void CopyFrom(const HeeksObj *object);
 	bool OneOfAKind(){return true;}

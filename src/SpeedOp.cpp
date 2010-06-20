@@ -353,4 +353,22 @@ void CSpeedOp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
     COp::GetTools(t_list, p);
 }
 
+bool CSpeedOpParams::operator== ( const CSpeedOpParams & rhs ) const
+{
+	if (m_horizontal_feed_rate != rhs.m_horizontal_feed_rate) return(false);
+	if (m_vertical_feed_rate != rhs.m_vertical_feed_rate) return(false);
+	if (m_spindle_speed != rhs.m_spindle_speed) return(false);
+
+	return(true);
+}
+
+bool CSpeedOp::operator==(const CSpeedOp & rhs) const
+{
+	if (m_speed_op_params != rhs.m_speed_op_params) return(false);
+
+	return(COp::operator==(rhs));
+}
+
+
+
 

@@ -379,3 +379,22 @@ std::list<double> CDepthOp::GetDepths() const
     return(depths);
 }
 
+
+
+bool CDepthOpParams::operator== ( const CDepthOpParams & rhs ) const
+{
+	if (m_clearance_height != rhs.m_clearance_height) return(false);
+	if (m_start_depth != rhs.m_start_depth) return(false);
+	if (m_step_down != rhs.m_step_down) return(false);
+	if (m_final_depth != rhs.m_final_depth) return(false);
+	if (m_rapid_down_to_height != rhs.m_rapid_down_to_height) return(false);
+
+	return(true);
+}
+
+bool CDepthOp::operator== ( const CDepthOp & rhs ) const
+{
+	if (m_depth_op_params != rhs.m_depth_op_params) return(false);
+	return(CSpeedOp::operator==(rhs));
+}
+

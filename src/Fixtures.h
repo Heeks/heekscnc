@@ -30,4 +30,8 @@ public:
 	CFixture *Find( const CFixture::eCoordinateSystemNumber_t coordinate_system_number );
 	int GetNextFixture();
 
+	bool operator== ( const CFixtures & rhs ) const { return(ObjList::operator==(rhs)); }
+	bool operator!= ( const CFixtures & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent( HeeksObj *other ) { return( *this != (*(CFixtures *)other) ); }
+
 };

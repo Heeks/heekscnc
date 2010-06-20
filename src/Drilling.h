@@ -36,6 +36,9 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	const wxString ConfigScope(void)const{return _T("Drilling");}
+
+	bool operator== ( const CDrillingParams & rhs ) const;
+	bool operator!= ( const CDrillingParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 /**
@@ -121,6 +124,10 @@ public:
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	static bool ValidType( const int object_type );
+
+	bool operator==( const CDrilling & rhs ) const;
+	bool operator!=( const CDrilling & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent( HeeksObj *other ) { return( *this != (*(CDrilling *)other) ); }
 };
 
 

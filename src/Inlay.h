@@ -60,6 +60,9 @@ public:
 	eAxis_t         m_mirror_axis;
 	bool			m_female_before_male_fixtures;
 	double          m_min_cornering_angle;
+
+	bool operator== ( const CInlayParams & rhs ) const;
+	bool operator!= ( const CInlayParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 /**
@@ -247,6 +250,11 @@ public:
 
 	CInlay( const CInlay & rhs );
 	CInlay & operator= ( const CInlay & rhs );
+
+	bool operator==( const CInlay & rhs ) const;
+	bool operator!= ( const CInlay & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CInlay *)other)); }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return InlayType;}

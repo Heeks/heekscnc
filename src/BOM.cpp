@@ -501,3 +501,26 @@ void CBOM::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	HeeksObj::GetTools(t_list, p);
 }
+bool NCRect::operator==( const NCRect & rhs ) const
+{
+	if (m_x != rhs.m_x) return(false);
+	if (m_y != rhs.m_y) return(false);
+	if (m_width != rhs.m_width) return(false);
+	if (m_height != rhs.m_height) return(false);
+
+	return(true);
+}
+
+bool CBOM::operator==( const CBOM & rhs ) const
+{
+	if (m_max_levels != rhs.m_max_levels) return(false);
+	if (m_gap != rhs.m_gap) return(false);
+
+	if (rects.size() != rhs.rects.size())
+	{
+		return(false);
+	}
+
+	return(true);
+}
+

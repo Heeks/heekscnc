@@ -1869,5 +1869,23 @@ CInlay & CInlay::operator= ( const CInlay & rhs )
 	return(*this);
 }
 
+bool CInlayParams::operator== ( const CInlayParams & rhs ) const
+{
+	if (m_border_width != rhs.m_border_width) return(false);
+	if (m_clearance_tool != rhs.m_clearance_tool) return(false);
+	if (m_pass != rhs.m_pass) return(false);
+	if (m_mirror_axis != rhs.m_mirror_axis) return(false);
+	if (m_female_before_male_fixtures != rhs.m_female_before_male_fixtures) return(false);
+	if (m_min_cornering_angle != rhs.m_min_cornering_angle) return(false);
 
+	return(true);
+
+}
+
+bool CInlay::operator== ( const CInlay & rhs ) const
+{
+	if (m_params != rhs.m_params) return(false);
+
+	return(CDepthOp::operator==(rhs));
+}
 

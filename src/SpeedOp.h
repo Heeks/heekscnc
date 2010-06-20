@@ -21,6 +21,8 @@ public:
 	double m_spindle_speed;
 
 	CSpeedOpParams();
+	bool operator== ( const CSpeedOpParams & rhs ) const;
+	bool operator!= ( const CSpeedOpParams & rhs ) const { return(! (*this == rhs)); }
 
 	void GetProperties(CSpeedOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -63,6 +65,10 @@ public:
 	void ReloadPointers() { COp::ReloadPointers(); }
 
 	static wxString ConfigScope() { return(_T("SpeedOp")); }
+
+	bool operator==( const CSpeedOp & rhs ) const;
+	bool operator!=( const CSpeedOp & rhs ) const { return(! (*this == rhs)); }
+	bool IsDifferent(HeeksObj *other) { return( *this != (*((CSpeedOp *) other))); }
 };
 
 #endif

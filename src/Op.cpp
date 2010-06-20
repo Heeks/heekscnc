@@ -370,4 +370,15 @@ void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
     return(fixtures);
 } // End PrivateFixtures() method
 
+bool COp::operator==(const COp & rhs) const
+{
+	if (m_comment != rhs.m_comment) return(false);
+	if (m_active != rhs.m_active) return(false);
+	if (m_title != rhs.m_title) return(false);
+	if (m_execution_order != rhs.m_execution_order) return(false);
+	if (m_cutting_tool_number != rhs.m_cutting_tool_number) return(false);
+	if (m_operation_type != rhs.m_operation_type) return(false);
+
+	return(ObjList::operator==(rhs));
+}
 

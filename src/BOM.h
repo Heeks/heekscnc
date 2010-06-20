@@ -25,6 +25,9 @@ public:
 			return true;
 		return false;
 	}
+
+	bool operator==( const NCRect & rhs ) const;
+	bool operator!=( const NCRect & rhs ) const { return(! (*this == rhs)); }
 };
 
 
@@ -38,6 +41,11 @@ public:
 
 	CBOM(wxString path);
 	~CBOM();
+
+	bool operator==(const CBOM & rhs) const;
+	bool operator!=(const CBOM & rhs) const { return(! (*this == rhs)); }
+
+	bool IsDifferent(HeeksObj *other) { return(*this != (*(CBOM *)other)); }
 
 	void Load(wxString path);
 	void Pack(double width, double height, int gap);

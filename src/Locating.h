@@ -33,6 +33,9 @@ public:
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
 	wxString ConfigScope() const { return(_("Locating")); }
+
+	bool operator== ( const CLocatingParams & rhs ) const;
+	bool operator!= ( const CLocatingParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 /**
@@ -80,6 +83,9 @@ public:
 
 	CLocating( const CLocating & rhs );
 	CLocating & operator= ( const CLocating & rhs );
+
+	bool operator==(const CLocating & rhs ) const;
+	bool operator!=(const CLocating & rhs ) const { return(! (*this == rhs)); }
 
 	// HeeksObj's virtual functions
 	int GetType()const{return LocatingType;}

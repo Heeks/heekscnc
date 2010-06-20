@@ -1018,3 +1018,30 @@ void CProgram::ChangeUnits( const double units )
     Tools()->OnChangeUnits(units);
     Operations()->OnChangeUnits(units);
 }
+bool CProgram::operator==( const CProgram & rhs ) const
+{
+	if (m_raw_material != rhs.m_raw_material) return(false);
+	if (m_machine != rhs.m_machine) return(false);
+	if (m_output_file != rhs.m_output_file) return(false);
+	if (m_output_file_name_follows_data_file_name != rhs.m_output_file_name_follows_data_file_name) return(false);
+	if (m_script_edited != rhs.m_script_edited) return(false);
+	if (m_units != rhs.m_units) return(false);
+
+	return(ObjList::operator==(rhs));
+}
+
+
+bool CMachine::operator==( const CMachine & rhs ) const
+{
+	if (configuration_file_name != rhs.configuration_file_name) return(false);
+	if (file_name != rhs.file_name) return(false);
+	if (description != rhs.description) return(false);
+	if (m_max_spindle_speed != rhs.m_max_spindle_speed) return(false);
+	if (m_safety_height_defined != rhs.m_safety_height_defined) return(false);
+	if (m_safety_height != rhs.m_safety_height) return(false);
+
+	return(true);
+}
+
+
+

@@ -52,6 +52,9 @@ public:
 	void ReadFromXMLElement(TiXmlElement* pElem);
 
 	static wxString ConfigScope() { return(_T("Profile")); }
+
+	bool operator==(const CProfileParams & rhs ) const;
+	bool operator!=(const CProfileParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 class CProfile: public CDepthOp{
@@ -70,6 +73,11 @@ public:
 
 	CProfile( const CProfile & rhs );
 	CProfile & operator= ( const CProfile & rhs );
+
+	bool operator==( const CProfile & rhs ) const;
+	bool operator!=( const CProfile & rhs ) const { return(! (*this == rhs)); }
+
+	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CProfile *)other)); }
 
 
 	// HeeksObj's virtual functions
