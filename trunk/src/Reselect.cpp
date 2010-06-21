@@ -6,6 +6,7 @@
 #include "Reselect.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyInt.h"
+#include "interface/ObjList.h"
 
 static bool GetSketches(std::list<int>& sketches )
 {
@@ -32,8 +33,12 @@ void ReselectSketches::Run()
 	heeksCAD->PickObjects(_("Select Sketches"), MARKING_FILTER_SKETCH);
 	if(GetSketches( sketches ))
 	{
+		heeksCAD->CreateUndoPoint();
 		m_sketches->clear();
 		*m_sketches = sketches;
+		((ObjList*)m_object)->Clear();
+		m_object->ReloadPointers();
+		heeksCAD->Changed();
 	}
 	else
 	{
