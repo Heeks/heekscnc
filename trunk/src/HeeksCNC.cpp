@@ -1426,6 +1426,10 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	CInlay::GetOptions(&(machining_options->m_list));
 
 	list->push_back(machining_options);
+
+	PropertyList* excellon_options = new PropertyList(_("Excellon options"));
+	Excellon::GetOptions(&(excellon_options->m_list));
+	list->push_back(excellon_options);
 }
 
 void CHeeksCNCApp::OnFrameDelete()
