@@ -18,6 +18,7 @@ for isolation milling.
 #include "Drilling.h"
 #include "CNCPoint.h"
 #include "CuttingTool.h"
+#include "interface/Property.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Lin.hxx>
@@ -77,6 +78,10 @@ class Excellon
 
 		typedef std::map< CNCPoint, CDrilling::Symbol_t > Points_t;
 		Points_t	m_existing_points;
+
+public:
+		static void GetOptions(std::list<Property *> *list);
+		static bool s_allow_dummy_tool_definitions;
 };
 
 
