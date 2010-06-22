@@ -29,6 +29,8 @@
 
 extern CHeeksCADInterface* heeksCAD;
 
+/* static */ bool Excellon::s_allow_dummy_tool_definitions = true;
+
 Excellon::Excellon()
 {
 	m_units = 25.4;	// inches.
@@ -765,28 +767,36 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		} // End if - else
 	} // End while
 
-    if ((excellon_tool_number > 0) && (tool_diameter > 0.0))
+    if (excellon_tool_number > 0)
 	{
 		// We either want to find an existing drill bit of this size or we need
 		// to define a new one.
 
-        bool found = false;
+		if ((tool_diameter <= 0.0) && s_allow_dummy_tool_definitions)
+		{
+			// The file doesn't define the tool's diameter.  Just convert the tool number into a value in thousanths
+			// of an inch and let it through.
+
+			tool_diameter = (excellon_tool_number * 0.001);
+		}
+
+		bool found = false;
 		for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild(); tool != NULL; tool = theApp.m_program->Tools()->GetNextChild() )
 		{
 			// We're looking for a tool whose diameter is tool_diameter.
 			CCuttingTool *pCuttingTool = (CCuttingTool *)tool;
-			if ((pCuttingTool->m_params.m_diameter - tool_diameter) < heeksCAD->GetTolerance())
+			if (fabs(pCuttingTool->m_params.m_diameter - tool_diameter) < heeksCAD->GetTolerance())
 			{
 				// We've found it.
 				// Keep a map of the tool numbers found in the Excellon file to those in our tool table.
-                m_tool_table_map.insert( std::make_pair( excellon_tool_number, pCuttingTool->m_tool_number ));
-                m_active_cutting_tool_number = pCuttingTool->m_tool_number;	// Use our internal tool number
-                found = true;
-                break;
+				m_tool_table_map.insert( std::make_pair( excellon_tool_number, pCuttingTool->m_tool_number ));
+				m_active_cutting_tool_number = pCuttingTool->m_tool_number;	// Use our internal tool number
+				found = true;
+				break;
 			} // End if - then
 		} // End for
 
-        if (! found)
+        if ((! found) && (tool_diameter > 0.0))
         {
             // We didn't find an existing tool with the right diameter.  Add one now.
             int id = heeksCAD->GetNextID(CuttingToolType);
@@ -862,5 +872,22 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 	return(true);
 } // End ReadDataBlock() method
 
+
+
+static void on_set_allow_dummy_tool_definitions(int choice, HeeksObj *unused)
+{
+	(void) unused;	// Avoid the compiler warning.
+	Excellon::s_allow_dummy_tool_definitions = (choice != 0);
+}
+
+
+/* static */ void Excellon::GetOptions(std::list<Property *> *list)
+{
+	std::list<wxString> choices;
+
+	choices.push_back(_("False"));
+	choices.push_back(_("True"));
+	list->push_back(new PropertyChoice(_("allow dummy tool definitions"), choices, (int) (s_allow_dummy_tool_definitions?1:0), NULL, on_set_allow_dummy_tool_definitions));
+} // End GetOptions() method
 
 
