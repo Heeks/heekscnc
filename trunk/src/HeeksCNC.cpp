@@ -206,6 +206,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 			} // End if - then
 		} // End for
 
+		heeksCAD->CreateUndoPoint();
 		CProfile *new_object = new CProfile(sketches, milling_cutting_tool_number);
 		new_object->AddMissingChildren();
 		theApp.m_program->Operations()->Add(new_object,NULL);
@@ -226,6 +227,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 				heeksCAD->Mark(new_object);
 			} // End if - then
 		} // End for
+		heeksCAD->Changed();
 	}
 }
 
@@ -235,10 +237,12 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 	std::list<int> sketches;
 	if(GetSketches(sketches, cutting_tools))
 	{
+		heeksCAD->CreateUndoPoint();
 		CPocket *new_object = new CPocket(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
 		theApp.m_program->Operations()->Add(new_object, NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
+		heeksCAD->Changed();
 	}
 }
 
@@ -270,10 +274,12 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
+	heeksCAD->CreateUndoPoint();
 	CZigZag *new_object = new CZigZag(solids);
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
@@ -321,6 +327,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 #endif
+	heeksCAD->CreateUndoPoint();
 	CAdaptive *new_object = new CAdaptive(	solids,
 						sketches,
 						cutting_tool_number,
@@ -329,6 +336,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 
@@ -386,10 +394,12 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
+	heeksCAD->CreateUndoPoint();
 	CDrilling *new_object = new CDrilling( symbols, cutting_tool_number, depth );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 
@@ -420,10 +430,12 @@ static void NewChamferOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
+	heeksCAD->CreateUndoPoint();
 	CChamfer *new_object = new CChamfer( symbols, cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 
@@ -452,10 +464,12 @@ static void NewLocatingOpMenuCallback(wxCommandEvent &event)
         return;
     }
 
+	heeksCAD->CreateUndoPoint();
 	CLocating *new_object = new CLocating( symbols );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void NewProbe_Centre_MenuCallback(wxCommandEvent &event)
@@ -477,10 +491,12 @@ static void NewProbe_Centre_MenuCallback(wxCommandEvent &event)
 		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
 	} // End if - then
 
+	heeksCAD->CreateUndoPoint();
 	CProbe_Centre *new_object = new CProbe_Centre( cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void NewProbe_Grid_MenuCallback(wxCommandEvent &event)
@@ -502,10 +518,12 @@ static void NewProbe_Grid_MenuCallback(wxCommandEvent &event)
 		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
 	} // End if - then
 
+	heeksCAD->CreateUndoPoint();
 	CProbe_Grid *new_object = new CProbe_Grid( cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 
@@ -528,10 +546,12 @@ static void NewProbe_Edge_MenuCallback(wxCommandEvent &event)
 		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
 	} // End if - then
 
+	heeksCAD->CreateUndoPoint();
 	CProbe_Edge *new_object = new CProbe_Edge( cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 
@@ -541,10 +561,12 @@ static void NewFixtureMenuCallback(wxCommandEvent &event)
 	{
 		CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(theApp.m_program->Fixtures()->GetNextFixture());
 
+		heeksCAD->CreateUndoPoint();
 		CFixture *new_object = new CFixture( NULL, coordinate_system_number, theApp.m_program->m_machine.m_safety_height_defined, theApp.m_program->m_machine.m_safety_height );
 		theApp.m_program->Fixtures()->Add(new_object, NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
+		heeksCAD->Changed();
 	} // End if - then
 	else
 	{
@@ -646,10 +668,12 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
+	heeksCAD->CreateUndoPoint();
 	CCounterBore *new_object = new CCounterBore( symbols, cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void NewContourOpMenuCallback(wxCommandEvent &event)
@@ -675,10 +699,12 @@ static void NewContourOpMenuCallback(wxCommandEvent &event)
 		} // End if - else
 	} // End for
 
+	heeksCAD->CreateUndoPoint();
 	CContour *new_object = new CContour( symbols, cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 
@@ -703,28 +729,34 @@ static void NewInlayOpMenuCallback(wxCommandEvent &event)
 		} // End if - else
 	} // End for
 
+	heeksCAD->CreateUndoPoint();
 	CInlay *new_object = new CInlay( symbols, cutting_tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 
 
 static void NewSpeedReferenceMenuCallback(wxCommandEvent &event)
 {
+	heeksCAD->CreateUndoPoint();
 	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), int(CCuttingToolParams::eCarbide), 0.0, 0.0);
 	theApp.m_program->SpeedReferences()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void NewCuttingRateMenuCallback(wxCommandEvent &event)
 {
+	heeksCAD->CreateUndoPoint();
 	CCuttingRate *new_object = new CCuttingRate(0.0, 0.0);
 	theApp.m_program->SpeedReferences()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
@@ -733,28 +765,34 @@ static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
 	std::list<int> sketches;
 	if(GetSketches(sketches, cutting_tools))
 	{
+		heeksCAD->CreateUndoPoint();
 		CTurnRough *new_object = new CTurnRough(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
 		theApp.m_program->Operations()->Add(new_object, NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
+		heeksCAD->Changed();
 	}
 }
 
 static void NewScriptOpMenuCallback(wxCommandEvent &event)
 {
+	heeksCAD->CreateUndoPoint();
 	CScriptOp *new_object = new CScriptOp();
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void AddNewCuttingTool(CCuttingToolParams::eCuttingToolType type)
 {
 	// Add a new cutting tool.
+	heeksCAD->CreateUndoPoint();
 	CCuttingTool *new_object = new CCuttingTool(NULL, type, heeksCAD->GetNextID(CuttingToolType));
 	theApp.m_program->Tools()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
 }
 
 static void NewDrillMenuCallback(wxCommandEvent &event)
