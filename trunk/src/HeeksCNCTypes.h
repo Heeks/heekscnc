@@ -32,5 +32,6 @@ enum{
 	ProbeGridType,
 	TagsType,
 	TagType,
+	ScriptOpType,
 	HeeksCNCMaximumType
 };

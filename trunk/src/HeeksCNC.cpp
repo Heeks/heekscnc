@@ -51,6 +51,7 @@
 #include "Inlay.h"
 #include "Tags.h"
 #include "Tag.h"
+#include "ScriptOp.h"
 
 #include <sstream>
 
@@ -739,6 +740,14 @@ static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
 	}
 }
 
+static void NewScriptOpMenuCallback(wxCommandEvent &event)
+{
+	CScriptOp *new_object = new CScriptOp();
+	theApp.m_program->Operations()->Add(new_object, NULL);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+}
+
 static void AddNewCuttingTool(CCuttingToolParams::eCuttingToolType type)
 {
 	// Add a new cutting tool.
@@ -952,6 +961,7 @@ static CCallbackTool new_rough_turn_operation(_("New Rough Turning Operation..."
 static CCallbackTool new_chamfer_operation(_("New Chamfer Operation..."), _T("opchamfer"), NewChamferOpMenuCallback);
 static CCallbackTool new_contour_operation(_("New Contour Operation..."), _T("opcontour"), NewContourOpMenuCallback);
 static CCallbackTool new_inlay_operation(_("New Inlay Operation..."), _T("opinlay"), NewInlayOpMenuCallback);
+static CCallbackTool new_script_operation(_("New Script Operation..."), _T("scriptop"), NewScriptOpMenuCallback);
 
 void CHeeksCNCApp::GetNewOperationTools(std::list<Tool*>* t_list)
 {
@@ -965,6 +975,7 @@ void CHeeksCNCApp::GetNewOperationTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_chamfer_operation);
 	t_list->push_back(&new_contour_operation);
 	t_list->push_back(&new_inlay_operation);
+	t_list->push_back(&new_script_operation);
 }
 
 static void AddToolBars()
@@ -989,6 +1000,7 @@ static void AddToolBars()
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
 	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
 	heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
+	heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
 	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("drill")), _("New Cutting Tool Definition..."), NewDrillMenuCallback);
@@ -1206,6 +1218,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Inlay", CInlay::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tags", CTags::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tag", CTag::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("ScriptOp", CScriptOp::ReadFromXMLElement);
 
 #ifdef WIN32
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=147;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=0;pos=448;prop=100000;bestw=116;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=485;floaty=209;floatw=143;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=575;prop=100000;bestw=89;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=479;floaty=236;floatw=116;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=205|dock_size(1,10,0)=33|")));

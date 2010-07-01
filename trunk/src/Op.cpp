@@ -294,6 +294,7 @@ bool COp::IsAnOperation(int object_type)
 		case ChamferType:
 		case ContourType:
 		case InlayType:
+		case ScriptOpType:
 			return true;
 		default:
 			return false;
