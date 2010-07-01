@@ -27,8 +27,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8284271"
-     inkscape:cx="299.31094"
-     inkscape:cy="769.44739"
+     inkscape:cx="364.62318"
+     inkscape:cy="871.75757"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -10756,6 +10756,26 @@
        y1="244.34225"
        x2="33.810226"
        y2="270.39337" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3200"
+       id="linearGradient4309"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.5002539,0,0,1.3998036,-15.027927,-32.933606)"
+       x1="109.5"
+       y1="69.862183"
+       x2="130.5"
+       y2="69.862183" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3200"
+       id="linearGradient4314"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.5007908,0,0,1.1996019,275.60967,23.545031)"
+       x1="109.5"
+       y1="69.862183"
+       x2="130.5"
+       y2="69.862183" />
   </defs>
   <metadata
      id="metadata7">
@@ -12307,6 +12327,26 @@
          id="path10210"
          d="M 330,392.36218 L 340,402.36218"
          style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g4320"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\icons\scriptop.png"
+       inkscape:export-xdpi="47.80209"
+       inkscape:export-ydpi="47.80209">
+      <path
+         style="fill:url(#linearGradient4314);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.13417718;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 440.69666,122.34687 L 470.71248,122.34687 L 470.71248,92.356814 L 440.69666,92.356814 L 440.69666,122.34687 z"
+         id="path4302" />
+      <text
+         id="text4316"
+         y="97.362183"
+         x="440"
+         style="font-size:5.76965952px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="97.362183"
+           x="440"
+           id="tspan4318"
+           sodipodi:role="line">rapid(0,0)</tspan></text>
     </g>
   </g>
 </svg>

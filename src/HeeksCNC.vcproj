@@ -553,6 +553,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\HeeksCAD\interface\ObjectCanvas.cpp"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\interface\ObjList.cpp"
 			>
 		</File>
@@ -738,6 +742,14 @@
 		</File>
 		<File
 			RelativePath=".\Reselect.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ScriptOp.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ScriptOp.h"
 			>
 		</File>
 		<File
