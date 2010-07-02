@@ -220,7 +220,6 @@ PropertyDouble.o: ${HEEKSCADPATH}/interface/PropertyDouble.cpp \
 
 PropertyFile.o: ${HEEKSCADPATH}/interface/PropertyFile.cpp \
 		${HEEKSCADPATH}/interface/Property.h \
-
 		${HEEKSCADPATH}/interface/PropertyString.h
 	$(CC) -c ${HEEKSCADPATH}/interface/PropertyFile.cpp ${CCFLAGS} -o $@
 
