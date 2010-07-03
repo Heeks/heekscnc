@@ -6,6 +6,9 @@
 # Hirutso Enni, 2009-01-13
 
 import nc
+import ocl
+
+pdcf = ocl.PathDropCutterFinish()
 
 ################################################################################
 class CreatorAttach(nc.Creator):
@@ -14,6 +17,10 @@ class CreatorAttach(nc.Creator):
         nc.Creator.__init__(self)
 
         self.original = original
+        self.x = 0
+        self.y = 0
+        self.z = 0
+        self.imperial = False
 
     ############################################################################
     ##  Shift in Z
@@ -53,6 +60,7 @@ class CreatorAttach(nc.Creator):
     ##  Settings
     
     def imperial(self):
+        self.imperial = True
         self.original.imperial()
 
     def metric(self):
@@ -63,6 +71,18 @@ class CreatorAttach(nc.Creator):
 
     def incremental(self):
         self.original.incremental()
+
+    def polar(self, on=True):
+        self.original.polar(on)
+
+    def set_plane(self, plane):
+        self.original.set_plane(plane)
+
+    def set_temporary_origin(self, x=None, y=None, z=None, a=None, b=None, c=None):
+        self.original.set_temporary_origin(x,y,z,a,b,c)
+
+    def remove_temporary_origin(self):
+        self.original.remove_temporary_origin()
 
     ############################################################################
     ##  Tools
@@ -100,8 +120,8 @@ class CreatorAttach(nc.Creator):
     def feedrate_hv(self, fh, fv):
         self.original.feedrate_hv(fh, fv)
 
-    def spindle(self, s):
-        self.original.spindle(s)
+    def spindle(self, s, clockwise=True):
+        self.original.spindle(s, clockwise)
 
     def coolant(self, mode=0):
         self.original.coolant(mode)
@@ -112,17 +132,67 @@ class CreatorAttach(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
-        self.original.rapid(x, y, self.z2(z), a, b, c)
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
+        self.original.rapid(x, y, z, a, b, c, machine_coordinates)
 
-    def feed(self, x=None, y=None, z=None):
-        self.original.feed(x, y, self.z2(z))
+    def feed(self, x=None, y=None, z=None, machine_coordinates=False):
+        if self.x == None or self.y == None or self.z == None:
+            self.original.feed(x, y, z, machine_coordinates)
+            if x != None: self.x = x
+            if y != None: self.y = y
+            if z != None: self.z = z
+            return
+        px = self.x
+        py = self.y
+        pz = self.z
+        if x != None: self.x = x
+        if y != None: self.y = y
+        if z != None: self.z = z
+        path = ocl.Path()
+        path.append(ocl.Line(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z)))
+        pdcf.setPath(path)
+        pdcf.run()
+        plist = pdcf.getCLPoints()
+        i = 0
+        for p in plist:
+            if i > 0:
+                if self.imperial:
+                    self.original.feed(p.x * 0.039370079, p.y * 0.039370079, p.z * 0.039370079, machine_coordinates)
+                else:
+                    self.original.feed(p.x, p.y, p.z, machine_coordinates)
+            i = i + 1
+
+    def arc(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None, ccw = True):
+        self.feed(x, y, z)
+        return 
+        if self.x == None or self.y == None or self.z == None:
+            raise "first attached move can't be an arc"
+        px = self.x
+        py = self.y
+        pz = self.z
+        if x != None: self.x = x
+        if y != None: self.y = y
+        if z != None: self.z = z
+        path = ocl.Path()
+        print 'path length = ', len(path.getSpans())
+        path.append(ocl.Arc(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z), ocl.Point(px + i, py + j, pz), ccw))
+        pdcf.setPath(path)
+        pdcf.run()
+        plist = pdcf.getCLPoints()
+        i = 0
+        for p in plist:
+            if i > 0:
+                if self.imperial:
+                    self.original.feed(p.x * 0.039370079, p.y * 0.039370079, p.z * 0.039370079)
+                else:
+                    self.original.feed(p.x, p.y, p.z)
+            i = i + 1
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.original.arc_cw(x, y, self.z2(z), i, j, self.z2(k), r)
+        self.arc(x, y, z, i, j, k, r, False)
 
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.original.arc_ccw(x, y, self.z2(z), i, j, self.z2(k), r)
+        self.arc(x, y, z, i, j, k, r, True)
 
     def dwell(self, t):
         self.original.dwell(t)
@@ -132,6 +202,18 @@ class CreatorAttach(nc.Creator):
 
     def rapid_unhome(self):
         self.original.rapid_unhome()
+
+    ############################################################################
+    ##  Cutter radius compensation
+
+    def use_CRC(self):
+        return self.original.use_CRC()
+
+    def start_CRC(self, left = True, radius = 0.0):
+        self.original.start_CRC(left, radius)
+
+    def end_CRC(self):
+        self.original.end_CRC()
 
     ############################################################################
     ##  Cycles
