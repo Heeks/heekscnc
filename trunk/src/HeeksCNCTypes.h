@@ -33,5 +33,7 @@ enum{
 	TagsType,
 	TagType,
 	ScriptOpType,
+	AttachOpType,
+	UnattachOpType,
 	HeeksCNCMaximumType
 };

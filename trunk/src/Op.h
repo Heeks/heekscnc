@@ -52,6 +52,7 @@ public:
 	virtual Python AppendTextToProgram( CMachineState *pMachineState );
 	virtual std::list<CFixture> PrivateFixtures();
 	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(1); }
+	virtual bool UsesTool(){return true;} // some operations don't use the tool number
 
 	void ReloadPointers() { ObjList::ReloadPointers(); }
 
