@@ -27,8 +27,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8284271"
-     inkscape:cx="364.62318"
-     inkscape:cy="871.75757"
+     inkscape:cx="187.73981"
+     inkscape:cy="720.56786"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -10776,6 +10776,28 @@
        y1="69.862183"
        x2="130.5"
        y2="69.862183" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3690"
+       id="radialGradient4321"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.9730603,0,0,0.9808461,13.060738,400.83176)"
+       cx="166.42264"
+       cy="22.006586"
+       fx="166.42264"
+       fy="22.006586"
+       r="15.904826" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3690"
+       id="radialGradient4325"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.9730603,0,0,0.9808461,58.06074,400.83176)"
+       cx="166.42264"
+       cy="22.006586"
+       fx="166.42264"
+       fy="22.006586"
+       r="15.904826" />
   </defs>
   <metadata
      id="metadata7">
@@ -10872,7 +10894,8 @@
        inkscape:label="#g3716"
        inkscape:export-xdpi="46.223274"
        inkscape:export-ydpi="46.223274"
-       inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\zigzag.png">
+       inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\zigzag.png"
+       transform="translate(-14.923585,-6.6429402e-2)">
       <path
          transform="matrix(0.9730603,0,0,1.0654311,2.9843228,-1.0853603)"
          d="M 181.82746,22.006586 A 15.404826,14.142136 0 1 1 151.01781,22.006586 A 15.404826,14.142136 0 1 1 181.82746,22.006586 z"
@@ -12347,6 +12370,34 @@
            x="440"
            id="tspan4318"
            sodipodi:role="line">rapid(0,0)</tspan></text>
+    </g>
+    <g
+       id="g5113"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\icons\attach.png"
+       inkscape:export-xdpi="34.285713"
+       inkscape:export-ydpi="34.285713">
+      <path
+         id="path4308"
+         d="M 175,407.36218 C 166.74623,407.36218 160.03334,414.07347 160,422.36218 L 190,422.36218 C 189.96666,414.07347 183.25377,407.36218 175,407.36218 z"
+         style="fill:url(#radialGradient4321);fill-opacity:1;fill-rule:nonzero;stroke:#1a1a1a;stroke-width:1.01819873" />
+      <path
+         id="path4327"
+         d="M 155,417.36218 C 155,417.36218 160,417.36218 160,417.36218 C 160,417.36218 165,407.36218 175,407.36218 C 185,407.36218 190,417.36218 190,417.36218 L 195,417.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+    </g>
+    <g
+       id="g5117"
+       inkscape:export-filename="C:\Users\Dan\HeeksCNC\bitmaps\unattach.png"
+       inkscape:export-xdpi="207.88867"
+       inkscape:export-ydpi="207.88867">
+      <path
+         id="path4323"
+         d="M 220,407.36218 C 211.74623,407.36218 205.03334,414.07347 205,422.36218 L 235,422.36218 C 234.96666,414.07347 228.25377,407.36218 220,407.36218 z"
+         style="fill:url(#radialGradient4325);fill-opacity:1;fill-rule:nonzero;stroke:#1a1a1a;stroke-width:1.01819873" />
+      <path
+         id="path4329"
+         d="M 200,417.36218 L 240,417.36218"
+         style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
     </g>
   </g>
 </svg>

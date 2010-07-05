@@ -126,8 +126,6 @@ void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	object_for_tools = this;
 
-	CHeeksCNCApp::GetNewOperationTools(t_list);
-
 	t_list->push_back(&set_all_active);
 	t_list->push_back(&set_all_inactive);
 

@@ -357,6 +357,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\AttachOp.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\AttachOp.h"
+			>
+		</File>
+		<File
 			RelativePath=".\BOM.cpp"
 			>
 		</File>
