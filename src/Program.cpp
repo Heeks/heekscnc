@@ -32,6 +32,7 @@
 #include "Tools.h"
 #include "interface/strconv.h"
 #include "MachineState.h"
+#include "AttachOp.h"
 
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
@@ -548,6 +549,7 @@ Python CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->m_textCtrl->Clear();
 	CZigZag::number_for_stl_file = 1;
 	CAdaptive::number_for_stl_file = 1;
+	CAttachOp::number_for_stl_file = 1;
 
 	bool kurve_module_needed = false;
 	bool kurve_funcs_needed = false;

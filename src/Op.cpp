@@ -108,7 +108,7 @@ void COp::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyCheck(_("active"), m_active, this, on_set_active));
 	list->push_back(new PropertyInt(_("execution_order"), m_execution_order, this, on_set_execution_order));
 
-	{
+	if(UsesTool()){
 		std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
 
 		int choice = 0;
@@ -258,7 +258,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 		python << _T("comment(") << PythonString(m_comment) << _T(")\n");
 	}
 
-	python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the correct cutting tool.
+	if(UsesTool())python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the correct cutting tool.
 
 	// Check to see if this operation has its own fixture settings.  If so, change to that fixture now.
 	for (HeeksObj *ob = GetFirstChild(); ob != NULL; ob = GetNextChild())
@@ -270,7 +270,6 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 			break;
 		}
 	}
-
 
 	return(python);
 }

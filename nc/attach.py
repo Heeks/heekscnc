@@ -17,17 +17,23 @@ class CreatorAttach(nc.Creator):
         nc.Creator.__init__(self)
 
         self.original = original
-        self.x = 0
-        self.y = 0
-        self.z = 0
+        self.x = original.x
+        self.y = original.y
+        self.z = original.z
         self.imperial = False
 
     ############################################################################
     ##  Shift in Z
 
     def z2(self, z):
-        if (z == None) : return None
-        return z + 100
+        path = ocl.Path()
+        # use a line with no length
+        path.append(ocl.Line(ocl.Point(self.x, self.y, self.z), ocl.Point(self.x, self.y, self.z)))
+        pdcf.setPath(path)
+        pdcf.run()
+        plist = pdcf.getCLPoints()
+        p = plist[0]
+        return p.z
 
     ############################################################################
     ##  Programs
@@ -134,20 +140,24 @@ class CreatorAttach(nc.Creator):
 
     def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
         self.original.rapid(x, y, z, a, b, c, machine_coordinates)
+        if x != None: self.x = x
+        if y != None: self.y = y
+        if z != None: self.z = z
 
     def feed(self, x=None, y=None, z=None, machine_coordinates=False):
-        if self.x == None or self.y == None or self.z == None:
-            self.original.feed(x, y, z, machine_coordinates)
-            if x != None: self.x = x
-            if y != None: self.y = y
-            if z != None: self.z = z
-            return
         px = self.x
         py = self.y
         pz = self.z
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z
+        if self.x == None or self.y == None or self.z == None:
+            self.original.feed(x, y, z, machine_coordinates)
+            return
+        if px == self.x and py == self.y:
+            # z move only
+            self.original.feed(x, y, self.z2(z), machine_coordinates)
+            return
         path = ocl.Path()
         path.append(ocl.Line(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z)))
         pdcf.setPath(path)

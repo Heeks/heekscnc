@@ -1,25 +1,11 @@
 import ocl
 import math
 from nc.nc import *
-import STLTools as stl
-
-
-
-# a class which implements PushTriangle
-class STLSurfPusher:
-    def __init__(self, s):
-        self.s = s
-            
-    def PushTriangle(self, x0, y0, z0, x1, y1, z1, x2, y2, z2):
-        self.s.addTriangle(ocl.Triangle(ocl.Point(x0, y0, z0), ocl.Point(x1, y1, z1), ocl.Point(x2, y2, z2)))
 
 def STLSurfFromFile(filepath):
     s = ocl.STLSurf()
-    pusher = STLSurfPusher(s)
-    stl_reader = stl.reader(filepath)
-    fl = open(filepath, "r")
-    stl_reader.AsciiReadFacets(fl, pusher)
-    fl.close()
+    print 'reading ', filepath
+    ocl.STLReader(filepath, s)
     return s
 
 def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0):
@@ -42,7 +28,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
       final_depth *= units
       # read the stl file, we know it is an ascii file because HeeksCNC made it
       s = STLSurfFromFile(filepath)
-   dcf = ocl.PathDropCutterFinish(s)
+   dcf = ocl.PathDropCutter(s)
    cutter = ocl.CylCutter()
    if corner_radius == 0.0:
       cutter = ocl.CylCutter(tool_diameter + mat_allowance)
@@ -93,6 +79,12 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
          dcf.setPath(path)
          dcf.run()
          plist = dcf.getCLPoints()
+         f = ocl.LineCLFilter()
+         f.setTolerance(0.01)
+         for p in plist:
+             f.addCLPoint(p)
+         f.run()
+         plist = f.getCLPoints()
          n = 0
          for p in plist:
             p.z = p.z + mat_allowance
