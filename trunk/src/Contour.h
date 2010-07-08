@@ -29,14 +29,23 @@ public:
 	}eSide;
 	eSide m_tool_on_side;
 
+	typedef enum
+	{
+	    ePlunge = 0,
+	    eRamp
+    } EntryMove_t;
+    EntryMove_t m_entry_move_type;
+
 public:
 	CContourParams()
 	{
 		m_tool_on_side = eOn;
+		m_entry_move_type = ePlunge;
+		ReadDefaultValues();
 	}
 
-	void set_initial_values();
-	void write_values_to_config();
+	void WriteDefaultValues();
+    void ReadDefaultValues();
 	void GetProperties(CContour* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
@@ -52,7 +61,24 @@ public:
 	{
 		return(! (*this == rhs));	// Call the equivalence operator.
 	}
+
+    friend wxString & operator<< ( wxString & str, CContourParams::EntryMove_t & move )
+    {
+        switch(move)
+        {
+            case CContourParams::ePlunge:
+                str << _("Plunge");
+                break;
+
+            case CContourParams::eRamp:
+                str << _("Ramp");
+                break;
+        }
+
+        return(str);
+    }
 };
+
 
 /**
 	The CContour class is suspiciously similar to the CProfile class.  The main difference is that the NC path
@@ -97,13 +123,14 @@ public:
 	//	Constructors.
 	CContour():CDepthOp(GetTypeString(), 0, ContourType)
 	{
-		m_params.set_initial_values();
+	    ReadDefaultValues();
 	}
+
 	CContour(	const Symbols_t &symbols,
 			const int cutting_tool_number )
 		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ContourType), m_symbols(symbols)
 	{
-		m_params.set_initial_values();
+	    ReadDefaultValues();
 		ReloadPointers();
 	}
 
@@ -124,6 +151,9 @@ public:
 	bool CanAdd(HeeksObj *object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
+	void WriteDefaultValues();
+    void ReadDefaultValues();
+
 	bool operator== ( const CContour & rhs ) const;
 	bool operator!= ( const CContour & rhs ) const { return(! (*this == rhs)); }
 	bool IsDifferent(HeeksObj* other);
@@ -141,11 +171,21 @@ public:
 	static Python GeneratePathFromWire( 	const TopoDS_Wire & wire,
 											CMachineState *pMachineState,
 											const double clearance_height,
-											const double rapid_down_to_height );
+											const double rapid_down_to_height,
+											const double start_depth,
+											const CContourParams::EntryMove_t entry_move_type );
+
+	static Python GeneratePathForEdge(		const TopoDS_Edge &edge,
+											const double first_parameter,
+											const double last_parameter,
+											const bool forwards,
+											CMachineState *pMachineState,
+											const double end_z );
 
     static Python GenerateRampedEntry(      ::size_t starting_edge_offset,
                                             std::vector<TopoDS_Edge> & edges,
-                                            CMachineState *pMachineState );
+                                            CMachineState *pMachineState,
+											const double end_z );
 
 	static bool Clockwise( const gp_Circ & circle );
 	void ReloadPointers();
@@ -153,6 +193,12 @@ public:
 
 	static std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire );
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
+
+	static std::vector<TopoDS_Edge>::size_type NextOffset(	const std::vector<TopoDS_Edge> &edges,
+													const std::vector<TopoDS_Edge>::size_type edges_offset,
+													const int direction );
+
+	static bool EdgesJoin( const TopoDS_Edge &a, const TopoDS_Edge &b );
 
 public:
 	static gp_Pnt GetStart(const TopoDS_Edge &edge);

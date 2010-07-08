@@ -267,7 +267,6 @@ static void on_set_gradient(double value, HeeksObj* object)
 	((CCuttingTool*)object)->m_params.m_gradient = value;
 	object->KillGLLists();
 	heeksCAD->Repaint();
-	wxMessageBox(_("Warning: The tool's gradient is not yet used for toolpath generation"));
 }
 
 
