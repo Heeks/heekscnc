@@ -48,17 +48,6 @@ extern CHeeksCADInterface* heeksCAD;
 
 /* static */ double CContour::max_deviation_for_spline_to_arc = 0.1;
 
-void CContourParams::set_initial_values()
-{
-	CNCConfig config(ConfigPrefix());
-	config.Read(_T("ToolOnSide"), (int *) &m_tool_on_side, (int) eOn);
-}
-
-void CContourParams::write_values_to_config()
-{
-	CNCConfig config(ConfigPrefix());
-	config.Write(_T("ToolOnSide"), (int) m_tool_on_side);
-}
 
 static void on_set_tool_on_side(int value, HeeksObj* object){
 	switch(value)
@@ -76,66 +65,112 @@ static void on_set_tool_on_side(int value, HeeksObj* object){
 	((CContour*)object)->WriteDefaultValues();
 }
 
+static void on_set_entry_move_type(int value, HeeksObj *object)
+{
+    ((CContour*)object)->m_params.m_entry_move_type = CContourParams::EntryMove_t(value);
+    ((CContour*)object)->WriteDefaultValues();
+}
+
 void CContourParams::GetProperties(CContour* parent, std::list<Property *> *list)
 {
-    std::list< wxString > choices;
-
-    SketchOrderType order = SketchOrderTypeUnknown;
-
-    if(parent->GetNumChildren() > 0)
     {
-        HeeksObj* sketch = NULL;
+        std::list< wxString > choices;
 
-        for (HeeksObj *object = parent->GetFirstChild(); ((sketch == NULL) && (object != NULL)); object = parent->GetNextChild())
+        SketchOrderType order = SketchOrderTypeUnknown;
+
+        if(parent->GetNumChildren() > 0)
         {
-            if (object->GetType() == SketchType)
+            HeeksObj* sketch = NULL;
+
+            for (HeeksObj *object = parent->GetFirstChild(); ((sketch == NULL) && (object != NULL)); object = parent->GetNextChild())
             {
-                sketch = object;
+                if (object->GetType() == SketchType)
+                {
+                    sketch = object;
+                }
             }
-        }
 
-        if(sketch != NULL)
-        {
-            order = heeksCAD->GetSketchOrder(sketch);
-            switch(order)
+            if(sketch != NULL)
             {
-            case SketchOrderTypeOpen:
-                choices.push_back(_("Left"));
-                choices.push_back(_("Right"));
-                break;
+                order = heeksCAD->GetSketchOrder(sketch);
+                switch(order)
+                {
+                case SketchOrderTypeOpen:
+                    choices.push_back(_("Left"));
+                    choices.push_back(_("Right"));
+                    break;
 
-            case SketchOrderTypeCloseCW:
-            case SketchOrderTypeCloseCCW:
-                choices.push_back(_("Outside"));
-                choices.push_back(_("Inside"));
-                break;
+                case SketchOrderTypeCloseCW:
+                case SketchOrderTypeCloseCCW:
+                    choices.push_back(_("Outside"));
+                    choices.push_back(_("Inside"));
+                    break;
 
-            default:
-                choices.push_back(_("Outside or Left"));
-                choices.push_back(_("Inside or Right"));
-                break;
+                default:
+                    choices.push_back(_("Outside or Left"));
+                    choices.push_back(_("Inside or Right"));
+                    break;
+                }
             }
+
+            choices.push_back(_("On"));
+
+            int choice = int(CContourParams::eOn);
+            switch (parent->m_params.m_tool_on_side)
+            {
+                case CContourParams::eRightOrInside:	choice = 1;
+                        break;
+
+                case CContourParams::eOn:	choice = 2;
+                        break;
+
+                case CContourParams::eLeftOrOutside:	choice = 0;
+                        break;
+            } // End switch
+
+            list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
         }
-
-        choices.push_back(_("On"));
-
-        int choice = int(CContourParams::eOn);
-        switch (parent->m_params.m_tool_on_side)
-        {
-            case CContourParams::eRightOrInside:	choice = 1;
-                    break;
-
-            case CContourParams::eOn:	choice = 2;
-                    break;
-
-            case CContourParams::eLeftOrOutside:	choice = 0;
-                    break;
-        } // End switch
-
-        list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
     }
 
+    {
+        int choice = int(parent->m_params.m_entry_move_type);
+        std::list<wxString> choices;
+        for (CContourParams::EntryMove_t move = CContourParams::ePlunge; move <= CContourParams::eRamp; move = CContourParams::EntryMove_t(int(move) + 1))
+        {
+            wxString description;
+            description << move;
+            choices.push_back( description );
+        }
 
+        list->push_back(new PropertyChoice(_("entry move type"), choices, choice, parent, on_set_entry_move_type));
+    }
+
+}
+
+void CContourParams::WriteDefaultValues()
+{
+	CNCConfig config(ConfigPrefix());
+	config.Write(_T("ToolOnSide"), (int) m_tool_on_side);
+	config.Write(_T("EntryMoveType"), (int) m_entry_move_type);
+}
+
+void CContourParams::ReadDefaultValues()
+{
+	CNCConfig config(ConfigPrefix());
+	config.Read(_T("ToolOnSide"), (int *) &m_tool_on_side, (int) eOn);
+	config.Read(_T("EntryMoveType"), (int *) &m_entry_move_type, (int) ePlunge);
+}
+
+void CContour::WriteDefaultValues()
+{
+    m_params.WriteDefaultValues();
+	CDepthOp::WriteDefaultValues();
+}
+
+void CContour::ReadDefaultValues()
+{
+    m_params.ReadDefaultValues();
+	CDepthOp::ReadDefaultValues();
 }
 
 void CContourParams::WriteXMLAttributes(TiXmlNode *root)
@@ -145,12 +180,13 @@ void CContourParams::WriteXMLAttributes(TiXmlNode *root)
 	root->LinkEndChild( element );
 
 	element->SetAttribute("side", m_tool_on_side);
+	element->SetAttribute("entry_move_type", int(m_entry_move_type));
 }
 
 void CContourParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	int int_for_enum;
-	if(pElem->Attribute("side", &int_for_enum))m_tool_on_side = (eSide)int_for_enum;
+	if(pElem->Attribute("side")) pElem->Attribute("side", (int *) &m_tool_on_side);
+	if (pElem->Attribute("entry_move_type")) pElem->Attribute("entry_move_type", (int *) &m_entry_move_type);
 }
 
 
@@ -333,6 +369,47 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     return(direction);
 }
 
+
+/**
+	We're itterating through the vector of TopoDS_Edge objects forwards
+	and backwards until we're either deep enough for our purposes or we
+	come to a discontinuity between the two edges.  This routine simply
+	looks for the ends (as both beginning and end) of the vector and
+	allows the offset to loop around the vector if necessary.
+ */
+/* static */ std::vector<TopoDS_Edge>::size_type CContour::NextOffset(
+	const std::vector<TopoDS_Edge> &edges,
+	const std::vector<TopoDS_Edge>::size_type edges_offset,
+	const int direction )
+{
+	if ((direction > 0) && (edges_offset == edges.size()-1))
+	{
+		return(0);  // Loop around.
+	}
+
+	if ((direction < 0) && (edges_offset == 0))
+	{
+		return(edges.size()-1); // Loop around.
+	}
+
+	return(edges_offset + direction);
+}
+
+
+/* static */ bool CContour::EdgesJoin( const TopoDS_Edge &a, const TopoDS_Edge &b )
+{
+	double tolerance = heeksCAD->GetTolerance();
+
+	if (GetStart(a).Distance(GetStart(b)) < tolerance) return(true);
+	if (GetStart(a).Distance(GetEnd(b)) < tolerance) return(true);
+	if (GetEnd(a).Distance(GetStart(b)) < tolerance) return(true);
+	if (GetEnd(a).Distance(GetEnd(b)) < tolerance) return(true);
+
+	return(false);
+}
+
+
+
 /**
     For these edges, plan a path to get the cutting tool from the current
     depth down to the first edge's depth at no more than the gradient
@@ -349,7 +426,8 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 /* static */ Python CContour::GenerateRampedEntry(
     ::size_t starting_edge_offset,
     std::vector<TopoDS_Edge> & edges,
-	CMachineState *pMachineState )
+	CMachineState *pMachineState,
+	const double end_z )
 {
     Python python;
 
@@ -367,50 +445,235 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
     double gradient = pCuttingTool->Gradient();
 
-    const TopoDS_Shape &first_edge = edges[0];
+    const TopoDS_Shape &first_edge = edges[starting_edge_offset];
     BRepAdaptor_Curve top_curve(TopoDS::Edge(first_edge));
     gp_Pnt point;
     top_curve.D0(top_curve.FirstParameter(),point);
-    double edge_depth = point.Z();
+    double initial_tool_depth = pMachineState->Location().Z();
 
-    while (pMachineState->Location().Z() > edge_depth)
+    CNCPoint end_point(pMachineState->Location());
+    end_point.SetZ(end_z); // This is where we want to be when we've finished.
+
+    python << _T("comment('Ramp down to ") << end_z << _T(" at a gradient of ") << gradient << _T("')\n");
+
+    int direction = +1;	// Move forwards through the list of edges (for now)
+
+    if (pMachineState->Location().Distance(GetStart(edges[starting_edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[starting_edge_offset])))
     {
-        ::size_t edge_offset = starting_edge_offset;
-        do
+        // The machine is closer to the starting point of this edge.  Find out whether the end point is closer
+        // to the next edge or the previous edge.  Set the direction of edge iteration accordingly.
+        int next_edge_offset = NextOffset(edges,starting_edge_offset,+1);
+        int previous_edge_offset = NextOffset(edges,starting_edge_offset,-1);
+
+        // We're going to end up at this edge's end point.
+        CNCPoint reference_point(GetEnd(edges[starting_edge_offset]));
+        double next_distance = reference_point.Distance(GetStart(edges[next_edge_offset]));
+        if (reference_point.Distance(GetEnd(edges[next_edge_offset])) < next_distance)
         {
-            const TopoDS_Shape &E = edges[edge_offset];
-            BRepAdaptor_Curve curve(TopoDS::Edge(E));
-            double edge_length = GCPnts_AbscissaPoint::Length (curve);
-            double distance_remaining = pMachineState->Location().Z() - edge_depth;
+            next_distance = reference_point.Distance(GetEnd(edges[next_edge_offset]));
+        }
 
-            // We need to go distance_remaining over the edge_length at no more
-            // than the gradient.  See if we can do that within this edge's length.
-            // If so, figure out what point marks the necessary depth.
-            double depth_possible_with_this_edge = gradient * edge_length * -1.0;   // positive number representing a depth (distance)
-            if (distance_remaining < depth_possible_with_this_edge)
+        double previous_distance = reference_point.Distance(GetStart(edges[previous_edge_offset]));
+        if (reference_point.Distance(GetEnd(edges[previous_edge_offset])) < previous_distance)
+        {
+            previous_distance = reference_point.Distance(GetEnd(edges[previous_edge_offset]));
+        }
+
+        if (next_distance < previous_edge_offset)
+        {
+            direction = +1;
+        }
+        else
+        {
+            direction = -1;
+        }
+    }
+    else
+    {
+        // We're going to end up at this edge's start point.  See which direction the next nearest edge is from here.
+        int next_edge_offset = NextOffset(edges,starting_edge_offset,+1);
+        int previous_edge_offset = NextOffset(edges,starting_edge_offset,-1);
+
+        // We're going to end up at this edge's end point.
+        CNCPoint reference_point(GetStart(edges[starting_edge_offset]));
+        double next_distance = reference_point.Distance(GetStart(edges[next_edge_offset]));
+        if (reference_point.Distance(GetEnd(edges[next_edge_offset])) < next_distance)
+        {
+            next_distance = reference_point.Distance(GetEnd(edges[next_edge_offset]));
+        }
+
+        double previous_distance = reference_point.Distance(GetStart(edges[previous_edge_offset]));
+        if (reference_point.Distance(GetEnd(edges[previous_edge_offset])) < previous_distance)
+        {
+            previous_distance = reference_point.Distance(GetEnd(edges[previous_edge_offset]));
+        }
+
+        if (next_distance < previous_edge_offset)
+        {
+            direction = +1;
+        }
+        else
+        {
+            direction = -1;
+        }
+    }
+
+    // Ideally we would ramp down to half the step-down height in one direction and then come
+    // back the other direction.  That way we would be back at the starting point by the
+    // time we're at the step-down height.
+    double half_way_down = ((initial_tool_depth - end_z) / 2.0) + end_z;
+
+    double goal_z = end_z;
+
+    // If the tool's diameter is too large for this gradient and step-down then don't go
+    // half way and then back again.  Instead, go all the way out and come back at this
+    // base height.
+    if ((initial_tool_depth - (gradient * pCuttingTool->CuttingRadius() * 2.0)) > half_way_down)
+    {
+        goal_z = half_way_down;    // We're going to be moving more than one cutting tool radius so aim
+                                    // for half way down and then double back to find final depth.
+    }
+
+    ::size_t edge_offset = starting_edge_offset;
+    while ((pMachineState->Location().Z() - end_z) > tolerance)
+    {
+        const TopoDS_Shape &E = edges[edge_offset];
+        BRepAdaptor_Curve curve(TopoDS::Edge(E));
+        double edge_length = GCPnts_AbscissaPoint::Length (curve);
+
+        double distance_remaining = pMachineState->Location().Z() - goal_z;
+
+        // We need to go distance_remaining over the edge_length at no more
+        // than the gradient.  See if we can do that within this edge's length.
+        // If so, figure out what point marks the necessary depth.
+        double depth_possible_with_this_edge = gradient * edge_length * -1.0;   // positive number representing a depth (distance)
+        if (distance_remaining <= depth_possible_with_this_edge)
+        {
+            // We don't need to traverse this whole edge before we're at depth.  Find
+            // the point along this edge at which we will be at depth.
+            // The FirstParameter() and the LastParameter() are not always lengths but they
+            // do form a numeric representation of a distance along the element.  For lines
+            // they are lengths and for arcs they are radians.  In any case, we can
+            // use the proportion of the length to come up with a 'U' parameter for
+            // this edge that indicates the point along the edge.
+
+            if (pMachineState->Location().Distance(GetStart(edges[edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[edge_offset])))
             {
-                // We don't need to traverse this whole edge before we're at depth.  Find
-                // the point along this edge at which we will be at depth.
-                // The FirstParameter() and the LastParameter() are not always lengths but they
-                // do form a numeric representation of a distance along the element.  For lines
-                // they are lengths and for arcs they are radians.  In any case, we can
-                // use the proportion of the length to come up with a 'U' parameter for
-                // this edge that indicates the point along the edge.
-
+                // We're going from FirstParameter() towards LastParameter()
                 double proportion = distance_remaining / depth_possible_with_this_edge;
-                double U = (curve.LastParameter() - curve.FirstParameter()) / proportion;
-                gp_Pnt point_at_full_depth;
-                curve.D0(U,point_at_full_depth);
+                double U = ((curve.LastParameter() - curve.FirstParameter()) * proportion) + curve.FirstParameter();
 
                 // The point_at_full_depth indicates where we will be when we are at depth.  Run
                 // along the edge down to this point
+                // python << _T("comment('from first to U')\n");
+                python << GeneratePathForEdge( edges[edge_offset], curve.FirstParameter(), U, true, pMachineState, goal_z );
+
+                if (DirectionTowarardsNextEdge( edges[edge_offset], edges[NextOffset(edges,edge_offset,(int) ((fabs(goal_z - end_z) > tolerance)?direction * -1.0:direction))] ))
+                {
+                    // We're heading towards the end of this edge.
+                    // python << _T("comment('from U to last 1')\n");
+                    python << GeneratePathForEdge( edges[edge_offset], U, curve.LastParameter(), true, pMachineState, goal_z );
+                }
+                else
+                {
+                    // We're heading towards the beginning of this edge.
+                    // python << _T("comment('from U to first 2')\n");
+                    python << GeneratePathForEdge( edges[edge_offset], U, curve.FirstParameter(), false, pMachineState, goal_z );
+                }
+            }
+            else
+            {
+                // We're going from LastParameter() towards FirstParameter()
+                double proportion = 1.0 - (distance_remaining / depth_possible_with_this_edge);
+                double U = ((curve.LastParameter() - curve.FirstParameter()) * proportion) + curve.FirstParameter();
+
+                /*
+                printf("first %lf last %lf proportion %lf U %lf\n",
+                    curve.FirstParameter(), curve.LastParameter(), proportion, U);
+                */
+
+                // The point_at_full_depth indicates where we will be when we are at depth.  Run
+                // along the edge down to this point
+                // python << _T("comment('from last to U 3')\n");
+                python << GeneratePathForEdge( edges[edge_offset], curve.LastParameter(), U, false, pMachineState, goal_z );
+
+                if (DirectionTowarardsNextEdge( edges[edge_offset], edges[NextOffset(edges,edge_offset,(int) ((fabs(goal_z - end_z) > tolerance)?direction * -1.0:direction))] ))
+                {
+                    // We're heading towards the end of this edge.
+                    // python << _T("comment('from U to last 4')\n");
+                    python << GeneratePathForEdge( edges[edge_offset], U, curve.LastParameter(), true, pMachineState, goal_z );
+                }
+                else
+                {
+                    // We're heading towards the beginning of this edge.
+                    // python << _T("comment('from U to first 5')\n");
+                    python << GeneratePathForEdge( edges[edge_offset], U, curve.FirstParameter(), false, pMachineState, goal_z );
+                }
             }
 
-            edge_offset++;
-            if (edge_offset == edges.size()-1) edge_offset = 0;  // Loop around.
-        } while (((pMachineState->Location().Z() - edge_depth) > tolerance) && (edge_offset != starting_edge_offset));
+            if (fabs(goal_z - end_z) > tolerance)
+            {
+                direction *= -1.0;  // Reverse direction
+                goal_z = end_z;   // Changed goal.
+            }
+        }
+        else
+        {
+            // This edge is not long enough for us to reach our goal depth.  Run all the way along this edge.
+            double z_for_this_run = pMachineState->Location().Z() - depth_possible_with_this_edge;
+            if (pMachineState->Location().Distance(GetStart(edges[edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[edge_offset])))
+            {
+                // python << _T("comment('part step down 6')\n");
+                python << GeneratePathForEdge( edges[edge_offset], curve.FirstParameter(), curve.LastParameter(), true, pMachineState, z_for_this_run );
+            }
+            else
+            {
+                // python << _T("comment('part step down 7')\n");
+                python << GeneratePathForEdge( edges[edge_offset], curve.LastParameter(), curve.FirstParameter(), false, pMachineState, z_for_this_run );
+            }
+        }
+
+        if (EdgesJoin( edges[edge_offset], edges[NextOffset(edges,edge_offset,direction)] ) == false)
+        {
+            // Reverse direction
+            // python << _T("comment('reverse without incrementing')\n");
+            direction *= -1.0;
+        }
+        else
+        {
+            // Step through the array of edges in the current direction (looping from end to start (or vice versa) if necessary)
+            edge_offset = NextOffset(edges,edge_offset,direction);
+        }
     } // while
 
+    while (pMachineState->Location() != end_point)
+    {
+        const TopoDS_Shape &E = edges[edge_offset];
+        BRepAdaptor_Curve curve(TopoDS::Edge(E));
+
+        if (pMachineState->Location().Distance(GetStart(edges[edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[edge_offset])))
+        {
+            // python << _T("comment('rewinding 7')\n");
+            python << GeneratePathForEdge( edges[edge_offset], curve.FirstParameter(), curve.LastParameter(), true, pMachineState, pMachineState->Location().Z() );
+        }
+        else
+        {
+            // python << _T("comment('rewinding 8')\n");
+            python << GeneratePathForEdge( edges[edge_offset], curve.LastParameter(), curve.FirstParameter(), false, pMachineState, pMachineState->Location().Z() );
+        }
+
+        if (EdgesJoin( edges[edge_offset], edges[NextOffset(edges,edge_offset,direction)] ) == false)
+        {
+            // Reverse direction
+            direction *= -1.0;
+        }
+        else
+        {
+            edge_offset = NextOffset(edges,edge_offset,direction);
+        }
+    } // End while
+
+    python << _T("comment('end ramp')\n");
 	return(python);
 }
 
@@ -426,11 +689,11 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	const TopoDS_Wire & wire,
 	CMachineState *pMachineState,       // for both fixture and last_position.
 	const double clearance_height,
-	const double rapid_down_to_height )
+	const double rapid_down_to_height,
+	const double start_depth,
+	const CContourParams::EntryMove_t entry_move_type )
 {
 	Python python;
-
-	double tolerance = heeksCAD->GetTolerance();
 
     std::vector<TopoDS_Edge> edges = SortEdges(wire);
 
@@ -438,325 +701,299 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 	{
 		const TopoDS_Shape &E = edges[i];
 
-		// enum GeomAbs_CurveType
-		// 0 - GeomAbs_Line
-		// 1 - GeomAbs_Circle
-		// 2 - GeomAbs_Ellipse
-		// 3 - GeomAbs_Hyperbola
-		// 4 - GeomAbs_Parabola
-		// 5 - GeomAbs_BezierCurve
-		// 6 - GeomAbs_BSplineCurve
-		// 7 - GeomAbs_OtherCurve
-
 		BRepAdaptor_Curve curve(TopoDS::Edge(E));
-		GeomAbs_CurveType curve_type = curve.GetType();
 
-      	switch(curve_type)
+		double uStart = curve.FirstParameter();
+		double uEnd = curve.LastParameter();
+		gp_Pnt PS;
+		gp_Vec VS;
+		curve.D1(uStart, PS, VS);
+		gp_Pnt PE;
+		gp_Vec VE;
+		curve.D1(uEnd, PE, VE);
+
+		if (pMachineState->Location() == CNCPoint(PS))
 		{
-			case GeomAbs_Line:
-				// make a line
+			// We're heading towards the PE point.
+			python << GeneratePathForEdge(edges[i], uStart, uEnd, true, pMachineState, PE.Z());
+		} // End if - then
+		else if (pMachineState->Location() == CNCPoint(PE))
+		{
+			// We're goint towards PS
+			python << GeneratePathForEdge(edges[i], uEnd, uStart, false, pMachineState, PS.Z());
+		}
+		else
+		{
+			// We need to move to the start BEFORE machining this line.
+			CNCPoint start(PS);
+			CNCPoint end(PE);
+			bool isForwards = true;
+
+			if (i < (edges.size()-1))
 			{
-				double uStart = curve.FirstParameter();
-				double uEnd = curve.LastParameter();
-				gp_Pnt PS;
-				gp_Vec VS;
-				curve.D1(uStart, PS, VS);
-				gp_Pnt PE;
-				gp_Vec VE;
-				curve.D1(uEnd, PE, VE);
-
-				if (pMachineState->Location() == CNCPoint(PS))
-				{
-					// We're heading towards the PE point.
-					CNCPoint point(PE);
-					python << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
-					pMachineState->Location(point);
-				} // End if - then
-				else if (pMachineState->Location() == CNCPoint(PE))
-				{
-					CNCPoint point(PS);
-					python << _T("feed(x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
-					pMachineState->Location(point);
-				}
-				else
-				{
-					// We need to move to the start BEFORE machining this line.
-					CNCPoint start(PS);
-					CNCPoint end(PE);
-
-					if (i < (edges.size()-1))
-					{
-                        if (! DirectionTowarardsNextEdge( edges[i], edges[i+1] ))
-                        {
-                            // The next edge is closer to this edge's start point.  reverse direction
-                            // so that the next movement is better.
-
-                            CNCPoint temp = start;
-                            start = end;
-                            end = temp;
-                        }
-					}
-
-					python << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-					python << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
-					python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-					python << _T("feed(z=") << start.Z(true) << _T(")\n");
-
-					python << _T("feed(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(", z=") << end.Z(true) << _T(")\n");
-					pMachineState->Location(end);
-				}
-			}
-			break;
-
-            /*
-            // It would be great if we could do the BiArc movements along the spline that Dan put in for
-            // Profile operations.  I will get there eventually.
-            case GeomAbs_BSplineCurve:
-            */
-
-
-			case GeomAbs_Circle:
-			if ((pMachineState->Fixture().m_params.m_xz_plane == 0.0) && (pMachineState->Fixture().m_params.m_yz_plane == 0.0))
-			{
-				double uStart = curve.FirstParameter();
-				double uEnd = curve.LastParameter();
-				gp_Pnt PS;
-				gp_Vec VS;
-				curve.D1(uStart, PS, VS);
-				gp_Pnt PE;
-				gp_Vec VE;
-				curve.D1(uEnd, PE, VE);
-				gp_Circ circle = curve.Circle();
-
-
-                // It's an Arc.
-
-                if (pMachineState->Location() == CNCPoint(PS))
+                if (! DirectionTowarardsNextEdge( edges[i], edges[i+1] ))
                 {
-                    // Arc towards PE
-                    CNCPoint point(PE);
-                    CNCPoint centre( circle.Location() );
-                    bool l_bClockwise = Clockwise(circle);
+                    // The next edge is closer to this edge's start point.  reverse direction
+                    // so that the next movement is better.
 
-                     std::list<CNCPoint> points;
-                    double period = curve.Period();
-                    double u = uStart;
-                    for (u = uStart; u <= uEnd; u += (period/4.0))
-                    {
-                        gp_Pnt p;
-                        gp_Vec v;
-                        curve.D1(u, p, v);
-                        points.push_back( p );
-                    }
-                    if (*points.rbegin() != CNCPoint(PE))
-                    {
-                        points.push_back( CNCPoint(PE) );
-                    }
+                    double temp = uStart;
+					uStart = uEnd;
+					uEnd = temp;
 
-                    for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
-                    {
-                        if (itPoint->Distance(pMachineState->Location()) > tolerance)
-                        {
-                            CNCPoint offset = centre - pMachineState->Location();
-                            python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
-                            if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
-                            python << _T(")\n");
-                            pMachineState->Location(*itPoint);
-                        }
-                    } // End for
+					CNCPoint temppnt(start);
+					start = end;
+					end = temppnt;
+
+					isForwards = false;
                 }
-                else if (pMachineState->Location() == CNCPoint(PE))
+			}
+
+            // If the tool is directly above the beginning of the next edge, we don't want
+            // to move to clearance height and rapid across to it.
+            CNCPoint s(start); s.SetZ(0.0); // Flatten start
+            CNCPoint l(pMachineState->Location()); l.SetZ(0.0);
+            if (s != l)
+            {
+                // Move up above workpiece to relocate to the start of the next edge.
+                python << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
+                python << _T("rapid(x=") << start.X(true) << _T(", y=") << start.Y(true) << _T(")\n");
+                python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+                python << _T("feed(z=") << start_depth / theApp.m_program->m_units << _T(")\n");
+                CNCPoint where(start);
+                where.SetZ(start_depth / theApp.m_program->m_units);
+                pMachineState->Location(where);
+            }
+
+            switch (entry_move_type)
+            {
+                case CContourParams::ePlunge:
+                    python << _T("feed(z=") << start.Z(true) << _T(")\n");
+                    pMachineState->Location().SetZ( start.Z() );;
+                    break;
+
+                case CContourParams::eRamp:
                 {
-                    // Arc towards PS
-                    CNCPoint point(PS);
-                    CNCPoint centre( circle.Location() );
-                    bool l_bClockwise = ! Clockwise(circle);
-
-                    std::list<CNCPoint> points;
-                    double period = curve.Period();
-                    for (double u = uEnd; u >= uStart; u -= (period/4.0))
-                    {
-                        gp_Pnt p;
-                        gp_Vec v;
-                        curve.D1(u, p, v);
-                        points.push_back( p );
-                    }
-                    if (*points.rbegin() != CNCPoint(PS))
-                    {
-                        points.push_back( CNCPoint(PS) );
-                    }
-
-                    for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
-                    {
-                        if (itPoint->Distance(pMachineState->Location()) > tolerance)
-                        {
-                            CNCPoint offset = centre - pMachineState->Location();
-
-                            python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
-                            if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
-                            python << _T(")\n");
-                            pMachineState->Location(*itPoint);
-                        }
-                    } // End for
+                    python << GenerateRampedEntry( i, edges, pMachineState, start.Z() );
                 }
-                else
-                {
-                    // Move to PS first.
-                    std::list<CNCPoint> points;
-                    double period = curve.Period();
+                    break;
+            } // End switch
 
-                    CNCPoint start(PS);
-                    CNCPoint end(PE);
-                    CNCPoint centre( circle.Location() );
-                    bool l_bClockwise = Clockwise(circle);
-
-                    for (double u = uStart; u <= uEnd; u += (period/4.0))
-                    {
-                        gp_Pnt p;
-                        gp_Vec v;
-                        curve.D1(u, p, v);
-                        points.push_back( p );
-                    }
-                    if (*points.rbegin() != CNCPoint(PE))
-                    {
-                        points.push_back( CNCPoint(PE) );
-                    }
-
-                    if (i < (edges.size()-1))
-                    {
-                        if (! DirectionTowarardsNextEdge( edges[i], edges[i+1] ))
-                        {
-                            // The next edge is closer to this edge's start point.  reverse direction
-                            // so that the next movement is better.
-
-                            CNCPoint temp = start;
-                            start = end;
-                            end = temp;
-                            l_bClockwise = ! l_bClockwise;
-
-                            points.clear();
-                            for (double u = uEnd; u >= uStart; u -= (period/4.0))
-                            {
-                                gp_Pnt p;
-                                gp_Vec v;
-                                curve.D1(u, p, v);
-                                points.push_back( p );
-                            }
-                            if (*points.rbegin() != CNCPoint(PS))
-                            {
-                                points.push_back( CNCPoint(PS) );
-                            }
-                        }
-                    }
-
-					python << _T("rapid(z=") << clearance_height / theApp.m_program->m_units << _T(")\n");
-                    python << _T("rapid(x=") << points.begin()->X(true) << _T(", y=") << points.begin()->Y(true) << _T(")\n");
-                    python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-                    python << _T("feed(z=") << points.begin()->Z(true) << _T(")\n");
-
-                    pMachineState->Location(*(points.begin()));
-
-                    for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
-                    {
-                        if (itPoint->Distance(pMachineState->Location()) > tolerance)
-                        {
-                            CNCPoint offset = centre - pMachineState->Location();
-
-                            python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                                << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
-                            if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
-                            python << _T(")\n");
-                            pMachineState->Location(*itPoint);
-                        }
-                    } // End for
-                }
-				break;
-			}
-			else
-			{
-			    // We've rotated the arcs in either the xz or yz planes.  The GCode will produce a helical arc in these
-			    // situations while we need a rotated arc.  They're not quite the same.  To that end, we will produce
-			    // a more accurate representation by following the arcs with small lines.  Fall through to the 'default'
-			    // option which will stroke the arcs into small lines.
-			}
-
-			default:
-			{
-				// make lots of small lines
-				double uStart = curve.FirstParameter();
-				double uEnd = curve.LastParameter();
-				gp_Pnt PS;
-				gp_Vec VS;
-				curve.D1(uStart, PS, VS);
-				gp_Pnt PE;
-				gp_Vec VE;
-				curve.D1(uEnd, PE, VE);
-
-				TopoDS_Edge edge(TopoDS::Edge(E));
-				BRepTools::Clean(edge);
-				BRepMesh::Mesh(edge, max_deviation_for_spline_to_arc);
-
-				TopLoc_Location L;
-				Handle(Poly_Polygon3D) Polyg = BRep_Tool::Polygon3D(edge, L);
-				if (!Polyg.IsNull()) {
-					const TColgp_Array1OfPnt& Points = Polyg->Nodes();
-					Standard_Integer po;
-					int i = 0;
-					std::list<CNCPoint> interpolated_points;
-					for (po = Points.Lower(); po <= Points.Upper(); po++, i++) {
-						CNCPoint p = (Points.Value(po)).Transformed(L);
-						interpolated_points.push_back(p);
-					} // End for
-
-					// See if we should go from the start to the end or the end to the start.
-					if (*interpolated_points.rbegin() == pMachineState->Location())
-					{
-						// We need to go from the end to the start.  Reverse the point locations to
-						// make this easier.
-
-						interpolated_points.reverse();
-					} // End if - then
-
-					if (*interpolated_points.begin() != pMachineState->Location())
-					{
-						// This curve is not nearby to the last_position.  Rapid to the start
-						// point to start this off.
-
-						// We need to move to the start BEFORE machining this line.
-						CNCPoint start(pMachineState->Location());
-						CNCPoint end(*interpolated_points.begin());
-
-						python << _T("rapid(z=") << PythonString(clearance_height / theApp.m_program->m_units).c_str() << _T(")\n");
-						python << _T("rapid(x=") << end.X(true) << _T(", y=") << end.Y(true) << _T(")\n");
-						python << _T("rapid(z=") << rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
-						python << _T("feed(z=") << end.Z(true) << _T(")\n");
-
-						pMachineState->Location(end);
-					}
-
-					for (std::list<CNCPoint>::iterator itPoint = interpolated_points.begin(); itPoint != interpolated_points.end(); itPoint++)
-					{
-						if (*itPoint != pMachineState->Location())
-						{
-							python << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
-							pMachineState->Location(*itPoint);
-						} // End if - then
-					} // End for
-				} // End if - then
-			}
-			break;
-		} // End switch
+            python << GeneratePathForEdge(edges[i], uStart, uEnd, isForwards, pMachineState, PE.Z());
+		}
 	}
-
-	python << _T("rapid(z=") << PythonString(clearance_height / theApp.m_program->m_units).c_str() << _T(")\n");
-	CNCPoint temp = pMachineState->Location();
-	temp.SetZ( clearance_height );
-	pMachineState->Location(temp);
 
 	return(python);
 }
+
+
+
+/**
+    We want to move the cutting tool along this edge.  If the tool's current
+    position aligns with either the first_parameter's location or the last_parameter's
+    location then run to the opposite end.  If the tool's location does not align
+    with either of these locations then go from first to last.
+    NOTE: Ignore the Z value when looking for these alignments.
+ */
+/* static */ Python CContour::GeneratePathForEdge(
+	const TopoDS_Edge &edge,
+	const double first_parameter,
+	const double last_parameter,
+	const bool direction,
+	CMachineState *pMachineState,
+	const double end_z )
+{
+	Python python;
+
+	double tolerance = heeksCAD->GetTolerance();
+
+	BRepAdaptor_Curve curve(edge);
+	GeomAbs_CurveType curve_type = curve.GetType();
+
+	double uStart = first_parameter;
+    double uEnd = last_parameter;
+    gp_Pnt PS;
+    gp_Vec VS;
+    curve.D1(uStart, PS, VS);
+    PS.SetZ(pMachineState->Location().Z());
+    gp_Pnt PE;
+    gp_Vec VE;
+    curve.D1(uEnd, PE, VE);
+    PE.SetZ(pMachineState->Location().Z());
+
+    bool forwards = direction;
+
+    if (pMachineState->Location() == CNCPoint(PE))
+    {
+        // We need to go from last to first. Swap
+        // the start and end U values.
+
+        double tmp = uStart;
+        uStart = uEnd;
+        uEnd = tmp;
+
+        forwards = ! forwards;
+    }
+
+  	switch(curve_type)
+	{
+		case GeomAbs_Line:
+			// make a line
+		{
+			gp_Pnt PS;
+			gp_Vec VS;
+			curve.D1(uStart, PS, VS);
+			PS.SetZ(pMachineState->Location().Z());
+			gp_Pnt PE;
+			gp_Vec VE;
+			curve.D1(uEnd, PE, VE);
+			PE.SetZ(end_z);
+
+			std::list<CNCPoint> points;
+			points.push_back(PS);
+			points.push_back(PE);
+
+			for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
+            {
+                if (itPoint->Distance(pMachineState->Location()) > tolerance)
+                {
+                    python << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
+                    pMachineState->Location(*itPoint);
+                }
+            } // End for
+		}
+		break;
+
+		case GeomAbs_Circle:
+		if ((pMachineState->Fixture().m_params.m_xz_plane == 0.0) && (pMachineState->Fixture().m_params.m_yz_plane == 0.0))
+		{
+			gp_Pnt PS;
+			gp_Vec VS;
+			curve.D1(uStart, PS, VS);
+			gp_Pnt PE;
+			gp_Vec VE;
+			curve.D1(uEnd, PE, VE);
+			gp_Circ circle = curve.Circle();
+
+            // Arc towards PE
+            CNCPoint point(PE);
+            CNCPoint centre( circle.Location() );
+            bool l_bClockwise = Clockwise(circle);
+            if (! forwards) l_bClockwise = ! l_bClockwise;
+
+            std::list<CNCPoint> points;
+            double period = curve.Period();
+            double u = uStart;
+			if (uStart < uEnd)
+			{
+				double step_down = (pMachineState->Location().Z() - end_z) / ((uEnd - uStart) / (period/4.0));
+				double z = pMachineState->Location().Z();
+
+				for (u = uStart; u <= uEnd; u += (period/4.0))
+				{
+					gp_Pnt p;
+					gp_Vec v;
+					curve.D1(u, p, v);
+					p.SetZ(z);
+					z -= step_down;
+					points.push_back( p );
+				}
+			}
+			else
+			{
+				double step_down = (pMachineState->Location().Z() - end_z) / ((uStart - uEnd) / (period/4.0));
+				double z = pMachineState->Location().Z();
+
+				for (u = uStart; u >= uEnd; u -= (period/4.0))
+				{
+					gp_Pnt p;
+					gp_Vec v;
+					curve.D1(u, p, v);
+					p.SetZ(z);
+					z -= step_down;
+					points.push_back( p );
+				}
+				// l_bClockwise = ! l_bClockwise;
+			}
+
+            if ((points.size() > 0) && (*points.rbegin() != CNCPoint(PE)))
+            {
+                CNCPoint point(PE);
+                point.SetZ(end_z);
+                points.push_back( point );
+            }
+
+            for (std::list<CNCPoint>::iterator itPoint = points.begin(); itPoint != points.end(); itPoint++)
+            {
+                if (itPoint->Distance(pMachineState->Location()) > tolerance)
+                {
+                    CNCPoint offset = centre - pMachineState->Location();
+                    python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
+                        << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
+                    // if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
+                    python << _T(")\n");
+                    pMachineState->Location(*itPoint);
+                }
+            } // End for
+
+            break; // Allow the circle option to fall through to the 'default' option if
+                    // there is any rotation in the YZ and/or XZ planes.
+        }
+
+		default:
+		{
+			// make lots of small lines
+			gp_Pnt PS;
+			gp_Vec VS;
+			curve.D1(uStart, PS, VS);
+			gp_Pnt PE;
+			gp_Vec VE;
+			curve.D1(uEnd, PE, VE);
+
+			BRepTools::Clean(edge);
+			BRepMesh::Mesh(edge, max_deviation_for_spline_to_arc);
+
+			TopLoc_Location L;
+			Handle(Poly_Polygon3D) Polyg = BRep_Tool::Polygon3D(edge, L);
+			if (!Polyg.IsNull()) {
+				const TColgp_Array1OfPnt& Points = Polyg->Nodes();
+				Standard_Integer po;
+				int i = 0;
+				std::list<CNCPoint> interpolated_points;
+				for (po = Points.Lower(); po <= Points.Upper(); po++, i++) {
+					CNCPoint p = (Points.Value(po)).Transformed(L);
+					interpolated_points.push_back(p);
+				} // End for
+
+				// See if we should go from the start to the end or the end to the start.
+				if (*interpolated_points.rbegin() == pMachineState->Location())
+				{
+					// We need to go from the end to the start.  Reverse the point locations to
+					// make this easier.
+
+					interpolated_points.reverse();
+				} // End if - then
+
+				double step_down = (pMachineState->Location().Z() - end_z) / interpolated_points.size();
+				double z = pMachineState->Location().Z();
+				for (std::list<CNCPoint>::iterator itPoint = interpolated_points.begin(); itPoint != interpolated_points.end(); itPoint++)
+				{
+					itPoint->SetZ( z );
+					z -= step_down;
+
+					if (*itPoint != pMachineState->Location())
+					{
+						python << _T("feed(x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(")\n");
+						pMachineState->Location(*itPoint);
+					} // End if - then
+				} // End for
+			} // End if - then
+		}
+		break;
+	} // End switch
+
+	return(python);
+}
+
 
 
 
@@ -851,7 +1088,9 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
                             python << GeneratePathFromWire(	tool_path_wire,
                                                             pMachineState,
                                                             m_depth_op_params.m_clearance_height,
-                                                            m_depth_op_params.m_rapid_down_to_height );
+                                                            m_depth_op_params.m_rapid_down_to_height,
+                                                            m_depth_op_params.m_start_depth,
+                                                            m_params.m_entry_move_type );
                         } // End if - then
                     } // End for
                 } // End for
@@ -863,6 +1102,23 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
             } // End catch
         } // End if - else
     } // End for
+
+    if (pMachineState->Location().Z() < (m_depth_op_params.m_clearance_height / theApp.m_program->m_units))
+    {
+        // Move up above workpiece to relocate to the start of the next operation.
+        python << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+
+        CNCPoint where(pMachineState->Location());
+        where.SetZ(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
+        pMachineState->Location(where);
+    }
+
+    if (number_of_bad_sketches > 0)
+    {
+        wxString message;
+        message << _("Failed to create contours around ") << number_of_bad_sketches << _(" sketches");
+        wxMessageBox(message);
+    }
 
 	return(python);
 }
