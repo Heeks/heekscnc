@@ -1129,7 +1129,9 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
                         python << CContour::GeneratePathFromWire(wire,
                                                                 pMachineState,
                                                                 m_depth_op_params.m_clearance_height,
-                                                                m_depth_op_params.m_rapid_down_to_height );
+                                                                m_depth_op_params.m_rapid_down_to_height,
+                                                                m_depth_op_params.m_start_depth,
+                                                                CContourParams::ePlunge );
                     } // End for
                 } // End if - then
             } // End for
@@ -1645,7 +1647,9 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
                 python << CContour::GeneratePathFromWire(tool_path_wire,
                                                         pMachineState,
                                                         m_depth_op_params.m_clearance_height,
-                                                        m_depth_op_params.m_rapid_down_to_height );
+                                                        m_depth_op_params.m_rapid_down_to_height,
+                                                        m_depth_op_params.m_start_depth,
+                                                        CContourParams::ePlunge );
 
                 if (depth == final_depth)
                 {

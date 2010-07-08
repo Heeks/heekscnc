@@ -39,22 +39,20 @@
 			<Add directory="../../heekscad" />
 			<Add directory="../heekscad" />
 			<Add directory="kurve/geometry" />
+			<Add directory="../../libarea" />
+			<Add directory="/usr/include/python2.6" />
 		</Compiler>
 		<Linker>
 			<Add option="`wx-config --libs`" />
 			<Add option="`wx-config --gl-libs`" />
 			<Add option="-lTKVRML -lTKSTL -lTKBRep -lTKIGES -lTKShHealing -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKXSBase -lTKShapeSchema -lFWOSPlugin -lTKBool -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKMath -lTKOffset -lTKPrim -lTKPShape -lTKService -lTKTopAlgo -lTKV2d -lTKV3d -lTKMesh -lTKAdvTools -lTKBO -lTKXDESTEP -lTKXCAF -lTKXCAFSchema -lTKLCAF -lTKPLCAF -lstdc++ -lGLU -lGL ${WXLIBS}" />
+			<Add option="-lpthread -ldl -lutil -lm -lpython2.6" />
 		</Linker>
-		<Unit filename="kurve/PythonInterface.cpp" />
-		<Unit filename="kurve/PythonInterface.h" />
-		<Unit filename="kurve/geometry/Construction.cpp" />
-		<Unit filename="kurve/geometry/Finite.cpp" />
-		<Unit filename="kurve/geometry/Matrix.cpp" />
-		<Unit filename="kurve/geometry/geometry.h" />
-		<Unit filename="kurve/geometry/kurve.cpp" />
-		<Unit filename="kurve/geometry/offset.cpp" />
 		<Unit filename="src/Adaptive.cpp" />
 		<Unit filename="src/Adaptive.h" />
+		<Unit filename="src/AreaLibrary.h" />
+		<Unit filename="src/AttachOp.cpp" />
+		<Unit filename="src/AttachOp.h" />
 		<Unit filename="src/BOM.cpp" />
 		<Unit filename="src/BOM.h" />
 		<Unit filename="src/CNCConfig.h" />
@@ -105,7 +103,6 @@
 		<Unit filename="src/Operations.cpp" />
 		<Unit filename="src/Operations.h" />
 		<Unit filename="src/OutputCanvas.cpp" />
-		<Unit filename="src/OutputCanvas.h" />
 		<Unit filename="src/Pocket.cpp" />
 		<Unit filename="src/Pocket.h" />
 		<Unit filename="src/Probe.h" />
@@ -123,12 +120,18 @@
 		<Unit filename="src/RawMaterial.h" />
 		<Unit filename="src/Reselect.cpp" />
 		<Unit filename="src/Reselect.h" />
+		<Unit filename="src/ScriptOp.cpp" />
+		<Unit filename="src/ScriptOp.h" />
 		<Unit filename="src/SpeedOp.cpp" />
 		<Unit filename="src/SpeedOp.h" />
 		<Unit filename="src/SpeedReference.cpp" />
 		<Unit filename="src/SpeedReference.h" />
 		<Unit filename="src/SpeedReferences.cpp" />
 		<Unit filename="src/SpeedReferences.h" />
+		<Unit filename="src/Tag.cpp" />
+		<Unit filename="src/Tag.h" />
+		<Unit filename="src/Tags.cpp" />
+		<Unit filename="src/Tags.h" />
 		<Unit filename="src/Tools.cpp" />
 		<Unit filename="src/Tools.h" />
 		<Unit filename="src/TrsfNCCode.cpp" />
@@ -149,6 +152,10 @@
 		<Unit filename="../interface/MarkedObject.h" />
 		<Unit filename="../interface/ObjList.cpp" />
 		<Unit filename="../interface/ObjList.h" />
+		<Unit filename="../interface/ObjectCanvas.cpp" />
+		<Unit filename="../interface/ObjectCanvas.h" />
+		<Unit filename="../interface/PictureFrame.cpp" />
+		<Unit filename="../interface/PictureFrame.h" />
 		<Unit filename="../interface/PropertyCheck.cpp" />
 		<Unit filename="../interface/PropertyCheck.h" />
 		<Unit filename="../interface/PropertyChoice.cpp" />
