@@ -111,6 +111,7 @@ CZigZag::CZigZag(const std::list<int> &solids, const int cutting_tool_number)
 			Add(object, NULL);
 		}
 	}
+	m_solids.clear();
 
 	SetDepthOpParamsFromBox();
 
@@ -179,6 +180,8 @@ void CZigZag::ReloadPointers()
 			Add( object, NULL );
 		}
 	}
+
+	m_solids.clear();	// We don't want to convert them twice.
 
 	CDepthOp::ReloadPointers();
 }

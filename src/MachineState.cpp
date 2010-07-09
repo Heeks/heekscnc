@@ -18,6 +18,7 @@ CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54, false, 0.0)
         m_location = CNCPoint(0.0, 0.0, 0.0);
         m_cutting_tool_number = 0;  // No tool assigned.
         m_fixture_has_been_set = false;
+		m_attached_to_surface = false;
 }
 
 CMachineState::~CMachineState() { }
@@ -35,6 +36,7 @@ CMachineState & CMachineState::operator= ( CMachineState & rhs )
         m_fixture = rhs.Fixture();
         m_cutting_tool_number = rhs.CuttingTool();
         m_fixture_has_been_set = rhs.m_fixture_has_been_set;
+		m_attached_to_surface = rhs.m_attached_to_surface;
     }
 
     return(*this);
@@ -44,6 +46,7 @@ bool CMachineState::operator== ( const CMachineState & rhs ) const
 {
     if (m_fixture != rhs.Fixture()) return(false);
     if (m_cutting_tool_number != rhs.m_cutting_tool_number) return(false);
+    if(m_attached_to_surface != rhs.m_attached_to_surface) return false;
 
     // Don't include the location in the state check.  Moving around the machine is nothing to reset ourselves
     // over.
@@ -70,6 +73,11 @@ Python CMachineState::CuttingTool( const int new_cutting_tool )
         {
             python << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title) << _T(")\n");
             python << _T("tool_change( id=") << new_cutting_tool << _T(")\n");
+			if(m_attached_to_surface)
+			{
+				python << _T("cutter = ") << pCuttingTool->OCLDefinition() << _T("\n");
+				python << _T("nc.attach.pdcf.setCutter(cutter)\n");
+			}
         } // End if - then
     }
 

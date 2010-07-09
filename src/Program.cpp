@@ -555,10 +555,11 @@ Python CProgram::RewritePythonProgram()
 	bool kurve_funcs_needed = false;
 	bool area_module_needed = false;
 	bool area_funcs_needed = false;
+	bool ocl_module_needed = false;
 	bool ocl_funcs_needed = false;
-	bool adaptive_op_exists = false;
-	bool drilling_op_exists = false;
-	bool rough_turning_op_exists = false;
+	bool nc_attach_needed = false;
+	bool actp_funcs_needed = false;
+	bool turning_module_needed = false;
 
 	typedef std::vector< COp * > OperationsMap_t;
 	OperationsMap_t operations;
@@ -574,44 +575,38 @@ Python CProgram::RewritePythonProgram()
 	{
 		operations.push_back( (COp *) object );
 
-		if(object->GetType() == ProfileType)
+		if(((COp*)object)->m_active)
 		{
-			if(((CProfile*)object)->m_active)
+
+			switch(object->GetType())
 			{
+			case ProfileType:
 				kurve_module_needed = true;
 				kurve_funcs_needed = true;
-			}
-		}
-		else if((object->GetType() == PocketType) || (object->GetType() == InlayType))
-		{
-			if(((COp*)object)->m_active)
-			{
+				break;
+
+			case PocketType:
+			case InlayType:
 				area_module_needed = true;
 				area_funcs_needed = true;
-			}
-		}
-		else if(object->GetType() == ZigZagType)
-		{
-			if(((CZigZag*)object)->m_active)
-			{
+				break;
+
+			case AttachOpType:
+			case UnattachOpType:
+				ocl_module_needed = true;
+				nc_attach_needed = true;
+			case ZigZagType:
 				ocl_funcs_needed = true;
-			}
-		}
-		else if(object->GetType() == AdaptiveType)
-		{
-			if(((CAdaptive*)object)->m_active)adaptive_op_exists = true;
-		}
-		else if(object->GetType() == DrillingType)
-		{
-			if(((CDrilling*)object)->m_active)drilling_op_exists = true;
-		}
-		else if(object->GetType() == TurnRoughType)
-		{
-			if(((CProfile*)object)->m_active)
-			{
+				break;
+
+			case AdaptiveType:
+				actp_funcs_needed = true;
+				break;
+
+			case TurnRoughType:
 				kurve_module_needed = true;
 				area_module_needed = true;
-				rough_turning_op_exists = true;
+				turning_module_needed = true;
 			}
 		}
 	}
@@ -653,21 +648,31 @@ Python CProgram::RewritePythonProgram()
 		python << _T("import area_funcs\n");
 	}
 
+	// attach operations
+	if(nc_attach_needed)
+	{
+		python << _T("import nc.attach\n");
+	}
+
 	// OpenCamLib stuff
+	if(ocl_module_needed)
+	{
+		python << _T("import ocl\n");
+	}
 	if(ocl_funcs_needed)
 	{
 		python << _T("import ocl_funcs\n");
 	}
 
 	// actp
-	if(adaptive_op_exists)
+	if(actp_funcs_needed)
 	{
 		python << _T("import actp_funcs\n");
 		python << _T("import actp\n");
 		python << _T("\n");
 	}
 
-	if(rough_turning_op_exists)
+	if(turning_module_needed)
 	{
 		python << _T("import turning\n");
 		python << _T("\n");

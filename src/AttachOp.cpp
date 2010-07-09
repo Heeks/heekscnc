@@ -23,6 +23,10 @@
 
 int CAttachOp::number_for_stl_file = 1;
 
+CAttachOp::CAttachOp():COp(GetTypeString(), 0, AttachOpType), m_tolerance(0.01)
+{
+}
+
 CAttachOp::CAttachOp( const CAttachOp & rhs ) : COp(rhs), m_solids(rhs.m_solids), m_tolerance(rhs.m_tolerance)
 {
 }
@@ -92,25 +96,19 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
     wxFileName filepath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("surface%d.stl"), number_for_stl_file).c_str() );
 	number_for_stl_file++;
 
-	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
+	//heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
 
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = copies_to_delete.begin(); l_itSolid != copies_to_delete.end(); l_itSolid++)
 	{
 		delete *l_itSolid;
 	} // End for
-	python << _T("s = ocl_funcs.STLSurfFromFile('") << PythonString(filepath.GetFullPath()) << _T("')\n");
-	python << _T("nc.attach.pdcf = ocl.PathDropCutterFinish(s)\n");
+
+	python << _T("s = ocl_funcs.STLSurfFromFile(") << PythonString(filepath.GetFullPath()) << _T(")\n");
+	python << _T("nc.attach.pdcf = ocl.PathDropCutter(s)\n");
 	python << _T("nc.attach.attach_begin()\n");
 
-	/*
-s = ocl_funcs.STLSurfFromFile('C:\\Users\\Dan\\AppData\\Local\\Temp\\surface.stl')
-nc.attach.pdcf = ocl.PathDropCutterFinish(s)
-nc.attach.cutter = ocl.CylCutter(6.0)
-nc.attach.pdcf.setCutter(nc.attach.cutter)
-
-nc.attach.attach_begin()
-*/
+	pMachineState->m_attached_to_surface = true;
 
 	return(python);
 } // End AppendTextToProgram() method
@@ -220,6 +218,7 @@ Python CUnattachOp::AppendTextToProgram(CMachineState *pMachineState)
 	Python python;
 
 	python << _T("nc.attach.attach_end()\n");
+	pMachineState->m_attached_to_surface = false;
 
 	return python;
 }

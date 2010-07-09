@@ -1498,6 +1498,27 @@ TopoDS_Shape CCuttingTool::GetShape() const
    } // End catch
 } // End GetShape() method
 
+Python CCuttingTool::OCLDefinition() const
+{
+	Python python;
+
+	switch (m_params.m_type)
+	{
+		case CCuttingToolParams::eEndmill:
+		case CCuttingToolParams::eSlotCutter:
+		case CCuttingToolParams::eBallEndMill:
+			// to do, not just CylCutter for everything
+			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("))\n");
+			break;
+
+		default:
+			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("))\n");
+			break;
+	} // End switch
+
+	return python;
+
+} // End GetShape() method
 
 TopoDS_Face CCuttingTool::GetSideProfile() const
 {
