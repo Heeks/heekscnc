@@ -14,7 +14,7 @@ public:
 	double m_tolerance;
 	static int number_for_stl_file;
 
-	CAttachOp():COp(GetTypeString(), 0, AttachOpType) {}
+	CAttachOp();
 
 	CAttachOp( const CAttachOp & rhs );
 	CAttachOp & operator= ( const CAttachOp & rhs );

@@ -63,7 +63,9 @@ private:
     }; // End Instance class definition
 
 public:
-    CMachineState();
+	bool m_attached_to_surface;
+
+	CMachineState();
     ~CMachineState();
 
     CMachineState(CMachineState & rhs);

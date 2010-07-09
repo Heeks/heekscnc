@@ -294,6 +294,8 @@ bool COp::IsAnOperation(int object_type)
 		case ContourType:
 		case InlayType:
 		case ScriptOpType:
+		case AttachOpType:
+		case UnattachOpType:
 			return true;
 		default:
 			return false;
