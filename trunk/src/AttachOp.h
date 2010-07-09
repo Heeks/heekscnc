@@ -15,7 +15,7 @@ public:
 	static int number_for_stl_file;
 
 	CAttachOp();
-
+	CAttachOp(const std::list<int> &solids);
 	CAttachOp( const CAttachOp & rhs );
 	CAttachOp & operator= ( const CAttachOp & rhs );
 
@@ -27,15 +27,21 @@ public:
 	const wxChar* GetTypeString(void)const{return _T("AttachOp");}
 	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CAttachOp *)other)); }
+	void ReloadPointers();
+
+	const wxString ConfigScope(void)const{return _T("AttachOp");}
 
 	// COp's virtual functions
 	Python AppendTextToProgram(CMachineState *pMachineState);
 	bool UsesTool(){return false;}
+	void WriteDefaultValues();
+	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

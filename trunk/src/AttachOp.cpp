@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "AttachOp.h"
+#include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "interface/HeeksObj.h"
@@ -25,6 +26,22 @@ int CAttachOp::number_for_stl_file = 1;
 
 CAttachOp::CAttachOp():COp(GetTypeString(), 0, AttachOpType), m_tolerance(0.01)
 {
+}
+
+CAttachOp::CAttachOp(const std::list<int> &solids):COp(GetTypeString(), 0, AttachOpType), m_solids(solids), m_tolerance(0.01)
+{
+	ReadDefaultValues();
+
+	for(std::list<int>::const_iterator It = solids.begin(); It != solids.end(); It++)
+	{
+		int solid = *It;
+		HeeksObj* object = heeksCAD->GetIDObject(SolidType, solid);
+		if(object)
+		{
+			Add(object, NULL);
+		}
+	}
+	m_solids.clear();
 }
 
 CAttachOp::CAttachOp( const CAttachOp & rhs ) : COp(rhs), m_solids(rhs.m_solids), m_tolerance(rhs.m_tolerance)
@@ -49,6 +66,22 @@ const wxBitmap &CAttachOp::GetIcon()
 	static wxBitmap* icon = NULL;
 	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/attach.png")));
 	return *icon;
+}
+
+void CAttachOp::ReloadPointers()
+{
+	for (std::list<int>::iterator symbol = m_solids.begin(); symbol != m_solids.end(); symbol++)
+	{
+		HeeksObj *object = heeksCAD->GetIDObject( SolidType, *symbol );
+		if (object != NULL)
+		{
+			Add( object, NULL );
+		}
+	}
+
+	m_solids.clear();	// We don't want to convert them twice.
+
+	COp::ReloadPointers();
 }
 
 Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
@@ -96,7 +129,7 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
     wxFileName filepath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("surface%d.stl"), number_for_stl_file).c_str() );
 	number_for_stl_file++;
 
-	//heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
+	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
 
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = copies_to_delete.begin(); l_itSolid != copies_to_delete.end(); l_itSolid++)
@@ -120,6 +153,17 @@ void CAttachOp::GetProperties(std::list<Property *> *list)
 	AddSolidsProperties(list, m_solids);
 	list->push_back(new PropertyLength(_("tolerance"), m_tolerance, this, on_set_tolerance));
 	COp::GetProperties(list);
+}
+
+static ReselectSolids reselect_solids;
+
+void CAttachOp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+	reselect_solids.m_solids = &m_solids;
+	reselect_solids.m_object = this;
+	t_list->push_back(&reselect_solids);
+
+	COp::GetTools( t_list, p );
 }
 
 HeeksObj *CAttachOp::MakeACopy(void)const
@@ -189,6 +233,22 @@ HeeksObj* CAttachOp::ReadFromXMLElement(TiXmlElement* element)
 	new_object->ReadBaseXML(element);
 
 	return new_object;
+}
+
+void CAttachOp::WriteDefaultValues()
+{
+	COp::WriteDefaultValues();
+
+	CNCConfig config(ConfigScope());
+	config.Write(wxString(GetTypeString()) + _T("Tolerance"), m_tolerance);
+}
+
+void CAttachOp::ReadDefaultValues()
+{
+	COp::ReadDefaultValues();
+
+	CNCConfig config(ConfigScope());
+	config.Read(wxString(GetTypeString()) + _T("Tolerance"), &m_tolerance, 0.01);
 }
 
 bool CAttachOp::operator==( const CAttachOp & rhs ) const
