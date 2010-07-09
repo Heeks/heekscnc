@@ -4,8 +4,8 @@ from nc.nc import *
 
 def STLSurfFromFile(filepath):
     s = ocl.STLSurf()
-    print 'reading ', filepath
     ocl.STLReader(filepath, s)
+    s.build_kdtree()
     return s
 
 def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0):
@@ -122,4 +122,3 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
             rapid(z = clearance)
          else:
             rapid(z = clearance / units)
-

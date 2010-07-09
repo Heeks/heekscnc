@@ -7,8 +7,9 @@
 
 import nc
 import ocl
+import ocl_funcs
 
-pdcf = ocl.PathDropCutterFinish()
+pdcf = ocl.PathDropCutter()
 
 ################################################################################
 class CreatorAttach(nc.Creator):
@@ -156,13 +157,26 @@ class CreatorAttach(nc.Creator):
             return
         if px == self.x and py == self.y:
             # z move only
-            self.original.feed(x, y, self.z2(z), machine_coordinates)
+            self.original.feed(self.x, self.y, self.z2(self.z), machine_coordinates)
             return
+            
+        # make a path which is a line
         path = ocl.Path()
         path.append(ocl.Line(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z)))
+        
+        # get the points on the surface
         pdcf.setPath(path)
         pdcf.run()
         plist = pdcf.getCLPoints()
+        
+        #refine the points
+        f = ocl.LineCLFilter()
+        f.setTolerance(0.01)
+        for p in plist:
+            f.addCLPoint(p)
+        f.run()
+        plist = f.getCLPoints()
+        
         i = 0
         for p in plist:
             if i > 0:
@@ -184,11 +198,21 @@ class CreatorAttach(nc.Creator):
         if y != None: self.y = y
         if z != None: self.z = z
         path = ocl.Path()
-        print 'path length = ', len(path.getSpans())
         path.append(ocl.Arc(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z), ocl.Point(px + i, py + j, pz), ccw))
+        
+        # get the points on the surface
         pdcf.setPath(path)
         pdcf.run()
         plist = pdcf.getCLPoints()
+        
+        #refine the points
+        f = ocl.LineCLFilter()
+        f.setTolerance(0.01)
+        for p in plist:
+            f.addCLPoint(p)
+        f.run()
+        plist = f.getCLPoints()
+
         i = 0
         for p in plist:
             if i > 0:
