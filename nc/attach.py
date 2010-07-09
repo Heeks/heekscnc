@@ -144,6 +144,29 @@ class CreatorAttach(nc.Creator):
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z
+        
+    def cut_path(self, path):
+        # get the points on the surface
+        pdcf.setPath(path)
+        pdcf.run()
+        plist = pdcf.getCLPoints()
+        
+        #refine the points
+        f = ocl.LineCLFilter()
+        f.setTolerance(0.005)
+        for p in plist:
+            f.addCLPoint(p)
+        f.run()
+        plist = f.getCLPoints()
+        
+        i = 0
+        for p in plist:
+            if i > 0:
+                if self.imperial:
+                    self.original.feed(p.x * 0.039370079, p.y * 0.039370079, p.z * 0.039370079)
+                else:
+                    self.original.feed(p.x, p.y, p.z)
+            i = i + 1
 
     def feed(self, x=None, y=None, z=None, machine_coordinates=False):
         px = self.x
@@ -164,31 +187,10 @@ class CreatorAttach(nc.Creator):
         path = ocl.Path()
         path.append(ocl.Line(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z)))
         
-        # get the points on the surface
-        pdcf.setPath(path)
-        pdcf.run()
-        plist = pdcf.getCLPoints()
+        # cut along the path
+        self.cut_path(path)
         
-        #refine the points
-        f = ocl.LineCLFilter()
-        f.setTolerance(0.01)
-        for p in plist:
-            f.addCLPoint(p)
-        f.run()
-        plist = f.getCLPoints()
-        
-        i = 0
-        for p in plist:
-            if i > 0:
-                if self.imperial:
-                    self.original.feed(p.x * 0.039370079, p.y * 0.039370079, p.z * 0.039370079, machine_coordinates)
-                else:
-                    self.original.feed(p.x, p.y, p.z, machine_coordinates)
-            i = i + 1
-
     def arc(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None, ccw = True):
-        self.feed(x, y, z)
-        return 
         if self.x == None or self.y == None or self.z == None:
             raise "first attached move can't be an arc"
         px = self.x
@@ -200,27 +202,8 @@ class CreatorAttach(nc.Creator):
         path = ocl.Path()
         path.append(ocl.Arc(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z), ocl.Point(px + i, py + j, pz), ccw))
         
-        # get the points on the surface
-        pdcf.setPath(path)
-        pdcf.run()
-        plist = pdcf.getCLPoints()
-        
-        #refine the points
-        f = ocl.LineCLFilter()
-        f.setTolerance(0.01)
-        for p in plist:
-            f.addCLPoint(p)
-        f.run()
-        plist = f.getCLPoints()
-
-        i = 0
-        for p in plist:
-            if i > 0:
-                if self.imperial:
-                    self.original.feed(p.x * 0.039370079, p.y * 0.039370079, p.z * 0.039370079)
-                else:
-                    self.original.feed(p.x, p.y, p.z)
-            i = i + 1
+        # cut along the path
+        self.cut_path(path)
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         self.arc(x, y, z, i, j, k, r, False)
