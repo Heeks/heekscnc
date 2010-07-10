@@ -38,6 +38,7 @@
 #include <gp_Circ.hxx>
 #include <ShapeFix_Wire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
 #include <BRepMesh.hxx>
@@ -204,7 +205,7 @@ const wxBitmap &CContour::GetIcon()
 }
 
 
-/* static */ gp_Pnt CContour::GetStart(const TopoDS_Edge &edge)
+/* static */ CNCPoint CContour::GetStart(const TopoDS_Edge &edge)
 {
     BRepAdaptor_Curve curve(edge);
     double uStart = curve.FirstParameter();
@@ -215,7 +216,7 @@ const wxBitmap &CContour::GetIcon()
     return(PS);
 }
 
-/* static */ gp_Pnt CContour::GetEnd(const TopoDS_Edge &edge)
+/* static */ CNCPoint CContour::GetEnd(const TopoDS_Edge &edge)
 {
     BRepAdaptor_Curve curve(edge);
     double uEnd = curve.LastParameter();
@@ -342,27 +343,27 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     bool direction = forwards;
 
     double min_distance = 9999999;  // Some big number.
-    if (GetStart(from).Distance( GetEnd( to )) < min_distance)
+    if (GetStart(from).XYDistance( GetEnd( to )) < min_distance)
     {
-        min_distance = GetStart( from ).Distance( GetEnd( to ));
+        min_distance = GetStart( from ).XYDistance( GetEnd( to ));
         direction = backwards;
     }
 
-    if (GetEnd(from).Distance( GetEnd( to )) < min_distance)
+    if (GetEnd(from).XYDistance( GetEnd( to )) < min_distance)
     {
-        min_distance = GetEnd(from).Distance( GetEnd( to ));
+        min_distance = GetEnd(from).XYDistance( GetEnd( to ));
         direction = forwards;
     }
 
-    if (GetStart(from).Distance( GetStart( to )) < min_distance)
+    if (GetStart(from).XYDistance( GetStart( to )) < min_distance)
     {
-        min_distance = GetStart(from).Distance( GetStart( to ));
+        min_distance = GetStart(from).XYDistance( GetStart( to ));
         direction = backwards;
     }
 
-    if (GetEnd(from).Distance( GetStart( to )) < min_distance)
+    if (GetEnd(from).XYDistance( GetStart( to )) < min_distance)
     {
-        min_distance = GetEnd(from).Distance( GetStart( to ));
+        min_distance = GetEnd(from).XYDistance( GetStart( to ));
         direction = forwards;
     }
 
@@ -400,14 +401,13 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 {
 	double tolerance = heeksCAD->GetTolerance();
 
-	if (GetStart(a).Distance(GetStart(b)) < tolerance) return(true);
-	if (GetStart(a).Distance(GetEnd(b)) < tolerance) return(true);
-	if (GetEnd(a).Distance(GetStart(b)) < tolerance) return(true);
-	if (GetEnd(a).Distance(GetEnd(b)) < tolerance) return(true);
+	if (GetStart(a).XYDistance(GetStart(b)) < tolerance) return(true);
+	if (GetStart(a).XYDistance(GetEnd(b)) < tolerance) return(true);
+	if (GetEnd(a).XYDistance(GetStart(b)) < tolerance) return(true);
+	if (GetEnd(a).XYDistance(GetEnd(b)) < tolerance) return(true);
 
 	return(false);
 }
-
 
 
 /**
@@ -458,7 +458,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
     int direction = +1;	// Move forwards through the list of edges (for now)
 
-    if (pMachineState->Location().Distance(GetStart(edges[starting_edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[starting_edge_offset])))
+    if (pMachineState->Location().XYDistance(GetStart(edges[starting_edge_offset])) < pMachineState->Location().XYDistance(GetEnd(edges[starting_edge_offset])))
     {
         // The machine is closer to the starting point of this edge.  Find out whether the end point is closer
         // to the next edge or the previous edge.  Set the direction of edge iteration accordingly.
@@ -467,16 +467,16 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
         // We're going to end up at this edge's end point.
         CNCPoint reference_point(GetEnd(edges[starting_edge_offset]));
-        double next_distance = reference_point.Distance(GetStart(edges[next_edge_offset]));
-        if (reference_point.Distance(GetEnd(edges[next_edge_offset])) < next_distance)
+        double next_distance = reference_point.XYDistance(GetStart(edges[next_edge_offset]));
+        if (reference_point.XYDistance(GetEnd(edges[next_edge_offset])) < next_distance)
         {
-            next_distance = reference_point.Distance(GetEnd(edges[next_edge_offset]));
+            next_distance = reference_point.XYDistance(GetEnd(edges[next_edge_offset]));
         }
 
-        double previous_distance = reference_point.Distance(GetStart(edges[previous_edge_offset]));
-        if (reference_point.Distance(GetEnd(edges[previous_edge_offset])) < previous_distance)
+        double previous_distance = reference_point.XYDistance(GetStart(edges[previous_edge_offset]));
+        if (reference_point.XYDistance(GetEnd(edges[previous_edge_offset])) < previous_distance)
         {
-            previous_distance = reference_point.Distance(GetEnd(edges[previous_edge_offset]));
+            previous_distance = reference_point.XYDistance(GetEnd(edges[previous_edge_offset]));
         }
 
         if (next_distance < previous_edge_offset)
@@ -496,16 +496,16 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
         // We're going to end up at this edge's end point.
         CNCPoint reference_point(GetStart(edges[starting_edge_offset]));
-        double next_distance = reference_point.Distance(GetStart(edges[next_edge_offset]));
-        if (reference_point.Distance(GetEnd(edges[next_edge_offset])) < next_distance)
+        double next_distance = reference_point.XYDistance(GetStart(edges[next_edge_offset]));
+        if (reference_point.XYDistance(GetEnd(edges[next_edge_offset])) < next_distance)
         {
             next_distance = reference_point.Distance(GetEnd(edges[next_edge_offset]));
         }
 
         double previous_distance = reference_point.Distance(GetStart(edges[previous_edge_offset]));
-        if (reference_point.Distance(GetEnd(edges[previous_edge_offset])) < previous_distance)
+        if (reference_point.XYDistance(GetEnd(edges[previous_edge_offset])) < previous_distance)
         {
-            previous_distance = reference_point.Distance(GetEnd(edges[previous_edge_offset]));
+            previous_distance = reference_point.XYDistance(GetEnd(edges[previous_edge_offset]));
         }
 
         if (next_distance < previous_edge_offset)
@@ -535,7 +535,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     }
 
     ::size_t edge_offset = starting_edge_offset;
-    while ((pMachineState->Location().Z() - end_z) > tolerance)
+    while (fabs(pMachineState->Location().Z() - end_z) > tolerance)
     {
         const TopoDS_Shape &E = edges[edge_offset];
         BRepAdaptor_Curve curve(TopoDS::Edge(E));
@@ -557,7 +557,8 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
             // use the proportion of the length to come up with a 'U' parameter for
             // this edge that indicates the point along the edge.
 
-            if (pMachineState->Location().Distance(GetStart(edges[edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[edge_offset])))
+            if (pMachineState->Location().XYDistance(GetStart(edges[edge_offset])) < pMachineState->Location().XYDistance(GetEnd(edges[edge_offset])))
+            // if (forwards)
             {
                 // We're going from FirstParameter() towards LastParameter()
                 double proportion = distance_remaining / depth_possible_with_this_edge;
@@ -565,19 +566,19 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
                 // The point_at_full_depth indicates where we will be when we are at depth.  Run
                 // along the edge down to this point
-                // python << _T("comment('from first to U')\n");
+                // python << _T("comment('part 0 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                 python << GeneratePathForEdge( edges[edge_offset], curve.FirstParameter(), U, true, pMachineState, goal_z );
 
                 if (DirectionTowarardsNextEdge( edges[edge_offset], edges[NextOffset(edges,edge_offset,(int) ((fabs(goal_z - end_z) > tolerance)?direction * -1.0:direction))] ))
                 {
                     // We're heading towards the end of this edge.
-                    // python << _T("comment('from U to last 1')\n");
+                    // python << _T("comment('part 1 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.LastParameter(), true, pMachineState, goal_z );
                 }
                 else
                 {
                     // We're heading towards the beginning of this edge.
-                    // python << _T("comment('from U to first 2')\n");
+                    // python << _T("comment('part 2 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.FirstParameter(), false, pMachineState, goal_z );
                 }
             }
@@ -587,6 +588,16 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                 double proportion = 1.0 - (distance_remaining / depth_possible_with_this_edge);
                 double U = ((curve.LastParameter() - curve.FirstParameter()) * proportion) + curve.FirstParameter();
 
+/*
+                python << _T("comment('proportion is ") << proportion << _T("')\n");
+                python << _T("comment('goal_z is ") << goal_z << _T("')\n");
+                python << _T("comment('end_z is ") << end_z << _T("')\n");
+                python << _T("comment('first parameter is ") << curve.FirstParameter() << _T("')\n");
+                python << _T("comment('last parameter is ") << curve.LastParameter() << _T("')\n");
+                python << _T("comment('u is ") << U << _T("')\n");
+
+                python << _T("comment('first_half is ") << ((fabs(goal_z - end_z) > tolerance)?_T("True"):_T("False")) << _T("')\n");
+*/
                 /*
                 printf("first %lf last %lf proportion %lf U %lf\n",
                     curve.FirstParameter(), curve.LastParameter(), proportion, U);
@@ -594,19 +605,19 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
                 // The point_at_full_depth indicates where we will be when we are at depth.  Run
                 // along the edge down to this point
-                // python << _T("comment('from last to U 3')\n");
+                // python << _T("comment('part 3 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                 python << GeneratePathForEdge( edges[edge_offset], curve.LastParameter(), U, false, pMachineState, goal_z );
 
                 if (DirectionTowarardsNextEdge( edges[edge_offset], edges[NextOffset(edges,edge_offset,(int) ((fabs(goal_z - end_z) > tolerance)?direction * -1.0:direction))] ))
                 {
                     // We're heading towards the end of this edge.
-                    // python << _T("comment('from U to last 4')\n");
+                    // python << _T("comment('part 4 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.LastParameter(), true, pMachineState, goal_z );
                 }
                 else
                 {
                     // We're heading towards the beginning of this edge.
-                    // python << _T("comment('from U to first 5')\n");
+                    // python << _T("comment('part 5 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.FirstParameter(), false, pMachineState, goal_z );
                 }
             }
@@ -621,14 +632,13 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
         {
             // This edge is not long enough for us to reach our goal depth.  Run all the way along this edge.
             double z_for_this_run = pMachineState->Location().Z() - depth_possible_with_this_edge;
-            if (pMachineState->Location().Distance(GetStart(edges[edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[edge_offset])))
+
+            if (pMachineState->Location().XYDistance(GetStart(edges[edge_offset])) < pMachineState->Location().XYDistance(GetEnd(edges[edge_offset])))
             {
-                // python << _T("comment('part step down 6')\n");
                 python << GeneratePathForEdge( edges[edge_offset], curve.FirstParameter(), curve.LastParameter(), true, pMachineState, z_for_this_run );
             }
             else
             {
-                // python << _T("comment('part step down 7')\n");
                 python << GeneratePathForEdge( edges[edge_offset], curve.LastParameter(), curve.FirstParameter(), false, pMachineState, z_for_this_run );
             }
         }
@@ -651,14 +661,12 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
         const TopoDS_Shape &E = edges[edge_offset];
         BRepAdaptor_Curve curve(TopoDS::Edge(E));
 
-        if (pMachineState->Location().Distance(GetStart(edges[edge_offset])) < pMachineState->Location().Distance(GetEnd(edges[edge_offset])))
+        if (pMachineState->Location().XYDistance(GetStart(edges[edge_offset])) < pMachineState->Location().XYDistance(GetEnd(edges[edge_offset])))
         {
-            // python << _T("comment('rewinding 7')\n");
             python << GeneratePathForEdge( edges[edge_offset], curve.FirstParameter(), curve.LastParameter(), true, pMachineState, pMachineState->Location().Z() );
         }
         else
         {
-            // python << _T("comment('rewinding 8')\n");
             python << GeneratePathForEdge( edges[edge_offset], curve.LastParameter(), curve.FirstParameter(), false, pMachineState, pMachineState->Location().Z() );
         }
 
@@ -818,20 +826,14 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     gp_Pnt PE;
     gp_Vec VE;
     curve.D1(uEnd, PE, VE);
-    PE.SetZ(pMachineState->Location().Z());
+    PE.SetZ(end_z);
 
     bool forwards = direction;
 
     if (pMachineState->Location() == CNCPoint(PE))
     {
-        // We need to go from last to first. Swap
-        // the start and end U values.
-
-        double tmp = uStart;
-        uStart = uEnd;
-        uEnd = tmp;
-
-        forwards = ! forwards;
+        // We are already at the end point.  Just return.
+        return python;
     }
 
   	switch(curve_type)
@@ -949,6 +951,12 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 			gp_Vec VE;
 			curve.D1(uEnd, PE, VE);
 
+/*
+            Handle_Adaptor3d_HCurve trimmed(curve.Trim(uStart, uEnd, tolerance));
+            Handle_Geom_Curve hcurve(curve);
+            GeomAdaptor_Curve tcurve(hcurve.Trim(uStart, uEnd, tolerance));
+*/
+
 			BRepTools::Clean(edge);
 			BRepMesh::Mesh(edge, max_deviation_for_spline_to_arc);
 
@@ -965,13 +973,16 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 				} // End for
 
 				// See if we should go from the start to the end or the end to the start.
-				if (*interpolated_points.rbegin() == pMachineState->Location())
+				// if (interpolated_points.rbegin()->XYDistance(pMachineState->Location()) < tolerance)
+				// if (interpolated_points.rbegin()->XYDistance(pMachineState->Location()) < interpolated_points.begin()->XYDistance(pMachineState->Location()))
+				if (first_parameter > last_parameter)
 				{
 					// We need to go from the end to the start.  Reverse the point locations to
 					// make this easier.
 
 					interpolated_points.reverse();
 				} // End if - then
+
 
 				double step_down = (pMachineState->Location().Z() - end_z) / interpolated_points.size();
 				double z = pMachineState->Location().Z();
