@@ -201,8 +201,8 @@ public:
 	static bool EdgesJoin( const TopoDS_Edge &a, const TopoDS_Edge &b );
 
 public:
-	static gp_Pnt GetStart(const TopoDS_Edge &edge);
-    static gp_Pnt GetEnd(const TopoDS_Edge &edge);
+	static CNCPoint GetStart(const TopoDS_Edge &edge);
+    static CNCPoint GetEnd(const TopoDS_Edge &edge);
     static double GetLength(const TopoDS_Edge &edge);
 };
 

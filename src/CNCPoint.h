@@ -38,6 +38,10 @@ public:
 
 	void ToDoubleArray( double *pArrayOfThree ) const;
 
+	double XYDistance( const CNCPoint & rhs ) const;
+	double XZDistance( const CNCPoint & rhs ) const;
+	double YZDistance( const CNCPoint & rhs ) const;
+
 private:
 	double Tolerance() const;
 	double Units() const;

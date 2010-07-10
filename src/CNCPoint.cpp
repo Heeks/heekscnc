@@ -120,6 +120,33 @@ void CNCPoint::ToDoubleArray( double *pArrayOfThree ) const
 } // End ToDoubleArray() method
 
 
+double CNCPoint::XYDistance( const CNCPoint & rhs ) const
+{
+    gp_Pnt _lhs(*this);
+    gp_Pnt _rhs(rhs);
+    _lhs.SetZ(0.0);
+    _rhs.SetZ(0.0);
+    return(_lhs.Distance(_rhs));
+}
+
+double CNCPoint::XZDistance( const CNCPoint & rhs ) const
+{
+    gp_Pnt _lhs(*this);
+    gp_Pnt _rhs(rhs);
+    _lhs.SetY(0.0);
+    _rhs.SetY(0.0);
+    return(_lhs.Distance(_rhs));
+}
+
+double CNCPoint::YZDistance( const CNCPoint & rhs ) const
+{
+    gp_Pnt _lhs(*this);
+    gp_Pnt _rhs(rhs);
+    _lhs.SetX(0.0);
+    _rhs.SetX(0.0);
+    return(_lhs.Distance(_rhs));
+}
+
 
 
 CNCVector::CNCVector() : gp_Vec(0.0, 0.0, 0.0)
