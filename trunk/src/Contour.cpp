@@ -541,6 +541,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     ::size_t edge_offset = starting_edge_offset;
     while (fabs(pMachineState->Location().Z() - end_z) > tolerance)
     {
+        bool direction_has_changed = false;     // Avoid the double direction change.
         const TopoDS_Shape &E = edges[edge_offset];
         BRepAdaptor_Curve curve(TopoDS::Edge(E));
         double edge_length = GCPnts_AbscissaPoint::Length (curve);
@@ -562,7 +563,6 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
             // this edge that indicates the point along the edge.
 
             if (pMachineState->Location().XYDistance(GetStart(edges[edge_offset])) < pMachineState->Location().XYDistance(GetEnd(edges[edge_offset])))
-            // if (forwards)
             {
                 // We're going from FirstParameter() towards LastParameter()
                 double proportion = distance_remaining / depth_possible_with_this_edge;
@@ -570,19 +570,16 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
                 // The point_at_full_depth indicates where we will be when we are at depth.  Run
                 // along the edge down to this point
-                // python << _T("comment('part 0 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                 python << GeneratePathForEdge( edges[edge_offset], curve.FirstParameter(), U, true, pMachineState, goal_z );
 
                 if (DirectionTowarardsNextEdge( edges[edge_offset], edges[NextOffset(edges,edge_offset,(int) ((fabs(goal_z - end_z) > tolerance)?direction * -1.0:direction))] ))
                 {
                     // We're heading towards the end of this edge.
-                    // python << _T("comment('part 1 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.LastParameter(), true, pMachineState, goal_z );
                 }
                 else
                 {
                     // We're heading towards the beginning of this edge.
-                    // python << _T("comment('part 2 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.FirstParameter(), false, pMachineState, goal_z );
                 }
             }
@@ -592,42 +589,25 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                 double proportion = 1.0 - (distance_remaining / depth_possible_with_this_edge);
                 double U = ((curve.LastParameter() - curve.FirstParameter()) * proportion) + curve.FirstParameter();
 
-/*
-                python << _T("comment('proportion is ") << proportion << _T("')\n");
-                python << _T("comment('goal_z is ") << goal_z << _T("')\n");
-                python << _T("comment('end_z is ") << end_z << _T("')\n");
-                python << _T("comment('first parameter is ") << curve.FirstParameter() << _T("')\n");
-                python << _T("comment('last parameter is ") << curve.LastParameter() << _T("')\n");
-                python << _T("comment('u is ") << U << _T("')\n");
-
-                python << _T("comment('first_half is ") << ((fabs(goal_z - end_z) > tolerance)?_T("True"):_T("False")) << _T("')\n");
-*/
-                /*
-                printf("first %lf last %lf proportion %lf U %lf\n",
-                    curve.FirstParameter(), curve.LastParameter(), proportion, U);
-                */
-
                 // The point_at_full_depth indicates where we will be when we are at depth.  Run
                 // along the edge down to this point
-                // python << _T("comment('part 3 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                 python << GeneratePathForEdge( edges[edge_offset], curve.LastParameter(), U, false, pMachineState, goal_z );
 
                 if (DirectionTowarardsNextEdge( edges[edge_offset], edges[NextOffset(edges,edge_offset,(int) ((fabs(goal_z - end_z) > tolerance)?direction * -1.0:direction))] ))
                 {
                     // We're heading towards the end of this edge.
-                    // python << _T("comment('part 4 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.LastParameter(), true, pMachineState, goal_z );
                 }
                 else
                 {
                     // We're heading towards the beginning of this edge.
-                    // python << _T("comment('part 5 edge offset ") << (int) edge_offset << _T(" direction ") << (int) direction << _T("')\n");
                     python << GeneratePathForEdge( edges[edge_offset], U, curve.FirstParameter(), false, pMachineState, goal_z );
                 }
             }
 
             if (fabs(goal_z - end_z) > tolerance)
             {
+                direction_has_changed = true;
                 direction *= -1.0;  // Reverse direction
                 goal_z = end_z;   // Changed goal.
             }
@@ -649,9 +629,12 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
         if (EdgesJoin( edges[edge_offset], edges[NextOffset(edges,edge_offset,direction)] ) == false)
         {
-            // Reverse direction
-            // python << _T("comment('reverse without incrementing')\n");
-            direction *= -1.0;
+            if (! direction_has_changed)
+            {
+                // Reverse direction
+                direction *= -1.0;
+                direction_has_changed = true;
+            }
         }
         else
         {
@@ -967,8 +950,6 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 				} // End for
 
 				// See if we should go from the start to the end or the end to the start.
-				// if (interpolated_points.rbegin()->XYDistance(pMachineState->Location()) < tolerance)
-				// if (interpolated_points.rbegin()->XYDistance(pMachineState->Location()) < interpolated_points.begin()->XYDistance(pMachineState->Location()))
 				if (first_parameter > last_parameter)
 				{
 					// We need to go from the end to the start.  Reverse the point locations to
