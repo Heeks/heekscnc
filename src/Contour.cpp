@@ -44,6 +44,10 @@
 #include <BRepMesh.hxx>
 #include <Poly_Polygon3D.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <Handle_BRepAdaptor_HCurve.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -944,18 +948,8 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 		default:
 		{
 			// make lots of small lines
-			gp_Pnt PS;
-			gp_Vec VS;
-			curve.D1(uStart, PS, VS);
-			gp_Pnt PE;
-			gp_Vec VE;
-			curve.D1(uEnd, PE, VE);
-
-/*
-            Handle_Adaptor3d_HCurve trimmed(curve.Trim(uStart, uEnd, tolerance));
-            Handle_Geom_Curve hcurve(curve);
-            GeomAdaptor_Curve tcurve(hcurve.Trim(uStart, uEnd, tolerance));
-*/
+			BRepBuilderAPI_MakeEdge edge_builder(curve.Curve().Curve(), uStart, uEnd);
+			TopoDS_Edge edge(edge_builder.Edge());
 
 			BRepTools::Clean(edge);
 			BRepMesh::Mesh(edge, max_deviation_for_spline_to_arc);
