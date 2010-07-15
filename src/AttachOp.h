@@ -12,10 +12,11 @@ class CAttachOp: public COp{
 public:
 	std::list<int> m_solids;
 	double m_tolerance;
+	double m_min_z;
 	static int number_for_stl_file;
 
 	CAttachOp();
-	CAttachOp(const std::list<int> &solids);
+	CAttachOp(const std::list<int> &solids, double tol, double min_z);
 	CAttachOp( const CAttachOp & rhs );
 	CAttachOp & operator= ( const CAttachOp & rhs );
 

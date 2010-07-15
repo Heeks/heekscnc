@@ -24,11 +24,11 @@
 
 int CAttachOp::number_for_stl_file = 1;
 
-CAttachOp::CAttachOp():COp(GetTypeString(), 0, AttachOpType), m_tolerance(0.01)
+CAttachOp::CAttachOp():COp(GetTypeString(), 0, AttachOpType), m_tolerance(0.01), m_min_z(0.0)
 {
 }
 
-CAttachOp::CAttachOp(const std::list<int> &solids):COp(GetTypeString(), 0, AttachOpType), m_solids(solids), m_tolerance(0.01)
+CAttachOp::CAttachOp(const std::list<int> &solids, double tol, double min_z):COp(GetTypeString(), 0, AttachOpType), m_solids(solids), m_tolerance(tol), m_min_z(min_z)
 {
 	ReadDefaultValues();
 
@@ -44,7 +44,7 @@ CAttachOp::CAttachOp(const std::list<int> &solids):COp(GetTypeString(), 0, Attac
 	m_solids.clear();
 }
 
-CAttachOp::CAttachOp( const CAttachOp & rhs ) : COp(rhs), m_solids(rhs.m_solids), m_tolerance(rhs.m_tolerance)
+CAttachOp::CAttachOp( const CAttachOp & rhs ) : COp(rhs), m_solids(rhs.m_solids), m_tolerance(rhs.m_tolerance), m_min_z(rhs.m_min_z)
 {
 }
 
@@ -55,6 +55,7 @@ CAttachOp & CAttachOp::operator= ( const CAttachOp & rhs )
 		COp::operator=( rhs );
 		m_solids = rhs.m_solids;
 		m_tolerance = rhs.m_tolerance;
+		m_min_z = rhs.m_min_z;
 	}
 
 	return(*this);
@@ -139,6 +140,7 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 
 	python << _T("s = ocl_funcs.STLSurfFromFile(") << PythonString(filepath.GetFullPath()) << _T(")\n");
 	python << _T("nc.attach.pdcf = ocl.PathDropCutter(s)\n");
+	python << _T("nc.attach.pdcf.minimumZ = ") << m_min_z << _T("\n");
 	python << _T("nc.attach.attach_begin()\n");
 
 	pMachineState->m_attached_to_surface = true;
@@ -147,11 +149,13 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 } // End AppendTextToProgram() method
 
 static void on_set_tolerance(double value, HeeksObj* object){((CAttachOp*)object)->m_tolerance = value;}
+static void on_set_min_z(double value, HeeksObj* object){((CAttachOp*)object)->m_min_z = value;}
 
 void CAttachOp::GetProperties(std::list<Property *> *list)
 {
 	AddSolidsProperties(list, m_solids);
 	list->push_back(new PropertyLength(_("tolerance"), m_tolerance, this, on_set_tolerance));
+	list->push_back(new PropertyLength(_("minimum z"), m_min_z, this, on_set_min_z));
 	COp::GetProperties(list);
 }
 
@@ -189,6 +193,9 @@ void CAttachOp::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = new TiXmlElement( "AttachOp" );
 	root->LinkEndChild( element );
 
+	element->SetDoubleAttribute("tolerance", m_tolerance);
+	element->SetDoubleAttribute("minz", m_min_z);
+
 	// write solid ids
 	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
 	{
@@ -205,6 +212,9 @@ void CAttachOp::WriteXML(TiXmlNode *root)
 HeeksObj* CAttachOp::ReadFromXMLElement(TiXmlElement* element)
 {
 	CAttachOp* new_object = new CAttachOp;
+
+	element->Attribute("tolerance", &new_object->m_tolerance);
+	element->Attribute("minz", &new_object->m_min_z);
 
 	std::list<TiXmlElement *> elements_to_remove;
 
@@ -241,6 +251,7 @@ void CAttachOp::WriteDefaultValues()
 
 	CNCConfig config(ConfigScope());
 	config.Write(wxString(GetTypeString()) + _T("Tolerance"), m_tolerance);
+	config.Write(wxString(GetTypeString()) + _T("MinZ"), m_min_z);
 }
 
 void CAttachOp::ReadDefaultValues()
@@ -249,11 +260,13 @@ void CAttachOp::ReadDefaultValues()
 
 	CNCConfig config(ConfigScope());
 	config.Read(wxString(GetTypeString()) + _T("Tolerance"), &m_tolerance, 0.01);
+	config.Read(wxString(GetTypeString()) + _T("MinZ"), &m_min_z, 0.0);
 }
 
 bool CAttachOp::operator==( const CAttachOp & rhs ) const
 {
 	if (m_tolerance != rhs.m_tolerance) return false;
+	if (m_min_z != rhs.m_min_z) return false;
 	if (m_solids.size() != rhs.m_solids.size()) return false;
 
 	std::list<int>::const_iterator It = m_solids.begin();
