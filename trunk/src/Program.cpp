@@ -593,6 +593,7 @@ Python CProgram::RewritePythonProgram()
 
 			case AttachOpType:
 			case UnattachOpType:
+			case ScriptOpType:
 				ocl_module_needed = true;
 				nc_attach_needed = true;
 			case ZigZagType:

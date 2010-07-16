@@ -35,6 +35,12 @@ public:
 
 	// COp's virtual functions
 	Python AppendTextToProgram(CMachineState *pMachineState);
+	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(0); }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+
+	static Python OpenCamLibDefinition(std::list<HeeksObj *> objects, Python object_title);
+	static Python OpenCamLibDefinition(TopoDS_Edge edge);
+	static std::vector< std::vector<TopoDS_Edge> > AggregateConnectedEdges( std::vector<TopoDS_Edge> & edge );
+
 };

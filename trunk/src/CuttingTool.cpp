@@ -1858,5 +1858,31 @@ bool CCuttingTool::operator==( const CCuttingTool & rhs ) const
 	return(true);
 }
 
+Python CCuttingTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
+{
+	Python python;
+	Python _indent;
+
+	for (::size_t i=0; i<indent; i++)
+	{
+		_indent << _T("\t");
+	}
+
+	switch (m_params.m_type)
+	{
+	case CCuttingToolParams::eBallEndMill:
+		python << _indent << _T("ocl.BallCutter(") << CuttingRadius(false) << _T(")");
+		return(python);
+
+	case CCuttingToolParams::eEndmill:
+	case CCuttingToolParams::eSlotCutter:
+		python << _indent << _T("ocl.CylCutter(") << CuttingRadius(false) << _T(")");
+		return(python);
+	} // End switch
+
+	return(python);
+}
+
+
 
 
