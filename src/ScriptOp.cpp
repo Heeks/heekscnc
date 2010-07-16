@@ -259,12 +259,15 @@ Python CScriptOp::AppendTextToProgram(CMachineState *pMachineState)
 	    children.push_back(child);
 	}
 
-	Python object_title;
-	object_title << _T("script_op_id_") << (int) this->m_id;
+    if (children.size() > 0)
+    {
+        Python object_title;
+        object_title << _T("script_op_id_") << (int) this->m_id;
 
-	python << OpenCamLibDefinition(children, object_title);
-	python << _T("\n");
-	python << _T("graphics = ") << object_title << _T("()\n\n");
+        python << OpenCamLibDefinition(children, object_title);
+        python << _T("\n");
+        python << _T("graphics = ") << object_title << _T("()\n\n");
+    }
 
 	python << m_str.c_str();
 
