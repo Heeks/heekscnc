@@ -256,6 +256,8 @@ public:
 	void ImportProbeCalibrationData( const wxString & probed_points_xml_file_name );
 	double Gradient() const { return(m_params.m_gradient); }
 
+	Python OpenCamLibDefinition(const unsigned int indent = 0);
+
 private:
 	void DeleteSolid();
 

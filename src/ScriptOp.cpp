@@ -6,6 +6,7 @@
  */
 
 #include "stdafx.h"
+#include <TopoDS_Edge.hxx>
 #include "ScriptOp.h"
 #include "ProgramCanvas.h"
 #include "Program.h"
@@ -16,6 +17,13 @@
 
 #include <sstream>
 #include <iomanip>
+
+#include <BRepAdaptor_Curve.hxx>
+#include <gp_Circ.hxx>
+#include <BRepTools.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepMesh.hxx>
+#include <Poly_Polygon3D.hxx>
 
 CScriptOp::CScriptOp( const CScriptOp & rhs ) : COp(rhs)
 {
@@ -41,9 +49,222 @@ const wxBitmap &CScriptOp::GetIcon()
 	return *icon;
 }
 
+
+
+/* static */ Python CScriptOp::OpenCamLibDefinition(TopoDS_Edge edge)
+{
+    Python python;
+
+	BRepAdaptor_Curve curve(edge);
+	switch (curve.GetType())
+	{
+		case GeomAbs_Line:
+		{
+			CNCPoint PS;
+			gp_Vec VS;
+			curve.D1(curve.FirstParameter(), PS, VS);
+			CNCPoint PE;
+			gp_Vec VE;
+			curve.D1(curve.LastParameter(), PE, VE);
+
+			python << _T("ocl.Line(ocl.Point(") << PS.X(false) << _T(",") << PS.Y(false) << _T(",") << PS.Z(false) << _T("), ")
+					<< _T("ocl.Point(") << PE.X(false) << _T(",") << PE.Y(false) << _T(",") << PE.Z(false) << _T("))");
+		}
+		break;
+
+		case GeomAbs_Circle:
+		{
+			CNCPoint PS;
+			gp_Vec VS;
+			curve.D1(curve.FirstParameter(), PS, VS);
+			CNCPoint PE;
+			gp_Vec VE;
+			curve.D1(curve.LastParameter(), PE, VE);
+			gp_Circ circle = curve.Circle();
+
+            // Arc towards PE
+            CNCPoint point(PE);
+            CNCPoint centre( circle.Location() );
+            bool l_bClockwise = (circle.Axis().Direction().Z() <= 0);
+
+			python << _T("ocl.Arc(")
+					<< _T("ocl.Point(") << PS.X(false) << _T(",") << PS.Y(false) << _T(",") << PS.Z(false) << _T("),") // Start
+					<< _T("ocl.Point(") << PE.X(false) << _T(",") << PE.Y(false) << _T(",") << PE.Z(false) << _T("),") // End
+					<< _T("ocl.Point(") << centre.X(false) << _T(",") << centre.Y(false) << _T(",") << centre.Z(false) << _T("),") // Centre
+					<< (l_bClockwise?_T("True"):_T("False")) << _T(")"); // Direction
+			break;
+		}
+
+		default:
+		{
+			// make lots of small lines
+			gp_Pnt PS;
+			gp_Vec VS;
+			curve.D1(curve.FirstParameter(), PS, VS);
+			gp_Pnt PE;
+			gp_Vec VE;
+			curve.D1(curve.LastParameter(), PE, VE);
+
+			BRepTools::Clean(edge);
+			double max_deviation_for_spline_to_arc = 0.001;
+			BRepMesh::Mesh(edge, max_deviation_for_spline_to_arc);
+
+			TopLoc_Location L;
+			Handle(Poly_Polygon3D) Polyg = BRep_Tool::Polygon3D(edge, L);
+			if (!Polyg.IsNull()) {
+				const TColgp_Array1OfPnt& Points = Polyg->Nodes();
+				Standard_Integer po;
+				int i = 0;
+				std::list<CNCPoint> interpolated_points;
+				python << _T("ocl.Path(");
+				CNCPoint previous;
+				for (po = Points.Lower(); po <= Points.Upper(); po++, i++) {
+					CNCPoint p = (Points.Value(po)).Transformed(L);
+					interpolated_points.push_back(p);
+
+					if (interpolated_points.size() == 1)
+					{
+						previous = p;
+					}
+					else
+					{
+						python << _T("ocl.Line(")
+								<< _T("ocl.Point(") << previous.X(false) << _T(",") << previous.Y(false) << _T(",") << previous.Z(false) << _T(")")
+								<< _T("ocl.Point(") << p.X(false) << _T(",") << p.Y(false) << _T(",") << p.Z(false) << _T(")")
+								<< _T(")");
+					}
+				} // End for
+				python << _T(")");	// End ocl.Path() definition
+			} // End if - then
+		}
+		break;
+	} // End switch
+
+	return(python);
+}
+
+
+/**
+	This method sorts and traverses the list of TopoDS_Edge objects arranging them into
+	vectors of connected edges.  It also ensures that each edge's definition is swapped
+	around so that moving from the edge's FirstParameter() to its LastParameter() correctly
+	sets up the tool's location to start machining the next edge in the connected series.
+
+	The resultant array of connected edge sequences should allow all edges in each sequence
+	to be machined 'at depth'.
+ */
+/* static */ std::vector< std::vector<TopoDS_Edge> > CScriptOp::AggregateConnectedEdges( std::vector<TopoDS_Edge> & edges )
+{
+	std::vector<TopoDS_Edge> all_edges;
+	std::copy( edges.begin(), edges.end(), std::inserter( all_edges, all_edges.begin() ));
+
+	typedef std::vector<TopoDS_Edge> Series_t;
+	typedef std::vector< Series_t > Chains_t;
+	Chains_t chains;
+
+/*
+	while (all_edges.size() > 0)
+	{
+        Series_t used;
+        for (Series_t::iterator itEdge = all_edges.begin(); itEdge != all_edges.end(); itEdge++)
+        {
+            if (used.size() == 0)
+            {
+                used.push_back(*itEdge);
+            }
+            else
+            {
+                // See if this edge connects with either end of the 'used' series.
+                if (GetStart(
+            }
+        } // End for
+	} // End while
+*/
+
+	return(chains);
+
+} // End AggregateConnectedEdges() method
+
+/**
+    This method converts the list of objects into a set of nested classes that
+    describe the geometry.  These classes will include definitions of these objects
+    in terms of lines, arcs and points.  Any BSpline (or other) objects that are
+ */
+/* static */ Python CScriptOp::OpenCamLibDefinition(std::list<HeeksObj *> objects, Python object_title )
+{
+    Python python;
+
+	if (objects.size() > 0)
+	{
+		python << _T("class ") << object_title << _T(":\n");
+
+		python << _T("\tsketches = []\n");
+		python << _T("\tpoints = []\n");
+	}
+
+    for (std::list<HeeksObj *>::iterator itObject = objects.begin(); itObject != objects.end(); itObject++)
+    {
+		std::vector<TopoDS_Edge> edges;
+		switch ((*itObject)->GetType())
+		{
+		case PointType:
+			double p[3];
+			memset( p, 0, sizeof(p) );
+			heeksCAD->VertexGetPoint( *itObject, p );
+			python << _T("\tpoints.append(ocl.Point(") << p[0] << _T(",") << p[1] << _T(",") << p[2] << _T("))\n");
+			break;
+
+		case SketchType:
+			if (! heeksCAD->ConvertSketchToEdges( *itObject, edges ))
+			{
+				Python empty;
+				return(empty);
+			}
+			else
+			{
+				// The edges will already have been sorted.  We need to traverse them in order and separate
+				// connected sequences of them.  As we start new connected sequences, we should check to see
+				// if they connect back to their beginning and mark them as 'periodic'.
+				if (edges.size() > 0)
+				{
+					python << _T("\tsketch_id_") << (int) (*itObject)->m_id << _T(" = ocl.Path()\n");
+				}
+
+				for (std::vector<TopoDS_Edge>::size_type offset = 0; offset < edges.size(); offset++)
+				{
+					python << _T("\tsketch_id_") << (int) (*itObject)->m_id << _T(".append(") << OpenCamLibDefinition(edges[offset]) << _T(")\n");
+				}
+
+				if (edges.size() > 0)
+				{
+					python << _T("\tsketches.append(")
+							<< _T("sketch_id_") << (int) (*itObject)->m_id << _T(")\n");
+				}
+			} // End if - else
+			break;
+		} // End switch
+    } // End for
+
+    return(python);
+
+}
+
 Python CScriptOp::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
+
+	std::list<HeeksObj *> children;
+	for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
+	{
+	    children.push_back(child);
+	}
+
+	Python object_title;
+	object_title << _T("script_op_id_") << (int) this->m_id;
+
+	python << OpenCamLibDefinition(children, object_title);
+	python << _T("\n");
+	python << _T("graphics = ") << object_title << _T("()\n\n");
 
 	python << m_str.c_str();
 
