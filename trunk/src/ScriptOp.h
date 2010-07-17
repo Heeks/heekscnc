@@ -41,6 +41,5 @@ public:
 
 	static Python OpenCamLibDefinition(std::list<HeeksObj *> objects, Python object_title);
 	static Python OpenCamLibDefinition(TopoDS_Edge edge);
-	static std::vector< std::vector<TopoDS_Edge> > AggregateConnectedEdges( std::vector<TopoDS_Edge> & edge );
 
 };
