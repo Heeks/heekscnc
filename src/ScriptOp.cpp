@@ -157,8 +157,8 @@ const wxBitmap &CScriptOp::GetIcon()
 	{
 		python << _T("class ") << object_title << _T(":\n");
 
-		python << _T("\tsketches = []\n");
-		python << _T("\tpoints = []\n");
+		python << _T("\040\040\040\040sketches = []\n");
+		python << _T("\040\040\040\040points = []\n");
 	}
 
     for (std::list<HeeksObj *>::iterator itObject = objects.begin(); itObject != objects.end(); itObject++)
@@ -170,7 +170,7 @@ const wxBitmap &CScriptOp::GetIcon()
 			double p[3];
 			memset( p, 0, sizeof(p) );
 			heeksCAD->VertexGetPoint( *itObject, p );
-			python << _T("\tpoints.append(ocl.Point(") << p[0] << _T(",") << p[1] << _T(",") << p[2] << _T("))\n");
+			python << _T("\040\040\040\040points.append(ocl.Point(") << p[0] << _T(",") << p[1] << _T(",") << p[2] << _T("))\n");
 			break;
 
 		case SketchType:
@@ -186,17 +186,17 @@ const wxBitmap &CScriptOp::GetIcon()
 				// if they connect back to their beginning and mark them as 'periodic'.
 				if (edges.size() > 0)
 				{
-					python << _T("\tsketch_id_") << (int) (*itObject)->m_id << _T(" = ocl.Path()\n");
+					python << _T("\040\040\040\040sketch_id_") << (int) (*itObject)->m_id << _T(" = ocl.Path()\n");
 				}
 
 				for (std::vector<TopoDS_Edge>::size_type offset = 0; offset < edges.size(); offset++)
 				{
-					python << _T("\tsketch_id_") << (int) (*itObject)->m_id << _T(".append(") << OpenCamLibDefinition(edges[offset]) << _T(")\n");
+					python << _T("\040\040\040\040sketch_id_") << (int) (*itObject)->m_id << _T(".append(") << OpenCamLibDefinition(edges[offset]) << _T(")\n");
 				}
 
 				if (edges.size() > 0)
 				{
-					python << _T("\tsketches.append(")
+					python << _T("\040\040\040\040sketches.append(")
 							<< _T("sketch_id_") << (int) (*itObject)->m_id << _T(")\n");
 				}
 			} // End if - else
