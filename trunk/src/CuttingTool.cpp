@@ -1865,7 +1865,7 @@ Python CCuttingTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
 
 	for (::size_t i=0; i<indent; i++)
 	{
-		_indent << _T("\t");
+		_indent << _T("\040\040\040\040");
 	}
 
 	switch (m_params.m_type)
