@@ -145,47 +145,6 @@ const wxBitmap &CScriptOp::GetIcon()
 
 
 /**
-	This method sorts and traverses the list of TopoDS_Edge objects arranging them into
-	vectors of connected edges.  It also ensures that each edge's definition is swapped
-	around so that moving from the edge's FirstParameter() to its LastParameter() correctly
-	sets up the tool's location to start machining the next edge in the connected series.
-
-	The resultant array of connected edge sequences should allow all edges in each sequence
-	to be machined 'at depth'.
- */
-/* static */ std::vector< std::vector<TopoDS_Edge> > CScriptOp::AggregateConnectedEdges( std::vector<TopoDS_Edge> & edges )
-{
-	std::vector<TopoDS_Edge> all_edges;
-	std::copy( edges.begin(), edges.end(), std::inserter( all_edges, all_edges.begin() ));
-
-	typedef std::vector<TopoDS_Edge> Series_t;
-	typedef std::vector< Series_t > Chains_t;
-	Chains_t chains;
-
-/*
-	while (all_edges.size() > 0)
-	{
-        Series_t used;
-        for (Series_t::iterator itEdge = all_edges.begin(); itEdge != all_edges.end(); itEdge++)
-        {
-            if (used.size() == 0)
-            {
-                used.push_back(*itEdge);
-            }
-            else
-            {
-                // See if this edge connects with either end of the 'used' series.
-                if (GetStart(
-            }
-        } // End for
-	} // End while
-*/
-
-	return(chains);
-
-} // End AggregateConnectedEdges() method
-
-/**
     This method converts the list of objects into a set of nested classes that
     describe the geometry.  These classes will include definitions of these objects
     in terms of lines, arcs and points.  Any BSpline (or other) objects that are
