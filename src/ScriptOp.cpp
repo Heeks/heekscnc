@@ -51,7 +51,7 @@ const wxBitmap &CScriptOp::GetIcon()
 
 
 
-/* static */ Python CScriptOp::OpenCamLibDefinition(TopoDS_Edge edge)
+/* static */ Python CScriptOp::OpenCamLibDefinition(TopoDS_Edge edge, Python prefix, Python suffix)
 {
     Python python;
 
@@ -67,8 +67,8 @@ const wxBitmap &CScriptOp::GetIcon()
 			gp_Vec VE;
 			curve.D1(curve.LastParameter(), PE, VE);
 
-			python << _T("ocl.Line(ocl.Point(") << PS.X(false) << _T(",") << PS.Y(false) << _T(",") << PS.Z(false) << _T("), ")
-					<< _T("ocl.Point(") << PE.X(false) << _T(",") << PE.Y(false) << _T(",") << PE.Z(false) << _T("))");
+			python << prefix << _T("ocl.Line(ocl.Point(") << PS.X(true) << _T(",") << PS.Y(true) << _T(",") << PS.Z(true) << _T("), ")
+					<< _T("ocl.Point(") << PE.X(true) << _T(",") << PE.Y(true) << _T(",") << PE.Z(true) << _T("))") << suffix;
 		}
 		break;
 
@@ -87,11 +87,12 @@ const wxBitmap &CScriptOp::GetIcon()
             CNCPoint centre( circle.Location() );
             bool l_bClockwise = (circle.Axis().Direction().Z() <= 0);
 
-			python << _T("ocl.Arc(")
-					<< _T("ocl.Point(") << PS.X(false) << _T(",") << PS.Y(false) << _T(",") << PS.Z(false) << _T("),") // Start
-					<< _T("ocl.Point(") << PE.X(false) << _T(",") << PE.Y(false) << _T(",") << PE.Z(false) << _T("),") // End
-					<< _T("ocl.Point(") << centre.X(false) << _T(",") << centre.Y(false) << _T(",") << centre.Z(false) << _T("),") // Centre
-					<< (l_bClockwise?_T("True"):_T("False")) << _T(")"); // Direction
+			python << prefix << _T("ocl.Arc(")
+					<< _T("ocl.Point(") << PS.X(true) << _T(",") << PS.Y(true) << _T(",") << PS.Z(true) << _T("),") // Start
+					<< _T("ocl.Point(") << PE.X(true) << _T(",") << PE.Y(true) << _T(",") << PE.Z(true) << _T("),") // End
+					<< _T("ocl.Point(") << centre.X(true) << _T(",") << centre.Y(true) << _T(",") << centre.Z(true) << _T("),") // Centre
+					<< (l_bClockwise?_T("True"):_T("False")) << _T(")") // Direction
+					<< suffix;
 			break;
 		}
 
@@ -116,7 +117,6 @@ const wxBitmap &CScriptOp::GetIcon()
 				Standard_Integer po;
 				int i = 0;
 				std::list<CNCPoint> interpolated_points;
-				python << _T("ocl.Path(");
 				CNCPoint previous;
 				for (po = Points.Lower(); po <= Points.Upper(); po++, i++) {
 					CNCPoint p = (Points.Value(po)).Transformed(L);
@@ -128,13 +128,14 @@ const wxBitmap &CScriptOp::GetIcon()
 					}
 					else
 					{
-						python << _T("ocl.Line(")
-								<< _T("ocl.Point(") << previous.X(false) << _T(",") << previous.Y(false) << _T(",") << previous.Z(false) << _T(")")
-								<< _T("ocl.Point(") << p.X(false) << _T(",") << p.Y(false) << _T(",") << p.Z(false) << _T(")")
-								<< _T(")");
+						python << prefix << _T("ocl.Line(")
+								<< _T("ocl.Point(") << previous.X(true) << _T(",") << previous.Y(true) << _T(",") << previous.Z(true) << _T("),")
+								<< _T("ocl.Point(") << p.X(true) << _T(",") << p.Y(true) << _T(",") << p.Z(true) << _T(")")
+								<< _T(")")
+								<< suffix;
+                        previous = p;
 					}
 				} // End for
-				python << _T(")");	// End ocl.Path() definition
 			} // End if - then
 		}
 		break;
@@ -170,7 +171,7 @@ const wxBitmap &CScriptOp::GetIcon()
 			double p[3];
 			memset( p, 0, sizeof(p) );
 			heeksCAD->VertexGetPoint( *itObject, p );
-			python << _T("\040\040\040\040points.append(ocl.Point(") << p[0] << _T(",") << p[1] << _T(",") << p[2] << _T("))\n");
+			python << _T("\040\040\040\040points.append(ocl.Point(") << p[0] / theApp.m_program->m_units << _T(",") << p[1] / theApp.m_program->m_units << _T(",") << p[2] / theApp.m_program->m_units << _T("))\n");
 			break;
 
 		case SketchType:
@@ -191,7 +192,11 @@ const wxBitmap &CScriptOp::GetIcon()
 
 				for (std::vector<TopoDS_Edge>::size_type offset = 0; offset < edges.size(); offset++)
 				{
-					python << _T("\040\040\040\040sketch_id_") << (int) (*itObject)->m_id << _T(".append(") << OpenCamLibDefinition(edges[offset]) << _T(")\n");
+				    Python prefix;
+				    Python suffix;
+					prefix << _T("\040\040\040\040sketch_id_") << (int) (*itObject)->m_id << _T(".append(");
+					suffix << _T(")\n");
+					python << OpenCamLibDefinition(edges[offset], prefix, suffix);
 				}
 
 				if (edges.size() > 0)

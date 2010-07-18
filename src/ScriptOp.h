@@ -40,6 +40,6 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	static Python OpenCamLibDefinition(std::list<HeeksObj *> objects, Python object_title);
-	static Python OpenCamLibDefinition(TopoDS_Edge edge);
+	static Python OpenCamLibDefinition(TopoDS_Edge edge, Python prefix, Python suffix);
 
 };
