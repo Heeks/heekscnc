@@ -1,19 +1,14 @@
 import area
 from nc.nc import *
 
-def cut_area(a, rapid_down_to_height, final_depth, clearance_height):
-    for curve in range(0, area.num_curves(a)):
-        px = 0.0
-        py = 0.0
-        
+def cut_area(a, need_rapid, p, rapid_down_to_height, final_depth, clearance_height, stepover):
+    for curve in a.getCurves():
         first = True
 
-        for vertex in range(0, area.num_vertices(a, curve)):
-            sp, x, y, cx, cy = area.get_vertex(a, curve, vertex)
-            
-            if first:
+        for vertex in curve.getVertices():
+            if need_rapid and first:
                 # rapid across
-                rapid(x, y)
+                rapid(vertex.p.x, vertex.p.y)
                 
                 ##rapid down
                 rapid(z = rapid_down_to_height)
@@ -23,20 +18,28 @@ def cut_area(a, rapid_down_to_height, final_depth, clearance_height):
 
                 first = False
             else:
-                if sp == 1:
-                    arc_ccw(x, y, i = cx - px, j = cy - py)
-                elif sp == -1:
-                    arc_cw(x, y, i = cx - px, j = cy - py)
+                dc = vertex.c - prev_p
+                if vertex.type == 1:
+                    arc_ccw(vertex.p.x, vertex.p.y, i = dc.x, j = dc.y)
+                elif vertex.type == -1:
+                    arc_cw(x, y, i = dc.x, j = dc.y)
                 else:
-                    feed(x, y)
+                    feed(vertex.p.x, vertex.p.y)
 
-            px = x
-            py = y
+            prev_p = vertex.p
 
         rapid(z = clearance_height)
-
+        
+def cut_arealist(arealist, rapid_down_to_height, depth, clearance_height, stepover):
+    need_rapid = True
+    p = area.Point(0, 0)
+    for a in arealist:
+        cut_area(a, need_rapid, p, rapid_down_to_height, depth, clearance_height, stepover)
+    
 def recur(arealist, a1, stepover, from_center):
-    if area.num_curves(a1) == 0:
+    # this makes arealist by recursively offsetting a1 inwards
+    
+    if a1.num_curves() == 0:
         return
     
     if from_center:
@@ -44,13 +47,13 @@ def recur(arealist, a1, stepover, from_center):
     else:
         arealist.append(a1)
 
-    a_offset = area.new()
-    area.copy(a1, a_offset)
-    area.offset(a_offset, stepover)
+    a_offset = area.Area(a1)
+    a_offset.Offset(stepover)
     
-    for curve in range(0, area.num_curves(a_offset)):
-        a2 = area.new()
-        area.add_curve(a2, a_offset, curve)
+    # split curves into new areas
+    for curve in a_offset.getCurves():
+        a2 = area.Area()
+        a2.append(curve)
         recur(arealist, a2, stepover, from_center)
 
 def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, round_corner_factor, clearance_height, from_center):
@@ -62,9 +65,8 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
 
     arealist = list()
 
-    a_firstoffset = area.new()
-    area.copy(a, a_firstoffset)
-    area.offset(a_firstoffset, first_offset)
+    a_firstoffset = area.Area(a)
+    a_firstoffset.Offset(first_offset)
     
     recur(arealist, a_firstoffset, stepover, from_center)
     
@@ -80,12 +82,10 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
             depth = start_depth - i * stepdown
 
         offset_value = first_offset
-        a_offset = area.new()
-        area.copy(a, a_offset)
+        a_offset = area.Area(a)
         area.set_round_corner_factor(round_corner_factor)
-        area.offset(a_offset, offset_value)
+        a_offset.Offset(offset_value)
         
-        for a_offset in arealist:
-            cut_area(a_offset, rapid_down_to_height, depth, clearance_height)
+        cut_arealist(arealist, rapid_down_to_height, depth, clearance_height, stepover)
 
 
