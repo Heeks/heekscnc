@@ -116,7 +116,9 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
     gcode.imbue(std::locale("C"));
 	gcode << std::setprecision(10);
 
-	gcode << wxString::Format(_T("a%d = area.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id).c_str();
+	wxString area_str = wxString::Format(_T("a%d"), id_to_use > 0 ? id_to_use : sketch->m_id);
+
+	gcode << area_str.c_str() << _T(" = area.Area()\n");
 
 	bool started = false;
 
@@ -153,17 +155,14 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 
 				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
 				{
-					gcode << _T("area.start_new_curve(a");
-					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
-					gcode << _T(")\n");
+					gcode << area_str.c_str() << _T(".append(c)\n");
 					started = false;
 				}
 
 				if(!started)
 				{
-					gcode << _T("area.add_point(a");
-					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
-					gcode << _T(", 0, ") << start.X(true) << _T(", ") << start.Y(true) << _T(", 0, 0)\n");
+					gcode << _T("c = area.Curve()\n");
+					gcode << _T("c.append(area.Vertex(0, area.Point(") << start.X(true) << _T(", ") << start.Y(true) << _T("), area.Point(0, 0)))\n");
 					started = true;
 				}
 				span_object->GetEndPoint(e);
@@ -171,9 +170,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 
 				if(type == LineType)
 				{
-					gcode << _T("area.add_point(a");
-					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
-					gcode << _T(", 0, ") << end.X(true) << _T(", ") << end.Y(true) << _T(", 0, 0)\n");
+					gcode << _T("c.append(area.Vertex(0, area.Point(") << end.X(true) << _T(", ") << end.Y(true) << _T("), area.Point(0, 0)))\n");
 				}
 				else if(type == ArcType)
 				{
@@ -183,10 +180,8 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
 					int span_type = (pos[2] >=0) ? 1:-1;
-					gcode << _T("area.add_point(a");
-					gcode << (unsigned int) (id_to_use > 0 ? id_to_use : sketch->m_id);
-					gcode << _T(", ") << span_type << _T(", ") << end.X(true) << _T(", ") << end.Y(true);
-					gcode << _T(", ") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")\n");
+					gcode << _T("c.append(area.Vertex(") << span_type << _T(", area.Point(") << end.X(true) << _T(", ") << end.Y(true);
+					gcode << _T("), area.Point(") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")))\n");
 				}
 				memcpy(prev_e, e, 3*sizeof(double));
 			} // End if - then
@@ -215,15 +210,18 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 					{
 						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
 
-						gcode << _T("area.add_point(a");
-						gcode << (id_to_use > 0 ? id_to_use : sketch->m_id);
-						gcode << _T(", ") << l_itPoint->first << _T(", ");
+						gcode << _T("c.append(area.Vertex(") << l_itPoint->first << _T(", area.Point(");
 						gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
-						gcode << _T(", ") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")\n");
+						gcode << _T("), area.Point(") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")))\n");
 					} // End for
 				}
 			} // End if - else
 		}
+	}
+
+	if(started)
+	{
+		gcode << area_str.c_str() << _T(".append(c)\n");
 	}
 
 	// delete the spans made
