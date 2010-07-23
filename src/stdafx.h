@@ -43,3 +43,8 @@ extern "C" {
 
 // TODO: reference additional headers your program requires here
 
+// Visual Studio 2010 work arround
+
+#if _MSC_VER == 1600
+	#include <iterator>
+#endif
