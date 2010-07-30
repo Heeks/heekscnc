@@ -10,3 +10,4 @@ hpgl3d 3D HPGL 0.01mm 0
 hm50 Hafco HM-50 2400
 gantry_router Gantry Router without tool change or spindle control 0
 rez2 Prva zavracska format rez (Unofficial slovak national standard) 0
+centroid1 centroid mill post 0
