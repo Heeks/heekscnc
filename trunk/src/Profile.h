@@ -93,7 +93,6 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
-	bool CanBeRemoved(){return false;}
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	void ReloadPointers();
