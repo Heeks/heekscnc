@@ -86,6 +86,15 @@ class Tag:
         if z < depth: z = depth
         return z
             
+    def dist(self, k):
+        # return the distance from the tag point to the given kurve
+        d = kurve.point_to_perim(k, self.x, self.y)
+        px, py = kurve.perim_to_point(k, d)
+        dx = math.fabs(self.x - px)
+        dy = math.fabs(self.y - py)
+        d = math.sqrt(dx*dx + dy*dy)
+        return d
+
 tags = []
 
 def clear_tags():
@@ -233,6 +242,13 @@ def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius =
             offset_success = kurve.offset(k, offset_k, offset)
             if offset_success == False:
                 raise "couldn't offset kurve %d" % (k)
+                
+    # remove tags further than radius from the offset kurve
+    new_tags = []
+    for tag in tags:
+        if tag.dist(offset_k) <= radius + 0.001:
+            new_tags.append(tag)
+    tags = new_tags
 
     if kurve.num_spans(offset_k) == 0:
         raise "sketch has no spans!"
