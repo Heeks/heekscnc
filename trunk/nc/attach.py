@@ -10,6 +10,7 @@ import ocl
 import ocl_funcs
 
 pdcf = ocl.PathDropCutter()
+units = 1.0
 
 ################################################################################
 class CreatorAttach(nc.Creator):
@@ -18,9 +19,9 @@ class CreatorAttach(nc.Creator):
         nc.Creator.__init__(self)
 
         self.original = original
-        self.x = original.x
-        self.y = original.y
-        self.z = original.z
+        self.x = original.x * units
+        self.y = original.y * units
+        self.z = original.z * units
         self.imperial = False
 
     ############################################################################
@@ -139,11 +140,11 @@ class CreatorAttach(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
-        self.original.rapid(x, y, z, a, b, c, machine_coordinates)
-        if x != None: self.x = x
-        if y != None: self.y = y
-        if z != None: self.z = z
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
+        self.original.rapid(x, y, z, a, b, c)
+        if x != None: self.x = x * units
+        if y != None: self.y = y * units
+        if z != None: self.z = z * units
         
     def cut_path(self, path):
         # get the points on the surface
@@ -162,25 +163,22 @@ class CreatorAttach(nc.Creator):
         i = 0
         for p in plist:
             if i > 0:
-                if self.imperial:
-                    self.original.feed(p.x * 0.039370079, p.y * 0.039370079, p.z * 0.039370079)
-                else:
-                    self.original.feed(p.x, p.y, p.z)
+                self.original.feed(p.x/units, p.y/units, p.z/units)
             i = i + 1
 
-    def feed(self, x=None, y=None, z=None, machine_coordinates=False):
+    def feed(self, x=None, y=None, z=None):
         px = self.x
         py = self.y
         pz = self.z
-        if x != None: self.x = x
-        if y != None: self.y = y
-        if z != None: self.z = z
+        if x != None: self.x = x * units
+        if y != None: self.y = y * units
+        if z != None: self.z = z * units
         if self.x == None or self.y == None or self.z == None:
-            self.original.feed(x, y, z, machine_coordinates)
+            self.original.feed(x, y, z)
             return
         if px == self.x and py == self.y:
             # z move only
-            self.original.feed(self.x, self.y, self.z2(self.z), machine_coordinates)
+            self.original.feed(self.x/units, self.y/units, self.z2(self.z)/units)
             return
             
         # make a path which is a line
@@ -196,9 +194,9 @@ class CreatorAttach(nc.Creator):
         px = self.x
         py = self.y
         pz = self.z
-        if x != None: self.x = x
-        if y != None: self.y = y
-        if z != None: self.z = z
+        if x != None: self.x = x * units
+        if y != None: self.y = y * units
+        if z != None: self.z = z * units
         path = ocl.Path()
         path.append(ocl.Arc(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z), ocl.Point(px + i, py + j, pz), ccw))
         

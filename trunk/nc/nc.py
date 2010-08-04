@@ -166,11 +166,11 @@ class Creator:
     ############################################################################
     ##  Moves
     
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
         """Rapid move"""
         pass
 
-    def feed(self, x=None, y=None, z=None, machine_coordinates=False):
+    def feed(self, x=None, y=None, z=None):
         """Feed move"""
         pass
 
@@ -194,13 +194,17 @@ class Creator:
         """Return from rapid home"""
         pass
 
+    def set_machine_coordinates(self):
+        """Set machine coordinates"""
+        pass
+
     ############################################################################
     ##  Cutter radius compensation
     
     def use_CRC(self):
         """CRC"""
         return False
-
+        
     def start_CRC(self, left = True, radius = 0.0):
         """start_CRC"""
         pass
@@ -399,11 +403,11 @@ def gearrange(gear=0):
 ############################################################################
 ##  Moves
 
-def rapid(x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
-    creator.rapid(x, y, z, a, b, c, machine_coordinates)
+def rapid(x=None, y=None, z=None, a=None, b=None, c=None):
+    creator.rapid(x, y, z, a, b, c)
 
-def feed(x=None, y=None, z=None, machine_coordinates=False):
-    creator.feed(x, y, z, machine_coordinates)
+def feed(x=None, y=None, z=None):
+    creator.feed(x, y, z)
 
 def arc_cw(x=None, y=None, z=None, i=None, j=None, k=None, r=None):
     creator.arc_cw(x, y, z, i, j, k, r)
@@ -419,6 +423,9 @@ def rapid_home(x=None, y=None, z=None, a=None, b=None, c=None):
 
 def rapid_unhome():
     creator.rapid_unhome()
+    
+def set_machine_coordinates():
+    creator.set_machine_coordinates()
 
 ############################################################################
 ##  Cutter radius compensation
