@@ -5,7 +5,7 @@
 # And global functions for calling current creator
 #
 # Hirutso Enni, 2009-01-13
-
+# altered by Dan Falck 2010-08-04
 ################################################################################
 
 ncOFF = 0
@@ -139,6 +139,33 @@ class Creator:
     def workplane(self, id):
         """Set the workplane"""
         pass
+    ############################################################################
+    ##  APT360 like Transformation Definitions
+    ##  These definitions were created while looking at Irvin Kraal's book on APT
+    ##  - Numerical Control Progamming in APT - page 211
+
+    def matrix(self,a1=None,b1=None,c1=None,a2=None,b2=None,c2=None,a3=None,b3=None,c3=None):
+        """Create a matrix for transformations"""
+        pass
+    def transl(self,x=None,y=None,z=None):
+        """Translate in x,y,z direction"""
+        pass
+    def rotate(self,xyrot=None,yzrot=None,zxrot=None,angle=None):
+        """Rotate about a coordinate axis"""
+        pass
+    def scale(self,k=None):
+        """Scale by factor k"""
+        pass
+    def matrix_product(self,matrix1=None,matrix2=None):
+        """Create matrix that is the product of two other matrices"""
+        pass
+    def mirror_plane(self,plane1=None,plane2=None,plane3=None):
+        """Mirror image about one or more coordinate planes"""
+        pass
+    def mirror_line(self,line=None):
+        """Mirror about a line"""
+        pass
+
 
     ############################################################################
     ##  Rates + Modes
@@ -248,6 +275,14 @@ class Creator:
 
     def comment(self, text):
         """Insert a comment"""
+        pass
+
+    def insert(self, text):
+        """APT style INSERT statement"""
+        pass
+
+    def block_delete(self, on=False):
+        """block to ignore if block delete switch is on"""
         pass
 
     def variable(self, id):
@@ -383,6 +418,34 @@ def workplane(id):
     creator.workplane(id)
 
 ############################################################################
+##  APT360 like Transformation Definitions
+##  These definitions were created while looking at Irvin Kraal's book on APT
+##  - Numerical Control Progamming in APT - page 211
+
+def matrix(a1=None,b1=None,c1=None,a2=None,b2=None,c2=None,a3=None,b3=None,c3=None):
+    creator.matrix(a1,b1,c1,a2,b2,c2,a3,b3,c3)
+    
+def transl(x=None,y=None,z=None):
+    creator.transl(x,y,z)
+    
+def rotate(xyrot=None,yzrot=None,zxrot=None,angle=None):
+    creator.rotate(xyrot,yzrot,zxrot,angle)
+    
+def scale(k=None):
+    creator.scale(k)
+    
+def matrix_product(matrix1=None,matrix2=None):
+    creator.matrix_product(matrix1,matrix2)
+    
+def mirror_plane(plane1=None,plane2=None,plane3=None):
+    creator.mirror_plane(plane1,plane2,plane3)
+   
+def mirror_line(line=None):
+    creator.mirror_line(line)
+    
+
+
+############################################################################
 ##  Rates + Modes
 
 def feedrate(f):
@@ -480,6 +543,12 @@ def peck(count, first, last=None, step=0.0):
 
 def comment(text):
     creator.comment(text)
+
+def insert(text):
+    creator.insert(text)
+
+def block_delete(on=False):
+    creator.block_delete(on)   
 
 def variable(id):
     creator.variable(id)
