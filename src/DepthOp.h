@@ -22,6 +22,12 @@ public:
 	double m_step_down;
 	double m_final_depth;
 	double m_rapid_down_to_height;
+	//check to see if in Absolute or Incremental mode for moves
+	typedef enum {
+		eAbsolute,
+		eIncremental
+	}eAbsMode;
+	eAbsMode m_abs_mode;
 
 	CDepthOpParams();
 	bool operator== ( const CDepthOpParams & rhs ) const;
