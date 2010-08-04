@@ -44,8 +44,8 @@ class CreatorIso(nc.Creator):
         self.prev_z = ''
         self.useCrc = False
         self.gCRC = ''
-
         self.fmt = iso.codes.FORMAT_MM()
+        self.absolute_flag = True
 
     ############################################################################
     ##  Internals
@@ -130,10 +130,14 @@ class CreatorIso(nc.Creator):
         self.fmt = iso.codes.FORMAT_MM()
 
     def absolute(self):
+        self.write_blocknum()
         self.g += iso.codes.ABSOLUTE()
+        self.absolute_flag = True
 
     def incremental(self):
+        self.write_blocknum()
         self.g += iso.codes.INCREMENTAL()
+        self.absolute_flag = False
 
     def polar(self, on=True):
         if (on) : self.g += iso.codes.POLAR_ON()
@@ -257,19 +261,51 @@ class CreatorIso(nc.Creator):
         self.write_preps()
         if (x != None):
             dx = x - self.x
-            self.write(iso.codes.X() + (self.fmt % x))
+            if (self.absolute_flag ):
+                self.write(iso.codes.X() + (self.fmt % x))
+            else:
+                self.write(iso.codes.X() + (self.fmt % dx))
             self.x = x
         if (y != None):
             dy = y - self.y
-            self.write(iso.codes.Y() + (self.fmt % y))
+            if (self.absolute_flag ):
+                self.write(iso.codes.Y() + (self.fmt % y))
+            else:
+                self.write(iso.codes.Y() + (self.fmt % dy))
+
             self.y = y
         if (z != None):
             dz = z - self.z
-            self.write(iso.codes.Z() + (self.fmt % z))
+            if (self.absolute_flag ):
+                self.write(iso.codes.Z() + (self.fmt % z))
+            else:
+                self.write(iso.codes.Z() + (self.fmt % dz))
+
             self.z = z
-        if (a != None) : self.write(iso.codes.A() + (iso.codes.FORMAT_ANG() % a))
-        if (b != None) : self.write(iso.codes.B() + (iso.codes.FORMAT_ANG() % b))
-        if (c != None) : self.write(iso.codes.C() + (iso.codes.FORMAT_ANG() % c))
+
+        if (a != None):
+            da = a - self.a
+            if (self.absolute_flag ):
+                self.write(iso.codes.A() + (self.fmt % a))
+            else:
+                self.write(iso.codes.A() + (self.fmt % da))
+            self.a = a
+
+        if (b != None):
+            db = b - self.b
+            if (self.absolute_flag ):
+                self.write(iso.codes.B() + (self.fmt % b))
+            else:
+                self.write(iso.codes.B() + (self.fmt % db))
+            self.b = b
+
+        if (c != None):
+            dc = c - self.c
+            if (self.absolute_flag ):
+                self.write(iso.codes.C() + (self.fmt % c))
+            else:
+                self.write(iso.codes.C() + (self.fmt % dc))
+            self.c = c
         self.write_spindle()
         self.write_misc()
         self.write('\n')
@@ -287,15 +323,26 @@ class CreatorIso(nc.Creator):
         dx = dy = dz = 0
         if (x != None):
             dx = x - self.x
-            self.write(iso.codes.X() + (self.fmt % x))
+            if (self.absolute_flag ):
+                self.write(iso.codes.X() + (self.fmt % x))
+            else:
+                self.write(iso.codes.X() + (self.fmt % dx))
             self.x = x
         if (y != None):
             dy = y - self.y
-            self.write(iso.codes.Y() + (self.fmt % y))
+            if (self.absolute_flag ):
+                self.write(iso.codes.Y() + (self.fmt % y))
+            else:
+                self.write(iso.codes.Y() + (self.fmt % dy))
+
             self.y = y
         if (z != None):
             dz = z - self.z
-            self.write(iso.codes.Z() + (self.fmt % z))
+            if (self.absolute_flag ):
+                self.write(iso.codes.Z() + (self.fmt % z))
+            else:
+                self.write(iso.codes.Z() + (self.fmt % dz))
+
             self.z = z
         if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
         self.write_feedrate()
@@ -330,13 +377,25 @@ class CreatorIso(nc.Creator):
             self.write(arc_g_code)
         self.write_preps()
         if (x != None):
-            self.write(iso.codes.X() + (self.fmt % x))
+            dx = x - self.x
+            if (self.absolute_flag ):
+                self.write(iso.codes.X() + (self.fmt % x))
+            else:
+                self.write(iso.codes.X() + (self.fmt % dx))
             self.x = x
         if (y != None):
-            self.write(iso.codes.Y() + (self.fmt % y))
+            dy = y - self.y
+            if (self.absolute_flag ):
+                self.write(iso.codes.Y() + (self.fmt % y))
+            else:
+                self.write(iso.codes.Y() + (self.fmt % dy))
             self.y = y
         if (z != None):
-            self.write(iso.codes.Z() + (self.fmt % z))
+            dz = z - self.z
+            if (self.absolute_flag ):
+                self.write(iso.codes.Z() + (self.fmt % z))
+            else:
+                self.write(iso.codes.Z() + (self.fmt % dz))
             self.z = z
         if (i != None) : self.write(iso.codes.CENTRE_X() + (self.fmt % i))
         if (j != None) : self.write(iso.codes.CENTRE_Y() + (self.fmt % j))
