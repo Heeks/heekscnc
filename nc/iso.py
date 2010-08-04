@@ -246,11 +246,8 @@ class CreatorIso(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False ):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
         self.write_blocknum()
-        if (machine_coordinates != False):
-            self.write(iso.codes.MACHINE_COORDINATES())
-            self.prev_g0123 != iso.codes.RAPID()
         if self.g0123_modal:
             if self.prev_g0123 != iso.codes.RAPID():
                 self.write(iso.codes.RAPID())
@@ -277,12 +274,9 @@ class CreatorIso(nc.Creator):
         self.write_misc()
         self.write('\n')
 
-    def feed(self, x=None, y=None, z=None, machine_coordinates=False):
+    def feed(self, x=None, y=None, z=None):
         if self.same_xyz(x, y, z): return
         self.write_blocknum()
-        if (machine_coordinates != False):
-            self.write(iso.codes.MACHINE_COORDINATES())
-            self.prev_g0123 = ''
         if self.g0123_modal:
             if self.prev_g0123 != iso.codes.FEED():
                 self.write(iso.codes.FEED())
@@ -373,6 +367,10 @@ class CreatorIso(nc.Creator):
 
     def rapid_unhome(self):
         pass
+
+    def set_machine_coordinates(self):
+        self.write(iso.codes.MACHINE_COORDINATES())
+        self.prev_g0123 = ''
 
     ############################################################################
     ##  CRC
