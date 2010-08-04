@@ -130,12 +130,12 @@ class CreatorIso(nc.Creator):
         self.fmt = iso.codes.FORMAT_MM()
 
     def absolute(self):
-        self.write_blocknum()
+        #self.write_blocknum()
         self.g += iso.codes.ABSOLUTE()
         self.absolute_flag = True
 
     def incremental(self):
-        self.write_blocknum()
+        #self.write_blocknum()
         self.g += iso.codes.INCREMENTAL()
         self.absolute_flag = False
 
