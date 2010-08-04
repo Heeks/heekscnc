@@ -141,6 +141,7 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 	python << _T("s = ocl_funcs.STLSurfFromFile(") << PythonString(filepath.GetFullPath()) << _T(")\n");
 	python << _T("nc.attach.pdcf = ocl.PathDropCutter(s)\n");
 	python << _T("nc.attach.pdcf.minimumZ = ") << m_min_z << _T("\n");
+	python << _T("nc.attach.units = ") << theApp.m_program->m_units << _T("\n");
 	python << _T("nc.attach.attach_begin()\n");
 
 	pMachineState->m_attached_to_surface = true;
