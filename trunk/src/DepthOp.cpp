@@ -21,11 +21,13 @@
 
 CDepthOpParams::CDepthOpParams()
 {
+	m_abs_mode = eAbsolute;
 	m_clearance_height = 0.0;
 	m_start_depth = 0.0;
 	m_step_down = 0.0;
 	m_final_depth = 0.0;
 	m_rapid_down_to_height = 0.0;
+	
 }
 
 CDepthOp & CDepthOp::operator= ( const CDepthOp & rhs )
@@ -91,13 +93,33 @@ static void on_set_rapid_down_to_height(double value, HeeksObj* object)
 	((CDepthOp*)object)->WriteDefaultValues();
 }
 
+static void on_set_abs_mode(int value, HeeksObj* object) {
+
+	((CDepthOp*)object)->m_depth_op_params.m_abs_mode = (CDepthOpParams::eAbsMode)value;
+	((CDepthOp*)object)->WriteDefaultValues();
+	
+}
+
+
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("Absolute"));
+		choices.push_back(_("Incremental"));
+		list->push_back(new PropertyChoice(_("ABS/INCR mode"), choices, m_abs_mode, parent, on_set_abs_mode));
+	}
+
+
 	list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
 	list->push_back(new PropertyLength(_("step down"), m_step_down, parent, on_set_step_down));
 	list->push_back(new PropertyLength(_("start depth"), m_start_depth, parent, on_set_start_depth));
 	list->push_back(new PropertyLength(_("final depth"), m_final_depth, parent, on_set_final_depth));
 	list->push_back(new PropertyLength(_("rapid down to height"), m_rapid_down_to_height, parent, on_set_rapid_down_to_height));
+	
+
+
+
 }
 
 void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
@@ -109,19 +131,20 @@ void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 	element->SetDoubleAttribute("startdepth", m_start_depth);
 	element->SetDoubleAttribute("depth", m_final_depth);
 	element->SetDoubleAttribute("r", m_rapid_down_to_height);
+	element->SetAttribute("abs_mode", m_abs_mode);
 }
 
 void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	TiXmlElement* depthop = TiXmlHandle(pElem).FirstChildElement("depthop").Element();
 	if(depthop)
-	{
+	{	int int_for_enum;
 		depthop->Attribute("clear", &m_clearance_height);
 		depthop->Attribute("down", &m_step_down);
 		depthop->Attribute("startdepth", &m_start_depth);
 		depthop->Attribute("depth", &m_final_depth);
 		depthop->Attribute("r", &m_rapid_down_to_height);
-
+		if(pElem->Attribute("abs_mode", &int_for_enum))m_abs_mode = (eAbsMode)int_for_enum;
 		pElem->RemoveChild(depthop);	// We don't want to interpret this again when
 										// the ObjList::ReadBaseXML() method gets to it.
 	}
@@ -160,6 +183,7 @@ void CDepthOp::WriteDefaultValues()
 	config.Write(_T("StepDown"), m_depth_op_params.m_step_down);
 	config.Write(_T("FinalDepth"), m_depth_op_params.m_final_depth);
 	config.Write(_T("RapidDown"), m_depth_op_params.m_rapid_down_to_height);
+	config.Write(_T("ABSMode"), m_depth_op_params.m_abs_mode);
 }
 
 void CDepthOp::ReadDefaultValues()
@@ -172,6 +196,9 @@ void CDepthOp::ReadDefaultValues()
 	config.Read(_T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
 	config.Read(_T("FinalDepth"), &m_depth_op_params.m_final_depth, -1.0);
 	config.Read(_T("RapidDown"), &m_depth_op_params.m_rapid_down_to_height, 2.0);
+	int int_mode = m_depth_op_params.m_abs_mode;
+	config.Read(_T("ABSMode"), &int_mode, CDepthOpParams::eAbsolute);
+	m_depth_op_params.m_abs_mode = (CDepthOpParams::eAbsMode)int_mode;
 }
 
 void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
@@ -265,6 +292,15 @@ Python CDepthOp::AppendTextToProgram(CMachineState *pMachineState)
 	{
 		python << _T("tool_diameter = float(") << (pCuttingTool->CuttingRadius(true) * 2.0) << _T(")\n");
 	} // End if - then
+
+	if(m_depth_op_params.m_abs_mode == CDepthOpParams::eAbsolute){
+		python << _T("#absolute() mode\n");
+	} 
+	else
+	{
+		python << _T("rapid(z=clearance)\n");
+		python << _T("incremental()\n");
+	}// End if else - then
 
 	return(python);
 }
