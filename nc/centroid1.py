@@ -25,7 +25,7 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
 
 
         self.absolute_flag = True
-
+        self.prev_g91 = ''
 
 ################################################################################
 # general 
@@ -170,9 +170,31 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
                 self.write(iso.codes.Z() + (self.fmt % dz))
 
             self.z = z
-        if (a != None) : self.write(iso.codes.A() + (iso.codes.FORMAT_ANG() % a))
-        if (b != None) : self.write(iso.codes.B() + (iso.codes.FORMAT_ANG() % b))
-        if (c != None) : self.write(iso.codes.C() + (iso.codes.FORMAT_ANG() % c))
+
+        if (a != None):
+            da = a - self.a
+            if (self.absolute_flag ):
+                self.write(iso.codes.A() + (self.fmt % a))
+            else:
+                self.write(iso.codes.A() + (self.fmt % da))
+            self.a = a
+
+        if (b != None):
+            db = b - self.b
+            if (self.absolute_flag ):
+                self.write(iso.codes.B() + (self.fmt % b))
+            else:
+                self.write(iso.codes.B() + (self.fmt % db))
+            self.b = b
+
+        if (c != None):
+            dc = c - self.c
+            if (self.absolute_flag ):
+                self.write(iso.codes.C() + (self.fmt % c))
+            else:
+                self.write(iso.codes.C() + (self.fmt % dc))
+            self.c = c
+
         self.write_spindle()
         self.write_misc()
         self.write('\n')
@@ -212,6 +234,8 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
             else:
                 self.write(iso.codes.Z() + (self.fmt % dz))
             self.z = z
+
+
         if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
         self.write_feedrate()
         self.write_spindle()
