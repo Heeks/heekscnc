@@ -654,7 +654,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 		// profile the kurve
 		python << wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_down_to_height, clearance, start_depth, step_down, final_depth)\n"), sketch, side_string.c_str());
 	}
-
+	python << _T("absolute()\n");
 	return(python);
 }
 
