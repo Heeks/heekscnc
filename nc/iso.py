@@ -528,6 +528,12 @@ class CreatorIso(nc.Creator):
     def comment(self, text):
         self.write((iso.codes.COMMENT(text) + '\n'))
 
+    def insert(self, text):
+        pass
+
+    def block_delete(self, on=False):        
+        pass
+
     def variable(self, id):
         return (iso.codes.VARIABLE() % id)
 
