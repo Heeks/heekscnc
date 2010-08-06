@@ -9,7 +9,10 @@
 class Parser:
 
     def __init__(self):
-        pass
+        self.currentx = 0.0
+        self.currenty = 0.0
+        self.currentz = 0.0
+        self.absolute_flag = True
 
     ############################################################################
     ##  Internals
@@ -77,9 +80,18 @@ class Parser:
     def add_line(self, x=None, y=None, z=None, a=None, b=None, c=None):
         if (x == None and y == None and z == None and a == None and b == None and c == None) : return
         self.file_out.write('\t\t\t<line')
-        if (x != None) : self.file_out.write(' x="%.6f"' % x)
-        if (y != None) : self.file_out.write(' y="%.6f"' % y)
-        if (z != None) : self.file_out.write(' z="%.6f"' % z)
+        if (x != None) :
+            if self.absolute_flag: self.currentx = x
+            else: self.currentx = self.currentx + x
+            self.file_out.write(' x="%.6f"' % self.currentx)
+        if (y != None) :
+            if self.absolute_flag: self.currenty = y
+            else: self.currenty = self.currenty + y
+            self.file_out.write(' y="%.6f"' % self.currenty)
+        if (z != None) :
+            if self.absolute_flag: self.currentz = z
+            else: self.currentz = self.currentz + z
+            self.file_out.write(' z="%.6f"' % self.currentz)
         if (a != None) : self.file_out.write(' a="%.6f"' % a)
         if (b != None) : self.file_out.write(' b="%.6f"' % b)
         if (c != None) : self.file_out.write(' c="%.6f"' % c)
@@ -88,12 +100,27 @@ class Parser:
     def add_arc(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None, d=None):
         if (x == None and y == None and z == None and i == None and j == None and k == None and r == None and d == None) : return
         self.file_out.write('\t\t\t<arc')
-        if (x != None) : self.file_out.write(' x="%.6f"' % x)
-        if (y != None) : self.file_out.write(' y="%.6f"' % y)
-        if (z != None) : self.file_out.write(' z="%.6f"' % z)
+        if (x != None) :
+            if self.absolute_flag: self.currentx = x
+            else: self.currentx = self.currentx + x
+            self.file_out.write(' x="%.6f"' % self.currentx)
+        if (y != None) :
+            if self.absolute_flag: self.currenty = y
+            else: self.currenty = self.currenty + y
+            self.file_out.write(' y="%.6f"' % self.currenty)
+        if (z != None) :
+            if self.absolute_flag: self.currentz = z
+            else: self.currentz = self.currentz + z
+            self.file_out.write(' z="%.6f"' % self.currentz)
         if (i != None) : self.file_out.write(' i="%.6f"' % i)
         if (j != None) : self.file_out.write(' j="%.6f"' % j)
         if (k != None) : self.file_out.write(' k="%.6f"' % k)
         if (r != None) : self.file_out.write(' r="%.6f"' % r)
         if (d != None) : self.file_out.write(' d="%i"' % d)
         self.file_out.write(' />\n')
+        
+    def incremental(self):
+        self.absolute_flag = False
+        
+    def absolute(self):
+        self.absolute_flag = True
