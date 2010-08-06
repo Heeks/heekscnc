@@ -13,6 +13,10 @@ import sys
 class ParserIso(nc.Parser):
 
     def __init__(self):
+        self.currentx = 0.0
+        self.currenty = 0.0
+        self.currentz = 0.0
+        self.absolute_flag = False
         nc.Parser.__init__(self)
 
         self.pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
@@ -121,6 +125,10 @@ class ParserIso(nc.Parser):
                     no_move = True
                     path_col = "feed"
                     col = "feed"
+                elif (word == 'G90' or word == 'g90'):
+                    self.absolute_flag = True
+                elif (word == 'G91' or word == 'g91'):
+                    self.absolute_flag = False
                 elif (word[0] == 'G') : col = "prep"
                 elif (word[0] == 'I' or word[0] == 'i'):
                     col = "axis"
@@ -191,8 +199,16 @@ class ParserIso(nc.Parser):
             else:
                 if (move and not no_move):
                     self.begin_path(path_col)
-                    if (arc) : self.add_arc(x, y, z, i, j, k, r, arc)
-                    else     : self.add_line(x, y, z, a, b, c)
+                    if self.absolute_flag:
+                        if x != None: self.currentx = x
+                        if y != None: self.currenty = y
+                        if z != None: self.currentz = z
+                    else:
+                        if x != None: self.currentx = self.currentx + x
+                        if y != None: self.currenty = self.currenty + y
+                        if z != None: self.currentz = self.currentz + z
+                    if (arc) : self.add_arc(self.currentx, self.currenty, self.currentz, i, j, k, r, arc)
+                    else     : self.add_line(self.currentx, self.currenty, self.currentz, a, b, c)
    	            self.end_path()
 
             self.end_ncblock()
