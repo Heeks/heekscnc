@@ -154,7 +154,7 @@ static void on_set_min_z(double value, HeeksObj* object){((CAttachOp*)object)->m
 
 void CAttachOp::GetProperties(std::list<Property *> *list)
 {
-	AddSolidsProperties(list, m_solids);
+	AddSolidsProperties(list, this);
 	list->push_back(new PropertyLength(_("tolerance"), m_tolerance, this, on_set_tolerance));
 	list->push_back(new PropertyLength(_("minimum z"), m_min_z, this, on_set_min_z));
 	COp::GetProperties(list);

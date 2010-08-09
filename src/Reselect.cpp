@@ -106,15 +106,25 @@ wxString GetIntListString(const std::list<int> &list)
 	return str;
 }
 
-void AddSolidsProperties(std::list<Property *> *list, std::list<int> &solids)
+void AddSolidsProperties(std::list<Property *> *list, HeeksObj* object)
 {
+	std::list<int> solids;
+	for(HeeksObj* child = object->GetFirstChild(); child; child = object->GetNextChild())
+	{
+		if(child->GetIDGroupType() == SolidType)solids.push_back(child->GetID());
+	}
 	if(solids.size() == 0)list->push_back(new PropertyString(_("solids"), _("None"), NULL));
 	else if(solids.size() == 1)list->push_back(new PropertyInt(_("solid id"), solids.front(), NULL));
 	else list->push_back(new PropertyString(_("solids"), GetIntListString(solids), NULL));
 }
 
-void AddSketchesProperties(std::list<Property *> *list, std::list<int> &sketches)
+void AddSketchesProperties(std::list<Property *> *list, HeeksObj* object)
 {
+	std::list<int> sketches;
+	for(HeeksObj* child = object->GetFirstChild(); child; child = object->GetNextChild())
+	{
+		if(child->GetIDGroupType() == SketchType)sketches.push_back(child->GetID());
+	}
 	if(sketches.size() == 0)list->push_back(new PropertyString(_("sketches"), _("None"), NULL));
 	else if(sketches.size() == 1)list->push_back(new PropertyInt(_("sketch id"), sketches.front(), NULL));
 	else list->push_back(new PropertyString(_("sketches"), GetIntListString(sketches), NULL));

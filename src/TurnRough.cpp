@@ -274,7 +274,7 @@ void CTurnRough::glCommands(bool select, bool marked, bool no_color)
 void CTurnRough::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyString(_T("TO DO!"), _T("THIS OPERATION DOESN'T WORK YET!"), this, NULL));
-	AddSketchesProperties(list, m_sketches);
+	AddSketchesProperties(list, this);
 
 	m_turn_rough_params.GetProperties(this, list);
 
