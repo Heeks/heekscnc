@@ -1,4 +1,5 @@
 emc2 Linux Enhanced Machine Controller 0
+mach3 Mach3 Machine Controller 0
 iso Standard ISO output 0
 iso_modal Standard ISO modal output 0
 iso_with_spaces Standard ISO with spaces 0
