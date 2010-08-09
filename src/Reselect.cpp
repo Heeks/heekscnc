@@ -75,8 +75,12 @@ void ReselectSolids::Run()
 	heeksCAD->PickObjects(_("Select Solids"), MARKING_FILTER_SOLID | MARKING_FILTER_STL_SOLID);
 	if(GetSolids( solids ))
 	{
+		heeksCAD->CreateUndoPoint();
 		m_solids->clear();
 		*m_solids = solids;
+		((ObjList*)m_object)->Clear();
+		m_object->ReloadPointers();
+		heeksCAD->Changed();
 	}
 	else
 	{
