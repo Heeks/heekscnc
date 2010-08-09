@@ -791,7 +791,7 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 
 void CProfile::GetProperties(std::list<Property *> *list)
 {
-	AddSketchesProperties(list, m_sketches);
+	AddSketchesProperties(list, this);
 	m_profile_params.GetProperties(this, list);
 
 	CDepthOp::GetProperties(list);

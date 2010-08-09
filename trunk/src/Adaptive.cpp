@@ -584,8 +584,8 @@ void CAdaptive::glCommands(bool select, bool marked, bool no_color)
 
 void CAdaptive::GetProperties(std::list<Property *> *list)
 {
-	AddSolidsProperties(list, m_solids);
-	AddSketchesProperties(list, m_sketches);
+	AddSolidsProperties(list, this);
+	AddSketchesProperties(list, this);
 	m_params.GetProperties(this, list);
 	COp::GetProperties(list);
 }
