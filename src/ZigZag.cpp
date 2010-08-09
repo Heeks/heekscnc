@@ -375,7 +375,7 @@ void CZigZag::WriteDefaultValues()
 	config.Write(wxString(GetTypeString()) + _T("BoxYMax"), m_params.m_box.m_x[4]);
 	config.Write(wxString(GetTypeString()) + _T("StepOver"), m_params.m_step_over);
 	config.Write(wxString(GetTypeString()) + _T("Direction"), m_params.m_direction);
-	config.Write(wxString(GetTypeString()) + _T("Direction"), m_params.m_direction);
+	config.Write(wxString(GetTypeString()) + _T("MatAllowance"), m_params.m_material_allowance);
 	config.Write(wxString(GetTypeString()) + _T("Style"), m_params.m_style);
 }
 
