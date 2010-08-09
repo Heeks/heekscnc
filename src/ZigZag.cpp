@@ -272,7 +272,7 @@ void CZigZag::glCommands(bool select, bool marked, bool no_color)
 
 void CZigZag::GetProperties(std::list<Property *> *list)
 {
-	AddSolidsProperties(list, m_solids);
+	AddSolidsProperties(list, this);
 	m_params.GetProperties(this, list);
 	CDepthOp::GetProperties(list);
 }

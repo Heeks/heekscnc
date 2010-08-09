@@ -28,5 +28,5 @@ public:
 	wxString BitmapPath(){ return _T("selsolid");}
 };
 
-void AddSolidsProperties(std::list<Property *> *list, std::list<int> &solids);
-void AddSketchesProperties(std::list<Property *> *list, std::list<int> &sketches);
+void AddSolidsProperties(std::list<Property *> *list, HeeksObj* object);
+void AddSketchesProperties(std::list<Property *> *list, HeeksObj* object);
