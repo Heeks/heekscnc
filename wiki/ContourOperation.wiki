@@ -1,0 +1,9 @@
+#summary Follow a sketch with the tool
+
+= Introduction =
+
+The Contour operation allows Sketch objects to determine the tool's path.  The tool can be run either to the left, right or along (on) the sketch.  As the Contour operation is, itself, a type of Depth Operation, it supports parameters for _clearance_ _height_, _start_ _depth_, _step_ _down_ and _final_ _depth_.
+
+The Contour operation was added to allow experimentation with the OpenCascade graphics libraries rather than to satisfy a need for a missing function.  In most respects the Profile Operation is superior to the Contour operation.  To this end, the Profile operation should be used in most circumstances.
+
+The only function that the Contour operation has over the Profile operation (at the moment) is the ability to specify the tool's entry move.  i.e. either to plunge straight down to cutting depth or to follow the sketch's outline while ramping down gradually to the cutting depth.
