@@ -35,5 +35,6 @@ enum{
 	ScriptOpType,
 	AttachOpType,
 	UnattachOpType,
+	WaterlineType,
 	HeeksCNCMaximumType
 };
