@@ -145,7 +145,7 @@ const wxBitmap &CWaterline::GetIcon()
 {
 	if(!m_active)return GetInactiveIcon();
 	static wxBitmap* icon = NULL;
-	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/zigzag.png")));
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/waterline.png")));
 	return *icon;
 }
 
