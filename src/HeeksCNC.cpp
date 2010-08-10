@@ -1067,7 +1067,7 @@ static void AddToolBars()
 
 	heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
 	heeksCAD->AddFlyoutButton(_("ZigZag"), ToolImage(_T("zigzag")), _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Waterline"), ToolImage(_T("zigzag")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
+	heeksCAD->AddFlyoutButton(_("Waterline"), ToolImage(_T("waterline")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Attach"), ToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Unattach"), ToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
 	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
@@ -1202,7 +1202,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	wxMenu *menu3dMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
-	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Waterline Operation..."), ToolImage(_T("zigzag")), NewWaterlineOpMenuCallback);
+	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Waterline Operation..."), ToolImage(_T("waterline")), NewWaterlineOpMenuCallback);
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), ToolImage(_T("attach")), NewAttachOpMenuCallback);
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), ToolImage(_T("unattach")), NewUnattachOpMenuCallback);
 
