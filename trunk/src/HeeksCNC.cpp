@@ -28,6 +28,7 @@
 #include "Profile.h"
 #include "Pocket.h"
 #include "ZigZag.h"
+#include "Waterline.h"
 #include "Adaptive.h"
 #include "Drilling.h"
 #include "Locating.h"
@@ -282,6 +283,43 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 	heeksCAD->Changed();
 }
+
+static void NewWaterlineOpMenuCallback(wxCommandEvent &event)
+{
+	// check for at least one solid selected
+	std::list<int> solids;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+	}
+
+	// if no selected solids,
+	if(solids.size() == 0)
+	{
+		// use all the solids in the drawing
+		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
+		{
+			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+		}
+	}
+
+	if(solids.size() == 0)
+	{
+		wxMessageBox(_("There are no solids!"));
+		return;
+	}
+
+	heeksCAD->CreateUndoPoint();
+	CWaterline *new_object = new CWaterline(solids);
+	theApp.m_program->Operations()->Add(new_object, NULL);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
+}
+
 
 static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 {
@@ -1029,6 +1067,7 @@ static void AddToolBars()
 
 	heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
 	heeksCAD->AddFlyoutButton(_("ZigZag"), ToolImage(_T("zigzag")), _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+	heeksCAD->AddFlyoutButton(_("Waterline"), ToolImage(_T("zigzag")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Attach"), ToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
 	heeksCAD->AddFlyoutButton(_("Unattach"), ToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
 	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
@@ -1163,6 +1202,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	wxMenu *menu3dMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
+	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Waterline Operation..."), ToolImage(_T("zigzag")), NewWaterlineOpMenuCallback);
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), ToolImage(_T("attach")), NewAttachOpMenuCallback);
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), ToolImage(_T("unattach")), NewUnattachOpMenuCallback);
 
@@ -1249,6 +1289,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Pocket", CPocket::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Waterline", CWaterline::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Locating", CLocating::ReadFromXMLElement);
