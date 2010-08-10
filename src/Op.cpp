@@ -217,6 +217,7 @@ void COp::ReadDefaultValues()
 			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
 			break;
 		case ZigZagType:
+		case WaterlineType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
 			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
 			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
@@ -282,6 +283,7 @@ bool COp::IsAnOperation(int object_type)
 		case ProfileType:
 		case PocketType:
 		case ZigZagType:
+		case WaterlineType:
 		case AdaptiveType:
 		case DrillingType:
 		case CounterBoreType:

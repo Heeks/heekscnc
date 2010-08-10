@@ -19,6 +19,7 @@
 #include "Profile.h"
 #include "Pocket.h"
 #include "ZigZag.h"
+#include "Waterline.h"
 #include "Adaptive.h"
 #include "Drilling.h"
 #include "CuttingTool.h"
@@ -548,6 +549,7 @@ Python CProgram::RewritePythonProgram()
 
 	theApp.m_program_canvas->m_textCtrl->Clear();
 	CZigZag::number_for_stl_file = 1;
+	CWaterline::number_for_stl_file = 1;
 	CAdaptive::number_for_stl_file = 1;
 	CAttachOp::number_for_stl_file = 1;
 
@@ -597,6 +599,7 @@ Python CProgram::RewritePythonProgram()
 				ocl_module_needed = true;
 				nc_attach_needed = true;
 			case ZigZagType:
+			case WaterlineType:
 				ocl_funcs_needed = true;
 				break;
 
