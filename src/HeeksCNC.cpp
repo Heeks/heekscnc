@@ -317,7 +317,7 @@ static void NewWaterlineOpMenuCallback(wxCommandEvent &event)
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
+	heeksCAD->Changed();	
 }
 
 
