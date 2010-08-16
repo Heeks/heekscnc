@@ -648,7 +648,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 		{
 			if(!tags_cleared)python << _T("kurve_funcs.clear_tags()\n");
 			tags_cleared = true;
-			python << _T("kurve_funcs.add_tag(") << tag->m_pos[0] << _T(", ") << tag->m_pos[1] << _T(", ") << tag->m_width << _T(", ") << tag->m_angle * PI/180 << _T(", ") << tag->m_height << _T(")\n");
+			python << _T("kurve_funcs.add_tag(") << tag->m_pos[0] / theApp.m_program->m_units << _T(", ") << tag->m_pos[1] / theApp.m_program->m_units << _T(", ") << tag->m_width / theApp.m_program->m_units << _T(", ") << tag->m_angle * PI/180 << _T(", ") << tag->m_height / theApp.m_program->m_units << _T(")\n");
 		}
 
 		// profile the kurve
