@@ -295,9 +295,10 @@ void CWaterline::WriteXML(TiXmlNode *root)
 	m_params.WriteXMLAttributes(element);
 
 	// write solid ids
-	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
+	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
 	{
-		int solid = *It;
+		if (object->GetIDGroupType() != SolidType)continue;
+		int solid = object->GetID();
 		TiXmlElement * solid_element = new TiXmlElement( "solid" );
 		element->LinkEndChild( solid_element );
 		solid_element->SetAttribute("id", solid);
