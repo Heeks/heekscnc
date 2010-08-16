@@ -1077,6 +1077,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Waterline.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Waterline.h"
+			>
+		</File>
+		<File
 			RelativePath=".\ZigZag.cpp"
 			>
 		</File>
