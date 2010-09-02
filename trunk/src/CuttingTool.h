@@ -199,6 +199,8 @@ public:
 		{
 			m_title = GenerateMeaningfulName();
 		} // End if - else
+
+		ResetParametersToReasonableValues();
 	} // End constructor
 
     CCuttingTool( const CCuttingTool & rhs );
