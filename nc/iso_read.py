@@ -195,7 +195,10 @@ class ParserIso(nc.Parser):
             else:
                 if (move and not no_move):
                     self.begin_path(path_col)
-                    if (arc) : self.add_arc(x, y, z, i, j, k, r, arc)
+                    if (arc==-1): 
+                        self.add_arc(x, y, z, i, j, k, r, arc)
+                    elif (arc==1): 
+                        self.add_arc(x, y, z, i, j, k, -r, arc)
                     else     : self.add_line(x, y, z, a, b, c)
    	            self.end_path()
 
