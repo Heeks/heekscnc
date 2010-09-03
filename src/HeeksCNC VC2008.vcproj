@@ -469,6 +469,10 @@
 			>
 		</File>
 		<File
+			RelativePath="$(HEEKSCADPATH)\src\Geom.cpp"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\interface\HeeksCADInterface.h"
 			>
 		</File>
