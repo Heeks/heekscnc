@@ -17,6 +17,7 @@
 #include "interface/Tool.h"
 #include "CNCConfig.h"
 #include "CuttingTool.h"
+#include "src/Geom.h"
 
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Solid.hxx>
@@ -59,6 +60,7 @@ void ColouredText::ReadFromXMLElement(TiXmlElement* element)
 
 // static
 double PathObject::m_current_x[3] = {0, 0, 0};
+double PathObject::m_prev_x[3] = {0, 0, 0};
 
 void PathObject::WriteBaseXML(TiXmlElement *pElem)
 {
@@ -72,16 +74,14 @@ void PathObject::WriteBaseXML(TiXmlElement *pElem)
 
 void PathObject::ReadFromXMLElement(TiXmlElement* pElem)
 {
+	memcpy(m_prev_x, m_current_x, 3*sizeof(double));
+
 	double x;
-	if(pElem->Attribute("x", &x))m_current_x[0] = x;
-	if(pElem->Attribute("y", &x))m_current_x[1] = x;
-	if(pElem->Attribute("z", &x))m_current_x[2] = x;
+	if(pElem->Attribute("x", &x))m_current_x[0] = x * CNCCodeBlock::multiplier;
+	if(pElem->Attribute("y", &x))m_current_x[1] = x * CNCCodeBlock::multiplier;
+	if(pElem->Attribute("z", &x))m_current_x[2] = x * CNCCodeBlock::multiplier;
 
 	memcpy(m_x, m_current_x, 3*sizeof(double));
-
-	m_x[0] *= CNCCodeBlock::multiplier;
-	m_x[1] *= CNCCodeBlock::multiplier;
-	m_x[2] *= CNCCodeBlock::multiplier;
 
 	if (pElem->Attribute("cutting_tool_number"))
 	{
@@ -176,16 +176,64 @@ void PathArc::WriteXML(TiXmlNode *root)
 void PathArc::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	// get the attributes
-	if (pElem->Attribute("i")) pElem->Attribute("i", &m_c[0]);
-	if (pElem->Attribute("j")) pElem->Attribute("j", &m_c[1]);
-	if (pElem->Attribute("k")) pElem->Attribute("k", &m_c[2]);
-	if (pElem->Attribute("d")) pElem->Attribute("d", &m_dir);
+	bool radius_set = false;
+	if (pElem->Attribute("r"))
+	{
+		pElem->Attribute("r", &m_radius);
+		m_radius *= CNCCodeBlock::multiplier;
+		radius_set = true;
+	}
+	else
+	{
+		if (pElem->Attribute("i")) pElem->Attribute("i", &m_c[0]);
+		if (pElem->Attribute("j")) pElem->Attribute("j", &m_c[1]);
+		if (pElem->Attribute("k")) pElem->Attribute("k", &m_c[2]);
+		if (pElem->Attribute("d")) pElem->Attribute("d", &m_dir);
 
-	m_c[0] *= CNCCodeBlock::multiplier;
-	m_c[1] *= CNCCodeBlock::multiplier;
-	m_c[2] *= CNCCodeBlock::multiplier;
+		m_c[0] *= CNCCodeBlock::multiplier;
+		m_c[1] *= CNCCodeBlock::multiplier;
+		m_c[2] *= CNCCodeBlock::multiplier;
+	}
 
 	PathObject::ReadFromXMLElement(pElem);
+
+	if(radius_set)
+	{
+		// set ij and direction from radius
+		SetFromRadius();
+	}
+}
+
+void PathArc::SetFromRadius()
+{
+	// make a circle at start point and end point
+	gp_Pnt ps(m_prev_x[0], m_prev_x[1], m_prev_x[2]);
+	gp_Pnt pe(m_x[0], m_x[1], m_x[2]);
+	double r = fabs(m_radius);
+	gp_Circ c1(gp_Ax2(ps, gp_Dir(0, 0, 1)), r);
+	gp_Circ c2(gp_Ax2(pe, gp_Dir(0, 0, 1)), r);
+	std::list<gp_Pnt> plist;
+	intersect(c1, c2, plist);
+	if(plist.size() == 2)
+	{
+		gp_Pnt p1 = plist.front();
+		gp_Pnt p2 = plist.back();
+		gp_Vec along(ps, pe);
+		gp_Vec right = gp_Vec(0, 0, 1).Crossed(along);
+		gp_Vec vc(p1, p2);
+		bool left = vc.Dot(right) < 0;
+		if((m_radius < 0) == left)
+		{
+			extract(gp_Vec(ps, p1), this->m_c);
+			this->m_dir = 1;
+		}
+		else
+		{
+			extract(gp_Vec(ps, p2), this->m_c);
+			this->m_dir = -1;
+		}
+		m_radius = r;
+	}
 }
 
 void PathArc::glVertices(const PathObject* prev_po)
