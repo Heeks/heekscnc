@@ -56,6 +56,7 @@ public:
 
 public:
 	static double m_current_x[3];
+	static double m_prev_x[3];
 	double m_x[3];
 	int m_cutting_tool_number;
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
@@ -107,6 +108,7 @@ public:
 					const double feed_rate,
 					const double spindle_rpm,
 					const unsigned int number_of_cutting_edges) const;
+	void SetFromRadius();
 };
 
 class ColouredPath

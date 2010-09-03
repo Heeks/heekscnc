@@ -41,6 +41,15 @@ extern "C" {
 #include "interface/HeeksObj.h"
 #include "interface/ObjectCanvas.h"
 
+#include "gp_Pnt.hxx"
+#include "gp_Lin.hxx"
+#include "gp_Circ.hxx"
+#include "gp_Pln.hxx"
+#include "Geom_Plane.hxx"
+#include "GeomAPI_IntSS.hxx"
+#include "Geom_Line.hxx"
+#include "gp_Elips.hxx"
+
 // TODO: reference additional headers your program requires here
 
 // Visual Studio 2010 work arround
