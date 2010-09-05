@@ -197,8 +197,9 @@ class ParserIso(nc.Parser):
                     self.begin_path(path_col)
                     if (arc==-1): 
                         self.add_arc(x, y, z, i, j, k, r, arc)
-                    elif (arc==1): 
-                        self.add_arc(x, y, z, i, j, k, -r, arc)
+                    elif (arc==1):
+                        #self.add_arc(x, y, z, i, j, k, -r, arc) #if you want to use arcs with R values uncomment the first part of this line and comment the next one
+                        self.add_arc(x, y, z, i, j, k, r, arc)
                     else     : self.add_line(x, y, z, a, b, c)
    	            self.end_path()
 
