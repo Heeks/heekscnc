@@ -19,6 +19,7 @@
 #include "../kurve/geometry/geometry.h"
 #include "CuttingTool.h"
 #include "MachineState.h"
+#include "Program.h"
 
 #include <sstream>
 

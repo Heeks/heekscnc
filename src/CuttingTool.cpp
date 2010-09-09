@@ -21,6 +21,7 @@
 #include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
+#include "Program.h"
 
 #include <sstream>
 #include <string>
@@ -79,6 +80,13 @@
 
 extern CHeeksCADInterface* heeksCAD;
 
+#ifdef HEEKSCNC
+#define PROGRAM theApp.m_program
+#define TOOLS (theApp.m_program ? theApp.m_program->Tools() : NULL)
+#else
+#define PROGRAM heeksCNC->GetProgram()
+#define TOOLS heeksCNC->GetTools()
+#endif
 
 void CCuttingToolParams::set_initial_values()
 {
@@ -692,7 +700,7 @@ Python CCuttingTool::AppendTextToProgram()
 
 	if (m_params.m_diameter > 0)
 	{
-		python << _T("radius=") << m_params.m_diameter / 2 /theApp.m_program->m_units << _T(", ");
+		python << _T("radius=") << m_params.m_diameter / 2 /PROGRAM->m_units << _T(", ");
 	} // End if - then
 	else
 	{
@@ -701,7 +709,7 @@ Python CCuttingTool::AppendTextToProgram()
 
 	if (m_params.m_tool_length_offset > 0)
 	{
-		python << _T("length=") << m_params.m_tool_length_offset /theApp.m_program->m_units << _T(", ");
+		python << _T("length=") << m_params.m_tool_length_offset /PROGRAM->m_units << _T(", ");
 	} // End if - then
 	else
 	{
@@ -897,9 +905,9 @@ CCuttingTool *CCuttingTool::Find( const int tool_number )
 CCuttingTool::ToolNumber_t CCuttingTool::FindFirstByType( const CCuttingToolParams::eCuttingToolType type )
 {
 
-	if ((theApp.m_program) && (theApp.m_program->Tools()))
+	if (TOOLS)
 	{
-		HeeksObj* tool_list = theApp.m_program->Tools();
+		HeeksObj* tool_list = TOOLS;
 		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
 			if (ob->GetType() != CuttingToolType) continue;
@@ -920,9 +928,9 @@ CCuttingTool::ToolNumber_t CCuttingTool::FindFirstByType( const CCuttingToolPara
 int CCuttingTool::FindCuttingTool( const int tool_number )
 {
 
-	if ((theApp.m_program) && (theApp.m_program->Tools()))
+	if (TOOLS)
 	{
-		HeeksObj* tool_list = theApp.m_program->Tools();
+		HeeksObj* tool_list = TOOLS;
 
 		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
@@ -946,9 +954,9 @@ std::vector< std::pair< int, wxString > > CCuttingTool::FindAllCuttingTools()
 	// Always add a value of zero to allow for an absense of cutting tool use.
 	tools.push_back( std::make_pair(0, _T("No Cutting Tool") ) );
 
-	if ((theApp.m_program) && (theApp.m_program->Tools()))
+	if (TOOLS)
 	{
-		HeeksObj* tool_list = theApp.m_program->Tools();
+		HeeksObj* tool_list = TOOLS;
 
 		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
 		{
@@ -1033,16 +1041,16 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 		(m_params.m_type != CCuttingToolParams::eTouchProbe) &&
 		(m_params.m_type != CCuttingToolParams::eToolLengthSwitch))
 	{
-		if (theApp.m_program->m_units == 1)
+		if (PROGRAM->m_units == 1)
 		{
 			// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
-			l_ossName << m_params.m_diameter / theApp.m_program->m_units << " mm ";
+			l_ossName << m_params.m_diameter / PROGRAM->m_units << " mm ";
 		} // End if - then
 		else
 		{
 			// We're using inches.  Find a fractional representation if one matches.
-			wxString fraction = FractionalRepresentation(m_params.m_diameter / theApp.m_program->m_units);
-			wxString guage = GuageNumberRepresentation( m_params.m_diameter / theApp.m_program->m_units, theApp.m_program->m_units );
+			wxString fraction = FractionalRepresentation(m_params.m_diameter / PROGRAM->m_units);
+			wxString guage = GuageNumberRepresentation( m_params.m_diameter / PROGRAM->m_units, PROGRAM->m_units );
 
 			if (fraction.Len() > 0)
 			{
@@ -1054,17 +1062,17 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 			    {
                     l_ossName << guage.c_str() << " ";
 
-                    if ((theApp.m_program) && (theApp.m_program->Tools()))
+                    if (TOOLS)
                     {
-                        if (theApp.m_program->Tools()->m_title_format == CTools::eIncludeGuageAndSize)
+                        if (TOOLS->m_title_format == CTools::eIncludeGuageAndSize)
                         {
-                            l_ossName << "(" << m_params.m_diameter / theApp.m_program->m_units << " inch) ";
+                            l_ossName << "(" << m_params.m_diameter / PROGRAM->m_units << " inch) ";
                         }
                     }
 			    }
 			    else
 			    {
-			        l_ossName << m_params.m_diameter / theApp.m_program->m_units << " inch ";
+			        l_ossName << m_params.m_diameter / PROGRAM->m_units << " inch ";
 			    }
 			}
 		} // End if - else
@@ -1658,7 +1666,7 @@ double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = fal
 			radius = m_params.m_diameter/2;
 	} // End switch
 
-	if (express_in_drawing_units) return(radius / theApp.m_program->m_units);
+	if (express_in_drawing_units) return(radius / PROGRAM->m_units);
 	else return(radius);
 
 } // End CuttingRadius() method
@@ -1747,9 +1755,9 @@ void CCuttingTool::ImportProbeCalibrationData( const wxString & probed_points_xm
 				{
 					std::string name(pPoint->Value());
 
-					if (name == "X") { double value; pPoint->Attribute("X", &value); point.SetX( value / theApp.m_program->m_units ); }
-					if (name == "Y") { double value; pPoint->Attribute("Y", &value); point.SetY( value / theApp.m_program->m_units ); }
-					if (name == "Z") { double value; pPoint->Attribute("Z", &value); point.SetZ( value / theApp.m_program->m_units ); }
+					if (name == "X") { double value; pPoint->Attribute("X", &value); point.SetX( value / PROGRAM->m_units ); }
+					if (name == "Y") { double value; pPoint->Attribute("Y", &value); point.SetY( value / PROGRAM->m_units ); }
+					if (name == "Z") { double value; pPoint->Attribute("Z", &value); point.SetZ( value / PROGRAM->m_units ); }
 				} // End for
 
 				points.push_back(point);

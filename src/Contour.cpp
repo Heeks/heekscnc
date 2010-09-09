@@ -23,11 +23,13 @@
 #include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
+#include "Program.h"
 
 #include <sstream>
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 #include <BRepOffsetAPI_MakeOffset.hxx>
 #include <TopoDS.hxx>
@@ -50,6 +52,8 @@
 #include <Adaptor3d_Curve.hxx>
 
 extern CHeeksCADInterface* heeksCAD;
+
+using namespace std;
 
 /* static */ double CContour::max_deviation_for_spline_to_arc = 0.1;
 

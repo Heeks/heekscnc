@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Interface.h"
+#include "HeeksCNCInterface.h"
 
 class Property;
 
@@ -32,3 +33,9 @@ void OnFrameDelete()
 	theApp.OnFrameDelete();
 }
 
+CHeeksCNCInterface heeksCNC_interface;
+
+void GetInterface(CHeeksCNCInterface** i)
+{
+	*i = &heeksCNC_interface;
+}

@@ -25,6 +25,7 @@
 #include "Contour.h"
 #include "Pocket.h"
 #include "MachineState.h"
+#include "Program.h"
 
 #include <sstream>
 #include <iomanip>

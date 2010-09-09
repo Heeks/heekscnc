@@ -7,6 +7,8 @@
 #include "CounterBore.h"
 #include "ProgramCanvas.h"
 #include "MachineState.h"
+#include "CNCConfig.h"
+#include "Program.h"
 
 void CChamferParams::set_initial_values()
 {
