@@ -210,7 +210,7 @@ void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 		}
 	}
 
-	list->push_back(new PropertyLength(_("Min Cornering Angle (degrees)"), m_min_cornering_angle, parent, on_set_min_cornering_angle));
+	list->push_back(new PropertyDouble(_("Min Cornering Angle (degrees)"), m_min_cornering_angle, parent, on_set_min_cornering_angle));
 }
 
 void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
