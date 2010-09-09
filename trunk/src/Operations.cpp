@@ -13,7 +13,7 @@
 
 bool COperations::CanAdd(HeeksObj* object)
 {
-	return 	((object != NULL) && (COp::IsAnOperation(object->GetType())));
+	return 	((object != NULL) && (IsAnOperation(object->GetType())));
 }
 
 COperations & COperations::operator= ( const COperations & rhs )
@@ -91,7 +91,7 @@ class SetAllActive: public Tool{
 	{
 		for(HeeksObj* object = object_for_tools->GetFirstChild(); object; object = object_for_tools->GetNextChild())
 		{
-			if(COp::IsAnOperation(object->GetType()))
+			if(COperations::IsAnOperation(object->GetType()))
 			{
 				((COp*)object)->m_active = true;
 				heeksCAD->Changed();
@@ -110,7 +110,7 @@ class SetAllInactive: public Tool{
 	{
 		for(HeeksObj* object = object_for_tools->GetFirstChild(); object; object = object_for_tools->GetNextChild())
 		{
-			if(COp::IsAnOperation(object->GetType()))
+			if(COperations::IsAnOperation(object->GetType()))
 			{
 				((COp*)object)->m_active = false;
 				heeksCAD->Changed();
@@ -152,5 +152,34 @@ void COperations::OnChangeUnits(const double units)
         }
     }
     heeksCAD->Changed();
+}
+
+//static
+bool COperations::IsAnOperation(int object_type)
+{
+	switch(object_type)
+	{
+		case ProfileType:
+		case PocketType:
+		case ZigZagType:
+		case WaterlineType:
+		case AdaptiveType:
+		case DrillingType:
+		case CounterBoreType:
+		case TurnRoughType:
+		case LocatingType:
+		case ProbeCentreType:
+		case ProbeEdgeType:
+		case ProbeGridType:
+		case ChamferType:
+		case ContourType:
+		case InlayType:
+		case ScriptOpType:
+		case AttachOpType:
+		case UnattachOpType:
+			return true;
+		default:
+			return theApp.m_external_op_types.find(object_type) != theApp.m_external_op_types.end();
+	}
 }
 

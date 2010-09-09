@@ -13,7 +13,9 @@
 #include "Op.h"
 #include "SpeedOp.h"
 #include "interface/strconv.h"
+#include "SpeedReference.h"
 #include <wx/stdpaths.h>
+#include "Program.h"
 
 #include <vector>
 #include <algorithm>

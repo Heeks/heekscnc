@@ -9,9 +9,6 @@
 #include "interface/Tool.h"
 #include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
-#include "RawMaterial.h"
-#include "HeeksCNC.h"
-#include "SpeedReference.h"
 #include "CNCConfig.h"
 
 class CSpeedReferences: public ObjList{

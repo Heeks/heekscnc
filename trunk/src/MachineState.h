@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "stdafx.h"
 #include "Fixture.h"
 #include "PythonStuff.h"
 #include "CNCPoint.h"

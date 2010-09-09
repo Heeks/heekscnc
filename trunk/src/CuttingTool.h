@@ -8,14 +8,8 @@
 
 #pragma once
 
-#include "Program.h"
 #include "Op.h"
 #include "HeeksCNCTypes.h"
-
-#include <gp_Pnt.hxx>
-#include <gp_Dir.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
 
 #include <vector>
 #include <algorithm>

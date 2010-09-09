@@ -5,9 +5,8 @@
  * details.
  */
 
-#include "stdafx.h"
+#include <stdafx.h>
 #include "Op.h"
-#include "ProgramCanvas.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyCheck.h"
@@ -17,9 +16,12 @@
 #include "HeeksCNCTypes.h"
 #include "CuttingTool.h"
 #include "PythonStuff.h"
+#include "CNCConfig.h"
 #include "MachineState.h"
-#include "Contour.h"
+#include "Program.h"
+#ifdef HEEKSCNC
 #include "Fixtures.h"
+#endif
 
 #include <iterator>
 #include <vector>
@@ -246,7 +248,6 @@ void COp::ReadDefaultValues()
 	} // End if - then
 }
 
-
 /**
     Change tools (if necessary) and assign any private fixtures.
  */
@@ -261,6 +262,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 
 	if(UsesTool())python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the correct cutting tool.
 
+#ifdef HEEKSCNC
 	// Check to see if this operation has its own fixture settings.  If so, change to that fixture now.
 	for (HeeksObj *ob = GetFirstChild(); ob != NULL; ob = GetNextChild())
 	{
@@ -271,37 +273,9 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 			break;
 		}
 	}
+#endif
 
 	return(python);
-}
-
-//static
-bool COp::IsAnOperation(int object_type)
-{
-	switch(object_type)
-	{
-		case ProfileType:
-		case PocketType:
-		case ZigZagType:
-		case WaterlineType:
-		case AdaptiveType:
-		case DrillingType:
-		case CounterBoreType:
-		case TurnRoughType:
-		case LocatingType:
-		case ProbeCentreType:
-		case ProbeEdgeType:
-		case ProbeGridType:
-		case ChamferType:
-		case ContourType:
-		case InlayType:
-		case ScriptOpType:
-		case AttachOpType:
-		case UnattachOpType:
-			return true;
-		default:
-			return false;
-	}
 }
 
 void COp::OnEditString(const wxChar* str){
@@ -309,16 +283,18 @@ void COp::OnEditString(const wxChar* str){
 	heeksCAD->Changed();
 }
 
+#ifdef HEEKSCNC
 class AddFixture: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Add Fixture");}
 	void Run()
 	{
-        if (theApp.m_program->Fixtures()->GetNextFixture() > 0)
+		CProgram* program = theApp.m_program;
+        if (program->Fixtures()->GetNextFixture() > 0)
         {
-            CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(theApp.m_program->Fixtures()->GetNextFixture());
+            CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(program->Fixtures()->GetNextFixture());
 
-            CFixture *new_object = new CFixture( NULL, coordinate_system_number, theApp.m_program->m_machine.m_safety_height_defined, theApp.m_program->m_machine.m_safety_height );
+            CFixture *new_object = new CFixture( NULL, coordinate_system_number, program->m_machine.m_safety_height_defined, program->m_machine.m_safety_height );
             m_pThis->Add(new_object, NULL);
             heeksCAD->ClearMarkedList();
             heeksCAD->Mark(new_object);
@@ -337,13 +313,13 @@ public:
 };
 
 static AddFixture add_fixture;
-
-
+#endif
 
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     ObjList::GetTools( t_list, p );
 
+#ifdef HEEKSCNC
 	// See if this operation already has a child fixture.  If so, don't add a second one.
 	unsigned int num_private_fixtures = 0;
 	for (HeeksObj *child = GetFirstChild(); (child != NULL); child = GetNextChild())
@@ -356,6 +332,7 @@ void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 		add_fixture.Set(this);
 		t_list->push_back(&add_fixture);
 	} // End if - then
+#endif
 }
 
 

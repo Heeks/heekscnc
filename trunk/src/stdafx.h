@@ -15,6 +15,7 @@
 #include <set>
 
 #include <wx/wx.h>
+#include <wx/textfile.h>
 
 extern "C" {
 #include <GL/gl.h>
@@ -42,6 +43,7 @@ extern "C" {
 #include "interface/ObjectCanvas.h"
 
 #include "gp_Pnt.hxx"
+#include <gp_Dir.hxx>
 #include "gp_Lin.hxx"
 #include "gp_Circ.hxx"
 #include "gp_Pln.hxx"
@@ -49,6 +51,8 @@ extern "C" {
 #include "GeomAPI_IntSS.hxx"
 #include "Geom_Line.hxx"
 #include "gp_Elips.hxx"
+#include "TopoDS_Shape.hxx"
+#include "TopoDS_Face.hxx"
 
 // TODO: reference additional headers your program requires here
 

@@ -26,6 +26,7 @@
 #include "MachineState.h"
 #include "Program.h"
 #include "interface/strconv.h"
+#include "Operations.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -35,7 +36,13 @@
 #include <string>
 #include <algorithm>
 
-class CProgram;
+#ifdef HEEKSCNC
+#define PROGRAM theApp.m_program
+#define FIXTURES_FIND theApp.m_program->Fixtures()->Find
+#else
+#define PROGRAM heeksCNC->GetProgram()
+#define FIXTURES_FIND heeksCNC->FixtureFind
+#endif
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -268,7 +275,7 @@ static void on_set_coordinate_system_number(const int zero_based_choice, HeeksOb
 	pFixture->ResetTitle();
 
 	// See if we already have a fixture for this coordinate system.  If so, merge with it.
-	CFixture *pExistingFixture = theApp.m_program->Fixtures()->Find( pFixture->m_coordinate_system_number );
+	CFixture *pExistingFixture = FIXTURES_FIND( pFixture->m_coordinate_system_number );
 	if ((pExistingFixture != NULL) && (pExistingFixture != pFixture))
 	{
         // There is a pre-existing fixture for this coordinate system.  Use the pre-existing one and
@@ -319,9 +326,15 @@ void CFixture::CopyFrom(const HeeksObj* object)
 	operator=(*((CFixture*)object));
 }
 
+#ifdef HEEKSCNC
+#define IS_AN_OPERATION COperations::IsAnOperation
+#else
+#define IS_AN_OPERATION heeksCNC->IsAnOperation
+#endif
+
 bool CFixture::CanAddTo(HeeksObj* owner)
 {
-	return (((owner != NULL) && ((owner->GetType() == FixturesType) || (COp::IsAnOperation(owner->GetType())))));
+	return (((owner != NULL) && ((owner->GetType() == FixturesType) || (IS_AN_OPERATION(owner->GetType())))));
 }
 
 void CFixture::WriteXML(TiXmlNode *root)

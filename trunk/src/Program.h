@@ -9,9 +9,7 @@
 #include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
 #include "RawMaterial.h"
-#include "HeeksCNC.h"
 #include "SpeedReferences.h"
-#include "PythonStuff.h"
 
 class CNCCode;
 class CProgram;

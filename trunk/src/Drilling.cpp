@@ -21,6 +21,7 @@
 #include "Fixture.h"
 #include "CNCPoint.h"
 #include "MachineState.h"
+#include "Program.h"
 
 #include <sstream>
 #include <iomanip>
