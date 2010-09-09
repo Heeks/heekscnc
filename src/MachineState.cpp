@@ -9,9 +9,15 @@
 #include "MachineState.h"
 #include "CuttingTool.h"
 #include "CNCPoint.h"
-
+#include "Program.h"
 
 class CFixture;
+
+#ifdef HEEKSCNC
+#define PROGRAM theApp.m_program
+#else
+#define PROGRAM heeksCNC->GetProgram()
+#endif
 
 CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54, false, 0.0)
 {
@@ -114,19 +120,19 @@ Python CMachineState::Fixture( CFixture new_fixture )
 				if (m_fixture.m_params.m_safety_height > new_fixture.m_params.m_safety_height)
 				{
 					python << _T("machine_coordinates()");
-					python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / theApp.m_program->m_units << _T(")\n");
+					python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(")\n");
 				} // End if - then
 				else
 				{
 					python << _T("machine_coordinates()");
-					python << _T("rapid(z=") << new_fixture.m_params.m_safety_height / theApp.m_program->m_units << _T(")\n");
+					python << _T("rapid(z=") << new_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(")\n");
 				} // End if - else
 			} // End if - then
 			else
 			{
 				// The old fixture has a safety height but the new one doesn't
 				python << _T("machine_coordinates()");
-				python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / theApp.m_program->m_units << _T(")\n");
+				python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(")\n");
 			} // End if - else
         }
 
@@ -148,7 +154,7 @@ Python CMachineState::Fixture( CFixture new_fixture )
 				wxString comment;
 				comment << _("Move above touch-off point for ") << new_fixture.m_coordinate_system_number;
 				python << _T("comment(") << PythonString(comment) << _T(")\n");
-				python << _T("rapid(x=") << new_fixture.m_params.m_touch_off_point.X()/theApp.m_program->m_units << _T(", y=") << new_fixture.m_params.m_touch_off_point.Y()/theApp.m_program->m_units << _T(")\n");
+				python << _T("rapid(x=") << new_fixture.m_params.m_touch_off_point.X()/PROGRAM->m_units << _T(", y=") << new_fixture.m_params.m_touch_off_point.Y()/PROGRAM->m_units << _T(")\n");
 			}
 		} // End if - then
 

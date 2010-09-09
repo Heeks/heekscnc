@@ -7,7 +7,6 @@
 
 #include "HeeksCNCTypes.h"
 #include "DepthOp.h"
-#include "geometry.h"
 #include "Drilling.h"
 #include "CNCPoint.h"
 

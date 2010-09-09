@@ -640,7 +640,7 @@ static void DesignRulesAdjustment(const bool apply_changes)
 
 	for(HeeksObj* obj = operations->GetFirstChild(); obj; obj = operations->GetNextChild())
 	{
-		if (COp::IsAnOperation( obj->GetType() ))
+		if (COperations::IsAnOperation( obj->GetType() ))
 		{
 			if (obj != NULL)
 			{

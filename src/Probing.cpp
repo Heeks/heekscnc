@@ -29,6 +29,7 @@
 #include "NCCode.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
+#include "Program.h"
 
 #include <sstream>
 #include <iomanip>

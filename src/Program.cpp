@@ -553,6 +553,13 @@ Python CProgram::RewritePythonProgram()
 	CAdaptive::number_for_stl_file = 1;
 	CAttachOp::number_for_stl_file = 1;
 
+	// call any OnRewritePython functions from other plugins
+	for(std::list< void(*)() >::iterator It = theApp.m_OnRewritePython_list.begin(); It != theApp.m_OnRewritePython_list.end(); It++)
+	{
+		void(*callbackfunc)() = *It;
+		(*callbackfunc)();
+	}
+
 	bool kurve_module_needed = false;
 	bool kurve_funcs_needed = false;
 	bool area_module_needed = false;
@@ -819,7 +826,7 @@ Python CProgram::RewritePythonProgram()
 			HeeksObj *object = (HeeksObj *) *l_itOperation;
 			if (object == NULL) continue;
 
-			if(COp::IsAnOperation(object->GetType()))
+			if(COperations::IsAnOperation(object->GetType()))
 			{
 			    bool already_processed = false;
 			    std::list<CFixture> private_fixtures = ((COp *) object)->PrivateFixtures();

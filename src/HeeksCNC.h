@@ -28,6 +28,8 @@ public:
 	wxToolBarBase* m_machiningBar;
 	wxString m_dll_path;
 	int m_icon_texture_number;
+	std::list< void(*)() > m_OnRewritePython_list;
+	std::set<int> m_external_op_types;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();

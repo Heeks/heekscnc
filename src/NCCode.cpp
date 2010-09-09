@@ -18,6 +18,7 @@
 #include "CNCConfig.h"
 #include "CuttingTool.h"
 #include "src/Geom.h"
+#include "Program.h"
 
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Solid.hxx>

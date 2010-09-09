@@ -485,6 +485,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\HeeksCNCInterface.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\HeeksCNCInterface.h"
+			>
+		</File>
+		<File
 			RelativePath=".\HeeksCNCTypes.h"
 			>
 		</File>
@@ -730,6 +738,14 @@
 		</File>
 		<File
 			RelativePath="$(HEEKSCADPATH)\interface\PropertyVertex.h"
+			>
+		</File>
+		<File
+			RelativePath=".\PythonString.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\PythonString.h"
 			>
 		</File>
 		<File

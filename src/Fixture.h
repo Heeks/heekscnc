@@ -5,8 +5,7 @@
  * This program is released under the BSD license. See the file COPYING for
  * details.
  */
-
- #pragma once
+#pragma once
 
 #include "tinyxml/tinyxml.h"
 #include "HeeksCNCTypes.h"

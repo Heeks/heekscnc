@@ -36,7 +36,11 @@ double CNCPoint::Tolerance() const
 
 double CNCPoint::Units() const
 {
+#ifdef HEEKSCNC
 	return(theApp.m_program->m_units);
+#else
+	return(heeksCNC->GetProgram()->m_units);
+#endif
 }
 
 double CNCPoint::X(const bool in_drawing_units /* = false */) const

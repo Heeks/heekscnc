@@ -6,6 +6,7 @@
 #include "Tools.h"
 #include "Program.h"
 #include "interface/Tool.h"
+#include "CuttingTool.h"
 #include "tinyxml/tinyxml.h"
 #include <wx/stdpaths.h>
 
