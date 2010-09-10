@@ -670,26 +670,9 @@ bool CInlay::CornerNeedsSharpenning(Corners_t::iterator itCorner) const
 	}
 
     double min_cornering_angle_in_radians = (m_params.m_min_cornering_angle / 360.0) * (2.0 * PI);
+    double angle = vectors[0].AngleWithRef(vectors[1], reference);
 
-    double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
-	double angle2 = vectors[1].AngleWithRef( gp_Vec(1,0,0), reference );
-
-	while (angle1 < 0) angle1 += (2.0 * PI);
-	while (angle2 < 0) angle2 += (2.0 * PI);
-
-    if (angle1 < angle2)
-    {
-        double angle = angle2 - angle1;
-        if (angle > PI) angle -= PI;
-        return(angle < min_cornering_angle_in_radians);
-    }
-    else
-    {
-        double angle = angle1 - angle2;
-        if (angle > PI) angle -= PI;
-        return(angle < min_cornering_angle_in_radians);
-    }
-
+    return fabs(angle) < min_cornering_angle_in_radians;
 } // End of CornerNeedsSharpenning() method
 
 
