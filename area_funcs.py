@@ -1,15 +1,12 @@
 import area
 from nc.nc import *
+import math
 
 # some globals, to save passing variables as parameters too much
-area_for_pocket = None
-first_offset_for_pocket = None
+area_for_feed_possible = None
+tool_radius_for_pocket = None
 
-def curve_start(curve):
-    vlist = curve.getVertices()
-    return vlist[0].p
-
-def cut_curve(curve, need_rapid, p, rapid_down_to_height, final_depth, stepover):
+def cut_curve(curve, need_rapid, p, rapid_down_to_height, final_depth):
     prev_p = p
     first = True
 
@@ -77,26 +74,29 @@ def make_obround(p0, p1, radius):
     return obround
     
 def feed_possible(p0, p1):    
-    obround = make_obround(p0, p1, first_offset_for_pocket)
-    a = area.Area(area_for_pocket)
+    obround = make_obround(p0, p1, tool_radius_for_pocket)
+    a = area.Area(area_for_feed_possible)
     obround.Subtract(a)
     if obround.num_curves() > 0:
         return False
     return True
 
-def cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, stepover):
+def cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, keep_tool_down_if_poss):
     p = area.Point(0, 0)
     first = True
     for curve in curve_list:
         need_rapid = True
-        if(first == False):
-            # see if we can feed across
-            s = curve_start(curve)
-            if feed_possible(p, s):
+        if first == False:
+            s = curve.FirstVertex().p
+            if keep_tool_down_if_poss == True:
+                # see if we can feed across
+                if feed_possible(p, s):
+                    need_rapid = False
+            elif s.x == p.x and s.y == p.y:
                 need_rapid = False
-            if need_rapid:
-                rapid(z = clearance_height)
-        p = cut_curve(curve, need_rapid, p, rapid_down_to_height, depth, stepover)
+        if need_rapid:
+            rapid(z = clearance_height)
+        p = cut_curve(curve, need_rapid, p, rapid_down_to_height, depth)
         first = False
     rapid(z = clearance_height)
     
@@ -127,11 +127,169 @@ def get_curve_list(arealist):
             curve_list.append(curve)
     return curve_list
 
-def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, round_corner_factor, clearance_height, from_center):
-    global area_for_pocket
-    global first_offset_for_pocket
-    area_for_pocket = a
-    first_offset_for_pocket = first_offset
+curve_list_for_zigs = []
+rightward_for_zigs = True
+sin_angle_for_zigs = 0.0
+cos_angle_for_zigs = 1.0
+sin_minus_angle_for_zigs = 0.0
+cos_minus_angle_for_zigs = 1.0
+test_count = 0
+
+def make_zig_curve(curve, y0, y):
+    global test_count
+    
+    if rightward_for_zigs:
+        curve.Reverse()
+        
+    zig = area.Curve()
+    
+    zig_started = False
+    zag_found = False
+    
+    prev_p = None
+    
+    for vertex in curve.getVertices():
+        if prev_p != None:
+            if math.fabs(vertex.p.y - y0) < 0.002:
+                if zig_started:
+                    zig.append(unrotated_vertex(vertex))
+                elif math.fabs(prev_p.y - y0) < 0.002 and vertex.type == 0:
+                    zig.append(area.Vertex(0, unrotated_point(prev_p), area.Point(0, 0)))
+                    zig.append(unrotated_vertex(vertex))
+                    zig_started = True
+            elif zig_started:
+                zig.append(unrotated_vertex(vertex))
+                if math.fabs(vertex.p.y - y) < 0.002:
+                    zag_found = True
+                    break
+        prev_p = vertex.p
+        
+    if zig_started:
+        curve_list_for_zigs.append(zig)        
+
+def make_zig(a, y0, y):
+    for curve in a.getCurves():
+        make_zig_curve(curve, y0, y)
+        
+reorder_zig_list_list = []
+        
+def add_reorder_zig(curve):
+    global reorder_zig_list_list
+    
+    # look in existing lists
+    s = curve.FirstVertex().p
+    for curve_list in reorder_zig_list_list:
+        last_curve = curve_list[len(curve_list) - 1]
+        e = last_curve.LastVertex().p
+        if math.fabs(s.x - e.x) < 0.002 and math.fabs(s.y - e.y) < 0.002:
+            curve_list.append(curve)
+            return
+        
+    # else add a new list
+    curve_list = []
+    curve_list.append(curve)
+    reorder_zig_list_list.append(curve_list)
+
+def reorder_zigs():
+    global curve_list_for_zigs
+    global reorder_zig_list_list
+    reorder_zig_list_list = []
+    for curve in curve_list_for_zigs:
+        add_reorder_zig(curve)
+        
+    curve_list_for_zigs = []
+    for curve_list in reorder_zig_list_list:
+        for curve in curve_list:
+            curve_list_for_zigs.append(curve)
+            
+def rotated_point(p):
+    return area.Point(p.x * cos_angle_for_zigs - p.y * sin_angle_for_zigs, p.x * sin_angle_for_zigs + p.y * cos_angle_for_zigs)
+    
+def unrotated_point(p):
+    return area.Point(p.x * cos_minus_angle_for_zigs - p.y * sin_minus_angle_for_zigs, p.x * sin_minus_angle_for_zigs + p.y * cos_minus_angle_for_zigs)
+
+def rotated_vertex(v):
+    if v.type:
+        return area.Vertex(v.type, rotated_point(v.p), rotated_point(v.c))
+    return area.Vertex(v.type, rotated_point(v.p), area.Point(0, 0))
+
+def unrotated_vertex(v):
+    if v.type:
+        return area.Vertex(v.type, unrotated_point(v.p), unrotated_point(v.c))
+    return area.Vertex(v.type, unrotated_point(v.p), area.Point(0, 0))
+
+def rotated_area(a):
+    an = area.Area()
+    for curve in a.getCurves():
+        curve_new = area.Curve()
+        for v in curve.getVertices():
+            curve_new.append(rotated_vertex(v))
+        an.append(curve_new)
+    return an
+
+def zigzag(a, a_firstoffset, stepover):
+    if a.num_curves() == 0:
+        return
+    
+    global rightward_for_zigs
+    global curve_list_for_zigs
+    global test_count
+    global sin_angle_for_zigs
+    global cos_angle_for_zigs
+    global sin_minus_angle_for_zigs
+    global cos_minus_angle_for_zigs
+    
+    a = rotated_area(a)
+    
+    b = area.Box()
+    a.GetBox(b)
+    
+    x0 = b.MinX() - 1.0
+    x1 = b.MaxX() + 1.0
+
+    height = b.MaxY() - b.MinY()
+    num_steps = int(height / stepover + 1)
+    y = b.MinY() + 0.1
+    null_point = area.Point(0, 0)
+    rightward_for_zigs = True
+    curve_list_for_zigs = []
+    test_count = 0
+    
+    for i in range(0, num_steps):
+        test_count = test_count + 1
+        y0 = y
+        y = y + stepover
+        p0 = area.Point(x0, y0)
+        p1 = area.Point(x0, y)
+        p2 = area.Point(x1, y)
+        p3 = area.Point(x1, y0)
+        c = area.Curve()
+        c.append(area.Vertex(0, p0, null_point, 0))
+        c.append(area.Vertex(0, p1, null_point, 0))
+        c.append(area.Vertex(0, p2, null_point, 1))
+        c.append(area.Vertex(0, p3, null_point, 0))
+        c.append(area.Vertex(0, p0, null_point, 1))
+        a2 = area.Area()
+        a2.append(c)
+        a2.Intersect(a)
+        make_zig(a2, y0, y)
+        rightward_for_zigs = (rightward_for_zigs == False)
+        
+    reorder_zigs()
+
+def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, round_corner_factor, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle):
+    global area_for_feed_possible
+    global tool_radius_for_pocket
+    global sin_angle_for_zigs
+    global cos_angle_for_zigs
+    global sin_minus_angle_for_zigs
+    global cos_minus_angle_for_zigs
+    tool_radius_for_pocket = tool_radius
+    radians_angle = zig_angle * math.pi / 180
+    sin_angle_for_zigs = math.sin(-radians_angle)
+    cos_angle_for_zigs = math.cos(-radians_angle)
+    sin_minus_angle_for_zigs = math.sin(radians_angle)
+    cos_minus_angle_for_zigs = math.cos(radians_angle)
         
     if rapid_down_to_height > clearance_height:
         rapid_down_to_height = clearance_height
@@ -139,14 +297,20 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
     area.set_round_corner_factor(round_corner_factor)
 
     arealist = list()
+    
+    area_for_feed_possible = area.Area(a)
+    area_for_feed_possible.Offset(extra_offset - 0.01)
 
     a_firstoffset = area.Area(a)
-    a_firstoffset.Offset(first_offset)
+    a_firstoffset.Offset(tool_radius + extra_offset)
     
-    recur(arealist, a_firstoffset, stepover, from_center)
-    
-    curve_list = get_curve_list(arealist)
-    
+    if use_zig_zag:
+        zigzag(a_firstoffset, a_firstoffset, stepover)
+        curve_list = curve_list_for_zigs
+    else:
+        recur(arealist, a_firstoffset, stepover, from_center)
+        curve_list = get_curve_list(arealist)
+        
     layer_count = int((start_depth - final_depth) / stepdown)
 
     if layer_count * stepdown + 0.00001 < start_depth - final_depth:
@@ -157,12 +321,7 @@ def pocket(a, first_offset, rapid_down_to_height, start_depth, final_depth, step
             depth = final_depth
         else:
             depth = start_depth - i * stepdown
-
-        offset_value = first_offset
-        a_offset = area.Area(a)
-        area.set_round_corner_factor(round_corner_factor)
-        a_offset.Offset(offset_value)
         
-        cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, stepover)
+        cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, keep_tool_down_if_poss)
 
 

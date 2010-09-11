@@ -17,6 +17,9 @@ public:
 	double m_round_corner_factor;
 	double m_material_allowance;
 	double m_step_over;
+	bool m_keep_tool_down_if_poss;
+	bool m_use_zig_zag;
+	double m_zig_angle;
 
 	CPocketParams();
 

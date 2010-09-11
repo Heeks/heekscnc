@@ -39,7 +39,6 @@ public:
 	bool CanAdd(HeeksObj* object);
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
-	bool AutoExpand(){return true;}
 	bool UsesID() { return(false); }
 	void CopyFrom(const HeeksObj* object);
 
