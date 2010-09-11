@@ -35,6 +35,9 @@ CPocketParams::CPocketParams()
 	m_material_allowance = 0.0;
 	m_round_corner_factor = 0.0;
 	m_starting_place = true;
+	m_keep_tool_down_if_poss = true;
+	m_use_zig_zag = true;
+	m_zig_angle = 0.0;
 }
 
 void CPocketParams::set_initial_values(const CCuttingTool::ToolNumber_t cutting_tool_number)
@@ -73,6 +76,24 @@ static void on_set_starting_place(int value, HeeksObj* object)
 	((CPocket*)object)->WriteDefaultValues();
 }
 
+static void on_set_keep_tool_down(bool value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_keep_tool_down_if_poss = value;
+	((CPocket*)object)->WriteDefaultValues();
+}
+
+static void on_set_use_zig_zag(bool value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_use_zig_zag = value;
+	((CPocket*)object)->WriteDefaultValues();
+}
+
+static void on_set_zig_angle(double value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_zig_angle = value;
+	((CPocket*)object)->WriteDefaultValues();
+}
+
 void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("step over"), m_step_over, parent, on_set_step_over));
@@ -85,6 +106,9 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 		choices.push_back(_("Center"));
 		list->push_back(new PropertyChoice(_("starting_place"), choices, m_starting_place, parent, on_set_starting_place));
 	}
+	list->push_back(new PropertyCheck(_("keep tool down"), m_keep_tool_down_if_poss, parent, on_set_keep_tool_down));
+	list->push_back(new PropertyCheck(_("use zig zag"), m_use_zig_zag, parent, on_set_use_zig_zag));
+	if(m_use_zig_zag)list->push_back(new PropertyDouble(_("zig angle"), m_zig_angle, parent, on_set_zig_angle));
 }
 
 void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
@@ -96,6 +120,9 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("mat", m_material_allowance);
 	element->SetDoubleAttribute("rf", m_round_corner_factor);
 	element->SetAttribute("from_center", m_starting_place);
+	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
+	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
+	element->SetDoubleAttribute("zig_angle", m_zig_angle);
 }
 
 void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -104,6 +131,12 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("mat", &m_material_allowance);
 	pElem->Attribute("rf", &m_round_corner_factor);
 	pElem->Attribute("from_center", &m_starting_place);
+	int int_for_bool = false;
+	pElem->Attribute("keep_tool_down", &int_for_bool);
+	m_keep_tool_down_if_poss = (int_for_bool != 0);
+	pElem->Attribute("use_zig_zag", &int_for_bool);
+	m_use_zig_zag = (int_for_bool != 0);
+	pElem->Attribute("zig_angle", &m_zig_angle);
 }
 
 static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, int id_to_use = 0)
@@ -310,14 +343,18 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 			// start - assume we are at a suitable clearance height
 
 			// Pocket the area
-			python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2 + ");
+			python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2, ");
 			python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
 			python << _T(", rapid_down_to_height, start_depth, final_depth, ");
 			python << m_pocket_params.m_step_over / theApp.m_program->m_units;
 			python << _T(", step_down, ");
 			python << m_pocket_params.m_round_corner_factor;
 			python << _T(", clearance, ");
-			python << m_pocket_params.m_starting_place << _T(")\n");
+			python << m_pocket_params.m_starting_place;
+			python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
+			python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
+			python << _T(", ") << m_pocket_params.m_zig_angle;
+			python << _T(")\n");
 
 			// rapid back up to clearance plane
 			python << _T("rapid(z = clearance)\n");
@@ -343,6 +380,9 @@ void CPocket::WriteDefaultValues()
 	config.Write(_T("MaterialAllowance"), m_pocket_params.m_material_allowance);
 	config.Write(_T("RoundCornerFactor"), m_pocket_params.m_round_corner_factor);
 	config.Write(_T("FromCenter"), m_pocket_params.m_starting_place);
+	config.Write(_T("KeepToolDown"), m_pocket_params.m_keep_tool_down_if_poss);
+	config.Write(_T("UseZigZag"), m_pocket_params.m_use_zig_zag);
+	config.Write(_T("ZigAngle"), m_pocket_params.m_zig_angle);
 }
 
 void CPocket::ReadDefaultValues()
@@ -354,6 +394,9 @@ void CPocket::ReadDefaultValues()
 	config.Read(_T("MaterialAllowance"), &m_pocket_params.m_material_allowance, 0.2);
 	config.Read(_T("RoundCornerFactor"), &m_pocket_params.m_round_corner_factor, 1.0);
 	config.Read(_T("FromCenter"), &m_pocket_params.m_starting_place, 1);
+	config.Read(_T("KeepToolDown"), &m_pocket_params.m_keep_tool_down_if_poss, true);
+	config.Read(_T("UseZigZag"), &m_pocket_params.m_use_zig_zag, false);
+	config.Read(_T("ZigAngle"), &m_pocket_params.m_zig_angle);
 }
 
 void CPocket::glCommands(bool select, bool marked, bool no_color)
@@ -644,6 +687,9 @@ bool CPocketParams::operator==(const CPocketParams & rhs) const
 	if (m_round_corner_factor != rhs.m_round_corner_factor) return(false);
 	if (m_material_allowance != rhs.m_material_allowance) return(false);
 	if (m_step_over != rhs.m_step_over) return(false);
+	if (m_keep_tool_down_if_poss != rhs.m_keep_tool_down_if_poss) return(false);
+	if (m_use_zig_zag != rhs.m_use_zig_zag) return(false);
+	if (m_zig_angle != rhs.m_zig_angle) return(false);
 
 	return(true);
 }
