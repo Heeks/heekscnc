@@ -12,6 +12,5 @@ hm50 Hafco HM-50 2400
 gantry_router Gantry Router without tool change or spindle control 0
 rez2 Prvá zváračská format rez (Unofficial slovak national standard) 0
 centroid1 centroid mill post 0
-isoR R format for arcs 0
 anilam_crusader_m Anilam Crusader M 0
 
