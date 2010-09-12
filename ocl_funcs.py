@@ -30,7 +30,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
    dcf = ocl.PathDropCutter(s)
    cutter = ocl.CylCutter()
    if corner_radius == 0.0:
-      cutter = ocl.CylCutter(tool_diameter + mat_allowance)
+      cutter = ocl.CylCutter(tool_diameter + mat_allowance, 100.0)
    elif corner_radius > tool_diameter / 2 - 0.000000001:
       cutter = ocl.BallCutter(tool_diameter + mat_allowance)
    else:
