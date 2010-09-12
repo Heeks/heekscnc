@@ -34,7 +34,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="`wx-config --cxxflags`\" />
-			<Add option='-Wall -fPIC -g -I &quot;./&quot; $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DRUNINPLACE -DCODEBLOCKS -DOPEN_SOURCE_GEOMETRY' />
+			<Add option='-Wall -fPIC -g -I &quot;./&quot; $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DRUNINPLACE -DCODEBLOCKS -DOPEN_SOURCE_GEOMETRY -DHEEKSCNC' />
 			<Add directory="/usr/include/opencascade" />
 			<Add directory="../../heekscad" />
 			<Add directory="../heekscad" />
@@ -87,6 +87,8 @@
 		<Unit filename="src/GTri.h" />
 		<Unit filename="src/HeeksCNC.cpp" />
 		<Unit filename="src/HeeksCNC.h" />
+		<Unit filename="src/HeeksCNCInterface.cpp" />
+		<Unit filename="src/HeeksCNCInterface.h" />
 		<Unit filename="src/HeeksCNCTypes.h" />
 		<Unit filename="src/Inlay.cpp" />
 		<Unit filename="src/Inlay.h" />
@@ -114,6 +116,8 @@
 		<Unit filename="src/Program.h" />
 		<Unit filename="src/ProgramCanvas.cpp" />
 		<Unit filename="src/ProgramCanvas.h" />
+		<Unit filename="src/PythonString.cpp" />
+		<Unit filename="src/PythonString.h" />
 		<Unit filename="src/PythonStuff.cpp" />
 		<Unit filename="src/PythonStuff.h" />
 		<Unit filename="src/RawMaterial.cpp" />
@@ -138,6 +142,8 @@
 		<Unit filename="src/TrsfNCCode.h" />
 		<Unit filename="src/TurnRough.cpp" />
 		<Unit filename="src/TurnRough.h" />
+		<Unit filename="src/Waterline.cpp" />
+		<Unit filename="src/Waterline.h" />
 		<Unit filename="src/ZigZag.cpp" />
 		<Unit filename="src/ZigZag.h" />
 		<Unit filename="src/stdafx.cpp" />
@@ -182,6 +188,8 @@
 		<Unit filename="../interface/TransientObject.h" />
 		<Unit filename="../interface/strconv.cpp" />
 		<Unit filename="../interface/strconv.h" />
+		<Unit filename="../src/Geom.cpp" />
+		<Unit filename="../src/Geom.h" />
 		<Unit filename="../tinyxml/tinystr.cpp" />
 		<Unit filename="../tinyxml/tinystr.h" />
 		<Unit filename="../tinyxml/tinyxml.cpp" />
