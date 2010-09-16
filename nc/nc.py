@@ -326,6 +326,46 @@ class Creator:
     def rapid_to_rotated_coordinate(self, x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
 	pass
 
+    ############################################################################
+    ##  NC code creator for additive machines like RepRap
+
+
+    def wipe(self):
+        """wipe routine"""
+        pass
+
+    def extruder_on_fwd(self):
+	"""Turn on the extruder"""
+	pass
+
+    def extruder_on_rev(self):
+	"""turn on the extruder in reverse"""
+	pass
+
+    def extruder_off(self):
+	"""turn off the extruder"""
+	pass
+
+    def extruder_temp(self, temp):
+	"""Set the extruder temp in celsius"""
+	pass
+
+    def fan_on(self):
+	"""turn on the cooling fan"""
+	pass
+
+    def fan_off(self):
+	"""turn off the cooling fan"""
+	pass
+
+    def build_bed_temp(self, temp):
+	"""Set the bed temp in celsius"""
+	pass
+
+    def chamber_temp(self, temp):
+	"""Set the chamber temp in celsius"""
+	pass
+
 ################################################################################
 
 creator = Creator()
@@ -586,4 +626,33 @@ def rapid_to_intersection(x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, inters
 def rapid_to_rotated_coordinate(x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
     creator.rapid_to_rotated_coordinate(x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final)
 
+############################################################################
+##  NC code creator for additive machines like RepRap
+
+def wipe():
+    creator.wipe()
+
+def extruder_on_fwd():
+    creator.extruder_on_fwd()
+
+def extruder_on_rev():
+    creator.extruder_on_rev()
+
+def extruder_off(sef):
+    creator.extruder_off()
+
+def extruder_temp(temp=None):
+    creator.extruder_temp(temp)
+
+def fan_on():
+    creator.fan_on()
+
+def fan_off():
+    creator.fan_off()
+
+def build_bed_temp(temp=None):
+    creator.build_bed_temp(temp)
+
+def chamber_temp(temp=None):
+    creator.chamber_temp(temp)
 
