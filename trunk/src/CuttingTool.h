@@ -30,6 +30,7 @@ public:
 		eTurningTool,
 		eTouchProbe,
 		eToolLengthSwitch,
+		eExtrusion,
 		eUndefinedToolType
 	} eCuttingToolType;
 
@@ -49,6 +50,7 @@ public:
 		types_list.push_back( CuttingToolTypeDescription_t( eTurningTool, wxString(_("Turning Tool")) ));
 		types_list.push_back( CuttingToolTypeDescription_t( eTouchProbe, wxString(_("Touch Probe")) ));
 		types_list.push_back( CuttingToolTypeDescription_t( eToolLengthSwitch, wxString(_("Tool Length Switch")) ));
+		types_list.push_back( CuttingToolTypeDescription_t( eExtrusion, wxString(_("Extrusion")) ));		
 
 		return(types_list);
 	} // End GetCuttingToolTypesList() method
@@ -60,6 +62,8 @@ public:
 		eCarbide,
 		eUndefinedMaterialType
 	} eMaterial_t;
+	
+
 
 	typedef std::pair< eMaterial_t, wxString > MaterialDescription_t;
 	typedef std::vector<MaterialDescription_t > MaterialsList_t;
@@ -79,6 +83,9 @@ public:
 	// G10 L1 P[tool number] R[radius] X[offset] Z[offset] Q[orientation]
 
 	int m_material;	// eMaterial_t - describes the cutting surface type.
+
+
+
 
 	double m_diameter;
 	double m_tool_length_offset;
@@ -147,6 +154,39 @@ public:
 
 	double m_probe_offset_x;
 	double m_probe_offset_y;
+	
+	// The following  properties relate to the extrusions created by a reprap style 3D printer.
+	// using temperature, speed, and the height of the nozzle, and the nozzle size it's possible to create 
+	// many different sizes and shapes of extrusion.
+
+	typedef enum {
+		eABS = 0,
+		ePLA,
+		eHDPE,
+		eUndefinedExtrusionMaterialType
+	} eExtrusionMaterial_t;	
+	typedef std::pair< eExtrusionMaterial_t, wxString > ExtrusionMaterialDescription_t;
+	typedef std::vector<ExtrusionMaterialDescription_t > ExtrusionMaterialsList_t;
+
+	static ExtrusionMaterialsList_t GetExtrusionMaterialsList()
+	{
+		ExtrusionMaterialsList_t ExtrusionMaterials_list;
+
+		ExtrusionMaterials_list.push_back( ExtrusionMaterialDescription_t( eABS, wxString(_("ABS Plastic")) ));
+		ExtrusionMaterials_list.push_back( ExtrusionMaterialDescription_t( ePLA, wxString(_("PLA Plastic")) ));
+		ExtrusionMaterials_list.push_back( ExtrusionMaterialDescription_t( eHDPE, wxString(_("HDPE Plastic")) ));		
+
+		return(ExtrusionMaterials_list);
+	}
+	int m_extrusion_material;
+	double m_feedrate;
+	double m_layer_height;
+	double m_width_over_thickness;
+	double m_temperature;
+	double m_flowrate;
+	double m_filament_diameter;
+
+
 
 	// The gradient is the steepest angle at which this tool can plunge into the material.  Many
 	// cutting tools behave better if they are slowly ramped down into the material.  This gradient
