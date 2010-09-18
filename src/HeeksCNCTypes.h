@@ -36,5 +36,6 @@ enum{
 	AttachOpType,
 	UnattachOpType,
 	WaterlineType,
+	RaftType,
 	HeeksCNCMaximumType
 };

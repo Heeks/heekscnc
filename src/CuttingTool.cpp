@@ -113,7 +113,16 @@ void CCuttingToolParams::set_initial_values()
 	// The following are ONLY for touch probe tools
 	config.Read(_T("probe_offset_x"), &m_probe_offset_x, 0.0);
 	config.Read(_T("probe_offset_y"), &m_probe_offset_y, 0.0);
-
+	
+	// The following are ONLY for extrusions
+	config.Read(_T("m_extrusion_material"), &m_extrusion_material, int(eABS));  //type of plastic or other material to extrude
+	config.Read(_T("m_feedrate"), &m_feedrate, 50);  //the base feed rate.
+	config.Read(_T("m_layer_height"), &m_layer_height, .35);  //Distance the extruder moves in Z axis for each layer.
+	config.Read(_T("m_width_over_thickness"), &m_width_over_thickness, 1.8);  //Ratio expressing the height over width of the extruded filament 1.0 indicates a circular cross section.  Higher numbers indicate an elliptical extrusion.
+	config.Read(_T("m_temperature"), &m_temperature, 220); //temp in celsius
+	config.Read(_T("m_flowrate"), &m_flowrate, 255); //speed of the extruder motor.
+	config.Read(_T("m_filament_diameter"), &m_filament_diameter, 3); //The diameter of the raw filament.  Typically ~3mm
+	
 	config.Read(_T("gradient"), &m_gradient, 0.0);  // Straight plunge by default.
 }
 
@@ -145,6 +154,16 @@ void CCuttingToolParams::write_values_to_config()
 	// The following are ONLY for touch probe tools
 	config.Write(_T("probe_offset_x"), m_probe_offset_x);
 	config.Write(_T("probe_offset_y"), m_probe_offset_y);
+
+	// The following are ONLY for extrusions
+	config.Write(_T("m_extrusion_material"), m_extrusion_material);
+	config.Write(_T("m_feedrate"), m_feedrate);
+	config.Write(_T("m_layer_height"), m_layer_height);
+	config.Write(_T("m_width_over_thickness"), m_width_over_thickness);
+	config.Write(_T("m_temperature"), m_temperature);
+	config.Write(_T("m_flowrate"), &m_flowrate); 
+	config.Write(_T("m_filament_diameter"), &m_filament_diameter); 
+	
 
 	config.Write(_T("gradient"), m_gradient);
 }
@@ -302,6 +321,9 @@ double CCuttingToolParams::ReasonableGradient( const eCuttingToolType type ) con
 		case CCuttingToolParams::eToolLengthSwitch:
 				return(0.0);
 
+		case CCuttingToolParams::eExtrusion:
+				return(0.0);				
+
 		case CCuttingToolParams::eChamfer:
 				return(0.0);
 
@@ -370,6 +392,12 @@ void CCuttingTool::ResetParametersToReasonableValues()
 				m_params.m_flat_radius = 0;
 				ResetTitle();
 				break;
+				
+		case CCuttingToolParams::eExtrusion:
+				m_params.m_corner_radius = (m_params.m_diameter / 2);
+				m_params.m_flat_radius = 0;
+				ResetTitle();
+				break;				
 
 		case CCuttingToolParams::eToolLengthSwitch:
 				m_params.m_corner_radius = (m_params.m_diameter / 2);
@@ -487,6 +515,66 @@ static void on_set_probe_offset_y(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
+static void on_set_extrusion_material(int zero_based_choice, HeeksObj* object)
+{
+	if (zero_based_choice < 0) return;	// An error has occured.
+
+	if ((zero_based_choice >= CCuttingToolParams::eABS) && (zero_based_choice <= CCuttingToolParams::eHDPE))
+	{
+		((CCuttingTool*)object)->m_params.m_extrusion_material = zero_based_choice;
+		((CCuttingTool*)object)->ResetTitle();
+		heeksCAD->RefreshProperties();
+		object->KillGLLists();
+		heeksCAD->Repaint();
+	} // End if - then
+	else
+	{
+		wxMessageBox(_T("Extrusion material must be between 0 and 2. Aborting value change"));
+	} // End if - else
+
+}
+
+static void on_set_feedrate(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_feedrate = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_layer_height(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_layer_height = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_width_over_thickness(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_width_over_thickness = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_temperature(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_temperature = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_flowrate(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_flowrate = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_filament_diameter(double value, HeeksObj* object)
+{
+	((CCuttingTool*)object)->m_params.m_filament_diameter = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
 
 void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property *> *list)
 {
@@ -499,7 +587,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		list->push_back(new PropertyChoice(_("Automatic Title"), choices, choice, parent, on_set_automatically_generate_title));
 	}
 
-	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch))
+	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion))
 	{
 		CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
 
@@ -513,6 +601,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		} // End for
 		list->push_back(new PropertyChoice(_("Material"), choices, choice, parent, on_set_material));
 	}
+	
 
 
 	{
@@ -529,7 +618,7 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		list->push_back(new PropertyChoice(_("Type"), choices, choice, parent, on_set_type));
 	}
 
-	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch))
+	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion))
 	{
 		list->push_back(new PropertyLength(_("max_advance_per_revolution"), m_max_advance_per_revolution, parent, on_set_max_advance_per_revolution));
 	} // End if - then
@@ -563,9 +652,13 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 	{
 		// We're using milling/drilling tools
 		list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
-		list->push_back(new PropertyLength(_("tool_length_offset"), m_tool_length_offset, parent, on_set_tool_length_offset));
 
-		if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch))
+		if ((m_type != eExtrusion))
+		{
+		list->push_back(new PropertyLength(_("tool_length_offset"), m_tool_length_offset, parent, on_set_tool_length_offset));
+		}
+
+		if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion))
 		{
 			list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
 			list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
@@ -581,7 +674,28 @@ void CCuttingToolParams::GetProperties(CCuttingTool* parent, std::list<Property 
 		list->push_back(new PropertyLength(_("Probe offset X"), m_probe_offset_x, parent, on_set_probe_offset_x));
 		list->push_back(new PropertyLength(_("Probe offset Y"), m_probe_offset_y, parent, on_set_probe_offset_y));
 	}
+	
+	if (m_type == eExtrusion)
+	// The following are ONLY for extrusion
+	{
+		CCuttingToolParams::ExtrusionMaterialsList_t materials = CCuttingToolParams::GetExtrusionMaterialsList();
 
+		int choice = -1;
+		std::list< wxString > choices;
+		for (CCuttingToolParams::ExtrusionMaterialsList_t::size_type i=0; i<materials.size(); i++)
+		{
+			choices.push_back(materials[i].second);
+			if (m_extrusion_material == materials[i].first) choice = int(i);
+
+		} // End for
+		list->push_back(new PropertyChoice(_("extrusion_material"), choices, choice, parent, on_set_extrusion_material));
+		list->push_back(new PropertyLength(_("width_over_thickness"), m_width_over_thickness, parent, on_set_width_over_thickness));
+		list->push_back(new PropertyLength(_("feedrate"), m_feedrate, parent, on_set_feedrate));
+		list->push_back(new PropertyLength(_("layer_height"), m_layer_height, parent, on_set_layer_height));
+		list->push_back(new PropertyLength(_("temperature"), m_temperature, parent, on_set_temperature));
+		list->push_back(new PropertyLength(_("flowrate"), m_flowrate, parent, on_set_flowrate));
+		list->push_back(new PropertyLength(_("filament_diameter"), m_filament_diameter, parent, on_set_filament_diameter));
+	}
 
 }
 
@@ -612,7 +726,15 @@ void CCuttingToolParams::WriteXMLAttributes(TiXmlNode *root)
 
 	element->SetDoubleAttribute("probe_offset_x", m_probe_offset_x);
 	element->SetDoubleAttribute("probe_offset_y", m_probe_offset_y);
-
+	
+	element->SetDoubleAttribute("width_over_thickness", m_width_over_thickness);
+	element->SetDoubleAttribute("feedrate", m_feedrate);
+	element->SetAttribute("extrusion_material", m_extrusion_material);
+	element->SetAttribute("automatically_generate_title", m_automatically_generate_title );
+	element->SetAttribute("layer_height", m_layer_height );
+	element->SetAttribute("temperature", m_temperature );
+	element->SetDoubleAttribute("filament_diameter", m_filament_diameter );
+	element->SetDoubleAttribute("flowrate", m_flowrate );
 	element->SetDoubleAttribute("gradient", m_gradient);
 }
 
@@ -644,6 +766,16 @@ void CCuttingToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 
 	if (pElem->Attribute( "probe_offset_x" )) pElem->Attribute("probe_offset_x", &m_probe_offset_x);
 	if (pElem->Attribute( "probe_offset_y" )) pElem->Attribute("probe_offset_y", &m_probe_offset_y);
+	
+	if (pElem->Attribute("extrusion_material")) pElem->Attribute("extrusion_material", &m_extrusion_material);
+	if (pElem->Attribute("max_advance_per_revolution")) pElem->Attribute("max_advance_per_revolution", &m_max_advance_per_revolution);
+	if (pElem->Attribute("layer_height")) pElem->Attribute("layer_height", &m_layer_height);
+	if (pElem->Attribute("automatically_generate_title")) pElem->Attribute("automatically_generate_title", &m_automatically_generate_title);
+	if (pElem->Attribute("width_over_thickness")) pElem->Attribute("width_over_thickness", &m_width_over_thickness);
+	if (pElem->Attribute("temperature")) pElem->Attribute("temperature", &m_temperature);
+	if (pElem->Attribute("filament_diameter")) pElem->Attribute("filament_diameter", &m_filament_diameter);
+	if (pElem->Attribute("flowrate")) pElem->Attribute("flowrate", &m_flowrate);
+
 
 	if (pElem->Attribute( "gradient" ))
 	{
@@ -842,6 +974,13 @@ const wxBitmap &CCuttingTool::GetIcon()
 				if(toolLengthSwitchIcon == NULL)toolLengthSwitchIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/probe.png")));
 				return *toolLengthSwitchIcon;
 			}
+			
+		case CCuttingToolParams::eExtrusion:
+			{
+				static wxBitmap* extrusionIcon = NULL;
+				if(extrusionIcon == NULL)extrusionIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/extrusion.png")));
+				return *extrusionIcon;
+			}	
 		default:
 			{
 				static wxBitmap* toolIcon = NULL;
@@ -1039,7 +1178,7 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 
 	if (	(m_params.m_type != CCuttingToolParams::eTurningTool) &&
 		(m_params.m_type != CCuttingToolParams::eTouchProbe) &&
-		(m_params.m_type != CCuttingToolParams::eToolLengthSwitch))
+		(m_params.m_type != CCuttingToolParams::eToolLengthSwitch)) 
 	{
 		if (PROGRAM->m_units == 1)
 		{
@@ -1078,7 +1217,7 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 		} // End if - else
 	} // End if - then
 
-	if ((m_params.m_type != CCuttingToolParams::eTouchProbe) && (m_params.m_type != CCuttingToolParams::eToolLengthSwitch))
+	if ((m_params.m_type != CCuttingToolParams::eTouchProbe) && (m_params.m_type != CCuttingToolParams::eToolLengthSwitch) && (m_params.m_type != CCuttingToolParams::eExtrusion))
 	{
 		switch (m_params.m_material)
 		{
@@ -1089,6 +1228,21 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 								break;
 		} // End switch
 	} // End if - then
+
+	if ((m_params.m_type == CCuttingToolParams::eExtrusion))
+	{
+		switch (m_params.m_extrusion_material)
+		{
+			case CCuttingToolParams::eABS: l_ossName << "ABS ";
+								break;
+			case CCuttingToolParams::ePLA:	l_ossName << (_("PLA "));
+								break;
+			case CCuttingToolParams::eHDPE:	l_ossName << (_("HDPE "));
+								break;
+		} // End switch
+	} // End if - then
+
+
 
 	switch (m_params.m_type)
 	{
@@ -1116,6 +1270,9 @@ wxString CCuttingTool::GenerateMeaningfulName() const
 							break;
 
                 case CCuttingToolParams::eTouchProbe:	l_ossName << (_("Touch Probe"));
+							break;
+
+                case CCuttingToolParams::eExtrusion:	l_ossName << (_("Extrusion"));
 							break;
 
                 case CCuttingToolParams::eToolLengthSwitch:	l_ossName << (_("Tool Length Switch"));
@@ -1476,6 +1633,7 @@ TopoDS_Shape CCuttingTool::GetShape() const
 
 		case CCuttingToolParams::eEndmill:
 		case CCuttingToolParams::eSlotCutter:
+		case CCuttingToolParams::eExtrusion:
 		default:
 		{
 			// First a cylinder to represent the shaft.
@@ -1661,6 +1819,7 @@ double CCuttingTool::CuttingRadius( const bool express_in_drawing_units /* = fal
 		case CCuttingToolParams::eBallEndMill:
 		case CCuttingToolParams::eTurningTool:
 		case CCuttingToolParams::eTouchProbe:
+		case CCuttingToolParams::eExtrusion:
 		case CCuttingToolParams::eToolLengthSwitch:
 		default:
 			radius = m_params.m_diameter/2;
@@ -1851,7 +2010,14 @@ bool CCuttingToolParams::operator==( const CCuttingToolParams & rhs ) const
 	if (m_automatically_generate_title != rhs.m_automatically_generate_title) return(false);
 	if (m_probe_offset_x != rhs.m_probe_offset_x) return(false);
 	if (m_probe_offset_y != rhs.m_probe_offset_y) return(false);
-
+	if (m_extrusion_material != rhs.m_material) return(false);
+	if (m_automatically_generate_title != rhs.m_automatically_generate_title) return(false);
+	if (m_layer_height != rhs.m_layer_height) return(false);
+	if (m_width_over_thickness != rhs.m_width_over_thickness) return(false);
+	if (m_feedrate != rhs.m_feedrate) return(false);
+	if (m_temperature != rhs.m_temperature) return(false);
+	if (m_flowrate != rhs.m_flowrate) return(false);	
+	if (m_filament_diameter != rhs.m_filament_diameter) return(false);	
 	return(true);
 }
 

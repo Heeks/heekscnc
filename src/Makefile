@@ -44,7 +44,7 @@ endif
 
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DHAVE_LIMITS ${RIP} ${KURVE_FLAGS} -I$(CASINCPATH)
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o Raft.o
 
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
@@ -77,8 +77,10 @@ HeeksCNC.o: HeeksCNC.cpp \
 		CuttingRate.h \
 		SpeedReference.h \
 		Probing.h \
-		CuttingTool.h
+		CuttingTool.h \
+		Raft.h
 	$(CC) -c HeeksCNC.cpp ${CCFLAGS} -o $@
+	
 
 HeeksColor.o: ${HEEKSCADPATH}/interface/HeeksColor.cpp  \
 		${HEEKSCADPATH}/interface/HeeksColor.h
@@ -193,6 +195,7 @@ Program.o: Program.cpp \
 		Drilling.h \
 		CuttingTool.h \
 		Op.h \
+		Raft.h \
 		CNCConfig.h \
 		RawMaterial.h 
 	$(CC) -c Program.cpp ${CCFLAGS} -o $@
@@ -418,6 +421,24 @@ TurnRough.o: TurnRough.cpp \
 		${HEEKSCADPATH}/interface/Tool.h
 	$(CC) -c TurnRough.cpp ${CCFLAGS} -o $@
 
+Raft.o: Raft.cpp \
+		HeeksCNCTypes.h \
+		DepthOp.h \
+		Raft.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		Program.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyLength.h \
+		${HEEKSCADPATH}/interface/PropertyString.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/interface/PropertyVertex.h \
+		${HEEKSCADPATH}/interface/PropertyCheck.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h
+	$(CC) -c Raft.cpp ${CCFLAGS} -o $@
+
+
 SpeedOp.o: SpeedOp.cpp \
 		Op.h
 	$(CC) -c SpeedOp.cpp ${CCFLAGS} -o $@
@@ -525,7 +546,7 @@ AttachOp.o: AttachOp.cpp \
 Geom.o: ${HEEKSCADPATH}/src/Geom.cpp \
 		${HEEKSCADPATH}/src/Geom.h
 	$(CC) -c ${HEEKSCADPATH}/src/Geom.cpp ${CCFLAGS} -o $@
-
+	
 clean:
 	-rm ${SHARED_LIBRARY} ${OBJECTS}
 

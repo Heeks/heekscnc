@@ -213,6 +213,7 @@ void COp::ReadDefaultValues()
 			break;
 		case ProfileType:
 		case PocketType:
+		case RaftType:
 		case CounterBoreType:
 			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
 			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
