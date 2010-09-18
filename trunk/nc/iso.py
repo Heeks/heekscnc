@@ -46,7 +46,7 @@ class CreatorIso(nc.Creator):
         self.gCRC = ''
         self.fmt = iso.codes.FORMAT_MM()
         self.absolute_flag = True
-
+        self.ffmt = iso.codes.FORMAT_FEEDRATE()
     ############################################################################
     ##  Internals
 
@@ -213,7 +213,7 @@ class CreatorIso(nc.Creator):
     ##  Rates + Modes
 
     def feedrate(self, f):
-        self.f = iso.codes.FEEDRATE() + (self.fmt % f)
+        self.f = iso.codes.FEEDRATE() + (self.ffmt % f)
         self.fhv = False
 
     def feedrate_hv(self, fh, fv):
@@ -224,10 +224,10 @@ class CreatorIso(nc.Creator):
     def calc_feedrate_hv(self, h, v):
         if math.fabs(v) > math.fabs(h * 2):
             # some horizontal, so it should be fine to use the horizontal feed rate
-            self.f = iso.codes.FEEDRATE() + (self.fmt % self.fv)
+            self.f = iso.codes.FEEDRATE() + (self.ffmt % self.fv)
         else:
             # not much, if any horizontal component, so use the vertical feed rate
-            self.f = iso.codes.FEEDRATE() + (self.fmt % self.fh)
+            self.f = iso.codes.FEEDRATE() + (self.ffmt % self.fh)
 
     def spindle(self, s, clockwise):
 	if s < 0: clockwise = not clockwise
@@ -555,11 +555,11 @@ class CreatorIso(nc.Creator):
             self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
 
         if self.drill_modal:
-            if ( iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )!= self.prev_f:
-               self.write(iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )        
-               self.prev_f = iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE()
+            if ( iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE() )!= self.prev_f:
+               self.write(iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE() )        
+               self.prev_f = iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE()
         else: 
-            self.write( iso.codes.FEEDRATE() + (self.fmt % self.fv) + iso.codes.SPACE() )            
+            self.write( iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE() )            
         self.write_spindle()            
         self.write_misc()    
         self.write('\n')
@@ -634,7 +634,7 @@ class CreatorIso(nc.Creator):
 	self.write(' X #' + intersection_variable_x + ' Y #' + intersection_variable_y + '\n')
 
 	self.write_blocknum()
-	self.write(iso.codes.FEEDRATE() + (self.fmt % (self.fh / 2.0)) + '\n')
+	self.write(iso.codes.FEEDRATE() + (self.ffmt % (self.fh / 2.0)) + '\n')
 
 	self.write_blocknum()
 	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
@@ -663,7 +663,7 @@ class CreatorIso(nc.Creator):
 	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
 	if (self.fhv) : self.calc_feedrate_hv(1, 0)
 	self.write_blocknum()
-	self.write(iso.codes.FEEDRATE() + ' [' + (self.fmt % self.fh) + ' / 5.0 ]')
+	self.write(iso.codes.FEEDRATE() + ' [' + (self.ffmt % self.fh) + ' / 5.0 ]')
 	self.write('\t(Set the feed rate for probing)\n')
 
     	self.write_blocknum();
