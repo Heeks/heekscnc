@@ -34,6 +34,7 @@
 #include "interface/strconv.h"
 #include "MachineState.h"
 #include "AttachOp.h"
+#include "Raft.h"
 
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
@@ -595,6 +596,7 @@ Python CProgram::RewritePythonProgram()
 				break;
 
 			case PocketType:
+			case RaftType:
 			case InlayType:
 				area_module_needed = true;
 				area_funcs_needed = true;

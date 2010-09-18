@@ -161,6 +161,7 @@ bool COperations::IsAnOperation(int object_type)
 	{
 		case ProfileType:
 		case PocketType:
+		case RaftType:
 		case ZigZagType:
 		case WaterlineType:
 		case AdaptiveType:
