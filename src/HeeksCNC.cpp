@@ -1006,7 +1006,7 @@ static void OpenBOMFileMenuCallback(wxCommandEvent& event)
 
 static void SaveNcFileMenuCallback(wxCommandEvent& event)
 {
-	wxString ext_str(_T("*.tap")); // to do, use the machine's NC extension
+	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
 	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
 	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), wxEmptyString, wxEmptyString, wildcard_string, wxSAVE|wxOVERWRITE_PROMPT);
 	fd.SetFilterIndex(1);
