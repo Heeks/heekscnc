@@ -21,31 +21,31 @@ class CreatorMakerbotHBP(iso_modal.CreatorIsoModal):
 
     def program_begin(self, id, name=''):
         self.write((maker.codes.COMMENT(now)))
-        self.write((maker.codes.EXTRUDER_TEMP('220')))
-        self.write((maker.codes.BUILD_BED_TEMP('110')))
-        self.write((maker.codes.FAN_OFF()) + '(Turn the fan off)\n')
-        self.write((maker.codes.METRIC()) + '(Metric FTW)\n')
-        self.write((maker.codes.ABSOLUTE()))
+        self.write((maker.codes.EXTRUDER_TEMP('220')) + (maker.codes.COMMENT('Extruder Temp')) )
+        self.write((maker.codes.BUILD_BED_TEMP('110'))+ (maker.codes.COMMENT('Build Bed Temp')) )
+        self.write((maker.codes.FAN_OFF()) + (maker.codes.COMMENT('Fan Off')) )
+        self.write((maker.codes.METRIC()) + (maker.codes.COMMENT('Metric units')) )
+        self.write((maker.codes.ABSOLUTE()) + (maker.codes.COMMENT('Absolute units')) )
         self.write('G92 X0 Y0 Z0 (You are now at 0,0,0)\n')
         self.write('G0 Z15 (Move up for warmup)\n')
-        self.write((maker.codes.EXTRUDER_SPEED_PWM('255')))
+        self.write((maker.codes.EXTRUDER_SPEED_PWM('255')) + (maker.codes.COMMENT('Extruder Speed')) )
         self.write('M6 T0 (Wait for tool to heat up)\n')
         self.write('G04 P5000 (Wait 5 seconds)\n')
-        self.write((maker.codes.EXTRUDER_ON_FWD()))
+        self.write((maker.codes.EXTRUDER_ON_FWD()) + (maker.codes.COMMENT('Extruder On')) )
         self.write('G04 P5000 (Wait 5 seconds)\n')
-        self.write((maker.codes.EXTRUDER_OFF()))
+        self.write((maker.codes.EXTRUDER_OFF()) + (maker.codes.COMMENT('Extruder Off')) )
         self.write('M01 (The heated build platform is heating up. Wait until after the lights have turned off for the first time, clear the test extrusion, and click yes.)\n')
         self.write('G0 Z0    (Go back to zero.)\n')
 
     def program_end(self):
-        self.write((maker.codes.COMMENT('end of the file, cooldown routines')))
-        self.write((maker.codes.EXTRUDER_TEMP('0')))
-        self.write((maker.codes.BUILD_BED_TEMP('0')))
-        self.write((maker.codes.FAN_ON()))
+        self.write((maker.codes.COMMENT('End of the file. Begin cool-down')))
+        self.write((maker.codes.EXTRUDER_TEMP('0')) + (maker.codes.COMMENT('Extruder Temp')) )
+        self.write((maker.codes.BUILD_BED_TEMP('0')) + (maker.codes.COMMENT('Build Bed Temp')) )
+        self.write((maker.codes.FAN_ON()) + (maker.codes.COMMENT('Fan On')) )
         self.write('G92 Z0 (zero our z axis - hack b/c skeinforge mangles gcodes in end.txt)\n')
         self.write('G1 Z10 (go up 10 b/c it was zeroed earlier.)\n')
         self.write('G1 X0 Y0 Z10 (go to 0,0,z)\n')
-        self.write((maker.codes.STEPPERS_OFF()))
+        self.write((maker.codes.STEPPERS_OFF()) + (maker.codes.COMMENT('Steppers Off')) )
 
     def program_stop(self):
         self.write((maker.codes.EXTRUDER_TEMP('0')))
@@ -102,10 +102,12 @@ class CreatorMakerbotHBP(iso_modal.CreatorIsoModal):
 ################################################################################
 # tool info
     def tool_change(self, id):
-        self.write_blocknum()
+     	self.write_blocknum()
         self.write((maker.codes.TOOL() % id) + '\n')
         self.t = id
-
+    
+    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+	pass
 ############################################################################
 ##  Moves
 

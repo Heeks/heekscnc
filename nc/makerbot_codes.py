@@ -17,7 +17,7 @@ class Codes():
 	def FORMAT_DWELL(self): return('P%f')
 
 	def BLOCK(self): return('N%i' + self.SPACE())
-	def COMMENT(self,comment): return( ('(%s)\n' % comment ) )
+	def COMMENT(self,comment): return( (' (%s)\n' % comment ) )
 	def VARIABLE(self): return( '#%i')
 	def VARIABLE_SET(self): return( '=%.3f')
 
