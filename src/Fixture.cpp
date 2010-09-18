@@ -256,7 +256,7 @@ Python CFixture::AppendTextToProgram() const
 
 	if (m_title.size() > 0)
 	{
-		python << _T("comment(") << PythonString(m_title) << _T(")\n");
+		//python << _T("comment(") << PythonString(m_title) << _T(")\n");
 	} // End if - then
 
 	python << _T("workplane(") << int(m_coordinate_system_number) << _T(")\n");
