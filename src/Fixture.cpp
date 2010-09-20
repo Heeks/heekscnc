@@ -5,7 +5,7 @@
  * details.
  */
 
-#include "stdafx.h"
+#include <stdafx.h>
 #include <math.h>
 #include "Fixture.h"
 #include "Fixtures.h"

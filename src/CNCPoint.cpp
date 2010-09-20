@@ -5,7 +5,7 @@
  * details.
  */
 
-#include "stdafx.h"
+#include <stdafx.h>
 #include "CNCPoint.h"
 
 #include "interface/HeeksCADInterface.h"
