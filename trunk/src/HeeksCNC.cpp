@@ -72,6 +72,7 @@ CHeeksCNCApp::CHeeksCNCApp(){
 	m_run_program_on_new_line = false;
 	m_machiningBar = NULL;
 	m_icon_texture_number = 0;
+	m_machining_hidden = false;
 }
 
 CHeeksCNCApp::~CHeeksCNCApp(){
@@ -1072,69 +1073,72 @@ void CHeeksCNCApp::GetNewCuttingToolTools(std::list<Tool*>* t_list)
 
 static void AddToolBars()
 {
-	wxFrame* frame = heeksCAD->GetMainFrame();
-	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	if(theApp.m_machiningBar)delete theApp.m_machiningBar;
-	theApp.m_machiningBar = new wxToolBar(frame, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
-	theApp.m_machiningBar->SetToolBitmapSize(wxSize(ToolImage::GetBitmapSize(), ToolImage::GetBitmapSize()));
+	if(!theApp.m_machining_hidden)
+	{
+		wxFrame* frame = heeksCAD->GetMainFrame();
+		wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+		if(theApp.m_machiningBar)delete theApp.m_machiningBar;
+		theApp.m_machiningBar = new wxToolBar(frame, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
+		theApp.m_machiningBar->SetToolBitmapSize(wxSize(ToolImage::GetBitmapSize(), ToolImage::GetBitmapSize()));
 
-	heeksCAD->StartToolBarFlyout(_("Milling operations"));
-	heeksCAD->AddFlyoutButton(_("Profile"), ToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Pocket"), ToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Adaptive"), ToolImage(_T("adapt")), _("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("CounterBore"), ToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Contour"), ToolImage(_T("opcontour")), _("New Contour Operation..."), NewContourOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Inlay"), ToolImage(_T("opinlay")), _("New Inlay Operation..."), NewInlayOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
-	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+		heeksCAD->StartToolBarFlyout(_("Milling operations"));
+		heeksCAD->AddFlyoutButton(_("Profile"), ToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Pocket"), ToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Adaptive"), ToolImage(_T("adapt")), _("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("CounterBore"), ToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Contour"), ToolImage(_T("opcontour")), _("New Contour Operation..."), NewContourOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Inlay"), ToolImage(_T("opinlay")), _("New Inlay Operation..."), NewInlayOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-	heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
-	heeksCAD->AddFlyoutButton(_("ZigZag"), ToolImage(_T("zigzag")), _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Waterline"), ToolImage(_T("waterline")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Attach"), ToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Unattach"), ToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
-	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+		heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
+		heeksCAD->AddFlyoutButton(_("ZigZag"), ToolImage(_T("zigzag")), _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Waterline"), ToolImage(_T("waterline")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Attach"), ToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Unattach"), ToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-	heeksCAD->StartToolBarFlyout(_("Additive operations"));
-	heeksCAD->AddFlyoutButton(_("Raft"), ToolImage(_T("raft")), _("New Raft Operation..."), NewRaftOpMenuCallback);
-	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
-	
-	heeksCAD->StartToolBarFlyout(_("Other operations"));
-	heeksCAD->AddFlyoutButton(_("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
-	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
-	heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
-	heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
-	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+		heeksCAD->StartToolBarFlyout(_("Additive operations"));
+		heeksCAD->AddFlyoutButton(_("Raft"), ToolImage(_T("raft")), _("New Raft Operation..."), NewRaftOpMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("drill")), _("New Cutting Tool Definition..."), NewDrillMenuCallback);
+		heeksCAD->StartToolBarFlyout(_("Other operations"));
+		heeksCAD->AddFlyoutButton(_("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
+		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
+		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
+		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-	heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Fixture"), ToolImage(_T("fixture")), _("New Fixture..."), NewFixtureMenuCallback);
+		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("drill")), _("New Cutting Tool Definition..."), NewDrillMenuCallback);
 
-	heeksCAD->StartToolBarFlyout(_("Design Rules"));
-	heeksCAD->AddFlyoutButton(_("Design Rules Check"), ToolImage(_("design_rules_check")), _("Design Rules Check..."), DesignRulesCheckMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Design Rules Adjustment"), ToolImage(_("design_rules_adjustment")), _("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
-	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Fixture"), ToolImage(_T("fixture")), _("New Fixture..."), NewFixtureMenuCallback);
 
-	heeksCAD->StartToolBarFlyout(_("Speeds"));
-	heeksCAD->AddFlyoutButton(_("Speed Reference"), ToolImage(_T("speed_reference")), _("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Cutting Rate"), ToolImage(_T("cutting_rate")), _("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
-	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+		heeksCAD->StartToolBarFlyout(_("Design Rules"));
+		heeksCAD->AddFlyoutButton(_("Design Rules Check"), ToolImage(_("design_rules_check")), _("Design Rules Check..."), DesignRulesCheckMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Design Rules Adjustment"), ToolImage(_("design_rules_adjustment")), _("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-	heeksCAD->StartToolBarFlyout(_("Post Processing"));
-	heeksCAD->AddFlyoutButton(_("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Make Python Script"), ToolImage(_T("python")), _("Make Python Script"), MakeScriptMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Run Python Script"), ToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Post-Process"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
-	heeksCAD->AddFlyoutButton(_("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
-	heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
-	heeksCAD->AddFlyoutButton(_("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
-	heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+		heeksCAD->StartToolBarFlyout(_("Speeds"));
+		heeksCAD->AddFlyoutButton(_("Speed Reference"), ToolImage(_T("speed_reference")), _("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Cutting Rate"), ToolImage(_T("cutting_rate")), _("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-	theApp.m_machiningBar->Realize();
-	aui_manager->AddPane(theApp.m_machiningBar, wxAuiPaneInfo().Name(_T("MachiningBar")).Caption(_T("Machining tools")).ToolbarPane().Top());
-	heeksCAD->RegisterToolBar(theApp.m_machiningBar);
+		heeksCAD->StartToolBarFlyout(_("Post Processing"));
+		heeksCAD->AddFlyoutButton(_("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Make Python Script"), ToolImage(_T("python")), _("Make Python Script"), MakeScriptMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Run Python Script"), ToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Post-Process"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
+		heeksCAD->AddFlyoutButton(_("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
+		heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+
+		theApp.m_machiningBar->Realize();
+		aui_manager->AddPane(theApp.m_machiningBar, wxAuiPaneInfo().Name(_T("MachiningBar")).Caption(_T("Machining tools")).ToolbarPane().Top());
+		heeksCAD->RegisterToolBar(theApp.m_machiningBar);
+	}
 }
 
 void OnBuildTexture()
@@ -1308,10 +1312,10 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
 
 	// add tick boxes for them all on the view menu
-	wxMenu* view_menu = heeksCAD->GetWindowMenu();
-	heeksCAD->AddMenuItem(view_menu, _T("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
-	heeksCAD->AddMenuItem(view_menu, _T("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
-	heeksCAD->AddMenuItem(view_menu, _T("Machining"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
+	wxMenu* window_menu = heeksCAD->GetWindowMenu();
+	heeksCAD->AddMenuItem(window_menu, _T("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
+	heeksCAD->AddMenuItem(window_menu, _T("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
+	heeksCAD->AddMenuItem(window_menu, _T("Machining"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
 	heeksCAD->RegisterHideableWindow(m_machiningBar);

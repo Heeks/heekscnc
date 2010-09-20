@@ -5,7 +5,7 @@
  * details.
  */
 
-#include "stdafx.h"
+#include <stdafx.h>
 #include "MachineState.h"
 #include "CuttingTool.h"
 #include "CNCPoint.h"

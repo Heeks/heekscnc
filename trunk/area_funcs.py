@@ -99,7 +99,7 @@ def cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, kee
         p = cut_curve(curve, need_rapid, p, rapid_down_to_height, depth)
         first = False
     rapid(z = clearance_height)
-    
+
 def recur(arealist, a1, stepover, from_center):
     # this makes arealist by recursively offsetting a1 inwards
     
@@ -133,11 +133,9 @@ sin_angle_for_zigs = 0.0
 cos_angle_for_zigs = 1.0
 sin_minus_angle_for_zigs = 0.0
 cos_minus_angle_for_zigs = 1.0
-test_count = 0
+one_over_units = 1.0
 
 def make_zig_curve(curve, y0, y):
-    global test_count
-    
     if rightward_for_zigs:
         curve.Reverse()
         
@@ -150,16 +148,16 @@ def make_zig_curve(curve, y0, y):
     
     for vertex in curve.getVertices():
         if prev_p != None:
-            if math.fabs(vertex.p.y - y0) < 0.002:
+            if math.fabs(vertex.p.y - y0) < 0.002 * one_over_units:
                 if zig_started:
                     zig.append(unrotated_vertex(vertex))
-                elif math.fabs(prev_p.y - y0) < 0.002 and vertex.type == 0:
+                elif math.fabs(prev_p.y - y0) < 0.002 * one_over_units and vertex.type == 0:
                     zig.append(area.Vertex(0, unrotated_point(prev_p), area.Point(0, 0)))
                     zig.append(unrotated_vertex(vertex))
                     zig_started = True
             elif zig_started:
                 zig.append(unrotated_vertex(vertex))
-                if math.fabs(vertex.p.y - y) < 0.002:
+                if math.fabs(vertex.p.y - y) < 0.002 * one_over_units:
                     zag_found = True
                     break
         prev_p = vertex.p
@@ -181,7 +179,7 @@ def add_reorder_zig(curve):
     for curve_list in reorder_zig_list_list:
         last_curve = curve_list[len(curve_list) - 1]
         e = last_curve.LastVertex().p
-        if math.fabs(s.x - e.x) < 0.002 and math.fabs(s.y - e.y) < 0.002:
+        if math.fabs(s.x - e.x) < 0.002 * one_over_units and math.fabs(s.y - e.y) < 0.002 * one_over_units:
             curve_list.append(curve)
             return
         
@@ -233,11 +231,13 @@ def zigzag(a, a_firstoffset, stepover):
     
     global rightward_for_zigs
     global curve_list_for_zigs
-    global test_count
     global sin_angle_for_zigs
     global cos_angle_for_zigs
     global sin_minus_angle_for_zigs
     global cos_minus_angle_for_zigs
+    global one_over_units
+    
+    one_over_units = 1 / area.get_units()
     
     a = rotated_area(a)
     
@@ -249,14 +249,12 @@ def zigzag(a, a_firstoffset, stepover):
 
     height = b.MaxY() - b.MinY()
     num_steps = int(height / stepover + 1)
-    y = b.MinY() + 0.1
+    y = b.MinY() + 0.1 * one_over_units
     null_point = area.Point(0, 0)
     rightward_for_zigs = True
     curve_list_for_zigs = []
-    test_count = 0
     
     for i in range(0, num_steps):
-        test_count = test_count + 1
         y0 = y
         y = y + stepover
         p0 = area.Point(x0, y0)
