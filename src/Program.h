@@ -65,6 +65,7 @@ public:
 	static wxString ConfigScope(void) {return _T("Program");}
 
 public:
+	static wxString alternative_machines_file;
 	CRawMaterial m_raw_material;	// for material hardness - to determine feeds and speeds.
 	CMachine m_machine;
 	wxString m_output_file;		// NOTE: Only relevant if the filename does NOT follow the data file's name.

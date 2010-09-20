@@ -26,6 +26,8 @@ public:
 	COutputCanvas* m_output_canvas;
 	bool m_run_program_on_new_line;
 	wxToolBarBase* m_machiningBar;
+	wxMenu *m_menuMachining;
+	bool m_machining_hidden;
 	wxString m_dll_path;
 	int m_icon_texture_number;
 	std::list< void(*)() > m_OnRewritePython_list;

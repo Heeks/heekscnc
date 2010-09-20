@@ -21,4 +21,6 @@ public:
 	virtual void RegisterOperationType( int type );
 	virtual bool IsAnOperation( int type );
 	virtual wxString GetDllFolder();
+	virtual void SetMachinesFile( const wxString& filepath );
+	virtual void HideMachiningMenu();
 };

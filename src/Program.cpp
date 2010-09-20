@@ -45,6 +45,8 @@
 #include <memory>
 using namespace std;
 
+wxString CProgram::alternative_machines_file = _T("");
+
 CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed_references(NULL), m_fixtures(NULL), m_script_edited(false)
 {
 	CNCConfig config(ConfigScope());
@@ -908,7 +910,8 @@ void CProgram::UpdateFromUserType()
 // static
 void CProgram::GetMachines(std::vector<CMachine> &machines)
 {
-	wxString machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
+	wxString machines_file = CProgram::alternative_machines_file;
+	if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
 	ifstream ifs(Ttc(machines_file.c_str()));
 	if(!ifs)
 	{
