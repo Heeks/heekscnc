@@ -409,19 +409,19 @@
 			>
 		</File>
 		<File
-			RelativePath=".\CuttingRate.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\CuttingRate.h"
-			>
-		</File>
-		<File
 			RelativePath=".\CTool.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\CTool.h"
+			>
+		</File>
+		<File
+			RelativePath=".\CuttingRate.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\CuttingRate.h"
 			>
 		</File>
 		<File
@@ -754,6 +754,14 @@
 		</File>
 		<File
 			RelativePath=".\PythonStuff.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Raft.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Raft.h"
 			>
 		</File>
 		<File
