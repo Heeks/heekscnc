@@ -161,8 +161,8 @@ void CToolParams::write_values_to_config()
 	config.Write(_T("m_layer_height"), m_layer_height);
 	config.Write(_T("m_width_over_thickness"), m_width_over_thickness);
 	config.Write(_T("m_temperature"), m_temperature);
-	config.Write(_T("m_flowrate"), &m_flowrate); 
-	config.Write(_T("m_filament_diameter"), &m_filament_diameter); 
+	config.Write(_T("m_flowrate"), m_flowrate); 
+	config.Write(_T("m_filament_diameter"), m_filament_diameter); 
 	
 
 	config.Write(_T("gradient"), m_gradient);
