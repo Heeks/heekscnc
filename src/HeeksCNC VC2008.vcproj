@@ -417,11 +417,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\CuttingTool.cpp"
+			RelativePath=".\CTool.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\CuttingTool.h"
+			RelativePath=".\CTool.h"
 			>
 		</File>
 		<File

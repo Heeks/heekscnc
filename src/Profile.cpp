@@ -18,7 +18,7 @@
 #include "interface/PropertyInt.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
 #include "PythonStuff.h"
@@ -267,8 +267,8 @@ CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
 	m_profile_params = rhs.m_profile_params;
 }
 
-CProfile::CProfile(const std::list<int> &sketches, const int cutting_tool_number )
-		: 	CDepthOp(GetTypeString(), &sketches, cutting_tool_number, ProfileType),
+CProfile::CProfile(const std::list<int> &sketches, const int tool_number )
+		: 	CDepthOp(GetTypeString(), &sketches, tool_number, ProfileType),
 			m_tags(NULL), m_sketches(sketches)
 {
     ReadDefaultValues();
@@ -689,10 +689,10 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (pCuttingTool == NULL)
+	CTool *pTool = CTool::Find( m_tool_number );
+	if (pTool == NULL)
 	{
-		wxMessageBox(_T("Cannot generate GCode for profile without a cutting tool assigned"));
+		wxMessageBox(_T("Cannot generate GCode for profile without a tool assigned"));
 		return(python);
 	} // End if - then
 
@@ -1030,10 +1030,10 @@ std::list<wxString> CProfile::ConfirmAutoRollRadius(const bool apply_changes)
 
 	if (m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside)
 	{
-		// Look at the dimensions of the sketches as well as the diameter of the cutting bit to decide if
+		// Look at the dimensions of the sketches as well as the diameter of the bit to decide if
 		// our existing m_auto_roll_radius is too big for this profile.  If so, reduce it now.
-		CCuttingTool *pCuttingTool = NULL;
-		if ((m_cutting_tool_number > 0) && ((pCuttingTool = CCuttingTool::Find(m_cutting_tool_number)) != NULL))
+		CTool *pTool = NULL;
+		if ((m_tool_number > 0) && ((pTool = CTool::Find(m_tool_number)) != NULL))
 		{
 			for (std::list<int>::iterator l_itSketchId = m_sketches.begin(); l_itSketchId != m_sketches.end(); l_itSketchId++)
 			{
@@ -1044,7 +1044,7 @@ std::list<wxString> CProfile::ConfirmAutoRollRadius(const bool apply_changes)
 					sketch->GetBox( bounding_box );
 
 					double min_distance_across = (bounding_box.Height() < bounding_box.Width())?bounding_box.Height():bounding_box.Width();
-					double max_roll_radius = (min_distance_across - (pCuttingTool->CuttingRadius() * 2.0)) / 2.0;
+					double max_roll_radius = (min_distance_across - (pTool->CuttingRadius() * 2.0)) / 2.0;
 
 					if (max_roll_radius < m_profile_params.m_auto_roll_radius)
 					{
@@ -1121,10 +1121,10 @@ std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
 	} // End if - then
 
 
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CCuttingTool *pCutter = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+		CTool *pCutter = (CTool *) CTool::Find( m_tool_number );
 		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
 		{
 			// The tool we've chosen can't cut as deep as we've setup to go.

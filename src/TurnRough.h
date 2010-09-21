@@ -41,8 +41,8 @@ public:
 	CTurnRoughParams m_turn_rough_params;
 
 	CTurnRough():CSpeedOp(GetTypeString(),0, TurnRoughType){}
-	CTurnRough(const std::list<int> &sketches, const int cutting_tool_number )
-		: 	CSpeedOp(GetTypeString(), cutting_tool_number, TurnRoughType),
+	CTurnRough(const std::list<int> &sketches, const int tool_number )
+		: 	CSpeedOp(GetTypeString(), tool_number, TurnRoughType),
 			m_sketches(sketches)
 	{
 		m_turn_rough_params.set_initial_values();

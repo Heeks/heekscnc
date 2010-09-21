@@ -17,7 +17,7 @@
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "MachineState.h"
 
 CSpeedOpParams::CSpeedOpParams()
@@ -27,23 +27,23 @@ CSpeedOpParams::CSpeedOpParams()
 	m_spindle_speed = 0.0;
 }
 
-void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
+void CSpeedOpParams::ResetFeeds(const int tool_number)
 {
 	if ((theApp.m_program) &&
 	    (theApp.m_program->SpeedReferences()) &&
 	    (theApp.m_program->SpeedReferences()->m_estimate_when_possible))
 	{
 
-		// Use the 'feeds and speeds' class along with the cutting tool properties to
+		// Use the 'feeds and speeds' class along with the tool properties to
 		// help set some logical values for the spindle speed.
 
-		if ((cutting_tool_number > 0) && (CCuttingTool::Find( cutting_tool_number ) != NULL))
+		if ((tool_number > 0) && (CTool::Find( tool_number ) != NULL))
 		{
-			CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
-			if (pCuttingTool != NULL)
+			CTool *pTool = CTool::Find( tool_number );
+			if (pTool != NULL)
 			{
-				if ((pCuttingTool->m_params.m_type == CCuttingToolParams::eDrill) ||
-				    (pCuttingTool->m_params.m_type == CCuttingToolParams::eCentreDrill))
+				if ((pTool->m_params.m_type == CToolParams::eDrill) ||
+				    (pTool->m_params.m_type == CToolParams::eCentreDrill))
 				{
 					// There is a 'rule of thumb' that Stanley Dornfeld put forward in
 					// an EMC2 reference.  It states that;
@@ -59,45 +59,45 @@ void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 					// moving sideways through the material.
 
 					// Let the spindle speed be used (as it has already been determined
-					// based on the raw material, the cutting tool's material and the
+					// based on the raw material, the tool's material and the
 					// tool's diameter.)  We just need to compare this spindle speed with
 					// the magic '3000' value to find out what proportion of the 'rule of thumb'
 					// we're using.
 
 					double proportion = m_spindle_speed / 3000.0;
-					double drill_diameter_in_inches = pCuttingTool->m_params.m_diameter / 25.4;
+					double drill_diameter_in_inches = pTool->m_params.m_diameter / 25.4;
 					double feed_rate_inches_per_minute = 100.0 * drill_diameter_in_inches * proportion;
 					m_vertical_feed_rate = feed_rate_inches_per_minute * 25.4;	// mm per minute
 					m_horizontal_feed_rate = 0.0;	// We're going straight down with a drill bit.
 				} // End if - then
-				else if (pCuttingTool->m_params.m_max_advance_per_revolution > 0)
+				else if (pTool->m_params.m_max_advance_per_revolution > 0)
 				{
 					// Spindle speed is in revolutions per minute.
-					double advance_per_rev = pCuttingTool->m_params.m_max_advance_per_revolution;
+					double advance_per_rev = pTool->m_params.m_max_advance_per_revolution;
 					double feed_rate_mm_per_minute = m_spindle_speed * advance_per_rev;
 
 					// Now we need to decide whether we assign this value to the vertical
-					// or horozontal (or both) feed rates.  Use the cutting tool type to
+					// or horozontal (or both) feed rates.  Use the tool type to
 					// decide on the typical usage.
 
-					switch (pCuttingTool->m_params.m_type)
+					switch (pTool->m_params.m_type)
 					{
-						case CCuttingToolParams::eDrill:
-						case CCuttingToolParams::eCentreDrill:
+						case CToolParams::eDrill:
+						case CToolParams::eCentreDrill:
 							m_vertical_feed_rate = feed_rate_mm_per_minute;
 							m_horizontal_feed_rate = 0.0;	// We're going straight down with a drill bit.
 							break;
 
-						case CCuttingToolParams::eChamfer:
-						case CCuttingToolParams::eTurningTool:
+						case CToolParams::eChamfer:
+						case CToolParams::eTurningTool:
 							// Spread it across both horizontal and vertical
 							m_vertical_feed_rate = (1.0/sqrt(2.0)) * feed_rate_mm_per_minute;
 							m_horizontal_feed_rate = (1.0/sqrt(2.0)) * feed_rate_mm_per_minute;
 							break;
 
-						case CCuttingToolParams::eEndmill:
-						case CCuttingToolParams::eBallEndMill:
-						case CCuttingToolParams::eSlotCutter:
+						case CToolParams::eEndmill:
+						case CToolParams::eBallEndMill:
+						case CToolParams::eSlotCutter:
 						default:
 							m_horizontal_feed_rate = feed_rate_mm_per_minute;
 							break;
@@ -108,31 +108,31 @@ void CSpeedOpParams::ResetFeeds(const int cutting_tool_number)
 	} // End if - then
 } // End ResetFeeds() method
 
-void CSpeedOpParams::ResetSpeeds(const int cutting_tool_number)
+void CSpeedOpParams::ResetSpeeds(const int tool_number)
 {
 	if ((theApp.m_program) &&
 	    (theApp.m_program->SpeedReferences()) &&
 	    (theApp.m_program->SpeedReferences()->m_estimate_when_possible))
 	{
 
-		// Use the 'feeds and speeds' class along with the cutting tool properties to
+		// Use the 'feeds and speeds' class along with the tool properties to
 		// help set some logical values for the spindle speed.
 
-		if ((cutting_tool_number > 0) && (CCuttingTool::Find( cutting_tool_number ) != NULL))
+		if ((tool_number > 0) && (CTool::Find( tool_number ) != NULL))
 		{
 			wxString material_name = theApp.m_program->m_raw_material.m_material_name;
 			double hardness = theApp.m_program->m_raw_material.m_brinell_hardness;
 			double surface_speed = CSpeedReferences::GetSurfaceSpeed( material_name,
-										CCuttingTool::CutterMaterial( cutting_tool_number ),
+										CTool::CutterMaterial( tool_number ),
 										hardness );
 			if (surface_speed > 0)
 			{
-				CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
-				if (pCuttingTool != NULL)
+				CTool *pTool = CTool::Find( tool_number );
+				if (pTool != NULL)
 				{
-					if (pCuttingTool->m_params.m_diameter > 0)
+					if (pTool->m_params.m_diameter > 0)
 					{
-						m_spindle_speed = (surface_speed * 1000.0) / (PI * pCuttingTool->m_params.m_diameter);
+						m_spindle_speed = (surface_speed * 1000.0) / (PI * pTool->m_params.m_diameter);
 						m_spindle_speed = floor(m_spindle_speed);	// Round down to integer
 
 						// Now wait one minute.  If the chosen machine can't turn the spindle that
@@ -258,8 +258,8 @@ void CSpeedOp::ReadDefaultValues()
 
 	if(m_auto_set_speeds_feeds)
 	{
-		m_speed_op_params.ResetSpeeds(m_cutting_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
-		m_speed_op_params.ResetFeeds(m_cutting_tool_number);
+		m_speed_op_params.ResetSpeeds(m_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
+		m_speed_op_params.ResetFeeds(m_tool_number);
 	}
 }
 
@@ -321,8 +321,8 @@ public:
 	const wxChar* GetTitle(){return _("Reset Feeds and Speeds");}
 	void Run()
 	{
-     	m_pThis->m_speed_op_params.ResetSpeeds( m_pThis->m_cutting_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
-		m_pThis->m_speed_op_params.ResetFeeds( m_pThis->m_cutting_tool_number);
+     	m_pThis->m_speed_op_params.ResetSpeeds( m_pThis->m_tool_number);	// NOTE: The speed MUST be set BEFORE the feedrates
+		m_pThis->m_speed_op_params.ResetFeeds( m_pThis->m_tool_number);
 	}
 	wxString BitmapPath(){ return _T("import");}
 	wxString previous_path;
@@ -335,12 +335,12 @@ static ResetFeedsAndSpeeds reset_feeds_and_speeds;
 
 void CSpeedOp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-    if (m_cutting_tool_number > 0)
+    if (m_tool_number > 0)
     {
         wxString material_name = theApp.m_program->m_raw_material.m_material_name;
         double hardness = theApp.m_program->m_raw_material.m_brinell_hardness;
         double surface_speed = CSpeedReferences::GetSurfaceSpeed( material_name,
-                                        CCuttingTool::CutterMaterial( m_cutting_tool_number ),
+                                        CTool::CutterMaterial( m_tool_number ),
                                             hardness );
         if (surface_speed > 0)
         {

@@ -18,7 +18,7 @@
 #include "interface/PropertyVertex.h"
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "geometry.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
@@ -45,14 +45,14 @@ CRaftParams::CRaftParams()
 	m_interfacelayerextrusion = 0;
 }
 
-void CRaftParams::set_initial_values(const CCuttingTool::ToolNumber_t cutting_tool_number)
+void CRaftParams::set_initial_values(const CTool::ToolNumber_t tool_number)
 {
-    if (cutting_tool_number > 0)
+    if (tool_number > 0)
     {
-        CCuttingTool *pCuttingTool = CCuttingTool::Find(cutting_tool_number);
-        if (pCuttingTool != NULL)
+        CTool *pTool = CTool::Find(tool_number);
+        if (pTool != NULL)
         {
-            m_step_over = pCuttingTool->CuttingRadius() * 3.0 / 5.0;
+            m_step_over = pTool->CuttingRadius() * 3.0 / 5.0;
         }
     }
 }
@@ -143,7 +143,7 @@ void CRaftParams::GetProperties(CRaft* parent, std::list<Property *> *list)
 	list->push_back(new PropertyLength(_("baselayers"), m_baselayers, parent, on_set_baselayers));
 	list->push_back(new PropertyDouble(_("interfacelayers"), m_interfacelayers, parent, on_set_interfacelayers));
 	
-	std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
+	std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
 
 	int basechoice = 0;
 	int interfacechoice = 0;
@@ -346,10 +346,10 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 
 	ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (pCuttingTool == NULL)
+	CTool *pTool = CTool::Find( m_tool_number );
+	if (pTool == NULL)
 	{
-		wxMessageBox(_T("Cannot generate GCode for raft without a cutting tool assigned"));
+		wxMessageBox(_T("Cannot generate GCode for raft without a tool assigned"));
 		return(python);
 	} // End if - then
 
@@ -582,11 +582,11 @@ HeeksObj* CRaft::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
-CRaft::CRaft(const std::list<int> &sketches, const int cutting_tool_number )
-	: CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches)
+CRaft::CRaft(const std::list<int> &sketches, const int tool_number )
+	: CDepthOp(GetTypeString(), &sketches, tool_number ), m_sketches(sketches)
 {
 	ReadDefaultValues();
-	m_params.set_initial_values(cutting_tool_number);
+	m_params.set_initial_values(tool_number);
 
 	for (Sketches_t::iterator sketch = m_sketches.begin(); sketch != m_sketches.end(); sketch++)
 	{
@@ -600,11 +600,11 @@ CRaft::CRaft(const std::list<int> &sketches, const int cutting_tool_number )
 	m_sketches.clear();
 }
 
-CRaft::CRaft(const std::list<HeeksObj *> &sketches, const int cutting_tool_number )
-	: CDepthOp(GetTypeString(), sketches, cutting_tool_number )
+CRaft::CRaft(const std::list<HeeksObj *> &sketches, const int tool_number )
+	: CDepthOp(GetTypeString(), sketches, tool_number )
 {
 	ReadDefaultValues();
-	m_params.set_initial_values(cutting_tool_number);
+	m_params.set_initial_values(tool_number);
 
 	for (std::list<HeeksObj *>::const_iterator sketch = sketches.begin(); sketch != sketches.end(); sketch++)
 	{
@@ -669,10 +669,10 @@ std::list<wxString> CRaft::DesignRulesAdjustment(const bool apply_changes)
 	} // End if - then
 
 
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CCuttingTool *pCutter = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+		CTool *pCutter = (CTool *) CTool::Find( m_tool_number );
 
 		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
 		{
@@ -701,7 +701,7 @@ std::list<wxString> CRaft::DesignRulesAdjustment(const bool apply_changes)
 			wxString change;
 			change << _("The step-over distance for raft (id=");
 			change << m_id;
-			change << _(") is larger than the cutting tool's diameter");
+			change << _(") is larger than the tool's diameter");
 			changes.push_back(change);
 
 			if (apply_changes)
@@ -776,3 +776,4 @@ bool CRaft::operator==(const CRaft & rhs) const
 
 	return(CDepthOp::operator==(rhs));
 }
+

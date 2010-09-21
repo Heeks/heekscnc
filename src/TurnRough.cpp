@@ -16,7 +16,7 @@
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Reselect.h"
 #include "MachineState.h"
 
@@ -197,14 +197,14 @@ Python CTurnRough::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachine
 	{
 		python << WriteSketchDefn(object, sketch, pMachine);
 
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
+		CTool *pTool = CTool::Find( m_tool_number );
 
 		// add the machining command
 		python << wxString::Format(_T("turning.rough(k%d, "), sketch);
-		python << pCuttingTool->m_params.m_corner_radius / theApp.m_program->m_units << _T(", ");
-		python << pCuttingTool->m_params.m_tool_angle << _T(", ");
-		python << pCuttingTool->m_params.m_front_angle << _T(", ");
-		python << pCuttingTool->m_params.m_back_angle << _T(", ");
+		python << pTool->m_params.m_corner_radius / theApp.m_program->m_units << _T(", ");
+		python << pTool->m_params.m_tool_angle << _T(", ");
+		python << pTool->m_params.m_front_angle << _T(", ");
+		python << pTool->m_params.m_back_angle << _T(", ");
 		python << m_turn_rough_params.m_clearance << _T(")\n");
 	}
 
@@ -215,10 +215,10 @@ Python CTurnRough::AppendTextToProgram(CMachineState *pMachine)
 {
 	Python python;
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (pCuttingTool == NULL)
+	CTool *pTool = CTool::Find( m_tool_number );
+	if (pTool == NULL)
 	{
-		wxMessageBox(_T("Cannot generate GCode for profile without a cutting tool assigned"));
+		wxMessageBox(_T("Cannot generate GCode for profile without a tool assigned"));
 		return(python);
 	} // End if - then
 

@@ -68,7 +68,7 @@ public:
 	static double max_deviation_for_spline_to_arc;
 
 	CProfile():CDepthOp(GetTypeString(), 0, ProfileType), m_tags(NULL) {}
-	CProfile(const std::list<int> &sketches, const int cutting_tool_number );
+	CProfile(const std::list<int> &sketches, const int tool_number );
 
 	CProfile( const CProfile & rhs );
 	CProfile & operator= ( const CProfile & rhs );

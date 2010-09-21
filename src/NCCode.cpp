@@ -16,7 +16,7 @@
 #include "interface/PropertyInt.h"
 #include "interface/Tool.h"
 #include "CNCConfig.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "src/Geom.h"
 #include "Program.h"
 
@@ -65,7 +65,7 @@ double PathObject::m_prev_x[3] = {0, 0, 0};
 
 void PathObject::WriteBaseXML(TiXmlElement *pElem)
 {
-	pElem->SetAttribute("cutting_tool_number", m_cutting_tool_number);
+	pElem->SetAttribute("tool_number", m_tool_number);
 
 	pElem->SetDoubleAttribute("x", m_x[0] / CNCCodeBlock::multiplier);
 	pElem->SetDoubleAttribute("y", m_x[1] / CNCCodeBlock::multiplier);
@@ -84,13 +84,13 @@ void PathObject::ReadFromXMLElement(TiXmlElement* pElem)
 
 	memcpy(m_x, m_current_x, 3*sizeof(double));
 
-	if (pElem->Attribute("cutting_tool_number"))
+	if (pElem->Attribute("tool_number"))
 	{
-		pElem->Attribute("cutting_tool_number", &m_cutting_tool_number);
+		pElem->Attribute("tool_number", &m_tool_number);
 	} // End if - then
 	else
 	{
-		m_cutting_tool_number = 0;	// No tool selected.
+		m_tool_number = 0;	// No tool selected.
 	} // End if - else
 }
 
@@ -759,7 +759,7 @@ void CNCCode::GetProperties(std::list<Property *> *list)
 
 /**
 	Define an 'apply' button class so that we can apply a combination
-	of the cutting tools and the GCode paths into a solid and use it
+	of the tools and the GCode paths into a solid and use it
 	to remove sections of the solids in the data model.
  */
 
@@ -786,8 +786,8 @@ class ApplyNCCode: public Tool{
 
 			std::map<int, TopoDS_Shape> tools;
 
-			std::list< std::pair<PathObject *, CCuttingTool *> > paths = theApp.m_program->NCCode()->GetPaths();
-			std::list< std::pair<PathObject *, CCuttingTool *> >::const_iterator l_itPath;
+			std::list< std::pair<PathObject *, CTool *> > paths = theApp.m_program->NCCode()->GetPaths();
+			std::list< std::pair<PathObject *, CTool *> >::const_iterator l_itPath;
 
 			// This stuff takes a long time.  Give the user something to look at in the meantime.
 			int progress = 1;
@@ -808,14 +808,14 @@ class ApplyNCCode: public Tool{
 				} // End if - then
 				else
 				{
-					if (tools.find( l_itPath->first->m_cutting_tool_number ) == tools.end())
+					if (tools.find( l_itPath->first->m_tool_number ) == tools.end())
 					{
 						try {
-							tools.insert( std::make_pair( l_itPath->first->m_cutting_tool_number, l_itPath->second->GetShape() ) );
+							tools.insert( std::make_pair( l_itPath->first->m_tool_number, l_itPath->second->GetShape() ) );
 						} catch(...)
 						{
 							// There must be something wrong with the parameters that describe
-							// the cutting tool.  Just skip this one.
+							// the tool.  Just skip this one.
 							continue;
 						}
 					} // End if - then
@@ -825,7 +825,7 @@ class ApplyNCCode: public Tool{
 					pPreviousPoint = l_itPath->first;
 
 					// Just put some values here for now.  The feed_rate and spindle_rpm will eventually come from
-					// the GCode.  The number_of_cutting_edges will come from the CCuttingTool class.
+					// the GCode.  The number_of_cutting_edges will come from the CTool class.
 
 					double feed_rate = 100.0;
 					double spindle_rpm = 50;
@@ -851,7 +851,7 @@ class ApplyNCCode: public Tool{
 						// Now move the tool to this point's location.
 						gp_Trsf move;
 						move.SetTranslation( gp_Pnt(0,0,0), *l_itPnt );
-						TopoDS_Shape tool = BRepBuilderAPI_Transform( tools[ l_itPath->first->m_cutting_tool_number ], move, true );
+						TopoDS_Shape tool = BRepBuilderAPI_Transform( tools[ l_itPath->first->m_tool_number ], move, true );
 
 						Shapes_t::iterator l_itShape;
 						for (l_itShape = shapes.begin(); l_itShape != shapes.end(); l_itShape++)
@@ -1152,9 +1152,9 @@ std::list<gp_Pnt> PathArc::Interpolate(
 } // End Interpolate() method
 
 
-std::list< std::pair<PathObject *, CCuttingTool *> > CNCCode::GetPaths() const
+std::list< std::pair<PathObject *, CTool *> > CNCCode::GetPaths() const
 {
-	std::list< std::pair<PathObject *, CCuttingTool *> > paths;
+	std::list< std::pair<PathObject *, CTool *> > paths;
 
 	for(std::list<CNCCodeBlock*>::const_iterator l_itCodeBlock = m_blocks.begin(); l_itCodeBlock != m_blocks.end(); l_itCodeBlock++)
 	{
@@ -1164,10 +1164,10 @@ std::list< std::pair<PathObject *, CCuttingTool *> > CNCCode::GetPaths() const
 			for (std::list< PathObject* >::const_iterator l_itPoint = l_itColouredPath->m_points.begin();
 				l_itPoint != l_itColouredPath->m_points.end(); l_itPoint++)
 			{
-				CCuttingTool *pCuttingTool = CCuttingTool::Find( (*l_itPoint)->m_cutting_tool_number );
-				if (pCuttingTool != NULL)
+				CTool *pTool = CTool::Find( (*l_itPoint)->m_tool_number );
+				if (pTool != NULL)
 				{
-					paths.push_back( std::make_pair( *l_itPoint, pCuttingTool ) );
+					paths.push_back( std::make_pair( *l_itPoint, pTool ) );
 				} // End if - then
 			} // End for
 		} // End for

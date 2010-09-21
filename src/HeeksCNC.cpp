@@ -33,7 +33,7 @@
 #include "Adaptive.h"
 #include "Drilling.h"
 #include "Locating.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "CounterBore.h"
 #include "TurnRough.h"
 #include "Fixture.h"
@@ -42,7 +42,6 @@
 #include "Operations.h"
 #include "Fixtures.h"
 #include "Tools.h"
-#include "CuttingTool.h"
 #include "interface/strconv.h"
 #include "CNCPoint.h"
 #include "BOM.h"
@@ -63,7 +62,7 @@ CHeeksCADInterface* heeksCAD = NULL;
 CHeeksCNCApp theApp;
 
 extern void ImportFixturesFile( const wxChar *file_path );
-extern void ImportCuttingToolsFile( const wxChar *file_path );
+extern void ImportToolsFile( const wxChar *file_path );
 extern void ImportSpeedReferencesFile( const wxChar *file_path );
 
 CHeeksCNCApp::CHeeksCNCApp(){
@@ -142,7 +141,7 @@ static void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
 	event.Check(aui_manager->GetPane(theApp.m_output_canvas).IsShown());
 }
 
-static bool GetSketches(std::list<int>& sketches, std::list<int> &cutting_tools )
+static bool GetSketches(std::list<int>& sketches, std::list<int> &tools )
 {
 	// check for at least one sketch selected
 
@@ -155,9 +154,9 @@ static bool GetSketches(std::list<int>& sketches, std::list<int> &cutting_tools 
 			sketches.push_back(object->m_id);
 		} // End if - then
 
-		if ((object != NULL) && (object->GetType() == CuttingToolType))
+		if ((object != NULL) && (object->GetType() == ToolType))
 		{
-			cutting_tools.push_back( object->m_id );
+			tools.push_back( object->m_id );
 		} // End if - then
 	}
 
@@ -173,35 +172,35 @@ static bool GetSketches(std::list<int>& sketches, std::list<int> &cutting_tools 
 static void NewProfileOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> drill_bits;
-	std::list<int> cutting_tools;
+	std::list<int> tools;
 	std::list<int> sketches;
-	int milling_cutting_tool_number = -1;
-	if(GetSketches(sketches, cutting_tools))
+	int milling_tool_number = -1;
+	if(GetSketches(sketches, tools))
 	{
-		// Look through the cutting tools that have been selected.  If any of them
+		// Look through the tools that have been selected.  If any of them
 		// are drill or centre bits then create Drilling cycle objects as well.
 		// If we find a milling bit then pass that through to the CProfile object.
 		std::list<int>::const_iterator l_itTool;
-		for (l_itTool = cutting_tools.begin(); l_itTool != cutting_tools.end(); l_itTool++)
+		for (l_itTool = tools.begin(); l_itTool != tools.end(); l_itTool++)
 		{
-			HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, *l_itTool );
+			HeeksObj *ob = heeksCAD->GetIDObject( ToolType, *l_itTool );
 			if (ob != NULL)
 			{
-				switch (((CCuttingTool *)ob)->m_params.m_type)
+				switch (((CTool *)ob)->m_params.m_type)
 				{
-					case CCuttingToolParams::eDrill:
-					case CCuttingToolParams::eCentreDrill:
+					case CToolParams::eDrill:
+					case CToolParams::eCentreDrill:
 						// Keep a list for later.  We need to create the Profile object
 						// before we create Drilling objects that refer to it.
 						drill_bits.push_back( *l_itTool );
 						break;
 
-					case CCuttingToolParams::eChamfer:
-					case CCuttingToolParams::eEndmill:
-					case CCuttingToolParams::eSlotCutter:
-					case CCuttingToolParams::eBallEndMill:
+					case CToolParams::eChamfer:
+					case CToolParams::eEndmill:
+					case CToolParams::eSlotCutter:
+					case CToolParams::eBallEndMill:
 						// We only want one.  Just keep overwriting this variable.
-						milling_cutting_tool_number = ((CCuttingTool *)ob)->m_tool_number;
+						milling_tool_number = ((CTool *)ob)->m_tool_number;
 						break;
 
 					default:
@@ -211,7 +210,7 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 		} // End for
 
 		heeksCAD->CreateUndoPoint();
-		CProfile *new_object = new CProfile(sketches, milling_cutting_tool_number);
+		CProfile *new_object = new CProfile(sketches, milling_tool_number);
 		new_object->AddMissingChildren();
 		theApp.m_program->Operations()->Add(new_object,NULL);
 		heeksCAD->ClearMarkedList();
@@ -222,10 +221,10 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 
 		for (l_itTool = drill_bits.begin(); l_itTool != drill_bits.end(); l_itTool++)
 		{
-			HeeksObj *ob = heeksCAD->GetIDObject( CuttingToolType, *l_itTool );
+			HeeksObj *ob = heeksCAD->GetIDObject( ToolType, *l_itTool );
 			if (ob != NULL)
 			{
-				CDrilling *new_object = new CDrilling( profiles, ((CCuttingTool *)ob)->m_tool_number, -1 );
+				CDrilling *new_object = new CDrilling( profiles, ((CTool *)ob)->m_tool_number, -1 );
 				theApp.m_program->Operations()->Add(new_object, NULL);
 				heeksCAD->ClearMarkedList();
 				heeksCAD->Mark(new_object);
@@ -237,12 +236,12 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 
 static void NewPocketOpMenuCallback(wxCommandEvent &event)
 {
-	std::list<int> cutting_tools;
+	std::list<int> tools;
 	std::list<int> sketches;
-	if(GetSketches(sketches, cutting_tools))
+	if(GetSketches(sketches, tools))
 	{
 		heeksCAD->CreateUndoPoint();
-		CPocket *new_object = new CPocket(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
+		CPocket *new_object = new CPocket(sketches, (tools.size()>0)?(*tools.begin()):-1 );
 		theApp.m_program->Operations()->Add(new_object, NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
@@ -252,12 +251,12 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 
 static void NewRaftOpMenuCallback(wxCommandEvent &event)
 {
-	std::list<int> cutting_tools;
+	std::list<int> tools;
 	std::list<int> sketches;
-	if(GetSketches(sketches, cutting_tools))
+	if(GetSketches(sketches, tools))
 	{
 		heeksCAD->CreateUndoPoint();
-		CRaft *new_object = new CRaft(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
+		CRaft *new_object = new CRaft(sketches, (tools.size()>0)?(*tools.begin()):-1 );
 		theApp.m_program->Operations()->Add(new_object, NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
@@ -343,7 +342,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> solids;
 	std::list<int> sketches;
-	int cutting_tool_number = 0;
+	int tool_number = 0;
 	int reference_object_type = -1;
 	unsigned int reference_object_id = -1;
 
@@ -353,7 +352,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		HeeksObj* object = *It;
 		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
 		if(object->GetType() == SketchType) sketches.push_back(object->m_id);
-		if(object->GetType() == CuttingToolType) cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+		if(object->GetType() == ToolType) tool_number = ((CTool *)object)->m_tool_number;
 		if((object->GetType() == PointType) ||
 		   (object->GetType() == DrillingType))
 		{
@@ -387,7 +386,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->CreateUndoPoint();
 	CAdaptive *new_object = new CAdaptive(	solids,
 						sketches,
-						cutting_tool_number,
+						tool_number,
 						reference_object_type,
 						reference_object_id);
 	theApp.m_program->Operations()->Add(new_object, NULL);
@@ -402,17 +401,17 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 {
 	std::vector<CNCPoint> intersections;
 	CDrilling::Symbols_t symbols;
-	CDrilling::Symbols_t cuttingTools;
-	int cutting_tool_number = 0;
+	CDrilling::Symbols_t Tools;
+	int tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if (object->GetType() == CuttingToolType)
+		if (object->GetType() == ToolType)
 		{
-			cuttingTools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			Tools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 		else
 		{
@@ -424,19 +423,19 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	} // End for
 
 	double depth = -1;
-	CDrilling::Symbols_t cuttingToolsThatMatchCircles;
+	CDrilling::Symbols_t ToolsThatMatchCircles;
 	CDrilling drill( symbols, -1, -1 );
 
 	intersections = drill.FindAllLocations(NULL);
 
-	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
+	if ((Tools.size() == 0) && (ToolsThatMatchCircles.size() > 0))
 	{
-		// The operator didn't point to a cutting tool object and one of the circles that they
-		// did point to happenned to match the diameter of an existing cutting tool.  Use that
+		// The operator didn't point to a tool object and one of the circles that they
+		// did point to happenned to match the diameter of an existing tool.  Use that
 		// one as our default.  The operator can always overwrite it later on.
 
-		std::copy( cuttingToolsThatMatchCircles.begin(), cuttingToolsThatMatchCircles.end(),
-				std::inserter( cuttingTools, cuttingTools.begin() ));
+		std::copy( ToolsThatMatchCircles.begin(), ToolsThatMatchCircles.end(),
+				std::inserter( Tools, Tools.begin() ));
 	} // End if - then
 
 	if (intersections.size() == 0)
@@ -445,14 +444,14 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	if(cuttingTools.size() > 1)
+	if(Tools.size() > 1)
 	{
-		wxMessageBox(_("You may only select a single cutting tool for each drilling operation.!"));
+		wxMessageBox(_("You may only select a single tool for each drilling operation.!"));
 		return;
 	}
 
 	heeksCAD->CreateUndoPoint();
-	CDrilling *new_object = new CDrilling( symbols, cutting_tool_number, depth );
+	CDrilling *new_object = new CDrilling( symbols, tool_number, depth );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -463,17 +462,17 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 static void NewChamferOpMenuCallback(wxCommandEvent &event)
 {
 	CDrilling::Symbols_t symbols;
-	CDrilling::Symbols_t cuttingTools;
-	int cutting_tool_number = 0;
+	CDrilling::Symbols_t Tools;
+	int tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if (object->GetType() == CuttingToolType)
+		if (object->GetType() == ToolType)
 		{
-			cuttingTools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			Tools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 		else
 		{
@@ -481,14 +480,14 @@ static void NewChamferOpMenuCallback(wxCommandEvent &event)
 		} // End if - else
 	} // End for
 
-	if(cuttingTools.size() > 1)
+	if(Tools.size() > 1)
 	{
-		wxMessageBox(_("You may only select a single cutting tool for each chamfer operation.!"));
+		wxMessageBox(_("You may only select a single tool for each chamfer operation.!"));
 		return;
 	}
 
 	heeksCAD->CreateUndoPoint();
-	CChamfer *new_object = new CChamfer( symbols, cutting_tool_number );
+	CChamfer *new_object = new CChamfer( symbols, tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -549,25 +548,25 @@ static void NewLocatingOpMenuCallback(wxCommandEvent &event)
 
 static void NewProbe_Centre_MenuCallback(wxCommandEvent &event)
 {
-	CCuttingTool::ToolNumber_t cutting_tool_number = 0;
+	CTool::ToolNumber_t tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if ((object != NULL) && (object->GetType() == CuttingToolType))
+		if ((object != NULL) && (object->GetType() == ToolType))
 		{
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 	} // End for
 
-	if (cutting_tool_number == 0)
+	if (tool_number == 0)
 	{
-		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+		tool_number = CTool::FindFirstByType( CToolParams::eTouchProbe );
 	} // End if - then
 
 	heeksCAD->CreateUndoPoint();
-	CProbe_Centre *new_object = new CProbe_Centre( cutting_tool_number );
+	CProbe_Centre *new_object = new CProbe_Centre( tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -576,25 +575,25 @@ static void NewProbe_Centre_MenuCallback(wxCommandEvent &event)
 
 static void NewProbe_Grid_MenuCallback(wxCommandEvent &event)
 {
-	CCuttingTool::ToolNumber_t cutting_tool_number = 0;
+	CTool::ToolNumber_t tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if ((object != NULL) && (object->GetType() == CuttingToolType))
+		if ((object != NULL) && (object->GetType() == ToolType))
 		{
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 	} // End for
 
-	if (cutting_tool_number == 0)
+	if (tool_number == 0)
 	{
-		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+		tool_number = CTool::FindFirstByType( CToolParams::eTouchProbe );
 	} // End if - then
 
 	heeksCAD->CreateUndoPoint();
-	CProbe_Grid *new_object = new CProbe_Grid( cutting_tool_number );
+	CProbe_Grid *new_object = new CProbe_Grid( tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -604,25 +603,25 @@ static void NewProbe_Grid_MenuCallback(wxCommandEvent &event)
 
 static void NewProbe_Edge_MenuCallback(wxCommandEvent &event)
 {
-	CCuttingTool::ToolNumber_t cutting_tool_number = 0;
+	CTool::ToolNumber_t tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if ((object != NULL) && (object->GetType() == CuttingToolType))
+		if ((object != NULL) && (object->GetType() == ToolType))
 		{
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 	} // End for
 
-	if (cutting_tool_number == 0)
+	if (tool_number == 0)
 	{
-		cutting_tool_number = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+		tool_number = CTool::FindFirstByType( CToolParams::eTouchProbe );
 	} // End if - then
 
 	heeksCAD->CreateUndoPoint();
-	CProbe_Edge *new_object = new CProbe_Edge( cutting_tool_number );
+	CProbe_Edge *new_object = new CProbe_Edge( tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -696,17 +695,17 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 {
 	std::vector<CNCPoint> intersections;
 	CCounterBore::Symbols_t symbols;
-	CCounterBore::Symbols_t cuttingTools;
-	int cutting_tool_number = 0;
+	CCounterBore::Symbols_t Tools;
+	int tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if (object->GetType() == CuttingToolType)
+		if (object->GetType() == ToolType)
 		{
-			cuttingTools.push_back( CCounterBore::Symbol_t( object->GetType(), object->m_id ) );
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			Tools.push_back( CCounterBore::Symbol_t( object->GetType(), object->m_id ) );
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 		else
 		{
@@ -717,18 +716,18 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 		} // End if - else
 	} // End for
 
-	CCounterBore::Symbols_t cuttingToolsThatMatchCircles;
+	CCounterBore::Symbols_t ToolsThatMatchCircles;
 	CCounterBore counterbore( symbols, -1 );
 	intersections = counterbore.FindAllLocations( NULL, NULL );
 
-	if ((cuttingTools.size() == 0) && (cuttingToolsThatMatchCircles.size() > 0))
+	if ((Tools.size() == 0) && (ToolsThatMatchCircles.size() > 0))
 	{
-		// The operator didn't point to a cutting tool object and one of the circles that they
-		// did point to happenned to match the diameter of an existing cutting tool.  Use that
+		// The operator didn't point to a tool object and one of the circles that they
+		// did point to happenned to match the diameter of an existing tool.  Use that
 		// one as our default.  The operator can always overwrite it later on.
 
-		std::copy( cuttingToolsThatMatchCircles.begin(), cuttingToolsThatMatchCircles.end(),
-				std::inserter( cuttingTools, cuttingTools.begin() ));
+		std::copy( ToolsThatMatchCircles.begin(), ToolsThatMatchCircles.end(),
+				std::inserter( Tools, Tools.begin() ));
 	} // End if - then
 
 	if (intersections.size() == 0)
@@ -737,14 +736,14 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	if(cuttingTools.size() > 1)
+	if(Tools.size() > 1)
 	{
-		wxMessageBox(_("You may only select a single cutting tool for each drilling operation.!"));
+		wxMessageBox(_("You may only select a single tool for each drilling operation.!"));
 		return;
 	}
 
 	heeksCAD->CreateUndoPoint();
-	CCounterBore *new_object = new CCounterBore( symbols, cutting_tool_number );
+	CCounterBore *new_object = new CCounterBore( symbols, tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -754,8 +753,8 @@ static void NewCounterBoreOpMenuCallback(wxCommandEvent &event)
 static void NewContourOpMenuCallback(wxCommandEvent &event)
 {
 	CContour::Symbols_t symbols;
-	CContour::Symbols_t cuttingTools;
-	int cutting_tool_number = 0;
+	CContour::Symbols_t Tools;
+	int tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
@@ -763,10 +762,10 @@ static void NewContourOpMenuCallback(wxCommandEvent &event)
 		HeeksObj* object = *It;
 		if (object == NULL) continue;
 
-		if (object->GetType() == CuttingToolType)
+		if (object->GetType() == ToolType)
 		{
-			cuttingTools.push_back( CContour::Symbol_t( object->GetType(), object->m_id ) );
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			Tools.push_back( CContour::Symbol_t( object->GetType(), object->m_id ) );
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 		else
 		{
@@ -775,7 +774,7 @@ static void NewContourOpMenuCallback(wxCommandEvent &event)
 	} // End for
 
 	heeksCAD->CreateUndoPoint();
-	CContour *new_object = new CContour( symbols, cutting_tool_number );
+	CContour *new_object = new CContour( symbols, tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -786,17 +785,17 @@ static void NewContourOpMenuCallback(wxCommandEvent &event)
 static void NewInlayOpMenuCallback(wxCommandEvent &event)
 {
 	CInlay::Symbols_t symbols;
-	CInlay::Symbols_t cuttingTools;
-	int cutting_tool_number = 0;
+	CInlay::Symbols_t Tools;
+	int tool_number = 0;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if (object->GetType() == CuttingToolType)
+		if (object->GetType() == ToolType)
 		{
-			cuttingTools.push_back( CInlay::Symbol_t( object->GetType(), object->m_id ) );
-			cutting_tool_number = ((CCuttingTool *)object)->m_tool_number;
+			Tools.push_back( CInlay::Symbol_t( object->GetType(), object->m_id ) );
+			tool_number = ((CTool *)object)->m_tool_number;
 		} // End if - then
 		else
 		{
@@ -805,7 +804,7 @@ static void NewInlayOpMenuCallback(wxCommandEvent &event)
 	} // End for
 
 	heeksCAD->CreateUndoPoint();
-	CInlay *new_object = new CInlay( symbols, cutting_tool_number );
+	CInlay *new_object = new CInlay( symbols, tool_number );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -817,7 +816,7 @@ static void NewInlayOpMenuCallback(wxCommandEvent &event)
 static void NewSpeedReferenceMenuCallback(wxCommandEvent &event)
 {
 	heeksCAD->CreateUndoPoint();
-	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), int(CCuttingToolParams::eCarbide), 0.0, 0.0);
+	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), int(CToolParams::eCarbide), 0.0, 0.0);
 	theApp.m_program->SpeedReferences()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -836,12 +835,12 @@ static void NewCuttingRateMenuCallback(wxCommandEvent &event)
 
 static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
 {
-	std::list<int> cutting_tools;
+	std::list<int> tools;
 	std::list<int> sketches;
-	if(GetSketches(sketches, cutting_tools))
+	if(GetSketches(sketches, tools))
 	{
 		heeksCAD->CreateUndoPoint();
-		CTurnRough *new_object = new CTurnRough(sketches, (cutting_tools.size()>0)?(*cutting_tools.begin()):-1 );
+		CTurnRough *new_object = new CTurnRough(sketches, (tools.size()>0)?(*tools.begin()):-1 );
 		theApp.m_program->Operations()->Add(new_object, NULL);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
@@ -859,11 +858,11 @@ static void NewScriptOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Changed();
 }
 
-static void AddNewCuttingTool(CCuttingToolParams::eCuttingToolType type)
+static void AddNewTool(CToolParams::eToolType type)
 {
-	// Add a new cutting tool.
+	// Add a new tool.
 	heeksCAD->CreateUndoPoint();
-	CCuttingTool *new_object = new CCuttingTool(NULL, type, heeksCAD->GetNextID(CuttingToolType));
+	CTool *new_object = new CTool(NULL, type, heeksCAD->GetNextID(ToolType));
 	theApp.m_program->Tools()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -872,52 +871,52 @@ static void AddNewCuttingTool(CCuttingToolParams::eCuttingToolType type)
 
 static void NewDrillMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eDrill);
+	AddNewTool(CToolParams::eDrill);
 }
 
 static void NewCentreDrillMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eCentreDrill);
+	AddNewTool(CToolParams::eCentreDrill);
 }
 
 static void NewEndmillMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eEndmill);
+	AddNewTool(CToolParams::eEndmill);
 }
 
 static void NewSlotCutterMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eSlotCutter);
+	AddNewTool(CToolParams::eSlotCutter);
 }
 
 static void NewBallEndMillMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eBallEndMill);
+	AddNewTool(CToolParams::eBallEndMill);
 }
 
 static void NewChamferMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eChamfer);
+	AddNewTool(CToolParams::eChamfer);
 }
 
 static void NewTurningToolMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eTurningTool);
+	AddNewTool(CToolParams::eTurningTool);
 }
 
 static void NewTouchProbeMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eTouchProbe);
+	AddNewTool(CToolParams::eTouchProbe);
 }
 
 static void NewToolLengthSwitchMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eToolLengthSwitch);
+	AddNewTool(CToolParams::eToolLengthSwitch);
 }
 
 static void NewExtrusionMenuCallback(wxCommandEvent &event)
 {
-	AddNewCuttingTool(CCuttingToolParams::eExtrusion);
+	AddNewTool(CToolParams::eExtrusion);
 }
 
 static void MakeScriptMenuCallback(wxCommandEvent &event)
@@ -1057,7 +1056,7 @@ static CCallbackTool new_touch_probe(_("New Touch Probe..."), _T("probe"), NewTo
 static CCallbackTool new_extrusion(_("New Extrusion..."), _T("extrusion"), NewExtrusionMenuCallback);
 static CCallbackTool new_tool_length_switch(_("New Tool Length Switch..."), _T("probe"), NewToolLengthSwitchMenuCallback);
 
-void CHeeksCNCApp::GetNewCuttingToolTools(std::list<Tool*>* t_list)
+void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 {
 	t_list->push_back(&new_drill_tool);
 	t_list->push_back(&new_centre_drill_tool);
@@ -1111,7 +1110,7 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Cutting Tool"), ToolImage(_T("drill")), _("New Cutting Tool Definition..."), NewDrillMenuCallback);
+		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Tool"), ToolImage(_T("drill")), _("New Tool Definition..."), NewDrillMenuCallback);
 
 		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Fixture"), ToolImage(_T("fixture")), _("New Fixture..."), NewFixtureMenuCallback);
 
@@ -1337,7 +1336,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("ProbeEdge", CProbe_Edge::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ProbeGrid", CProbe_Grid::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CounterBore", CCounterBore::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("CuttingTool", CCuttingTool::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Tool", CTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixture", CFixture::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("TurnRough", CTurnRough::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("SpeedReferences", CSpeedReferences::ReadFromXMLElement);
@@ -1388,7 +1387,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
         file_extensions.push_back(_T("tool"));
         file_extensions.push_back(_T("tools"));
         file_extensions.push_back(_T("tooltable"));
-        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportCuttingToolsFile ))
+        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportToolsFile ))
         {
             printf("Failed to register handler for Tool Table files\n");
         }

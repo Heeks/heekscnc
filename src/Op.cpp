@@ -14,7 +14,7 @@
 #include "interface/Tool.h"
 #include "tinyxml/tinyxml.h"
 #include "HeeksCNCTypes.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "PythonStuff.h"
 #include "CNCConfig.h"
 #include "MachineState.h"
@@ -39,7 +39,7 @@ void COp::WriteBaseXML(TiXmlElement *element)
 	element->SetAttribute("active", m_active);
 	element->SetAttribute("title", m_title.utf8_str());
 	element->SetAttribute("execution_order", m_execution_order);
-	element->SetAttribute("cutting_tool_number", m_cutting_tool_number);
+	element->SetAttribute("tool_number", m_tool_number);
 
 	ObjList::WriteBaseXML(element);
 }
@@ -72,13 +72,13 @@ void COp::ReadBaseXML(TiXmlElement* element)
 		m_execution_order = 0;
 	} // End if - else
 
-	if (element->Attribute("cutting_tool_number") != NULL)
+	if (element->Attribute("tool_number") != NULL)
 	{
-		m_cutting_tool_number = atoi(element->Attribute("cutting_tool_number"));
+		m_tool_number = atoi(element->Attribute("tool_number"));
 	} // End if - then
 	else
 	{
-		m_cutting_tool_number = 0;
+		m_tool_number = 0;
 	} // End if - else
 
 	ObjList::ReadBaseXML(element);
@@ -88,20 +88,20 @@ static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)
 static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->Changed();}
 static void on_set_execution_order(int value, HeeksObj* object){((COp*)object)->m_execution_order = value;heeksCAD->Changed();}
 
-static void on_set_cutting_tool_number(int zero_based_choice, HeeksObj* object)
+static void on_set_tool_number(int zero_based_choice, HeeksObj* object)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
-	std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
+	std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
 
 	if ((zero_based_choice >= int(0)) && (zero_based_choice <= int(tools.size()-1)))
 	{
-                ((COp *)object)->m_cutting_tool_number = tools[zero_based_choice].first;	// Convert the choice offset to the tool number for that choice
+                ((COp *)object)->m_tool_number = tools[zero_based_choice].first;	// Convert the choice offset to the tool number for that choice
 	} // End if - then
 
 	((COp*)object)->WriteDefaultValues();
 
-} // End on_set_cutting_tool_number() routine
+} // End on_set_tool_number() routine
 
 
 void COp::GetProperties(std::list<Property *> *list)
@@ -111,7 +111,7 @@ void COp::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyInt(_("execution_order"), m_execution_order, this, on_set_execution_order));
 
 	if(UsesTool()){
-		std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
+		std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
 
 		int choice = 0;
                 std::list< wxString > choices;
@@ -119,13 +119,13 @@ void COp::GetProperties(std::list<Property *> *list)
 		{
                 	choices.push_back(tools[i].second);
 
-			if (m_cutting_tool_number == tools[i].first)
+			if (m_tool_number == tools[i].first)
 			{
                 		choice = int(i);
 			} // End if - then
 		} // End for
 
-		list->push_back(new PropertyChoice(_("cutting tool"), choices, choice, this, on_set_cutting_tool_number));
+		list->push_back(new PropertyChoice(_("tool"), choices, choice, this, on_set_tool_number));
 	}
 
 	ObjList::GetProperties(list);
@@ -155,7 +155,7 @@ COp & COp::operator= ( const COp & rhs )
 		m_active = rhs.m_active;
 		m_title = rhs.m_title;
 		m_execution_order = rhs.m_execution_order;
-		m_cutting_tool_number = rhs.m_cutting_tool_number;
+		m_tool_number = rhs.m_tool_number;
 		m_operation_type = rhs.m_operation_type;
 	}
 
@@ -178,14 +178,14 @@ void COp::glCommands(bool select, bool marked, bool no_color)
 void COp::WriteDefaultValues()
 {
 	CNCConfig config(GetTypeString());
-	config.Write(_T("CuttingTool"), m_cutting_tool_number);
+	config.Write(_T("Tool"), m_tool_number);
 }
 
 void COp::ReadDefaultValues()
 {
-	if (m_cutting_tool_number <= 0)
+	if (m_tool_number <= 0)
 	{
-		// The cutting tool number hasn't been assigned from above.  Set some reasonable
+		// The tool number hasn't been assigned from above.  Set some reasonable
 		// defaults.
 
 		CNCConfig config(GetTypeString());
@@ -203,49 +203,49 @@ void COp::ReadDefaultValues()
 		switch(m_operation_type)
 		{
 		case DrillingType:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eDrill );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eCentreDrill );
+			default_tool = CTool::FindFirstByType( CToolParams::eDrill );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eCentreDrill );
 			break;
 		case AdaptiveType:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
+			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
 			break;
 		case ProfileType:
 		case PocketType:
 		case RaftType:
 		case CounterBoreType:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
+			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
 			break;
 		case ZigZagType:
 		case WaterlineType:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
+			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
 			break;
 		case TurnRoughType:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTurningTool );
+			default_tool = CTool::FindFirstByType( CToolParams::eTurningTool );
 			break;
         case LocatingType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
 		case ProbeGridType:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eTouchProbe );
+			default_tool = CTool::FindFirstByType( CToolParams::eTouchProbe );
 			break;
         case ChamferType:
         case InlayType:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eChamfer );
+			default_tool = CTool::FindFirstByType( CToolParams::eChamfer );
 			break;
 		default:
-			default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eSlotCutter );
-			if (default_tool <= 0) default_tool = CCuttingTool::FindFirstByType( CCuttingToolParams::eBallEndMill );
+			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
 			if (default_tool <= 0) default_tool = 4;
 			break;
 		}
-		config.Read(_T("CuttingTool"), &m_cutting_tool_number, default_tool);
+		config.Read(_T("Tool"), &m_tool_number, default_tool);
 	} // End if - then
 }
 
@@ -261,7 +261,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 		python << _T("comment(") << PythonString(m_comment) << _T(")\n");
 	}
 
-	if(UsesTool())python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the correct cutting tool.
+	if(UsesTool())python << pMachineState->Tool(m_tool_number);  // Select the correct  tool.
 
 #ifdef HEEKSCNC
 	// Check to see if this operation has its own fixture settings.  If so, change to that fixture now.
@@ -358,7 +358,7 @@ bool COp::operator==(const COp & rhs) const
 	if (m_active != rhs.m_active) return(false);
 	if (m_title != rhs.m_title) return(false);
 	if (m_execution_order != rhs.m_execution_order) return(false);
-	if (m_cutting_tool_number != rhs.m_cutting_tool_number) return(false);
+	if (m_tool_number != rhs.m_tool_number) return(false);
 	if (m_operation_type != rhs.m_operation_type) return(false);
 
 	return(ObjList::operator==(rhs));

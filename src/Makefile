@@ -44,7 +44,7 @@ endif
 
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DHAVE_LIMITS ${RIP} ${KURVE_FLAGS} -I$(CASINCPATH)
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CuttingTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o Raft.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o Raft.o  #PrintOp.o
 
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
@@ -77,7 +77,7 @@ HeeksCNC.o: HeeksCNC.cpp \
 		CuttingRate.h \
 		SpeedReference.h \
 		Probing.h \
-		CuttingTool.h \
+		CTool.h \
 		Raft.h
 	$(CC) -c HeeksCNC.cpp ${CCFLAGS} -o $@
 	
@@ -193,7 +193,7 @@ Program.o: Program.cpp \
 		Waterline.h \
 		Adaptive.h \
 		Drilling.h \
-		CuttingTool.h \
+		CTool.h \
 		Op.h \
 		Raft.h \
 		CNCConfig.h \
@@ -328,6 +328,19 @@ DepthOp.o: DepthOp.cpp \
 		${HEEKSCADPATH}/interface/Tool.h
 	$(CC) -c DepthOp.cpp ${CCFLAGS} -o $@
 
+#PrintOp.o: PrintOp.cpp \
+#		Op.h \
+#		PrintOp.h \
+#		CNCConfig.h \
+#		ProgramCanvas.h \
+#		Program.h \
+#		${HEEKSCADPATH}/interface/PropertyInt.h \
+#		${HEEKSCADPATH}/interface/PropertyDouble.h \
+#		${HEEKSCADPATH}/interface/PropertyLength.h \
+#		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+#		${HEEKSCADPATH}/interface/Tool.h
+#	$(CC) -c PrintOp.cpp ${CCFLAGS} -o $@
+
 Op.o: Op.cpp \
 		${HEEKSCADPATH}/interface/HeeksObj.h \
 		Op.h \
@@ -363,11 +376,11 @@ Drilling.o: Drilling.cpp \
 		${HEEKSCADPATH}/interface/PropertyDouble.h \
 		${HEEKSCADPATH}/interface/PropertyChoice.h \
 		${HEEKSCADPATH}/tinyxml/tinyxml.h \
-		CuttingTool.h
+		CTool.h
 	$(CC) -c Drilling.cpp ${CCFLAGS} -o $@
 
-CuttingTool.o: CuttingTool.cpp \
-		CuttingTool.h \
+CTool.o: CTool.cpp \
+		CTool.h \
 		CNCConfig.h \
 		ProgramCanvas.h \
 		${HEEKSCADPATH}/interface/HeeksObj.h \
@@ -375,7 +388,7 @@ CuttingTool.o: CuttingTool.cpp \
 		${HEEKSCADPATH}/interface/PropertyDouble.h \
 		${HEEKSCADPATH}/interface/PropertyChoice.h \
 		${HEEKSCADPATH}/tinyxml/tinyxml.h
-	$(CC) -c CuttingTool.cpp ${CCFLAGS} -o $@
+	$(CC) -c CTool.cpp ${CCFLAGS} -o $@
 
 Fixture.o: Fixture.cpp \
 		Fixture.h \
@@ -401,7 +414,7 @@ CounterBore.o: CounterBore.cpp \
 		${HEEKSCADPATH}/interface/PropertyDouble.h \
 		${HEEKSCADPATH}/interface/PropertyChoice.h \
 		${HEEKSCADPATH}/tinyxml/tinyxml.h \
-		CuttingTool.h
+		CTool.h
 	$(CC) -c CounterBore.cpp ${CCFLAGS} -o $@
 
 TurnRough.o: TurnRough.cpp \
@@ -491,7 +504,7 @@ MachineState.o: MachineState.cpp \
 Operations.o: Operations.cpp \
 		Operations.h \
 		Drilling.h \
-		CuttingTool.h \
+		CTool.h \
 		Excellon.h
 	$(CC) -c Operations.cpp ${CCFLAGS} -o $@
 

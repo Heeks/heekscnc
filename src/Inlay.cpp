@@ -17,7 +17,7 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "Operations.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Profile.h"
 #include "Fixture.h"
 #include "CNCPoint.h"
@@ -140,7 +140,7 @@ void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
     list->push_back(new PropertyLength(_("Border Width"), m_border_width, parent, on_set_border_width));
 
     {
-		std::vector< std::pair< int, wxString > > tools = CCuttingTool::FindAllCuttingTools();
+		std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
 
 		int choice = 0;
         std::list< wxString > choices;
@@ -297,7 +297,7 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << CDepthOp::AppendTextToProgram( pMachineState );
 
-	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+	CTool *pChamferingBit = (CTool *) heeksCAD->GetIDObject( ToolType, m_tool_number );
 
 	if (! pChamferingBit)
 	{
@@ -470,7 +470,7 @@ double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
 		std::copy( _vectors.begin(), _vectors.end(), std::inserter( vectors, vectors.begin() ) );
 
 		// We should be able to project a vector at half the angle between these two vectors (plus 180 degrees)
-		// and up at the angle of the cutting tool.  We should find a known coordinate in this direction (in fact
+		// and up at the angle of the  tool.  We should find a known coordinate in this direction (in fact
 		// there may be many).  This vector is the toolpath we want to follow to sharpen the corners.
 
 		double angle1 = vectors[0].AngleWithRef( gp_Vec(1,0,0), reference );
@@ -510,11 +510,11 @@ double CInlay::CornerAngle( const std::set<CNCVector> _vectors ) const
 /**
     Find the two vectors associated with this coordinate.  These represent the two edges joining at
     this coordinate.  If we draw a line at the mid-angle between these two vectors and then we rotate
-    that line down at the cutting tool's angle then we will be able to find other corners that are
+    that line down at the  tool's angle then we will be able to find other corners that are
     made below this one.
  */
 
-CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners, const CCuttingTool *pChamferingBit ) const
+CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay::Corners_t corners, const CTool *pChamferingBit ) const
 {
 	/*
 	// Test cases.
@@ -587,9 +587,9 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 
 		// Rotate that line down (around the Y axis) so that it aligns with the cutting edge
 		// of the chamfering bit.
-		gp_Trsf rotate_to_match_cutting_tool;
-		rotate_to_match_cutting_tool.SetRotation( gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,-1,0)), (-90.0 - pChamferingBit->m_params.m_cutting_edge_angle) / 360.0 * 2.0 * PI );
-		endpoint.Transform(rotate_to_match_cutting_tool);
+		gp_Trsf rotate_to_match_tool;
+		rotate_to_match_tool.SetRotation( gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,-1,0)), (-90.0 - pChamferingBit->m_params.m_cutting_edge_angle) / 360.0 * 2.0 * PI );
+		endpoint.Transform(rotate_to_match_tool);
 
 		// Now rotate the line around so that it aligns with the bisecting angle between
 		// the two connected edges.
@@ -605,7 +605,7 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 
 		// This should now be close to pointing to where the
 		// toolpath wires have their vertices.  It won't be exactly through their vertices
-		// due to the fact that the cutting tool won't be able to get right into the top-most
+		// due to the fact that the tool won't be able to get right into the top-most
 		// corner due to its circular shape.  To allow for this, we will find the closes
 		// vertex to this line at each level of depth.  These, together, will form the
 		// toolpath required to sharpen the edges.
@@ -617,7 +617,7 @@ CInlay::Corners_t CInlay::FindSimilarCorners( const CNCPoint coordinate, CInlay:
 		// heeksCAD->Add(heeksCAD->NewLine(start,end), NULL);
 
 		// The endpoint now represents a vector (from the origin) that points half way between
-		// the two edge angles as well as down at the cutting tool's angle.  Find the closest
+		// the two edge angles as well as down at the tool's angle.  Find the closest
 		// points to this line at each of the valley's depths.  These points will form the
 		// toolpath we need.
 
@@ -685,7 +685,7 @@ Python CInlay::FormCorners( Valley_t & paths, CMachineState *pMachineState ) con
 {
 	Python python;
 
-	python << pMachineState->CuttingTool(m_cutting_tool_number);	// Select the chamfering bit.
+	python << pMachineState->Tool(m_tool_number);	// Select the chamfering bit.
 
     // Gather a list of all corner coordinates and the angles formed there for each wire.
 	Corners_t corners;
@@ -791,7 +791,7 @@ Python CInlay::FormCorners( Valley_t & paths, CMachineState *pMachineState ) con
 
 		if (corners[*itCoordinate].size() == 2)
 		{
-			Corners_t similar = FindSimilarCorners(*itCoordinate, corners, CCuttingTool::Find(pMachineState->CuttingTool()));
+			Corners_t similar = FindSimilarCorners(*itCoordinate, corners, CTool::Find(pMachineState->Tool()));
 
 			// We don't want to form corners on two intersecting edges if the angle of intersection
             // is too shallow.  i.e. if there are two lines that are mostly pointing in the same
@@ -892,7 +892,7 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 
 	typedef double Depth_t;
 
-	CCuttingTool *pChamferingBit = (CCuttingTool *) heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
+	CTool *pChamferingBit = (CTool *) heeksCAD->GetIDObject( ToolType, m_tool_number );
 
     // For all selected sketches.
 	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
@@ -1065,7 +1065,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 	Python python;
 
 	python << _T("comment(") << PythonString(_("Form valley walls")) << _T(")\n");
-	python << pMachineState->CuttingTool(m_cutting_tool_number);  // select the chamfering bit.
+	python << pMachineState->Tool(m_tool_number);  // select the chamfering bit.
 	python << SelectFixture(pMachineState, true);	// Select female fixture (if appropriate)
 
     double tolerance = heeksCAD->GetTolerance();
@@ -1140,7 +1140,7 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMac
 	python << _T("comment(") << PythonString(_("Form valley pockets")) << _T(")\n");
 
 	python << SelectFixture(pMachineState, true);	// Select female fixture (if appropriate)
-	python << pMachineState->CuttingTool(m_params.m_clearance_tool);	// Select the clearance tool.
+	python << pMachineState->Tool(m_params.m_clearance_tool);	// Select the clearance tool.
 
 	CNCPoint last_position(0,0,0);
 	for (Valleys_t::iterator itValley = valleys.begin(); itValley != valleys.end(); itValley++)
@@ -1225,7 +1225,7 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
     double tolerance = heeksCAD->GetTolerance();
 
 	python << SelectFixture(pMachineState, false);	// Select male fixture (if appropriate)
-	python << pMachineState->CuttingTool(m_params.m_clearance_tool);	// Select the clearance tool.
+	python << pMachineState->Tool(m_params.m_clearance_tool);	// Select the clearance tool.
 
 	// Use the parameters to determine if we're going to mirror the selected
     // sketches around the X or Y axis.
@@ -1374,10 +1374,10 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
 		// the mirrored sketches down to the inverted 'top surface' depth.
 
 		double border_width = m_params.m_border_width;
-		if ((CCuttingTool::Find(m_params.m_clearance_tool) != NULL) &&
-			(border_width <= (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius())))
+		if ((CTool::Find(m_params.m_clearance_tool) != NULL) &&
+			(border_width <= (2.0 * CTool::Find( m_params.m_clearance_tool)->CuttingRadius())))
 		{
-			border_width = (2.0 * CCuttingTool::Find( m_params.m_clearance_tool)->CuttingRadius());
+			border_width = (2.0 * CTool::Find( m_params.m_clearance_tool)->CuttingRadius());
 			border_width += 1; // Make sure there really is room.  Add 1mm to be sure.
 		}
 		HeeksObj* bounding_sketch = heeksCAD->NewSketch();
@@ -1501,7 +1501,7 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 	python << _T("comment(") << PythonString(_("Form mountain walls")) << _T(")\n");
 
 	python << SelectFixture(pMachineState, false);	// Select male fixture (if appropriate)
-	python << pMachineState->CuttingTool(m_cutting_tool_number);	// Select the chamfering bit.
+	python << pMachineState->Tool(m_tool_number);	// Select the chamfering bit.
 
     double tolerance = heeksCAD->GetTolerance();
 
@@ -1626,7 +1626,7 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
                 transform.Perform(tool_path_wire, false);
                 tool_path_wire = TopoDS::Wire(transform.Shape());
 
-                python << pMachineState->CuttingTool(m_cutting_tool_number);  // Select the chamfering bit.
+                python << pMachineState->Tool(m_tool_number);  // Select the chamfering bit.
 
                 python << CContour::GeneratePathFromWire(tool_path_wire,
                                                         pMachineState,

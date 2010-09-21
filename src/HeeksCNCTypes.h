@@ -12,7 +12,7 @@ enum{
 	ZigZagType,
 	AdaptiveType,
 	DrillingType,
-	CuttingToolType,
+	ToolType,
 	ToolsType,
 	CounterBoreType,
 	TurnRoughType,

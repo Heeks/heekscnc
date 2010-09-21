@@ -55,8 +55,8 @@ void CChamferParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 
 
 CChamfer::CChamfer(	const Symbols_t &symbols,
-			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ChamferType), m_symbols(symbols)
+			const int tool_number )
+		: CDepthOp(GetTypeString(), NULL, tool_number, ChamferType), m_symbols(symbols)
 {
     for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
     {
@@ -169,14 +169,14 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 	// chamfer.  i.e. if the chamfering width is longer than the chamfering bit's cutting
 	// edge length then we're out of business.
 
-	CCuttingTool *pChamferingBit = CCuttingTool::Find( m_cutting_tool_number );
+	CTool *pChamferingBit = CTool::Find( m_tool_number );
 	if (pChamferingBit == NULL)
 	{
 		// No socks, no shirt, no service.
 		return(python);
 	} // End if - then
 
-	if (pChamferingBit->m_params.m_type != CCuttingToolParams::eChamfer)
+	if (pChamferingBit->m_params.m_type != CToolParams::eChamfer)
 	{
 		// We need to make the various radius and angle calculations based on the
 		// assumption that it's a chamfering bit.  If not, we can't handle the
@@ -220,11 +220,11 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 			// around the edge.
 
 			CDrilling *pDrilling = (CDrilling *) child;
-			CCuttingTool *pDrillBit = CCuttingTool::Find( pDrilling->m_cutting_tool_number );
+			CTool *pDrillBit = CTool::Find( pDrilling->m_tool_number );
 			if (pDrillBit == NULL)
 			{
 				// It's difficult to drill a hole without a drill bit but apparently this file does.
-				printf("Ignoring drilling operation (id=%d) with no cutting tool defined\n", pDrilling->m_id );
+				printf("Ignoring drilling operation (id=%d) with no  tool defined\n", pDrilling->m_id );
 				continue;
 			}
 

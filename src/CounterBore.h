@@ -11,7 +11,7 @@
 
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include <list>
 #include <vector>
 #include "CNCPoint.h"
@@ -24,7 +24,7 @@ public:
 	double m_diameter;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 	int m_sort_locations;		// '1' = sort location points prior to generating GCode (to optimize paths)
 
-	void set_initial_values( const int cutting_tool_number );
+	void set_initial_values( const int tool_number );
 	void write_values_to_config();
 	void GetProperties(CCounterBore* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -88,7 +88,7 @@ public:
 	//	Constructors.
 	CCounterBore():CDepthOp(GetTypeString(), 0, CounterBoreType){}
 	CCounterBore(	const Symbols_t &symbols,
-			const int cutting_tool_number );
+			const int tool_number );
 
 	CCounterBore( const CCounterBore & rhs );
 	CCounterBore & operator= ( const CCounterBore & rhs );
@@ -112,7 +112,7 @@ public:
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
 	Python AppendTextToProgram(CMachineState *pMachineState);
-	Python GenerateGCodeForOneLocation( const CNCPoint & location, const CCuttingTool *pCuttingTool ) const;
+	Python GenerateGCodeForOneLocation( const CNCPoint & location, const CTool *pTool ) const;
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

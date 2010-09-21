@@ -18,7 +18,7 @@
 #include "interface/PropertyVertex.h"
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "geometry.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
@@ -40,14 +40,14 @@ CPocketParams::CPocketParams()
 	m_zig_angle = 0.0;
 }
 
-void CPocketParams::set_initial_values(const CCuttingTool::ToolNumber_t cutting_tool_number)
+void CPocketParams::set_initial_values(const CTool::ToolNumber_t tool_number)
 {
-    if (cutting_tool_number > 0)
+    if (tool_number > 0)
     {
-        CCuttingTool *pCuttingTool = CCuttingTool::Find(cutting_tool_number);
-        if (pCuttingTool != NULL)
+        CTool *pTool = CTool::Find(tool_number);
+        if (pTool != NULL)
         {
-            m_step_over = pCuttingTool->CuttingRadius() * 3.0 / 5.0;
+            m_step_over = pTool->CuttingRadius() * 3.0 / 5.0;
         }
     }
 }
@@ -282,10 +282,10 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 
 	ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (pCuttingTool == NULL)
+	CTool *pTool = CTool::Find( m_tool_number );
+	if (pTool == NULL)
 	{
-		wxMessageBox(_T("Cannot generate GCode for pocket without a cutting tool assigned"));
+		wxMessageBox(_T("Cannot generate GCode for pocket without a tool assigned"));
 		return(python);
 	} // End if - then
 
@@ -510,11 +510,11 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
-CPocket::CPocket(const std::list<int> &sketches, const int cutting_tool_number )
-	: CDepthOp(GetTypeString(), &sketches, cutting_tool_number ), m_sketches(sketches)
+CPocket::CPocket(const std::list<int> &sketches, const int tool_number )
+	: CDepthOp(GetTypeString(), &sketches, tool_number ), m_sketches(sketches)
 {
 	ReadDefaultValues();
-	m_pocket_params.set_initial_values(cutting_tool_number);
+	m_pocket_params.set_initial_values(tool_number);
 
 	for (Sketches_t::iterator sketch = m_sketches.begin(); sketch != m_sketches.end(); sketch++)
 	{
@@ -528,11 +528,11 @@ CPocket::CPocket(const std::list<int> &sketches, const int cutting_tool_number )
 	m_sketches.clear();
 }
 
-CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int cutting_tool_number )
-	: CDepthOp(GetTypeString(), sketches, cutting_tool_number )
+CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
+	: CDepthOp(GetTypeString(), sketches, tool_number )
 {
 	ReadDefaultValues();
-	m_pocket_params.set_initial_values(cutting_tool_number);
+	m_pocket_params.set_initial_values(tool_number);
 
 	for (std::list<HeeksObj *>::const_iterator sketch = sketches.begin(); sketch != sketches.end(); sketch++)
 	{
@@ -597,10 +597,10 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 	} // End if - then
 
 
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
-		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CCuttingTool *pCutter = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+		// Make sure the hole depth isn't greater than the tool's depth.
+		CTool *pCutter = (CTool *) CTool::Find( m_tool_number );
 
 		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
 		{
@@ -623,13 +623,13 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 			} // End if - then
 		} // End if - then
 
-		// Also make sure the 'step-over' distance isn't larger than the cutting tool's diameter.
+		// Also make sure the 'step-over' distance isn't larger than the tool's diameter.
 		if ((pCutter != NULL) && ((pCutter->CuttingRadius(false) * 2.0) < m_pocket_params.m_step_over))
 		{
 			wxString change;
 			change << _("The step-over distance for pocket (id=");
 			change << m_id;
-			change << _(") is larger than the cutting tool's diameter");
+			change << _(") is larger than the tool's diameter");
 			changes.push_back(change);
 
 			if (apply_changes)

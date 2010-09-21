@@ -7,7 +7,7 @@
 
 #include "HeeksCNCTypes.h"
 #include "DepthOp.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 
 class CPocket;
 
@@ -23,7 +23,7 @@ public:
 
 	CPocketParams();
 
-    void set_initial_values(const CCuttingTool::ToolNumber_t cutting_tool_number);
+    void set_initial_values(const CTool::ToolNumber_t tool_number);
 	void GetProperties(CPocket* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -42,8 +42,8 @@ public:
 	static double max_deviation_for_spline_to_arc;
 
 	CPocket():CDepthOp(GetTypeString(), 0, PocketType){}
-	CPocket(const std::list<int> &sketches, const int cutting_tool_number );
-	CPocket(const std::list<HeeksObj *> &sketches, const int cutting_tool_number );
+	CPocket(const std::list<int> &sketches, const int tool_number );
+	CPocket(const std::list<HeeksObj *> &sketches, const int tool_number );
 	CPocket( const CPocket & rhs );
 	CPocket & operator= ( const CPocket & rhs );
 

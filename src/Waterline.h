@@ -31,7 +31,7 @@ public:
 	static int number_for_stl_file;
 
 	CWaterline():CDepthOp(GetTypeString(), 0, WaterlineType){}
-	CWaterline(const std::list<int> &solids, const int cutting_tool_number = -1);
+	CWaterline(const std::list<int> &solids, const int tool_number = -1);
 	CWaterline( const CWaterline & rhs );
 	CWaterline & operator= ( const CWaterline & rhs );
 

@@ -26,13 +26,13 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-static void on_set_cutting_tool_material(int zero_based_choice, HeeksObj* object)
+static void on_set_tool_material(int zero_based_choice, HeeksObj* object)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
 	CSpeedReference *pSpeedReference = (CSpeedReference *) object;
 
-	pSpeedReference->m_cutting_tool_material = zero_based_choice;
+	pSpeedReference->m_tool_material = zero_based_choice;
 	pSpeedReference->ResetTitle();
 	heeksCAD->RefreshProperties();
 }
@@ -76,17 +76,17 @@ const wxBitmap &CSpeedReference::GetIcon()
 void CSpeedReference::GetProperties(std::list<Property *> *list)
 {
 	{
-		CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
+		CToolParams::MaterialsList_t materials = CToolParams::GetMaterialsList();
 
 		int choice = -1;
 		std::list< wxString > choices;
-		for (CCuttingToolParams::MaterialsList_t::size_type i=0; i<materials.size(); i++)
+		for (CToolParams::MaterialsList_t::size_type i=0; i<materials.size(); i++)
 		{
 			choices.push_back(materials[i].second);
-			if (m_cutting_tool_material == materials[i].first) choice = int(i);
+			if (m_tool_material == materials[i].first) choice = int(i);
 
 		} // End for
-		list->push_back(new PropertyChoice(_("Material"), choices, choice, this, on_set_cutting_tool_material));
+		list->push_back(new PropertyChoice(_("Material"), choices, choice, this, on_set_tool_material));
 	}
 
 	list->push_back(new PropertyDouble(_("Brinell hardness of raw material"), m_brinell_hardness_of_raw_material, this, on_set_brinell_hardness_of_raw_material));
@@ -129,7 +129,7 @@ void CSpeedReference::WriteXML(TiXmlNode *root)
 	root->LinkEndChild( element );
 	element->SetAttribute("title", m_title.utf8_str());
 	element->SetAttribute("surface_speed", m_surface_speed );
-	element->SetAttribute("cutting_tool_material", int(m_cutting_tool_material) );
+	element->SetAttribute("tool_material", int(m_tool_material) );
 	element->SetAttribute("brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
 	element->SetAttribute("raw_material_name", m_material_name.utf8_str() );
 
@@ -149,12 +149,12 @@ HeeksObj* CSpeedReference::ReadFromXMLElement(TiXmlElement* element)
 	wxString material_name;
 	if (element->Attribute("raw_material_name")) material_name = Ctt(element->Attribute("raw_material_name"));
 
-	int cutting_tool_material = int(CCuttingToolParams::eCarbide);
-	if (element->Attribute("cutting_tool_material")) element->Attribute("cutting_tool_material", &cutting_tool_material);
+	int tool_material = int(CToolParams::eCarbide);
+	if (element->Attribute("tool_material")) element->Attribute("tool_material", &tool_material);
 
 	wxString title(Ctt(element->Attribute("title")));
 	CSpeedReference* new_object = new CSpeedReference( 	material_name,
-								cutting_tool_material,
+								tool_material,
 								brinell_hardness_of_raw_material,
 								surface_speed );
 	new_object->ReadBaseXML(element);
@@ -175,11 +175,11 @@ void CSpeedReference::ResetTitle()
 	std::ostringstream l_ossTitle;
 #endif
 
-	CCuttingToolParams::MaterialsList_t materials = CCuttingToolParams::GetMaterialsList();
+	CToolParams::MaterialsList_t materials = CToolParams::GetMaterialsList();
 	std::map< int, wxString > materials_map;
 	std::copy( materials.begin(), materials.end(), std::inserter( materials_map, materials_map.begin() ) );
 
-	l_ossTitle << m_material_name.c_str() << " (" << m_brinell_hardness_of_raw_material << ") with " << materials_map[m_cutting_tool_material].c_str();
+	l_ossTitle << m_material_name.c_str() << " (" << m_brinell_hardness_of_raw_material << ") with " << materials_map[m_tool_material].c_str();
 
 	OnEditString(l_ossTitle.str().c_str());
 } // End ResetTitle() method
@@ -187,7 +187,7 @@ void CSpeedReference::ResetTitle()
 
 bool CSpeedReference::operator== ( const CSpeedReference & rhs ) const
 {
-    if (m_cutting_tool_material != rhs.m_cutting_tool_material) return(false);
+    if (m_tool_material != rhs.m_tool_material) return(false);
 	if (m_material_name != rhs.m_material_name) return(false);
 	if (m_brinell_hardness_of_raw_material != rhs.m_brinell_hardness_of_raw_material) return(false);
 	if (m_surface_speed != rhs.m_surface_speed) return(false);

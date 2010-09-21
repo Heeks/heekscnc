@@ -15,7 +15,7 @@
 #include "interface/PropertyLength.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "MachineState.h"
 
 
@@ -265,15 +265,15 @@ void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches
 	// then we can't even guess as to what the operator wants.
 
 	const double default_chamfer_width = 1.0;	// mm
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-		if (pCuttingTool != NULL)
+		CTool *pTool = CTool::Find( m_tool_number );
+		if (pTool != NULL)
 		{
-			if ((pCuttingTool->m_params.m_type == CCuttingToolParams::eChamfer) &&
-			    (pCuttingTool->m_params.m_cutting_edge_angle > 0))
+			if ((pTool->m_params.m_type == CToolParams::eChamfer) &&
+			    (pTool->m_params.m_cutting_edge_angle > 0))
 			{
-				m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - (default_chamfer_width * tan( degrees_to_radians( 90.0 - pCuttingTool->m_params.m_cutting_edge_angle ) ));
+				m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - (default_chamfer_width * tan( degrees_to_radians( 90.0 - pTool->m_params.m_cutting_edge_angle ) ));
 			} // End if - then
 		} // End if - then
 	} // End if - then
@@ -291,10 +291,10 @@ Python CDepthOp::AppendTextToProgram(CMachineState *pMachineState)
     python << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
     python << _T("final_depth = float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")\n");
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (pCuttingTool != NULL)
+	CTool *pTool = CTool::Find( m_tool_number );
+	if (pTool != NULL)
 	{
-		python << _T("tool_diameter = float(") << (pCuttingTool->CuttingRadius(true) * 2.0) << _T(")\n");
+		python << _T("tool_diameter = float(") << (pTool->CuttingRadius(true) * 2.0) << _T(")\n");
 	} // End if - then
 
 	if(m_depth_op_params.m_abs_mode == CDepthOpParams::eAbsolute){
@@ -315,8 +315,8 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 
 	std::list<wxString> changes;
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (pCuttingTool == NULL)
+	CTool *pTool = CTool::Find( m_tool_number );
+	if (pTool == NULL)
 	{
 #ifdef UNICODE
 		std::wostringstream l_ossChange;
@@ -324,13 +324,13 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 		std::ostringstream l_ossChange;
 #endif
 
-		l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("does not have a cutting tool assigned") << ". " << _("It can not produce GCode without a cutting tool assignment") << ".\n";
+		l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("does not have a tool assigned") << ". " << _("It can not produce GCode without a tool assignment") << ".\n";
 		changes.push_back(l_ossChange.str().c_str());
 	} // End if - then
 	else
 	{
 		double cutting_depth = m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth;
-		if (cutting_depth > pCuttingTool->m_params.m_cutting_edge_height)
+		if (cutting_depth > pTool->m_params.m_cutting_edge_height)
 		{
 #ifdef UNICODE
 			std::wostringstream l_ossChange;
@@ -338,7 +338,7 @@ std::list<wxString> CDepthOp::DesignRulesAdjustment(const bool apply_changes)
 			std::ostringstream l_ossChange;
 #endif
 
-			l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("is set to cut deeper than the assigned cutting tool will allow") << ".\n";
+			l_ossChange << _("WARNING") << ": " << _("Depth Operation") << " (id=" << m_id << ") " << _("is set to cut deeper than the assigned tool will allow") << ".\n";
 			changes.push_back(l_ossChange.str().c_str());
 		} // End if - then
 	} // End if - else
