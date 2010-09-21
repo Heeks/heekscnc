@@ -17,8 +17,8 @@ public:
 	double m_leadoffrad;
 	double m_retractzheight;	// This is the safe height at which travel in X and Y directions will not hit anything.  The library code initializes this to 5 more than the model's maximum Z value.
 	double m_leadoffsamplestep;
-	double m_toolcornerrad;		// Value taken from CuttingTool object if one is referenced (via COp::m_cutting_tool_number)
-	double m_toolflatrad;		// Value taken from CuttingTool object if one is referenced (via COp::m_cutting_tool_number)
+	double m_toolcornerrad;		// Value taken from Tool object if one is referenced (via COp::m_tool_number)
+	double m_toolflatrad;		// Value taken from Tool object if one is referenced (via COp::m_tool_number)
 	double m_samplestep;
 	double m_stepdown;
 	double m_clearcuspheight;
@@ -44,7 +44,7 @@ public:
 	double m_boundary_y1;
 
 	void set_initial_values(const std::list<int> &solids, 		// To set retractzheight value
-				const int cutting_tool_number,
+				const int tool_number,
 		       		const int reference_object_type,	// For possible starting point
 				const unsigned int reference_object_id,	// For possible starting point
 				const std::list<int> &sketches );	// To set boundaryclear value
@@ -69,14 +69,14 @@ public:
 	CAdaptive():COp(GetTypeString(), 0, AdaptiveType){}
 	CAdaptive(	const std::list<int> &solids,
 			const std::list<int> &sketches,
-			const int cutting_tool_number = 0,
+			const int tool_number = 0,
 			const int reference_object_type = -1,	// For possible starting point
 			const int reference_object_id = -1 )	// For possible starting point
-		: COp(GetTypeString(), cutting_tool_number, AdaptiveType),
+		: COp(GetTypeString(), tool_number, AdaptiveType),
 			m_solids(solids),
 			m_sketches(sketches)
 	{
-		m_params.set_initial_values(solids, cutting_tool_number, reference_object_type, reference_object_id, sketches);
+		m_params.set_initial_values(solids, tool_number, reference_object_type, reference_object_id, sketches);
 
 		std::list<int>::iterator id;
 		for (id = m_solids.begin(); id != m_solids.end(); id++)

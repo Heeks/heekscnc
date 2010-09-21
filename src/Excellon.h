@@ -17,7 +17,7 @@ for isolation milling.
 
 #include "Drilling.h"
 #include "CNCPoint.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "interface/Property.h"
 
 #include <gp_Pnt.hxx>
@@ -61,7 +61,7 @@ class Excellon
 		unsigned int m_YDigitsLeftOfPoint;
 		unsigned int m_YDigitsRightOfPoint;
 
-		unsigned int m_active_cutting_tool_number;
+		unsigned int m_active_tool_number;
 
 		bool m_mirror_image_x_axis;
 		bool m_mirror_image_y_axis;
@@ -69,11 +69,11 @@ class Excellon
 		double m_spindle_speed;
 		double m_feed_rate;
 
-		// Associates tool number in the Excellon file with tools in the CuttingTools (plural) list.
-		typedef std::map< unsigned int, CCuttingTool::ToolNumber_t > ToolTableMap_t;
+		// Associates tool number in the Excellon file with tools in the Tools (plural) list.
+		typedef std::map< unsigned int, CTool::ToolNumber_t > ToolTableMap_t;
 		ToolTableMap_t	m_tool_table_map;
 
-		typedef std::map< CCuttingTool::ToolNumber_t, CDrilling::Symbols_t > Holes_t;
+		typedef std::map< CTool::ToolNumber_t, CDrilling::Symbols_t > Holes_t;
 		Holes_t m_holes;
 
 		typedef std::map< CNCPoint, CDrilling::Symbol_t > Points_t;

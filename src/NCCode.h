@@ -14,7 +14,7 @@
 #include "interface/HeeksObj.h"
 #include "interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 
 #include <TopoDS_Shape.hxx>
 #include <gp_Pnt.hxx>
@@ -58,7 +58,7 @@ public:
 	static double m_current_x[3];
 	static double m_prev_x[3];
 	double m_x[3];
-	int m_cutting_tool_number;
+	int m_tool_number;
 	PathObject(){m_x[0] = m_x[1] = m_x[2] = 0.0;}
 	virtual int GetType() = 0; // 0 - line, 1 - arc
 	virtual void GetBox(CBox &box,const PathObject* prev_po){box.Insert(m_x);}
@@ -213,5 +213,5 @@ public:
 	void FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1);
 	void HighlightBlock(long pos);
 
-	std::list< std::pair<PathObject *, CCuttingTool *> > GetPaths() const;
+	std::list< std::pair<PathObject *, CTool *> > GetPaths() const;
 };

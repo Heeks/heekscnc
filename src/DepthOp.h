@@ -33,7 +33,7 @@ public:
 	bool operator== ( const CDepthOpParams & rhs ) const;
 	bool operator!= ( const CDepthOpParams & rhs ) const { return(! (*this == rhs)); }
 
-	void set_initial_values(const std::list<int> *sketches = NULL, const int cutting_tool_number = -1);
+	void set_initial_values(const std::list<int> *sketches = NULL, const int tool_number = -1);
 	void write_values_to_config();
 	void GetProperties(CDepthOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -45,15 +45,15 @@ class CDepthOp : public CSpeedOp
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(const wxString& title, const std::list<int> *sketches = NULL, const int cutting_tool_number = -1, const int operation_type = UnknownType )
-		: CSpeedOp(title, cutting_tool_number, operation_type)
+	CDepthOp(const wxString& title, const std::list<int> *sketches = NULL, const int tool_number = -1, const int operation_type = UnknownType )
+		: CSpeedOp(title, tool_number, operation_type)
 	{
 		ReadDefaultValues();
 		SetDepthsFromSketchesAndTool(sketches);
 	}
 
-	CDepthOp(const wxString& title, const std::list<HeeksObj *> sketches, const int cutting_tool_number = -1, const int operation_type = UnknownType )
-		: CSpeedOp(title, cutting_tool_number, operation_type)
+	CDepthOp(const wxString& title, const std::list<HeeksObj *> sketches, const int tool_number = -1, const int operation_type = UnknownType )
+		: CSpeedOp(title, tool_number, operation_type)
 	{
 		ReadDefaultValues();
 		SetDepthsFromSketchesAndTool(sketches);

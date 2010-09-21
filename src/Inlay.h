@@ -11,7 +11,7 @@
 
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 
 #include <list>
 #include <vector>
@@ -55,7 +55,7 @@ public:
 	const wxString ConfigPrefix(void)const{return _T("Inlay");}
 
 	double m_border_width;
-	CCuttingTool::ToolNumber_t  m_clearance_tool;
+	CTool::ToolNumber_t  m_clearance_tool;
 	eInlayPass_t    m_pass;
 	eAxis_t         m_mirror_axis;
 	bool			m_female_before_male_fixtures;
@@ -76,11 +76,11 @@ public:
 
 	This class uses the offet functionality for TopoDS_Wire objects to handle the path generation. This is DIFFERENT
 	to that used by the Profile class in that it doesn't handle the case where the user wants to machine inside a
-	sketch but where the diamter of the cutting tool makes that impossible.  With the Profile class, this would be
+	sketch but where the diamter of the tool makes that impossible.  With the Profile class, this would be
 	possible for a converging sketch shape such that the tool would penetrate as far as it could without gouging
 	the sketch but would not cut out the whole sketch shape.  This class allows the FAILURE to occur rather than
 	allowing half the sketch to be machined.  At the initial time of writing, I consider this to be a GOOD thing.
-	I wish to do some 'inlay' work and I want to know whether the cutting tools will COMPLETELY cut out the sketch
+	I wish to do some 'inlay' work and I want to know whether the tools will COMPLETELY cut out the sketch
 	shapes.  Perhaps we will add a flag to enable/disable this behaviour later.
  */
 
@@ -233,14 +233,14 @@ public:
 		m_params.set_initial_values();
 	}
 	CInlay(	const Symbols_t &symbols,
-			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, InlayType), m_symbols(symbols)
+			const int tool_number )
+		: CDepthOp(GetTypeString(), NULL, tool_number, InlayType), m_symbols(symbols)
 	{
 		m_params.set_initial_values();
 		ReloadPointers();
-		if (CCuttingTool::Find(cutting_tool_number))
+		if (CTool::Find(tool_number))
 		{
-		    CCuttingTool *pChamferingBit = CCuttingTool::Find(cutting_tool_number);
+		    CTool *pChamferingBit = CTool::Find(tool_number);
 		    double theta = pChamferingBit->m_params.m_cutting_edge_angle / 360.0 * 2.0 * PI;
 		    double radius = pChamferingBit->m_params.m_diameter / 2.0;
 		    m_depth_op_params.m_step_down = radius / tan(theta);
@@ -294,7 +294,7 @@ public:
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
 	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
 	Python FormCorners( Valley_t & paths, CMachineState *pMachineState ) const;
-	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners, const CCuttingTool *pChamferingBit ) const;
+	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners, const CTool *pChamferingBit ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;
 
 	Valleys_t DefineValleys(CMachineState *pMachineState);

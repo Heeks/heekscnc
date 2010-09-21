@@ -91,11 +91,11 @@ public:
 
 	This class uses the offet functionality for TopoDS_Wire objects to handle the path generation. This is DIFFERENT
 	to that used by the Profile class in that it doesn't handle the case where the user wants to machine inside a
-	sketch but where the diamter of the cutting tool makes that impossible.  With the Profile class, this would be
+	sketch but where the diamter of the  tool makes that impossible.  With the Profile class, this would be
 	possible for a converging sketch shape such that the tool would penetrate as far as it could without gouging
 	the sketch but would not cut out the whole sketch shape.  This class allows the FAILURE to occur rather than
 	allowing half the sketch to be machined.  At the initial time of writing, I consider this to be a GOOD thing.
-	I wish to do some 'inlay' work and I want to know whether the cutting tools will COMPLETELY cut out the sketch
+	I wish to do some 'inlay' work and I want to know whether the  tools will COMPLETELY cut out the sketch
 	shapes.  Perhaps we will add a flag to enable/disable this behaviour later.
  */
 
@@ -127,8 +127,8 @@ public:
 	}
 
 	CContour(	const Symbols_t &symbols,
-			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, ContourType), m_symbols(symbols)
+			const int tool_number )
+		: CDepthOp(GetTypeString(), NULL, tool_number, ContourType), m_symbols(symbols)
 	{
 	    ReadDefaultValues();
 		ReloadPointers();

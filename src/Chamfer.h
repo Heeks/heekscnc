@@ -11,7 +11,7 @@
 
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "CNCPoint.h"
 #include "MachineState.h"
 
@@ -112,7 +112,7 @@ public:
 	//	Constructors.
 	CChamfer():CDepthOp(GetTypeString(), NULL, 0, ChamferType){}
 	CChamfer(	const Symbols_t &symbols,
-			const int cutting_tool_number );
+			const int tool_number );
 
 	CChamfer( const CChamfer & rhs );
 	CChamfer & operator= ( const CChamfer & rhs );

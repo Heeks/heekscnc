@@ -29,7 +29,7 @@ public:
 	// The following line is the prototype setup in the Python routines for the drill sequence.
 	// def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
 
-	void set_initial_values( const double depth, const int cutting_tool_number );
+	void set_initial_values( const double depth, const int tool_number );
 	void write_values_to_config();
 	void GetProperties(CDrilling* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
@@ -92,7 +92,7 @@ public:
 	//	Constructors.
 	CDrilling():CSpeedOp(GetTypeString(), 0){}
 	CDrilling(	const Symbols_t &symbols,
-			const int cutting_tool_number,
+			const int tool_number,
 			const double depth );
 
 	CDrilling( const CDrilling & rhs );

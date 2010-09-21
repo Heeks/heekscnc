@@ -70,8 +70,8 @@ public:
     CMachineState(CMachineState & rhs);
     CMachineState & operator= ( CMachineState & rhs );
 
-    int CuttingTool() const { return(m_cutting_tool_number); }
-    Python CuttingTool( const int new_cutting_tool );
+    int Tool() const { return(m_tool_number); }
+    Python Tool( const int new_tool );
 
     CFixture Fixture() const { return(m_fixture); }
     Python Fixture( CFixture fixture );
@@ -86,7 +86,7 @@ public:
 	void MarkAsProcessed( const int object_type, const unsigned int object_id, const CFixture fixture );
 
 private:
-    int         m_cutting_tool_number;
+    int         m_tool_number;
     CFixture    m_fixture;
     CNCPoint      m_location;
     bool        m_fixture_has_been_set;
