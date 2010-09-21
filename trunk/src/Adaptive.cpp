@@ -13,7 +13,7 @@
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Drilling.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
@@ -28,9 +28,9 @@ int CAdaptive::number_for_stl_file = 1;
 
 
 /**
- * If the cutting_tool_number is positive and relates to an existing
- * CuttingTool object then take the toolcornerrad and toolflatrad
- * from the CuttingTool object's values.
+ * If the tool_number is positive and relates to an existing
+ * Tool object then take the toolcornerrad and toolflatrad
+ * from the Tool object's values.
  *
  * If the reference_object_type/id refers to either a point object
  * or a Drilling object then use that object's location as this
@@ -42,7 +42,7 @@ int CAdaptive::number_for_stl_file = 1;
  */
 void CAdaptiveParams::set_initial_values(
 		const std::list<int> &solids,
-		const int cutting_tool_number /* = 0 */,
+		const int tool_number /* = 0 */,
 		const int reference_object_type, /* = -1 */
 		const unsigned int reference_object_id, /* = -1 */
 		const std::list<int> &sketches )
@@ -79,18 +79,18 @@ void CAdaptiveParams::set_initial_values(
 	config.Read(_T("m_boundary_y0"), &m_boundary_y0, -20);
 	config.Read(_T("m_boundary_y1"), &m_boundary_y1, 20);
 
-	// If the user has selected a cutting tool as part of this operation then use that tool's
+	// If the user has selected a  tool as part of this operation then use that tool's
 	// parameters to set these ones.  If no tool was selected then it's back to default
 	// behaviour for this module.
 
-	if ((cutting_tool_number > 0) && (CCuttingTool::FindCuttingTool( cutting_tool_number ) > 0))
+	if ((tool_number > 0) && (CTool::FindTool( tool_number ) > 0))
 	{
-		CCuttingTool *pCuttingTool = (CCuttingTool *) CCuttingTool::Find( cutting_tool_number );
-		if (pCuttingTool != NULL)
+		CTool *pTool = (CTool *) CTool::Find( tool_number );
+		if (pTool != NULL)
 		{
-			m_toolcornerrad = pCuttingTool->m_params.m_corner_radius;
-			m_toolflatrad = pCuttingTool->m_params.m_flat_radius;
-			m_stepdown = pCuttingTool->m_params.m_cutting_edge_height / 4.0;
+			m_toolcornerrad = pTool->m_params.m_corner_radius;
+			m_toolflatrad = pTool->m_params.m_flat_radius;
+			m_stepdown = pTool->m_params.m_cutting_edge_height / 4.0;
 			m_clearcuspheight = m_stepdown / 3.0;
 		} // End if - then
 	} // End if - then
@@ -185,10 +185,10 @@ static void on_set_leadoffsamplestep(double value, HeeksObj* object){((CAdaptive
 
 static void on_set_toolcornerrad(double value, HeeksObj* object)
 {
-	if ((((COp *)object)->m_cutting_tool_number > 0) &&
-	    (CCuttingTool::FindCuttingTool( ((COp *)object)->m_cutting_tool_number ) > 0))
+	if ((((COp *)object)->m_tool_number > 0) &&
+	    (CTool::FindTool( ((COp *)object)->m_tool_number ) > 0))
 	{
-		wxMessageBox(_T("The corner radius will be taken from the cutting tool definition rather than this value.  Aborting change"));
+		wxMessageBox(_T("The corner radius will be taken from the  tool definition rather than this value.  Aborting change"));
 		return;
 	} // End if - then
 	else
@@ -199,10 +199,10 @@ static void on_set_toolcornerrad(double value, HeeksObj* object)
 
 static void on_set_toolflatrad(double value, HeeksObj* object)
 {
-	if ((((COp *)object)->m_cutting_tool_number > 0) &&
-	    (CCuttingTool::FindCuttingTool( ((COp *)object)->m_cutting_tool_number ) > 0))
+	if ((((COp *)object)->m_tool_number > 0) &&
+	    (CTool::FindTool( ((COp *)object)->m_tool_number ) > 0))
 	{
-		wxMessageBox(_T("The corner radius will be taken from the cutting tool definition rather than this value.  Aborting change"));
+		wxMessageBox(_T("The corner radius will be taken from the  tool definition rather than this value.  Aborting change"));
 		return;
 	} // End if - then
 	else
@@ -364,7 +364,7 @@ void CAdaptiveParams::ReadFromXMLElement(TiXmlElement* pElem)
 
 /**
 	Find out how high up all the objects are for this operation.   From this we
-	will determine how far to retract the cutting tool so as not to hit
+	will determine how far to retract the  tool so as not to hit
 	them during rapid movements.
  */
 double CAdaptive::GetMaxHeight( const int object_type, const std::list<int> & object_ids )
@@ -460,21 +460,21 @@ Python CAdaptive::AppendTextToProgram(CMachineState *pMachineState )
 
 	python << _T("actp.setleadoffsamplestep(") << m_params.m_leadoffsamplestep << _T(")\n");
 
-	if ((((COp *)this)->m_cutting_tool_number > 0) &&
-	    (CCuttingTool::FindCuttingTool( ((COp *)this)->m_cutting_tool_number ) > 0) )
+	if ((((COp *)this)->m_tool_number > 0) &&
+	    (CTool::FindTool( ((COp *)this)->m_tool_number ) > 0) )
 	{
-		// We have a cutting tool to refer to.  Get these values from there instead.
+		// We have a  tool to refer to.  Get these values from there instead.
 
-		CCuttingTool *pCuttingTool = (CCuttingTool *) CCuttingTool::Find( ((COp *)this)->m_cutting_tool_number );
-		if (pCuttingTool != NULL)
+		CTool *pTool = (CTool *) CTool::Find( ((COp *)this)->m_tool_number );
+		if (pTool != NULL)
 		{
-			python << _T("actp.settoolcornerrad(") << pCuttingTool->m_params.m_corner_radius << _T(")\n");
-			python << _T("actp.settoolflatrad(") << pCuttingTool->m_params.m_flat_radius << _T(")\n");
+			python << _T("actp.settoolcornerrad(") << pTool->m_params.m_corner_radius << _T(")\n");
+			python << _T("actp.settoolflatrad(") << pTool->m_params.m_flat_radius << _T(")\n");
 		} // End if - then
 	} // End if - then
 	else
 	{
-		// This object has values and/or we don't have a cutting tool number to refer to.
+		// This object has values and/or we don't have a  tool number to refer to.
 		// Use these values instead.
 
 		python << _T("actp.settoolcornerrad(") << m_params.m_toolcornerrad << _T(")\n");

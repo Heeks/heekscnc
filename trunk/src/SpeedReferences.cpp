@@ -9,7 +9,7 @@
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
 #include "interface/Tool.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Op.h"
 #include "SpeedOp.h"
 #include "interface/strconv.h"
@@ -249,7 +249,7 @@ std::set< double > CSpeedReferences::GetAllHardnessValues()
 
 double CSpeedReferences::GetSurfaceSpeed(
 	const wxString & material_name,
-	const int cutting_tool_material,
+	const int tool_material,
 	const double brinell_hardness_of_raw_material )
 {
 	if (theApp.m_program == NULL) return(-1.0);
@@ -261,7 +261,7 @@ double CSpeedReferences::GetSurfaceSpeed(
 	{
 		if (material->GetType() != SpeedReferenceType) continue;
 		if ((material_name == ((CSpeedReference *) material)->m_material_name) &&
-		    (cutting_tool_material == ((CSpeedReference *) material)->m_cutting_tool_material) &&
+		    (tool_material == ((CSpeedReference *) material)->m_tool_material) &&
 		    (brinell_hardness_of_raw_material == ((CSpeedReference *) material)->m_brinell_hardness_of_raw_material))
 		{
 			return( ((CSpeedReference *) material)->m_surface_speed );

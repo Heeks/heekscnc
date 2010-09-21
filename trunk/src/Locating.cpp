@@ -15,7 +15,7 @@
 #include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Profile.h"
 #include "Fixture.h"
 #include "Drilling.h"

@@ -52,7 +52,7 @@ public:
 	static std::set< double > GetAllHardnessValues();
 
 	static double GetSurfaceSpeed( const wxString & material_name,
-					const int cutting_tool_material,
+					const int tool_material,
 					const double brinell_hardness_of_raw_material );
 };
 

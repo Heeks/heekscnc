@@ -10,7 +10,7 @@
 
 #include "Program.h"
 #include "HeeksCNCTypes.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 
 #include <vector>
 #include <algorithm>

@@ -6,8 +6,9 @@
  */
 
 #include "HeeksCNCTypes.h"
+//#include "PrintOp.h"
 #include "DepthOp.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 
 class CRaft;
 
@@ -22,12 +23,12 @@ public:
 	double m_zig_angle;
 	int m_baselayers;
 	int m_interfacelayers;
-	CCuttingTool::ToolNumber_t  m_baselayerextrusion;
-	CCuttingTool::ToolNumber_t  m_interfacelayerextrusion;
+	CTool::ToolNumber_t  m_baselayerextrusion;
+	CTool::ToolNumber_t  m_interfacelayerextrusion;
 	
 	CRaftParams();
 
-    	void set_initial_values(const CCuttingTool::ToolNumber_t cutting_tool_number);
+    	void set_initial_values(const CTool::ToolNumber_t tool_number);
 	void GetProperties(CRaft* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -46,8 +47,8 @@ public:
 	static double max_deviation_for_spline_to_arc;
 
 	CRaft():CDepthOp(GetTypeString(), 0, RaftType){}
-	CRaft(const std::list<int> &sketches, const int cutting_tool_number );
-	CRaft(const std::list<HeeksObj *> &sketches, const int cutting_tool_number );
+	CRaft(const std::list<int> &sketches, const int tool_number );
+	CRaft(const std::list<HeeksObj *> &sketches, const int tool_number );
 	CRaft( const CRaft & rhs );
 	CRaft & operator= ( const CRaft & rhs );
 

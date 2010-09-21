@@ -15,7 +15,7 @@
 #include <vector>
 #include "CNCPoint.h"
 #include "interface/Tool.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "NCCode.h"
 
 class CProbing;
@@ -80,19 +80,19 @@ public:
 
 public:
 	//	Constructors.
-	CProbing( const wxString title, const int cutting_tool_number, const int operation_type):CSpeedOp(title, cutting_tool_number, operation_type)
+	CProbing( const wxString title, const int tool_number, const int operation_type):CSpeedOp(title, tool_number, operation_type)
 	{
 		m_speed_op_params.m_spindle_speed = 0;	// We don't want the spindle to move while we're probing.
 		COp::m_active = 0;	// We don't want the normal GCode generation routines to include us.
 		m_depth = 10.0;	// mm
 		m_distance = 50.0;	// mm
 
-		// If the cutting tool number has been defined as a probe already, use half the probe's length
+		// If the tool number has been defined as a probe already, use half the probe's length
 		// as the depth to plunge (by default)
-		CCuttingTool *pCuttingTool = CCuttingTool::Find(cutting_tool_number);
-		if ((pCuttingTool != NULL) && (pCuttingTool->m_params.m_type == CCuttingToolParams::eTouchProbe))
+		CTool *pTool = CTool::Find(tool_number);
+		if ((pTool != NULL) && (pTool->m_params.m_type == CToolParams::eTouchProbe))
 		{
-			m_depth = pCuttingTool->m_params.m_tool_length_offset / 2.0;
+			m_depth = pTool->m_params.m_tool_length_offset / 2.0;
 		}
 
 		CNCCode::ReadColorsFromConfig();	// We're going to need them in the glCommands() methods
@@ -377,7 +377,7 @@ public:
 class CProbe_Grid: public CProbing {
 public:
 	//	Constructors.
-	CProbe_Grid(const int cutting_tool_number = 0) : CProbing(_("Probe Grid"), cutting_tool_number, ProbeGridType )
+	CProbe_Grid(const int tool_number = 0) : CProbing(_("Probe Grid"), tool_number, ProbeGridType )
 	{
 	    m_for_fixture_measurement = true;
 		m_num_x_points = 2;
@@ -426,7 +426,7 @@ public:
 class CProbe_Centre: public CProbing {
 public:
 	//	Constructors.
-	CProbe_Centre(const int cutting_tool_number = 0) : CProbing(_("Probe Centre"), cutting_tool_number, ProbeCentreType )
+	CProbe_Centre(const int tool_number = 0) : CProbing(_("Probe Centre"), tool_number, ProbeCentreType )
 	{
 		m_direction = int(eOutside);
 		m_number_of_points = 2;
@@ -473,7 +473,7 @@ public:
 	be re-read by HeeksCNC's fixture objects.
 
 	This class may also repeat this operation so as to find two perpendicular edges.  It then intersects
-	these two lines and moves the cutting point to the intersection point.  The intend is to use this
+	these two lines and moves the point to the intersection point.  The intend is to use this
 	GCode program to set the zero point at the intersection of two perpendicular edges.
  */
 class CProbe_Edge: public CProbing {
@@ -481,12 +481,12 @@ class CProbe_Edge: public CProbing {
 
 public:
 	//	Constructors.
-	CProbe_Edge(const int cutting_tool_number = 0) :
-		CProbing(_("Probe Edge"), cutting_tool_number, ProbeEdgeType )
+	CProbe_Edge(const int tool_number = 0) :
+		CProbing(_("Probe Edge"), tool_number, ProbeEdgeType )
 	{
 		m_retract = 5.0;	// mm.  This is how far to retract from the edge before probing back in.
 		m_number_of_edges = 2;	// A single edge produces only an angle in an XML document.  Two edges also moves the
-								// cutting point back to the intersection of these edges.
+								// point back to the intersection of these edges.
 		m_edge = eBottom;
 		m_corner = eBottomLeft;
 		m_check_levels = 1;

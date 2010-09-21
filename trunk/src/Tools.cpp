@@ -6,13 +6,13 @@
 #include "Tools.h"
 #include "Program.h"
 #include "interface/Tool.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "tinyxml/tinyxml.h"
 #include <wx/stdpaths.h>
 
 bool CTools::CanAdd(HeeksObj* object)
 {
-	return 	((object != NULL) && (object->GetType() == CuttingToolType));
+	return 	((object != NULL) && (object->GetType() == ToolType));
 }
 
 
@@ -89,7 +89,7 @@ HeeksObj* CTools::ReadFromXMLElement(TiXmlElement* pElem)
 	return new_object;
 }
 
-class ExportCuttingTools: public Tool{
+class ExportTools: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Export");}
 	void Run()
@@ -109,47 +109,47 @@ class ExportCuttingTools: public Tool{
 		fd.SetFilterIndex(1);
 		if (fd.ShowModal() == wxID_CANCEL) return;
 		previous_path = fd.GetPath().c_str();
-		std::list<HeeksObj *> cutting_tools;
-		for (HeeksObj *cutting_tool = theApp.m_program->Tools()->GetFirstChild();
-			cutting_tool != NULL;
-			cutting_tool = theApp.m_program->Tools()->GetNextChild() )
+		std::list<HeeksObj *> tools;
+		for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild();
+			tool != NULL;
+			tool = theApp.m_program->Tools()->GetNextChild() )
 		{
-			cutting_tools.push_back( cutting_tool );
+			tools.push_back( tool );
 		} // End for
 
-		heeksCAD->SaveXMLFile( cutting_tools, previous_path.c_str(), false );
+		heeksCAD->SaveXMLFile( tools, previous_path.c_str(), false );
 	}
 	wxString BitmapPath(){ return _T("export");}
 	wxString previous_path;
 };
 
-static ExportCuttingTools export_cutting_tools;
+static ExportTools export_tools;
 
-void ImportCuttingToolsFile( const wxChar *file_path )
+void ImportToolsFile( const wxChar *file_path )
 {
     // Delete the speed references that we've already got.  Otherwise we end
     // up with duplicates.  Do this in two passes.  Otherwise we end up
     // traversing the same list that we're modifying.
 
-    std::list<HeeksObj *> cutting_tools;
-    for (HeeksObj *cutting_tool = theApp.m_program->Tools()->GetFirstChild();
-        cutting_tool != NULL;
-        cutting_tool = theApp.m_program->Tools()->GetNextChild() )
+    std::list<HeeksObj *> tools;
+    for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild();
+        tool != NULL;
+        tool = theApp.m_program->Tools()->GetNextChild() )
     {
-        cutting_tools.push_back( cutting_tool );
+        tools.push_back( tool );
     } // End for
 
-    for (std::list<HeeksObj *>::iterator l_itObject = cutting_tools.begin(); l_itObject != cutting_tools.end(); l_itObject++)
+    for (std::list<HeeksObj *>::iterator l_itObject = tools.begin(); l_itObject != tools.end(); l_itObject++)
     {
         heeksCAD->Remove( *l_itObject );
     } // End for
 
     // And read the default speed references.
-    // heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_cutting_tools );
+    // heeksCAD->OpenXMLFile( _T("default.speeds"), true, theApp.m_program->m_tools );
     heeksCAD->OpenXMLFile( file_path, theApp.m_program->Tools() );
 }
 
-class ImportCuttingTools: public Tool{
+class ImportTools: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Import");}
 	void Run()
@@ -170,20 +170,20 @@ class ImportCuttingTools: public Tool{
 		if (fd.ShowModal() == wxID_CANCEL) return;
 		previous_path = fd.GetPath().c_str();
 
-        ImportCuttingToolsFile( previous_path.c_str() );
+        ImportToolsFile( previous_path.c_str() );
 	}
 	wxString BitmapPath(){ return _T("import");}
 	wxString previous_path;
 };
 
-static ImportCuttingTools import_cutting_tools;
+static ImportTools import_tools;
 
 void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	t_list->push_back(&import_cutting_tools);
-	t_list->push_back(&export_cutting_tools);
+	t_list->push_back(&import_tools);
+	t_list->push_back(&export_tools);
 
-	CHeeksCNCApp::GetNewCuttingToolTools(t_list);
+	CHeeksCNCApp::GetNewToolTools(t_list);
 
 	ObjList::GetTools(t_list, p);
 }
@@ -191,17 +191,17 @@ void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 void CTools::OnChangeUnits(const double units)
 {
-    std::list<HeeksObj *> cutting_tools;
-    for (HeeksObj *cutting_tool = theApp.m_program->Tools()->GetFirstChild();
-        cutting_tool != NULL;
-        cutting_tool = theApp.m_program->Tools()->GetNextChild() )
+    std::list<HeeksObj *> tools;
+    for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild();
+        tool != NULL;
+        tool = theApp.m_program->Tools()->GetNextChild() )
     {
-        cutting_tools.push_back( cutting_tool );
+        tools.push_back( tool );
     } // End for
 
-    for (std::list<HeeksObj *>::iterator l_itObject = cutting_tools.begin(); l_itObject != cutting_tools.end(); l_itObject++)
+    for (std::list<HeeksObj *>::iterator l_itObject = tools.begin(); l_itObject != tools.end(); l_itObject++)
     {
-        ((CCuttingTool *) *l_itObject)->ResetTitle();
+        ((CTool *) *l_itObject)->ResetTitle();
     } // End for
 }
 

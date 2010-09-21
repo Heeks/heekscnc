@@ -16,7 +16,7 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "Operations.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Profile.h"
 #include "Fixture.h"
 #include "CNCPoint.h"
@@ -31,7 +31,7 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-void CDrillingParams::set_initial_values( const double depth, const int cutting_tool_number )
+void CDrillingParams::set_initial_values( const double depth, const int tool_number )
 {
 	CNCConfig config(ConfigScope());
 
@@ -56,12 +56,12 @@ void CDrillingParams::set_initial_values( const double depth, const int cutting_
 	// NOTE: If the peck depth is zero (or less) then the operator may have manually chosen
 	// to not peck.  In this case, don't add a positive peck depth - which would force
 	// a pecking cycle rather than another drilling cycle.
-	if ((cutting_tool_number > 0) && (m_peck_depth > 0.0))
+	if ((tool_number > 0) && (m_peck_depth > 0.0))
 	{
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
-		if (pCuttingTool != NULL)
+		CTool *pTool = CTool::Find( tool_number );
+		if (pTool != NULL)
 		{
-			m_peck_depth = pCuttingTool->m_params.m_diameter / 2.0;
+			m_peck_depth = pTool->m_params.m_diameter / 2.0;
 		}
 	}
 
@@ -312,12 +312,12 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 	{
 		double l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
 
-		if (m_cutting_tool_number > 0)
+		if (m_tool_number > 0)
 		{
-			HeeksObj* cuttingTool = heeksCAD->GetIDObject( CuttingToolType, m_cutting_tool_number );
-			if (cuttingTool != NULL)
+			HeeksObj* Tool = heeksCAD->GetIDObject( ToolType, m_tool_number );
+			if (Tool != NULL)
 			{
-                		l_dHoleDiameter = ((CCuttingTool *) cuttingTool)->m_params.m_diameter;
+                		l_dHoleDiameter = ((CTool *) Tool)->m_params.m_diameter;
 			} // End if - then
 		} // End if - then
 
@@ -381,11 +381,11 @@ void CDrilling::CopyFrom(const HeeksObj* object)
 }
 
 CDrilling::CDrilling(	const Symbols_t &symbols,
-        const int cutting_tool_number,
+        const int tool_number,
         const double depth )
-    : CSpeedOp(GetTypeString(), cutting_tool_number, DrillingType), m_symbols(symbols)
+    : CSpeedOp(GetTypeString(), tool_number, DrillingType), m_symbols(symbols)
 {
-    m_params.set_initial_values(depth, cutting_tool_number);
+    m_params.set_initial_values(depth, tool_number);
     for (Symbols_t::iterator itSymbol = m_symbols.begin(); itSymbol != m_symbols.end(); itSymbol++)
     {
         HeeksObj *obj = heeksCAD->GetIDObject(itSymbol->first, itSymbol->second);
@@ -719,14 +719,14 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 	std::list<wxString> changes;
 
 	// Make some special checks if we're using a chamfering bit.
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
-		CCuttingTool *pChamfer = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+		CTool *pChamfer = (CTool *) CTool::Find( m_tool_number );
 		if (pChamfer != NULL)
 		{
 			std::vector<CNCPoint> these_locations = FindAllLocations(NULL);
 
-			if (pChamfer->m_params.m_type == CCuttingToolParams::eChamfer)
+			if (pChamfer->m_params.m_type == CToolParams::eChamfer)
 			{
 				// We need to make sure that the diameter of the hole (that will
 				// have been drilled in a previous drilling operation) is between
@@ -744,11 +744,11 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 					{
 						// Make sure we're looking at a hole drilled with something
 						// more than a centre drill.
-						CCuttingToolParams::eCuttingToolType type = CCuttingTool::CutterType( ((COp *)obj)->m_cutting_tool_number );
-						if (	(type == CCuttingToolParams::eDrill) ||
-							(type == CCuttingToolParams::eEndmill) ||
-							(type == CCuttingToolParams::eSlotCutter) ||
-							(type == CCuttingToolParams::eBallEndMill))
+						CToolParams::eToolType type = CTool::CutterType( ((COp *)obj)->m_tool_number );
+						if (	(type == CToolParams::eDrill) ||
+							(type == CToolParams::eEndmill) ||
+							(type == CToolParams::eSlotCutter) ||
+							(type == CToolParams::eBallEndMill))
 						{
 							// See if any of the other drilling locations line up
 							// with our drilling locations.  If so, we must be
@@ -764,7 +764,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 								// We're here.  We must be chamfering a hole we've
 								// drilled previously.  Check the diameters.
 
-								CCuttingTool *pPreviousTool = CCuttingTool::Find( ((COp *)obj)->m_cutting_tool_number );
+								CTool *pPreviousTool = CTool::Find( ((COp *)obj)->m_tool_number );
 								if (pPreviousTool->CuttingRadius() < pChamfer->m_params.m_flat_radius)
 								{
 #ifdef UNICODE
@@ -795,10 +795,10 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 		} // End if - then
 	} // End if - then
 
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CCuttingTool *pDrill = (CCuttingTool *) CCuttingTool::Find( m_cutting_tool_number );
+		CTool *pDrill = (CTool *) CTool::Find( m_tool_number );
 		if ((pDrill != NULL) && (pDrill->m_params.m_cutting_edge_height < m_params.m_depth))
 		{
 			// The drill bit we've chosen can't cut as deep as we've setup to go.

@@ -384,9 +384,9 @@ void CFixture::OnEditString(const wxChar* str){
 
 
 /**
- * This method uses the various attributes of the cutting tool to produce a meaningful name.
+ * This method uses the various attributes of the tool to produce a meaningful name.
  * eg: with diameter = 6, units = 1 (mm) and type = 'drill' the name would be '6mm Drill Bit".  The
- * idea is to produce a m_title value that is representative of the cutting tool.  This will
+ * idea is to produce a m_title value that is representative of the tool.  This will
  * make selection in the program list easier.
  *
  * NOTE: The ResetTitle() method looks at the m_title value for strings that are likely to
@@ -447,7 +447,7 @@ wxString CFixture::ResetTitle()
 
 /**
         This is the Graphics Library Commands (from the OpenGL set).  This method calls the OpenGL
-        routines to paint the cutting tool in the graphics window.  The graphics is transient.
+        routines to paint the tool in the graphics window.  The graphics is transient.
  */
 void CFixture::glCommands(bool select, bool marked, bool no_color)
 {

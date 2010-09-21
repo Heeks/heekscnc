@@ -19,12 +19,11 @@
 #include "interface/strconv.h"
 #include "tinyxml/tinyxml.h"
 #include "Operations.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Profile.h"
 #include "Fixture.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
-#include "CuttingTool.h"
 #include "interface/HeeksColor.h"
 #include "NCCode.h"
 #include "PythonStuff.h"
@@ -67,14 +66,14 @@ Python CProbe_Centre::AppendTextToProgram( CMachineState *pMachineState )
 
 	double probe_radius = 0.0;
 
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number);
-		if (pCuttingTool != NULL)
+		CTool *pTool = CTool::Find( m_tool_number);
+		if (pTool != NULL)
 		{
-			probe_radius = pCuttingTool->CuttingRadius(true);
-			probe_offset_x = 0.0 - pCuttingTool->m_params.m_probe_offset_x;
-			probe_offset_y = 0.0 - pCuttingTool->m_params.m_probe_offset_y;
+			probe_radius = pTool->CuttingRadius(true);
+			probe_offset_x = 0.0 - pTool->m_params.m_probe_offset_x;
+			probe_offset_y = 0.0 - pTool->m_params.m_probe_offset_y;
 		} // End if - then
 	} // End if - then
 
@@ -424,14 +423,14 @@ Python CProbe_Edge::AppendTextToProgram( CMachineState *pMachineState )
 	double probe_offset_y = 0.0;
 	double probe_radius = 0.0;
 
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number);
-		if (pCuttingTool != NULL)
+		CTool *pTool = CTool::Find( m_tool_number);
+		if (pTool != NULL)
 		{
-			probe_radius = pCuttingTool->CuttingRadius(true);
-			probe_offset_x = 0.0 - pCuttingTool->m_params.m_probe_offset_x;
-			probe_offset_y = 0.0 - pCuttingTool->m_params.m_probe_offset_y;
+			probe_radius = pTool->CuttingRadius(true);
+			probe_offset_x = 0.0 - pTool->m_params.m_probe_offset_x;
+			probe_offset_y = 0.0 - pTool->m_params.m_probe_offset_y;
 		} // End if - then
 	} // End if - then
 
@@ -821,7 +820,7 @@ Python CProbe_Edge::AppendTextToProgram( CMachineState *pMachineState )
 
 		python << _T("xml_file_name=") << PythonString(this->GetOutputFileName( _T(".xml"), true )) << _T(")\n");
 
-		// And position the cutting tool at the intersection of the two lines.
+		// And position the tool at the intersection of the two lines.
 		// This should be safe as the 'probe_single_point() call made in the AppendTextForSingleOperation() routine returns
 		// the machine's position to the originally jogged position.  This is expected to be above the workpiece
 		// at a same movement height.
@@ -2091,7 +2090,7 @@ void CProbe_Edge::GenerateMeaningfullName()
 		m_title << eCorners_t(m_corner) << _(" corner");
 	} // End if - else
 
-	m_title << _T(" at ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+	m_title << _T(" at ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 	if (theApp.m_program->m_units > 1) m_title << _T(" inch intervals");
 	else m_title << _T(" mm intervals");
 
@@ -2103,7 +2102,7 @@ void CProbe_Centre::GenerateMeaningfullName()
 	{
 		m_title = _("Probe protrusion along ");
 		m_title << eAlignment_t(m_alignment);
-		m_title << _T(" min ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+		m_title << _T(" min ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 		else m_title << _T(" mm");
 	} // End if - then
@@ -2111,7 +2110,7 @@ void CProbe_Centre::GenerateMeaningfullName()
 	{
 		m_title = _("Probe hole along ");
 		m_title << eAlignment_t(m_alignment);
-		m_title << _T(" max ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+		m_title << _T(" max ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 		else m_title << _T(" mm");
 	} // End if - else
@@ -2121,14 +2120,14 @@ void CProbe_Centre::GenerateMeaningfullName()
 		if (m_direction == eOutside)
 		{
 			m_title = _("Probe protrusion");
-			m_title << _T(" min ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+			m_title << _T(" min ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 			else m_title << _T(" mm");
 		} // End if - then
 		else
 		{
 			m_title = _("Probe hole");
-			m_title << _T(" max ") << CCuttingTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+			m_title << _T(" max ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
 			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 			else m_title << _T(" mm");
 		} // End if - else

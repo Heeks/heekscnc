@@ -15,7 +15,7 @@
 #include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Drilling.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
@@ -29,19 +29,19 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-void CCounterBoreParams::set_initial_values( const int cutting_tool_number )
+void CCounterBoreParams::set_initial_values( const int tool_number )
 {
 	CNCConfig config(ConfigScope());
 
 	config.Read(_T("m_diameter"), &m_diameter, (25.4 / 10));	// One tenth of an inch
 	config.Read(_T("m_sort_locations"), &m_sort_locations, 1);
 
-	if (cutting_tool_number > 0)
+	if (tool_number > 0)
 	{
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( cutting_tool_number );
-		if (pCuttingTool != NULL)
+		CTool *pTool = CTool::Find( tool_number );
+		if (pTool != NULL)
 		{
-			std::pair< double, double > depth_and_diameter = CCounterBore::SelectSizeForHead( pCuttingTool->m_params.m_diameter );
+			std::pair< double, double > depth_and_diameter = CCounterBore::SelectSizeForHead( pTool->m_params.m_diameter );
 			m_diameter = depth_and_diameter.second;
 		} // End if - then
 	} // End if - then
@@ -111,7 +111,7 @@ const wxBitmap &CCounterBore::GetIcon()
 	this end, we need to spiral down to each successive cutting depth and then spiral out to the
 	outside diameter.  Repeat these operations until we've cut the full depth and the full width.
  */
-Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const CCuttingTool *pCuttingTool ) const
+Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, const CTool *pTool ) const
 {
 	Python python;
 
@@ -130,7 +130,7 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 	python << _T("feed( x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 
 	double tolerance = heeksCAD->GetTolerance();
-	double max_radius_of_spiral = (m_params.m_diameter / 2.0) - pCuttingTool->CuttingRadius(false);
+	double max_radius_of_spiral = (m_params.m_diameter / 2.0) - pTool->CuttingRadius(false);
 
 	while ((cutting_depth - final_depth) > tolerance)
 	{
@@ -147,7 +147,7 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 		// the hole.  We don't want it to be more than the tool's radius but we also don't
 		// want it to be wider than the hole.
 
-		double radius_of_spiral = pCuttingTool->CuttingRadius(false) * 0.75;
+		double radius_of_spiral = pTool->CuttingRadius(false) * 0.75;
 		if (radius_of_spiral > max_radius_of_spiral)
 		{
 			// Reduce the radius of the spiral so that we don't run outside the hole.
@@ -202,7 +202,7 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 		python << _T("comment('Now spiral outwards to the counterbore perimeter')\n");
 
 		do {
-			radius_of_spiral += (pCuttingTool->CuttingRadius(false) * 0.75);
+			radius_of_spiral += (pTool->CuttingRadius(false) * 0.75);
 			if (radius_of_spiral > max_radius_of_spiral)
 			{
 				// Reduce the radius of the spiral so that we don't run outside the hole.
@@ -289,15 +289,15 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 
 	python << CDepthOp::AppendTextToProgram(pMachineState);
 
-	if (m_cutting_tool_number > 0)
+	if (m_tool_number > 0)
 	{
-		CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-		if (pCuttingTool != NULL)
+		CTool *pTool = CTool::Find( m_tool_number );
+		if (pTool != NULL)
 		{
-			if ((pCuttingTool->CuttingRadius() * 2.0) >= m_params.m_diameter)
+			if ((pTool->CuttingRadius() * 2.0) >= m_params.m_diameter)
 			{
 				wxString message;
-				message << _("Error: Tool diameter (") << pCuttingTool->m_params.m_diameter << _T(") ")
+				message << _("Error: Tool diameter (") << pTool->m_params.m_diameter << _T(") ")
 					 << _(">= hole diameter (") << m_params.m_diameter << _T(") ")
 					 << _("in counter bore operation.  ")
 					 << _("Skipping this counter bore operation (ID=") << m_id << _T(")");
@@ -309,14 +309,14 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point( pMachineState->Fixture().Adjustment(*l_itLocation) );
-				python << GenerateGCodeForOneLocation( point, pCuttingTool );
+				python << GenerateGCodeForOneLocation( point, pTool );
 				pMachineState->Location(*l_itLocation); // Remember where we are.
 			} // End for
 		} // End if - then
 		else
 		{
 			wxString message;
-			message << _("Warning: Counter bore refers to a cutting tool ")
+			message << _("Warning: Counter bore refers to a tool ")
 				 << _("that can't be found in the model.  ")
 				 << _("Skipping this counter bore operation (ID=") << m_id << _T(")");
 			wxMessageBox(message);
@@ -325,7 +325,7 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 	else
 	{
 		wxString message;
-		message << _("Warning: Counter bore operations MUST refer to a cutting tool.  ")
+		message << _("Warning: Counter bore operations MUST refer to a tool.  ")
 			 << _("Skipping this counter bore operation (ID=") << m_id << _T(")");
 		wxMessageBox(message);
 	} // End if - else
@@ -585,7 +585,7 @@ void CCounterBore::ReloadPointers()
  * 	add the intersection points to the result set.
  *
  *	If any of the selected objects are DrillingType objects then see if they refer
- *	to CuttingTool objects.  If so, remember which ones.  We may want to see what
+ *	to Tool objects.  If so, remember which ones.  We may want to see what
  *	size holes were drilled so that we can make an intellegent selection for the
  *	socket head.
  */
@@ -629,9 +629,9 @@ std::vector<CNCPoint> CCounterBore::FindAllLocations( std::list<int> *pToolNumbe
 		if (lhsPtr->GetType() == DrillingType)
 		{
 			// Ask the Drilling object what reference points it uses.
-			if ((((COp *) lhsPtr)->m_cutting_tool_number > 0) && (pToolNumbersReferenced != NULL))
+			if ((((COp *) lhsPtr)->m_tool_number > 0) && (pToolNumbersReferenced != NULL))
 			{
-				pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_cutting_tool_number );
+				pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_tool_number );
 			} // End if - then
 
 			std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
@@ -786,8 +786,8 @@ void CCounterBore::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 
 CCounterBore::CCounterBore(	const Symbols_t &symbols,
-			const int cutting_tool_number )
-		: CDepthOp(GetTypeString(), NULL, cutting_tool_number, CounterBoreType), m_symbols(symbols)
+			const int tool_number )
+		: CDepthOp(GetTypeString(), NULL, tool_number, CounterBoreType), m_symbols(symbols)
 {
     for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
     {
@@ -799,7 +799,7 @@ CCounterBore::CCounterBore(	const Symbols_t &symbols,
     } // End for
     m_symbols.clear();
 
-    m_params.set_initial_values( cutting_tool_number );
+    m_params.set_initial_values( tool_number );
 
     std::list<int> drillbits;
     std::vector<CNCPoint> locations = FindAllLocations( &drillbits, NULL );
@@ -810,10 +810,10 @@ CCounterBore::CCounterBore(	const Symbols_t &symbols,
 
         for (std::list<int>::const_iterator drillbit = drillbits.begin(); drillbit != drillbits.end(); drillbit++)
         {
-            HeeksObj *object = heeksCAD->GetIDObject( CuttingToolType, *drillbit );
+            HeeksObj *object = heeksCAD->GetIDObject( ToolType, *drillbit );
             if (object != NULL)
             {
-                std::pair< double, double > screw_size = SelectSizeForHead( ((CCuttingTool *) object)->m_params.m_diameter );
+                std::pair< double, double > screw_size = SelectSizeForHead( ((CTool *) object)->m_params.m_diameter );
                 m_depth_op_params.m_final_depth = screw_size.first;
                 m_params.m_diameter = screw_size.second;
             } // End if - then

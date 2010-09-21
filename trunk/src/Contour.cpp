@@ -16,7 +16,7 @@
 #include "interface/PropertyChoice.h"
 #include "tinyxml/tinyxml.h"
 #include "Operations.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "Profile.h"
 #include "Fixture.h"
 #include "Fixtures.h"
@@ -419,9 +419,9 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
 
 /**
-    For these edges, plan a path to get the cutting tool from the current
+    For these edges, plan a path to get the  tool from the current
     depth down to the first edge's depth at no more than the gradient
-    specified for the cutting tool.  This might mean running right around
+    specified for the  tool.  This might mean running right around
     all edges spiralling down until the required depth or it might mean
     running along part of the wire backwards and forwards until the depth
     is achieved.
@@ -444,14 +444,14 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
     double tolerance = heeksCAD->GetTolerance();
 
-    // Get the gradient from the cutting tool's definition.
-    CCuttingTool *pCuttingTool = CCuttingTool::Find( pMachineState->CuttingTool() );
-    if (pCuttingTool == NULL)
+    // Get the gradient from the  tool's definition.
+    CTool *pTool = CTool::Find( pMachineState->Tool() );
+    if (pTool == NULL)
     {
         return(python); // empty.
     }
 
-    double gradient = pCuttingTool->Gradient();
+    double gradient = pTool->Gradient();
 
     const TopoDS_Shape &first_edge = edges[starting_edge_offset];
     BRepAdaptor_Curve top_curve(TopoDS::Edge(first_edge));
@@ -536,9 +536,9 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
     // If the tool's diameter is too large for this gradient and step-down then don't go
     // half way and then back again.  Instead, go all the way out and come back at this
     // base height.
-    if ((initial_tool_depth - (gradient * pCuttingTool->CuttingRadius() * 2.0)) > half_way_down)
+    if ((initial_tool_depth - (gradient * pTool->CuttingRadius() * 2.0)) > half_way_down)
     {
-        goal_z = half_way_down;    // We're going to be moving more than one cutting tool radius so aim
+        goal_z = half_way_down;    // We're going to be moving more than one  tool radius so aim
                                     // for half way down and then double back to find final depth.
     }
 
@@ -787,7 +787,7 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 
 
 /**
-    We want to move the cutting tool along this edge.  If the tool's current
+    We want to move the  tool along this edge.  If the tool's current
     position aligns with either the first_parameter's location or the last_parameter's
     location then run to the opposite end.  If the tool's location does not align
     with either of these locations then go from first to last.
@@ -1003,8 +1003,8 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
 	unsigned int number_of_bad_sketches = 0;
 	double tolerance = heeksCAD->GetTolerance();
 
-	CCuttingTool *pCuttingTool = CCuttingTool::Find( m_cutting_tool_number );
-	if (! pCuttingTool)
+	CTool *pTool = CTool::Find( m_tool_number );
+	if (! pTool)
 	{
 		return(python);
 	}
@@ -1045,7 +1045,7 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
 
                     for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
                     {
-                        double radius = pCuttingTool->CuttingRadius(false,m_depth_op_params.m_start_depth - *itDepth);
+                        double radius = pTool->CuttingRadius(false,m_depth_op_params.m_start_depth - *itDepth);
 
                         if (m_params.m_tool_on_side == CContourParams::eLeftOrOutside) radius *= +1.0;
                         if (m_params.m_tool_on_side == CContourParams::eRightOrInside) radius *= -1.0;

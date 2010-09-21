@@ -7,7 +7,7 @@
 
 #include <stdafx.h>
 #include "MachineState.h"
-#include "CuttingTool.h"
+#include "CTool.h"
 #include "CNCPoint.h"
 #include "Program.h"
 
@@ -22,7 +22,7 @@ class CFixture;
 CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54, false, 0.0)
 {
         m_location = CNCPoint(0.0, 0.0, 0.0);
-        m_cutting_tool_number = 0;  // No tool assigned.
+        m_tool_number = 0;  // No tool assigned.
         m_fixture_has_been_set = false;
 		m_attached_to_surface = false;
 }
@@ -40,7 +40,7 @@ CMachineState & CMachineState::operator= ( CMachineState & rhs )
     {
         m_location = rhs.Location();
         m_fixture = rhs.Fixture();
-        m_cutting_tool_number = rhs.CuttingTool();
+        m_tool_number = rhs.Tool();
         m_fixture_has_been_set = rhs.m_fixture_has_been_set;
 		m_attached_to_surface = rhs.m_attached_to_surface;
     }
@@ -51,7 +51,7 @@ CMachineState & CMachineState::operator= ( CMachineState & rhs )
 bool CMachineState::operator== ( const CMachineState & rhs ) const
 {
     if (m_fixture != rhs.Fixture()) return(false);
-    if (m_cutting_tool_number != rhs.m_cutting_tool_number) return(false);
+    if (m_tool_number != rhs.m_tool_number) return(false);
     if(m_attached_to_surface != rhs.m_attached_to_surface) return false;
 
     // Don't include the location in the state check.  Moving around the machine is nothing to reset ourselves
@@ -63,25 +63,25 @@ bool CMachineState::operator== ( const CMachineState & rhs ) const
 }
 
 /**
-    The machine's cutting tool has changed.  Issue the appropriate GCode if necessary.
+    The machine's tool has changed.  Issue the appropriate GCode if necessary.
  */
-Python CMachineState::CuttingTool( const int new_cutting_tool )
+Python CMachineState::Tool( const int new_tool )
 {
     Python python;
 
-    if (m_cutting_tool_number != new_cutting_tool)
+    if (m_tool_number != new_tool)
     {
-        m_cutting_tool_number = new_cutting_tool;
+        m_tool_number = new_tool;
 
         // Select the right tool.
-        CCuttingTool *pCuttingTool = (CCuttingTool *) CCuttingTool::Find(new_cutting_tool);
-        if (pCuttingTool != NULL)
+        CTool *pTool = (CTool *) CTool::Find(new_tool);
+        if (pTool != NULL)
         {
-            python << _T("comment(") << PythonString(_T("tool change to ") + pCuttingTool->m_title) << _T(")\n");
-            python << _T("tool_change( id=") << new_cutting_tool << _T(")\n");
+            python << _T("comment(") << PythonString(_T("tool change to ") + pTool->m_title) << _T(")\n");
+            python << _T("tool_change( id=") << new_tool << _T(")\n");
 			if(m_attached_to_surface)
 			{
-				python << _T("cutter = ") << pCuttingTool->OCLDefinition() << _T("\n");
+				python << _T("cutter = ") << pTool->OCLDefinition() << _T("\n");
 				python << _T("nc.attach.pdcf.setCutter(cutter)\n");
 			}
         } // End if - then
@@ -98,7 +98,7 @@ Python CMachineState::CuttingTool( const int new_cutting_tool )
     able to call this routine repeatedly without worrying about unnecessary movements.
 
 	If we're moving between two different fixtures, move above the new fixture's touch-off point before
-	continuing on with the other machine operations.  This ensures that the cutting tool is somewhere above
+	continuing on with the other machine operations.  This ensures that the tool is somewhere above
 	the new fixture before we start any other movements.
  */
 Python CMachineState::Fixture( CFixture new_fixture )

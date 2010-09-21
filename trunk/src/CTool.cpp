@@ -605,11 +605,11 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 
 
 	{
-		CToolParams::CuttingToolTypesList_t tool_types = CToolParams::GetCuttingToolTypesList();
+		CToolParams::ToolTypesList_t tool_types = CToolParams::GetToolTypesList();
 
 		int choice = -1;
 		std::list< wxString > choices;
-		for (CToolParams::CuttingToolTypesList_t::size_type i=0; i<tool_types.size(); i++)
+		for (CToolParams::ToolTypesList_t::size_type i=0; i<tool_types.size(); i++)
 		{
 			choices.push_back(tool_types[i].second);
 			if (m_type == tool_types[i].first) choice = int(i);
@@ -747,7 +747,7 @@ void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("tool_length_offset")) pElem->Attribute("tool_length_offset", &m_tool_length_offset);
 	if (pElem->Attribute("material")) pElem->Attribute("material", &m_material);
 	if (pElem->Attribute("orientation")) pElem->Attribute("orientation", &m_orientation);
-	if (pElem->Attribute("type")) { int value; pElem->Attribute("type", &value); m_type = CToolParams::eCuttingToolType(value); }
+	if (pElem->Attribute("type")) { int value; pElem->Attribute("type", &value); m_type = CToolParams::eToolType(value); }
 	if (pElem->Attribute("corner_radius")) pElem->Attribute("corner_radius", &m_corner_radius);
 	if (pElem->Attribute("flat_radius")) pElem->Attribute("flat_radius", &m_flat_radius);
 	if (pElem->Attribute("cutting_edge_angle")) pElem->Attribute("cutting_edge_angle", &m_cutting_edge_angle);

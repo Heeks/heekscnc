@@ -44,7 +44,7 @@ Excellon::Excellon()
 	m_YDigitsLeftOfPoint = 2;
 	m_YDigitsRightOfPoint = 4;
 
-	m_active_cutting_tool_number = 0;	// None selected yet.
+	m_active_tool_number = 0;	// None selected yet.
 
 	m_mirror_image_x_axis = false;
 	m_mirror_image_y_axis = false;
@@ -165,13 +165,13 @@ bool Excellon::Read( const char *p_szFileName, const bool force_mirror /* = fals
 		} // End while
 
 		// Now go through and add the drilling cycles for each different tool.
-		std::set< CCuttingTool::ToolNumber_t > tool_numbers;
+		std::set< CTool::ToolNumber_t > tool_numbers;
 		for (Holes_t::const_iterator l_itHole = m_holes.begin(); l_itHole != m_holes.end(); l_itHole++)
 		{
 			tool_numbers.insert( l_itHole->first );
 		} // End for
 
-		for (std::set<CCuttingTool::ToolNumber_t>::const_iterator l_itToolNumber = tool_numbers.begin();
+		for (std::set<CTool::ToolNumber_t>::const_iterator l_itToolNumber = tool_numbers.begin();
 			l_itToolNumber != tool_numbers.end(); l_itToolNumber++)
 		{
 			double depth = 2.5;	// mm
@@ -279,7 +279,7 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 			// Reset Tool Data
 			_data.erase(0,2);
             m_tool_table_map.clear();
-            m_active_cutting_tool_number = 0;
+            m_active_tool_number = 0;
 		}
 		else if (_data.substr(0,4) == "FMAT")
 		{
@@ -784,13 +784,13 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 		for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild(); tool != NULL; tool = theApp.m_program->Tools()->GetNextChild() )
 		{
 			// We're looking for a tool whose diameter is tool_diameter.
-			CCuttingTool *pCuttingTool = (CCuttingTool *)tool;
-			if (fabs(pCuttingTool->m_params.m_diameter - tool_diameter) < heeksCAD->GetTolerance())
+			CTool *pTool = (CTool *)tool;
+			if (fabs(pTool->m_params.m_diameter - tool_diameter) < heeksCAD->GetTolerance())
 			{
 				// We've found it.
 				// Keep a map of the tool numbers found in the Excellon file to those in our tool table.
-				m_tool_table_map.insert( std::make_pair( excellon_tool_number, pCuttingTool->m_tool_number ));
-				m_active_cutting_tool_number = pCuttingTool->m_tool_number;	// Use our internal tool number
+				m_tool_table_map.insert( std::make_pair( excellon_tool_number, pTool->m_tool_number ));
+				m_active_tool_number = pTool->m_tool_number;	// Use our internal tool number
 				found = true;
 				break;
 			} // End if - then
@@ -799,28 +799,28 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
         if ((! found) && (tool_diameter > 0.0))
         {
             // We didn't find an existing tool with the right diameter.  Add one now.
-            int id = heeksCAD->GetNextID(CuttingToolType);
-            CCuttingTool *tool = new CCuttingTool(NULL, CCuttingToolParams::eDrill, id);
+            int id = heeksCAD->GetNextID(ToolType);
+            CTool *tool = new CTool(NULL, CToolParams::eDrill, id);
             heeksCAD->SetObjectID( tool, id );
             tool->SetDiameter( tool_diameter * m_units );
             theApp.m_program->Tools()->Add( tool, NULL );
 
             // Keep a map of the tool numbers found in the Excellon file to those in our tool table.
             m_tool_table_map.insert( std::make_pair( excellon_tool_number, tool->m_tool_number ));
-            m_active_cutting_tool_number = tool->m_tool_number;	// Use our internal tool number
+            m_active_tool_number = tool->m_tool_number;	// Use our internal tool number
         }
 	} // End if - then
 
 	if (excellon_tool_number > 0)
 	{
 		// They may have selected a tool.
-		m_active_cutting_tool_number = m_tool_table_map[excellon_tool_number];
+		m_active_tool_number = m_tool_table_map[excellon_tool_number];
 	} // End if - then
 
 
 	if (position_has_been_set)
 	{
-		if (m_active_cutting_tool_number <= 0)
+		if (m_active_tool_number <= 0)
 		{
 			printf("Hole position defined without selecting a tool first\n");
 			return(false);
@@ -845,23 +845,23 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 			} // End if - then
 
 			// There is already a point here.  Use it.
-			if (m_holes.find( m_active_cutting_tool_number ) == m_holes.end())
+			if (m_holes.find( m_active_tool_number ) == m_holes.end())
 			{
 				// We haven't used this drill bit before.  Add it now.
 				CDrilling::Symbols_t symbols;
 				CDrilling::Symbol_t symbol( m_existing_points[ cnc_point ] );
 				symbols.push_back( symbol );
 
-				m_holes.insert( std::make_pair( m_active_cutting_tool_number, symbols ) );
+				m_holes.insert( std::make_pair( m_active_tool_number, symbols ) );
 			}
 			else
 			{
 				// We've already used this drill bit.  Just add to its list of symbols.
-				m_holes[ m_active_cutting_tool_number ].push_back( m_existing_points[ cnc_point ] );
+				m_holes[ m_active_tool_number ].push_back( m_existing_points[ cnc_point ] );
 			} // End if - else
 
 			/*
-			printf("Drill hole using tool %d at x=%lf, y=%lf z=%lf\n", m_active_cutting_tool_number,
+			printf("Drill hole using tool %d at x=%lf, y=%lf z=%lf\n", m_active_tool_number,
 				pPosition->X(), pPosition->Y(), pPosition->Z() );
 			*/
 		} // End if - else
