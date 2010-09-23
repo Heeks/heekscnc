@@ -139,7 +139,9 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 	} // End for
 
 	python << _T("s = ocl_funcs.STLSurfFromFile(") << PythonString(filepath.GetFullPath()) << _T(")\n");
-	python << _T("nc.attach.pdcf = ocl.PathDropCutter(s)\n");
+	python << _T("nc.attach.pdcf = ocl.PathDropCutter()\n");
+	python << _T("nc.attach.pdcf.setSTL(s)\n");
+	python << _T("nc.attach.pdcf.setSampling(0.1)\n");
 	python << _T("nc.attach.pdcf.minimumZ = ") << m_min_z << _T("\n");
 	python << _T("nc.attach.units = ") << theApp.m_program->m_units << _T("\n");
 	python << _T("nc.attach.attach_begin()\n");
