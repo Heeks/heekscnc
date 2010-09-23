@@ -574,16 +574,14 @@ clean:
 
 install:
 	test -z "$(DESTDIR)$(LIBDIR)/heekscad" || $(mkdir_p) "$(DESTDIR)$(LIBDIR)/heekscad"
-	test -z "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps"
-	test -z "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps/pocket" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps/pocket"
+	#test -z "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/bitmaps"
 	test -z "$(DESTDIR)$(HEEKSCNCDIR)/icons" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/icons"
 	test -z "$(DESTDIR)$(LIBDIR)/heekscnc/nc" || $(mkdir_p) "$(DESTDIR)$(LIBDIR)/heekscnc/nc"
 	test -z "$(DESTDIR)$(HEEKSCNCDIR)/nc" || $(mkdir_p) "$(DESTDIR)$(HEEKSCNCDIR)/nc"
 	strip $(SHARED_LIBRARY)
 	chmod 644 $(SHARED_LIBRARY)
-	cp $(SHARED_LIBRARY) $(DESTDIR)$(LIBDIR)/heekscnc/
-	cp ../bitmaps/*.png ../bitmaps/*.svg $(DESTDIR)$(HEEKSCNCDIR)/bitmaps/
-	cp ../bitmaps/pocket/*.png  $(DESTDIR)$(HEEKSCNCDIR)/bitmaps/pocket/
+	cp $(SHARED_LIBRARY) $(DESTDIR)$(LIBDIR)/heekscnc/	
+	cp -r ../bitmaps $(DESTDIR)$(HEEKSCNCDIR)
 	cp ../icons/*.png $(DESTDIR)$(HEEKSCNCDIR)/icons/
 	cp ../nc/*.py $(DESTDIR)$(LIBDIR)/heekscnc/nc/
 	cp ../nc/*.txt $(DESTDIR)$(HEEKSCNCDIR)/nc/
