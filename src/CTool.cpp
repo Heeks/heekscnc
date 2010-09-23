@@ -731,8 +731,8 @@ void CToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("feedrate", m_feedrate);
 	element->SetAttribute("extrusion_material", m_extrusion_material);
 	element->SetAttribute("automatically_generate_title", m_automatically_generate_title );
-	element->SetAttribute("layer_height", m_layer_height );
-	element->SetAttribute("temperature", m_temperature );
+	element->SetDoubleAttribute("layer_height", m_layer_height );
+	element->SetDoubleAttribute("temperature", m_temperature );
 	element->SetDoubleAttribute("filament_diameter", m_filament_diameter );
 	element->SetDoubleAttribute("flowrate", m_flowrate );
 	element->SetDoubleAttribute("gradient", m_gradient);
