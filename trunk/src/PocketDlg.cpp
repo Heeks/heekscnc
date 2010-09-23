@@ -92,6 +92,8 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 
 	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, 5 );
 	sizerLeft->Add( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), 0, wxALL, 5 );
+	AddLabelAndControl(sizerLeft, _("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this, ID_ZIG_ANGLE));
+
 
 	wxString abs_mode_choices[] = {_("absolute"), _("incremental")};
 	AddLabelAndControl(sizerLeft, _("absolute mode"), m_cmbAbsMode = new wxComboBox(this, ID_ABS_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, abs_mode_choices));
