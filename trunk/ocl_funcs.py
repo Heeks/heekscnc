@@ -27,7 +27,6 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
       final_depth *= units
       # read the stl file, we know it is an ascii file because HeeksCNC made it
       s = STLSurfFromFile(filepath)
-   dcf = ocl.PathDropCutter(s)
    cutter = ocl.CylCutter()
    if corner_radius == 0.0:
       cutter = ocl.CylCutter(tool_diameter + mat_allowance, 100.0)
@@ -35,7 +34,6 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
       cutter = ocl.BallCutter(tool_diameter + mat_allowance)
    else:
       cutter = ocl.BullCutter(tool_diameter + mat_allowance, corner_radius)
-   dcf.setCutter(cutter)
    if final_depth > start_depth:
       raise 'final_depth > start_depth'
    height = start_depth - final_depth
@@ -46,7 +44,6 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
    for k in range(0, zsteps):
       z1 = start_depth - k * zstep_down
       z0 = start_depth - (k + 1) * zstep_down
-      dcf.minimumZ = z0
       steps = int((y1 - y0)/step_over) + 1
       if direction == 'Y': steps = int((x1 - x0)/step_over) + 1
       sub_step_over = (y1 - y0)/ steps
@@ -75,7 +72,12 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
                else:
                   path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
                   if i < steps: path.append(ocl.Line(ocl.Point(x1, u, 0), ocl.Point(x1, u + sub_step_over, 0))) # feed across to next pass
+         dcf = ocl.PathDropCutter()
+         dcf.minimumZ = z0
+         dcf.setSTL(s)
+         dcf.setCutter(cutter)
          dcf.setPath(path)
+         dcf.setSampling(0.1)
          dcf.run()
          plist = dcf.getCLPoints()
          f = ocl.LineCLFilter()
@@ -126,11 +128,11 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
 def cutting_tool( diameter, corner_radius, length ):
    cutter = ocl.CylCutter()
    if corner_radius == 0.0:
-      cutter = ocl.CylCutter(diameter)
+      cutter = ocl.CylCutter(diameter, length)
    elif corner_radius > diameter / 2 - 0.000000001:
-      cutter = ocl.BallCutter(diameter)
+      cutter = ocl.BallCutter(diameter, length)
    else:
-      cutter = ocl.BullCutter(diameter, corner_radius)
+      cutter = ocl.BullCutter(diameter, corner_radius, length)
 
    cutter.length = length
    return(cutter)
@@ -179,7 +181,7 @@ def waterline( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1
 
          waterline = ocl.Waterline()
          waterline.setSTL(s)
-         waterline.setTolerance(tolerance)
+         waterline.setSampling(tolerance)
          waterline.setCutter(cutter)
          waterline.setZ(z)
          waterline.run()
