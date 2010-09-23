@@ -339,7 +339,7 @@ const wxBitmap &CRaft::GetIcon()
 	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/raft.png")));
 	return *icon;
 }
-
+//This is what happens when the user pushes the post-process button.
 Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
@@ -347,9 +347,11 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 	ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
 
 	CTool *pTool = CTool::Find( m_tool_number );
-	if (pTool == NULL)
+	CTool *pBaseTool = CTool::Find( m_params.m_baselayerextrusion );
+	CTool *pInterfaceTool = CTool::Find( m_params.m_interfacelayerextrusion );
+	if (pTool == NULL)  //fix this to check for base and inteface tools and make sure the type is extrusion.
 	{
-		wxMessageBox(_T("Cannot generate GCode for raft without a tool assigned"));
+		wxMessageBox(_T("Please select an extrusion for the base and interface layers"));
 		return(python);
 	} // End if - then
 
@@ -399,29 +401,89 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 				}
 			}
 		}
-
+//			python <<  _T("feedrate_hv(") << getfromtool, getfromoperation <<_T(")");
+	//		python <<  _T("set_extruder_temp()");  
+			
 		if(object)
 		{
 			python << WriteSketchDefn(object, pMachineState, object->m_id);
 
 			// start - assume we are at a suitable clearance height
 
-			// Pocket the area
-			python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2, ");
-			python << m_params.m_material_allowance / theApp.m_program->m_units;
-			python << _T(", rapid_down_to_height, start_depth, final_depth, ");
-			python << m_params.m_step_over / theApp.m_program->m_units;
-			python << _T(", step_down, ");
-			python << m_params.m_round_corner_factor;
-			python << _T(", clearance, ");
-			python << m_params.m_starting_place;
-			python << (m_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
-			python << (m_params.m_use_zig_zag ? _T(", True") : _T(", False"));
-			python << _T(", ") << m_params.m_zig_angle;
-			python << _T(")\n");
+			// Base Layers
 
-			// rapid back up to clearance plane
-			python << _T("rapid(z = clearance)\n");
+			int layercount=1 ;  // just keep a count so we can toggle alternate layers 90 degrees perpendicular.
+			double starth, finalh;
+			double extruderheight = 0.0;
+			double layerh = (pBaseTool->m_params.m_layer_height);  //get the layerheight of the extrusion tool to use in the base layer.
+			
+			while (layercount <= (m_params.m_baselayers))
+			{
+				starth = extruderheight + layerh;
+				finalh = starth - layerh;
+				
+				python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2, ");
+				python << m_params.m_material_allowance / theApp.m_program->m_units;
+				python << _T(", " ) << starth << _T(", ") << starth << _T(", ") << finalh << _T(", ");  //rapid down to height, start height, final height
+				python << m_params.m_step_over / theApp.m_program->m_units;  //step over
+				python << _T(", ") << layerh << _T(", ");  //step Z should equal layerheight
+				python << m_params.m_round_corner_factor;
+				python << _T(", clearance, ");
+				python << m_params.m_starting_place;
+				python << _T(", True, ");  //keep the tool down if possible.		    
+				python << m_params.m_step_over / theApp.m_program->m_units;			    
+			  	if ( layercount % 2 == 0 ){
+					python << _T(", ") << m_params.m_zig_angle+90;
+					}
+  				else {
+					python << _T(", ") << m_params.m_zig_angle;
+				}
+				
+				python << _T(")\n");
+		    
+				// rapid back up to clearance plane
+				python << _T("rapid(z = clearance)\n");
+				extruderheight = extruderheight + layerh;
+	    
+				layercount = layercount + 1;
+			}
+						
+			// Interface Layers
+
+			layerh = (pInterfaceTool->m_params.m_layer_height);  //Get the layerheight for the interface extrusion tool.
+
+			while (layercount <= (m_params.m_baselayers + m_params.m_interfacelayers)) 
+			{
+				starth = extruderheight + layerh;
+				finalh = starth - layerh;
+				
+				python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2, ");
+				python << m_params.m_material_allowance / theApp.m_program->m_units;
+				python << _T(", " ) << starth << _T(", ") << starth << _T(", ") << finalh << _T(", ");  //rapid down to height, start height, final height
+				python << m_params.m_step_over / theApp.m_program->m_units;  //step over
+				python << _T(", ") << layerh << _T(", ");  //step Z should equal layerheight
+				python << m_params.m_round_corner_factor;
+				python << _T(", clearance, ");
+				python << m_params.m_starting_place;
+				python << _T(", True, ");  //keep the tool down if possible.		    
+				python << m_params.m_step_over / theApp.m_program->m_units;			    
+			  	if ( layercount % 2 == 0 ){
+					python << _T(", ") << m_params.m_zig_angle+90;
+					}
+  				else {
+					python << _T(", ") << m_params.m_zig_angle;
+				}
+				
+				python << _T(")\n");
+		    
+				// rapid back up to clearance plane
+				python << _T("rapid(z = clearance)\n");
+				extruderheight = extruderheight + layerh;
+	    
+				layercount = layercount + 1;
+			}	
+			
+
 		}
 
 		if(re_ordered_sketch)
