@@ -240,12 +240,15 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 	std::list<int> sketches;
 	if(GetSketches(sketches, tools))
 	{
-		heeksCAD->CreateUndoPoint();
 		CPocket *new_object = new CPocket(sketches, (tools.size()>0)?(*tools.begin()):-1 );
-		theApp.m_program->Operations()->Add(new_object, NULL);
-		heeksCAD->ClearMarkedList();
-		heeksCAD->Mark(new_object);
-		heeksCAD->Changed();
+		if(new_object->Edit())
+		{
+			heeksCAD->CreateUndoPoint();
+			theApp.m_program->Operations()->Add(new_object, NULL);
+			heeksCAD->Changed();
+		}
+		else
+			delete new_object;
 	}
 }
 

@@ -62,6 +62,7 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void ReloadPointers();
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 
 	// COp's virtual functions
 	Python AppendTextToProgram(CMachineState *pMachineState);

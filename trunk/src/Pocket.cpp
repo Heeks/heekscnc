@@ -23,6 +23,7 @@
 #include "CNCPoint.h"
 #include "Reselect.h"
 #include "MachineState.h"
+#include "PocketDlg.h"
 
 #include <sstream>
 
@@ -699,4 +700,21 @@ bool CPocket::operator==(const CPocket & rhs) const
 	if (m_pocket_params != rhs.m_pocket_params) return(false);
 
 	return(CDepthOp::operator==(rhs));
+}
+
+static bool OnEdit(HeeksObj* object)
+{
+	PocketDlg dlg(heeksCAD->GetMainFrame(), (CPocket*)object);
+	if(dlg.ShowModal() == wxID_OK)
+	{
+		dlg.GetData((CPocket*)object);
+		((CPocket*)object)->WriteDefaultValues();
+		return true;
+	}
+	return false;
+}
+
+void CPocket::GetOnEdit(bool(**callback)(HeeksObj*))
+{
+	*callback = OnEdit;
 }
