@@ -9,7 +9,6 @@ import nc
 import ocl
 import ocl_funcs
 
-pdcf = ocl.PathDropCutter()
 units = 1.0
 
 ################################################################################
@@ -23,6 +22,9 @@ class CreatorAttach(nc.Creator):
         self.y = original.y * units
         self.z = original.z * units
         self.imperial = False
+        self.stl = None
+        self.cutter = None
+        self.minz = None
 
     ############################################################################
     ##  Shift in Z
@@ -31,6 +33,11 @@ class CreatorAttach(nc.Creator):
         path = ocl.Path()
         # use a line with no length
         path.append(ocl.Line(ocl.Point(self.x, self.y, self.z), ocl.Point(self.x, self.y, self.z)))
+        pdcf = ocl.PathDropCutter()
+        pdcf.setSTL(self.stl)
+        pdcf.setCutter(self.cutter)
+        pdcf.setSampling(0.1)
+        pdcf.minimumZ = self.minz
         pdcf.setPath(path)
         pdcf.run()
         plist = pdcf.getCLPoints()
@@ -148,6 +155,11 @@ class CreatorAttach(nc.Creator):
         
     def cut_path(self, path):
         # get the points on the surface
+        pdcf = ocl.PathDropCutter()
+        pdcf.setSTL(self.stl)
+        pdcf.setCutter(self.cutter)
+        pdcf.setSampling(0.1)
+        pdcf.minimumZ = self.minz
         pdcf.setPath(path)
         pdcf.run()
         plist = pdcf.getCLPoints()

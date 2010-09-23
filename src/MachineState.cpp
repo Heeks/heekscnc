@@ -81,8 +81,7 @@ Python CMachineState::Tool( const int new_tool )
             python << _T("tool_change( id=") << new_tool << _T(")\n");
 			if(m_attached_to_surface)
 			{
-				python << _T("cutter = ") << pTool->OCLDefinition() << _T("\n");
-				python << _T("nc.attach.pdcf.setCutter(cutter)\n");
+				python << _T("nc.nc.creator.cutter = ") << pTool->OCLDefinition() << _T("\n");
 			}
         } // End if - then
     }
