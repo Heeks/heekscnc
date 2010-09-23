@@ -573,7 +573,15 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCAD\interface\ObjectCanvas.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\NiceTextCtrl.cpp"
+			>
+		</File>
+		<File
+			RelativePath="$(HEEKSCADPATH)\interface\NiceTextCtrl.h"
+			>
+		</File>
+		<File
+			RelativePath="$(HEEKSCADPATH)\interface\ObjectCanvas.cpp"
 			>
 		</File>
 		<File
@@ -622,6 +630,14 @@
 		</File>
 		<File
 			RelativePath=".\Pocket.h"
+			>
+		</File>
+		<File
+			RelativePath=".\PocketDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\PocketDlg.h"
 			>
 		</File>
 		<File
