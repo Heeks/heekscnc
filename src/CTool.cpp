@@ -1674,11 +1674,11 @@ Python CTool::OCLDefinition() const
 		case CToolParams::eSlotCutter:
 		case CToolParams::eBallEndMill:
 			// to do, not just CylCutter for everything
-			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("))\n");
+			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("), 1000)\n");
 			break;
 
 		default:
-			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("))\n");
+			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("), 1000)\n");
 			break;
 	} // End switch
 
@@ -2045,12 +2045,12 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
 	switch (m_params.m_type)
 	{
 	case CToolParams::eBallEndMill:
-		python << _indent << _T("ocl.BallCutter(") << CuttingRadius(false) << _T(")");
+		python << _indent << _T("ocl.BallCutter(") << CuttingRadius(false) << _T(", 1000)");
 		return(python);
 
 	case CToolParams::eEndmill:
 	case CToolParams::eSlotCutter:
-		python << _indent << _T("ocl.CylCutter(") << CuttingRadius(false) << _T(")");
+		python << _indent << _T("ocl.CylCutter(") << CuttingRadius(false) << _T(", 1000)");
 		return(python);
 	} // End switch
 
