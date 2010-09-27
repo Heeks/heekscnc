@@ -77,11 +77,11 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
          dcf.setSTL(s)
          dcf.setCutter(cutter)
          dcf.setPath(path)
-         dcf.setSampling(0.1)
+         dcf.setSampling(0.1) # FIXME: this should be adjustable by the (advanced) user
          dcf.run()
          plist = dcf.getCLPoints()
          f = ocl.LineCLFilter()
-         f.setTolerance(0.01)
+         f.setTolerance(0.01) # FIXME: this should be adjustable by and advanced user
          for p in plist:
              f.addCLPoint(p)
          f.run()
@@ -175,41 +175,40 @@ def waterline( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1
       working_diameter = tool_diameter + mat_allowance
 
       room_to_expand = True
-      while (room_to_expand == True):
-         cutter = cutting_tool(working_diameter, corner_radius, 10)
+      # while (room_to_expand == True):
+      cutter = cutting_tool(working_diameter, corner_radius, 10)
 
-         waterline = ocl.Waterline()
-         waterline.setSTL(s)
-         waterline.setSampling(tolerance)
-         waterline.setCutter(cutter)
-         waterline.setZ(z)
-         waterline.run()
-         cutter_loops = waterline.getLoops()
+      waterline = ocl.Waterline()
+      waterline.setSTL(s)
+      waterline.setSampling(tolerance)
+      waterline.setCutter(cutter)
+      waterline.setZ(z)
+      waterline.run()
+      cutter_loops = waterline.getLoops()
 
-         for cutter_loop in cutter_loops:
-            if ((cutter_loop[0].z != tool_location.z) or (tool_location.distance(cutter_loop[0]) > (tool_diameter / 2.0))):
-               # Move above the starting point.
-               rapid(z = clearance / units)
-               rapid(x=cutter_loop[0].x, y=cutter_loop[0].y)
-               tool_location.x = cutter_loop[0].x
-               tool_location.y = cutter_loop[0].y
-               tool_location.z = clearance / units
-
-               # Feed down to the cutting depth
-               rapid(x=cutter_loop[0].x, y=cutter_loop[0].y)
-               tool_location.x = cutter_loop[0].x
-               tool_location.y = cutter_loop[0].y
-
-            # Cut around the solid at this level.
-            for point in cutter_loop:
-               feed( x=point.x, y=point.y, z=point.z )
-               tool_location = point;
-
-               if (point.x < (x0-step_over)) or (point.x > (x1+step_over)) or (point.y < (y0-step_over)) or (point.y > (y1+step_over)):
-                  room_to_expand = False
-
-            # And retract to the clearance height
+      for cutter_loop in cutter_loops:
+         if ((cutter_loop[0].z != tool_location.z) or (tool_location.distance(cutter_loop[0]) > (tool_diameter / 2.0))):
+            # Move above the starting point.
             rapid(z = clearance / units)
+            rapid(x=cutter_loop[0].x, y=cutter_loop[0].y)
+            tool_location.x = cutter_loop[0].x
+            tool_location.y = cutter_loop[0].y
             tool_location.z = clearance / units
 
-         working_diameter += step_over
+            # Feed down to the cutting depth
+            rapid(x=cutter_loop[0].x, y=cutter_loop[0].y)
+            tool_location.x = cutter_loop[0].x
+            tool_location.y = cutter_loop[0].y
+
+         # Cut around the solid at this level.
+         for point in cutter_loop:
+            feed( x=point.x, y=point.y, z=point.z )
+            tool_location = point;
+            #if (point.x < (x0-step_over)) or (point.x > (x1+step_over)) or (point.y < (y0-step_over)) or (point.y > (y1+step_over)):
+            #   room_to_expand = False
+
+            # And retract to the clearance height
+         rapid(z = clearance / units)
+         tool_location.z = clearance / units
+
+         #working_diameter += step_over
