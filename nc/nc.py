@@ -365,7 +365,11 @@ class Creator:
     def chamber_temp(self, temp):
 	"""Set the chamber temp in celsius"""
 	pass
-
+	
+    def flowrate(self, flowrate):
+    	"""set the flowrate"""
+    	pass
+    	
 ################################################################################
 
 creator = Creator()
@@ -655,4 +659,7 @@ def build_bed_temp(temp=None):
 
 def chamber_temp(temp=None):
     creator.chamber_temp(temp)
+    
+def flowrate(flowrate=None):
+    creator.flowrate(flowrate)
 

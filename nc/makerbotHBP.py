@@ -70,7 +70,9 @@ class CreatorMakerbotHBP(iso_modal.CreatorIsoModal):
         
     def extruder_temp(self, temp):
          self.write((maker.codes.EXTRUDER_TEMP(temp)))
-         
+   
+    def flowrate(self, temp):
+         self.write('flowrate(')) + temp + (')\n')   
 ################################################################################
 # Build Environment Control
     def build_bed_temp(self, temp):
