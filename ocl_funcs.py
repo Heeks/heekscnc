@@ -27,7 +27,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
       final_depth *= units
       # read the stl file, we know it is an ascii file because HeeksCNC made it
       s = STLSurfFromFile(filepath)
-   cutter = ocl.CylCutter()
+   cutter = ocl.CylCutter(1.0,1.0) # a dummy-cutter for now
    if corner_radius == 0.0:
       cutter = ocl.CylCutter(tool_diameter + mat_allowance, 100.0)
    elif corner_radius > tool_diameter / 2 - 0.000000001:
@@ -126,7 +126,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
 
 
 def cutting_tool( diameter, corner_radius, length ):
-   cutter = ocl.CylCutter()
+   cutter = ocl.CylCutter(1.0,1.0) # dummy cutter
    if corner_radius == 0.0:
       cutter = ocl.CylCutter(diameter, length)
    elif corner_radius > diameter / 2 - 0.000000001:
@@ -134,7 +134,6 @@ def cutting_tool( diameter, corner_radius, length ):
    else:
       cutter = ocl.BullCutter(diameter, corner_radius, length)
 
-   cutter.length = length
    return(cutter)
 
 
