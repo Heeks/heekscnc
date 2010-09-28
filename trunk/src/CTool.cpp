@@ -775,7 +775,7 @@ void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("temperature")) pElem->Attribute("temperature", &m_temperature);
 	if (pElem->Attribute("filament_diameter")) pElem->Attribute("filament_diameter", &m_filament_diameter);
 	if (pElem->Attribute("flowrate")) pElem->Attribute("flowrate", &m_flowrate);
-
+	if (pElem->Attribute("feedrate")) pElem->Attribute("feedrate", &m_feedrate);
 
 	if (pElem->Attribute( "gradient" ))
 	{
