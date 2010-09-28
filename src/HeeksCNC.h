@@ -44,6 +44,7 @@ public:
 	void OnFrameDelete();
 	wxString GetDllFolder();
 	wxString GetResFolder();
+	void RunPythonScript();
 
 	typedef int SymbolType_t;
 	typedef unsigned int SymbolId_t;
