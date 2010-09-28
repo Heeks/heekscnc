@@ -57,37 +57,43 @@ class CreatorMakerbotHBP(iso_modal.CreatorIsoModal):
     def write_blocknum(self):
         pass
 
+    def set_plane(self, plane):
+         pass
+          
+    def workplane(self, id):
+        pass
+        
+    def spindle(self, s, clockwise):
+        pass
 ################################################################################
 # Extruder Control
-    def extruder_on_fwd(self):
-         self.write((maker.codes.EXTRUDER_ON_FWD()))
+    def extruder_on_fwd(self, flowrate):
+         self.write((maker.codes.EXTRUDER_SPEED_PWM(flowrate)) + ('\n'))
         
     def extruder_on_rev(self):
-         self.write((maker.codes.EXTRUDER_ON_REV()))
+         self.write((maker.codes.EXTRUDER_ON_REV()) + ('\n'))
         
     def extruder_off(self):
-         self.write((maker.codes.EXTRUDER_OFF()))
+         self.write((maker.codes.EXTRUDER_OFF()) + ('\n'))
         
     def extruder_temp(self, temp):
-         self.write((maker.codes.EXTRUDER_TEMP(temp)))
+         self.write((maker.codes.EXTRUDER_TEMP(temp)) + ('\n'))
    
-    def flowrate(self, temp):
-         self.write('flowrate(')) + temp + (')\n')   
 ################################################################################
 # Build Environment Control
     def build_bed_temp(self, temp):
-         self.write((maker.codes.BUILD_BED_TEMP(temp)))
+         self.write((maker.codes.BUILD_BED_TEMP(temp)) + ('\n'))
         
     def chamber_temp(self, temp):
-         self.write((maker.codes.CHAMBER_TEMP(temp)))   
+         self.write((maker.codes.CHAMBER_TEMP(temp)) + ('\n'))   
          
 ################################################################################
 # Fan Control
     def fan_on(self):
-         self.write((maker.codes.FAN_ON()))
+         self.write((maker.codes.FAN_ON()) + ('\n'))
         
     def fan_off(self):
-         self.write((maker.codes.FAN_OFF()))
+         self.write((maker.codes.FAN_OFF()) + ('\n'))
         
 ################################################################################
 # Custom routines
@@ -104,9 +110,10 @@ class CreatorMakerbotHBP(iso_modal.CreatorIsoModal):
 ################################################################################
 # tool info
     def tool_change(self, id):
-     	self.write_blocknum()
-        self.write((maker.codes.TOOL() % id) + '\n')
-        self.t = id
+    	pass
+     #	self.write_blocknum()
+     #  self.write((maker.codes.TOOL() % id) + '\n')
+     #  self.t = id
     
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
 	pass

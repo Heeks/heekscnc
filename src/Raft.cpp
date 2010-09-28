@@ -424,16 +424,16 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 		if(object)
 		{
 			python << WriteSketchDefn(object, pMachineState, object->m_id);
-			python << _T("feedrate_hv(") << pBaseTool->m_params.m_feedrate / theApp.m_program->m_units << _T(", ");  //set the feedrate for the base tool.
-			python <<  pBaseTool->m_params.m_feedrate / theApp.m_program->m_units << _T(")\n");
-			
-			python << _T("extruder_temp(") << pBaseTool->m_params.m_feedrate << _T(")\n");  //set extruder temp
-			python << _T("flowrate(") << pBaseTool->m_params.m_feedrate << _T(")\n");  //set flowrate
-
 
 			// start - assume we are at a suitable clearance height
 
 			// Base Layers
+
+			python << _T("feedrate_hv(") << pBaseTool->m_params.m_feedrate / theApp.m_program->m_units << _T(", ");  //set the feedrate for the base tool.
+			python <<  pBaseTool->m_params.m_feedrate / theApp.m_program->m_units << _T(")\n");
+			
+			python << _T("extruder_temp(") << pBaseTool->m_params.m_temperature << _T(")\n");  //set extruder temp
+			python << _T("extruder_on_fwd(") << pBaseTool->m_params.m_flowrate << _T(")\n");  //set flowrate
 
 			int layercount=1 ;  // just keep a count so we can toggle alternate layers 90 degrees perpendicular.
 			double starth, finalh;
@@ -476,6 +476,9 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 			layerh = (pInterfaceTool->m_params.m_layer_height);  //Get the layerheight for the interface extrusion tool.
 			python << _T("feedrate_hv(") << pInterfaceTool->m_params.m_feedrate / theApp.m_program->m_units << _T(", ");
 			python << pInterfaceTool->m_params.m_feedrate / theApp.m_program->m_units << _T(")\n");
+			python << _T("extruder_temp(") << pInterfaceTool->m_params.m_temperature << _T(")\n");  //set extruder temp
+			python << _T("extruder_on_fwd(") << pInterfaceTool->m_params.m_flowrate << _T(")\n");  //set flowrate
+
 
 			while (layercount <= (m_params.m_baselayers + m_params.m_interfacelayers)) 
 			{
