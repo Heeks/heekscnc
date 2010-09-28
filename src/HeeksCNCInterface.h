@@ -23,4 +23,5 @@ public:
 	virtual wxString GetDllFolder();
 	virtual void SetMachinesFile( const wxString& filepath );
 	virtual void HideMachiningMenu();
+	virtual void PostProcess();
 };

@@ -72,3 +72,12 @@ void CHeeksCNCInterface::HideMachiningMenu()
 	if(pos != wxNOT_FOUND)
 		menu_bar->Remove(pos);
 }
+
+void CHeeksCNCInterface::PostProcess()
+{
+	// write the python program
+	theApp.m_program->RewritePythonProgram();
+
+	// run it
+	theApp.RunPythonScript();
+}
