@@ -1018,6 +1018,7 @@ HeeksObj* CTool::ReadFromXMLElement(TiXmlElement* element)
 		std::string name(pElem->Value());
 		if(name == "params"){
 			new_object->m_params.ReadParametersFromXMLElement(pElem);
+			if(new_object->m_params.m_automatically_generate_title == 0)new_object->m_title.assign(title);
 		}
 	}
 

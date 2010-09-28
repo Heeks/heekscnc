@@ -1340,6 +1340,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("ProbeGrid", CProbe_Grid::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CounterBore", CCounterBore::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tool", CTool::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("CuttingTool", CTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixture", CFixture::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("TurnRough", CTurnRough::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("SpeedReferences", CSpeedReferences::ReadFromXMLElement);
