@@ -8,7 +8,7 @@
 # Many of these codes have nothing to do with reprap/additive machining but are left here in anticipation of future hybrid machines.
 
 class Codes():
-	def SPACE(self): return('')
+	def SPACE(self): return(' ')
 	def FORMAT_FEEDRATE(self): return('%.2f') 
 	def FORMAT_IN(self): return('%.5f')
 	def FORMAT_MM(self): return('%.3f')
@@ -31,8 +31,8 @@ class Codes():
 	def STOP(self): return('M00')
 
 	def IMPERIAL(self): return(self.SPACE() + 'G20')
-	def METRIC(self): return(self.SPACE() + 'G21')
-	def ABSOLUTE(self): return(self.SPACE() + 'G90')
+	def METRIC(self): return(self.SPACE() + 'G21' + self.SPACE())
+	def ABSOLUTE(self): return(self.SPACE() + 'G90' + self.SPACE())
 	def INCREMENTAL(self): return(self.SPACE() + 'G91')
 	def SET_TEMPORARY_COORDINATE_SYSTEM(self): return('G92' + self.SPACE())
 	def REMOVE_TEMPORARY_COORDINATE_SYSTEM(self): return('G92.1' + self.SPACE())
@@ -48,7 +48,7 @@ class Codes():
 	def WORKPLANE(self): return('G%i')
 	def WORKPLANE_BASE(self): return(53)
 
-	def FEEDRATE(self): return(self.SPACE() + 'F')
+	def FEEDRATE(self): return((self.SPACE() + ' F'))
 	def SPINDLE(self, format, speed): return(self.SPACE() + 'S' + (format % speed))
 	def SPINDLE_CW(self): return(self.SPACE() + 'M03')
 	def SPINDLE_CCW(self): return(self.SPACE() + 'M04')
@@ -59,10 +59,10 @@ class Codes():
 	def GEAR(self): return('M%i')
 	def GEAR_BASE(self): return(37)
 
-	def RAPID(self): return('G00')
-	def FEED(self): return('G01')
-	def ARC_CW(self): return('G02')
-	def ARC_CCW(self): return('G03')
+	def RAPID(self): return('G0')
+	def FEED(self): return('G1')
+	def ARC_CW(self): return('G2')
+	def ARC_CCW(self): return('G3')
 	def DWELL(self): return('G04')
 	def DRILL(self): return(self.SPACE() + 'G81')
 	def DRILL_WITH_DWELL(self, format, dwell): return(self.SPACE() + 'G82' + (format % dwell))
@@ -90,14 +90,14 @@ class Codes():
 
 	def MACHINE_COORDINATES(self): return('G53' + self.SPACE())
 
-	def EXTRUDER_ON_FWD (self): return(self.SPACE() + 'M101') #deprecated
-	def EXTRUDER_ON_REV (self): return(self.SPACE() + 'M102') 
-	def EXTRUDER_OFF (self): return(self.SPACE() + 'M103') 
-	def EXTRUDER_TEMP (self, degree_celsius): return( self.SPACE() + ('M104 S' + '%s' % degree_celsius) )
-	def EXTRUDER_TEMP_WAIT (self, degree_celsius): return( self.SPACE() + ('M109 S' + '%s' % degree_celsius) )
-	def READ_EXTRUDER_TEMP (self): return(self.SPACE() + 'M105')
-	def EXTRUDER_SPEED_PWM (self, speed_in_PWM): return(self.SPACE() + ('M108 S'  + '%s' % speed_in_PWM) ) #deprecated
- 	def EXTRUDER_SPEED_PWM (self, speed_in_RPM): return(self.SPACE() + ('M108 P'  + '%s' % speed_in_RPM) ) #deprecated
+	def EXTRUDER_ON_FWD (self): return('M101') #deprecated
+	def EXTRUDER_ON_REV (self): return('M102') 
+	def EXTRUDER_OFF (self): return('M103') 
+	def EXTRUDER_TEMP (self, degree_celsius): return('M104 S' + '%s' % degree_celsius) 
+	def EXTRUDER_TEMP_WAIT (self, degree_celsius): return('M109 S' + '%s' % degree_celsius) 
+	def READ_EXTRUDER_TEMP (self): return('M105')
+	def EXTRUDER_SPEED_PWM (self, speed_in_PWM): return('M108 S'  + '%s' % speed_in_PWM) #deprecated
+ 	def EXTRUDER_SPEED_RPM (self, speed_in_RPM): return('M108 P'  + '%s' % speed_in_RPM) #deprecated
  	
  	def STEPPERS_OFF(self): return(self.SPACE() + 'M118') 
 
@@ -109,10 +109,10 @@ class Codes():
 	def VALVE_OPEN (self, delay): return(self.SPACE() + ('M126 P' + '%' % delay) ) 
 	def VALVE_CLOSE (self, delay): return(self.SPACE() + ('M127 P' + '%' % delay) )  
 
-	def BUILD_BED_TEMP (self, degree_celsius): return( self.SPACE() + ('M140 S' + '%s' % degree_celsius) )
-	def BED_HOLDING_PRESSURE (self, pressure): return( self.SPACE() + ('M142 S' + '%s' % pressure) )
+	def BUILD_BED_TEMP (self, degree_celsius): return('M140 S' + '%s' % degree_celsius) 
+	def BED_HOLDING_PRESSURE (self, pressure): return('M142 S' + '%s' % pressure) 
 
-	def CHAMBER_TEMP (self, degree_celsius): return( self.SPACE() + ('M141 S' + '%s' % degree_celsius) )
+	def CHAMBER_TEMP (self, degree_celsius): return('M141 S' + '%s' % degree_celsius) 
 
 #The following codes are listed on the reprap wiki page at http://reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes but require more study.
 #
