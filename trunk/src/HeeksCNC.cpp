@@ -928,16 +928,16 @@ static void MakeScriptMenuCallback(wxCommandEvent &event)
 	theApp.m_program->RewritePythonProgram();
 }
 
-static void RunPythonScript()
+void CHeeksCNCApp::RunPythonScript()
 {
 	{
 		// clear the output file
-		wxFile f(theApp.m_program->GetOutputFileName().c_str(), wxFile::write);
+		wxFile f(m_program->GetOutputFileName().c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
 	{
 		// clear the backplot file
-		wxString backplot_path = theApp.m_program->GetOutputFileName() + _T(".nc.xml");
+		wxString backplot_path = m_program->GetOutputFileName() + _T(".nc.xml");
 		wxFile f(backplot_path.c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
@@ -950,20 +950,20 @@ static void RunPythonScript()
 	// of m_python_program matches the full contents of the m_textCtrl then
 	// it's likely that the text control holds as much of the python program
 	// as it can hold but more may still exist in m_python_program.
-	unsigned int text_control_length = theApp.m_program_canvas->m_textCtrl->GetLastPosition();
-	if (theApp.m_program->m_python_program.substr(0,text_control_length) != theApp.m_program_canvas->m_textCtrl->GetValue())
+	unsigned int text_control_length = m_program_canvas->m_textCtrl->GetLastPosition();
+	if (m_program->m_python_program.substr(0,text_control_length) != m_program_canvas->m_textCtrl->GetValue())
 	{
         // copy the contents of the program canvas to the string
-        theApp.m_program->m_python_program.clear();
-        theApp.m_program->m_python_program << theApp.m_program_canvas->m_textCtrl->GetValue();
+        m_program->m_python_program.clear();
+        m_program->m_python_program << theApp.m_program_canvas->m_textCtrl->GetValue();
 	}
 
-	HeeksPyPostProcess(theApp.m_program, theApp.m_program->GetOutputFileName(), true );
+	HeeksPyPostProcess(m_program, m_program->GetOutputFileName(), true );
 }
 
 static void RunScriptMenuCallback(wxCommandEvent &event)
 {
-	RunPythonScript();
+	theApp.RunPythonScript();
 }
 
 static void PostProcessMenuCallback(wxCommandEvent &event)
@@ -972,7 +972,7 @@ static void PostProcessMenuCallback(wxCommandEvent &event)
 	theApp.m_program->RewritePythonProgram();
 
 	// run it
-	RunPythonScript();
+	theApp.RunPythonScript();
 }
 
 static void CancelMenuCallback(wxCommandEvent &event)
