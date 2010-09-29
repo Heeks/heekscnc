@@ -37,7 +37,7 @@ class CreatorAttach(nc.Creator):
         pdcf.setSTL(self.stl)
         pdcf.setCutter(self.cutter)
         pdcf.setSampling(0.1)
-        pdcf.minimumZ = self.minz
+        pdcf.setZ(self.minz)
         pdcf.setPath(path)
         pdcf.run()
         plist = pdcf.getCLPoints()
@@ -159,7 +159,7 @@ class CreatorAttach(nc.Creator):
         pdcf.setSTL(self.stl)
         pdcf.setCutter(self.cutter)
         pdcf.setSampling(0.1)
-        pdcf.minimumZ = self.minz
+        pdcf.setZ(self.minz)
         pdcf.setPath(path)
         pdcf.run()
         plist = pdcf.getCLPoints()
