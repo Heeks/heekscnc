@@ -73,7 +73,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
                   path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
                   if i < steps: path.append(ocl.Line(ocl.Point(x1, u, 0), ocl.Point(x1, u + sub_step_over, 0))) # feed across to next pass
          dcf = ocl.PathDropCutter()
-         dcf.minimumZ = z0
+         dcf.setZ(z0)
          dcf.setSTL(s)
          dcf.setCutter(cutter)
          dcf.setPath(path)
