@@ -8,7 +8,9 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-class PocketDlg : public wxDialog
+#include "interface/HDialogs.h"
+
+class PocketDlg : public HDialog
 {
 	static wxBitmap* m_general_bitmap;
 	static wxBitmap* m_step_over_bitmap;
@@ -47,10 +49,6 @@ class PocketDlg : public wxDialog
 	wxCheckBox *m_chkActive;
 	wxTextCtrl *m_txtTitle;
 	PictureWindow *m_picture;
-
-	bool m_ignore_event_functions;
-
-	void AddLabelAndControl(wxBoxSizer* sizer, const wxString& label, wxWindow* control);
 
 public:
     PocketDlg(wxWindow *parent, CPocket* object);
