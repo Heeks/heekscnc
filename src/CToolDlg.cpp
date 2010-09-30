@@ -48,30 +48,30 @@ BEGIN_EVENT_TABLE(CToolDlg, wxDialog)
     EVT_COMBOBOX(ID_EXTRUSIONMATERIAL, CToolDlg::OnComboExtrusionMaterial)
 END_EVENT_TABLE()
 
+wxBitmap* CToolDlg::m_diameter_bitmap = NULL;
+wxBitmap* CToolDlg::m_tool_length_offset_bitmap = NULL;
+wxBitmap* CToolDlg::m_flat_radius_bitmap = NULL;
+wxBitmap* CToolDlg::m_corner_radius_bitmap = NULL;
+wxBitmap* CToolDlg::m_cutting_edge_angle_bitmap = NULL;
+wxBitmap* CToolDlg::m_cutting_edge_height_bitmap = NULL;
+wxBitmap* CToolDlg::m_general_bitmap = NULL;
+wxBitmap* CToolDlg::m_x_offset_bitmap = NULL;
+wxBitmap* CToolDlg::m_front_angle_bitmap = NULL;
+wxBitmap* CToolDlg::m_tool_angle_bitmap = NULL;
+wxBitmap* CToolDlg::m_back_angle_bitmap = NULL;
+wxBitmap* CToolDlg::m_orientation_bitmap = NULL;
+wxBitmap* CToolDlg::m_probe_offset_x_bitmap = NULL;
+wxBitmap* CToolDlg::m_probe_offset_y_bitmap = NULL;
+wxBitmap* CToolDlg::m_layer_height_bitmap = NULL;
+wxBitmap* CToolDlg::m_width_over_thickness_bitmap = NULL;
+wxBitmap* CToolDlg::m_temperature_bitmap = NULL;
+wxBitmap* CToolDlg::m_filament_diameter_bitmap = NULL;
+
 CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
              : wxDialog(parent, wxID_ANY, wxString(_T("Tool Definition")))
 {
 	m_ignore_event_functions = true;
     wxBoxSizer *sizerMain = new wxBoxSizer(wxHORIZONTAL);
-
-	m_general_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/general.png"), wxBITMAP_TYPE_PNG));
-	m_diameter_bitmap= wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/diameter.png"), wxBITMAP_TYPE_PNG));
-	m_tool_length_offset_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/toollengthoffset.png"), wxBITMAP_TYPE_PNG));
-	m_flat_radius_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/flatradius.png"), wxBITMAP_TYPE_PNG));
-	m_corner_radius_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/cornerradius.png"), wxBITMAP_TYPE_PNG));
-	m_cutting_edge_angle_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/cuttingedgeangle.png"), wxBITMAP_TYPE_PNG));
-	m_cutting_edge_height_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/cuttingedgeheight.png"), wxBITMAP_TYPE_PNG));
-	m_x_offset_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/xoffset.png"), wxBITMAP_TYPE_PNG));
-	m_front_angle_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/frontangle.png"), wxBITMAP_TYPE_PNG));
-	m_tool_angle_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/toolangle.png"), wxBITMAP_TYPE_PNG));
-	m_back_angle_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/backangle.png"), wxBITMAP_TYPE_PNG));
-	m_orientation_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/orientation.png"), wxBITMAP_TYPE_PNG));
-	m_probe_offset_x_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/probeoffsetx.png"), wxBITMAP_TYPE_PNG));
-	m_probe_offset_y_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/probeoffsety.png"), wxBITMAP_TYPE_PNG));
-	m_layer_height_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/layerheight.png"), wxBITMAP_TYPE_PNG));
-	m_width_over_thickness_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/wovert.png"), wxBITMAP_TYPE_PNG));
-	m_temperature_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/temperature.png"), wxBITMAP_TYPE_PNG));
-	m_filament_diameter_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/ctool/filament.png"), wxBITMAP_TYPE_PNG));
 
 	// add left sizer
     wxBoxSizer *sizerLeft = new wxBoxSizer(wxVERTICAL);
@@ -82,7 +82,7 @@ CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
     sizerMain->Add( sizerRight, 0, wxALL, 5 );
 
 	// add picture to right side
-	m_picture = new PictureWindow(this, m_general_bitmap);
+	m_picture = new PictureWindow(this, wxSize(300, 200));
 	wxBoxSizer *pictureSizer = new wxBoxSizer(wxVERTICAL);
 	pictureSizer->Add(m_picture, 1, wxGROW);
     sizerRight->Add( pictureSizer, 0, wxALL, 5 );
@@ -141,15 +141,6 @@ CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
 	 
 	AddLabelAndControl(sizerLeft, _("Title"), m_txtTitle = new wxTextCtrl(this, ID_TITLE));
 	sizerLeft->Add( m_chkVisible = new wxCheckBox( this, ID_VISIBLE, _("Visible") ), 0, wxALL, 5 );	
-	
-//	AddLabelAndControl(sizerLeft, _("sketches"), m_idsSketches = new CObjectIdsCtrl(this, ID_SKETCHES));
-//	wxString starting_place_choices[] = {_("boundary"), _("center")};
-//	AddLabelAndControl(sizerLeft, _("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices));
-//	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, 5 );
-//	AddLabelAndControl(sizerLeft, _("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this, ID_ZIG_ANGLE));
-//	AddLabelAndControl(sizerLeft, _("clearance height"), m_lgthClearanceHeight = new CLengthCtrl(this, ID_CLEARANCE_HEIGHT));
-//	AddLabelAndControl(sizerLeft, _("comment"), m_txtComment = new wxTextCtrl(this, ID_COMMENT));
-//	sizerLeft->Add( m_chkActive = new wxCheckBox( this, ID_ACTIVE, _("active") ), 0, wxALL, 5 );
 
 	SetFromData(object);
 
@@ -157,7 +148,7 @@ CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
     sizerMain->SetSizeHints(this);
 	sizerMain->Fit(this);
 
-//    m_idsSketches->SetFocus();
+    m_cmbTitleType->SetFocus();
 
 	m_ignore_event_functions = false;
 
@@ -260,39 +251,43 @@ void CToolDlg::SetFromData(CTool* object)
 	m_ignore_event_functions = false;
 }
 
+void CToolDlg::SetPicture(wxBitmap** bitmap, const wxString& name)
+{
+	m_picture->SetPicture(bitmap, theApp.GetResFolder() + _T("/bitmaps/ctool/") + name + _T(".png"), wxBITMAP_TYPE_PNG);
+}
+
 void CToolDlg::SetPicture()
 {
 	wxWindow* w = FindFocus();
 
-	if(w == m_dblDiameter)m_picture->SetPicture(m_diameter_bitmap);
-	else if(w == m_dblToolLengthOffset)m_picture->SetPicture(m_tool_length_offset_bitmap);
-	else if(w == m_dblFlatRadius)m_picture->SetPicture(m_flat_radius_bitmap);
-	else if(w == m_dblCornerRadius)m_picture->SetPicture(m_corner_radius_bitmap);
-	else if(w == m_dblCuttingEdgeAngle)m_picture->SetPicture(m_cutting_edge_angle_bitmap);
-	else if(w == m_dblCuttingEdgeHeight)m_picture->SetPicture(m_cutting_edge_height_bitmap);
+	if(w == m_dblDiameter)SetPicture(&m_diameter_bitmap, _T("diameter"));
+	else if(w == m_dblToolLengthOffset)SetPicture(&m_tool_length_offset_bitmap, _T("toollengthoffset"));
+	else if(w == m_dblFlatRadius)SetPicture(&m_flat_radius_bitmap, _T("flatradius"));
+	else if(w == m_dblCornerRadius)SetPicture(&m_corner_radius_bitmap, _T("cornerradius"));
+	else if(w == m_dblCuttingEdgeAngle)SetPicture(&m_cutting_edge_angle_bitmap, _T("cuttingedgeangle"));
+	else if(w == m_dblCuttingEdgeHeight)SetPicture(&m_cutting_edge_height_bitmap, _T("cuttingedgeheight"));
 	
 
 	// The following are all for lathe tools.  They become relevant when the m_type = eTurningTool
-	 else if(w == m_dblXOffset)m_picture->SetPicture(m_x_offset_bitmap);
-	 else if(w == m_dblFrontAngle)m_picture->SetPicture(m_front_angle_bitmap);
-	 else if(w == m_dblToolAngle)m_picture->SetPicture(m_tool_angle_bitmap);
-	 else if(w == m_dblBackAngle)m_picture->SetPicture(m_back_angle_bitmap);
-	 else if(w == m_lgthorientation)m_picture->SetPicture(m_orientation_bitmap);
+	 else if(w == m_dblXOffset)SetPicture(&m_x_offset_bitmap, _T("xoffset"));
+	 else if(w == m_dblFrontAngle)SetPicture(&m_front_angle_bitmap, _T("frontangle"));
+	 else if(w == m_dblToolAngle)SetPicture(&m_tool_angle_bitmap, _T("toolangle"));
+	 else if(w == m_dblBackAngle)SetPicture(&m_back_angle_bitmap, _T("backangle"));
+	 else if(w == m_lgthorientation)SetPicture(&m_orientation_bitmap, _T("orientation"));
 
 	// The following are for probe tools
 	
-	 else if(w == m_dblProbeOffsetX)m_picture->SetPicture(m_probe_offset_x_bitmap);
-	 else if(w == m_dblProbeOffsetY)m_picture->SetPicture(m_probe_offset_y_bitmap);
+	 else if(w == m_dblProbeOffsetX)SetPicture(&m_probe_offset_x_bitmap, _T("probeoffsetx"));
+	 else if(w == m_dblProbeOffsetY)SetPicture(&m_probe_offset_y_bitmap, _T("probeoffsety"));
 	
 	
 	// The following are for extrusion
-	 else if(w == m_dblLayerHeight)m_picture->SetPicture(m_layer_height_bitmap);
-	 else if(w == m_dblWidthOverThickness)m_picture->SetPicture(m_width_over_thickness_bitmap);
-	 else if(w == m_dblTemperature)m_picture->SetPicture(m_temperature_bitmap);
-	 else if(w == m_dblFilamentDiameter)m_picture->SetPicture(m_filament_diameter_bitmap);
+	 else if(w == m_dblLayerHeight)SetPicture(&m_layer_height_bitmap, _T("layerheight"));
+	 else if(w == m_dblWidthOverThickness)SetPicture(&m_width_over_thickness_bitmap, _T("wovert"));
+	 else if(w == m_dblTemperature)SetPicture(&m_temperature_bitmap, _T("temperature"));
+	 else if(w == m_dblFilamentDiameter)SetPicture(&m_filament_diameter_bitmap, _T("filament"));
 	 
-	else m_picture->SetPicture(m_general_bitmap);	
-	
+	else SetPicture(&m_general_bitmap, _T("general"));	
 }
 
 void CToolDlg::OnChildFocus(wxChildFocusEvent& event)

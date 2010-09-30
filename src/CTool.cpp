@@ -2075,7 +2075,11 @@ static bool OnEdit(HeeksObj* object)
 
 void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
 {
+#ifndef STABLE_OPS_ONLY
 	*callback = OnEdit;
+#else
+	*callback = NULL;
+#endif
 }
 
 
