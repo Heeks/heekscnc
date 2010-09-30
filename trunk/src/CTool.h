@@ -294,6 +294,8 @@ public:
 
 	Python OpenCamLibDefinition(const unsigned int indent = 0);
 
+	void GetOnEdit(bool(**callback)(HeeksObj*));
+
 private:
 	void DeleteSolid();
 

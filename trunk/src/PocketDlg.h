@@ -30,6 +30,7 @@ class PocketDlg : public wxDialog
 	CLengthCtrl *m_lgthStepOver;
 	CLengthCtrl *m_lgthMaterialAllowance;
 	wxComboBox *m_cmbStartingPlace;
+	wxComboBox *m_cmbTool;
 	wxCheckBox *m_chkKeepToolDown;
 	wxCheckBox *m_chkUseZigZag;
 	CDoubleCtrl *m_dblZigAngle;
@@ -61,6 +62,8 @@ public:
 	void OnComboStartingPlace( wxCommandEvent& event );
 	void OnCheckKeepToolDown(wxCommandEvent& event);
 	void OnCheckUseZigZag(wxCommandEvent& event);
+	void OnComboTool(wxCommandEvent& event);
+
 
     DECLARE_EVENT_TABLE()
 };

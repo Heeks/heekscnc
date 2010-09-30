@@ -29,6 +29,7 @@ enum
 	ID_COMMENT,
 	ID_ACTIVE,
 	ID_TITLE,
+	ID_TOOL,
 };
 
 BEGIN_EVENT_TABLE(PocketDlg, wxDialog)
@@ -36,6 +37,7 @@ BEGIN_EVENT_TABLE(PocketDlg, wxDialog)
     EVT_COMBOBOX(ID_STARTING_PLACE,PocketDlg::OnComboStartingPlace)
     EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, PocketDlg::OnCheckKeepToolDown)
     EVT_CHECKBOX(ID_USE_ZIG_ZAG, PocketDlg::OnCheckUseZigZag)
+    EVT_COMBOBOX(ID_TOOL,PocketDlg::OnComboTool)
 END_EVENT_TABLE()
 
 PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
@@ -90,6 +92,8 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 	wxString starting_place_choices[] = {_("boundary"), _("center")};
 	AddLabelAndControl(sizerLeft, _("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices));
 
+	wxString tools[] = {_("first"), _("second")};  // Yep, I'm clueless.  How do I get the list of tool strings from the CTool::FindAllTools() method?
+	AddLabelAndControl(sizerLeft, _("Tool"), m_cmbTool = new wxComboBox(this, ID_TOOL, _T(""), wxDefaultPosition, wxDefaultSize, 2, tools));
 	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, 5 );
 	sizerLeft->Add( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), 0, wxALL, 5 );
 	AddLabelAndControl(sizerLeft, _("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this, ID_ZIG_ANGLE));
@@ -147,6 +151,7 @@ void PocketDlg::GetData(CPocket* object)
 	object->m_speed_op_params.m_spindle_speed = m_dblSpindleSpeed->GetValue();
 	object->m_comment = m_txtComment->GetValue();
 	object->m_active = m_chkActive->GetValue();
+	object->m_tool_number = m_cmbTool->GetValue() ? 1:0;
 	object->m_title = m_txtTitle->GetValue();
 	m_ignore_event_functions = false;
 }
@@ -173,6 +178,7 @@ void PocketDlg::SetFromData(CPocket* object)
 	m_txtComment->SetValue(object->m_comment);
 	m_chkActive->SetValue(object->m_active);
 	m_txtTitle->SetValue(object->m_title);
+	m_cmbTool->SetValue((object->m_tool_number == 0) ? _("first") : _("second"));
 	m_ignore_event_functions = false;
 }
 
@@ -219,6 +225,12 @@ void PocketDlg::OnComboStartingPlace( wxCommandEvent& event )
 {
 	if(m_ignore_event_functions)return;
 	SetPicture();
+}
+
+void PocketDlg::OnComboTool( wxCommandEvent& event )
+{
+//	if(m_ignore_event_functions)return;
+	//SetPicture();
 }
 
 void PocketDlg::OnCheckKeepToolDown(wxCommandEvent& event)
