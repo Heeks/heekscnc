@@ -6,7 +6,7 @@ import math
 area_for_feed_possible = None
 tool_radius_for_pocket = None
 
-def cut_curve(curve, need_rapid, p, rapid_down_to_height, final_depth):
+def cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, final_depth):
     prev_p = p
     first = True
 
@@ -16,7 +16,7 @@ def cut_curve(curve, need_rapid, p, rapid_down_to_height, final_depth):
             rapid(vertex.p.x, vertex.p.y)
             
             ##rapid down
-            rapid(z = rapid_down_to_height)
+            rapid(z = current_start_depth + rapid_down_to_height)
             
             #feed down
             feed(z = final_depth)
@@ -81,7 +81,7 @@ def feed_possible(p0, p1):
         return False
     return True
 
-def cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, keep_tool_down_if_poss):
+def cut_curvelist(curve_list, rapid_down_to_height, current_start_depth, depth, clearance_height, keep_tool_down_if_poss):
     p = area.Point(0, 0)
     first = True
     for curve in curve_list:
@@ -96,7 +96,7 @@ def cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, kee
                 need_rapid = False
         if need_rapid:
             rapid(z = clearance_height)
-        p = cut_curve(curve, need_rapid, p, rapid_down_to_height, depth)
+        p = cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, depth)
         first = False
     rapid(z = clearance_height)
 
@@ -313,6 +313,8 @@ def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, fina
 
     if layer_count * stepdown + 0.00001 < start_depth - final_depth:
         layer_count += 1
+        
+    current_start_depth = start_depth
 
     for i in range(1, layer_count+1):
         if i == layer_count:
@@ -320,6 +322,7 @@ def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, fina
         else:
             depth = start_depth - i * stepdown
         
-        cut_curvelist(curve_list, rapid_down_to_height, depth, clearance_height, keep_tool_down_if_poss)
+        cut_curvelist(curve_list, rapid_down_to_height, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
+        current_start_depth = depth
 
 
