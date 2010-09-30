@@ -77,6 +77,7 @@
 #include <Geom_Plane.hxx>
 
 #include "Tools.h"
+#include "CToolDlg.h"
 
 extern CHeeksCADInterface* heeksCAD;
 
@@ -2058,6 +2059,21 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
 	return(python);
 }
 
+static bool OnEdit(HeeksObj* object)
+{
+	CToolDlg dlg(heeksCAD->GetMainFrame(), (CTool*)object);
+	if(dlg.ShowModal() == wxID_OK)
+	{
+		dlg.GetData((CTool*)object);
+		((CToolParams*)object)->write_values_to_config();
+		return true;
+	}
+	return false;
+}
 
+void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
+{
+	*callback = OnEdit;
+}
 
 
