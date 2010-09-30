@@ -6,6 +6,8 @@
  */
 
 #include "stdafx.h"
+
+#ifndef STABLE_OPS_ONLY
 #include "Adaptive.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -773,3 +775,4 @@ bool CAdaptive::operator==( const CAdaptive & rhs ) const
 	return(COp::operator==(rhs));
 }
 
+#endif //#ifndef STABLE_OPS_ONLY

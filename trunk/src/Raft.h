@@ -5,6 +5,7 @@
  * details.
  */
 
+#ifndef STABLE_OPS_ONLY
 #include "HeeksCNCTypes.h"
 //#include "PrintOp.h"
 #include "DepthOp.h"
@@ -81,3 +82,5 @@ public:
 	static void ReadFromConfig();
 	static void WriteToConfig();
 };
+
+#endif //#ifndef STABLE_OPS_ONLY
