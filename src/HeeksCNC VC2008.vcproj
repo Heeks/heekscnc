@@ -417,6 +417,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\CToolDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\CToolDlg.h"
+			>
+		</File>
+		<File
 			RelativePath=".\CuttingRate.cpp"
 			>
 		</File>
