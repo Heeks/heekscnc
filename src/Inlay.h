@@ -1,13 +1,15 @@
-
-#ifndef INLAY_CYCLE_CLASS_DEFINITION
-#define INLAY_CYCLE_CLASS_DEFINITION
-
 // Inlay.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
  * This program is released under the BSD license. See the file COPYING for
  * details.
  */
+
+#ifndef STABLE_OPS_ONLY
+
+#ifndef INLAY_CYCLE_CLASS_DEFINITION
+#define INLAY_CYCLE_CLASS_DEFINITION
+
 
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
@@ -322,3 +324,6 @@ public:
 
 
 #endif // INLAY_CYCLE_CLASS_DEFINITION
+
+
+#endif //#ifndef STABLE_OPS_ONLY

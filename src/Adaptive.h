@@ -4,6 +4,7 @@
  * This program is released under the BSD license. See the file COPYING for
  * details.
  */
+#ifndef STABLE_OPS_ONLY
 
 #include "Op.h"
 #include "HeeksCNCTypes.h"
@@ -124,3 +125,5 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	static double GetMaxHeight( const int object_type, const std::list<int> & object_ids );
 };
+
+#endif // #ifndef STABLE_OPS_ONLY

@@ -553,7 +553,9 @@ Python CProgram::RewritePythonProgram()
 	theApp.m_program_canvas->m_textCtrl->Clear();
 	CZigZag::number_for_stl_file = 1;
 	CWaterline::number_for_stl_file = 1;
+#ifndef STABLE_OPS_ONLY
 	CAdaptive::number_for_stl_file = 1;
+#endif
 	CAttachOp::number_for_stl_file = 1;
 
 	// call any OnRewritePython functions from other plugins

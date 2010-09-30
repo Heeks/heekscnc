@@ -27,15 +27,21 @@
 #include "NCCode.h"
 #include "Profile.h"
 #include "Pocket.h"
+#ifndef STABLE_OPS_ONLY
 #include "Raft.h"
+#endif
 #include "ZigZag.h"
 #include "Waterline.h"
+#ifndef STABLE_OPS_ONLY
 #include "Adaptive.h"
+#endif
 #include "Drilling.h"
 #include "Locating.h"
 #include "CTool.h"
 #include "CounterBore.h"
+#ifndef STABLE_OPS_ONLY
 #include "TurnRough.h"
+#endif
 #include "Fixture.h"
 #include "SpeedReference.h"
 #include "CuttingRate.h"
@@ -49,7 +55,9 @@
 #include "Excellon.h"
 #include "Chamfer.h"
 #include "Contour.h"
+#ifndef STABLE_OPS_ONLY
 #include "Inlay.h"
+#endif
 #include "Tags.h"
 #include "Tag.h"
 #include "ScriptOp.h"
@@ -252,6 +260,8 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 	}
 }
 
+#ifndef STABLE_OPS_ONLY
+
 static void NewRaftOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> tools;
@@ -267,6 +277,7 @@ static void NewRaftOpMenuCallback(wxCommandEvent &event)
 	}
 }
 
+#endif
 
 static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 {
@@ -340,7 +351,7 @@ static void NewWaterlineOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Changed();	
 }
 
-
+#ifndef STABLE_OPS_ONLY
 static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> solids;
@@ -397,7 +408,7 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 	heeksCAD->Changed();
 }
-
+#endif
 
 
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
@@ -784,6 +795,7 @@ static void NewContourOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Changed();
 }
 
+#ifndef STABLE_OPS_ONLY
 
 static void NewInlayOpMenuCallback(wxCommandEvent &event)
 {
@@ -814,7 +826,7 @@ static void NewInlayOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Changed();
 }
 
-
+#endif
 
 static void NewSpeedReferenceMenuCallback(wxCommandEvent &event)
 {
@@ -836,6 +848,8 @@ static void NewCuttingRateMenuCallback(wxCommandEvent &event)
 	heeksCAD->Changed();
 }
 
+#ifndef STABLE_OPS_ONLY
+
 static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> tools;
@@ -850,6 +864,8 @@ static void NewRoughTurnOpMenuCallback(wxCommandEvent &event)
 		heeksCAD->Changed();
 	}
 }
+
+#endif
 
 static void NewScriptOpMenuCallback(wxCommandEvent &event)
 {
@@ -902,10 +918,12 @@ static void NewChamferMenuCallback(wxCommandEvent &event)
 	AddNewTool(CToolParams::eChamfer);
 }
 
+#ifndef STABLE_OPS_ONLY
 static void NewTurningToolMenuCallback(wxCommandEvent &event)
 {
 	AddNewTool(CToolParams::eTurningTool);
 }
+#endif
 
 static void NewTouchProbeMenuCallback(wxCommandEvent &event)
 {
@@ -917,10 +935,12 @@ static void NewToolLengthSwitchMenuCallback(wxCommandEvent &event)
 	AddNewTool(CToolParams::eToolLengthSwitch);
 }
 
+#ifndef STABLE_OPS_ONLY
 static void NewExtrusionMenuCallback(wxCommandEvent &event)
 {
 	AddNewTool(CToolParams::eExtrusion);
 }
+#endif
 
 static void MakeScriptMenuCallback(wxCommandEvent &event)
 {
@@ -1054,9 +1074,13 @@ static CCallbackTool new_endmill_tool(_("New End Mill..."), _T("endmill"), NewEn
 static CCallbackTool new_slotdrill_tool(_("New Slot Drill..."), _T("slotdrill"), NewSlotCutterMenuCallback);
 static CCallbackTool new_ball_end_mill_tool(_("New Ball End Mill..."), _T("ballmill"), NewBallEndMillMenuCallback);
 static CCallbackTool new_chamfer_mill_tool(_("New Chamfer Mill..."), _T("chamfmill"), NewChamferMenuCallback);
+#ifndef STABLE_OPS_ONLY
 static CCallbackTool new_turn_tool(_("New Turning Tool..."), _T("turntool"), NewTurningToolMenuCallback);
+#endif
 static CCallbackTool new_touch_probe(_("New Touch Probe..."), _T("probe"), NewTouchProbeMenuCallback);
+#ifndef STABLE_OPS_ONLY
 static CCallbackTool new_extrusion(_("New Extrusion..."), _T("extrusion"), NewExtrusionMenuCallback);
+#endif
 static CCallbackTool new_tool_length_switch(_("New Tool Length Switch..."), _T("probe"), NewToolLengthSwitchMenuCallback);
 
 void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
@@ -1067,9 +1091,13 @@ void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_slotdrill_tool);
 	t_list->push_back(&new_ball_end_mill_tool);
 	// t_list->push_back(&new_chamfer_mill_tool);
+#ifndef STABLE_OPS_ONLY
 	t_list->push_back(&new_turn_tool);
+#endif
 	t_list->push_back(&new_touch_probe);
+#ifndef STABLE_OPS_ONLY
 	t_list->push_back(&new_extrusion);
+#endif
 	t_list->push_back(&new_tool_length_switch);
 }
 
@@ -1086,11 +1114,15 @@ static void AddToolBars()
 		heeksCAD->StartToolBarFlyout(_("Milling operations"));
 		heeksCAD->AddFlyoutButton(_("Profile"), ToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Pocket"), ToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
+#ifndef STABLE_OPS_ONLY
 		heeksCAD->AddFlyoutButton(_("Adaptive"), ToolImage(_T("adapt")), _("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
+#endif
 		heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("CounterBore"), ToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Contour"), ToolImage(_T("opcontour")), _("New Contour Operation..."), NewContourOpMenuCallback);
+#ifndef STABLE_OPS_ONLY
 		heeksCAD->AddFlyoutButton(_("Inlay"), ToolImage(_T("opinlay")), _("New Inlay Operation..."), NewInlayOpMenuCallback);
+#endif
 		heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
@@ -1101,9 +1133,11 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("Unattach"), ToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
+#ifndef STABLE_OPS_ONLY
 		heeksCAD->StartToolBarFlyout(_("Additive operations"));
 		heeksCAD->AddFlyoutButton(_("Raft"), ToolImage(_T("raft")), _("New Raft Operation..."), NewRaftOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
+#endif
 
 		heeksCAD->StartToolBarFlyout(_("Other operations"));
 		heeksCAD->AddFlyoutButton(_("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
@@ -1227,12 +1261,16 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	wxMenu *menuMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Profile Operation..."), ToolImage(_T("opprofile")), NewProfileOpMenuCallback);
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Pocket Operation..."), ToolImage(_T("pocket")), NewPocketOpMenuCallback);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Adaptive Roughing Operation..."), ToolImage(_T("adapt")), NewAdaptiveOpMenuCallback);
+#endif
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Drilling Operation..."), ToolImage(_T("drilling")), NewDrillingOpMenuCallback);
 	heeksCAD->AddMenuItem(menuMillingOperations, _("CounterBore Operation..."), ToolImage(_T("counterbore")), NewCounterBoreOpMenuCallback);
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Chamfer Operation..."), ToolImage(_T("opchamfer")), NewChamferOpMenuCallback);
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Contour Operation..."), ToolImage(_T("opcontour")), NewContourOpMenuCallback);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Inlay Operation..."), ToolImage(_T("opinlay")), NewInlayOpMenuCallback);
+#endif
 
 	wxMenu *menu3dMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
@@ -1241,11 +1279,15 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), ToolImage(_T("unattach")), NewUnattachOpMenuCallback);
 	
 	// Additive Operations menu
+#ifndef STABLE_OPS_ONLY
 	wxMenu *menuAdditiveMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menuAdditiveMillingOperations, _("Raft Operation..."), ToolImage(_T("raft")), NewRaftOpMenuCallback);
+#endif
 
 	wxMenu *menuOperations = new wxMenu;
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuOperations, _("Rough Turning Operation..."), ToolImage(_T("turnrough")), NewRoughTurnOpMenuCallback);
+#endif
 	heeksCAD->AddMenuItem(menuOperations, _("Script Operation..."), ToolImage(_T("scriptop")), NewScriptOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Check..."), ToolImage(_T("design_rules_check")), DesignRulesCheckMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Adjustment..."), ToolImage(_T("design_rules_adjustment")), DesignRulesAdjustmentMenuCallback);
@@ -1264,10 +1306,14 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuTools, _("Slot Drill..."), ToolImage(_T("slotdrill")), NewSlotCutterMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("Ball End Mill..."), ToolImage(_T("ballmill")), NewBallEndMillMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("Chamfer Mill..."), ToolImage(_T("chamfmill")), NewChamferMenuCallback);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuTools, _("Turning Tool..."), ToolImage(_T("turntool")), NewTurningToolMenuCallback);
+#endif
 	heeksCAD->AddMenuItem(menuTools, _("Touch Probe..."), ToolImage(_T("probe")), NewTouchProbeMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("Tool Length Switch..."), ToolImage(_T("probe")), NewToolLengthSwitchMenuCallback);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuTools, _("Extrusion..."), ToolImage(_T("extrusion")), NewExtrusionMenuCallback);
+#endif
 	
 	// Fixtures menu
 	wxMenu *menuFixtures = new wxMenu;
@@ -1277,7 +1323,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	wxMenu *menuMachining = new wxMenu;
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Milling Operation"), ToolImage(_T("ops")), NULL, NULL, menuMillingOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add New 3D Operation"), ToolImage(_T("ops")), NULL, NULL, menu3dMillingOperations);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Additive Operation"), ToolImage(_T("ops")), NULL, NULL, menuAdditiveMillingOperations);	
+#endif
 	heeksCAD->AddMenuItem(menuMachining, _("Add Other Operation"), ToolImage(_T("ops")), NULL, NULL, menuOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Tool"), ToolImage(_T("tools")), NULL, NULL, menuTools);
 	heeksCAD->AddMenuItem(menuMachining, _("Fixtures"), ToolImage(_T("fixtures")), NULL, NULL, menuFixtures);
@@ -1308,7 +1356,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	CProfile::ReadFromConfig();
 	CPocket::ReadFromConfig();
 	CSpeedOp::ReadFromConfig();
+#ifndef STABLE_OPS_ONLY
 	CRaft::ReadFromConfig();
+#endif
 
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
@@ -1329,10 +1379,14 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Tools", CTools::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Pocket", CPocket::ReadFromXMLElement);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->RegisterReadXMLfunction("Raft", CRaft::ReadFromXMLElement);
+#endif
 	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Waterline", CWaterline::ReadFromXMLElement);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
+#endif
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Locating", CLocating::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ProbeCentre", CProbe_Centre::ReadFromXMLElement);
@@ -1342,14 +1396,18 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Tool", CTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingTool", CTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixture", CFixture::ReadFromXMLElement);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->RegisterReadXMLfunction("TurnRough", CTurnRough::ReadFromXMLElement);
+#endif
 	heeksCAD->RegisterReadXMLfunction("SpeedReferences", CSpeedReferences::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("SpeedReference", CSpeedReference::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingRate", CCuttingRate::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Fixtures", CFixtures::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Chamfer", CChamfer::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Contour", CContour::ReadFromXMLElement);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->RegisterReadXMLfunction("Inlay", CInlay::ReadFromXMLElement);
+#endif
 	heeksCAD->RegisterReadXMLfunction("Tags", CTags::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tag", CTag::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ScriptOp", CScriptOp::ReadFromXMLElement);
@@ -1571,9 +1629,13 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	CSpeedOp::GetOptions(&(machining_options->m_list));
 	CProfile::GetOptions(&(machining_options->m_list));
 	CPocket::GetOptions(&(machining_options->m_list));
+#ifndef STABLE_OPS_ONLY
 	CRaft::GetOptions(&(machining_options->m_list));
+#endif
 	CContour::GetOptions(&(machining_options->m_list));
+#ifndef STABLE_OPS_ONLY
 	CInlay::GetOptions(&(machining_options->m_list));
+#endif
 
 	list->push_back(machining_options);
 
@@ -1593,7 +1655,9 @@ void CHeeksCNCApp::OnFrameDelete()
 	CNCCode::WriteColorsToConfig();
 	CProfile::WriteToConfig();
 	CPocket::WriteToConfig();
+#ifndef STABLE_OPS_ONLY
 	CRaft::WriteToConfig();
+#endif
 	CSpeedOp::WriteToConfig();
 }
 
