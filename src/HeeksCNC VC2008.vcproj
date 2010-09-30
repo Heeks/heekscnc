@@ -481,6 +481,14 @@
 			>
 		</File>
 		<File
+			RelativePath="$(HEEKSCADPATH)\interface\HDialogs.cpp"
+			>
+		</File>
+		<File
+			RelativePath="$(HEEKSCADPATH)\interface\HDialogs.h"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\interface\HeeksCADInterface.h"
 			>
 		</File>

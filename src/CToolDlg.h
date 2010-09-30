@@ -8,7 +8,9 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-class CToolDlg : public wxDialog
+#include "interface/HDialogs.h"
+
+class CToolDlg : public HDialog
 {
 	static wxBitmap* m_diameter_bitmap;
 	static wxBitmap* m_tool_length_offset_bitmap;
@@ -68,12 +70,6 @@ class CToolDlg : public wxDialog
 	CDoubleCtrl *m_dblTemperature;
 	CDoubleCtrl *m_dblFlowrate;
 	CDoubleCtrl *m_dblFilamentDiameter;
-
-
-
-	bool m_ignore_event_functions;
-
-	void AddLabelAndControl(wxBoxSizer* sizer, const wxString& label, wxWindow* control);
 
 public:
     CToolDlg(wxWindow *parent, CTool* object);
