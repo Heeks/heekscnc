@@ -10,24 +10,24 @@ class CObjectIdsCtrl;
 
 class CToolDlg : public wxDialog
 {
-	wxBitmap m_diameter_bitmap;
-	wxBitmap m_tool_length_offset_bitmap;
-	wxBitmap m_flat_radius_bitmap;
-	wxBitmap m_corner_radius_bitmap;
-	wxBitmap m_cutting_edge_angle_bitmap;
-	wxBitmap m_cutting_edge_height_bitmap;
-	wxBitmap m_general_bitmap;
-	wxBitmap m_x_offset_bitmap;
-	wxBitmap m_front_angle_bitmap;
-	wxBitmap m_tool_angle_bitmap;
-	wxBitmap m_back_angle_bitmap;
-	wxBitmap m_orientation_bitmap;
-	wxBitmap m_probe_offset_x_bitmap;
-	wxBitmap m_probe_offset_y_bitmap;
-	wxBitmap m_layer_height_bitmap;
-	wxBitmap m_width_over_thickness_bitmap;
-	wxBitmap m_temperature_bitmap;
-	wxBitmap m_filament_diameter_bitmap;
+	static wxBitmap* m_diameter_bitmap;
+	static wxBitmap* m_tool_length_offset_bitmap;
+	static wxBitmap* m_flat_radius_bitmap;
+	static wxBitmap* m_corner_radius_bitmap;
+	static wxBitmap* m_cutting_edge_angle_bitmap;
+	static wxBitmap* m_cutting_edge_height_bitmap;
+	static wxBitmap* m_general_bitmap;
+	static wxBitmap* m_x_offset_bitmap;
+	static wxBitmap* m_front_angle_bitmap;
+	static wxBitmap* m_tool_angle_bitmap;
+	static wxBitmap* m_back_angle_bitmap;
+	static wxBitmap* m_orientation_bitmap;
+	static wxBitmap* m_probe_offset_x_bitmap;
+	static wxBitmap* m_probe_offset_y_bitmap;
+	static wxBitmap* m_layer_height_bitmap;
+	static wxBitmap* m_width_over_thickness_bitmap;
+	static wxBitmap* m_temperature_bitmap;
+	static wxBitmap* m_filament_diameter_bitmap;
 	
 
 	wxComboBox *m_cmbTitleType;
@@ -80,6 +80,7 @@ public:
 	void GetData(CTool* object);
 	void SetFromData(CTool* object);
 	void SetPicture();
+	void SetPicture(wxBitmap** bitmap, const wxString& name);
 
 	void OnChildFocus(wxChildFocusEvent& event);
 	void OnComboTitleType( wxCommandEvent& event );

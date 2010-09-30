@@ -10,21 +10,21 @@ class CObjectIdsCtrl;
 
 class PocketDlg : public wxDialog
 {
-	wxBitmap m_general_bitmap;
-	wxBitmap m_step_over_bitmap;
-	wxBitmap m_material_allowance_bitmap;
-	wxBitmap m_starting_center_bitmap;
-	wxBitmap m_starting_boundary_bitmap;
-	wxBitmap m_tool_down_bitmap;
-	wxBitmap m_not_tool_down_bitmap;
-	wxBitmap m_use_zig_zag_bitmap;
-	wxBitmap m_zig_angle_bitmap;
-	wxBitmap m_not_use_zig_zag_bitmap;
-	wxBitmap m_clearnce_height_bitmap;
-	wxBitmap m_rapid_down_to_bitmap;
-	wxBitmap m_start_depth_bitmap;
-	wxBitmap m_final_depth_bitmap;
-	wxBitmap m_step_down_bitmap;
+	static wxBitmap* m_general_bitmap;
+	static wxBitmap* m_step_over_bitmap;
+	static wxBitmap* m_material_allowance_bitmap;
+	static wxBitmap* m_starting_center_bitmap;
+	static wxBitmap* m_starting_boundary_bitmap;
+	static wxBitmap* m_tool_down_bitmap;
+	static wxBitmap* m_not_tool_down_bitmap;
+	static wxBitmap* m_use_zig_zag_bitmap;
+	static wxBitmap* m_zig_angle_bitmap;
+	static wxBitmap* m_not_use_zig_zag_bitmap;
+	static wxBitmap* m_clearance_height_bitmap;
+	static wxBitmap* m_rapid_down_to_bitmap;
+	static wxBitmap* m_start_depth_bitmap;
+	static wxBitmap* m_final_depth_bitmap;
+	static wxBitmap* m_step_down_bitmap;
 
 	CObjectIdsCtrl *m_idsSketches;
 	CLengthCtrl *m_lgthStepOver;
@@ -57,6 +57,7 @@ public:
 	void GetData(CPocket* object);
 	void SetFromData(CPocket* object);
 	void SetPicture();
+	void SetPicture(wxBitmap** bitmap, const wxString& name);
 
 	void OnChildFocus(wxChildFocusEvent& event);
 	void OnComboStartingPlace( wxCommandEvent& event );

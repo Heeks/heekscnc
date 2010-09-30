@@ -40,26 +40,28 @@ BEGIN_EVENT_TABLE(PocketDlg, wxDialog)
     EVT_COMBOBOX(ID_TOOL,PocketDlg::OnComboTool)
 END_EVENT_TABLE()
 
+wxBitmap* PocketDlg::m_general_bitmap = NULL;
+wxBitmap* PocketDlg::m_step_over_bitmap = NULL;
+wxBitmap* PocketDlg::m_material_allowance_bitmap = NULL;
+wxBitmap* PocketDlg::m_starting_center_bitmap = NULL;
+wxBitmap* PocketDlg::m_starting_boundary_bitmap = NULL;
+wxBitmap* PocketDlg::m_tool_down_bitmap = NULL;
+wxBitmap* PocketDlg::m_not_tool_down_bitmap = NULL;
+wxBitmap* PocketDlg::m_use_zig_zag_bitmap = NULL;
+wxBitmap* PocketDlg::m_zig_angle_bitmap = NULL;
+wxBitmap* PocketDlg::m_clearance_height_bitmap = NULL;
+wxBitmap* PocketDlg::m_rapid_down_to_bitmap = NULL;
+wxBitmap* PocketDlg::m_start_depth_bitmap = NULL;
+wxBitmap* PocketDlg::m_final_depth_bitmap = NULL;
+wxBitmap* PocketDlg::m_step_down_bitmap = NULL;
+
+static std::vector< std::pair< int, wxString > > tools_for_combo;
+
 PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
              : wxDialog(parent, wxID_ANY, wxString(_T("Pocket Operation")))
 {
 	m_ignore_event_functions = true;
     wxBoxSizer *sizerMain = new wxBoxSizer(wxHORIZONTAL);
-
-	m_general_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/general.png"), wxBITMAP_TYPE_PNG));
-	m_step_over_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/step over.png"), wxBITMAP_TYPE_PNG));
-	m_material_allowance_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/material allowance.png"), wxBITMAP_TYPE_PNG));
-	m_starting_center_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/starting center.png"), wxBITMAP_TYPE_PNG));
-	m_starting_boundary_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/starting boundary.png"), wxBITMAP_TYPE_PNG));
-	m_tool_down_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/tool down.png"), wxBITMAP_TYPE_PNG));
-	m_not_tool_down_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/not tool down.png"), wxBITMAP_TYPE_PNG));
-	m_use_zig_zag_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/use zig zag.png"), wxBITMAP_TYPE_PNG));
-	m_zig_angle_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/zig angle.png"), wxBITMAP_TYPE_PNG));
-	m_clearnce_height_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/clearance height.png"), wxBITMAP_TYPE_PNG));
-	m_rapid_down_to_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/rapid down height.png"), wxBITMAP_TYPE_PNG));
-	m_start_depth_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/start depth.png"), wxBITMAP_TYPE_PNG));
-	m_final_depth_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/final depth.png"), wxBITMAP_TYPE_PNG));
-	m_step_down_bitmap = wxBitmap(wxImage(theApp.GetResFolder() + _T("/bitmaps/pocket/step down.png"), wxBITMAP_TYPE_PNG));
 
 	// add left sizer
     wxBoxSizer *sizerLeft = new wxBoxSizer(wxVERTICAL);
@@ -70,7 +72,7 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
     sizerMain->Add( sizerRight, 0, wxALL, 5 );
 
 	// add picture to right side
-	m_picture = new PictureWindow(this, m_general_bitmap);
+	m_picture = new PictureWindow(this, wxSize(300, 200));
 	wxBoxSizer *pictureSizer = new wxBoxSizer(wxVERTICAL);
 	pictureSizer->Add(m_picture, 1, wxGROW);
     sizerRight->Add( pictureSizer, 0, wxALL, 5 );
@@ -92,12 +94,15 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 	wxString starting_place_choices[] = {_("boundary"), _("center")};
 	AddLabelAndControl(sizerLeft, _("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices));
 
-	wxString tools[] = {_("first"), _("second")};  // Yep, I'm clueless.  How do I get the list of tool strings from the CTool::FindAllTools() method?
-	AddLabelAndControl(sizerLeft, _("Tool"), m_cmbTool = new wxComboBox(this, ID_TOOL, _T(""), wxDefaultPosition, wxDefaultSize, 2, tools));
+	tools_for_combo = CTool::FindAllTools();
+
+	wxArrayString tools;
+	for(unsigned int i = 0; i<tools_for_combo.size(); i++)tools.Add(tools_for_combo[i].second);
+	AddLabelAndControl(sizerLeft, _("Tool"), m_cmbTool = new wxComboBox(this, ID_TOOL, _T(""), wxDefaultPosition, wxDefaultSize, tools));
+
 	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, 5 );
 	sizerLeft->Add( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), 0, wxALL, 5 );
 	AddLabelAndControl(sizerLeft, _("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this, ID_ZIG_ANGLE));
-
 
 	wxString abs_mode_choices[] = {_("absolute"), _("incremental")};
 	AddLabelAndControl(sizerLeft, _("absolute mode"), m_cmbAbsMode = new wxComboBox(this, ID_ABS_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, abs_mode_choices));
@@ -151,7 +156,11 @@ void PocketDlg::GetData(CPocket* object)
 	object->m_speed_op_params.m_spindle_speed = m_dblSpindleSpeed->GetValue();
 	object->m_comment = m_txtComment->GetValue();
 	object->m_active = m_chkActive->GetValue();
-	object->m_tool_number = m_cmbTool->GetValue() ? 1:0;
+	
+	// get the tool number
+	object->m_tool_number = 0;
+	if(m_cmbTool->GetSelection() >= 0)object->m_tool_number = tools_for_combo[m_cmbTool->GetSelection()].first;
+
 	object->m_title = m_txtTitle->GetValue();
 	m_ignore_event_functions = false;
 }
@@ -163,6 +172,10 @@ void PocketDlg::SetFromData(CPocket* object)
 	m_lgthStepOver->SetValue(object->m_pocket_params.m_step_over);
 	m_lgthMaterialAllowance->SetValue(object->m_pocket_params.m_material_allowance);
 	m_cmbStartingPlace->SetValue((object->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));
+
+	// set the tool combo to the correct tool
+	for(unsigned int i = 0; i < tools_for_combo.size(); i++)if(tools_for_combo[i].first == object->m_tool_number){m_cmbTool->SetSelection(i); break;}
+
 	m_chkKeepToolDown->SetValue(object->m_pocket_params.m_keep_tool_down_if_poss);
 	m_chkUseZigZag->SetValue(object->m_pocket_params.m_use_zig_zag);
 	if(object->m_pocket_params.m_use_zig_zag)m_dblZigAngle->SetValue(object->m_pocket_params.m_zig_angle);
@@ -178,38 +191,42 @@ void PocketDlg::SetFromData(CPocket* object)
 	m_txtComment->SetValue(object->m_comment);
 	m_chkActive->SetValue(object->m_active);
 	m_txtTitle->SetValue(object->m_title);
-	m_cmbTool->SetValue((object->m_tool_number == 0) ? _("first") : _("second"));
 	m_ignore_event_functions = false;
+}
+
+void PocketDlg::SetPicture(wxBitmap** bitmap, const wxString& name)
+{
+	m_picture->SetPicture(bitmap, theApp.GetResFolder() + _T("/bitmaps/pocket/") + name + _T(".png"), wxBITMAP_TYPE_PNG);
 }
 
 void PocketDlg::SetPicture()
 {
 	wxWindow* w = FindFocus();
 
-	if(w == m_lgthStepOver)m_picture->SetPicture(m_step_over_bitmap);
-	else if(w == m_lgthMaterialAllowance)m_picture->SetPicture(m_material_allowance_bitmap);
+	if(w == m_lgthStepOver)SetPicture(&m_step_over_bitmap, _T("step over"));
+	else if(w == m_lgthMaterialAllowance)SetPicture(&m_material_allowance_bitmap, _T("material allowance"));
 	else if(w == m_cmbStartingPlace)
 	{
-		if(m_cmbStartingPlace->GetValue() == _("boundary"))m_picture->SetPicture(m_starting_boundary_bitmap);
-		else m_picture->SetPicture(m_starting_center_bitmap);
+		if(m_cmbStartingPlace->GetValue() == _("boundary"))SetPicture(&m_starting_boundary_bitmap, _T("starting boundary"));
+		else SetPicture(&m_starting_center_bitmap, _T("starting center"));
 	}
 	else if(w == m_chkKeepToolDown)
 	{
-		if(m_chkKeepToolDown->IsChecked())m_picture->SetPicture(m_tool_down_bitmap);
-		else m_picture->SetPicture(m_not_tool_down_bitmap);
+		if(m_chkKeepToolDown->IsChecked())SetPicture(&m_tool_down_bitmap, _T("tool down"));
+		else SetPicture(&m_not_tool_down_bitmap, _T("not tool down"));
 	}
 	else if(w == m_chkUseZigZag)
 	{
-		if(m_chkUseZigZag->IsChecked())m_picture->SetPicture(m_use_zig_zag_bitmap);
-		else m_picture->SetPicture(m_general_bitmap);
+		if(m_chkUseZigZag->IsChecked())SetPicture(&m_use_zig_zag_bitmap, _T("use zig zag"));
+		else SetPicture(&m_general_bitmap, _T("general"));
 	}
-	else if(w == m_dblZigAngle)m_picture->SetPicture(m_zig_angle_bitmap);
-	else if(w == m_lgthClearanceHeight)m_picture->SetPicture(m_clearnce_height_bitmap);
-	else if(w == m_lgthRapidDownToHeight)m_picture->SetPicture(m_rapid_down_to_bitmap);
-	else if(w == m_lgthStartDepth)m_picture->SetPicture(m_start_depth_bitmap);
-	else if(w == m_lgthFinalDepth)m_picture->SetPicture(m_final_depth_bitmap);
-	else if(w == m_lgthStepDown)m_picture->SetPicture(m_step_down_bitmap);
-	else m_picture->SetPicture(m_general_bitmap);
+	else if(w == m_dblZigAngle)SetPicture(&m_zig_angle_bitmap, _T("zig angle"));
+	else if(w == m_lgthClearanceHeight)SetPicture(&m_clearance_height_bitmap, _T("clearance height"));
+	else if(w == m_lgthRapidDownToHeight)SetPicture(&m_rapid_down_to_bitmap, _T("rapid down height"));
+	else if(w == m_lgthStartDepth)SetPicture(&m_start_depth_bitmap, _T("start depth"));
+	else if(w == m_lgthFinalDepth)SetPicture(&m_final_depth_bitmap, _T("final depth"));
+	else if(w == m_lgthStepDown)SetPicture(&m_step_down_bitmap, _T("step down"));
+	else SetPicture(&m_general_bitmap, _T("general"));
 }
 
 void PocketDlg::OnChildFocus(wxChildFocusEvent& event)
