@@ -6,6 +6,9 @@
  */
 
 #include "stdafx.h"
+
+#ifndef STABLE_OPS_ONLY
+
 #include "TurnRough.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -388,5 +391,4 @@ bool CTurnRough::operator==( const CTurnRough & rhs ) const
 	return(CSpeedOp::operator==(rhs));
 }
 
-
-
+#endif //#ifndef STABLE_OPS_ONLY

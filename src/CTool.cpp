@@ -270,11 +270,13 @@ static void on_set_back_angle(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
+static CToolParams::ToolTypesList_t tool_types_for_on_set_type;
+
 static void on_set_type(int zero_based_choice, HeeksObj* object)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
-	((CTool*)object)->m_params.m_type = CToolParams::eToolType(zero_based_choice);
+	((CTool*)object)->m_params.m_type = tool_types_for_on_set_type[zero_based_choice].first;
 	((CTool*)object)->ResetParametersToReasonableValues();
 	heeksCAD->RefreshProperties();
 	object->KillGLLists();
@@ -606,14 +608,14 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 
 
 	{
-		CToolParams::ToolTypesList_t tool_types = CToolParams::GetToolTypesList();
+		tool_types_for_on_set_type = CToolParams::GetToolTypesList();
 
 		int choice = -1;
 		std::list< wxString > choices;
-		for (CToolParams::ToolTypesList_t::size_type i=0; i<tool_types.size(); i++)
+		for (CToolParams::ToolTypesList_t::size_type i=0; i<tool_types_for_on_set_type.size(); i++)
 		{
-			choices.push_back(tool_types[i].second);
-			if (m_type == tool_types[i].first) choice = int(i);
+			choices.push_back(tool_types_for_on_set_type[i].second);
+			if (m_type == tool_types_for_on_set_type[i].first) choice = int(i);
 
 		} // End for
 		list->push_back(new PropertyChoice(_("Type"), choices, choice, parent, on_set_type));

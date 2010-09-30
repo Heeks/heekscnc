@@ -6,6 +6,8 @@
  */
 
 #include "stdafx.h"
+
+#ifndef STABLE_OPS_ONLY
 #include "Inlay.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -1877,3 +1879,4 @@ bool CInlay::operator== ( const CInlay & rhs ) const
 	return(CDepthOp::operator==(rhs));
 }
 
+#endif //#ifndef STABLE_OPS_ONLY

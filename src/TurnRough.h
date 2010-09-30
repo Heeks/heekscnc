@@ -5,6 +5,8 @@
  * details.
  */
 
+#ifndef STABLE_OPS_ONLY
+
 #include "HeeksCNCTypes.h"
 #include "SpeedOp.h"
 #include "geometry.h"
@@ -73,3 +75,5 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
+
+#endif //#ifndef STABLE_OPS_ONLY

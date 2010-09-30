@@ -6,6 +6,8 @@
  */
 
 #include "stdafx.h"
+
+#ifndef STABLE_OPS_ONLY
 #include "Raft.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -869,3 +871,4 @@ bool CRaft::operator==(const CRaft & rhs) const
 	return(CDepthOp::operator==(rhs));
 }
 
+#endif //#ifndef STABLE_OPS_ONLY
