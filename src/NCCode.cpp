@@ -67,9 +67,9 @@ void PathObject::WriteBaseXML(TiXmlElement *pElem)
 {
 	pElem->SetAttribute("tool_number", m_tool_number);
 
-	pElem->SetDoubleAttribute("x", m_x[0] / CNCCodeBlock::multiplier);
-	pElem->SetDoubleAttribute("y", m_x[1] / CNCCodeBlock::multiplier);
-	pElem->SetDoubleAttribute("z", m_x[2] / CNCCodeBlock::multiplier);
+	pElem->SetDoubleAttribute("x", m_x[0]);
+	pElem->SetDoubleAttribute("y", m_x[1]);
+	pElem->SetDoubleAttribute("z", m_x[2]);
 
 } // End WriteXML() method
 
@@ -166,9 +166,9 @@ void PathArc::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = new TiXmlElement( "arc" );
 	root->LinkEndChild( element );
 
-	element->SetDoubleAttribute("i", m_c[0] / CNCCodeBlock::multiplier);
-	element->SetDoubleAttribute("j", m_c[1] / CNCCodeBlock::multiplier);
-	element->SetDoubleAttribute("k", m_c[2] / CNCCodeBlock::multiplier);
+	element->SetDoubleAttribute("i", m_c[0]);
+	element->SetDoubleAttribute("j", m_c[1]);
+	element->SetDoubleAttribute("k", m_c[2]);
 	element->SetDoubleAttribute("d", m_dir);
 
 	PathObject::WriteBaseXML(element);

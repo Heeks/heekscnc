@@ -32,7 +32,7 @@ enum
 	ID_TOOL,
 };
 
-BEGIN_EVENT_TABLE(PocketDlg, wxDialog)
+BEGIN_EVENT_TABLE(PocketDlg, HDialog)
     EVT_CHILD_FOCUS(PocketDlg::OnChildFocus)
     EVT_COMBOBOX(ID_STARTING_PLACE,PocketDlg::OnComboStartingPlace)
     EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, PocketDlg::OnCheckKeepToolDown)
@@ -58,33 +58,37 @@ wxBitmap* PocketDlg::m_step_down_bitmap = NULL;
 static std::vector< std::pair< int, wxString > > tools_for_combo;
 
 PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
-             : wxDialog(parent, wxID_ANY, wxString(_T("Pocket Operation")))
+             : HDialog(parent, wxID_ANY, wxString(_T("Pocket Operation")))
 {
 	m_ignore_event_functions = true;
     wxBoxSizer *sizerMain = new wxBoxSizer(wxHORIZONTAL);
 
 	// add left sizer
     wxBoxSizer *sizerLeft = new wxBoxSizer(wxVERTICAL);
-    sizerMain->Add( sizerLeft, 0, wxALL, 5 );
+    sizerMain->Add( sizerLeft, 0, wxALL, control_border );
 
 	// add right sizer
     wxBoxSizer *sizerRight = new wxBoxSizer(wxVERTICAL);
-    sizerMain->Add( sizerRight, 0, wxALL, 5 );
+    sizerMain->Add( sizerRight, 0, wxALL, control_border );
 
 	// add picture to right side
 	m_picture = new PictureWindow(this, wxSize(300, 200));
 	wxBoxSizer *pictureSizer = new wxBoxSizer(wxVERTICAL);
 	pictureSizer->Add(m_picture, 1, wxGROW);
-    sizerRight->Add( pictureSizer, 0, wxALL, 5 );
+    sizerRight->Add( pictureSizer, 0, wxALL, control_border );
+
+	// add some of the controls to the right side
+	AddLabelAndControl(sizerRight, _("horizontal feedrate"), m_lgthHFeed = new CLengthCtrl(this, ID_HFEED));
+	AddLabelAndControl(sizerRight, _("vertical feedrate"), m_lgthVFeed = new CLengthCtrl(this, ID_VFEED));
+	AddLabelAndControl(sizerRight, _("spindle speed"), m_dblSpindleSpeed = new CDoubleCtrl(this, ID_SPINDLE_SPEED));
+
+	AddLabelAndControl(sizerRight, _("comment"), m_txtComment = new wxTextCtrl(this, ID_COMMENT));
+	sizerRight->Add( m_chkActive = new wxCheckBox( this, ID_ACTIVE, _("active") ), 0, wxALL, control_border );
+	AddLabelAndControl(sizerRight, _("title"), m_txtTitle = new wxTextCtrl(this, ID_TITLE));
 
 	// add OK and Cancel to right side
-    wxBoxSizer *sizerOKCancel = new wxBoxSizer(wxVERTICAL);
-	sizerRight->Add( sizerOKCancel, 0, wxALL | wxALIGN_RIGHT | wxALIGN_BOTTOM, 5 );
-    wxButton* buttonOK = new wxButton(this, wxID_OK, _("OK"));
-	sizerOKCancel->Add( buttonOK, 0, wxALL | wxDOWN, 5 );
-    wxButton* buttonCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-	sizerOKCancel->Add( buttonCancel, 0, wxALL | wxUP, 5 );
-    buttonOK->SetDefault();
+    wxBoxSizer *sizerOKCancel = MakeOkAndCancel(wxHORIZONTAL);
+	sizerRight->Add( sizerOKCancel, 0, wxALL | wxALIGN_RIGHT | wxALIGN_BOTTOM, control_border );
 
 	// add all the controls to the left side
 	AddLabelAndControl(sizerLeft, _("sketches"), m_idsSketches = new CObjectIdsCtrl(this, ID_SKETCHES));
@@ -100,8 +104,8 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 	for(unsigned int i = 0; i<tools_for_combo.size(); i++)tools.Add(tools_for_combo[i].second);
 	AddLabelAndControl(sizerLeft, _("Tool"), m_cmbTool = new wxComboBox(this, ID_TOOL, _T(""), wxDefaultPosition, wxDefaultSize, tools));
 
-	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, 5 );
-	sizerLeft->Add( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), 0, wxALL, 5 );
+	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, control_border );
+	sizerLeft->Add( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), 0, wxALL, control_border );
 	AddLabelAndControl(sizerLeft, _("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this, ID_ZIG_ANGLE));
 
 	wxString abs_mode_choices[] = {_("absolute"), _("incremental")};
@@ -112,13 +116,6 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 	AddLabelAndControl(sizerLeft, _("start depth"), m_lgthStartDepth = new CLengthCtrl(this, ID_START_DEPTH));
 	AddLabelAndControl(sizerLeft, _("final depth"), m_lgthFinalDepth = new CLengthCtrl(this, ID_FINAL_DEPTH));
 	AddLabelAndControl(sizerLeft, _("step down"), m_lgthStepDown = new CLengthCtrl(this, ID_STEP_DOWN));
-	AddLabelAndControl(sizerLeft, _("horizontal feedrate"), m_lgthHFeed = new CLengthCtrl(this, ID_HFEED));
-	AddLabelAndControl(sizerLeft, _("vertical feedrate"), m_lgthVFeed = new CLengthCtrl(this, ID_VFEED));
-	AddLabelAndControl(sizerLeft, _("spindle speed"), m_dblSpindleSpeed = new CDoubleCtrl(this, ID_SPINDLE_SPEED));
-
-	AddLabelAndControl(sizerLeft, _("comment"), m_txtComment = new wxTextCtrl(this, ID_COMMENT));
-	sizerLeft->Add( m_chkActive = new wxCheckBox( this, ID_ACTIVE, _("active") ), 0, wxALL, 5 );
-	AddLabelAndControl(sizerLeft, _("title"), m_txtTitle = new wxTextCtrl(this, ID_TITLE));
 
 	SetFromData(object);
 
@@ -260,13 +257,4 @@ void PocketDlg::OnCheckUseZigZag(wxCommandEvent& event)
 {
 	if(m_ignore_event_functions)return;
 	SetPicture();
-}
-
-void PocketDlg::AddLabelAndControl(wxBoxSizer* sizer, const wxString& label, wxWindow* control)
-{
-    wxBoxSizer *sizer_horizontal = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText *static_label = new wxStaticText(this, wxID_ANY, label);
-	sizer_horizontal->Add( static_label, 0, wxRIGHT | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5 );
-	sizer_horizontal->Add( control, 0, wxLEFT | wxALIGN_RIGHT | wxEXPAND | wxALIGN_CENTER_VERTICAL, 5 );
-	sizer->Add( sizer_horizontal, 0, wxALL, 5 );
 }

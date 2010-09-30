@@ -40,7 +40,7 @@ enum
 	
 };
 
-BEGIN_EVENT_TABLE(CToolDlg, wxDialog)
+BEGIN_EVENT_TABLE(CToolDlg, HDialog)
     EVT_CHILD_FOCUS(CToolDlg::OnChildFocus)
     EVT_COMBOBOX(ID_TITLE_TYPE,CToolDlg::OnComboTitleType)
     EVT_COMBOBOX(ID_TOOL_TYPE, CToolDlg::OnComboToolType)
@@ -68,33 +68,43 @@ wxBitmap* CToolDlg::m_temperature_bitmap = NULL;
 wxBitmap* CToolDlg::m_filament_diameter_bitmap = NULL;
 
 CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
-             : wxDialog(parent, wxID_ANY, wxString(_T("Tool Definition")))
+             : HDialog(parent, wxID_ANY, wxString(_T("Tool Definition")))
 {
 	m_ignore_event_functions = true;
     wxBoxSizer *sizerMain = new wxBoxSizer(wxHORIZONTAL);
 
 	// add left sizer
     wxBoxSizer *sizerLeft = new wxBoxSizer(wxVERTICAL);
-    sizerMain->Add( sizerLeft, 0, wxALL, 5 );
+    sizerMain->Add( sizerLeft, 0, wxALL, control_border );
 
 	// add right sizer
     wxBoxSizer *sizerRight = new wxBoxSizer(wxVERTICAL);
-    sizerMain->Add( sizerRight, 0, wxALL, 5 );
+    sizerMain->Add( sizerRight, 0, wxALL, control_border );
 
 	// add picture to right side
 	m_picture = new PictureWindow(this, wxSize(300, 200));
 	wxBoxSizer *pictureSizer = new wxBoxSizer(wxVERTICAL);
 	pictureSizer->Add(m_picture, 1, wxGROW);
-    sizerRight->Add( pictureSizer, 0, wxALL, 5 );
+    sizerRight->Add( pictureSizer, 0, wxALL, control_border );
+
+	// add some of the controls to the right side
+
+	// The following are for extrusion and should be hidden for all others
+	wxString extrusionmaterials[] = {_("ABS Plastic"),_("PLA Plastic"),_("HDPE Plastic"),_("Other") };
+	AddLabelAndControl(sizerRight, _("Extrusion Material"),m_cmbExtrusionMaterial = new wxComboBox(this, ID_EXTRUSIONMATERIAL, _T(""), wxDefaultPosition, wxDefaultSize, 4, extrusionmaterials));
+	AddLabelAndControl(sizerRight, _("Feed Rate"),m_dblFeedRate = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
+	AddLabelAndControl(sizerRight, _("Layer Height"),m_dblLayerHeight = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
+	AddLabelAndControl(sizerRight, _("Width Over Thickness ratio"),m_dblWidthOverThickness = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
+	AddLabelAndControl(sizerRight, _("Temperature"),m_dblTemperature = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
+	AddLabelAndControl(sizerRight, _("Flow Rate"),m_dblFlowrate = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
+	AddLabelAndControl(sizerRight, _("Filament Diameter"),m_dblFilamentDiameter = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
+
+	AddLabelAndControl(sizerRight, _("Title"), m_txtTitle = new wxTextCtrl(this, ID_TITLE));
+	sizerRight->Add( m_chkVisible = new wxCheckBox( this, ID_VISIBLE, _("Visible") ), 0, wxALL, control_border );	
 
 	// add OK and Cancel to right side
-    wxBoxSizer *sizerOKCancel = new wxBoxSizer(wxVERTICAL);
-	sizerRight->Add( sizerOKCancel, 0, wxALL | wxALIGN_RIGHT | wxALIGN_BOTTOM, 5 );
-    wxButton* buttonOK = new wxButton(this, wxID_OK, _("OK"));
-	sizerOKCancel->Add( buttonOK, 0, wxALL | wxDOWN, 5 );
-    wxButton* buttonCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-	sizerOKCancel->Add( buttonCancel, 0, wxALL | wxUP, 5 );
-    buttonOK->SetDefault();
+    wxBoxSizer *sizerOKCancel = MakeOkAndCancel(wxHORIZONTAL);
+	sizerRight->Add( sizerOKCancel, 0, wxALL | wxALIGN_RIGHT | wxALIGN_BOTTOM, control_border );
 
 	// add all the controls to the left side
 	wxString title_choices[] = {_("Leave manually assigned title"), _("Automatically Generate Title")};
@@ -128,20 +138,6 @@ CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
 	 AddLabelAndControl(sizerLeft, _("Probe Offset X"),m_dblProbeOffsetX = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
 	 AddLabelAndControl(sizerLeft, _("Probe Offset Y"),m_dblProbeOffsetY = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
 	
-	
-	// The following are for extrusion and should be hidden for all others
-	 wxString extrusionmaterials[] = {_("ABS Plastic"),_("PLA Plastic"),_("HDPE Plastic"),_("Other") };
-	 AddLabelAndControl(sizerLeft, _("Extrusion Material"),m_cmbExtrusionMaterial = new wxComboBox(this, ID_EXTRUSIONMATERIAL, _T(""), wxDefaultPosition, wxDefaultSize, 4, extrusionmaterials));
-	 AddLabelAndControl(sizerLeft, _("Feed Rate"),m_dblFeedRate = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
-	 AddLabelAndControl(sizerLeft, _("Layer Height"),m_dblLayerHeight = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
-	 AddLabelAndControl(sizerLeft, _("Width Over Thickness ratio"),m_dblWidthOverThickness = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
-	 AddLabelAndControl(sizerLeft, _("Temperature"),m_dblTemperature = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
-	 AddLabelAndControl(sizerLeft, _("Flow Rate"),m_dblFlowrate = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
-	 AddLabelAndControl(sizerLeft, _("Filament Diameter"),m_dblFilamentDiameter = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
-	 
-	AddLabelAndControl(sizerLeft, _("Title"), m_txtTitle = new wxTextCtrl(this, ID_TITLE));
-	sizerLeft->Add( m_chkVisible = new wxCheckBox( this, ID_VISIBLE, _("Visible") ), 0, wxALL, 5 );	
-
 	SetFromData(object);
 
     SetSizer( sizerMain );
@@ -321,13 +317,4 @@ void CToolDlg::OnComboExtrusionMaterial(wxCommandEvent& event)
 {
 	if(m_ignore_event_functions)return;
 //	SetPicture();
-}
-
-void CToolDlg::AddLabelAndControl(wxBoxSizer* sizer, const wxString& label, wxWindow* control)
-{
-    wxBoxSizer *sizer_horizontal = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText *static_label = new wxStaticText(this, wxID_ANY, label);
-	sizer_horizontal->Add( static_label, 0, wxRIGHT | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5 );
-	sizer_horizontal->Add( control, 0, wxLEFT | wxALIGN_RIGHT | wxEXPAND | wxALIGN_CENTER_VERTICAL, 5 );
-	sizer->Add( sizer_horizontal, 0, wxALL, 5 );
 }
