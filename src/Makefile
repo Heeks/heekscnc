@@ -44,7 +44,7 @@ endif
 
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DHAVE_LIMITS ${RIP} ${KURVE_FLAGS} -I$(CASINCPATH)
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o Raft.o PocketDlg.o NiceTextCtrl.o #PrintOp.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o Raft.o PocketDlg.o NiceTextCtrl.o CToolDlg.o #PrintOp.o
 
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
@@ -226,6 +226,7 @@ PropertyColor.o: ${HEEKSCADPATH}/interface/PropertyColor.cpp \
 		${HEEKSCADPATH}/interface/Property.h \
 		${HEEKSCADPATH}/interface/HeeksColor.h \
 		${HEEKSCADPATH}/interface/PropertyColor.h
+
 
 	$(CC) -c ${HEEKSCADPATH}/interface/PropertyColor.cpp ${CCFLAGS} -o $@
 
@@ -569,6 +570,10 @@ NiceTextCtrl.o: ${HEEKSCADPATH}/interface/NiceTextCtrl.cpp \
 		${HEEKSCADPATH}/interface/NiceTextCtrl.h
 	$(CC) -c ${HEEKSCADPATH}/interface/NiceTextCtrl.cpp ${CCFLAGS} -o $@
 	
+CToolDlg.o: CToolDlg.cpp \
+		CToolDlg.h
+	$(CC) -c CToolDlg.cpp ${CCFLAGS} -o $@
+
 clean:
 	-rm ${SHARED_LIBRARY} ${OBJECTS}
 
