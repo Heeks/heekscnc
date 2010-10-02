@@ -116,7 +116,8 @@ static void on_set_xy_plane(double value, HeeksObj* object)
 	((CFixture*)object)->ResetTitle();
 }
 
-static void on_set_pivot_point(const double *vt, HeeksObj* object){
+static void on_set_pivot_point(const double *vt, HeeksObj* object)
+{
 	((CFixture *)object)->m_params.m_pivot_point.SetX( vt[0] );
 	((CFixture *)object)->m_params.m_pivot_point.SetY( vt[1] );
 	((CFixture *)object)->m_params.m_pivot_point.SetZ( vt[2] );
@@ -466,9 +467,9 @@ gp_Pnt CFixture::Adjustment( const gp_Pnt & point ) const
 {
 	gp_Pnt transformed_point(point);
 
-	gp_Trsf matrix = GetMatrix();
-
-	transformed_point.Transform( matrix );
+	transformed_point.Transform( GetMatrix(YZ) );
+	transformed_point.Transform( GetMatrix(XZ) );
+	transformed_point.Transform( GetMatrix(XY) );
 
 	return(transformed_point);
 } // End Adjustment() method
@@ -512,11 +513,12 @@ void CFixture::extract(const gp_Trsf& tr, double *m)
 	This is a single rotation matrix that allows transformations around the pivot point
 	about the x,y and z axes by the various angles of rotation.
  */
-gp_Trsf CFixture::GetMatrix() const
+
+gp_Trsf CFixture::GetMatrix(const ePlane_t plane /* = XY */) const
 {
-	gp_Dir x_direction( 1, 0, 0 );
-	gp_Dir y_direction( 0, 1, 0 );
-	gp_Dir z_direction( 0, 0, 1 );
+	gp_Dir x_direction( 1.0, 0.0, 0.0 );
+	gp_Dir y_direction( 0.0, 1.0, 0.0 );
+	gp_Dir z_direction( 0.0, 0.0, 1.0 );
 
 	double yz_plane_angle_in_radians = (m_params.m_yz_plane / 360) * (2 * PI);	// degrees expressed in radians
 	double xz_plane_angle_in_radians = (m_params.m_xz_plane / 360) * (2 * PI);	// degrees expressed in radians
@@ -531,9 +533,19 @@ gp_Trsf CFixture::GetMatrix() const
 	gp_Trsf xy_plane_rotation_matrix;
 	xy_plane_rotation_matrix.SetRotation( gp_Ax1(m_params.m_pivot_point, z_direction), xy_plane_angle_in_radians );
 
-	gp_Trsf matrix = yz_plane_rotation_matrix * xz_plane_rotation_matrix * xy_plane_rotation_matrix;
+    switch (plane)
+    {
+        case YZ:
+            return(yz_plane_rotation_matrix);
 
-	return(matrix);
+        case XZ:
+            return(xz_plane_rotation_matrix);
+
+        default:
+        case XY:
+            return(xy_plane_rotation_matrix);
+    } // End switch
+
 } // End GetMatrix() method
 
 

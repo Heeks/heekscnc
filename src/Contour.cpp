@@ -1034,9 +1034,17 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
 
                     TopoDS_Shape wire = fix.Wire();
 
-                    BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-                    transform.Perform(wire, false);
-                    wire = transform.Shape();
+                    BRepBuilderAPI_Transform transform1(pMachineState->Fixture().GetMatrix(CFixture::YZ));
+                    transform1.Perform(wire, false);
+                    wire = transform1.Shape();
+
+                    BRepBuilderAPI_Transform transform2(pMachineState->Fixture().GetMatrix(CFixture::XZ));
+                    transform2.Perform(wire, false);
+                    wire = transform2.Shape();
+
+                    BRepBuilderAPI_Transform transform3(pMachineState->Fixture().GetMatrix(CFixture::XY));
+                    transform3.Perform(wire, false);
+                    wire = transform3.Shape();
 
                     BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
 

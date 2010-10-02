@@ -234,9 +234,15 @@ Python CZigZag::AppendTextToProgram(CMachineState *pMachineState)
 			if (copy != NULL)
 			{
 				double m[16];	// A different form of the transformation matrix.
-				CFixture::extract( pMachineState->Fixture().GetMatrix(), m );
-
+				CFixture::extract( pMachineState->Fixture().GetMatrix(CFixture::YZ), m );
                 copy->ModifyByMatrix(m);
+
+                CFixture::extract( pMachineState->Fixture().GetMatrix(CFixture::XZ), m );
+                copy->ModifyByMatrix(m);
+
+                CFixture::extract( pMachineState->Fixture().GetMatrix(CFixture::XY), m );
+                copy->ModifyByMatrix(m);
+
                 solids.push_back(copy);
             } // End if - then
         } // End if - then

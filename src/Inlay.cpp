@@ -1105,12 +1105,20 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
                     // for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
                     if (itPath != itValley->end())
                     {
+                        TopoDS_Wire wire(itPath->Wire());
 
                         // Rotate this wire to align with the fixture.
-                        BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-                        TopoDS_Wire wire(itPath->Wire());
-                        transform.Perform(wire, false);
-                        wire = TopoDS::Wire(transform.Shape());
+                        BRepBuilderAPI_Transform transform1(pMachineState->Fixture().GetMatrix(CFixture::YZ));
+                        transform1.Perform(wire, false);
+                        wire = TopoDS::Wire(transform1.Shape());
+
+                        BRepBuilderAPI_Transform transform2(pMachineState->Fixture().GetMatrix(CFixture::XZ));
+                        transform2.Perform(wire, false);
+                        wire = TopoDS::Wire(transform2.Shape());
+
+                        BRepBuilderAPI_Transform transform3(pMachineState->Fixture().GetMatrix(CFixture::XY));
+                        transform3.Perform(wire, false);
+                        wire = TopoDS::Wire(transform3.Shape());
 
                         python << CContour::GeneratePathFromWire(wire,
                                                                 pMachineState,
@@ -1168,10 +1176,20 @@ Python CInlay::FormValleyPockets( CInlay::Valleys_t valleys, CMachineState *pMac
             // to machine out the centre of the valley as well as the walls.
 
             // Rotate this wire to align with the fixture.
-            BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
             TopoDS_Wire wire(itPath->Wire());
-            transform.Perform(wire, false);
-            wire = TopoDS::Wire(transform.Shape());
+
+            // Rotate this wire to align with the fixture.
+            BRepBuilderAPI_Transform transform1(pMachineState->Fixture().GetMatrix(CFixture::YZ));
+            transform1.Perform(wire, false);
+            wire = TopoDS::Wire(transform1.Shape());
+
+            BRepBuilderAPI_Transform transform2(pMachineState->Fixture().GetMatrix(CFixture::XZ));
+            transform2.Perform(wire, false);
+            wire = TopoDS::Wire(transform2.Shape());
+
+            BRepBuilderAPI_Transform transform3(pMachineState->Fixture().GetMatrix(CFixture::XY));
+            transform3.Perform(wire, false);
+            wire = TopoDS::Wire(transform3.Shape());
 
             HeeksObj *pBoundary = heeksCAD->NewSketch();
             if (heeksCAD->ConvertWireToSketch(wire, pBoundary, heeksCAD->GetTolerance()))
@@ -1309,9 +1327,17 @@ Python CInlay::FormMountainPockets( CInlay::Valleys_t valleys, CMachineState *pM
             tool_path_wire = TopoDS::Wire(rotate.Shape());
 
             // Rotate this wire to align with the fixture.
-            BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-            transform.Perform(tool_path_wire, false);
-            tool_path_wire = TopoDS::Wire(transform.Shape());
+            BRepBuilderAPI_Transform transform1(pMachineState->Fixture().GetMatrix(CFixture::YZ));
+            transform1.Perform(tool_path_wire, false);
+            tool_path_wire = TopoDS::Wire(transform1.Shape());
+
+            BRepBuilderAPI_Transform transform2(pMachineState->Fixture().GetMatrix(CFixture::XZ));
+            transform2.Perform(tool_path_wire, false);
+            tool_path_wire = TopoDS::Wire(transform2.Shape());
+
+            BRepBuilderAPI_Transform transform3(pMachineState->Fixture().GetMatrix(CFixture::XY));
+            transform3.Perform(tool_path_wire, false);
+            tool_path_wire = TopoDS::Wire(transform3.Shape());
 
             HeeksObj *pBoundary = heeksCAD->NewSketch();
             if (heeksCAD->ConvertWireToSketch(tool_path_wire, pBoundary, heeksCAD->GetTolerance()))
@@ -1624,9 +1650,17 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
                 }
 
                 // Rotate this wire to align with the fixture.
-                BRepBuilderAPI_Transform transform(pMachineState->Fixture().GetMatrix());
-                transform.Perform(tool_path_wire, false);
-                tool_path_wire = TopoDS::Wire(transform.Shape());
+                BRepBuilderAPI_Transform transform1(pMachineState->Fixture().GetMatrix(CFixture::YZ));
+                transform1.Perform(tool_path_wire, false);
+                tool_path_wire = TopoDS::Wire(transform1.Shape());
+
+                BRepBuilderAPI_Transform transform2(pMachineState->Fixture().GetMatrix(CFixture::XZ));
+                transform2.Perform(tool_path_wire, false);
+                tool_path_wire = TopoDS::Wire(transform2.Shape());
+
+                BRepBuilderAPI_Transform transform3(pMachineState->Fixture().GetMatrix(CFixture::XY));
+                transform3.Perform(tool_path_wire, false);
+                tool_path_wire = TopoDS::Wire(transform3.Shape());
 
                 python << pMachineState->Tool(m_tool_number);  // Select the chamfering bit.
 
