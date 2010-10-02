@@ -58,6 +58,10 @@
 		<Unit filename="src/CNCConfig.h" />
 		<Unit filename="src/CNCPoint.cpp" />
 		<Unit filename="src/CNCPoint.h" />
+		<Unit filename="src/CTool.cpp" />
+		<Unit filename="src/CTool.h" />
+		<Unit filename="src/CToolDlg.cpp" />
+		<Unit filename="src/CToolDlg.h" />
 		<Unit filename="src/Chamfer.cpp" />
 		<Unit filename="src/Chamfer.h" />
 		<Unit filename="src/Contour.cpp" />
@@ -66,7 +70,6 @@
 		<Unit filename="src/CounterBore.h" />
 		<Unit filename="src/CuttingRate.cpp" />
 		<Unit filename="src/CuttingRate.h" />
-		<Unit filename="src/CuttingTool.cpp" />
 		<Unit filename="src/CuttingTool.h" />
 		<Unit filename="src/DepthOp.cpp" />
 		<Unit filename="src/DepthOp.h" />
@@ -107,6 +110,8 @@
 		<Unit filename="src/OutputCanvas.cpp" />
 		<Unit filename="src/Pocket.cpp" />
 		<Unit filename="src/Pocket.h" />
+		<Unit filename="src/PocketDlg.cpp" />
+		<Unit filename="src/PocketDlg.h" />
 		<Unit filename="src/Probe.h" />
 		<Unit filename="src/Probing.cpp" />
 		<Unit filename="src/Probing.h" />
@@ -120,6 +125,8 @@
 		<Unit filename="src/PythonString.h" />
 		<Unit filename="src/PythonStuff.cpp" />
 		<Unit filename="src/PythonStuff.h" />
+		<Unit filename="src/Raft.cpp" />
+		<Unit filename="src/Raft.h" />
 		<Unit filename="src/RawMaterial.cpp" />
 		<Unit filename="src/RawMaterial.h" />
 		<Unit filename="src/Reselect.cpp" />
@@ -148,6 +155,8 @@
 		<Unit filename="src/ZigZag.h" />
 		<Unit filename="src/stdafx.cpp" />
 		<Unit filename="src/stdafx.h" />
+		<Unit filename="../interface/HDialogs.cpp" />
+		<Unit filename="../interface/HDialogs.h" />
 		<Unit filename="../interface/HeeksColor.cpp" />
 		<Unit filename="../interface/HeeksColor.h" />
 		<Unit filename="../interface/HeeksObj.cpp" />
@@ -156,6 +165,8 @@
 		<Unit filename="../interface/LeftAndRight.h" />
 		<Unit filename="../interface/MarkedObject.cpp" />
 		<Unit filename="../interface/MarkedObject.h" />
+		<Unit filename="../interface/NiceTextCtrl.cpp" />
+		<Unit filename="../interface/NiceTextCtrl.h" />
 		<Unit filename="../interface/ObjList.cpp" />
 		<Unit filename="../interface/ObjList.h" />
 		<Unit filename="../interface/ObjectCanvas.cpp" />
