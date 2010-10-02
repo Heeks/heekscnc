@@ -136,12 +136,37 @@ public:
 		return(ss);
 	}
 
+
+	typedef enum {
+		YZ = 1,
+		XZ,
+		XY
+	} ePlane_t;
+
+	friend wxString & operator << ( wxString & ss, const ePlane_t & plane )
+	{
+		switch (plane)
+		{
+		case YZ:	ss << _T("YZ");
+			break;
+
+		case XZ:	ss << _T("XZ");
+			break;
+
+		case XY:	ss << _T("XY");
+			break;
+		} // End switch()
+
+		return(ss);
+	}
+
+
 	eCoordinateSystemNumber_t m_coordinate_system_number;
 
 	//	Constructors.
-	CFixture(const wxChar *title, 
+	CFixture(const wxChar *title,
 			const eCoordinateSystemNumber_t coordinate_system_number,
-			const bool safety_height_defined, 
+			const bool safety_height_defined,
 			const double safety_height )
 				: m_coordinate_system_number(coordinate_system_number)
 	{
@@ -192,7 +217,7 @@ public:
 	gp_Pnt Adjustment( double *point ) const;
 
 	static void extract(const gp_Trsf& tr, double *m);
-	gp_Trsf GetMatrix() const;
+	gp_Trsf GetMatrix(const ePlane_t = XY) const;
 
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void SetRotationsFromProbedPoints( const wxString & probed_points_xml_file_name );
