@@ -15,4 +15,5 @@ rez2 Prvá zváračská format rez (Unofficial slovak national standard) 0
 centroid1 centroid mill post 0
 anilam_crusader_m Anilam Crusader M 0
 makerbotHBP makerbotHBP 0
+lathe1 Lathe post-not finished 0
 
