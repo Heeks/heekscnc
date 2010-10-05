@@ -1,3 +1,4 @@
+
 // HeeksCNCTypes.h
 
 #pragma once
@@ -37,5 +38,6 @@ enum{
 	UnattachOpType,
 	WaterlineType,
 	RaftType,
+	TappingType,
 	HeeksCNCMaximumType
 };

@@ -30,6 +30,8 @@ class CToolDlg : public HDialog
 	static wxBitmap* m_width_over_thickness_bitmap;
 	static wxBitmap* m_temperature_bitmap;
 	static wxBitmap* m_filament_diameter_bitmap;
+	static wxBitmap* m_pitch_bitmap;
+	static wxBitmap* m_direction_bitmap;
 	
 
 	wxComboBox *m_cmbTitleType;
@@ -71,6 +73,10 @@ class CToolDlg : public HDialog
 	CDoubleCtrl *m_dblFlowrate;
 	CDoubleCtrl *m_dblFilamentDiameter;
 
+	// The following are for tap tools
+	CDoubleCtrl *m_dblPitch;
+	wxComboBox *m_cmbDirection;
+
 public:
     CToolDlg(wxWindow *parent, CTool* object);
 	void GetData(CTool* object);
@@ -83,6 +89,8 @@ public:
 	void OnComboToolType(wxCommandEvent& event);
 	void OnComboMaterial(wxCommandEvent& event);
 	void OnComboExtrusionMaterial(wxCommandEvent& event);
+
+	void OnComboDirection(wxCommandEvent& event);
 
 
     DECLARE_EVENT_TABLE()

@@ -1,3 +1,4 @@
+
 // Op.cpp
 /*
  * Copyright (c) 2009, Dan Heeks
@@ -238,6 +239,11 @@ void COp::ReadDefaultValues()
         case InlayType:
 			default_tool = CTool::FindFirstByType( CToolParams::eChamfer );
 			break;
+
+        case TappingType:
+			default_tool = CTool::FindFirstByType( CToolParams::eTapTool );
+			break;
+
 		default:
 			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
 			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );

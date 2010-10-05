@@ -125,7 +125,11 @@ void CToolParams::set_initial_values()
 	config.Read(_T("m_filament_diameter"), &m_filament_diameter, 3); //The diameter of the raw filament.  Typically ~3mm
 	
 	config.Read(_T("gradient"), &m_gradient, 0.0);  // Straight plunge by default.
-}
+
+	// The following are ONLY for tapping tools
+	config.Read(_T("m_direction"), &m_direction, 0);  // default to right-hand tap
+	config.Read(_T("m_pitch"), &m_pitch, 1.0);        // mm/rev, this would be for an M6 tap
+	}
 
 void CToolParams::write_values_to_config()
 {
@@ -167,6 +171,10 @@ void CToolParams::write_values_to_config()
 	
 
 	config.Write(_T("gradient"), m_gradient);
+
+	// The following are ONLY for tapping tools
+	config.Write(_T("m_direction"), m_direction); 
+	config.Write(_T("m_pitch"), m_pitch); 
 }
 
 void CTool::SetDiameter( const double diameter )
@@ -192,6 +200,21 @@ static void on_set_diameter(double value, HeeksObj* object)
 {
 	((CTool*)object)->SetDiameter( value );
 } // End on_set_diameter() routine
+
+static void on_set_direction(int value, HeeksObj* object)
+{
+	((CTool*)object)->m_params.m_direction = value;
+	((CTool*)object)->ResetTitle();
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_pitch(double value, HeeksObj* object)
+{
+	((CTool*)object)->m_params.m_pitch = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
 
 static void on_set_max_advance_per_revolution(double value, HeeksObj* object)
 {
@@ -418,6 +441,16 @@ void CTool::ResetParametersToReasonableValues()
 
 		case CToolParams::eTurningTool:
 				// No special constraints for this.
+				ResetTitle();
+				break;
+
+		case CToolParams::eTapTool:
+		                m_params.m_tool_length_offset = (5 * m_params.m_diameter);
+				m_params.m_automatically_generate_title = 1;
+				m_params.m_diameter = 6.0;
+				m_params.m_direction = 0;
+				m_params.m_pitch = 1.0;
+				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
 				ResetTitle();
 				break;
 
@@ -699,7 +732,19 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 		list->push_back(new PropertyLength(_("flowrate"), m_flowrate, parent, on_set_flowrate));
 		list->push_back(new PropertyLength(_("filament_diameter"), m_filament_diameter, parent, on_set_filament_diameter));
 	}
-
+	if (m_type == eTapTool)
+	{
+		// The following are ONLY for tapping tools
+		{
+			std::list< wxString > choices;
+			choices.push_back(_("right hand"));
+			choices.push_back(_("left hand"));
+			int choice = int(m_direction);
+			list->push_back(new PropertyChoice(_("Tap direction"), choices, choice, parent, on_set_direction));
+		}
+		list->push_back(new PropertyDouble(_("pitch"), m_pitch, parent, on_set_pitch));
+	}
+	
 }
 
 void CToolParams::WriteXMLAttributes(TiXmlNode *root)
@@ -739,6 +784,9 @@ void CToolParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("filament_diameter", m_filament_diameter );
 	element->SetDoubleAttribute("flowrate", m_flowrate );
 	element->SetDoubleAttribute("gradient", m_gradient);
+
+	element->SetDoubleAttribute("pitch", m_pitch);
+	element->SetAttribute("direction", m_direction);
 }
 
 void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -788,6 +836,8 @@ void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	{
 	    m_gradient = ReasonableGradient(m_type);
 	}
+	if (pElem->Attribute("direction")) pElem->Attribute("direction", &m_direction);
+	if (pElem->Attribute("pitch")) pElem->Attribute("pitch", &m_pitch);
 }
 
 CTool::~CTool()
@@ -983,7 +1033,13 @@ const wxBitmap &CTool::GetIcon()
 				static wxBitmap* extrusionIcon = NULL;
 				if(extrusionIcon == NULL)extrusionIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/extrusion.png")));
 				return *extrusionIcon;
-			}	
+			}
+		case CToolParams::eTapTool:
+			{
+				static wxBitmap* tapToolIcon = NULL;
+				if(tapToolIcon == NULL)tapToolIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/tap.png")));
+				return *tapToolIcon;
+			}		
 		default:
 			{
 				static wxBitmap* toolIcon = NULL;
@@ -1281,6 +1337,14 @@ wxString CTool::GenerateMeaningfulName() const
 
                 case CToolParams::eToolLengthSwitch:	l_ossName << (_("Tool Length Switch"));
 							break;
+
+                case CToolParams::eTapTool:	
+		  l_ossName << (_("Tap Tool"));
+		  if (m_params.m_direction == 1) {
+		    l_ossName << (_(", left hand"));
+		  } 
+
+		  break;
 
 		default:				break;
 	} // End switch
@@ -1638,6 +1702,7 @@ TopoDS_Shape CTool::GetShape() const
 		case CToolParams::eEndmill:
 		case CToolParams::eSlotCutter:
 		case CToolParams::eExtrusion:
+	        case CToolParams::eTapTool:             // reasonable?
 		default:
 		{
 			// First a cylinder to represent the shaft.
@@ -1825,6 +1890,7 @@ double CTool::CuttingRadius( const bool express_in_drawing_units /* = false */, 
 		case CToolParams::eTouchProbe:
 		case CToolParams::eExtrusion:
 		case CToolParams::eToolLengthSwitch:
+		case CToolParams::eTapTool:
 		default:
 			radius = m_params.m_diameter/2;
 	} // End switch
@@ -2022,6 +2088,8 @@ bool CToolParams::operator==( const CToolParams & rhs ) const
 	if (m_temperature != rhs.m_temperature) return(false);
 	if (m_flowrate != rhs.m_flowrate) return(false);	
 	if (m_filament_diameter != rhs.m_filament_diameter) return(false);	
+	if (m_direction != rhs.m_direction) return(false);	
+	if (m_pitch != rhs.m_pitch) return(false);	
 	return(true);
 }
 

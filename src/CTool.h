@@ -31,6 +31,7 @@ public:
 		eTouchProbe,
 		eToolLengthSwitch,
 		eExtrusion,
+		eTapTool,
 		eUndefinedToolType
 	} eToolType;
 
@@ -55,7 +56,9 @@ public:
 #ifndef STABLE_OPS_ONLY
 		types_list.push_back( ToolTypeDescription_t( eExtrusion, wxString(_("Extrusion")) ));		
 #endif
-
+#ifndef STABLE_OPS_ONLY
+		types_list.push_back( ToolTypeDescription_t( eTapTool, wxString(_("Tapping Tool")) ));		
+#endif
 		return(types_list);
 	} // End GetToolTypesList() method
 
@@ -200,6 +203,10 @@ public:
 	// To cater for this, a value of zero will indicate a straight plunge.
 
 	double m_gradient;
+
+	// properties for tapping tools
+	int m_direction;    // 0.. right hand tapping, 1..left hand tapping
+        double m_pitch;     // in units/rev 
 
 	void set_initial_values();
 	void write_values_to_config();

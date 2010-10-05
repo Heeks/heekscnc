@@ -178,6 +178,7 @@ bool COperations::IsAnOperation(int object_type)
 		case ScriptOpType:
 		case AttachOpType:
 		case UnattachOpType:
+		case TappingType:
 			return true;
 		default:
 			return theApp.m_external_op_types.find(object_type) != theApp.m_external_op_types.end();
