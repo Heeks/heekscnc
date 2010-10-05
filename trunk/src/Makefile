@@ -44,7 +44,7 @@ endif
 
 CCFLAGS=-Wall -fPIC -g -I "./" $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DHAVE_LIMITS ${RIP} ${KURVE_FLAGS} -I$(CASINCPATH)
 
-OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o Raft.o PocketDlg.o NiceTextCtrl.o CToolDlg.o HDialogs.o #PrintOp.o
+OBJECTS=HeeksCNC.o HeeksColor.o HeeksObj.o HeeksCNCInterface.o Interface.o NCCode.o ObjList.o OutputCanvas.o Profile.o Pocket.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyFile.o PropertyLength.o PropertyInt.o PropertyList.o PropertyString.o PropertyVertex.o PythonStuff.o PythonString.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinyxmlerror.o tinyxmlparser.o ZigZag.o Adaptive.o DepthOp.o Op.o Drilling.o CTool.o CounterBore.o TurnRough.o Fixture.o SpeedOp.o RawMaterial.o SpeedReferences.o SpeedReference.o CuttingRate.o Locating.o Operations.o Fixtures.o Tools.o Excellon.o TransientObject.o BOM.o TrsfNCCode.o Probing.o Reselect.o Chamfer.o Contour.o Inlay.o MachineState.o CNCPoint.o PictureFrame.o Tag.o Tags.o ScriptOp.o ObjectCanvas.o AttachOp.o Waterline.o Geom.o Raft.o PocketDlg.o NiceTextCtrl.o CToolDlg.o HDialogs.o Tapping.o #PrintOp.o
 
 
 SHARED_LIBRARY=../libheekscnc.so.0.5.1
@@ -73,6 +73,7 @@ HeeksCNC.o: HeeksCNC.cpp \
 		Waterline.h \
 		Adaptive.h \
 		Drilling.h \
+		Tapping.h \
 		Fixture.h \
 		CuttingRate.h \
 		SpeedReference.h \
@@ -193,6 +194,7 @@ Program.o: Program.cpp \
 		Waterline.h \
 		Adaptive.h \
 		Drilling.h \
+		Tapping.h \
 		CTool.h \
 		Op.h \
 		Raft.h \
@@ -381,6 +383,20 @@ Drilling.o: Drilling.cpp \
 		CTool.h
 	$(CC) -c Drilling.cpp ${CCFLAGS} -o $@
 
+Tapping.o: Tapping.cpp \
+		Op.h \
+		HeeksCNCTypes.h \
+		Tapping.h \
+		CNCConfig.h \
+		ProgramCanvas.h \
+		${HEEKSCADPATH}/interface/HeeksObj.h \
+		${HEEKSCADPATH}/interface/PropertyInt.h \
+		${HEEKSCADPATH}/interface/PropertyDouble.h \
+		${HEEKSCADPATH}/interface/PropertyChoice.h \
+		${HEEKSCADPATH}/tinyxml/tinyxml.h \
+		CTool.h
+	$(CC) -c Tapping.cpp ${CCFLAGS} -o $@
+
 CTool.o: CTool.cpp \
 		CTool.h \
 		CNCConfig.h \
@@ -506,6 +522,7 @@ MachineState.o: MachineState.cpp \
 Operations.o: Operations.cpp \
 		Operations.h \
 		Drilling.h \
+		Tapping.h \
 		CTool.h \
 		Excellon.h
 	$(CC) -c Operations.cpp ${CCFLAGS} -o $@

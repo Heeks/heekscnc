@@ -36,6 +36,7 @@
 #include "Adaptive.h"
 #endif
 #include "Drilling.h"
+#include "Tapping.h"
 #include "Locating.h"
 #include "CTool.h"
 #include "CounterBore.h"
@@ -473,6 +474,69 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 }
 
 
+static void NewTappingOpMenuCallback(wxCommandEvent &event)
+{
+	std::vector<CNCPoint> intersections;
+	CTapping::Symbols_t symbols;
+	CTapping::Symbols_t Tools;
+	int tool_number = 0;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if (object->GetType() == ToolType)
+		{
+			Tools.push_back( CTapping::Symbol_t( object->GetType(), object->m_id ) );
+			tool_number = ((CTool *)object)->m_tool_number;
+		} // End if - then
+		else
+		{
+		    if (CTapping::ValidType( object->GetType() ))
+		    {
+                symbols.push_back( CTapping::Symbol_t( object->GetType(), object->m_id ) );
+		    }
+		} // End if - else
+	} // End for
+
+	double depth = -1;
+	CTapping::Symbols_t ToolsThatMatchCircles;
+	CTapping tap( symbols, -1, -1 );
+
+	intersections = tap.FindAllLocations(NULL);
+
+	if ((Tools.size() == 0) && (ToolsThatMatchCircles.size() > 0))
+	{
+		// The operator didn't point to a tool object and one of the circles that they
+		// did point to happenned to match the diameter of an existing tool.  Use that
+		// one as our default.  The operator can always overwrite it later on.
+
+		std::copy( ToolsThatMatchCircles.begin(), ToolsThatMatchCircles.end(),
+				std::inserter( Tools, Tools.begin() ));
+	} // End if - then
+
+	if (intersections.size() == 0)
+	{
+		wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
+		return;
+	}
+
+	if(Tools.size() > 1)
+	{
+		wxMessageBox(_("You may only select a single tool for each tapping operation.!"));
+		return;
+	}
+
+	heeksCAD->CreateUndoPoint();
+	//CDrilling *new_object = new CDrilling( symbols, tool_number, depth );
+	CTapping *new_object = new CTapping( symbols, tool_number, depth );
+	theApp.m_program->Operations()->Add(new_object, NULL);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+	heeksCAD->Changed();
+}
+
+
 static void NewChamferOpMenuCallback(wxCommandEvent &event)
 {
 	CDrilling::Symbols_t symbols;
@@ -893,6 +957,11 @@ static void NewDrillMenuCallback(wxCommandEvent &event)
 	AddNewTool(CToolParams::eDrill);
 }
 
+static void NewTapToolMenuCallback(wxCommandEvent &event)
+{
+	AddNewTool(CToolParams::eTapTool);
+}
+
 static void NewCentreDrillMenuCallback(wxCommandEvent &event)
 {
 	AddNewTool(CToolParams::eCentreDrill);
@@ -1082,6 +1151,7 @@ static CCallbackTool new_touch_probe(_("New Touch Probe..."), _T("probe"), NewTo
 static CCallbackTool new_extrusion(_("New Extrusion..."), _T("extrusion"), NewExtrusionMenuCallback);
 #endif
 static CCallbackTool new_tool_length_switch(_("New Tool Length Switch..."), _T("probe"), NewToolLengthSwitchMenuCallback);
+static CCallbackTool new_tap_tool(_("New Tap Tool..."), _T("tap"), NewTapToolMenuCallback);
 
 void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 {
@@ -1099,6 +1169,7 @@ void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_extrusion);
 #endif
 	t_list->push_back(&new_tool_length_switch);
+	t_list->push_back(&new_tap_tool);
 }
 
 static void AddToolBars()
@@ -1124,6 +1195,7 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("Inlay"), ToolImage(_T("opinlay")), _("New Inlay Operation..."), NewInlayOpMenuCallback);
 #endif
 		heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Tap"), ToolImage(_T("optap")), _("New Tapping Operation..."), NewTappingOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
@@ -1271,6 +1343,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Inlay Operation..."), ToolImage(_T("opinlay")), NewInlayOpMenuCallback);
 #endif
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Tapping Operation..."), ToolImage(_T("optap")), NewTappingOpMenuCallback);
 
 	wxMenu *menu3dMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
@@ -1314,7 +1387,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuTools, _("Extrusion..."), ToolImage(_T("extrusion")), NewExtrusionMenuCallback);
 #endif
-	
+	heeksCAD->AddMenuItem(menuTools, _("Tap Tool..."), ToolImage(_T("tap")), NewTapToolMenuCallback);
+
 	// Fixtures menu
 	wxMenu *menuFixtures = new wxMenu;
 	heeksCAD->AddMenuItem(menuFixtures, _("New Fixture..."), ToolImage(_T("fixture")), NewFixtureMenuCallback);
@@ -1399,6 +1473,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #ifndef STABLE_OPS_ONLY
 	heeksCAD->RegisterReadXMLfunction("TurnRough", CTurnRough::ReadFromXMLElement);
 #endif
+	heeksCAD->RegisterReadXMLfunction("Tapping", CTapping::ReadFromXMLElement);
+
 	heeksCAD->RegisterReadXMLfunction("SpeedReferences", CSpeedReferences::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("SpeedReference", CSpeedReference::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingRate", CCuttingRate::ReadFromXMLElement);

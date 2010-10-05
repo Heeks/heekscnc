@@ -37,7 +37,8 @@ enum
     ID_TEMPERATURE,
     ID_FLOWRATE,
     ID_FILAMENTDIAMETER,
-	
+    ID_DIRECTION,
+    ID_PITCH,
 };
 
 BEGIN_EVENT_TABLE(CToolDlg, HDialog)
@@ -46,6 +47,7 @@ BEGIN_EVENT_TABLE(CToolDlg, HDialog)
     EVT_COMBOBOX(ID_TOOL_TYPE, CToolDlg::OnComboToolType)
     EVT_COMBOBOX(ID_MATERIAL, CToolDlg::OnComboMaterial)
     EVT_COMBOBOX(ID_EXTRUSIONMATERIAL, CToolDlg::OnComboExtrusionMaterial)
+    EVT_COMBOBOX(ID_DIRECTION, CToolDlg::OnComboDirection)
 END_EVENT_TABLE()
 
 wxBitmap* CToolDlg::m_diameter_bitmap = NULL;
@@ -66,6 +68,8 @@ wxBitmap* CToolDlg::m_layer_height_bitmap = NULL;
 wxBitmap* CToolDlg::m_width_over_thickness_bitmap = NULL;
 wxBitmap* CToolDlg::m_temperature_bitmap = NULL;
 wxBitmap* CToolDlg::m_filament_diameter_bitmap = NULL;
+wxBitmap* CToolDlg::m_pitch_bitmap = NULL;
+wxBitmap* CToolDlg::m_direction_bitmap = NULL;
 
 CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
              : HDialog(parent, wxID_ANY, wxString(_T("Tool Definition")))
@@ -102,6 +106,12 @@ CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
 	AddLabelAndControl(sizerRight, _("Title"), m_txtTitle = new wxTextCtrl(this, ID_TITLE));
 	sizerRight->Add( m_chkVisible = new wxCheckBox( this, ID_VISIBLE, _("Visible") ), 0, wxALL, control_border );	
 
+	// The following are for taps and should be hidden for all others
+	AddLabelAndControl(sizerRight, _("Pitch"),m_dblPitch = new CDoubleCtrl(this, ID_PITCH));
+	wxString tapdirections[] = {_("right hand"),_("left hand") };
+	AddLabelAndControl(sizerRight, _("Tap direction"),m_cmbDirection = new wxComboBox(this, ID_DIRECTION, _T(""), 
+											  wxDefaultPosition, wxDefaultSize, 2, tapdirections));
+
 	// add OK and Cancel to right side
     wxBoxSizer *sizerOKCancel = MakeOkAndCancel(wxHORIZONTAL);
 	sizerRight->Add( sizerOKCancel, 0, wxALL | wxALIGN_RIGHT | wxALIGN_BOTTOM, control_border );
@@ -113,8 +123,8 @@ CToolDlg::CToolDlg(wxWindow *parent, CTool* object)
 	wxString materials[] = {_("High Speed Steel"),_("Carbide") };
 	AddLabelAndControl(sizerLeft, _("Tool Material"), m_cmbMaterial = new wxComboBox(this, ID_MATERIAL, _T(""), wxDefaultPosition, wxDefaultSize, 2, materials));
 
-	wxString tool_types[] = {_("Drill Bit"), _("Centre Drill Bit"), _("End Mill"), _("Slot Cutter"), _("Ball End Mill"), _("Chamfer"), _("Turning Tool"), _("Touch Probe"), _("Tool Length Switch"), _("Extrusion")};
-	AddLabelAndControl(sizerLeft, _("Tool Type"), m_cmbToolType = new wxComboBox(this, ID_TOOL_TYPE, _T(""), wxDefaultPosition, wxDefaultSize, 10, tool_types));
+	wxString tool_types[] = {_("Drill Bit"), _("Centre Drill Bit"), _("End Mill"), _("Slot Cutter"), _("Ball End Mill"), _("Chamfer"), _("Turning Tool"), _("Touch Probe"), _("Tool Length Switch"), _("Extrusion"),_("Tap Tool")};
+	AddLabelAndControl(sizerLeft, _("Tool Type"), m_cmbToolType = new wxComboBox(this, ID_TOOL_TYPE, _T(""), wxDefaultPosition, wxDefaultSize, 11, tool_types));
 
 	AddLabelAndControl(sizerLeft, _("Max advance per revolution"), m_dblMaxAdvancePerRevolution = new CDoubleCtrl(this, ID_MAX_ADVANCE_PER_REVOLUTION));
 	AddLabelAndControl(sizerLeft, _("Diameter"), m_dblDiameter = new CDoubleCtrl(this, ID_DIAMETER));
@@ -195,7 +205,14 @@ void CToolDlg::GetData(CTool* object)
 	 object->m_params.m_temperature = m_dblTemperature->GetValue();
 	 object->m_params.m_flowrate = m_dblFlowrate->GetValue();
 	 object->m_params.m_filament_diameter = m_dblFilamentDiameter->GetValue();
-	
+
+	 // The following are for tap tools
+
+	 // need to deal with direction combo box
+
+	 // object->m_params.m_direction = m_cmbDirection->GetValue();
+	 object->m_params.m_pitch = m_dblPitch->GetValue();	 
+
 	//need to deal with the check box for visible
 	
 	object->m_title = m_txtTitle->GetValue();
@@ -240,7 +257,13 @@ void CToolDlg::SetFromData(CTool* object)
 	 m_dblFlowrate->SetValue(object->m_params.m_flowrate);
 	 m_dblFilamentDiameter->SetValue(object->m_params.m_filament_diameter);
 	
+	// The following are for tap tools
+	
+	 m_dblPitch->SetValue(object->m_params.m_pitch);
+	//need to deal with the text box for title
 
+	// m_cmbDirection->SetValue(object->m_params.m_direction);
+	
 	//need to deal with the text box for title
 	//need to deal with the check box for visible
 
@@ -283,6 +306,10 @@ void CToolDlg::SetPicture()
 	 else if(w == m_dblTemperature)SetPicture(&m_temperature_bitmap, _T("temperature"));
 	 else if(w == m_dblFilamentDiameter)SetPicture(&m_filament_diameter_bitmap, _T("filament"));
 	 
+	// The following are for tap tools
+	
+	//	 else if(w == m_dblPitch)SetPicture(&m_probe_offset_x_bitmap, _T("probeoffsetx"));
+	// else if(w == m_dblProbeOffsetY)SetPicture(&m_probe_offset_y_bitmap, _T("probeoffsety"));
 	else SetPicture(&m_general_bitmap, _T("general"));	
 }
 
@@ -314,6 +341,12 @@ void CToolDlg::OnComboToolType(wxCommandEvent& event)
 }
 
 void CToolDlg::OnComboExtrusionMaterial(wxCommandEvent& event)
+{
+	if(m_ignore_event_functions)return;
+//	SetPicture();
+}
+
+void CToolDlg::OnComboDirection(wxCommandEvent& event)
 {
 	if(m_ignore_event_functions)return;
 //	SetPicture();
