@@ -172,7 +172,7 @@ Python CTapping::AppendTextToProgram( CMachineState *pMachineState )
 		pitch = ((CTool *) Tool)->m_params.m_pitch;
 	      } // End if - then
 	  } // End if - then
-	
+
 	python << CSpeedOp::AppendTextToProgram( pMachineState );   // Set any private fixtures and change tools (if necessary)
 
 	std::vector<CNCPoint> locations = FindAllLocations(pMachineState);
@@ -655,10 +655,10 @@ std::vector<CNCPoint> CTapping::FindAllLocations(CMachineState *pMachineState)
 				} // End for
 			} // End if - then
 
-			if (lhsPtr->GetType() == TappingType)
+			if (lhsPtr->GetType() == DrillingType)
 			{
 				std::vector<CNCPoint> starting_points;
-				starting_points = ((CTapping *)lhsPtr)->FindAllLocations(pMachineState);
+				starting_points = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
 
 				// Copy the results in ONLY if each point doesn't already exist.
 				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
@@ -889,7 +889,7 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
         case PointType:
         case CircleType:
         case SketchType:
-        case TappingType:
+        case DrillingType:
         case ProfileType:
         case PocketType:
 		case FixtureType:
