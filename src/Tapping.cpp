@@ -722,6 +722,30 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 {
 	std::list<wxString> changes;
 
+	// Check that we're using a tapping tool and see if it's one of the standard sizes.
+	if (m_tool_number > 0)
+	{
+		CTool *pTool = (CTool *) CTool::Find( m_tool_number );
+		if (pTool != NULL)
+		{
+		    if (pTool->m_params.m_type != CToolParams::eTapTool)
+		    {
+		        changes.push_back(_("The tapping operation has not selected a tapping tool to use"));
+		    }
+		    else
+		    {
+		        // It is a tapping tool.  Check to see if the diameter and pitch combination match a standard size.
+
+		        std::list<wxString> tool_check = pTool->DesignRulesAdjustment(apply_changes);
+		        for (std::list<wxString>::iterator itChange = tool_check.begin(); itChange != tool_check.end(); itChange++)
+		        {
+		            changes.push_back(*itChange);
+		        }
+		    }
+		}
+	}
+
+
 	// Make some special checks if we're using a chamfering bit.
 	if (m_tool_number > 0)
 	{
@@ -733,10 +757,10 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 			if (pChamfer->m_params.m_type == CToolParams::eChamfer)
 			{
 				// We need to make sure that the diameter of the hole (that will
-				// have been taped in a previous tapping operation) is between
+				// have been drilled in a previous tapping operation) is between
 				// the chamfering bit's flat_radius (smallest) and diamter/2 (largest).
 
-				// First find ALL tapping cycles that created this hole.  Make sure
+				// First find ALL drilling cycles that created this hole.  Make sure
 				// to get them all as we may have used a centre tap before the
 				// main hole is taped.
 
@@ -744,7 +768,7 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 					obj != NULL;
 					obj = theApp.m_program->Operations()->GetNextChild())
 				{
-					if (obj->GetType() == TappingType)
+					if (obj->GetType() == DrillingType)
 					{
 						// Make sure we're looking at a hole taped with something
 						// more than a centre tap.
