@@ -148,7 +148,7 @@ static CTool::tap_sizes_t metric_tap_sizes[] = {
       {_T("64   x 4   mm fine"), 64.0, 4.0}
     };
 
-static CTool::tap_sizes_t imperial_tap_sizes[] = {
+static CTool::tap_sizes_t unified_thread_standard_tap_sizes[] = {
       {_T("#0 = 0.060 x 80 UNF"), 0.06 * 25.4, 25.4 / 80},
       {_T("#1 = 0.073 x 64 UNC"), 0.073 * 25.4, 25.4 / 64},
       {_T("#1 = 0.073 x 72 UNF"), 0.073 * 25.4, 25.4 / 72},
@@ -766,7 +766,7 @@ static void on_select_tap_from_standard_sizes(int chosen_units, HeeksObj* object
         break;
 
         case 2:
-        ((CTool *)object)->SelectTapFromStandardSizes(imperial_tap_sizes, sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]));
+        ((CTool *)object)->SelectTapFromStandardSizes(unified_thread_standard_tap_sizes, sizeof(unified_thread_standard_tap_sizes)/sizeof(unified_thread_standard_tap_sizes[0]));
         break;
 
         case 3:
@@ -944,7 +944,7 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 			std::list< wxString > choices;
 			choices.push_back(_("Select size"));
 			choices.push_back(_("Metric"));
-			choices.push_back(_("Imperial"));
+			choices.push_back(_("Unified Thread Standard (UNC/UNF/UNEF)"));
 			choices.push_back(_("British Standard Whitworth"));
 			int choice = 0;
 			list->push_back(new PropertyChoice(_("Select TAP from standard sizes"), choices, choice, parent, on_select_tap_from_standard_sizes));
@@ -1558,13 +1558,13 @@ wxString CTool::GenerateMeaningfulName() const
                             }
                     }
 
-                    for (::size_t i=0; ((i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0])) && (! found)); i++)
+                    for (::size_t i=0; ((i<sizeof(unified_thread_standard_tap_sizes)/sizeof(unified_thread_standard_tap_sizes[0])) && (! found)); i++)
                     {
-                        if ((m_params.m_diameter == imperial_tap_sizes[i].diameter) &&
-                            (m_params.m_pitch == imperial_tap_sizes[i].pitch))
+                        if ((m_params.m_diameter == unified_thread_standard_tap_sizes[i].diameter) &&
+                            (m_params.m_pitch == unified_thread_standard_tap_sizes[i].pitch))
                             {
                                 l_ossName.str(_T(""));  // Replace what came before.
-                                wxString description = imperial_tap_sizes[i].description;
+                                wxString description = unified_thread_standard_tap_sizes[i].description;
                                 description.Replace(_T("  "),_T(" "),true);
                                 l_ossName << description.utf8_str();
                                 found = true;
@@ -2427,10 +2427,10 @@ std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
             }
         }
 
-        for (::size_t i=0; i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]); i++)
+        for (::size_t i=0; i<sizeof(unified_thread_standard_tap_sizes)/sizeof(unified_thread_standard_tap_sizes[0]); i++)
         {
-            if ((m_params.m_diameter == imperial_tap_sizes[i].diameter) &&
-                (m_params.m_pitch == imperial_tap_sizes[i].pitch))
+            if ((m_params.m_diameter == unified_thread_standard_tap_sizes[i].diameter) &&
+                (m_params.m_pitch == unified_thread_standard_tap_sizes[i].pitch))
             {
                 found = true;
             }
