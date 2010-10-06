@@ -54,10 +54,10 @@ public:
 		types_list.push_back( ToolTypeDescription_t( eTouchProbe, wxString(_("Touch Probe")) ));
 		types_list.push_back( ToolTypeDescription_t( eToolLengthSwitch, wxString(_("Tool Length Switch")) ));
 #ifndef STABLE_OPS_ONLY
-		types_list.push_back( ToolTypeDescription_t( eExtrusion, wxString(_("Extrusion")) ));		
+		types_list.push_back( ToolTypeDescription_t( eExtrusion, wxString(_("Extrusion")) ));
 #endif
 #ifndef STABLE_OPS_ONLY
-		types_list.push_back( ToolTypeDescription_t( eTapTool, wxString(_("Tapping Tool")) ));		
+		types_list.push_back( ToolTypeDescription_t( eTapTool, wxString(_("Tapping Tool")) ));
 #endif
 		return(types_list);
 	} // End GetToolTypesList() method
@@ -69,7 +69,7 @@ public:
 		eCarbide,
 		eUndefinedMaterialType
 	} eMaterial_t;
-	
+
 
 
 	typedef std::pair< eMaterial_t, wxString > MaterialDescription_t;
@@ -161,9 +161,9 @@ public:
 
 	double m_probe_offset_x;
 	double m_probe_offset_y;
-	
+
 	// The following  properties relate to the extrusions created by a reprap style 3D printer.
-	// using temperature, speed, and the height of the nozzle, and the nozzle size it's possible to create 
+	// using temperature, speed, and the height of the nozzle, and the nozzle size it's possible to create
 	// many different sizes and shapes of extrusion.
 
 	typedef enum {
@@ -171,7 +171,7 @@ public:
 		ePLA,
 		eHDPE,
 		eUndefinedExtrusionMaterialType
-	} eExtrusionMaterial_t;	
+	} eExtrusionMaterial_t;
 	typedef std::pair< eExtrusionMaterial_t, wxString > ExtrusionMaterialDescription_t;
 	typedef std::vector<ExtrusionMaterialDescription_t > ExtrusionMaterialsList_t;
 
@@ -181,7 +181,7 @@ public:
 
 		ExtrusionMaterials_list.push_back( ExtrusionMaterialDescription_t( eABS, wxString(_("ABS Plastic")) ));
 		ExtrusionMaterials_list.push_back( ExtrusionMaterialDescription_t( ePLA, wxString(_("PLA Plastic")) ));
-		ExtrusionMaterials_list.push_back( ExtrusionMaterialDescription_t( eHDPE, wxString(_("HDPE Plastic")) ));		
+		ExtrusionMaterials_list.push_back( ExtrusionMaterialDescription_t( eHDPE, wxString(_("HDPE Plastic")) ));
 
 		return(ExtrusionMaterials_list);
 	}
@@ -206,7 +206,7 @@ public:
 
 	// properties for tapping tools
 	int m_direction;    // 0.. right hand tapping, 1..left hand tapping
-        double m_pitch;     // in units/rev 
+        double m_pitch;     // in units/rev
 
 	void set_initial_values();
 	void write_values_to_config();
@@ -309,6 +309,11 @@ public:
 
 private:
 	void DeleteSolid();
+
+public:
+    void SelectTapFromMetricSizes();
+    void SelectTapFromImperialSizes();
+    std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 }; // End CTool class definition.
 
