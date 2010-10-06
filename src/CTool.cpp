@@ -89,6 +89,124 @@ extern CHeeksCADInterface* heeksCAD;
 #define TOOLS heeksCNC->GetTools()
 #endif
 
+
+typedef struct
+{
+    wxString description;
+    double  diameter;
+    double  pitch;
+} tap_sizes_t;
+
+static tap_sizes_t metric_tap_sizes[] = {
+      {_T("1    x 0.25mm course"), 1.0, 0.25},
+      {_T("1.2  x 0.25mm course"), 1.2, 0.25},
+      {_T("1.4  x 0.3 mm course"), 1.3, 0.3},
+      {_T("1.6  x 0.35mm course"), 1.6, 0.35},
+      {_T("1.8  x 0.35mm course"), 1.8, 0.35},
+      {_T("2    x 0.4 mm course"), 2.0, 0.4},
+      {_T("2.5  x 0.45mm course"), 2.5, 0.45},
+      {_T("3    x 0.5 mm course"), 3.0, 0.5},
+      {_T("3.5  x 0.6 mm course"), 3.5, 0.6},
+      {_T("4    x 0.7 mm course"), 4.0, 0.7},
+      {_T("5    x 0.8 mm course"), 5.0, 0.8},
+      {_T("6    x 1   mm course"), 6.0, 1.0},
+      {_T("7    x 1   mm course"), 7.0, 1.0},
+      {_T("8    x 1.25mm course"), 8.0, 1.25},
+      {_T("8    x 1   mm fine"), 8.0, 1.0},
+      {_T("10   x 1.5 mm course"), 10.0, 1.5},
+      {_T("10   x 1   mm fine"), 10.0, 1.0},
+      {_T("10   x 1.25mm fine"), 10.0, 1.25},
+      {_T("12   x 1.75mm course"), 12.0, 1.75},
+      {_T("12   x 1.5 mm fine"), 12.0, 1.5},
+      {_T("12   x 1.25mm fine"), 12.0, 1.25},
+      {_T("14   x 1.5 mm fine"), 14.0, 1.5},
+      {_T("14   x 2   mm course"), 14.0, 2.0},
+      {_T("16   x 2   mm course"), 16.0, 2.0},
+      {_T("16   x 1.5 mm fine"), 16.0, 1.5},
+      {_T("18   x 2.5 mm course"), 18.0, 2.5},
+      {_T("18   x 2   mm fine"), 18.0, 2.0},
+      {_T("18   x 1.5 mm fine"), 18.0, 1.5},
+      {_T("20   x 2.5 mm course"), 20.0, 2.5},
+      {_T("20   x 2   mm fine"), 20.0, 2.0},
+      {_T("20   x 1.5 mm fine"), 20.0, 1.5},
+      {_T("30   x 3.5 mm course"), 30.0, 3.5},
+      {_T("30   x 2   mm fine"), 30.0, 2.0},
+      {_T("33   x 3.5 mm course"), 33.0, 3.5},
+      {_T("33   x 2   mm fine"), 33.0, 2.0},
+      {_T("36   x 4   mm course"), 36.0, 4.0},
+      {_T("36   x 3   mm fine"), 36.0, 3.0},
+      {_T("39   x 4   mm course"), 39.0, 4.0},
+      {_T("39   x 3   mm fine"), 39.0, 3.0},
+      {_T("42   x 4.5 mm course"), 42.0, 4.5},
+      {_T("42   x 3   mm fine"), 42.0, 3.0},
+      {_T("45   x 4.5 mm course"), 45.0, 4.5},
+      {_T("45   x 3   mm fine"), 45.0, 3.0},
+      {_T("48   x 5   mm course"), 48.0, 5.0},
+      {_T("48   x 3   mm fine"), 48.0, 3.0},
+      {_T("52   x 5   mm course"), 52.0, 5.0},
+      {_T("52   x 4   mm fine"), 52.0, 4.0},
+      {_T("56   x 5.5 mm course"), 56.0, 5.5},
+      {_T("56   x 4   mm fine"), 56.0, 4.0},
+      {_T("60   x 5.5 mm course"), 60.0, 5.5},
+      {_T("60   x 4   mm fine"), 60.0, 4.0},
+      {_T("64   x 6   mm course"), 64.0, 6.0},
+      {_T("64   x 4   mm fine"), 64.0, 4.0}
+    };
+
+static tap_sizes_t imperial_tap_sizes[] = {
+      {_T("#0 = 0.0600 x 80 UNF"), 0.06 * 25.4, 25.4 / 80},
+      {_T("#1 = 0.0730  x 64 UNC"), 0.073 * 25.4, 25.4 / 64},
+      {_T("#1 = 0.0730  x 72 UNF"), 0.073 * 25.4, 25.4 / 72},
+      {_T("#2 = 0.0860  x 56 UNC"), 0.086 * 25.4, 25.4 / 56},
+      {_T("#2 = 0.0860  x 64 UNF"), 0.086 * 25.4, 25.4 / 64},
+      {_T("#3 = 0.0990  x 48 UNC"), 0.099 * 25.4, 25.4 / 48},
+      {_T("#3 = 0.0990  x 56 UNF"), 0.099 * 25.4, 25.4 / 56},
+      {_T("#4 = 0.1120  x 40 UNC"), 0.112 * 25.4, 25.4 / 40},
+      {_T("#4 = 0.1120  x 48 UNF"), 0.112 * 25.4, 25.4 / 48},
+      {_T("#5 = 0.1250  x 40 UNC"), 0.125 * 25.4, 25.4 / 40},
+      {_T("#5 = 0.1250  x 44 UNF"), 0.125 * 25.4, 25.4 / 44},
+      {_T("#6 = 0.1380  x 32 UNC"), 0.138 * 25.4, 25.4 / 32},
+      {_T("#6 = 0.1380  x 40 UNF"), 0.138 * 25.4, 25.4 / 40},
+      {_T("#8 = 0.1640  x 32 UNC"), 0.164 * 25.4, 25.4 / 32},
+      {_T("#8 = 0.1640  x 36 UNF"), 0.164 * 25.4, 25.4 / 36},
+      {_T("#10= 0.1900  x 24 UNC"), 0.190 * 25.4, 25.4 / 24},
+      {_T("#10= 0.1900  x 32 UNF"), 0.190 * 25.4, 25.4 / 32},
+      {_T("#12= 0.2160  x 24 UNC"), 0.216 * 25.4, 25.4 / 24},
+      {_T("#12= 0.2160  x 28 UNC"), 0.216 * 25.4, 25.4 / 28},
+      {_T("#12= 0.2160  x 32 UNEF"), 0.216 * 25.4, 25.4 / 32},
+      {_T("1/4  x 20 UNC"), 0.25 * 25.4, 25.4 / 20},
+      {_T("1/4  x 28 UNC"), 0.25 * 25.4, 25.4 / 28},
+      {_T("1/4  x 32 UNEF"), 0.25 * 25.4, 25.4 / 32},
+      {_T("5/16 x 18 UNC"), (5.0/16.0) * 25.4, 25.4 / 18},
+      {_T("5/16 x 24 UNC"), (5.0/16.0) * 25.4, 25.4 / 24},
+      {_T("5/16 x 32 UNEF"), (5.0/16.0) * 25.4, 25.4 / 32},
+      {_T("3/8 x 16 UNC"), (3.0/8.0) * 25.4, 25.4 / 16},
+      {_T("3/8 x 24 UNC"), (3.0/8.0) * 25.4, 25.4 / 24},
+      {_T("3/8 x 32 UNEF"), (3.0/8.0) * 25.4, 25.4 / 32},
+      {_T("7/16 x 14 UNC"), (7.0/16.0) * 25.4, 25.4 / 14},
+      {_T("7/16 x 20 UNC"), (7.0/16.0) * 25.4, 25.4 / 20},
+      {_T("7/16 x 28 UNEF"), (7.0/16.0) * 25.4, 25.4 / 28},
+      {_T("1/2 x 13 UNC"), (1.0/2.0) * 25.4, 25.4 / 13},
+      {_T("1/2 x 20 UNC"), (1.0/2.0) * 25.4, 25.4 / 20},
+      {_T("1/2 x 28 UNEF"), (1.0/2.0) * 25.4, 25.4 / 28},
+      {_T("9/16 x 12 UNC"), (9.0/16.0) * 25.4, 25.4 / 12},
+      {_T("9/16 x 18 UNC"), (9.0/16.0) * 25.4, 25.4 / 18},
+      {_T("9/16 x 24 UNEF"), (9.0/16.0) * 25.4, 25.4 / 24},
+      {_T("5/8 x 11 UNC"), (5.0/8.0) * 25.4, 25.4 / 11},
+      {_T("5/8 x 18 UNC"), (5.0/8.0) * 25.4, 25.4 / 18},
+      {_T("5/8 x 24 UNEF"), (5.0/8.0) * 25.4, 25.4 / 24},
+      {_T("3/4 x 10 UNC"), (3.0/4.0) * 25.4, 25.4 / 10},
+      {_T("3/4 x 16 UNC"), (3.0/4.0) * 25.4, 25.4 / 16},
+      {_T("3/4 x 20 UNEF"), (3.0/4.0) * 25.4, 25.4 / 20},
+      {_T("7/8 x 9 UNC"), (7.0/8.0) * 25.4, 25.4 / 9},
+      {_T("7/8 x 14 UNC"), (7.0/8.0) * 25.4, 25.4 / 14},
+      {_T("7/8 x 20 UNEF"), (7.0/8.0) * 25.4, 25.4 / 20},
+      {_T("1 x 8 UNC"), 1.0 * 25.4, 25.4 / 8},
+      {_T("1 x 14 UNC"), 1.0 * 25.4, 25.4 / 14},
+      {_T("1 x 20 UNEF"), 1.0 * 25.4, 25.4 / 20}
+    };
+
+
 void CToolParams::set_initial_values()
 {
 	CNCConfig config(ConfigScope());
@@ -114,7 +232,7 @@ void CToolParams::set_initial_values()
 	// The following are ONLY for touch probe tools
 	config.Read(_T("probe_offset_x"), &m_probe_offset_x, 0.0);
 	config.Read(_T("probe_offset_y"), &m_probe_offset_y, 0.0);
-	
+
 	// The following are ONLY for extrusions
 	config.Read(_T("m_extrusion_material"), &m_extrusion_material, int(eABS));  //type of plastic or other material to extrude
 	config.Read(_T("m_feedrate"), &m_feedrate, 50);  //the base feed rate.
@@ -123,7 +241,7 @@ void CToolParams::set_initial_values()
 	config.Read(_T("m_temperature"), &m_temperature, 220); //temp in celsius
 	config.Read(_T("m_flowrate"), &m_flowrate, 255); //speed of the extruder motor.
 	config.Read(_T("m_filament_diameter"), &m_filament_diameter, 3); //The diameter of the raw filament.  Typically ~3mm
-	
+
 	config.Read(_T("gradient"), &m_gradient, 0.0);  // Straight plunge by default.
 
 	// The following are ONLY for tapping tools
@@ -166,15 +284,15 @@ void CToolParams::write_values_to_config()
 	config.Write(_T("m_layer_height"), m_layer_height);
 	config.Write(_T("m_width_over_thickness"), m_width_over_thickness);
 	config.Write(_T("m_temperature"), m_temperature);
-	config.Write(_T("m_flowrate"), m_flowrate); 
-	config.Write(_T("m_filament_diameter"), m_filament_diameter); 
-	
+	config.Write(_T("m_flowrate"), m_flowrate);
+	config.Write(_T("m_filament_diameter"), m_filament_diameter);
+
 
 	config.Write(_T("gradient"), m_gradient);
 
 	// The following are ONLY for tapping tools
-	config.Write(_T("m_direction"), m_direction); 
-	config.Write(_T("m_pitch"), m_pitch); 
+	config.Write(_T("m_direction"), m_direction);
+	config.Write(_T("m_pitch"), m_pitch);
 }
 
 void CTool::SetDiameter( const double diameter )
@@ -335,6 +453,7 @@ double CToolParams::ReasonableGradient( const eToolType type ) const
 	{
 	    case CToolParams::eCentreDrill:
 		case CToolParams::eDrill:
+		case CToolParams::eTapTool:
 				return(0.0);
 
         case CToolParams::eSlotCutter:
@@ -348,7 +467,7 @@ double CToolParams::ReasonableGradient( const eToolType type ) const
 				return(0.0);
 
 		case CToolParams::eExtrusion:
-				return(0.0);				
+				return(0.0);
 
 		case CToolParams::eChamfer:
 				return(0.0);
@@ -418,12 +537,12 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_flat_radius = 0;
 				ResetTitle();
 				break;
-				
+
 		case CToolParams::eExtrusion:
 				m_params.m_corner_radius = (m_params.m_diameter / 2);
 				m_params.m_flat_radius = 0;
 				ResetTitle();
-				break;				
+				break;
 
 		case CToolParams::eToolLengthSwitch:
 				m_params.m_corner_radius = (m_params.m_diameter / 2);
@@ -612,6 +731,93 @@ static void on_set_filament_diameter(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
+
+static void on_select_tap_from_standard_sizes(int chosen_units, HeeksObj* object)
+{
+    switch (chosen_units)
+    {
+        case 0:
+        return; // They didn't select metric or imperial.  Ignore this.
+
+        case 1:
+        ((CTool *)object)->SelectTapFromMetricSizes();
+        break;
+
+        case 2:
+        ((CTool *)object)->SelectTapFromImperialSizes();
+        break;
+    }
+}
+
+void CTool::SelectTapFromMetricSizes()
+{
+    wxString message(_("Select tap size"));
+    wxString caption(_("Standard Metric Tap Sizes"));
+
+    wxArrayString choices;
+
+    for (int i=0; i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]); i++)
+    {
+        choices.Add(metric_tap_sizes[i].description);
+    }
+
+    wxString choice = ::wxGetSingleChoice( message, caption, choices );
+
+    for (::size_t i=0; i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]); i++)
+    {
+        if ((choices.size() > 0) && (choice == choices[i]))
+        {
+            m_params.m_diameter = metric_tap_sizes[i].diameter;
+            m_params.m_pitch = metric_tap_sizes[i].pitch;
+            m_params.m_direction = 0;    // Right hand thread.
+
+            ResetTitle();
+            heeksCAD->RefreshProperties();
+            KillGLLists();
+            heeksCAD->Repaint();
+            return;
+        }
+    }
+
+
+}
+
+
+void CTool::SelectTapFromImperialSizes()
+{
+    wxString message(_("Select tap size"));
+    wxString caption(_("Standard Imperial Tap Sizes"));
+
+    wxArrayString choices;
+
+    for (::size_t i=0; i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]); i++)
+    {
+        choices.Add(imperial_tap_sizes[i].description);
+    }
+
+    wxString choice = ::wxGetSingleChoice( message, caption, choices );
+
+    for (int i=0; i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]); i++)
+    {
+        if ((choices.size() > 0) && (choice == choices[i]))
+        {
+            m_params.m_diameter = imperial_tap_sizes[i].diameter;
+            m_params.m_pitch = imperial_tap_sizes[i].pitch;
+            m_params.m_direction = 0;    // Right hand thread.
+
+            ResetTitle();
+            heeksCAD->RefreshProperties();
+            KillGLLists();
+            heeksCAD->Repaint();
+            return;
+        }
+    }
+
+
+}
+
+
+
 void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 {
 	{
@@ -637,7 +843,7 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 		} // End for
 		list->push_back(new PropertyChoice(_("Material"), choices, choice, parent, on_set_material));
 	}
-	
+
 
 
 	{
@@ -710,7 +916,7 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 		list->push_back(new PropertyLength(_("Probe offset X"), m_probe_offset_x, parent, on_set_probe_offset_x));
 		list->push_back(new PropertyLength(_("Probe offset Y"), m_probe_offset_y, parent, on_set_probe_offset_y));
 	}
-	
+
 	if (m_type == eExtrusion)
 	// The following are ONLY for extrusion
 	{
@@ -742,9 +948,18 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 			int choice = int(m_direction);
 			list->push_back(new PropertyChoice(_("Tap direction"), choices, choice, parent, on_set_direction));
 		}
-		list->push_back(new PropertyDouble(_("pitch"), m_pitch, parent, on_set_pitch));
+		list->push_back(new PropertyLength(_("pitch"), m_pitch, parent, on_set_pitch));
+
+        {
+			std::list< wxString > choices;
+			choices.push_back(_("Select size"));
+			choices.push_back(_("Metric"));
+			choices.push_back(_("Imperial"));
+			int choice = 0;
+			list->push_back(new PropertyChoice(_("Select TAP from standard sizes"), choices, choice, parent, on_select_tap_from_standard_sizes));
+		}
 	}
-	
+
 }
 
 void CToolParams::WriteXMLAttributes(TiXmlNode *root)
@@ -774,7 +989,7 @@ void CToolParams::WriteXMLAttributes(TiXmlNode *root)
 
 	element->SetDoubleAttribute("probe_offset_x", m_probe_offset_x);
 	element->SetDoubleAttribute("probe_offset_y", m_probe_offset_y);
-	
+
 	element->SetDoubleAttribute("width_over_thickness", m_width_over_thickness);
 	element->SetDoubleAttribute("feedrate", m_feedrate);
 	element->SetAttribute("extrusion_material", m_extrusion_material);
@@ -817,7 +1032,7 @@ void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 
 	if (pElem->Attribute( "probe_offset_x" )) pElem->Attribute("probe_offset_x", &m_probe_offset_x);
 	if (pElem->Attribute( "probe_offset_y" )) pElem->Attribute("probe_offset_y", &m_probe_offset_y);
-	
+
 	if (pElem->Attribute("extrusion_material")) pElem->Attribute("extrusion_material", &m_extrusion_material);
 	if (pElem->Attribute("max_advance_per_revolution")) pElem->Attribute("max_advance_per_revolution", &m_max_advance_per_revolution);
 	if (pElem->Attribute("layer_height")) pElem->Attribute("layer_height", &m_layer_height);
@@ -1027,7 +1242,7 @@ const wxBitmap &CTool::GetIcon()
 				if(toolLengthSwitchIcon == NULL)toolLengthSwitchIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/probe.png")));
 				return *toolLengthSwitchIcon;
 			}
-			
+
 		case CToolParams::eExtrusion:
 			{
 				static wxBitmap* extrusionIcon = NULL;
@@ -1039,7 +1254,7 @@ const wxBitmap &CTool::GetIcon()
 				static wxBitmap* tapToolIcon = NULL;
 				if(tapToolIcon == NULL)tapToolIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/tap.png")));
 				return *tapToolIcon;
-			}		
+			}
 		default:
 			{
 				static wxBitmap* toolIcon = NULL;
@@ -1223,10 +1438,6 @@ std::vector< std::pair< int, wxString > > CTool::FindAllTools()
  * eg: with diameter = 6, units = 1 (mm) and type = 'drill' the name would be '6mm Drill Bit".  The
  * idea is to produce a m_title value that is representative of the tool.  This will
  * make selection in the program list easier.
- *
- * NOTE: The ResetTitle() method looks at the m_title value for strings that are likely to
- * have come from this method.  If this method changes, the ResetTitle() method may also
- * need to change.
  */
 wxString CTool::GenerateMeaningfulName() const
 {
@@ -1238,7 +1449,7 @@ wxString CTool::GenerateMeaningfulName() const
 
 	if (	(m_params.m_type != CToolParams::eTurningTool) &&
 		(m_params.m_type != CToolParams::eTouchProbe) &&
-		(m_params.m_type != CToolParams::eToolLengthSwitch)) 
+		(m_params.m_type != CToolParams::eToolLengthSwitch))
 	{
 		if (PROGRAM->m_units == 1)
 		{
@@ -1338,11 +1549,11 @@ wxString CTool::GenerateMeaningfulName() const
                 case CToolParams::eToolLengthSwitch:	l_ossName << (_("Tool Length Switch"));
 							break;
 
-                case CToolParams::eTapTool:	
+                case CToolParams::eTapTool:
 		  l_ossName << (_("Tap Tool"));
 		  if (m_params.m_direction == 1) {
 		    l_ossName << (_(", left hand"));
-		  } 
+		  }
 
 		  break;
 
@@ -2086,10 +2297,10 @@ bool CToolParams::operator==( const CToolParams & rhs ) const
 	if (m_width_over_thickness != rhs.m_width_over_thickness) return(false);
 	if (m_feedrate != rhs.m_feedrate) return(false);
 	if (m_temperature != rhs.m_temperature) return(false);
-	if (m_flowrate != rhs.m_flowrate) return(false);	
-	if (m_filament_diameter != rhs.m_filament_diameter) return(false);	
-	if (m_direction != rhs.m_direction) return(false);	
-	if (m_pitch != rhs.m_pitch) return(false);	
+	if (m_flowrate != rhs.m_flowrate) return(false);
+	if (m_filament_diameter != rhs.m_filament_diameter) return(false);
+	if (m_direction != rhs.m_direction) return(false);
+	if (m_pitch != rhs.m_pitch) return(false);
 	return(true);
 }
 
@@ -2149,5 +2360,45 @@ void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
 	*callback = NULL;
 #endif
 }
+
+
+/**
+	This method adjusts any parameters that don't make sense.  It should report a list
+	of changes in the list of strings.
+ */
+std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
+{
+	std::list<wxString> changes;
+
+    if (m_params.m_type == CToolParams::eTapTool)
+    {
+        bool found = false;
+        for (::size_t i=0; i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]); i++)
+        {
+            if ((m_params.m_diameter == metric_tap_sizes[i].diameter) &&
+                (m_params.m_pitch == metric_tap_sizes[i].pitch))
+            {
+                found = true;
+            }
+        }
+
+        for (::size_t i=0; i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]); i++)
+        {
+            if ((m_params.m_diameter == imperial_tap_sizes[i].diameter) &&
+                (m_params.m_pitch == imperial_tap_sizes[i].pitch))
+            {
+                found = true;
+            }
+        }
+
+        if (! found)
+        {
+            changes.push_back(_("The TAP tool's diameter and pitch don't match any of the standard sizes"));
+        }
+    }
+
+	return(changes);
+
+} // End DesignRulesAdjustment() method
 
 
