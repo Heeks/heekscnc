@@ -118,7 +118,7 @@ void CAdaptiveParams::set_initial_values(
 
 				case DrillingType: {
 					std::vector<CNCPoint> locations;
-					locations = ((CDrilling *)ref)->FindAllLocations(NULL);
+					locations = CDrilling::FindAllLocations((CDrilling *)ref);
 					if (locations.size() == 1)
 					{
 						// There must be only one (didn't someone else say that once?) for our purposes.
