@@ -58,3 +58,5 @@ http://img17.imageshack.us/img17/2736/screenshot009o.png
 This file shows how the point and sketch information is presented from the ScriptOp operation.  It uses a Python subroutine to generate a spiral toolpath at each of the point locations attached to the ScriptOp object.
 
 [http://heekscnc.googlecode.com/svn/wiki/ScriptOpExample.heeks ScriptOpExample.heeks]
+
+http://heekscnc.googlecode.com/svn/wiki/Screenshot-ScriptOpSample.heeks.png
