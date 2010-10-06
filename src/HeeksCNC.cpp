@@ -74,6 +74,10 @@ extern void ImportFixturesFile( const wxChar *file_path );
 extern void ImportToolsFile( const wxChar *file_path );
 extern void ImportSpeedReferencesFile( const wxChar *file_path );
 
+extern CTool::tap_sizes_t metric_tap_sizes[];
+extern CTool::tap_sizes_t unified_thread_standard_tap_sizes[];
+extern CTool::tap_sizes_t british_standard_whitworth_tap_sizes[];
+
 CHeeksCNCApp::CHeeksCNCApp(){
 	m_draw_cutter_radius = true;
 	m_program = NULL;
@@ -349,7 +353,7 @@ static void NewWaterlineOpMenuCallback(wxCommandEvent &event)
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();	
+	heeksCAD->Changed();
 }
 
 #ifndef STABLE_OPS_ONLY
@@ -957,6 +961,108 @@ static void NewDrillMenuCallback(wxCommandEvent &event)
 	AddNewTool(CToolParams::eDrill);
 }
 
+static void NewMetricTappingToolMenuCallback(wxCommandEvent &event)
+{
+    wxString message(_("Select tap size"));
+    wxString caption(_("Standard Tap Sizes"));
+
+    wxArrayString choices;
+
+    for (::size_t i=0; (metric_tap_sizes[i].diameter > 0.0); i++)
+    {
+        choices.Add(metric_tap_sizes[i].description);
+    }
+
+    wxString choice = ::wxGetSingleChoice( message, caption, choices );
+
+    for (::size_t i=0; (metric_tap_sizes[i].diameter > 0.0); i++)
+    {
+        if ((choices.size() > 0) && (choice == choices[i]))
+        {
+            // Add a new tool.
+            heeksCAD->CreateUndoPoint();
+            CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
+            new_object->m_params.m_diameter = metric_tap_sizes[i].diameter;
+            new_object->m_params.m_pitch = metric_tap_sizes[i].pitch;
+            new_object->m_params.m_direction = 0;    // Right hand thread.
+            new_object->ResetTitle();
+            theApp.m_program->Tools()->Add(new_object, NULL);
+            heeksCAD->ClearMarkedList();
+            heeksCAD->Mark(new_object);
+            heeksCAD->Changed();
+            return;
+        }
+    }
+}
+
+static void NewUnifiedThreadingStandardTappingToolMenuCallback(wxCommandEvent &event)
+{
+	wxString message(_("Select tap size"));
+    wxString caption(_("Standard Tap Sizes"));
+
+    wxArrayString choices;
+
+    for (::size_t i=0; (unified_thread_standard_tap_sizes[i].diameter > 0.0); i++)
+    {
+        choices.Add(unified_thread_standard_tap_sizes[i].description);
+    }
+
+    wxString choice = ::wxGetSingleChoice( message, caption, choices );
+
+    for (::size_t i=0; (unified_thread_standard_tap_sizes[i].diameter > 0.0); i++)
+    {
+        if ((choices.size() > 0) && (choice == choices[i]))
+        {
+            // Add a new tool.
+            heeksCAD->CreateUndoPoint();
+            CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
+            new_object->m_params.m_diameter = unified_thread_standard_tap_sizes[i].diameter;
+            new_object->m_params.m_pitch = unified_thread_standard_tap_sizes[i].pitch;
+            new_object->m_params.m_direction = 0;    // Right hand thread.
+            new_object->ResetTitle();
+            theApp.m_program->Tools()->Add(new_object, NULL);
+            heeksCAD->ClearMarkedList();
+            heeksCAD->Mark(new_object);
+            heeksCAD->Changed();
+            return;
+        }
+    }
+}
+
+static void NewBritishStandardWhitworthTappingToolMenuCallback(wxCommandEvent &event)
+{
+	wxString message(_("Select tap size"));
+    wxString caption(_("Standard Tap Sizes"));
+
+    wxArrayString choices;
+
+    for (::size_t i=0; (british_standard_whitworth_tap_sizes[i].diameter > 0.0); i++)
+    {
+        choices.Add(british_standard_whitworth_tap_sizes[i].description);
+    }
+
+    wxString choice = ::wxGetSingleChoice( message, caption, choices );
+
+    for (::size_t i=0; (british_standard_whitworth_tap_sizes[i].diameter > 0.0); i++)
+    {
+        if ((choices.size() > 0) && (choice == choices[i]))
+        {
+            // Add a new tool.
+            heeksCAD->CreateUndoPoint();
+            CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
+            new_object->m_params.m_diameter = british_standard_whitworth_tap_sizes[i].diameter;
+            new_object->m_params.m_pitch = british_standard_whitworth_tap_sizes[i].pitch;
+            new_object->m_params.m_direction = 0;    // Right hand thread.
+            new_object->ResetTitle();
+            theApp.m_program->Tools()->Add(new_object, NULL);
+            heeksCAD->ClearMarkedList();
+            heeksCAD->Mark(new_object);
+            heeksCAD->Changed();
+            return;
+        }
+    }
+}
+
 static void NewTapToolMenuCallback(wxCommandEvent &event)
 {
 	AddNewTool(CToolParams::eTapTool);
@@ -1350,7 +1456,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Waterline Operation..."), ToolImage(_T("waterline")), NewWaterlineOpMenuCallback);
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), ToolImage(_T("attach")), NewAttachOpMenuCallback);
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), ToolImage(_T("unattach")), NewUnattachOpMenuCallback);
-	
+
 	// Additive Operations menu
 #ifndef STABLE_OPS_ONLY
 	wxMenu *menuAdditiveMillingOperations = new wxMenu;
@@ -1371,6 +1477,13 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("Probe Edge Operation..."), ToolImage(_T("probe")), NewProbe_Edge_MenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Probe Grid Operation..."), ToolImage(_T("probe")), NewProbe_Grid_MenuCallback);
 
+    // Tapping tools menu
+	wxMenu *menuTappingTools = new wxMenu;
+	heeksCAD->AddMenuItem(menuTappingTools, _("Any sized tap..."), ToolImage(_T("tap")), NewTapToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Metric standard sizes"), ToolImage(_T("tap")), NewMetricTappingToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Unified Threading Standard (UNC, UNF or UNEF)"), ToolImage(_T("tap")), NewUnifiedThreadingStandardTappingToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from British Standard Whitworth standard sizes"), ToolImage(_T("tap")), NewBritishStandardWhitworthTappingToolMenuCallback);
+
 	// Tools menu
 	wxMenu *menuTools = new wxMenu;
 	heeksCAD->AddMenuItem(menuTools, _("Drill..."), ToolImage(_T("drill")), NewDrillMenuCallback);
@@ -1387,7 +1500,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menuTools, _("Extrusion..."), ToolImage(_T("extrusion")), NewExtrusionMenuCallback);
 #endif
-	heeksCAD->AddMenuItem(menuTools, _("Tap Tool..."), ToolImage(_T("tap")), NewTapToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Tap Tool..."), ToolImage(_T("tap")), NULL, NULL, menuTappingTools);
 
 	// Fixtures menu
 	wxMenu *menuFixtures = new wxMenu;
@@ -1398,7 +1511,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Milling Operation"), ToolImage(_T("ops")), NULL, NULL, menuMillingOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add New 3D Operation"), ToolImage(_T("ops")), NULL, NULL, menu3dMillingOperations);
 #ifndef STABLE_OPS_ONLY
-	heeksCAD->AddMenuItem(menuMachining, _("Add New Additive Operation"), ToolImage(_T("ops")), NULL, NULL, menuAdditiveMillingOperations);	
+	heeksCAD->AddMenuItem(menuMachining, _("Add New Additive Operation"), ToolImage(_T("ops")), NULL, NULL, menuAdditiveMillingOperations);
 #endif
 	heeksCAD->AddMenuItem(menuMachining, _("Add Other Operation"), ToolImage(_T("ops")), NULL, NULL, menuOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Tool"), ToolImage(_T("tools")), NULL, NULL, menuTools);
