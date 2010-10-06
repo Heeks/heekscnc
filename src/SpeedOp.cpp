@@ -70,6 +70,13 @@ void CSpeedOpParams::ResetFeeds(const int tool_number)
 					m_vertical_feed_rate = feed_rate_inches_per_minute * 25.4;	// mm per minute
 					m_horizontal_feed_rate = 0.0;	// We're going straight down with a drill bit.
 				} // End if - then
+				else if (pTool->m_params.m_type == CToolParams::eTapTool)
+				{
+				    // Make sure we set the feed rate based on both the spindle speed and the pitch.
+
+					m_vertical_feed_rate = m_spindle_speed * pTool->m_params.m_pitch;
+					m_horizontal_feed_rate = 0.0;	// We're going straight down with a tap.
+				} // End if - then
 				else if (pTool->m_params.m_max_advance_per_revolution > 0)
 				{
 					// Spindle speed is in revolutions per minute.
@@ -118,7 +125,8 @@ void CSpeedOpParams::ResetSpeeds(const int tool_number)
 		// Use the 'feeds and speeds' class along with the tool properties to
 		// help set some logical values for the spindle speed.
 
-		if ((tool_number > 0) && (CTool::Find( tool_number ) != NULL))
+        CTool *pTool = CTool::Find( tool_number );
+		if ((tool_number > 0) && (pTool != NULL))
 		{
 			wxString material_name = theApp.m_program->m_raw_material.m_material_name;
 			double hardness = theApp.m_program->m_raw_material.m_brinell_hardness;
@@ -127,27 +135,29 @@ void CSpeedOpParams::ResetSpeeds(const int tool_number)
 										hardness );
 			if (surface_speed > 0)
 			{
-				CTool *pTool = CTool::Find( tool_number );
-				if (pTool != NULL)
-				{
-					if (pTool->m_params.m_diameter > 0)
-					{
-						m_spindle_speed = (surface_speed * 1000.0) / (PI * pTool->m_params.m_diameter);
-						m_spindle_speed = floor(m_spindle_speed);	// Round down to integer
-
-						// Now wait one minute.  If the chosen machine can't turn the spindle that
-						// fast then we'd better reduce our speed to match its maximum.
-
-						if ((theApp.m_program != NULL) &&
-						    (theApp.m_program->m_machine.m_max_spindle_speed > 0.0) &&
-						    (theApp.m_program->m_machine.m_max_spindle_speed < m_spindle_speed))
-						{
-							// Reduce the speed to match the machine's maximum setting.
-						    	m_spindle_speed = theApp.m_program->m_machine.m_max_spindle_speed;
-						} // End if - then
-					} // End if - then
-				} // End if - then
+                if (pTool->m_params.m_diameter > 0)
+                {
+                    m_spindle_speed = (surface_speed * 1000.0) / (PI * pTool->m_params.m_diameter);
+                    m_spindle_speed = floor(m_spindle_speed);	// Round down to integer
+                } // End if - then
 			} // End if - then
+
+            if (pTool->m_params.m_type == CToolParams::eTapTool)
+            {
+                // We don't want to run too fast with a tap.
+                m_spindle_speed = 500;  // We really should define this along with the max_spindle_speed parameter for the machine configuration.
+            }
+
+            // Now wait one minute.  If the chosen machine can't turn the spindle that
+            // fast then we'd better reduce our speed to match its maximum.
+
+            if ((theApp.m_program != NULL) &&
+                (theApp.m_program->m_machine.m_max_spindle_speed > 0.0) &&
+                (theApp.m_program->m_machine.m_max_spindle_speed < m_spindle_speed))
+            {
+                // Reduce the speed to match the machine's maximum setting.
+                m_spindle_speed = theApp.m_program->m_machine.m_max_spindle_speed;
+            } // End if - then
 		} // End if - then
 	} // End if - then
 } // End ResetSpeeds() method
@@ -167,6 +177,7 @@ static void on_set_vertical_feed_rate(double value, HeeksObj* object)
 static void on_set_spindle_speed(double value, HeeksObj* object)
 {
 	((CSpeedOp*)object)->m_speed_op_params.m_spindle_speed = value;
+	((CSpeedOp*)object)->m_speed_op_params.ResetFeeds(((CSpeedOp*)object)->m_tool_number);
 	((CSpeedOp*)object)->WriteDefaultValues();
 }
 
