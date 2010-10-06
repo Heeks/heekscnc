@@ -120,7 +120,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	std::vector<CNCPoint> FindAllLocations(CMachineState *pMachineState);
+	static std::vector<CNCPoint> FindAllLocations( ObjList *parent, const CNCPoint starting_location = CNCPoint(0.0, 0.0, 0.0),  const bool sort_locations = false, std::list<int> *pToolNumbersReferenced = NULL );
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	static bool ValidType( const int object_type );

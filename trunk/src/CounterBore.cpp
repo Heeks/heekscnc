@@ -305,7 +305,7 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 				return(python);
 			} // End if - then
 
-			std::vector<CNCPoint> locations = FindAllLocations( NULL, pMachineState );
+			std::vector<CNCPoint> locations = CDrilling::FindAllLocations( this, pMachineState->Location(), m_params.m_sort_locations, NULL );
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point( pMachineState->Fixture().Adjustment(*l_itLocation) );
@@ -377,7 +377,7 @@ void CCounterBore::glCommands(bool select, bool marked, bool no_color)
 		// For all coordinates that relate to these reference objects, draw the graphics that represents
 		// both a drilling hole and a counterbore.
 
-		std::vector<CNCPoint> locations = FindAllLocations( NULL, NULL );
+		std::vector<CNCPoint> locations = CDrilling::FindAllLocations( this );
 		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
 			std::list< CNCPoint > circle = PointsAround( *l_itLocation, m_params.m_diameter / 2, 10 );
@@ -577,171 +577,6 @@ void CCounterBore::ReloadPointers()
 
 
 
-/**
- * 	This method looks through the symbols in the list.  If they're PointType objects
- * 	then the object's location is added to the result set.  If it's a circle object
- * 	that doesn't intersect any other element (selected) then add its centre to
- * 	the result set.  Finally, find the intersections of all of these elements and
- * 	add the intersection points to the result set.
- *
- *	If any of the selected objects are DrillingType objects then see if they refer
- *	to Tool objects.  If so, remember which ones.  We may want to see what
- *	size holes were drilled so that we can make an intellegent selection for the
- *	socket head.
- */
-std::vector<CNCPoint> CCounterBore::FindAllLocations( std::list<int> *pToolNumbersReferenced, CMachineState *pMachineState )
-{
-	std::vector<CNCPoint> locations;
-
-	// Look to find all intersections between all selected objects.  At all these locations, create
-	// a drilling cycle.
-
-    std::list<HeeksObj *> lhs_children;
-	std::list<HeeksObj *> rhs_children;
-	for (HeeksObj *lhsPtr = GetFirstChild(); lhsPtr != NULL; lhsPtr = GetNextChild())
-	{
-	    lhs_children.push_back( lhsPtr );
-	    rhs_children.push_back( lhsPtr );
-	}
-
-	for (std::list<HeeksObj *>::iterator itLhs = lhs_children.begin(); itLhs != lhs_children.end(); itLhs++)
-	{
-	    HeeksObj *lhsPtr = *itLhs;
-		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
-							// intersect anything else, we want to know
-							// about it.
-
-		if (lhsPtr->GetType() == PointType)
-		{
-			HeeksObj *obj = lhsPtr;
-			if (obj != NULL)
-			{
-				double pos[3];
-				obj->GetStartPoint(pos);
-				if (std::find( locations.begin(), locations.end(), CNCPoint( pos[0], pos[1], pos[2] ) ) == locations.end())
-				{
-					locations.push_back( CNCPoint( pos[0], pos[1], pos[2] ) );
-				} // End if - then
-				continue;	// No need to intersect a point with anything.
-			} // End if - then
-		} // End if - then
-
-		if (lhsPtr->GetType() == DrillingType)
-		{
-			// Ask the Drilling object what reference points it uses.
-			if ((((COp *) lhsPtr)->m_tool_number > 0) && (pToolNumbersReferenced != NULL))
-			{
-				pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_tool_number );
-			} // End if - then
-
-			std::vector<CNCPoint> holes = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
-			for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
-			{
-				if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
-				{
-					locations.push_back( *l_itHole );
-				} // End if - then
-			} // End for
-		} // End if - then
-
-		for (std::list<HeeksObj *>::iterator itRhs = rhs_children.begin(); itRhs != rhs_children.end(); itRhs++)
-        {
-            HeeksObj *rhsPtr = *itRhs;
-
-			if (lhsPtr == rhsPtr) continue;
-			if (lhsPtr->GetType() == PointType) continue;	// No need to intersect a point type.
-
-			// Avoid repeated calls to the intersection code where possible.
-            std::list<double> results;
-
-			if (lhsPtr == NULL) continue;
-			if (rhsPtr == NULL) continue;
-
-			if (lhsPtr->Intersects( rhsPtr, &results ))
-			{
-				l_bIntersectionsFound = true;
-                while (((results.size() % 3) == 0) && (results.size() > 0))
-                {
-                        CNCPoint intersection;
-
-                        intersection.SetX( *(results.begin()) );
-                        results.erase(results.begin());
-
-                        intersection.SetY( *(results.begin()) );
-                        results.erase(results.begin());
-
-                        intersection.SetZ( *(results.begin()) );
-                        results.erase(results.begin());
-
-						if (std::find( locations.begin(), locations.end(), intersection ) == locations.end())
-						{
-							locations.push_back(intersection);
-						} // End if - then
-					} // End while
-				} // End if - then
-			} // End for
-
-		if (! l_bIntersectionsFound)
-		{
-			// This element didn't intersect anything else.  If it's a circle
-			// then add its centre point to the result set.
-
-			if (lhsPtr->GetType() == CircleType)
-			{
-				double pos[3];
-				if (heeksCAD->GetArcCentre( lhsPtr, pos ))
-				{
-					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
-					{
-						locations.push_back( CNCPoint( pos ) );
-					} // End if - then
-				} // End if - then
-			} // End if - then
-		} // End if - then
-        } // End for
-
-	if (m_params.m_sort_locations)
-	{
-		// This counter bore object has the 'sort' option turned on.  Take the first point (because we don't know any better) and
-		// sort the points in order of distance from each preceding point.  It may not be the most efficient arrangement
-		// but it's better than random.  If we were really eager we would allow the starting point to be based on the
-		// previous NC operation's ending point.
-		//
-		for (std::vector<CNCPoint>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
-		{
-			if (l_itPoint == locations.begin())
-			{
-				// It's the first point.  Reference this to zero so that the order makes some sense.
-                CNCPoint reference_location(0.0, 0.0, 0.0);
-
-                if (pMachineState)
-                {
-                    // We do know where the machine is currently positioned.  Sort the locations starting from
-                    // the nearest counterbore to the machine's current location.
-                    reference_location = pMachineState->Location();
-                }
-
-				sort_points_by_distance compare( reference_location );
-				std::sort( locations.begin(), locations.end(), compare );
-			} // End if - then
-			else
-			{
-				// We've already begun.  Just sort based on the previous point's location.
-				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
-				l_itNextPoint++;
-
-				if (l_itNextPoint != locations.end())
-				{
-					sort_points_by_distance compare( *l_itPoint );
-					std::sort( l_itNextPoint, locations.end(), compare );
-				} // End if - then
-			} // End if - else
-		} // End for
-	} // End if - then
-
-
-	return(locations);
-} // End FindAllLocations() method
 
 
 // Return depth and diameter in that order.
@@ -802,7 +637,7 @@ CCounterBore::CCounterBore(	const Symbols_t &symbols,
     m_params.set_initial_values( tool_number );
 
     std::list<int> drillbits;
-    std::vector<CNCPoint> locations = FindAllLocations( &drillbits, NULL );
+    std::vector<CNCPoint> locations = CDrilling::FindAllLocations( this, CNCPoint(0.0, 0.0, 0.0), false, &drillbits );
     if (drillbits.size() > 0)
     {
         // We found some drilling objects amongst the symbols. Use the diameter of

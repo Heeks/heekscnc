@@ -30,7 +30,7 @@ public:
 	double m_dwell;			// If dwell_bottom is non-zero then we're using the G82 tap cycle rather than G83 peck drill cycle.  This is the 'P' word
 	int    m_sort_tapping_locations;	// Perform a location-based sort before generating GCode?
 	int    m_tap_mode;	                // tap_mode_t
-	int    m_direction;	                // right=0, left=1 
+	int    m_direction;	                // right=0, left=1
 	// double m_pitch;	        // typically mm/rev - read from tool parameter
 	double m_depth;         // length of thread below x/y/z
 
@@ -133,7 +133,6 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	std::vector<CNCPoint> FindAllLocations(CMachineState *pMachineState);
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	static bool ValidType( const int object_type );

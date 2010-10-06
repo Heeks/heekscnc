@@ -175,7 +175,7 @@ Python CTapping::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << CSpeedOp::AppendTextToProgram( pMachineState );   // Set any private fixtures and change tools (if necessary)
 
-	std::vector<CNCPoint> locations = FindAllLocations(pMachineState);
+	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_tapping_locations, NULL);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );
@@ -325,7 +325,7 @@ void CTapping::glCommands(bool select, bool marked, bool no_color)
 			} // End if - then
 		} // End if - then
 
-		std::vector<CNCPoint> locations = FindAllLocations(NULL);
+		std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this);
 
 		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
@@ -526,195 +526,6 @@ void CTapping::ReloadPointers()
 
 
 /**
- * 	This method looks through the symbols in the list.  If they're PointType objects
- * 	then the object's location is added to the result set.  If it's a circle object
- * 	that doesn't intersect any other element (selected) then add its centre to
- * 	the result set.  Finally, find the intersections of all of these elements and
- * 	add the intersection points to the result vector.
- */
-std::vector<CNCPoint> CTapping::FindAllLocations(CMachineState *pMachineState)
-{
-	std::vector<CNCPoint> locations;
-	ReloadPointers();   // Make sure our integer lists have been converted into children first.
-
-	// Look to find all intersections between all selected objects.  At all these locations, create
-	// a tapping cycle.
-
-	std::list<HeeksObj *> lhs_children;
-	std::list<HeeksObj *> rhs_children;
-	for (HeeksObj *lhsPtr = GetFirstChild(); lhsPtr != NULL; lhsPtr = GetNextChild())
-	{
-	    lhs_children.push_back( lhsPtr );
-	    rhs_children.push_back( lhsPtr );
-	}
-
-	for (std::list<HeeksObj *>::iterator itLhs = lhs_children.begin(); itLhs != lhs_children.end(); itLhs++)
-	{
-	    HeeksObj *lhsPtr = *itLhs;
-		bool l_bIntersectionsFound = false;	// If it's a circle and it doesn't
-							// intersect anything else, we want to know
-							// about it.
-
-		if (lhsPtr->GetType() == PointType)
-		{
-			double pos[3];
-			lhsPtr->GetStartPoint(pos);
-
-			// Copy the results in ONLY if each point doesn't already exist.
-			if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
-			{
-				locations.push_back( CNCPoint( pos ) );
-			} // End if - then
-
-			continue;	// No need to intersect a point with anything.
-		} // End if - then
-
-        for (std::list<HeeksObj *>::iterator itRhs = rhs_children.begin(); itRhs != rhs_children.end(); itRhs++)
-        {
-            HeeksObj *rhsPtr = *itRhs;
-
-			if (lhsPtr == rhsPtr) continue;
-			if (lhsPtr->GetType() == PointType) continue;	// No need to intersect a point type.
-
-            std::list<double> results;
-
-            if ((lhsPtr != NULL) && (rhsPtr != NULL) && (lhsPtr->Intersects( rhsPtr, &results )))
-            {
-				l_bIntersectionsFound = true;
-                while (((results.size() % 3) == 0) && (results.size() > 0))
-                {
-                    CNCPoint intersection;
-
-                    intersection.SetX( *(results.begin()) );
-                    results.erase(results.begin());
-
-                    intersection.SetY( *(results.begin()) );
-                    results.erase(results.begin());
-
-                    intersection.SetZ( *(results.begin()) );
-                    results.erase(results.begin());
-
-					// Copy the results in ONLY if each point doesn't already exist.
-					if (std::find( locations.begin(), locations.end(), intersection ) == locations.end())
-					{
-						locations.push_back(intersection);
-					} // End if - then
-				} // End while
-			} // End if - then
-		} // End for
-
-		if (! l_bIntersectionsFound)
-		{
-			// This element didn't intersect anything else.  If it's a circle
-			// then add its centre point to the result set.
-
-			if (lhsPtr->GetType() == CircleType)
-			{
-				double pos[3];
-				if ((lhsPtr != NULL) && (heeksCAD->GetArcCentre( lhsPtr, pos )))
-				{
-					// Copy the results in ONLY if each point doesn't already exist.
-					if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
-					{
-						locations.push_back( CNCPoint( pos ) );
-					} // End if - then
-				} // End if - then
-			} // End if - then
-
-
-			if (lhsPtr->GetType() == SketchType)
-			{
-				CBox bounding_box;
-				lhsPtr->GetBox( bounding_box );
-				double pos[3];
-				bounding_box.Centre(pos);
-				// Copy the results in ONLY if each point doesn't already exist.
-				if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
-				{
-					locations.push_back( CNCPoint( pos ) );
-				} // End if - then
-			} // End if - then
-
-			if (lhsPtr->GetType() == ProfileType)
-			{
-				std::vector<CNCPoint> starting_points;
-				CFixture perfectly_aligned_fixture(NULL,CFixture::G54, false, 0.0);
-				CMachineState machine;
-				machine.Fixture(perfectly_aligned_fixture);
-
-				// to do, make this get the starting point again
-				//((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &machine );
-
-				// Copy the results in ONLY if each point doesn't already exist.
-				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
-				{
-					if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
-					{
-						locations.push_back( *l_itPoint );
-					} // End if - then
-				} // End for
-			} // End if - then
-
-			if (lhsPtr->GetType() == DrillingType)
-			{
-				std::vector<CNCPoint> starting_points;
-				starting_points = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
-
-				// Copy the results in ONLY if each point doesn't already exist.
-				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
-				{
-					if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
-					{
-						locations.push_back( *l_itPoint );
-					} // End if - then
-				} // End for
-			} // End if - then
-		} // End if - then
-	} // End for
-
-	if (m_params.m_sort_tapping_locations)
-	{
-		// This tapping cycle has the 'sort' option turned on.
-		//
-		// If the sorting option is turned off then the points need to be returned in order of the m_symbols list.  One day,
-		// we will allow the operator to re-order the m_symbols list by using a drag-n-drop operation on the sub-elements
-		// in the menu.  When this is done, the operator's decision as to order should be respected.  Until then, we can
-		// use the 'sort' option in the tapping cycle's parameters.
-
-		for (std::vector<CNCPoint>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
-		{
-			if (l_itPoint == locations.begin())
-			{
-				// It's the first point.
-				CNCPoint reference_location(0.0, 0.0, 0.0);
-				if (pMachineState)
-				{
-				    reference_location = pMachineState->Location();
-				}
-
-				sort_points_by_distance compare( reference_location );
-				std::sort( locations.begin(), locations.end(), compare );
-			} // End if - then
-			else
-			{
-				// We've already begun.  Just sort based on the previous point's location.
-				std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
-				l_itNextPoint++;
-
-				if (l_itNextPoint != locations.end())
-				{
-					sort_points_by_distance compare( *l_itPoint );
-					std::sort( l_itNextPoint, locations.end(), compare );
-				} // End if - then
-			} // End if - else
-		} // End for
-	} // End if - then
-
-	return(locations);
-} // End FindAllLocations() method
-
-
-/**
 	This method adjusts any parameters that don't make sense.  It should report a list
 	of changes in the list of strings.
  */
@@ -752,7 +563,7 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 		CTool *pChamfer = (CTool *) CTool::Find( m_tool_number );
 		if (pChamfer != NULL)
 		{
-			std::vector<CNCPoint> these_locations = FindAllLocations(NULL);
+			std::vector<CNCPoint> these_locations = CDrilling::FindAllLocations(this);
 
 			if (pChamfer->m_params.m_type == CToolParams::eChamfer)
 			{
@@ -782,7 +593,7 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 							// with our tapping locations.  If so, we must be
 							// chamfering a previously drilled hole.
 
-							std::vector<CNCPoint> previous_locations = ((CTapping *)obj)->FindAllLocations(NULL);
+							std::vector<CNCPoint> previous_locations = CDrilling::FindAllLocations((CTapping *)obj);
 							std::vector<CNCPoint> common_locations;
 							std::set_intersection( previous_locations.begin(), previous_locations.end(),
 										these_locations.begin(), these_locations.end(),
