@@ -143,6 +143,8 @@
 		<Unit filename="src/Tag.h" />
 		<Unit filename="src/Tags.cpp" />
 		<Unit filename="src/Tags.h" />
+		<Unit filename="src/Tapping.cpp" />
+		<Unit filename="src/Tapping.h" />
 		<Unit filename="src/Tools.cpp" />
 		<Unit filename="src/Tools.h" />
 		<Unit filename="src/TrsfNCCode.cpp" />

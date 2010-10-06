@@ -22,6 +22,7 @@
 #include "CNCPoint.h"
 #include "MachineState.h"
 #include "Program.h"
+#include "CounterBore.h"
 
 #include <sstream>
 #include <iomanip>
@@ -172,7 +173,7 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << CSpeedOp::AppendTextToProgram( pMachineState );   // Set any private fixtures and change tools (if necessary)
 
-	std::vector<CNCPoint> locations = FindAllLocations(pMachineState);
+	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_drilling_locations, NULL);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );
@@ -321,7 +322,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			} // End if - then
 		} // End if - then
 
-		std::vector<CNCPoint> locations = FindAllLocations(NULL);
+		std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this);
 
 		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 		{
@@ -528,17 +529,21 @@ void CDrilling::ReloadPointers()
  * 	the result set.  Finally, find the intersections of all of these elements and
  * 	add the intersection points to the result vector.
  */
-std::vector<CNCPoint> CDrilling::FindAllLocations(CMachineState *pMachineState)
+/* static */ std::vector<CNCPoint> CDrilling::FindAllLocations(
+                    ObjList *parent,
+                    const CNCPoint starting_location, // = CNCPoint(0.0, 0.0, 0.0)
+                    const bool sort_locations, // = false
+                    std::list<int> *pToolNumbersReferenced /* = NULL */ )
 {
 	std::vector<CNCPoint> locations;
-	ReloadPointers();   // Make sure our integer lists have been converted into children first.
+	parent->ReloadPointers();   // Make sure our integer lists have been converted into children first.
 
 	// Look to find all intersections between all selected objects.  At all these locations, create
 	// a drilling cycle.
 
 	std::list<HeeksObj *> lhs_children;
 	std::list<HeeksObj *> rhs_children;
-	for (HeeksObj *lhsPtr = GetFirstChild(); lhsPtr != NULL; lhsPtr = GetNextChild())
+	for (HeeksObj *lhsPtr = parent->GetFirstChild(); lhsPtr != NULL; lhsPtr = parent->GetNextChild())
 	{
 	    lhs_children.push_back( lhsPtr );
 	    rhs_children.push_back( lhsPtr );
@@ -651,24 +656,41 @@ std::vector<CNCPoint> CDrilling::FindAllLocations(CMachineState *pMachineState)
 				} // End for
 			} // End if - then
 
-			if (lhsPtr->GetType() == DrillingType)
-			{
-				std::vector<CNCPoint> starting_points;
-				starting_points = ((CDrilling *)lhsPtr)->FindAllLocations(pMachineState);
+            if (lhsPtr->GetType() == DrillingType)
+            {
+                // Ask the Drilling object what reference points it uses.
+                if ((((COp *) lhsPtr)->m_tool_number > 0) && (pToolNumbersReferenced != NULL))
+                {
+                    pToolNumbersReferenced->push_back( ((COp *) lhsPtr)->m_tool_number );
+                } // End if - then
 
-				// Copy the results in ONLY if each point doesn't already exist.
-				for (std::vector<CNCPoint>::const_iterator l_itPoint = starting_points.begin(); l_itPoint != starting_points.end(); l_itPoint++)
-				{
-					if (std::find( locations.begin(), locations.end(), *l_itPoint ) == locations.end())
-					{
-						locations.push_back( *l_itPoint );
-					} // End if - then
-				} // End for
-			} // End if - then
+                std::vector<CNCPoint> holes = CDrilling::FindAllLocations((CDrilling *)lhsPtr, starting_location, false, pToolNumbersReferenced);
+                for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
+                {
+                    if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
+                    {
+                        locations.push_back( *l_itHole );
+                    } // End if - then
+                } // End for
+            } // End if - then
+
+            if (lhsPtr->GetType() == CounterBoreType)
+            {
+                std::vector<CNCPoint> holes = CDrilling::FindAllLocations((CCounterBore *)lhsPtr, starting_location, false, NULL);
+                for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
+                {
+                    if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
+                    {
+                        locations.push_back( *l_itHole );
+                    } // End if - then
+                } // End for
+            } // End if - then
+
+
 		} // End if - then
 	} // End for
 
-	if (m_params.m_sort_drilling_locations)
+	if (sort_locations)
 	{
 		// This drilling cycle has the 'sort' option turned on.
 		//
@@ -683,10 +705,7 @@ std::vector<CNCPoint> CDrilling::FindAllLocations(CMachineState *pMachineState)
 			{
 				// It's the first point.
 				CNCPoint reference_location(0.0, 0.0, 0.0);
-				if (pMachineState)
-				{
-				    reference_location = pMachineState->Location();
-				}
+                reference_location = starting_location;
 
 				sort_points_by_distance compare( reference_location );
 				std::sort( locations.begin(), locations.end(), compare );
@@ -724,7 +743,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 		CTool *pChamfer = (CTool *) CTool::Find( m_tool_number );
 		if (pChamfer != NULL)
 		{
-			std::vector<CNCPoint> these_locations = FindAllLocations(NULL);
+			std::vector<CNCPoint> these_locations = CDrilling::FindAllLocations(this);
 
 			if (pChamfer->m_params.m_type == CToolParams::eChamfer)
 			{
@@ -754,7 +773,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 							// with our drilling locations.  If so, we must be
 							// chamfering a previously drilled hole.
 
-							std::vector<CNCPoint> previous_locations = ((CDrilling *)obj)->FindAllLocations(NULL);
+							std::vector<CNCPoint> previous_locations = CDrilling::FindAllLocations((CDrilling *)obj);
 							std::vector<CNCPoint> common_locations;
 							std::set_intersection( previous_locations.begin(), previous_locations.end(),
 										these_locations.begin(), these_locations.end(),

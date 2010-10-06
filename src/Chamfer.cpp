@@ -236,8 +236,8 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 				continue;
 			}
 
-			std::vector<CNCPoint> locations = pDrilling->FindAllLocations(pMachineState);
-			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+			std::vector<CNCPoint> locations = CDrilling::FindAllLocations(pDrilling, pMachineState->Location(), true, NULL);
+            for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
 				circles.push_back( Circle( point, hole_diameter, pDrilling->m_params.m_depth ) );
@@ -248,8 +248,7 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 		{
 			CCounterBore *pCounterBore = ((CCounterBore *) child);
 
-			std::list<int> unused;
-			std::vector<CNCPoint> locations = pCounterBore->FindAllLocations(&unused, pMachineState);
+			std::vector<CNCPoint> locations = CDrilling::FindAllLocations(pCounterBore, pMachineState->Location(), pCounterBore->m_params.m_sort_locations, NULL);
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
