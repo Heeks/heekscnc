@@ -90,14 +90,9 @@ extern CHeeksCADInterface* heeksCAD;
 #endif
 
 
-typedef struct
-{
-    wxString description;
-    double  diameter;
-    double  pitch;
-} tap_sizes_t;
 
-static tap_sizes_t metric_tap_sizes[] = {
+
+static CTool::tap_sizes_t metric_tap_sizes[] = {
       {_T("1    x 0.25mm course"), 1.0, 0.25},
       {_T("1.2  x 0.25mm course"), 1.2, 0.25},
       {_T("1.4  x 0.3 mm course"), 1.3, 0.3},
@@ -153,57 +148,84 @@ static tap_sizes_t metric_tap_sizes[] = {
       {_T("64   x 4   mm fine"), 64.0, 4.0}
     };
 
-static tap_sizes_t imperial_tap_sizes[] = {
-      {_T("#0 = 0.0600 x 80 UNF"), 0.06 * 25.4, 25.4 / 80},
-      {_T("#1 = 0.0730  x 64 UNC"), 0.073 * 25.4, 25.4 / 64},
-      {_T("#1 = 0.0730  x 72 UNF"), 0.073 * 25.4, 25.4 / 72},
-      {_T("#2 = 0.0860  x 56 UNC"), 0.086 * 25.4, 25.4 / 56},
-      {_T("#2 = 0.0860  x 64 UNF"), 0.086 * 25.4, 25.4 / 64},
-      {_T("#3 = 0.0990  x 48 UNC"), 0.099 * 25.4, 25.4 / 48},
-      {_T("#3 = 0.0990  x 56 UNF"), 0.099 * 25.4, 25.4 / 56},
-      {_T("#4 = 0.1120  x 40 UNC"), 0.112 * 25.4, 25.4 / 40},
-      {_T("#4 = 0.1120  x 48 UNF"), 0.112 * 25.4, 25.4 / 48},
-      {_T("#5 = 0.1250  x 40 UNC"), 0.125 * 25.4, 25.4 / 40},
-      {_T("#5 = 0.1250  x 44 UNF"), 0.125 * 25.4, 25.4 / 44},
-      {_T("#6 = 0.1380  x 32 UNC"), 0.138 * 25.4, 25.4 / 32},
-      {_T("#6 = 0.1380  x 40 UNF"), 0.138 * 25.4, 25.4 / 40},
-      {_T("#8 = 0.1640  x 32 UNC"), 0.164 * 25.4, 25.4 / 32},
-      {_T("#8 = 0.1640  x 36 UNF"), 0.164 * 25.4, 25.4 / 36},
-      {_T("#10= 0.1900  x 24 UNC"), 0.190 * 25.4, 25.4 / 24},
-      {_T("#10= 0.1900  x 32 UNF"), 0.190 * 25.4, 25.4 / 32},
-      {_T("#12= 0.2160  x 24 UNC"), 0.216 * 25.4, 25.4 / 24},
-      {_T("#12= 0.2160  x 28 UNC"), 0.216 * 25.4, 25.4 / 28},
-      {_T("#12= 0.2160  x 32 UNEF"), 0.216 * 25.4, 25.4 / 32},
+static CTool::tap_sizes_t imperial_tap_sizes[] = {
+      {_T("#0 = 0.060 x 80 UNF"), 0.06 * 25.4, 25.4 / 80},
+      {_T("#1 = 0.073 x 64 UNC"), 0.073 * 25.4, 25.4 / 64},
+      {_T("#1 = 0.073 x 72 UNF"), 0.073 * 25.4, 25.4 / 72},
+      {_T("#2 = 0.086 x 56 UNC"), 0.086 * 25.4, 25.4 / 56},
+      {_T("#2 = 0.086 x 64 UNF"), 0.086 * 25.4, 25.4 / 64},
+      {_T("#3 = 0.099 x 48 UNC"), 0.099 * 25.4, 25.4 / 48},
+      {_T("#3 = 0.099 x 56 UNF"), 0.099 * 25.4, 25.4 / 56},
+      {_T("#4 = 0.112 x 40 UNC"), 0.112 * 25.4, 25.4 / 40},
+      {_T("#4 = 0.112 x 48 UNF"), 0.112 * 25.4, 25.4 / 48},
+      {_T("#5 = 0.125 x 40 UNC"), 0.125 * 25.4, 25.4 / 40},
+      {_T("#5 = 0.125 x 44 UNF"), 0.125 * 25.4, 25.4 / 44},
+      {_T("#6 = 0.138 x 32 UNC"), 0.138 * 25.4, 25.4 / 32},
+      {_T("#6 = 0.138 x 40 UNF"), 0.138 * 25.4, 25.4 / 40},
+      {_T("#8 = 0.164 x 32 UNC"), 0.164 * 25.4, 25.4 / 32},
+      {_T("#8 = 0.164 x 36 UNF"), 0.164 * 25.4, 25.4 / 36},
+      {_T("#10= 0.190 x 24 UNC"), 0.190 * 25.4, 25.4 / 24},
+      {_T("#10= 0.190 x 32 UNF"), 0.190 * 25.4, 25.4 / 32},
+      {_T("#12= 0.216 x 24 UNC"), 0.216 * 25.4, 25.4 / 24},
+      {_T("#12= 0.216 x 28 UNC"), 0.216 * 25.4, 25.4 / 28},
+      {_T("#12= 0.216 x 32 UNEF"), 0.216 * 25.4, 25.4 / 32},
       {_T("1/4  x 20 UNC"), 0.25 * 25.4, 25.4 / 20},
-      {_T("1/4  x 28 UNC"), 0.25 * 25.4, 25.4 / 28},
+      {_T("1/4  x 28 UNF"), 0.25 * 25.4, 25.4 / 28},
       {_T("1/4  x 32 UNEF"), 0.25 * 25.4, 25.4 / 32},
       {_T("5/16 x 18 UNC"), (5.0/16.0) * 25.4, 25.4 / 18},
-      {_T("5/16 x 24 UNC"), (5.0/16.0) * 25.4, 25.4 / 24},
+      {_T("5/16 x 24 UNF"), (5.0/16.0) * 25.4, 25.4 / 24},
       {_T("5/16 x 32 UNEF"), (5.0/16.0) * 25.4, 25.4 / 32},
       {_T("3/8 x 16 UNC"), (3.0/8.0) * 25.4, 25.4 / 16},
-      {_T("3/8 x 24 UNC"), (3.0/8.0) * 25.4, 25.4 / 24},
+      {_T("3/8 x 24 UNF"), (3.0/8.0) * 25.4, 25.4 / 24},
       {_T("3/8 x 32 UNEF"), (3.0/8.0) * 25.4, 25.4 / 32},
       {_T("7/16 x 14 UNC"), (7.0/16.0) * 25.4, 25.4 / 14},
-      {_T("7/16 x 20 UNC"), (7.0/16.0) * 25.4, 25.4 / 20},
+      {_T("7/16 x 20 UNF"), (7.0/16.0) * 25.4, 25.4 / 20},
       {_T("7/16 x 28 UNEF"), (7.0/16.0) * 25.4, 25.4 / 28},
       {_T("1/2 x 13 UNC"), (1.0/2.0) * 25.4, 25.4 / 13},
-      {_T("1/2 x 20 UNC"), (1.0/2.0) * 25.4, 25.4 / 20},
+      {_T("1/2 x 20 UNF"), (1.0/2.0) * 25.4, 25.4 / 20},
       {_T("1/2 x 28 UNEF"), (1.0/2.0) * 25.4, 25.4 / 28},
       {_T("9/16 x 12 UNC"), (9.0/16.0) * 25.4, 25.4 / 12},
-      {_T("9/16 x 18 UNC"), (9.0/16.0) * 25.4, 25.4 / 18},
+      {_T("9/16 x 18 UNF"), (9.0/16.0) * 25.4, 25.4 / 18},
       {_T("9/16 x 24 UNEF"), (9.0/16.0) * 25.4, 25.4 / 24},
       {_T("5/8 x 11 UNC"), (5.0/8.0) * 25.4, 25.4 / 11},
-      {_T("5/8 x 18 UNC"), (5.0/8.0) * 25.4, 25.4 / 18},
+      {_T("5/8 x 18 UNF"), (5.0/8.0) * 25.4, 25.4 / 18},
       {_T("5/8 x 24 UNEF"), (5.0/8.0) * 25.4, 25.4 / 24},
       {_T("3/4 x 10 UNC"), (3.0/4.0) * 25.4, 25.4 / 10},
-      {_T("3/4 x 16 UNC"), (3.0/4.0) * 25.4, 25.4 / 16},
+      {_T("3/4 x 16 UNF"), (3.0/4.0) * 25.4, 25.4 / 16},
       {_T("3/4 x 20 UNEF"), (3.0/4.0) * 25.4, 25.4 / 20},
       {_T("7/8 x 9 UNC"), (7.0/8.0) * 25.4, 25.4 / 9},
-      {_T("7/8 x 14 UNC"), (7.0/8.0) * 25.4, 25.4 / 14},
+      {_T("7/8 x 14 UNF"), (7.0/8.0) * 25.4, 25.4 / 14},
       {_T("7/8 x 20 UNEF"), (7.0/8.0) * 25.4, 25.4 / 20},
       {_T("1 x 8 UNC"), 1.0 * 25.4, 25.4 / 8},
-      {_T("1 x 14 UNC"), 1.0 * 25.4, 25.4 / 14},
+      {_T("1 x 14 UNF"), 1.0 * 25.4, 25.4 / 14},
       {_T("1 x 20 UNEF"), 1.0 * 25.4, 25.4 / 20}
+    };
+
+static CTool::tap_sizes_t british_standard_whitworth_tap_sizes[] = {
+      {_T("1/16 x 60 BSW"), (1.0/16.0) * 25.4, 25.4 / 60},
+      {_T("3/32 x 48 BSW"), (3.0/32.0) * 25.4, 25.4 / 48},
+      {_T("1/8  x 48 BSW"), (1.0/8.0) * 25.4, 25.4 / 40},
+      {_T("5/32 x 32 BSW"), (5.0/32.0) * 25.4, 25.4 / 32},
+      {_T("3/16 x 24 BSW"), (3.0/16.0) * 25.4, 25.4 / 24},
+      {_T("7/32 x 24 BSW"), (7.0/32.0) * 25.4, 25.4 / 24},
+      {_T("1/4 x 20 BSW"), (1.0/4.0) * 25.4, 25.4 / 20},
+      {_T("5/16 x 18 BSW"), (5.0/16.0) * 25.4, 25.4 / 18},
+      {_T("3/8 x 16 BSW"), (3.0/8.0) * 25.4, 25.4 / 16},
+      {_T("7/16 x 14 BSW"), (7.0/16.0) * 25.4, 25.4 / 14},
+      {_T("1/2 x 12 BSW"), (1.0/2.0) * 25.4, 25.4 / 12},
+      {_T("9/16 x 12 BSW"), (9.0/16.0) * 25.4, 25.4 / 12},
+      {_T("5/8 x 11 BSW"), (5.0/8.0) * 25.4, 25.4 / 11},
+      {_T("11/16 x 11 BSW"), (11.0/16.0) * 25.4, 25.4 / 11},
+      {_T("3/4 x 10 BSW"), (3.0/4.0) * 25.4, 25.4 / 10},
+      {_T("13/16 x 10 BSW"), (13.0/16.0) * 25.4, 25.4 / 10},
+      {_T("7/8 x 9 BSW"), (7.0/8.0) * 25.4, 25.4 / 9},
+      {_T("15/16 x 9 BSW"), (15.0/16.0) * 25.4, 25.4 / 9},
+      {_T("1 x 8 BSW"), 1.0 * 25.4, 25.4 / 8},
+      {_T("1 1/8 x 7 BSW"), (1.0 + (1.0/8.0)) * 25.4, 25.4 / 7},
+      {_T("1 1/4 x 7 BSW"), (1.0 + (1.0/4.0)) * 25.4, 25.4 / 7},
+      {_T("1 1/2 x 6 BSW"), (1.0 + (1.0/2.0)) * 25.4, 25.4 / 6},
+      {_T("1 3/4 x 5 BSW"), (1.0 + (3.0/4.0)) * 25.4, 25.4 / 5},
+      {_T("2 x 4.5 BSW"), 2.0 * 25.4, 25.4 / 4.5}
     };
 
 
@@ -740,35 +762,39 @@ static void on_select_tap_from_standard_sizes(int chosen_units, HeeksObj* object
         return; // They didn't select metric or imperial.  Ignore this.
 
         case 1:
-        ((CTool *)object)->SelectTapFromMetricSizes();
+        ((CTool *)object)->SelectTapFromStandardSizes(metric_tap_sizes, sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]));
         break;
 
         case 2:
-        ((CTool *)object)->SelectTapFromImperialSizes();
+        ((CTool *)object)->SelectTapFromStandardSizes(imperial_tap_sizes, sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]));
+        break;
+
+        case 3:
+        ((CTool *)object)->SelectTapFromStandardSizes(british_standard_whitworth_tap_sizes, sizeof(british_standard_whitworth_tap_sizes)/sizeof(british_standard_whitworth_tap_sizes[0]));
         break;
     }
 }
 
-void CTool::SelectTapFromMetricSizes()
+void CTool::SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes, const ::size_t number_of_tap_sizes)
 {
     wxString message(_("Select tap size"));
-    wxString caption(_("Standard Metric Tap Sizes"));
+    wxString caption(_("Standard Tap Sizes"));
 
     wxArrayString choices;
 
-    for (int i=0; i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]); i++)
+    for (::size_t i=0; i<number_of_tap_sizes; i++)
     {
-        choices.Add(metric_tap_sizes[i].description);
+        choices.Add(tap_sizes[i].description);
     }
 
     wxString choice = ::wxGetSingleChoice( message, caption, choices );
 
-    for (::size_t i=0; i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]); i++)
+    for (::size_t i=0; i<number_of_tap_sizes; i++)
     {
         if ((choices.size() > 0) && (choice == choices[i]))
         {
-            m_params.m_diameter = metric_tap_sizes[i].diameter;
-            m_params.m_pitch = metric_tap_sizes[i].pitch;
+            m_params.m_diameter = tap_sizes[i].diameter;
+            m_params.m_pitch = tap_sizes[i].pitch;
             m_params.m_direction = 0;    // Right hand thread.
 
             ResetTitle();
@@ -778,42 +804,6 @@ void CTool::SelectTapFromMetricSizes()
             return;
         }
     }
-
-
-}
-
-
-void CTool::SelectTapFromImperialSizes()
-{
-    wxString message(_("Select tap size"));
-    wxString caption(_("Standard Imperial Tap Sizes"));
-
-    wxArrayString choices;
-
-    for (::size_t i=0; i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]); i++)
-    {
-        choices.Add(imperial_tap_sizes[i].description);
-    }
-
-    wxString choice = ::wxGetSingleChoice( message, caption, choices );
-
-    for (int i=0; i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0]); i++)
-    {
-        if ((choices.size() > 0) && (choice == choices[i]))
-        {
-            m_params.m_diameter = imperial_tap_sizes[i].diameter;
-            m_params.m_pitch = imperial_tap_sizes[i].pitch;
-            m_params.m_direction = 0;    // Right hand thread.
-
-            ResetTitle();
-            heeksCAD->RefreshProperties();
-            KillGLLists();
-            heeksCAD->Repaint();
-            return;
-        }
-    }
-
-
 }
 
 
@@ -955,6 +945,7 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 			choices.push_back(_("Select size"));
 			choices.push_back(_("Metric"));
 			choices.push_back(_("Imperial"));
+			choices.push_back(_("British Standard Whitworth"));
 			int choice = 0;
 			list->push_back(new PropertyChoice(_("Select TAP from standard sizes"), choices, choice, parent, on_select_tap_from_standard_sizes));
 		}
@@ -1550,11 +1541,54 @@ wxString CTool::GenerateMeaningfulName() const
 							break;
 
                 case CToolParams::eTapTool:
-		  l_ossName << (_("Tap Tool"));
-		  if (m_params.m_direction == 1) {
-		    l_ossName << (_(", left hand"));
-		  }
+                {
+                    // See if we can find a name for it in the standard TAP sizes tables.
+                    bool found = false;
 
+                    for (::size_t i=0; ((i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0])) && (! found)); i++)
+                    {
+                        if ((m_params.m_diameter == metric_tap_sizes[i].diameter) &&
+                            (m_params.m_pitch == metric_tap_sizes[i].pitch))
+                            {
+                                l_ossName.str(_T(""));  // Replace what came before.
+                                wxString description = metric_tap_sizes[i].description;
+                                description.Replace(_T("  "),_T(" "),true);
+                                l_ossName << description.utf8_str();
+                                found = true;
+                            }
+                    }
+
+                    for (::size_t i=0; ((i<sizeof(imperial_tap_sizes)/sizeof(imperial_tap_sizes[0])) && (! found)); i++)
+                    {
+                        if ((m_params.m_diameter == imperial_tap_sizes[i].diameter) &&
+                            (m_params.m_pitch == imperial_tap_sizes[i].pitch))
+                            {
+                                l_ossName.str(_T(""));  // Replace what came before.
+                                wxString description = imperial_tap_sizes[i].description;
+                                description.Replace(_T("  "),_T(" "),true);
+                                l_ossName << description.utf8_str();
+                                found = true;
+                            }
+                    }
+
+                    for (::size_t i=0; ((i<sizeof(british_standard_whitworth_tap_sizes)/sizeof(british_standard_whitworth_tap_sizes[0])) && (! found)); i++)
+                    {
+                        if ((m_params.m_diameter == british_standard_whitworth_tap_sizes[i].diameter) &&
+                            (m_params.m_pitch == british_standard_whitworth_tap_sizes[i].pitch))
+                            {
+                                l_ossName.str(_T(""));  // Replace what came before.
+                                wxString description = british_standard_whitworth_tap_sizes[i].description;
+                                description.Replace(_T("  "),_T(" "),true);
+                                l_ossName << description.utf8_str();
+                                found = true;
+                            }
+                    }
+
+                    l_ossName << (_(" Tap Tool"));
+                    if (m_params.m_direction == 1) {
+                        l_ossName << (_(", left hand"));
+                    }
+                }
 		  break;
 
 		default:				break;
@@ -2335,6 +2369,17 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
 	case CToolParams::eSlotCutter:
 		python << _indent << _T("ocl.CylCutter(") << CuttingRadius(false) << _T(", 1000)");
 		return(python);
+
+    case CToolParams::eDrill:
+    case CToolParams::eCentreDrill:
+    case CToolParams::eChamfer:
+    case CToolParams::eTurningTool:
+    case CToolParams::eTouchProbe:
+    case CToolParams::eToolLengthSwitch:
+    case CToolParams::eExtrusion:
+    case CToolParams::eTapTool:
+    case CToolParams::eUndefinedToolType:
+        return(python); // Avoid the compiler warnings.
 	} // End switch
 
 	return(python);
@@ -2386,6 +2431,15 @@ std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
         {
             if ((m_params.m_diameter == imperial_tap_sizes[i].diameter) &&
                 (m_params.m_pitch == imperial_tap_sizes[i].pitch))
+            {
+                found = true;
+            }
+        }
+
+        for (::size_t i=0; i<sizeof(british_standard_whitworth_tap_sizes)/sizeof(british_standard_whitworth_tap_sizes[0]); i++)
+        {
+            if ((m_params.m_diameter == british_standard_whitworth_tap_sizes[i].diameter) &&
+                (m_params.m_pitch == british_standard_whitworth_tap_sizes[i].pitch))
             {
                 found = true;
             }
