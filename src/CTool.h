@@ -318,7 +318,7 @@ public:
         double  pitch;
     } tap_sizes_t;
 
-    void SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes, const ::size_t number_of_tap_sizes);
+    void SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes);
     std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 }; // End CTool class definition.

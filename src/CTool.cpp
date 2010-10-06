@@ -92,7 +92,8 @@ extern CHeeksCADInterface* heeksCAD;
 
 
 
-static CTool::tap_sizes_t metric_tap_sizes[] = {
+
+CTool::tap_sizes_t metric_tap_sizes[] = {
       {_T("1    x 0.25mm course"), 1.0, 0.25},
       {_T("1.2  x 0.25mm course"), 1.2, 0.25},
       {_T("1.4  x 0.3 mm course"), 1.3, 0.3},
@@ -145,10 +146,11 @@ static CTool::tap_sizes_t metric_tap_sizes[] = {
       {_T("60   x 5.5 mm course"), 60.0, 5.5},
       {_T("60   x 4   mm fine"), 60.0, 4.0},
       {_T("64   x 6   mm course"), 64.0, 6.0},
-      {_T("64   x 4   mm fine"), 64.0, 4.0}
+      {_T("64   x 4   mm fine"), 64.0, 4.0},
+      {_T("End of table marker"), -1.0, -1.0}   // WARNING DO NOT REMOVE THIS ENTRY.  IT MUST BE THE LAST ENTRY IN THE TABLE
     };
 
-static CTool::tap_sizes_t unified_thread_standard_tap_sizes[] = {
+CTool::tap_sizes_t unified_thread_standard_tap_sizes[] = {
       {_T("#0 = 0.060 x 80 UNF"), 0.06 * 25.4, 25.4 / 80},
       {_T("#1 = 0.073 x 64 UNC"), 0.073 * 25.4, 25.4 / 64},
       {_T("#1 = 0.073 x 72 UNF"), 0.073 * 25.4, 25.4 / 72},
@@ -198,10 +200,11 @@ static CTool::tap_sizes_t unified_thread_standard_tap_sizes[] = {
       {_T("7/8 x 20 UNEF"), (7.0/8.0) * 25.4, 25.4 / 20},
       {_T("1 x 8 UNC"), 1.0 * 25.4, 25.4 / 8},
       {_T("1 x 14 UNF"), 1.0 * 25.4, 25.4 / 14},
-      {_T("1 x 20 UNEF"), 1.0 * 25.4, 25.4 / 20}
+      {_T("1 x 20 UNEF"), 1.0 * 25.4, 25.4 / 20},
+      {_T("End of table marker"), -1.0, -1.0}   // WARNING DO NOT REMOVE THIS ENTRY.  IT MUST BE THE LAST ENTRY IN THE TABLE
     };
 
-static CTool::tap_sizes_t british_standard_whitworth_tap_sizes[] = {
+CTool::tap_sizes_t british_standard_whitworth_tap_sizes[] = {
       {_T("1/16 x 60 BSW"), (1.0/16.0) * 25.4, 25.4 / 60},
       {_T("3/32 x 48 BSW"), (3.0/32.0) * 25.4, 25.4 / 48},
       {_T("1/8  x 48 BSW"), (1.0/8.0) * 25.4, 25.4 / 40},
@@ -225,8 +228,11 @@ static CTool::tap_sizes_t british_standard_whitworth_tap_sizes[] = {
       {_T("1 1/4 x 7 BSW"), (1.0 + (1.0/4.0)) * 25.4, 25.4 / 7},
       {_T("1 1/2 x 6 BSW"), (1.0 + (1.0/2.0)) * 25.4, 25.4 / 6},
       {_T("1 3/4 x 5 BSW"), (1.0 + (3.0/4.0)) * 25.4, 25.4 / 5},
-      {_T("2 x 4.5 BSW"), 2.0 * 25.4, 25.4 / 4.5}
+      {_T("2 x 4.5 BSW"), 2.0 * 25.4, 25.4 / 4.5},
+      {_T("End of table marker"), -1.0, -1.0}   // WARNING DO NOT REMOVE THIS ENTRY.  IT MUST BE THE LAST ENTRY IN THE TABLE
     };
+
+
 
 
 void CToolParams::set_initial_values()
@@ -762,34 +768,34 @@ static void on_select_tap_from_standard_sizes(int chosen_units, HeeksObj* object
         return; // They didn't select metric or imperial.  Ignore this.
 
         case 1:
-        ((CTool *)object)->SelectTapFromStandardSizes(metric_tap_sizes, sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]));
+        ((CTool *)object)->SelectTapFromStandardSizes(metric_tap_sizes);
         break;
 
         case 2:
-        ((CTool *)object)->SelectTapFromStandardSizes(unified_thread_standard_tap_sizes, sizeof(unified_thread_standard_tap_sizes)/sizeof(unified_thread_standard_tap_sizes[0]));
+        ((CTool *)object)->SelectTapFromStandardSizes(unified_thread_standard_tap_sizes);
         break;
 
         case 3:
-        ((CTool *)object)->SelectTapFromStandardSizes(british_standard_whitworth_tap_sizes, sizeof(british_standard_whitworth_tap_sizes)/sizeof(british_standard_whitworth_tap_sizes[0]));
+        ((CTool *)object)->SelectTapFromStandardSizes(british_standard_whitworth_tap_sizes);
         break;
     }
 }
 
-void CTool::SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes, const ::size_t number_of_tap_sizes)
+void CTool::SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes)
 {
     wxString message(_("Select tap size"));
     wxString caption(_("Standard Tap Sizes"));
 
     wxArrayString choices;
 
-    for (::size_t i=0; i<number_of_tap_sizes; i++)
+    for (::size_t i=0; tap_sizes[i].diameter > 0.0; i++)
     {
         choices.Add(tap_sizes[i].description);
     }
 
     wxString choice = ::wxGetSingleChoice( message, caption, choices );
 
-    for (::size_t i=0; i<number_of_tap_sizes; i++)
+    for (::size_t i=0; tap_sizes[i].diameter > 0.0; i++)
     {
         if ((choices.size() > 0) && (choice == choices[i]))
         {
@@ -1545,7 +1551,7 @@ wxString CTool::GenerateMeaningfulName() const
                     // See if we can find a name for it in the standard TAP sizes tables.
                     bool found = false;
 
-                    for (::size_t i=0; ((i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0])) && (! found)); i++)
+                    for (::size_t i=0; ((metric_tap_sizes[i].diameter > 0.0) && (! found)); i++)
                     {
                         if ((m_params.m_diameter == metric_tap_sizes[i].diameter) &&
                             (m_params.m_pitch == metric_tap_sizes[i].pitch))
@@ -1558,7 +1564,7 @@ wxString CTool::GenerateMeaningfulName() const
                             }
                     }
 
-                    for (::size_t i=0; ((i<sizeof(unified_thread_standard_tap_sizes)/sizeof(unified_thread_standard_tap_sizes[0])) && (! found)); i++)
+                    for (::size_t i=0; ((unified_thread_standard_tap_sizes[i].diameter > 0.0) && (! found)); i++)
                     {
                         if ((m_params.m_diameter == unified_thread_standard_tap_sizes[i].diameter) &&
                             (m_params.m_pitch == unified_thread_standard_tap_sizes[i].pitch))
@@ -1571,7 +1577,7 @@ wxString CTool::GenerateMeaningfulName() const
                             }
                     }
 
-                    for (::size_t i=0; ((i<sizeof(british_standard_whitworth_tap_sizes)/sizeof(british_standard_whitworth_tap_sizes[0])) && (! found)); i++)
+                    for (::size_t i=0; ((british_standard_whitworth_tap_sizes[i].diameter > 0.0) && (! found)); i++)
                     {
                         if ((m_params.m_diameter == british_standard_whitworth_tap_sizes[i].diameter) &&
                             (m_params.m_pitch == british_standard_whitworth_tap_sizes[i].pitch))
@@ -2418,7 +2424,7 @@ std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
     if (m_params.m_type == CToolParams::eTapTool)
     {
         bool found = false;
-        for (::size_t i=0; i<sizeof(metric_tap_sizes)/sizeof(metric_tap_sizes[0]); i++)
+        for (::size_t i=0; (metric_tap_sizes[i].diameter > 0.0); i++)
         {
             if ((m_params.m_diameter == metric_tap_sizes[i].diameter) &&
                 (m_params.m_pitch == metric_tap_sizes[i].pitch))
@@ -2427,7 +2433,7 @@ std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
             }
         }
 
-        for (::size_t i=0; i<sizeof(unified_thread_standard_tap_sizes)/sizeof(unified_thread_standard_tap_sizes[0]); i++)
+        for (::size_t i=0; (unified_thread_standard_tap_sizes[i].diameter > 0.0); i++)
         {
             if ((m_params.m_diameter == unified_thread_standard_tap_sizes[i].diameter) &&
                 (m_params.m_pitch == unified_thread_standard_tap_sizes[i].pitch))
@@ -2436,7 +2442,7 @@ std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
             }
         }
 
-        for (::size_t i=0; i<sizeof(british_standard_whitworth_tap_sizes)/sizeof(british_standard_whitworth_tap_sizes[0]); i++)
+        for (::size_t i=0; (british_standard_whitworth_tap_sizes[i].diameter > 0.0); i++)
         {
             if ((m_params.m_diameter == british_standard_whitworth_tap_sizes[i].diameter) &&
                 (m_params.m_pitch == british_standard_whitworth_tap_sizes[i].pitch))
