@@ -144,6 +144,41 @@ const wxBitmap &CScriptOp::GetIcon()
 	return(python);
 }
 
+/*
+This is a simple way to insert datum parameters for translating gcode around later
+*/
+/* static */ Python CScriptOp::MiscDefs(std::list<HeeksObj *> objects, Python object_title )
+{
+    Python python;
+
+    for (std::list<HeeksObj *>::iterator itObject = objects.begin(); itObject != objects.end(); itObject++)
+    {
+		std::vector<TopoDS_Edge> edges;
+		switch ((*itObject)->GetType())
+		{
+
+
+		case CoordinateSystemType:			
+			// you can paste in new datum/coordinate system parameters with this
+			python << _T("datumposition(")<< heeksCAD->GetDatumPosX(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumPosY(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumPosZ(*itObject)/ theApp.m_program->m_units<< _T(")\n");
+
+			python << _T("datumX_dir(")<< heeksCAD->GetDatumDirx_X(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDirx_Y(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDirx_Z(*itObject)/ theApp.m_program->m_units<< _T(")\n");
+			
+			python << _T("datumY_dir(")<< heeksCAD->GetDatumDiry_X(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDiry_Y(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDiry_Z(*itObject)/ theApp.m_program->m_units<< _T(")\n");
+
+			break;
+
+			
+			} // End switch
+    } // End for
+
+    return(python);
+
+}
+
+
+
+
 
 /**
     This method converts the list of objects into a set of nested classes that
@@ -173,6 +208,7 @@ const wxBitmap &CScriptOp::GetIcon()
 			heeksCAD->VertexGetPoint( *itObject, p );
 			python << _T("\040\040\040\040points.append(ocl.Point(") << p[0] / theApp.m_program->m_units << _T(",") << p[1] / theApp.m_program->m_units << _T(",") << p[2] / theApp.m_program->m_units << _T("))\n");
 			break;
+
 
 		case SketchType:
 			if (! heeksCAD->ConvertSketchToEdges( *itObject, edges ))
@@ -227,7 +263,7 @@ Python CScriptOp::AppendTextToProgram(CMachineState *pMachineState)
     {
         Python object_title;
         object_title << _T("script_op_id_") << (int) this->m_id;
-
+        python << MiscDefs(children, object_title);
         python << OpenCamLibDefinition(children, object_title);
         python << _T("\n");
         python << _T("graphics = ") << object_title << _T("()\n\n");

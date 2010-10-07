@@ -41,5 +41,5 @@ public:
 
 	static Python OpenCamLibDefinition(std::list<HeeksObj *> objects, Python object_title);
 	static Python OpenCamLibDefinition(TopoDS_Edge edge, Python prefix, Python suffix);
-
+	static Python MiscDefs(std::list<HeeksObj *> objects, Python object_title);
 };
