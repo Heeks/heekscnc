@@ -64,7 +64,7 @@ void CSpeedOpParams::ResetFeeds(const int tool_number)
 					// the magic '3000' value to find out what proportion of the 'rule of thumb'
 					// we're using.
 
-					double proportion = m_spindle_speed / 3000.0;
+				        double proportion = fabs(m_spindle_speed) / 3000.0;
 					double drill_diameter_in_inches = pTool->m_params.m_diameter / 25.4;
 					double feed_rate_inches_per_minute = 100.0 * drill_diameter_in_inches * proportion;
 					m_vertical_feed_rate = feed_rate_inches_per_minute * 25.4;	// mm per minute
@@ -74,14 +74,14 @@ void CSpeedOpParams::ResetFeeds(const int tool_number)
 				{
 				    // Make sure we set the feed rate based on both the spindle speed and the pitch.
 
-					m_vertical_feed_rate = m_spindle_speed * pTool->m_params.m_pitch;
+				        m_vertical_feed_rate = fabs(m_spindle_speed) * pTool->m_params.m_pitch;
 					m_horizontal_feed_rate = 0.0;	// We're going straight down with a tap.
 				} // End if - then
 				else if (pTool->m_params.m_max_advance_per_revolution > 0)
 				{
 					// Spindle speed is in revolutions per minute.
 					double advance_per_rev = pTool->m_params.m_max_advance_per_revolution;
-					double feed_rate_mm_per_minute = m_spindle_speed * advance_per_rev;
+					double feed_rate_mm_per_minute = fabs(m_spindle_speed) * advance_per_rev;
 
 					// Now we need to decide whether we assign this value to the vertical
 					// or horozontal (or both) feed rates.  Use the tool type to
@@ -153,10 +153,10 @@ void CSpeedOpParams::ResetSpeeds(const int tool_number)
 
             if ((theApp.m_program != NULL) &&
                 (theApp.m_program->m_machine.m_max_spindle_speed > 0.0) &&
-                (theApp.m_program->m_machine.m_max_spindle_speed < m_spindle_speed))
+                (theApp.m_program->m_machine.m_max_spindle_speed < fabs(m_spindle_speed)))
             {
                 // Reduce the speed to match the machine's maximum setting.
-                m_spindle_speed = theApp.m_program->m_machine.m_max_spindle_speed;
+	        m_spindle_speed = (m_spindle_speed < 0) ? -theApp.m_program->m_machine.m_max_spindle_speed : theApp.m_program->m_machine.m_max_spindle_speed;
             } // End if - then
 		} // End if - then
 	} // End if - then
