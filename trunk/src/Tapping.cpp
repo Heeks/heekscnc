@@ -555,6 +555,26 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 		        {
 		            changes.push_back(*itChange);
 		        }
+			
+			// see wether tapping direction and spindle direction match
+			if (pTool->m_params.m_direction && (m_speed_op_params.m_spindle_speed > 0)) 
+			{
+			    changes.push_back(_("Left-hand tapping needs a counterclockwise spindle rotation (negative spindle_speed)\n"));
+			    if (apply_changes)
+			    {
+			        changes.push_back(_("Adjusting spindle rotation to counterclockwise.\n"));
+				m_speed_op_params.m_spindle_speed  = - m_speed_op_params.m_spindle_speed;
+			    } // End if - then
+			}
+			if (!pTool->m_params.m_direction && (m_speed_op_params.m_spindle_speed < 0) )
+			{
+			    changes.push_back(_("right-hand tapping needs clockwise spindle rotation (positive spindle_speed)\n"));
+			    if (apply_changes)
+			    {
+				changes.push_back(_("Adjusting spindle rotation to clockwise.\n"));
+				m_speed_op_params.m_spindle_speed  = - m_speed_op_params.m_spindle_speed;
+			    } // End if - then
+			}
 		    }
 		}
 	}
