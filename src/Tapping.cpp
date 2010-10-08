@@ -560,20 +560,15 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 	// Make some special checks if we're using a chamfering bit.
 	if (m_tool_number > 0)
 	{
-		CTool *pChamfer = (CTool *) CTool::Find( m_tool_number );
-		if (pChamfer != NULL)
+		CTool *pTap = (CTool *) CTool::Find( m_tool_number );
+		if (pTap != NULL)
 		{
 			std::vector<CNCPoint> these_locations = CDrilling::FindAllLocations(this);
 
-			if (pChamfer->m_params.m_type == CToolParams::eChamfer)
+			if (pTap->m_params.m_type == CToolParams::eTapTool)
 			{
-				// We need to make sure that the diameter of the hole (that will
-				// have been drilled in a previous tapping operation) is between
-				// the chamfering bit's flat_radius (smallest) and diamter/2 (largest).
-
-				// First find ALL drilling cycles that created this hole.  Make sure
-				// to get them all as we may have used a centre tap before the
-				// main hole is taped.
+				// We need to make sure that the depth of the hole we're drilling is at least
+				// as deep as the depth of our tapping operation.
 
 				for (HeeksObj *obj = theApp.m_program->Operations()->GetFirstChild();
 					obj != NULL;
@@ -581,17 +576,19 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 				{
 					if (obj->GetType() == DrillingType)
 					{
+					    CDrilling *pDrilling = (CDrilling *) obj;
+
 						// Make sure we're looking at a hole taped with something
 						// more than a centre tap.
-						CToolParams::eToolType type = CTool::CutterType( ((COp *)obj)->m_tool_number );
+						CToolParams::eToolType type = CTool::CutterType( pDrilling->m_tool_number );
 						if (	(type == CToolParams::eDrill) ||
 							(type == CToolParams::eEndmill) ||
 							(type == CToolParams::eSlotCutter) ||
 							(type == CToolParams::eBallEndMill))
 						{
-							// See if any of the other tapping locations line up
+							// See if any of the other drilling locations line up
 							// with our tapping locations.  If so, we must be
-							// chamfering a previously drilled hole.
+							// tapping a previously drilled hole.
 
 							std::vector<CNCPoint> previous_locations = CDrilling::FindAllLocations((CTapping *)obj);
 							std::vector<CNCPoint> common_locations;
@@ -600,31 +597,15 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 										std::inserter( common_locations, common_locations.begin() ));
 							if (common_locations.size() > 0)
 							{
-								// We're here.  We must be chamfering a hole we've
-								// drilled previously.  Check the diameters.
+								// We're here.  We must be tapping a hole we've
+								// drilled previously.  Check the depths.
 
-								CTool *pPreviousTool = CTool::Find( ((COp *)obj)->m_tool_number );
-								if (pPreviousTool->CuttingRadius() < pChamfer->m_params.m_flat_radius)
+								if (pDrilling->m_params.m_depth < m_params.m_depth)
 								{
-#ifdef UNICODE
-									std::wostringstream l_ossChange;
-#else
-									std::ostringstream l_ossChange;
-#endif
-									l_ossChange << _("Chamfering bit for tapping op") << " (id=" << m_id << ") " << _("is too big for previously drilled hole") << " (tapping id=" << obj->m_id << ")\n";
-									changes.push_back( l_ossChange.str().c_str() );
-								} // End if - then
-
-								if (pPreviousTool->CuttingRadius() > (pChamfer->m_params.m_diameter/2.0))
-								{
-#ifdef UNICODE
-									std::wostringstream l_ossChange;
-#else
-									std::ostringstream l_ossChange;
-#endif
-									l_ossChange << _("Chamfering bit for tapping op") << " (id=" << m_id << ") " << _("is too small for previously drilled hole") << " (tapping id=" << obj->m_id << ")\n";
-									changes.push_back( l_ossChange.str().c_str() );
-								} // End if - then
+								    wxString change;
+								    change << _("ID ") << this->m_id << _(" The tapping operation's depth is greater than the previously drilled hole\n");
+								    changes.push_back(change);
+								}
 							} // End if - then
 
 						} // End if - then
@@ -637,8 +618,8 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 	if (m_tool_number > 0)
 	{
 		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CTool *pDrill = (CTool *) CTool::Find( m_tool_number );
-		if ((pDrill != NULL) && (pDrill->m_params.m_cutting_edge_height < m_params.m_depth))
+		CTool *pTap = (CTool *) CTool::Find( m_tool_number );
+		if ((pTap != NULL) && (pTap->m_params.m_cutting_edge_height < m_params.m_depth))
 		{
 			// The drill bit we've chosen can't cut as deep as we've setup to go.
 
@@ -650,12 +631,12 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 				std::ostringstream l_ossChange;
 #endif
 
-				l_ossChange << _("Adjusting depth of drill cycle") << " id='" << m_id << "' " << _("from") << " '"
+				l_ossChange << _("Adjusting depth of tapping cycle") << " id='" << m_id << "' " << _("from") << " '"
 					<< m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " "
-					<< pDrill->m_params.m_cutting_edge_height / theApp.m_program->m_units << "\n";
+					<< pTap->m_params.m_cutting_edge_height / theApp.m_program->m_units << "\n";
 				changes.push_back(l_ossChange.str().c_str());
 
-				m_params.m_depth = pDrill->m_params.m_cutting_edge_height;
+				m_params.m_depth = pTap->m_params.m_cutting_edge_height;
 			} // End if - then
 			else
 			{
@@ -665,49 +646,12 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 				std::ostringstream l_ossChange;
 #endif
 
-				l_ossChange << _("WARNING") << ": " << _("Tapping") << " (id=" << m_id << ").  " << _("Can't drill hole") << " " << m_params.m_depth / theApp.m_program->m_units << " when the drill bit's cutting length is only " << pDrill->m_params.m_cutting_edge_height << " long\n";
+				l_ossChange << _("WARNING") << ": " << _("Tapping") << " (id=" << m_id << ").  " << _("Can't tap hole") << " " << m_params.m_depth / theApp.m_program->m_units << " when the tapping bit's cutting length is only " << pTap->m_params.m_cutting_edge_height << " long\n";
 				changes.push_back(l_ossChange.str().c_str());
 			} // End if - else
 		} // End if - then
 	} // End if - then
 
-	// See if there is anything in the reference objects that may be in conflict with this object's current configuration.
-	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
-	{
-		switch (l_itSymbol->first)
-		{
-			case ProfileType:
-				{
-					CProfile *pProfile = (CProfile *) heeksCAD->GetIDObject( l_itSymbol->first, l_itSymbol->second );
-					if (pProfile != NULL)
-					{
-                        double depthOp_depth = ((CDepthOp *) pProfile)->m_depth_op_params.m_start_depth  - ((CDepthOp *) pProfile)->m_depth_op_params.m_final_depth;
-                        if (depthOp_depth != m_params.m_depth)
-                        {
-    #ifdef UNICODE
-                    std::wostringstream l_ossChange;
-    #else
-                    std::ostringstream l_ossChange;
-    #endif
-
-                            l_ossChange << _("Adjusting depth of drill cycle") << " (id='" << m_id << "') " << _("from") << " '"
-                                << m_params.m_depth / theApp.m_program->m_units << "' " << _("to") << " '"
-                                << depthOp_depth  / theApp.m_program->m_units<< "'\n";
-                            changes.push_back(l_ossChange.str().c_str());
-
-                            if (apply_changes)
-                            {
-                                m_params.m_depth = depthOp_depth;
-                            } // End if - then
-                        } // End if - then
-					}
-				}
-				break;
-
-			default:
-				break;
-		} // End switch
-	} // End for
 
 	return(changes);
 
