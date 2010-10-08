@@ -6,6 +6,7 @@
 #
 # Hirutso Enni, 2009-01-13
 # altered by Dan Falck 2010-08-04
+# added tap() arguments Michael Haberler 2010-10-07
 ################################################################################
 
 ncOFF = 0
@@ -259,7 +260,14 @@ class Creator:
         """Drilling routines"""
         pass
 
-    def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):
+    # original prototype was:
+    # def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):
+    #
+    # current call is like so:
+    # tap(x=10, y=10, z=0, tap_mode=0, depth=12.7, standoff=6.35, direction=0, pitch=1.25)
+    # just add tap_mode & direction parameters
+
+    def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None, tap_mode=None, direction=None):
         """Tapping routines"""
         pass
 
@@ -560,8 +568,9 @@ def profile():
 def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
     creator.drill(x, y, z, depth, standoff, dwell, peck_depth)
 
-def tap(x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):
-    creator.tap(x, y, z, zretract, depth, standoff, dwell_bottom, pitch, stoppos, spin_in, spin_out)
+
+def tap(x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None, tap_mode=None, direction=None):
+    creator.tap(x, y, z, zretract, depth, standoff, dwell_bottom, pitch, stoppos, spin_in, spin_out, tap_mode, direction)
 
 def bore(x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, feed_in=None, feed_out=None, stoppos=None, shift_back=None, shift_right=None, backbore=False, stop=False):
     creator.bore(x, y, z, zretract, depth, standoff, dwell_Bottom, feed_in, feed_out, stoppos, shift_back, shift_right, backbore, stop)
