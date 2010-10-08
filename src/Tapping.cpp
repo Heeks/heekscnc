@@ -163,6 +163,7 @@ Python CTapping::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 	double pitch = 0.0;
+	int direction = 0; // default to right hand
 
 	if (m_tool_number > 0)
 	  {
@@ -170,6 +171,7 @@ Python CTapping::AppendTextToProgram( CMachineState *pMachineState )
 	    if (Tool != NULL)
 	      {
 		pitch = ((CTool *) Tool)->m_params.m_pitch;
+		direction = ((CTool *) Tool)->m_params.m_direction;
 	      } // End if - then
 	  } // End if - then
 
@@ -187,6 +189,7 @@ Python CTapping::AppendTextToProgram( CMachineState *pMachineState )
 		       << _T("tap_mode=") << m_params.m_tap_mode << _T(", ")
 		       << _T("depth=") << m_params.m_depth/theApp.m_program->m_units << _T(", ")
 		       << _T("standoff=") << m_params.m_standoff/theApp.m_program->m_units << _T(", ")
+		       << _T("direction=") << direction << _T(", ") // needed for ISO G84/G74
 		       << _T("pitch=") << pitch/theApp.m_program->m_units // _T(", ")
 		       << _T(")\n");
 
