@@ -541,7 +541,7 @@ std::list<wxString> CTapping::DesignRulesAdjustment(const bool apply_changes)
 		{
 		    if (pTool->m_params.m_type != CToolParams::eTapTool)
 		    {
-		        changes.push_back(_("The tapping operation has not selected a tapping tool to use"));
+		        changes.push_back(_("The tapping operation has not selected a tapping tool to use\n"));
 		    }
 		    else
 		    {
