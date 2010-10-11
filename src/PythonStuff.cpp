@@ -82,7 +82,13 @@ public:
 #ifdef WIN32
 			Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
 #else
-			Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + wxString(_T("/../heekscnc/nc/") + m_program->m_machine.file_name + _T("_read.py\" ")) + wxString(_T("\"")) + m_filename + wxString(_T("\"")) );
+#ifdef RUNINPLACE
+            wxString path(_T("/nc/"));
+#else
+            wxString path(_T("/../heekscnc/nc/"));
+#endif
+
+			Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + path + m_program->m_machine.file_name + wxString(_T("_read.py\" \"")) + m_filename + wxString(_T("\"")) );
 #endif
 		} // End if - else
 	}
@@ -143,7 +149,9 @@ public:
         Execute(wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("\\post.bat\" \"")) + path.GetFullPath() + wxString(_T("\"")));
 #else
 
-		Execute(wxString(_T("python ")) + path.GetFullPath());
+        wxString path = wxString(_T("python ")) + path.GetFullPath();
+		cout<<path.c_str();
+		Execute(path);
 #endif
 	}
 	void ThenDo(void)
