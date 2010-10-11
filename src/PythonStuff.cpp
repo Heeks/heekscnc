@@ -149,8 +149,8 @@ public:
         Execute(wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("\\post.bat\" \"")) + path.GetFullPath() + wxString(_T("\"")));
 #else
 
-        wxString path = wxString(_T("python ")) + path.GetFullPath();
-		Execute(path);
+        wxString post_path = wxString(_T("python ")) + path.GetFullPath();
+		Execute(post_path);
 #endif
 	}
 	void ThenDo(void)
