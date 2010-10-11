@@ -150,7 +150,6 @@ public:
 #else
 
         wxString path = wxString(_T("python ")) + path.GetFullPath();
-		cout<<path.c_str();
 		Execute(path);
 #endif
 	}
