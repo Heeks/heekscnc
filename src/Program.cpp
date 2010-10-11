@@ -642,45 +642,45 @@ Python CProgram::RewritePythonProgram()
 				python << _T("# coding=CP1250\n");
 				python << _T("# Slovak language detected in Microsoft Windows\n");
 				break;
-			case wxLANGUAGE_GERMAN: 	
-			case wxLANGUAGE_GERMAN_AUSTRIAN: 	
-			case wxLANGUAGE_GERMAN_BELGIUM: 	
-			case wxLANGUAGE_GERMAN_LIECHTENSTEIN: 	
-			case wxLANGUAGE_GERMAN_LUXEMBOURG: 	
+			case wxLANGUAGE_GERMAN:
+			case wxLANGUAGE_GERMAN_AUSTRIAN:
+			case wxLANGUAGE_GERMAN_BELGIUM:
+			case wxLANGUAGE_GERMAN_LIECHTENSTEIN:
+			case wxLANGUAGE_GERMAN_LUXEMBOURG:
 			case wxLANGUAGE_GERMAN_SWISS  :
 				python << _T("# coding=CP1252\n");
 				python << _T("# German language or it's variant detected in Microsoft Windows\n");
 				break;
-			case wxLANGUAGE_FRENCH: 	
-			case wxLANGUAGE_FRENCH_BELGIAN: 	
-			case wxLANGUAGE_FRENCH_CANADIAN: 	
-			case wxLANGUAGE_FRENCH_LUXEMBOURG: 	
-			case wxLANGUAGE_FRENCH_MONACO: 	
+			case wxLANGUAGE_FRENCH:
+			case wxLANGUAGE_FRENCH_BELGIAN:
+			case wxLANGUAGE_FRENCH_CANADIAN:
+			case wxLANGUAGE_FRENCH_LUXEMBOURG:
+			case wxLANGUAGE_FRENCH_MONACO:
 			case wxLANGUAGE_FRENCH_SWISS:
 				python << _T("# coding=CP1252\n");
 				python << _T("# French language or it's variant detected in Microsoft Windows\n");
 				break;
-			case wxLANGUAGE_ITALIAN: 	
-			case wxLANGUAGE_ITALIAN_SWISS : 	
+			case wxLANGUAGE_ITALIAN:
+			case wxLANGUAGE_ITALIAN_SWISS :
 				python << _T("# coding=CP1252\n");
 				python << _T("#Italian language or it's variant detected in Microsoft Windows\n");
 				break;
-			case wxLANGUAGE_ENGLISH: 	
-			case wxLANGUAGE_ENGLISH_UK: 	
-			case wxLANGUAGE_ENGLISH_US: 	
-			case wxLANGUAGE_ENGLISH_AUSTRALIA: 	
-			case wxLANGUAGE_ENGLISH_BELIZE: 	
-			case wxLANGUAGE_ENGLISH_BOTSWANA: 	
-			case wxLANGUAGE_ENGLISH_CANADA: 	
-			case wxLANGUAGE_ENGLISH_CARIBBEAN: 	
-			case wxLANGUAGE_ENGLISH_DENMARK: 	
-			case wxLANGUAGE_ENGLISH_EIRE: 	
-			case wxLANGUAGE_ENGLISH_JAMAICA: 	
-			case wxLANGUAGE_ENGLISH_NEW_ZEALAND: 	
-			case wxLANGUAGE_ENGLISH_PHILIPPINES: 	
-			case wxLANGUAGE_ENGLISH_SOUTH_AFRICA: 	
-			case wxLANGUAGE_ENGLISH_TRINIDAD: 	
-			case wxLANGUAGE_ENGLISH_ZIMBABWE: 
+			case wxLANGUAGE_ENGLISH:
+			case wxLANGUAGE_ENGLISH_UK:
+			case wxLANGUAGE_ENGLISH_US:
+			case wxLANGUAGE_ENGLISH_AUSTRALIA:
+			case wxLANGUAGE_ENGLISH_BELIZE:
+			case wxLANGUAGE_ENGLISH_BOTSWANA:
+			case wxLANGUAGE_ENGLISH_CANADA:
+			case wxLANGUAGE_ENGLISH_CARIBBEAN:
+			case wxLANGUAGE_ENGLISH_DENMARK:
+			case wxLANGUAGE_ENGLISH_EIRE:
+			case wxLANGUAGE_ENGLISH_JAMAICA:
+			case wxLANGUAGE_ENGLISH_NEW_ZEALAND:
+			case wxLANGUAGE_ENGLISH_PHILIPPINES:
+			case wxLANGUAGE_ENGLISH_SOUTH_AFRICA:
+			case wxLANGUAGE_ENGLISH_TRINIDAD:
+			case wxLANGUAGE_ENGLISH_ZIMBABWE:
 				python << _T("# coding=CP1252\n");
 				python << _T("#English language or it's variant detected in Microsoft Windows\n");
 				break;
@@ -688,14 +688,16 @@ Python CProgram::RewritePythonProgram()
 				python << _T("# coding=CP1252\n");
 				python << _T("#Not supported language detected in Microsoft Windows. Assuming English alphabet\n");
 				break;
-		}		
+		}
 	#endif
 	// add standard stuff at the top
 	//hackhack, make it work on unix with FHS
 	python << _T("import sys\n");
 
 #ifndef WIN32
+#ifndef RUNINPLACE
 	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/")) << _T(")\n");
+#endif
 #endif
 
 	python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");
