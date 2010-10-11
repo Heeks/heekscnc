@@ -40,7 +40,7 @@ CRaftParams::CRaftParams()
 	m_keep_tool_down_if_poss = true;
 	m_use_zig_zag = true;
 	m_zig_angle = 0.0;
-	
+
 	m_baselayers = 2;
 	m_interfacelayers = 2;
 	m_baselayerextrusion = 0;
@@ -158,10 +158,10 @@ void CRaftParams::GetProperties(CRaft* parent, std::list<Property *> *list)
 	list->push_back(new PropertyCheck(_("keep tool down"), m_keep_tool_down_if_poss, parent, on_set_keep_tool_down));
 	list->push_back(new PropertyCheck(_("use zig zag"), m_use_zig_zag, parent, on_set_use_zig_zag));
 	if(m_use_zig_zag)list->push_back(new PropertyDouble(_("zig angle"), m_zig_angle, parent, on_set_zig_angle));
-	
+
 	list->push_back(new PropertyLength(_("baselayers"), m_baselayers, parent, on_set_baselayers));
 	list->push_back(new PropertyDouble(_("interfacelayers"), m_interfacelayers, parent, on_set_interfacelayers));
-	
+
 	std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
 
 	int basechoice = 0;
@@ -175,15 +175,15 @@ void CRaftParams::GetProperties(CRaft* parent, std::list<Property *> *list)
 			{
                 		basechoice = int(i);
 			} // End if - then
-			
+
 			if (m_interfacelayerextrusion == tools[i].first)
 			{
                 		interfacechoice = int(i);
 			}
 	} // End for
 
-	list->push_back(new PropertyChoice(_("Base Layer Extrusion"), choices, basechoice, parent, on_set_baselayerextrusion));	
-	list->push_back(new PropertyChoice(_("Interface Layer Extrusion"), choices, interfacechoice, parent, on_set_interfacelayerextrusion));	
+	list->push_back(new PropertyChoice(_("Base Layer Extrusion"), choices, basechoice, parent, on_set_baselayerextrusion));
+	list->push_back(new PropertyChoice(_("Interface Layer Extrusion"), choices, interfacechoice, parent, on_set_interfacelayerextrusion));
 }
 void CRaftParams::WriteXMLAttributes(TiXmlNode *root)
 {
@@ -197,11 +197,11 @@ void CRaftParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
 	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
 	element->SetDoubleAttribute("zig_angle", m_zig_angle);
-	
+
 	element->SetDoubleAttribute("baselayers", m_baselayers);
 	element->SetDoubleAttribute("interfacelayers", m_interfacelayers);
 	element->SetAttribute("Base_Layer_Extrusion", m_baselayerextrusion);
-	element->SetAttribute("Interface_Layer_Extrusion", m_interfacelayerextrusion);		
+	element->SetAttribute("Interface_Layer_Extrusion", m_interfacelayerextrusion);
 }
 
 void CRaftParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -216,11 +216,11 @@ void CRaftParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("use_zig_zag", &int_for_bool);
 	m_use_zig_zag = (int_for_bool != 0);
 	pElem->Attribute("zig_angle", &m_zig_angle);
-	
+
 	pElem->Attribute("baselayers", &m_baselayers);
 	pElem->Attribute("interfacelayers", &m_interfacelayers);
 	pElem->Attribute("Base_Layer_Extrusion", &m_baselayerextrusion);
-	pElem->Attribute("Interface_Layer_Extrusion", &m_interfacelayerextrusion);	
+	pElem->Attribute("Interface_Layer_Extrusion", &m_interfacelayerextrusion);
 }
 static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, int id_to_use = 0)
 {
@@ -421,8 +421,8 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 			}
 		}
 //			python <<  _T("feedrate_hv(") << getfromtool, getfromoperation <<_T(")");
-	//		python <<  _T("set_extruder_temp()");  
-			
+	//		python <<  _T("set_extruder_temp()");
+
 		if(object)
 		{
 			python << WriteSketchDefn(object, pMachineState, object->m_id);
@@ -433,7 +433,7 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 
 			python << _T("feedrate_hv(") << pBaseTool->m_params.m_feedrate / theApp.m_program->m_units << _T(", ");  //set the feedrate for the base tool.
 			python <<  pBaseTool->m_params.m_feedrate / theApp.m_program->m_units << _T(")\n");
-			
+
 			python << _T("extruder_temp(") << pBaseTool->m_params.m_temperature << _T(")\n");  //set extruder temp
 			python << _T("extruder_on_fwd(") << pBaseTool->m_params.m_flowrate << _T(")\n");  //set flowrate
 
@@ -441,12 +441,12 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 			double starth, finalh;
 			double extruderheight = 0.0;
 			double layerh = (pBaseTool->m_params.m_layer_height);  //get the layerheight of the extrusion tool to use in the base layer.
-			
+
 			while (layercount <= (m_params.m_baselayers))
 			{
 				starth = extruderheight + layerh;
 				finalh = starth - layerh;
-				
+
 				python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2, ");
 				python << m_params.m_material_allowance / theApp.m_program->m_units;
 				python << _T(", " ) << starth << _T(", ") << starth << _T(", ") << finalh << _T(", ");  //rapid down to height, start height, final height
@@ -455,24 +455,24 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 				python << m_params.m_round_corner_factor;
 				python << _T(", clearance, ");
 				python << m_params.m_starting_place;
-				python << _T(", True, ");  //keep the tool down if possible.		    
-				python << m_params.m_step_over / theApp.m_program->m_units;			    
+				python << _T(", True, ");  //keep the tool down if possible.
+				python << m_params.m_step_over / theApp.m_program->m_units;
 			  	if ( layercount % 2 == 0 ){
 					python << _T(", ") << m_params.m_zig_angle+90;
 					}
   				else {
 					python << _T(", ") << m_params.m_zig_angle;
 				}
-				
+
 				python << _T(")\n");
-		    
+
 				// rapid back up to clearance plane
 				python << _T("rapid(z = clearance)\n");
 				extruderheight = extruderheight + layerh;
-	    
+
 				layercount = layercount + 1;
 			}
-						
+
 			// Interface Layers
 
 			layerh = (pInterfaceTool->m_params.m_layer_height);  //Get the layerheight for the interface extrusion tool.
@@ -482,11 +482,11 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 			python << _T("extruder_on_fwd(") << pInterfaceTool->m_params.m_flowrate << _T(")\n");  //set flowrate
 
 
-			while (layercount <= (m_params.m_baselayers + m_params.m_interfacelayers)) 
+			while (layercount <= (m_params.m_baselayers + m_params.m_interfacelayers))
 			{
 				starth = extruderheight + layerh;
 				finalh = starth - layerh;
-				
+
 				python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2, ");
 				python << m_params.m_material_allowance / theApp.m_program->m_units;
 				python << _T(", " ) << starth << _T(", ") << starth << _T(", ") << finalh << _T(", ");  //rapid down to height, start height, final height
@@ -495,24 +495,24 @@ Python CRaft::AppendTextToProgram(CMachineState *pMachineState)
 				python << m_params.m_round_corner_factor;
 				python << _T(", clearance, ");
 				python << m_params.m_starting_place;
-				python << _T(", True, ");  //keep the tool down if possible.		    
-				python << m_params.m_step_over / theApp.m_program->m_units;			    
+				python << _T(", True, ");  //keep the tool down if possible.
+				python << m_params.m_step_over / theApp.m_program->m_units;
 			  	if ( layercount % 2 == 0 ){
 					python << _T(", ") << m_params.m_zig_angle+90;
 					}
   				else {
 					python << _T(", ") << m_params.m_zig_angle;
 				}
-				
+
 				python << _T(")\n");
-		    
+
 				// rapid back up to clearance plane
 				python << _T("rapid(z = clearance)\n");
 				extruderheight = extruderheight + layerh;
-	    
+
 				layercount = layercount + 1;
-			}	
-			
+			}
+
 
 		}
 
@@ -539,11 +539,11 @@ void CRaft::WriteDefaultValues()
 	config.Write(_T("KeepToolDown"), m_params.m_keep_tool_down_if_poss);
 	config.Write(_T("UseZigZag"), m_params.m_use_zig_zag);
 	config.Write(_T("ZigAngle"), m_params.m_zig_angle);
-	
-	config.Write(_T("baselayers"), m_params.m_baselayers);	
+
+	config.Write(_T("baselayers"), m_params.m_baselayers);
 	config.Write(_T("interfacelayers"), m_params.m_interfacelayers);
 	config.Write(_T("baselayerextrusion"), m_params.m_baselayerextrusion);
-	config.Write(_T("interfacelayerextrusion"), m_params.m_interfacelayerextrusion);	
+	config.Write(_T("interfacelayerextrusion"), m_params.m_interfacelayerextrusion);
 }
 
 void CRaft::ReadDefaultValues()
@@ -558,11 +558,11 @@ void CRaft::ReadDefaultValues()
 	config.Read(_T("KeepToolDown"), &m_params.m_keep_tool_down_if_poss, true);
 	config.Read(_T("UseZigZag"), &m_params.m_use_zig_zag, false);
 	config.Read(_T("ZigAngle"), &m_params.m_zig_angle);
-	
+
 	config.Read(_T("baselayers"), &m_params.m_baselayers, 2);	// Two base layers
 	config.Read(_T("interfacelayers"), &m_params.m_interfacelayers, 2);
 	config.Read(_T("baselayerextrusion"), &m_params.m_baselayerextrusion);
-	config.Read(_T("interfacelayerextrusion"), m_params.m_interfacelayerextrusion);	
+	config.Read(_T("interfacelayerextrusion"), m_params.m_interfacelayerextrusion);
 
 }
 void CRaft::glCommands(bool select, bool marked, bool no_color)
@@ -603,7 +603,6 @@ CRaft & CRaft::operator= ( const CRaft & rhs )
 		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
 
 		m_params = rhs.m_params;
-		static double max_deviation_for_spline_to_arc;
 	}
 
 	return(*this);
