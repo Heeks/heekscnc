@@ -3,6 +3,8 @@
 
 #pragma once
 
+// NOTE: If adding to this enumeration, please also update the HeeksCNCType() routine.
+
 enum{
 	ProgramType = 10001,
 	NCCodeBlockType,
