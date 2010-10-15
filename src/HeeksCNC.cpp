@@ -78,6 +78,8 @@ extern CTool::tap_sizes_t metric_tap_sizes[];
 extern CTool::tap_sizes_t unified_thread_standard_tap_sizes[];
 extern CTool::tap_sizes_t british_standard_whitworth_tap_sizes[];
 
+wxString HeeksCNCType(const int type);
+
 CHeeksCNCApp::CHeeksCNCApp(){
 	m_draw_cutter_radius = true;
 	m_program = NULL;
@@ -1657,6 +1659,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	}
 
 	heeksCAD->RegisterUnitsChangeHandler( UnitsChangedHandler );
+	heeksCAD->RegisterHeeksTypesConverter( HeeksCNCType );
 }
 
 std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
@@ -1890,3 +1893,48 @@ class MyApp : public wxApp
 
  IMPLEMENT_APP(MyApp)
 
+
+wxString HeeksCNCType( const int type )
+{
+    switch (type)
+    {
+    case ProgramType:       return(_("Program"));
+	case NCCodeBlockType:       return(_("NCCodeBlock"));
+	case NCCodeType:       return(_("NCCode"));
+	case OperationsType:       return(_("Operations"));
+	case ProfileType:       return(_("Profile"));
+	case PocketType:       return(_("Pocket"));
+	case ZigZagType:       return(_("ZigZag"));
+	case AdaptiveType:       return(_("Adaptive"));
+	case DrillingType:       return(_("Drilling"));
+	case ToolType:       return(_("Tool"));
+	case ToolsType:       return(_("Tools"));
+	case CounterBoreType:       return(_("CounterBore"));
+	case TurnRoughType:       return(_("TurnRough"));
+	case FixtureType:       return(_("Fixture"));
+	case FixturesType:       return(_("Fixtures"));
+	case SpeedReferenceType:       return(_("SpeedReference"));
+	case SpeedReferencesType:       return(_("SpeedReferences"));
+	case CuttingRateType:       return(_("CuttingRate"));
+	case LocatingType:       return(_("Locating"));
+	case BOMType:       return(_("BOM"));
+	case TrsfNCCodeType:      return(_("TrsfNCCode"));
+	case ProbeCentreType:       return(_("ProbeCentre"));
+	case ProbeEdgeType:       return(_("ProbeEdge"));
+	case ContourType:       return(_("Contour"));
+	case ChamferType:       return(_("Chamfer"));
+	case InlayType:       return(_("Inlay"));
+	case ProbeGridType:       return(_("ProbeGrid"));
+	case TagsType:       return(_("Tags"));
+	case TagType:       return(_("Tag"));
+	case ScriptOpType:       return(_("ScriptOp"));
+	case AttachOpType:       return(_("AttachOp"));
+	case UnattachOpType:       return(_("UnattachOp"));
+	case WaterlineType:       return(_("Waterline"));
+	case RaftType:       return(_("Raft"));
+	case TappingType:       return(_("Tapping"));
+
+	default:
+        return(_T("")); // Indicates that this function could not make the conversion.
+    } // End switch
+} // End HeeksCNCType() routine
