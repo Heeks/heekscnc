@@ -8,29 +8,91 @@
 #include <wx/process.h>
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
+#include <wx/txtstrm.h>
+#include <wx/log.h>
 #include "PythonStuff.h"
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
 #include "Program.h"
 
+
 class CPyProcess : public wxProcess
 {
 protected:
-	int m_pid;
+  int m_pid;
 
 public:
-	CPyProcess(void): wxProcess(heeksCAD->GetMainFrame()), m_pid(0) { }
+  CPyProcess(void);
 
-	void Execute(const wxChar* cmd);
-	void Cancel(void);
-	void OnTerminate(int pid, int status);
+  void Execute(const wxChar* cmd);
+  void Cancel(void);
+  void OnTerminate(int pid, int status);
+  void OnTimer(wxTimerEvent& event);
 
-	virtual void ThenDo(void) { }
+  virtual void ThenDo(void) { }
+
+private:
+  wxTimer m_timer;
+  void HandleInput(void);
+
 };
+
+CPyProcess::CPyProcess(void)
+{
+  m_pid = 0;
+  wxProcess(heeksCAD->GetMainFrame());
+  Connect(wxEVT_TIMER, wxTimerEventHandler(CPyProcess::OnTimer));
+  m_timer.SetOwner(this);
+
+}
+
+void CPyProcess::OnTimer(wxTimerEvent& event)
+{
+  HandleInput();
+}
+
+void CPyProcess::HandleInput(void)
+{
+  wxString s;
+  int l;
+  wxInputStream *m_in,*m_err;
+
+  m_in = GetInputStream();
+  m_err = GetErrorStream();
+
+  if (m_in) 
+    {
+      while (m_in->CanRead()) {
+	char buffer[4096];
+	m_in->Read(buffer, WXSIZEOF(buffer) - 1);
+	l = m_in->LastRead();
+	s += wxString::From8BitData(buffer, l);
+      }
+      if (s.Length() > 0) {
+	wxLogMessage(_T("> %s"),s.c_str());
+      }
+    }
+  if (m_err) 
+    {
+      while (m_err->CanRead()) {
+	char buffer[4096];
+	m_err->Read(buffer, WXSIZEOF(buffer) - 1);
+	l = m_err->LastRead();
+	s += wxString::From8BitData(buffer, l);
+      }
+      if (s.Length() > 0) {
+	wxLogMessage(_T("! %s"),s.c_str());
+      }
+    }
+}
 
 void CPyProcess::Execute(const wxChar* cmd)
 {
+	Redirect();
 	m_pid = wxExecute(cmd, wxEXEC_ASYNC, this);
+        wxLogMessage(_T("starting '%s' (%d)"),cmd,m_pid);
+	m_timer.Start(100);   //msec
+
 }
 
 void CPyProcess::Cancel(void)
@@ -46,8 +108,15 @@ void CPyProcess::OnTerminate(int pid, int status)
 {
 	if (pid == m_pid)
 	{
-		m_pid = 0;
-		ThenDo();
+	  m_timer.Stop(); 
+	  HandleInput();
+	  if (status) {
+	    wxLogMessage(_T("process %d exit(%d)"),pid, status);
+	  } else {
+	    wxLogDebug(_T("process %d exit(0)"),pid);
+	  }
+	  m_pid = 0;
+	  ThenDo();
 	}
 }
 
