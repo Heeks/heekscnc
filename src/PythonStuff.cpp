@@ -27,7 +27,7 @@ public:
   void Execute(const wxChar* cmd);
   void Cancel(void);
   void OnTerminate(int pid, int status);
-  void OnTimer(wxTimerEvent& event);
+  void OnTimer(wxTimerEvent& WXUNUSED(event));
 
   virtual void ThenDo(void) { }
 
@@ -54,7 +54,6 @@ void CPyProcess::OnTimer(wxTimerEvent& event)
 void CPyProcess::HandleInput(void)
 {
   wxString s;
-  int l;
   wxInputStream *m_in,*m_err;
 
   m_in = GetInputStream();
@@ -64,9 +63,8 @@ void CPyProcess::HandleInput(void)
     {
       while (m_in->CanRead()) {
 	char buffer[4096];
-	m_in->Read(buffer, WXSIZEOF(buffer) - 1);
-	l = m_in->LastRead();
-	s += wxString::From8BitData(buffer, l);
+	m_in->Read(buffer, sizeof(buffer));
+	s += wxString::From8BitData(buffer, m_in->LastRead());
       }
       if (s.Length() > 0) {
 	wxLogMessage(_T("> %s"),s.c_str());
@@ -76,9 +74,8 @@ void CPyProcess::HandleInput(void)
     {
       while (m_err->CanRead()) {
 	char buffer[4096];
-	m_err->Read(buffer, WXSIZEOF(buffer) - 1);
-	l = m_err->LastRead();
-	s += wxString::From8BitData(buffer, l);
+	m_err->Read(buffer, sizeof(buffer));
+	s += wxString::From8BitData(buffer, m_err->LastRead());
       }
       if (s.Length() > 0) {
 	wxLogMessage(_T("! %s"),s.c_str());
@@ -90,7 +87,11 @@ void CPyProcess::Execute(const wxChar* cmd)
 {
 	Redirect();
 	m_pid = wxExecute(cmd, wxEXEC_ASYNC, this);
-        wxLogMessage(_T("starting '%s' (%d)"),cmd,m_pid);
+	if (!m_pid) {
+	  wxLogMessage(_T("could not execute '%s'"),cmd);
+	} else {
+	  wxLogMessage(_T("starting '%s' (%d)"),cmd,m_pid);
+	}
 	m_timer.Start(100);   //msec
 
 }
@@ -109,7 +110,7 @@ void CPyProcess::OnTerminate(int pid, int status)
 	if (pid == m_pid)
 	{
 	  m_timer.Stop(); 
-	  HandleInput();
+	  HandleInput();   // anything left?
 	  if (status) {
 	    wxLogMessage(_T("process %d exit(%d)"),pid, status);
 	  } else {
