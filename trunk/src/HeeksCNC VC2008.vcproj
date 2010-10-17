@@ -941,6 +941,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Tapping.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Tapping.h"
+			>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\tinyxml\tinystr.cpp"
 			>
 			<FileConfiguration
