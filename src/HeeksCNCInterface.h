@@ -10,12 +10,15 @@ class CProgram;
 class CFixture;
 class CTools;
 class COperations;
+class CMachineState;
 
 class CHeeksCNCInterface{
 public:
 	virtual CProgram* GetProgram();
 	virtual CFixture* FixtureFind(int coordinate_system_number );
 	virtual CTools* GetTools();
+	virtual std::vector< std::pair< int, wxString > > FindAllTools();
+	virtual int FindFirstToolByType( unsigned int type );
 	virtual COperations* GetOperations();
 	virtual void RegisterOnRewritePython( void(*callbackfunc)() );
 	virtual void RegisterOperationType( int type );
@@ -24,4 +27,5 @@ public:
 	virtual void SetMachinesFile( const wxString& filepath );
 	virtual void HideMachiningMenu();
 	virtual void PostProcess();
+	virtual wxString MachineStateTool(CMachineState *pMachineState, const int new_tool);
 };
