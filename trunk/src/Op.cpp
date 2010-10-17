@@ -22,6 +22,13 @@
 #include "Program.h"
 #ifdef HEEKSCNC
 #include "Fixtures.h"
+#define FIND_FIRST_TOOL CTool::FindFirstByType
+#define FIND_ALL_TOOLS CTool::FindAllTools
+#define MACHINE_STATE_TOOL(t) pMachineState->Tool(t)
+#else
+#define FIND_FIRST_TOOL heeksCNC->FindFirstToolByType
+#define FIND_ALL_TOOLS heeksCNC->FindAllTools
+#define MACHINE_STATE_TOOL(t) heeksCNC->MachineStateTool(pMachineState, t)
 #endif
 
 #include <iterator>
@@ -93,7 +100,7 @@ static void on_set_tool_number(int zero_based_choice, HeeksObj* object)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
-	std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
+	std::vector< std::pair< int, wxString > > tools = FIND_ALL_TOOLS();
 
 	if ((zero_based_choice >= int(0)) && (zero_based_choice <= int(tools.size()-1)))
 	{
@@ -112,7 +119,7 @@ void COp::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyInt(_("execution_order"), m_execution_order, this, on_set_execution_order));
 
 	if(UsesTool()){
-		std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
+		std::vector< std::pair< int, wxString > > tools = FIND_ALL_TOOLS();
 
 		int choice = 0;
                 std::list< wxString > choices;
@@ -204,50 +211,50 @@ void COp::ReadDefaultValues()
 		switch(m_operation_type)
 		{
 		case DrillingType:
-			default_tool = CTool::FindFirstByType( CToolParams::eDrill );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eCentreDrill );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eDrill );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eCentreDrill );
 			break;
 		case AdaptiveType:
-			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
 			break;
 		case ProfileType:
 		case PocketType:
 		case RaftType:
 		case CounterBoreType:
-			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
 			break;
 		case ZigZagType:
 		case WaterlineType:
-			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
 			break;
 		case TurnRoughType:
-			default_tool = CTool::FindFirstByType( CToolParams::eTurningTool );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eTurningTool );
 			break;
         case LocatingType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
 		case ProbeGridType:
-			default_tool = CTool::FindFirstByType( CToolParams::eTouchProbe );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eTouchProbe );
 			break;
         case ChamferType:
         case InlayType:
-			default_tool = CTool::FindFirstByType( CToolParams::eChamfer );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eChamfer );
 			break;
 
         case TappingType:
-			default_tool = CTool::FindFirstByType( CToolParams::eTapTool );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eTapTool );
 			break;
 
 		default:
-			default_tool = CTool::FindFirstByType( CToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eSlotCutter );
-			if (default_tool <= 0) default_tool = CTool::FindFirstByType( CToolParams::eBallEndMill );
+			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
+			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
 			if (default_tool <= 0) default_tool = 4;
 			break;
 		}
@@ -267,7 +274,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 		python << _T("comment(") << PythonString(m_comment) << _T(")\n");
 	}
 
-	if(UsesTool())python << pMachineState->Tool(m_tool_number);  // Select the correct  tool.
+	if(UsesTool())python << MACHINE_STATE_TOOL(m_tool_number);  // Select the correct  tool.
 
 #ifdef HEEKSCNC
 	// Check to see if this operation has its own fixture settings.  If so, change to that fixture now.

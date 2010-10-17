@@ -5,6 +5,8 @@
 #include "Program.h"
 #include "Fixtures.h"
 #include "Operations.h"
+#include "CTool.h"
+#include "MachineState.h"
 #include <wx/aui/aui.h>
 
 CProgram* CHeeksCNCInterface::GetProgram()
@@ -21,6 +23,16 @@ CTools* CHeeksCNCInterface::GetTools()
 {
 	if(theApp.m_program == NULL)return NULL;
 	return theApp.m_program->Tools();
+}
+
+std::vector< std::pair< int, wxString > > CHeeksCNCInterface::FindAllTools()
+{
+	return CTool::FindAllTools();
+}
+
+int CHeeksCNCInterface::FindFirstToolByType( unsigned int type )
+{
+	return CTool::FindFirstByType((CToolParams::eToolType)type);
 }
 
 COperations* CHeeksCNCInterface::GetOperations()
@@ -80,4 +92,9 @@ void CHeeksCNCInterface::PostProcess()
 
 	// run it
 	theApp.RunPythonScript();
+}
+
+wxString CHeeksCNCInterface::MachineStateTool(CMachineState *pMachineState, const int new_tool)
+{
+	return pMachineState->Tool(new_tool);
 }
