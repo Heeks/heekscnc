@@ -342,16 +342,16 @@ class Creator:
         """wipe routine"""
         pass
 
-    def extruder_on_fwd(self, flowrate):
+    def extruder_on(self):
 	"""Turn on the extruder"""
-	pass
-
-    def extruder_on_rev(self, flowrate):
-	"""turn on the extruder in reverse"""
 	pass
 
     def extruder_off(self):
 	"""turn off the extruder"""
+	pass
+
+    def set_extruder_flowrate(self, flowrate):
+	"""Set the flowrate for the extruder"""
 	pass
 
     def extruder_temp(self, temp):
@@ -641,15 +641,15 @@ def rapid_to_rotated_coordinate(x1, y1, x2, y2, ref_x, ref_y, x_current, y_curre
 def wipe():
     creator.wipe()
 
-def extruder_on_fwd(flowrate=None):
-    creator.extruder_on_fwd(flowrate)
-
-def extruder_on_rev(flowrate=None):
-    creator.extruder_on_rev(flowrate)
+def extruder_on():
+    creator.extruder_on()
 
 def extruder_off():
     creator.extruder_off()
 
+def set_extruder_flowrate(flowrate):
+    creator.set_extruder_flowrate(flowrate)
+    
 def extruder_temp(temp=None):
     creator.extruder_temp(temp)
 

@@ -85,6 +85,11 @@ void CHeeksCNCInterface::HideMachiningMenu()
 		menu_bar->Remove(pos);
 }
 
+void CHeeksCNCInterface::SetProcessRedirect(bool redirect)
+{
+	CPyProcess::redirect = redirect;
+}
+
 void CHeeksCNCInterface::PostProcess()
 {
 	// write the python program

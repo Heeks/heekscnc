@@ -99,7 +99,7 @@ def cut_curvelist(curve_list, rapid_down_to_height, current_start_depth, depth, 
         p = cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, depth)
         first = False
     rapid(z = clearance_height)
-
+    
 def recur(arealist, a1, stepover, from_center):
     # this makes arealist by recursively offsetting a1 inwards
     
@@ -138,29 +138,53 @@ one_over_units = 1.0
 def make_zig_curve(curve, y0, y):
     if rightward_for_zigs:
         curve.Reverse()
+
+    # find a high point to start looking from
+    high_point = None
+    for vertex in curve.getVertices():
+        if high_point == None:
+            high_point = vertex.p
+        elif vertex.p.y > high_point.y:
+            # use this as the new high point
+            high_point = vertex.p
+        elif math.fabs(vertex.p.y - high_point.y) < 0.002 * one_over_units:
+            # equal high point
+            if rightward_for_zigs:
+                # use the furthest left point
+                if vertex.p.x < high_point.x:
+                    high_point = vertex.p
+            else:
+                 # use the furthest right point
+                if vertex.p.x > high_point.x:
+                    high_point = vertex.p
         
     zig = area.Curve()
     
+    high_point_found = False
     zig_started = False
     zag_found = False
     
-    prev_p = None
-    
-    for vertex in curve.getVertices():
-        if prev_p != None:
-            if math.fabs(vertex.p.y - y0) < 0.002 * one_over_units:
+    for i in range(0, 2): # process the curve twice because we don't know where it will start
+        prev_p = None
+        for vertex in curve.getVertices():
+            if zag_found: break
+            if prev_p != None:
                 if zig_started:
                     zig.append(unrotated_vertex(vertex))
-                elif math.fabs(prev_p.y - y0) < 0.002 * one_over_units and vertex.type == 0:
-                    zig.append(area.Vertex(0, unrotated_point(prev_p), area.Point(0, 0)))
-                    zig.append(unrotated_vertex(vertex))
-                    zig_started = True
-            elif zig_started:
-                zig.append(unrotated_vertex(vertex))
-                if math.fabs(vertex.p.y - y) < 0.002 * one_over_units:
-                    zag_found = True
-                    break
-        prev_p = vertex.p
+                    if math.fabs(vertex.p.y - y) < 0.002 * one_over_units:
+                        zag_found = True
+                        break
+                elif high_point_found:
+                    if math.fabs(vertex.p.y - y0) < 0.002 * one_over_units:
+                        if zig_started:
+                            zig.append(unrotated_vertex(vertex))
+                        elif math.fabs(prev_p.y - y0) < 0.002 * one_over_units and vertex.type == 0:
+                            zig.append(area.Vertex(0, unrotated_point(prev_p), area.Point(0, 0)))
+                            zig.append(unrotated_vertex(vertex))
+                            zig_started = True
+                elif vertex.p.x == high_point.x and vertex.p.y == high_point.y:
+                    high_point_found = True
+            prev_p = vertex.p
         
     if zig_started:
         curve_list_for_zigs.append(zig)        
@@ -225,7 +249,7 @@ def rotated_area(a):
         an.append(curve_new)
     return an
 
-def zigzag(a, a_firstoffset, stepover):
+def zigzag(a, stepover):
     if a.num_curves() == 0:
         return
     
@@ -296,17 +320,31 @@ def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, fina
 
     arealist = list()
     
-    area_for_feed_possible = area.Area(a)
-    area_for_feed_possible.Offset(extra_offset - 0.01)
+    if keep_tool_down_if_poss:
+        area_for_feed_possible = area.Area(a)
+        area_for_feed_possible.Offset(extra_offset - 0.01)
 
-    a_firstoffset = area.Area(a)
-    a_firstoffset.Offset(tool_radius + extra_offset)
+    a_offset = area.Area(a)
+    current_offset = tool_radius + extra_offset
+    a_offset.Offset(current_offset)
+    
+    do_recursive = True
     
     if use_zig_zag:
-        zigzag(a_firstoffset, a_firstoffset, stepover)
+        zigzag(a_offset, stepover)
         curve_list = curve_list_for_zigs
     else:
-        recur(arealist, a_firstoffset, stepover, from_center)
+        if do_recursive:
+            recur(arealist, a_offset, stepover, from_center)
+        else:
+            while(a_offset.num_curves() > 0):
+                if from_center:
+                    arealist.insert(0, a_offset)
+                else:
+                    arealist.append(a_offset)
+                current_offset = current_offset + stepover
+                a_offset = area.Area(a)
+                a_offset.Offset(current_offset)
         curve_list = get_curve_list(arealist)
         
     layer_count = int((start_depth - final_depth) / stepdown)

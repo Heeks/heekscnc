@@ -26,6 +26,7 @@ public:
 	virtual wxString GetDllFolder();
 	virtual void SetMachinesFile( const wxString& filepath );
 	virtual void HideMachiningMenu();
+	virtual void SetProcessRedirect(bool redirect);
 	virtual void PostProcess();
 	virtual wxString MachineStateTool(CMachineState *pMachineState, const int new_tool);
 };

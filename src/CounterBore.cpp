@@ -305,7 +305,7 @@ Python CCounterBore::AppendTextToProgram(CMachineState *pMachineState)
 				return(python);
 			} // End if - then
 
-			std::vector<CNCPoint> locations = CDrilling::FindAllLocations( this, pMachineState->Location(), m_params.m_sort_locations, NULL );
+			std::vector<CNCPoint> locations = CDrilling::FindAllLocations( this, pMachineState->Location(), m_params.m_sort_locations != 0, NULL );
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point( pMachineState->Fixture().Adjustment(*l_itLocation) );

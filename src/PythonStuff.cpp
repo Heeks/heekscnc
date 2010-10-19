@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include <wx/file.h>
 #include <wx/mimetype.h>
-#include <wx/process.h>
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include <wx/txtstrm.h>
@@ -15,27 +14,8 @@
 #include "OutputCanvas.h"
 #include "Program.h"
 
-
-class CPyProcess : public wxProcess
-{
-protected:
-  int m_pid;
-
-public:
-  CPyProcess(void);
-
-  void Execute(const wxChar* cmd);
-  void Cancel(void);
-  void OnTerminate(int pid, int status);
-  void OnTimer(wxTimerEvent& WXUNUSED(event));
-
-  virtual void ThenDo(void) { }
-
-private:
-  wxTimer m_timer;
-  void HandleInput(void);
-
-};
+//static
+bool CPyProcess::redirect = true;
 
 CPyProcess::CPyProcess(void)
 {
@@ -85,7 +65,7 @@ void CPyProcess::HandleInput(void)
 
 void CPyProcess::Execute(const wxChar* cmd)
 {
-	Redirect();
+	if(redirect)Redirect();
 	m_pid = wxExecute(cmd, wxEXEC_ASYNC, this);
 	if (!m_pid) {
 	  wxLogMessage(_T("could not execute '%s'"),cmd);
