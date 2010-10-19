@@ -11,7 +11,7 @@ class CodesEMC2(iso_codes.Codes):
 
 
     # This version of COMMENT removes comments from the resultant GCode
-    def COMMENT(self,comment): return('')
+    #def COMMENT(self,comment): return('')
 
 iso_codes.codes = CodesEMC2()
 
