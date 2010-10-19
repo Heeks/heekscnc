@@ -53,6 +53,9 @@ CProfileParams::CProfileParams()
 	m_end[0] = m_end[1] = m_end[2] = 0.0;
 	m_sort_sketches = 1;
 	m_offset_extra = 0.0;
+	m_do_finishing_pass = false;
+	m_finishing_h_feed_rate = 0.0;
+	m_finishing_cut_mode = eConventional;
 }
 
 static void on_set_tool_on_side(int value, HeeksObj* object){
@@ -91,7 +94,19 @@ static void on_set_sort_sketches(const int value, HeeksObj* object)
 	((CProfile*)object)->m_profile_params.m_sort_sketches = value;
 	((CProfile*)object)->WriteDefaultValues();
 }
-static void on_set_offset_extra(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_offset_extra = value;}
+static void on_set_offset_extra(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_offset_extra = value;((CProfile*)object)->WriteDefaultValues();}
+static void on_set_do_finishing_pass(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_do_finishing_pass = value; heeksCAD->RefreshProperties();((CProfile*)object)->WriteDefaultValues();}
+static void on_set_finishing_h_feed_rate(double value, HeeksObj* object)
+{
+	((CProfile*)object)->m_profile_params.m_finishing_h_feed_rate = value;
+	((CProfile*)object)->WriteDefaultValues();
+}
+
+static void on_set_finish_cut_mode(int value, HeeksObj* object)
+{
+	((CProfile*)object)->m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)value;
+	((CProfile*)object)->WriteDefaultValues();
+}
 
 void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
 {
@@ -163,7 +178,6 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		if(m_start_given)list->push_back(new PropertyVertex(_("start point"), m_start, parent, on_set_start));
 		list->push_back(new PropertyCheck(_("use end point"), m_end_given, parent, on_set_end_given));
 		if(m_end_given)list->push_back(new PropertyVertex(_("end point"), m_end, parent, on_set_end));
-
 	}
 	else
 	{
@@ -180,6 +194,18 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 	} // End if - else
 
 	list->push_back(new PropertyLength(_("offset_extra"), m_offset_extra, parent, on_set_offset_extra));
+	list->push_back(new PropertyCheck(_("do finishing pass"), m_do_finishing_pass, parent, on_set_do_finishing_pass));
+	if(m_do_finishing_pass)
+	{
+		list->push_back(new PropertyLength(_("finishing feed rate"), m_finishing_h_feed_rate, parent, on_set_finishing_h_feed_rate));
+
+		{
+			std::list< wxString > choices;
+			choices.push_back(_("Conventional"));
+			choices.push_back(_("Climb"));
+			list->push_back(new PropertyChoice(_("finish cut mode"), choices, m_finishing_cut_mode, parent, on_set_finish_cut_mode));
+		}
+	}
 }
 
 void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
@@ -227,6 +253,9 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("sort_sketches", l_ossValue.str().c_str());
 
 	element->SetDoubleAttribute("offset_extra", m_offset_extra);
+	element->SetAttribute("do_finishing_pass", m_do_finishing_pass ? 1:0);
+	element->SetDoubleAttribute("finishing_feed_rate", m_finishing_h_feed_rate);
+	element->SetAttribute("finish_cut_mode", m_finishing_cut_mode);
 }
 
 void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -255,6 +284,9 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("endz", &m_end[2]);
 	if(pElem->Attribute("sort_sketches"))m_sort_sketches = atoi(pElem->Attribute("sort_sketches"));
 	pElem->Attribute("offset_extra", &m_offset_extra);
+	if(pElem->Attribute("do_finishing_pass", &int_for_bool))m_do_finishing_pass = (int_for_bool != 0);
+	pElem->Attribute("finishing_feed_rate", &m_finishing_h_feed_rate);
+	if(pElem->Attribute("finish_cut_mode", &int_for_enum))m_finishing_cut_mode = (eCutMode)int_for_enum;
 }
 
 CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
@@ -554,7 +586,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 	return(python);
 }
 
-Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState)
+Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode)
 {
     Python python;
 
@@ -569,7 +601,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 			if(object)order = heeksCAD->GetSketchOrder(object);
 			if(order == SketchOrderTypeCloseCCW)initially_ccw = true;
 			if(m_speed_op_params.m_spindle_speed<0)reversed = !reversed;
-			if(m_profile_params.m_cut_mode == CProfileParams::eConventional)reversed = !reversed;
+			if(cut_mode == CProfileParams::eConventional)reversed = !reversed;
 			if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside)reversed = !reversed;
 		}
 
@@ -666,6 +698,10 @@ void CProfile::WriteDefaultValues()
 	config.Write(_T("ToolOnSide"), m_profile_params.m_tool_on_side);
 	config.Write(_T("CutMode"), m_profile_params.m_cut_mode);
 	config.Write(_T("RollRadius"), m_profile_params.m_auto_roll_radius);
+	config.Write(_T("OffsetExtra"), m_profile_params.m_offset_extra);
+	config.Write(_T("DoFinishPass"), m_profile_params.m_do_finishing_pass);
+	config.Write(_T("FinishFeedRate"), m_profile_params.m_finishing_h_feed_rate);
+	config.Write(_T("FinishCutMode"), m_profile_params.m_finishing_cut_mode);
 }
 
 void CProfile::ReadDefaultValues()
@@ -680,6 +716,11 @@ void CProfile::ReadDefaultValues()
 	config.Read(_T("CutMode"), &int_mode, CProfileParams::eConventional);
 	m_profile_params.m_cut_mode = (CProfileParams::eCutMode)int_mode;
 	config.Read(_T("RollRadius"), &m_profile_params.m_auto_roll_radius, 2.0);
+	config.Read(_T("OffsetExtra"), &m_profile_params.m_offset_extra, 0.0);
+	config.Read(_T("DoFinishPass"), &m_profile_params.m_do_finishing_pass, false);
+	config.Read(_T("FinishFeedRate"), &m_profile_params.m_finishing_h_feed_rate, 100.0);
+	config.Read(_T("FinishCutMode"), &int_mode, CProfileParams::eConventional);
+	m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)int_mode;
 
 	ConfirmAutoRollRadius(true);
 
@@ -689,23 +730,51 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
+	// roughing pass
+	python << AppendTextToProgram(pMachineState, false);
+
+	// finishing pass
+	if(this->m_profile_params.m_do_finishing_pass)
+	{
+		python << AppendTextToProgram(pMachineState, true);
+	}
+
+	return python;
+}
+
+Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishing_pass)
+{
+	Python python;
+
 	CTool *pTool = CTool::Find( m_tool_number );
 	if (pTool == NULL)
 	{
-		wxMessageBox(_T("Cannot generate GCode for profile without a tool assigned"));
+		if(!finishing_pass)wxMessageBox(_T("Cannot generate GCode for profile without a tool assigned"));
 		return(python);
 	} // End if - then
 
-	python << CDepthOp::AppendTextToProgram(pMachineState);
-
-	if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
+	if(finishing_pass)
 	{
-		python << _T("roll_radius = float(");
-		python << m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
-		python << _T(")\n");
+		python << _T("feedrate_hv(") << m_profile_params.m_finishing_h_feed_rate / theApp.m_program->m_units << _T(", ");
+		python << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
+		python << _T("flush_nc()\n");
+		python << _T("offset_extra = 0.0\n");
+	}
+	else
+	{
+		python << CDepthOp::AppendTextToProgram(pMachineState);
+
+		if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
+		{
+			python << _T("roll_radius = float(");
+			python << m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
+			python << _T(")\n");
+		}
+
+		python << _T("offset_extra = ") << m_profile_params.m_offset_extra / theApp.m_program->m_units << _T("\n");
 	}
 
-	python << _T("offset_extra = ") << m_profile_params.m_offset_extra / theApp.m_program->m_units << _T("\n");
+	CProfileParams::eCutMode cut_mode = finishing_pass ? m_profile_params.m_finishing_cut_mode : m_profile_params.m_cut_mode;
 
 	for(std::list<HeeksObj*>::iterator It = m_objects.begin(); It != m_objects.end(); It++)
 	{
@@ -729,13 +798,13 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				python << AppendTextForOneSketch(one_curve_sketch, object->m_id, pMachineState).c_str();
+				python << AppendTextForOneSketch(one_curve_sketch, object->m_id, pMachineState, cut_mode).c_str();
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			python << AppendTextForOneSketch(object, object->m_id, pMachineState).c_str();
+			python << AppendTextForOneSketch(object, object->m_id, pMachineState, cut_mode).c_str();
 		}
 
 		if(re_ordered_sketch)
@@ -1190,6 +1259,9 @@ bool CProfileParams::operator==( const CProfileParams & rhs ) const
 	for (::size_t i=0; i<sizeof(m_end)/sizeof(m_end[0]); i++) if (m_end[i] != rhs.m_end[i]) return(false);
 	if (m_sort_sketches != rhs.m_sort_sketches) return(false);
 	if (m_offset_extra != rhs.m_offset_extra) return(false);
+	if (m_do_finishing_pass != rhs.m_do_finishing_pass) return(false);
+	if (m_finishing_h_feed_rate != rhs.m_finishing_h_feed_rate) return(false);
+	if (m_finishing_cut_mode != rhs.m_finishing_cut_mode) return(false);
 
 	return(true);
 }

@@ -173,7 +173,7 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << CSpeedOp::AppendTextToProgram( pMachineState );   // Set any private fixtures and change tools (if necessary)
 
-	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_drilling_locations, NULL);
+	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_drilling_locations != 0, NULL);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );

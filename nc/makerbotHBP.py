@@ -67,15 +67,16 @@ class CreatorMakerbotHBP(iso_modal.CreatorIsoModal):
         pass
 ################################################################################
 # Extruder Control
-    def extruder_on_fwd(self, flowrate):
-         self.write((maker.codes.EXTRUDER_SPEED_PWM(flowrate)) + ('\n'))
         
-    def extruder_on_rev(self):
-         self.write((maker.codes.EXTRUDER_ON_REV()) + ('\n'))
+    def extruder_on(self):
+         self.write((maker.codes.EXTRUDER_ON()) + ('\n'))
         
     def extruder_off(self):
          self.write((maker.codes.EXTRUDER_OFF()) + ('\n'))
         
+    def set_extruder_flowrate(self, flowrate):
+         self.write((maker.codes.EXTRUDER_SPEED_PWM(flowrate)) + ('\n'))
+
     def extruder_temp(self, temp):
          self.write((maker.codes.EXTRUDER_TEMP(temp)) + ('\n'))
    

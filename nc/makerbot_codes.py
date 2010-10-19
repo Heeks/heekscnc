@@ -90,8 +90,7 @@ class Codes():
 
 	def MACHINE_COORDINATES(self): return('G53' + self.SPACE())
 
-	def EXTRUDER_ON_FWD (self): return('M101') #deprecated
-	def EXTRUDER_ON_REV (self): return('M102') 
+	def EXTRUDER_ON (self): return('M101') #deprecated
 	def EXTRUDER_OFF (self): return('M103') 
 	def EXTRUDER_TEMP (self, degree_celsius): return('M104 S' + '%s' % degree_celsius) 
 	def EXTRUDER_TEMP_WAIT (self, degree_celsius): return('M109 S' + '%s' % degree_celsius) 
