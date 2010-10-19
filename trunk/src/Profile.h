@@ -30,7 +30,6 @@ public:
 	}eCutMode;
 	eCutMode m_cut_mode;
 
-
 	// these are only used when m_sketches.size() == 1
 	bool m_auto_roll_on;
 	bool m_auto_roll_off;
@@ -42,7 +41,11 @@ public:
 	double m_start[3];
 	double m_end[3];
 	int m_sort_sketches;
+
 	double m_offset_extra; // in mm
+	bool m_do_finishing_pass;
+	double m_finishing_h_feed_rate;
+	eCutMode m_finishing_cut_mode;
 
 	CProfileParams();
 
@@ -100,7 +103,7 @@ public:
 	CTags* Tags(){return m_tags;}
 
 	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState, bool reversed );
-	Python AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState);
+	Python AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode);
 
 	// COp's virtual functions
 	Python AppendTextToProgram(CMachineState *pMachineState);
@@ -110,7 +113,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AddMissingChildren();
 	unsigned int GetNumSketches();
-
+	Python AppendTextToProgram(CMachineState *pMachineState, bool finishing_pass);
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	std::list<wxString> ConfirmAutoRollRadius(const bool apply_changes);
 

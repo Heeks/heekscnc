@@ -21,6 +21,12 @@ public:
 	bool m_use_zig_zag;
 	double m_zig_angle;
 
+	typedef enum {
+		eConventional,
+		eClimb
+	}eCutMode;
+	eCutMode m_cut_mode;
+
 	CPocketParams();
 
     void set_initial_values(const CTool::ToolNumber_t tool_number);

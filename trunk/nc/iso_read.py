@@ -21,6 +21,122 @@ class ParserIso(nc.Parser):
          #  followed by a possible deimcal, or a letter followed by # with a decimal . deimcal
         # add your character here > [(!;] for comments char
         # then look for the 'comment' function towards the end of the file and add another elif
+        
+    def ParseWord(self, word):
+        if (word[0] == 'A' or word[0] == 'a'):
+            self.col = "axis"
+            self.a = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'B' or word[0] == 'b'):
+            self.col = "axis"
+            self.b = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'C' or word[0] == 'c'):
+            self.col = "axis"
+            self.c = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'F' or word[0] == 'f'):
+            self.col = "axis"
+            self.f = eval(word[1:])
+            self.move = True
+        elif (word == 'G0' or word == 'G00' or word == 'g0' or word == 'g00'):
+            self.path_col = "rapid"
+            self.col = "rapid"
+            self.arc = 0
+        elif (word == 'G1' or word == 'G01' or word == 'g1' or word == 'g01'):
+            self.path_col = "feed"
+            self.col = "feed"
+            self.arc = 0
+        elif (word == 'G2' or word == 'G02' or word == 'g2' or word == 'g02' or word == 'G12' or word == 'g12'):
+            self.path_col = "feed"
+            self.col = "feed"
+            self.arc = -1
+        elif (word == 'G3' or word == 'G03' or word == 'g3' or word == 'g03' or word == 'G13' or word == 'g13'):
+            self.path_col = "feed"
+            self.col = "feed"
+            self.arc = +1
+        elif (word == 'G10' or word == 'g10'):
+            self.no_move = True		            
+        elif (word == 'L1' or word == 'l1'):
+            self.no_move = True
+        elif (word == 'G20' or word == 'G70'):
+            self.col = "prep"
+            self.set_mode(units=25.4)
+        elif (word == 'G21' or word == 'G71'):
+            self.col = "prep"
+            self.set_mode(units=1.0)
+        elif (word == 'G81' or word == 'g81'):
+            self.drill = True
+            self.no_move = True
+            self.path_col = "feed"
+            self.col = "feed"
+        elif (word == 'G82' or word == 'g82'):
+            self.drill = True;
+            self.no_move = True
+            self.path_col = "feed"
+            self.col = "feed"
+        elif (word == 'G83' or word == 'g83'):
+            self.drill = True
+            self.no_move = True
+            self.path_col = "feed"
+            self.col = "feed"
+        elif (word == 'G90' or word == 'g90'):
+            self.absolute()
+        elif (word == 'G91' or word == 'g91'):
+            self.incremental()
+        elif (word[0] == 'G') : col = "prep"
+        elif (word[0] == 'I' or word[0] == 'i'):
+            self.col = "axis"
+            self.i = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'J' or word[0] == 'j'):
+            self.col = "axis"
+            self.j = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'K' or word[0] == 'k'):
+            self.col = "axis"
+            self.k = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'M') : self.col = "misc"
+        elif (word[0] == 'N') : self.col = "blocknum"
+        elif (word[0] == 'O') : self.col = "program"
+        elif (word[0] == 'P' or word[0] == 'p'):
+            self.col = "axis"
+            self.p = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'Q' or word[0] == 'q'):
+            self.col = "axis"
+            self.q = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'R' or word[0] == 'r'):
+            self.col = "axis"
+            self.r = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'S' or word[0] == 's'):
+            self.col = "axis"
+            self.s = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'T') :
+            self.col = "tool"
+            self.set_tool( eval(word[1:]) )
+        elif (word[0] == 'X' or word[0] == 'x'):
+            self.col = "axis"
+            self.x = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'Y' or word[0] == 'y'):
+            self.col = "axis"
+            self.y = eval(word[1:])
+            self.move = True
+        elif (word[0] == 'Z' or word[0] == 'z'):
+            self.col = "axis"
+            self.z = eval(word[1:])
+            self.move = True
+        elif (word[0] == '(') : (self.col, self.cdata) = ("comment", True)
+        elif (word[0] == '!') : (self.col, self.cdata) = ("comment", True)
+        elif (word[0] == ';') : (self.col, self.cdata) = ("comment", True)
+        elif (word[0] == '#') : self.col = "variable"
+        elif (word[0] == ':') : self.col = "blocknum"
+        elif (ord(word[0]) <= 32) : self.cdata = True
 
     def Parse(self, name, oname=None):
         self.files_open(name,oname)
@@ -31,176 +147,60 @@ class ParserIso(nc.Parser):
         #self.end_path()
         #self.end_ncblock()
         
-        path_col = None
-        f = None
-        arc = 0
+        self.path_col = None
+        self.f = None
+        self.arc = 0
 
         while (self.readline()):
             
-            a = None
-            b = None
-            c = None
-            #f = None
-            i = None
-            j = None
-            k = None
-            p = None
-            q = None
-            r = None
-            s = None
-            x = None
-            y = None
-            z = None
+            self.a = None
+            self.b = None
+            self.c = None
+            self.i = None
+            self.j = None
+            self.k = None
+            self.p = None
+            self.q = None
+            self.r = None
+            self.s = None
+            self.x = None
+            self.y = None
+            self.z = None
 
             self.begin_ncblock()
 
-            move = False
-            #arc = 0
-            #path_col = None
-            drill = False
-            no_move = False
+            self.move = False
+            self.drill = False
+            self.no_move = False
 
             words = self.pattern_main.findall(self.line)
             for word in words:
-                col = None
-                cdata = False
-                if (word[0] == 'A' or word[0] == 'a'):
-                    col = "axis"
-                    a = eval(word[1:])
-                    move = True
-                elif (word[0] == 'B' or word[0] == 'b'):
-                    col = "axis"
-                    b = eval(word[1:])
-                    move = True
-                elif (word[0] == 'C' or word[0] == 'c'):
-                    col = "axis"
-                    c = eval(word[1:])
-                    move = True
-                elif (word[0] == 'F' or word[0] == 'f'):
-                    col = "axis"
-                    f = eval(word[1:])
-                    move = True
-                elif (word == 'G0' or word == 'G00' or word == 'g0' or word == 'g00'):
-                    path_col = "rapid"
-                    col = "rapid"
-                    arc = 0
-                elif (word == 'G1' or word == 'G01' or word == 'g1' or word == 'g01'):
-                    path_col = "feed"
-                    col = "feed"
-                    arc = 0
-                elif (word == 'G2' or word == 'G02' or word == 'g2' or word == 'g02' or word == 'G12' or word == 'g12'):
-                    path_col = "feed"
-                    col = "feed"
-                    arc = -1
-                elif (word == 'G3' or word == 'G03' or word == 'g3' or word == 'g03' or word == 'G13' or word == 'g13'):
-                    path_col = "feed"
-                    col = "feed"
-                    arc = +1
-                elif (word == 'G10' or word == 'g10'):
-		            no_move = True		            
-                elif (word == 'L1' or word == 'l1'):
-		            no_move = True
-                elif (word == 'G20' or word == 'G70'):
-                    col = "prep"
-                    self.set_mode(units=25.4)
-                elif (word == 'G21' or word == 'G71'):
-                    col = "prep"
-                    self.set_mode(units=1.0)
-                elif (word == 'G81' or word == 'g81'):
-                    drill = True
-                    no_move = True
-                    path_col = "feed"
-                    col = "feed"
-                elif (word == 'G82' or word == 'g82'):
-                    drill = True;
-                    no_move = True
-                    path_col = "feed"
-                    col = "feed"
-                elif (word == 'G83' or word == 'g83'):
-                    drill = True
-                    no_move = True
-                    path_col = "feed"
-                    col = "feed"
-                elif (word == 'G90' or word == 'g90'):
-                    self.absolute()
-                elif (word == 'G91' or word == 'g91'):
-                    self.incremental()
-                elif (word[0] == 'G') : col = "prep"
-                elif (word[0] == 'I' or word[0] == 'i'):
-                    col = "axis"
-                    i = eval(word[1:])
-                    move = True
-                elif (word[0] == 'J' or word[0] == 'j'):
-                    col = "axis"
-                    j = eval(word[1:])
-                    move = True
-                elif (word[0] == 'K' or word[0] == 'k'):
-                    col = "axis"
-                    k = eval(word[1:])
-                    move = True
-                elif (word[0] == 'M') : col = "misc"
-                elif (word[0] == 'N') : col = "blocknum"
-                elif (word[0] == 'O') : col = "program"
-                elif (word[0] == 'P' or word[0] == 'p'):
-                    col = "axis"
-                    p = eval(word[1:])
-                    move = True
-                elif (word[0] == 'Q' or word[0] == 'q'):
-                    col = "axis"
-                    q = eval(word[1:])
-                    move = True
-                elif (word[0] == 'R' or word[0] == 'r'):
-                    col = "axis"
-                    r = eval(word[1:])
-                    move = True
-                elif (word[0] == 'S' or word[0] == 's'):
-                    col = "axis"
-                    s = eval(word[1:])
-                    move = True
-                elif (word[0] == 'T') :
-                    col = "tool"
-                    self.set_tool( eval(word[1:]) )
-                elif (word[0] == 'X' or word[0] == 'x'):
-                    col = "axis"
-                    x = eval(word[1:])
-                    move = True
-                elif (word[0] == 'Y' or word[0] == 'y'):
-                    col = "axis"
-                    y = eval(word[1:])
-                    move = True
-                elif (word[0] == 'Z' or word[0] == 'z'):
-                    col = "axis"
-                    z = eval(word[1:])
-                    move = True
-                elif (word[0] == '(') : (col, cdata) = ("comment", True)
-                elif (word[0] == '!') : (col, cdata) = ("comment", True)
-                elif (word[0] == ';') : (col, cdata) = ("comment", True)
-                elif (word[0] == '#') : col = "variable"
-                elif (word[0] == ':') : col = "blocknum"
-                elif (ord(word[0]) <= 32) : cdata = True
-                self.add_text(word, col, cdata)
+                self.col = None
+                self.cdata = False
+                self.ParseWord(word)
+                self.add_text(word, self.col, self.cdata)
 
-            if (drill):
+            if (self.drill):
                 self.begin_path("rapid")
-                self.add_line(x, y, r)
+                self.add_line(self.x, self.y, self.r)
                 self.end_path()
 
                 self.begin_path("feed")
-                self.add_line(x, y, z)
+                self.add_line(self.x, self.y, self.z)
                 self.end_path()
 
                 self.begin_path("feed")
-                self.add_line(x, y, r)
+                self.add_line(self.x, self.y, self.r)
                 self.end_path()
             else:
-                if (move and not no_move):
-                    self.begin_path(path_col)
-                    if (arc==-1): 
-                        self.add_arc(x, y, z, i, j, k, r, arc)
-                    elif (arc==1):
+                if (self.move and not self.no_move):
+                    self.begin_path(self.path_col)
+                    if (self.arc==-1): 
+                        self.add_arc(self.x, self.y, self.z, self.i, self.j, self.k, self.r, self.arc)
+                    elif (self.arc==1):
                         #self.add_arc(x, y, z, i, j, k, -r, arc) #if you want to use arcs with R values uncomment the first part of this line and comment the next one
-                        self.add_arc(x, y, z, i, j, k, r, arc)
-                    else     : self.add_line(x, y, z, a, b, c)
+                        self.add_arc(self.x, self.y, self.z, self.i, self.j, self.k, self.r, self.arc)
+                    else     : self.add_line(self.x, self.y, self.z, self.a, self.b, self.c)
    	            self.end_path()
 
             self.end_ncblock()

@@ -248,7 +248,7 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 		{
 			CCounterBore *pCounterBore = ((CCounterBore *) child);
 
-			std::vector<CNCPoint> locations = CDrilling::FindAllLocations(pCounterBore, pMachineState->Location(), pCounterBore->m_params.m_sort_locations, NULL);
+			std::vector<CNCPoint> locations = CDrilling::FindAllLocations(pCounterBore, pMachineState->Location(), pCounterBore->m_params.m_sort_locations != 0, NULL);
 			for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
 				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
