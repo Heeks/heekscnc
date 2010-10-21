@@ -140,7 +140,7 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("zig_angle", &m_zig_angle);
 }
 
-static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, int id_to_use = 0)
+static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 {
 #ifdef UNICODE
 	std::wostringstream gcode;
@@ -149,10 +149,6 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 #endif
     gcode.imbue(std::locale("C"));
 	gcode << std::setprecision(10);
-
-	wxString area_str = wxString::Format(_T("a%d"), id_to_use > 0 ? id_to_use : sketch->m_id);
-
-	gcode << area_str.c_str() << _T(" = area.Area()\n");
 
 	bool started = false;
 
@@ -189,7 +185,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 
 				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
 				{
-					gcode << area_str.c_str() << _T(".append(c)\n");
+					gcode << _T("a.append(c)\n");
 					started = false;
 				}
 
@@ -225,7 +221,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 				{
 					if(started)
 					{
-						gcode << area_str.c_str() << _T(".append(c)\n");
+						gcode << _T("a.append(c)\n");
 						started = false;
 					}
 
@@ -254,7 +250,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 						gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
 						gcode << _T("), area.Point(") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")))\n");
 					} // End for
-					gcode << area_str.c_str() << _T(".append(c)\n");
+					gcode << _T("a.append(c)\n");
 				}
 			} // End if - else
 		}
@@ -262,7 +258,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 
 	if(started)
 	{
-		gcode << area_str.c_str() << _T(".append(c)\n");
+		gcode << _T("a.append(c)\n");
 		started = false;
 	}
 
@@ -272,9 +268,6 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 		HeeksObj* span = *It;
 		delete span;
 	}
-
-	// reorder the area, the outside curves must be made anti-clockwise and the insides clockwise
-	gcode << area_str.c_str() << _T(".Reorder()\n");
 
 	gcode << _T("\n");
 	return(wxString(gcode.str().c_str()));
@@ -303,6 +296,8 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 
 
 	python << CDepthOp::AppendTextToProgram(pMachineState);
+
+	python << _T("a = area.Area()\n");
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
@@ -350,26 +345,7 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 
 		if(object)
 		{
-			python << WriteSketchDefn(object, pMachineState, object->m_id);
-
-			// start - assume we are at a suitable clearance height
-
-			// Pocket the area
-			python << _T("area_funcs.pocket(a") << (int) object->m_id << _T(", tool_diameter/2, ");
-			python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
-			python << _T(", rapid_down_to_height, start_depth, final_depth, ");
-			python << m_pocket_params.m_step_over / theApp.m_program->m_units;
-			python << _T(", step_down, ");
-			python << m_pocket_params.m_round_corner_factor;
-			python << _T(", clearance, ");
-			python << m_pocket_params.m_starting_place;
-			python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
-			python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
-			python << _T(", ") << m_pocket_params.m_zig_angle;
-			python << _T(")\n");
-
-			// rapid back up to clearance plane
-			python << _T("rapid(z = clearance)\n");
+			python << WriteSketchDefn(object, pMachineState);
 		}
 
 		if(re_ordered_sketch)
@@ -377,6 +353,28 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 			delete re_ordered_sketch;
 		}
 	} // End for
+
+	// reorder the area, the outside curves must be made anti-clockwise and the insides clockwise
+	python << _T("a.Reorder()\n");
+
+	// start - assume we are at a suitable clearance height
+
+	// Pocket the area
+	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
+	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
+	python << _T(", rapid_down_to_height, start_depth, final_depth, ");
+	python << m_pocket_params.m_step_over / theApp.m_program->m_units;
+	python << _T(", step_down, ");
+	python << m_pocket_params.m_round_corner_factor;
+	python << _T(", clearance, ");
+	python << m_pocket_params.m_starting_place;
+	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
+	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
+	python << _T(", ") << m_pocket_params.m_zig_angle;
+	python << _T(")\n");
+
+	// rapid back up to clearance plane
+	python << _T("rapid(z = clearance)\n");
 
 	return(python);
 
