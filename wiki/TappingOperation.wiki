@@ -31,8 +31,11 @@ While you can add a Tapping operation at arbitrary points, taps are done on hole
   - set its parameters like depth (make sure it's less than the associated hole!), and spindle speed. For a left-hand tap, set a negative spindle speed value indicating CCW rotation.
 
   - run a Design Rule check.  
-    * Spindle direction (positive speed for clockwise right hand taps, negative for ccw left-hand taps) will be checked against the tools 'Tap direction' (left hand/right hand) setting.
-	  * tap depth is checked against hole depth.
+    * wether a Tap tool has been used
+    * tap depth less equal against hole depth
+    * tool's cutting edge height greater eqal tap depth 
+    * spindle direction (positive speed for clockwise right hand taps, negative for ccw left-hand taps) will be checked against the tools 'Tap direction' (left hand/right hand) setting.
+	  
 
   - make Python program/Postprocess
 
