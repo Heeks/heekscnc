@@ -33,6 +33,13 @@ This file contains a sketch with a square and 8 circles.  The circles have been 
 
 http://img35.imageshack.us/img35/2115/screenshot006vw.png 
 
+== Tapping: ==
+This file shows 4 drilled holes. A Tapping operation has beet attached to the Drilling operation. To learn more about tapping refer to the [TappingOperation] page.
+
+[http://heekscnc.googlecode.com/files/tapdemo.heeks tapdemo.heeks]
+
+http://heekscnc.googlecode.com/files/tapscreen.png
+
 == Adaptive Roughing: ==
 This file contains a 10cm x 10cm x 2.5cm solid with a pocket.  An adaptive roughing operation has been used starting at the the center.  It uses a 6.35mm (1/4") end-mill and the EMC postprocessor.  Note that the .heeks file contains the gcode from my run and is quite large (5.4MB).  To verify that adaptive roughing is working on your computer, hit the 'G0' button on the machining toolbar.  This is a cpu intensive operation and may take some time to complete.  On my computer, it takes about 3 minutes.
 
