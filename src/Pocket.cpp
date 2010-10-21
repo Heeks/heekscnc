@@ -223,6 +223,12 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 			{
 				if (type == CircleType)
 				{
+					if(started)
+					{
+						gcode << area_str.c_str() << _T(".append(c)\n");
+						started = false;
+					}
+
 					std::list< std::pair<int, gp_Pnt > > points;
 					span_object->GetCentrePoint(c);
 
@@ -231,15 +237,15 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 					double small_amount = 0.001;
 					double radius = heeksCAD->CircleGetRadius(span_object);
 
-					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 					points.push_back( std::make_pair(CW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
 					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
 					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
+					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 
 					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
 
+					gcode << _T("c = area.Curve()\n");
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
 						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
@@ -248,6 +254,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 						gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
 						gcode << _T("), area.Point(") << centre.X(true) << _T(", ") << centre.Y(true) << _T(")))\n");
 					} // End for
+					gcode << area_str.c_str() << _T(".append(c)\n");
 				}
 			} // End if - else
 		}
@@ -256,6 +263,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 	if(started)
 	{
 		gcode << area_str.c_str() << _T(".append(c)\n");
+		started = false;
 	}
 
 	// delete the spans made
@@ -264,6 +272,9 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 		HeeksObj* span = *It;
 		delete span;
 	}
+
+	// reorder the area, the outside curves must be made anti-clockwise and the insides clockwise
+	gcode << area_str.c_str() << _T(".Reorder()\n");
 
 	gcode << _T("\n");
 	return(wxString(gcode.str().c_str()));
