@@ -38,6 +38,7 @@ This file shows 4 drilled holes. A Tapping operation has beet attached to the Dr
 
 [http://heekscnc.googlecode.com/files/tapdemo.heeks tapdemo.heeks]
 
+[http://www.youtube.com/watch?v=4g-SlFrxPWM YouTube video]
 
 http://heekscnc.googlecode.com/files/tapscreen-small.png
 
