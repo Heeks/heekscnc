@@ -1,0 +1,30 @@
+; my current tool list
+T1 P1 D3.000000 Z+15.000000 ;Vorbohrer 1mm
+T2 P2 D3.000000 Z+15.000000 ;Vorbohrer 1.5mm
+T3 P3 D3.000000 Z+15.000000 ;Vorbohrer 3mm
+T4 P4 D3.000000 Z+15.000000 ;Alufräser WSP 1-schneidig  10mm
+T5 P5 D3.000000 Z+15.000000 ;Alufräser WSP 1-schneidig 12mm
+T6 P6 D10.000000 Z+50.000000 ;Alufräser WSP 2-schneidig 16mm
+T7 P7 D12.700000 Z+127.000000 ;Alufräser WSP 3-schneidig 20mm
+T8 P8 D4.000000 Z+20.000000 ;HSS Fräser 2-schneidig 3mm Alu Lackner&Urnitsch
+T9 P9 D20.000000 Z+100.000000 ;HSS Fräser 4-schneidig 4mm Zgonc
+T10 P10 D5.000000 ;HSS Fräser 4-schneidig 5mm Zgonc
+T11 P11 D6.000000 ;HSS Fräser 4-schneidig 6mm Zgonz
+T12 P12 D15.700000 ;Schruppfräser 4-schneidig gebraucht
+T13 P13 D23.800000 ;Schruppfräser 5-schneidig gebraucht
+T14 P14 D16.000000 ;T-Nutenfräser HSS 6-schneidig 16x8mm gebraucht
+T15 P15 D22.000000 ;T-Nutenfräser HSS 10-schneig 22x7.5 gebraucht
+T16 P16 D21.000000 ;T-Nutenfräser HSS 6-schneidig 21x11 gebraucht
+T17 P17 D19.250000 ;Schwalbenschwanzfräser HSS 6-schneidig 19.3x7.5
+T18 P18 D63.000000 ;Stirnwalzen Schruppfräser 63mm HSS 8-schneidig Ostrana
+T19 P19 D63.000000 ;Stirnwalzen Schlichtfräser 63mm HSS 8-schneidig Ostrana
+T20 P20 D63.000000 ;Scheibenfräser 63x10mm 10-schneidig HSS Ostrana
+T21 P21 D63.000000 ;Scheibenfräser 63x4mm 10-schneidig HSS Ostrana
+T22 P22 D50.000000 ;Prismenfräser 45 Grad 50mm HSS 24-schneidig Ostrana
+T23 P23 D63.000000 ;Prismenfräser 60 Grad 63mm HSS 24-schneidig Ostrana
+T24 P24 D63.000000 ;Prismenfräser 90 Grad 63mm HSS 24-schneidig Ostrana
+T25 P25 D63.000000 ;Schwalbenschwanzfräser 45 Grad HSS 63mm 24-schneidig Ostrana
+T26 P26 D80.000000 ;Metallsägeblatt 80 x2.5x22 Spiral
+T27 P27 D80.000000 ;Metallsägeblatt 80x1x22 Spiral
+T28 P28 D20.000000 ;Planfräser gebraucht Optimum HM-Plattenaufgelötet 4-schneidig
+T29 P29 D20.000000 ;Schlichtfräser HSS 20mm 4-schneidig Petzi uralt
