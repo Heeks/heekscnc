@@ -1,0 +1,15 @@
+If you bravely typed in your tool descriptions into the EMC tool table, and now
+are confronted with doing the same in HeeksCNC, this is for you.
+
+emc2hcnc tries a reasonable job to convert an EMC2 tooltable in 
+any of its historical shapes and forms to a HeeksCNC tool table.
+
+Usage:
+
+$ emc2hcnc <axis-ini-file>  >converted-table.tooltable
+
+or 
+
+$ emc2hcnc <emc-tool-table-file> [units string] >converted-table.tooltable
+
+Passing the axis ini file will read the associated tool table and also machine units.
