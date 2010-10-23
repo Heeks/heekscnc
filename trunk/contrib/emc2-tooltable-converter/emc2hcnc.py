@@ -76,7 +76,6 @@ class Tool(object):
     tt_codes = 'TPDXYZABCUVWIJQ'
     tt_types = 'IIFFFFFFFFFFFFI'
     intfmt = "%d"
-    #floatfmt = "%+4.4f"
     floatfmt = "%.2f"
     heeksNames = { 'T' : 'tool_number', 'P' : 'pocket_number', 'D':'diameter',
                    'X' : 'tool_length_offset_x', 'Y' : 'tool_length_offset_y',
@@ -114,6 +113,10 @@ class Tool(object):
             
         xml += 'tool_number="' + str(self.tool_number) + '" id="' + str(self.tool_number) +'">\n'
         xml += '\t<params automatically_generate_title="0" '
+        if self.format is 'lathe':
+            xml += 'type="6" '
+        else:
+            xml += 'type="2" '
         for k in list(self.lathe_fields if self.format is 'lathe' else self.mill_fields):
             if self.values[k]:
                 try:
