@@ -86,7 +86,16 @@ void COp::ReadBaseXML(TiXmlElement* element)
 	} // End if - then
 	else
 	{
-		m_tool_number = 0;
+	    // The older files used to call this attribute 'cutting_tool_number'.  Look for this old
+	    // name if we can't find the new one.
+	    if (element->Attribute("cutting_tool_number") != NULL)
+        {
+            m_tool_number = atoi(element->Attribute("cutting_tool_number"));
+        } // End if - then
+        else
+        {
+            m_tool_number = 0;
+        } // End if - else
 	} // End if - else
 
 	ObjList::ReadBaseXML(element);
