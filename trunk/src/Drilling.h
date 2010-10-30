@@ -25,9 +25,14 @@ public:
 	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
 	double m_peck_depth;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 	int    m_sort_drilling_locations;	// Perform a location-based sort before generating GCode?
+	int    m_retract_mode;	// boring - 0 - rapid retract, 1 - feed retract
+	int    m_spindle_mode;	// boring - if true, stop spindle at bottom
 
 	// The following line is the prototype setup in the Python routines for the drill sequence.
-	// def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
+	// depending on parameter combinations the backend should emit proper bore cycles (EMC2:  G85, G86, G89)
+	//
+	// def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None):
+
 
 	void set_initial_values( const double depth, const int tool_number );
 	void write_values_to_config();
