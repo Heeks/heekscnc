@@ -1,4 +1,4 @@
-#summary Tapping Cycles (EMC2 G33.1, ISO G84 - right, G74 -left cycles)
+#summary Tapping Cycles (EMC2 G33.1)
 = Introduction =
 
 The Tapping Cycle supports the inclusion of tapping operations on points. The selection logic for points is similar to the logic for selecting points for the Drilling operation:
@@ -42,7 +42,7 @@ While you can add a Tapping operation at arbitrary points, taps are done on hole
 = Parameters =
 
 == Program/Machine ==
-    currently the only machine emitting code for tapping is emc2tap, using the G33.1 cycle. This will be migrated to emc2 and hence automatically to derived machines once stable. If somebody can help me with ISO tapping cycles I'd be happy to add that.
+    currently the only machine emitting code for tapping is emc2 (and emc2tap, my test vehicle), using the G33.1 cycle.  If somebody can help me with ISO tapping cycles (G84 - right, G74 -left cycles) I'd be happy to add that.
 
 == Tap tool  ==
 
