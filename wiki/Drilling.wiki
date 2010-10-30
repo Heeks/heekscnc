@@ -1,9 +1,9 @@
-#summary Drilling Cycles (G81, G82-dwell and G83-peck)
+#summary Drilling and Reaming/Boring Cycles (G81, G82-dwell and G83-peck, G85, G86, G89)
 
 = Introduction =
 
 The Drilling Cycle supports the inclusion of Drilling (G81), Drilling
-with dwell (G82) and peck drilling (G83) depending on the parameters
+with dwell (G82),  peck drilling (G83), Boring-No Dwell-Feed Out (G85),  Boring-Spindle Stop-Rapid Out (G86) and Boring-Dwell-Feed Out (G89) operations depending on the parameters
 added to the Drilling Cycle object.
 
 It also refers to the new Cutting Tool object to find tool diameter
@@ -48,5 +48,14 @@ Drilling cycles will be located at an aggregation of;
 
     If neither the peck depth or dwell values has a positive value then the generated GCode will include the G81 drilling command.
 
+== Retract mode ==
+   Rapid retract from bottom of hole if 0.   If set to 1, the tool will feed retract from the bottom. Depending on dwell this emits either G85 or G89 on feed retract. Incompatible with peck depth > 0.
+
+== Spindle mode ==
+  Default 0 - keep spindle running while retracting. set to 1 to stop spindle at bottom, wait for dwell seconds and before rapid retract (G86).  Incompatible with peck depth > 0.
+
+
 == Sort Drill Locations ==
     If this is 'true', the list of locations at which holes should be drilled is sorted.  The sorting algorithm finds the nearest point to (0,0,0) and then, from there, the closest point to the previous one.
+
+The Retract mode and Spindle mode options are currently only supported in the emc2 machine.
