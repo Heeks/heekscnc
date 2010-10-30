@@ -33,7 +33,6 @@ void CPyProcess::OnTimer(wxTimerEvent& event)
 
 void CPyProcess::HandleInput(void)
 {
-  wxString s;
   wxInputStream *m_in,*m_err;
 
   m_in = GetInputStream();
@@ -41,6 +40,8 @@ void CPyProcess::HandleInput(void)
 
   if (m_in) 
     {
+	  wxString s;
+
       while (m_in->CanRead()) {
 	char buffer[4096];
 	m_in->Read(buffer, sizeof(buffer));
@@ -52,6 +53,8 @@ void CPyProcess::HandleInput(void)
     }
   if (m_err) 
     {
+	  wxString s;
+
       while (m_err->CanRead()) {
 	char buffer[4096];
 	m_err->Read(buffer, sizeof(buffer));
