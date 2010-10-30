@@ -172,7 +172,7 @@ class CreatorAnilamCM(iso.CreatorIso):
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         self.arc(False, x, y, z, i, j, k, r)
 
-    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None):
+    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None,retract_mode=None, spindle_mode=None):
         self.write('(Canned drill cycle ops are not yet supported here on this Anilam Crusader M postprocessor)')
 
 nc.creator = CreatorAnilamCM()
