@@ -11,9 +11,22 @@
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "interface/HeeksObj.h"
+#include "interface/PropertyList.h"
+#include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "PythonStuff.h"
 #include "MachineState.h"
+
+#ifdef HEEKSCNC
+#include "Fixtures.h"
+#define FIND_FIRST_TOOL CTool::FindFirstByType
+#define FIND_ALL_TOOLS CTool::FindAllTools
+#define MACHINE_STATE_TOOL(t) pMachineState->Tool(t)
+#else
+#define FIND_FIRST_TOOL heeksCNC->FindFirstToolByType
+#define FIND_ALL_TOOLS heeksCNC->FindAllTools
+#define MACHINE_STATE_TOOL(t) heeksCNC->MachineStateTool(pMachineState, t)
+#endif
 
 #include <sstream>
 #include <iomanip>
@@ -25,7 +38,7 @@
 #include <BRepMesh.hxx>
 #include <Poly_Polygon3D.hxx>
 
-CScriptOp::CScriptOp( const CScriptOp & rhs ) : COp(rhs)
+CScriptOp::CScriptOp( const CScriptOp & rhs ) : CDepthOp(rhs)
 {
 	m_str = rhs.m_str;
 }
@@ -34,7 +47,7 @@ CScriptOp & CScriptOp::operator= ( const CScriptOp & rhs )
 {
 	if (this != &rhs)
 	{
-		COp::operator=( rhs );
+		CDepthOp::operator=( rhs );
 		m_str = rhs.m_str;
 	}
 
@@ -249,9 +262,20 @@ This is a simple way to insert datum parameters for translating gcode around lat
 
 }
 
+
 Python CScriptOp::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
+
+	if (m_emit_depthop_params)
+	{
+		python << CDepthOp::AppendTextToProgram(pMachineState);
+	} else 	{
+		if(m_comment.Len() > 0)
+		{
+		  python << _T("comment(") << PythonString(m_comment) << _T(")\n");
+		}
+	}
 
 	std::list<HeeksObj *> children;
 	for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
@@ -275,6 +299,21 @@ Python CScriptOp::AppendTextToProgram(CMachineState *pMachineState)
 
 	return python;
 } // End AppendTextToProgram() method
+
+
+
+
+static void on_set_emit_depthop_params(bool value, HeeksObj* object)
+{
+	((CScriptOp*)object)->m_emit_depthop_params = int(value);
+	((CScriptOp*)object)->WriteDefaultValues();
+}
+
+void CScriptOp::GetProperties(std::list<Property *> *list)
+{
+    list->push_back(new PropertyCheck(_("emit_depthop_params"), m_emit_depthop_params, this, on_set_emit_depthop_params));
+    CDepthOp::GetProperties(list);
+}
 
 ObjectCanvas* CScriptOp::GetDialog(wxWindow* parent)
 {
@@ -311,8 +350,9 @@ void CScriptOp::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = new TiXmlElement( "ScriptOp" );
 	root->LinkEndChild( element );
 	element->SetAttribute("script", Ttc(m_str.c_str()));
+	element->SetAttribute("emit_depthop_params", int(m_emit_depthop_params) );
 
-	COp::WriteBaseXML(element);
+	CDepthOp::WriteBaseXML(element);
 }
 
 // static member function
@@ -321,6 +361,7 @@ HeeksObj* CScriptOp::ReadFromXMLElement(TiXmlElement* element)
 	CScriptOp* new_object = new CScriptOp;
 
 	new_object->m_str = wxString(Ctt(element->Attribute("script")));
+	if (element->Attribute("emit_depthop_params")) element->Attribute("emit_depthop_params", &new_object->m_emit_depthop_params);
 
 	// read common parameters
 	new_object->ReadBaseXML(element);
@@ -332,5 +373,5 @@ bool CScriptOp::operator==( const CScriptOp & rhs ) const
 {
 	if (m_str != rhs.m_str) return(false);
 
-	return(COp::operator==(rhs));
+	return(CDepthOp::operator==(rhs));
 }

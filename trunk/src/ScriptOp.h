@@ -6,13 +6,18 @@
  */
 
 #include "HeeksCNCTypes.h"
-#include "Op.h"
+#include "DepthOp.h"
 
-class CScriptOp: public COp{
+
+class CScriptOp: public CDepthOp {
+
+
+
 public:
 	wxString m_str;
+	int m_emit_depthop_params;
 
-	CScriptOp():COp(GetTypeString(), 0, ScriptOpType) {}
+	CScriptOp():CDepthOp(GetTypeString(), 0, ScriptOpType) {}
 
 	CScriptOp( const CScriptOp & rhs );
 	CScriptOp & operator= ( const CScriptOp & rhs );
@@ -27,6 +32,7 @@ public:
 	int GetType()const{return ScriptOpType;}
 	const wxChar* GetTypeString(void)const{return _T("ScriptOp");}
 	const wxBitmap &GetIcon();
+	void GetProperties( std::list<Property *> *list);
 	ObjectCanvas* GetDialog(wxWindow* parent);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
