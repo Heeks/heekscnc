@@ -364,7 +364,7 @@ class CreatorIso(nc.Creator):
         return True
 
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        if self.same_xyz(x, y, z): return
+        #if self.same_xyz(x, y, z): return
         self.write_blocknum()
         arc_g_code = ''
         if cw: arc_g_code = iso.codes.ARC_CW()
