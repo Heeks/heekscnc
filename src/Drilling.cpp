@@ -41,6 +41,8 @@ void CDrillingParams::set_initial_values( const double depth, const int tool_num
 	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
 	config.Read(_T("m_peck_depth"), &m_peck_depth, (25.4 / 10));	// One tenth of an inch
 	config.Read(_T("m_sort_drilling_locations"), &m_sort_drilling_locations, 1);
+	config.Read(_T("m_retract_mode"), &m_retract_mode, 0);
+	config.Read(_T("m_spindle_mode"), &m_spindle_mode, 0);
 
 	if (depth > 0)
 	{
@@ -80,8 +82,23 @@ void CDrillingParams::write_values_to_config()
 	config.Write(_T("m_depth"), m_depth);
 	config.Write(_T("m_peck_depth"), m_peck_depth);
 	config.Write(_T("m_sort_drilling_locations"), m_sort_drilling_locations);
+	config.Write(_T("m_retract_mode"), m_retract_mode);
+	config.Write(_T("m_spindle_mode"), m_spindle_mode);
+
 }
 
+
+static void on_set_spindle_mode(int value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_spindle_mode = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
+
+static void on_set_retract_mode(int value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_retract_mode = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
 
 static void on_set_standoff(double value, HeeksObj* object)
 {
@@ -123,12 +140,31 @@ void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *li
 	{ // Begin choice scope
 		std::list< wxString > choices;
 
+		choices.push_back(_("Rapid retract"));	// Must be 'false' (0)
+		choices.push_back(_("Feed retract"));	// Must be 'true' (non-zero)
+
+		int choice = int(m_retract_mode);
+		list->push_back(new PropertyChoice(_("retract_mode"), choices, choice, parent, on_set_retract_mode));
+	} // End choice scope
+	{ // Begin choice scope
+		std::list< wxString > choices;
+
+		choices.push_back(_("Keep running"));	// Must be 'false' (0)
+		choices.push_back(_("Stop at bottom"));	// Must be 'true' (non-zero)
+
+		int choice = int(m_spindle_mode);
+		list->push_back(new PropertyChoice(_("spindle_mode"), choices, choice, parent, on_set_spindle_mode));
+	} // End choice scope
+	{ // Begin choice scope
+		std::list< wxString > choices;
+
 		choices.push_back(_("Respect existing order"));	// Must be 'false' (0)
 		choices.push_back(_("True"));			// Must be 'true' (non-zero)
 
 		int choice = int(m_sort_drilling_locations);
 		list->push_back(new PropertyChoice(_("sort_drilling_locations"), choices, choice, parent, on_set_sort_drilling_locations));
 	} // End choice scope
+
 }
 
 void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
@@ -143,6 +179,8 @@ void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute("peck_depth", m_peck_depth);
 
 	element->SetAttribute("sort_drilling_locations", m_sort_drilling_locations);
+	element->SetAttribute("retract_mode", m_retract_mode);
+	element->SetAttribute("spindle_mode", m_spindle_mode);
 }
 
 void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -152,6 +190,8 @@ void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("depth")) pElem->Attribute("depth", &m_depth);
 	if (pElem->Attribute("peck_depth")) pElem->Attribute("peck_depth", &m_peck_depth);
 	if (pElem->Attribute("sort_drilling_locations")) pElem->Attribute("sort_drilling_locations", &m_sort_drilling_locations);
+	if (pElem->Attribute("retract_mode")) pElem->Attribute("retract_mode", &m_retract_mode);
+	if (pElem->Attribute("spindle_mode")) pElem->Attribute("spindle_mode", &m_spindle_mode);
 }
 
 const wxBitmap &CDrilling::GetIcon()
@@ -185,7 +225,9 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 			<< _T("depth=") << m_params.m_depth/theApp.m_program->m_units << _T(", ")
 			<< _T("standoff=") << m_params.m_standoff/theApp.m_program->m_units << _T(", ")
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
-			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units // << ", "
+			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units << _T(", ")
+			<< _T("retract_mode=") << m_params.m_retract_mode << _T(", ")
+			<< _T("spindle_mode=") << m_params.m_spindle_mode // << _T(", ")
 			<< _T(")\n");
         pMachineState->Location(point); // Remember where we are.
 	} // End for
@@ -889,6 +931,28 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
 		} // End switch
 	} // End for
 
+	// see wether combination of retract_mode, spindle_mode and peck_depth is valid:
+	// move to design rule check
+	if ((m_params.m_retract_mode == 1) || (m_params.m_spindle_mode == 1))
+	{
+		// if we feed retract, or stop the spindle at the bottom, this is a boring cycle.
+		// cant have peck_depth > 0 then
+		if (m_params.m_peck_depth > 0)
+		{
+#ifdef UNICODE
+			std::wostringstream l_ossChange;
+#else
+			std::ostringstream l_ossChange;
+#endif
+
+			l_ossChange << _("WARNING") << ": " << _("cant have boring cycle with pecking > 0") << " (id=" << m_id << ")\n";
+			changes.push_back(l_ossChange.str().c_str());
+
+		}
+	}
+
+
+
 	return(changes);
 
 } // End DesignRulesAdjustment() method
@@ -929,6 +993,8 @@ bool CDrillingParams::operator==( const CDrillingParams & rhs) const
 	if (m_depth != rhs.m_depth) return(false);
 	if (m_peck_depth != rhs.m_peck_depth) return(false);
 	if (m_sort_drilling_locations != rhs.m_sort_drilling_locations) return(false);
+	if (m_retract_mode != rhs.m_retract_mode) return(false);
+	if (m_spindle_mode != rhs.m_spindle_mode) return(false);
 
 	return(true);
 }
