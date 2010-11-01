@@ -115,10 +115,29 @@ def recur(arealist, a1, stepover, from_center):
     a_offset.Offset(stepover)
     
     # split curves into new areas
-    for curve in a_offset.getCurves():
-        a2 = area.Area()
-        a2.append(curve)
-        recur(arealist, a2, stepover, from_center)
+    if area.holes_linked():
+        for curve in a_offset.getCurves():
+            a2 = area.Area()
+            a2.append(curve)
+            recur(arealist, a2, stepover, from_center)
+    
+    else:
+        # split curves into new areas
+        a_offset.Reorder()
+        a2 = None
+       
+        for curve in a_offset.getCurves():
+            if curve.IsClockwise():
+                if a2 != None:
+                    a2.append(curve)
+            else:
+                if a2 != None:
+                    recur(arealist, a2, stepover, from_center)
+                a2 = area.Area()
+                a2.append(curve)
+
+        if a2 != None:
+            recur(arealist, a2, stepover, from_center)
         
 def get_curve_list(arealist):
     curve_list = list()
@@ -299,53 +318,57 @@ def zigzag(a, stepover):
         
     reorder_zigs()
 
-def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, round_corner_factor, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle):
-    global area_for_feed_possible
-    global tool_radius_for_pocket
-    global sin_angle_for_zigs
-    global cos_angle_for_zigs
-    global sin_minus_angle_for_zigs
-    global cos_minus_angle_for_zigs
-    tool_radius_for_pocket = tool_radius
-    radians_angle = zig_angle * math.pi / 180
-    sin_angle_for_zigs = math.sin(-radians_angle)
-    cos_angle_for_zigs = math.cos(-radians_angle)
-    sin_minus_angle_for_zigs = math.sin(radians_angle)
-    cos_minus_angle_for_zigs = math.cos(radians_angle)
-        
+def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle):
     if rapid_down_to_height > clearance_height:
-        rapid_down_to_height = clearance_height
-    
-    area.set_round_corner_factor(round_corner_factor)
+       rapid_down_to_height = clearance_height
 
-    arealist = list()
+    use_internal_function = False
     
-    if keep_tool_down_if_poss:
-        area_for_feed_possible = area.Area(a)
-        area_for_feed_possible.Offset(extra_offset - 0.01)
+    if use_internal_function:
+        curve_list = a.MakePocketToolpath(tool_radius, extra_offset, stepover, from_center, use_zig_zag, zig_angle)
+        
+    else:    
+        global area_for_feed_possible
+        global tool_radius_for_pocket
+        global sin_angle_for_zigs
+        global cos_angle_for_zigs
+        global sin_minus_angle_for_zigs
+        global cos_minus_angle_for_zigs
+        tool_radius_for_pocket = tool_radius
+        radians_angle = zig_angle * math.pi / 180
+        sin_angle_for_zigs = math.sin(-radians_angle)
+        cos_angle_for_zigs = math.cos(-radians_angle)
+        sin_minus_angle_for_zigs = math.sin(radians_angle)
+        cos_minus_angle_for_zigs = math.cos(radians_angle)
+        
+        arealist = list()
+        
+        if keep_tool_down_if_poss:
+            area_for_feed_possible = area.Area(a)
+            area_for_feed_possible.Offset(extra_offset - 0.01)
 
-    a_offset = area.Area(a)
-    current_offset = tool_radius + extra_offset
-    a_offset.Offset(current_offset)
-    
-    do_recursive = True
-    
-    if use_zig_zag:
-        zigzag(a_offset, stepover)
-        curve_list = curve_list_for_zigs
-    else:
-        if do_recursive:
-            recur(arealist, a_offset, stepover, from_center)
+        a_offset = area.Area(a)
+        current_offset = tool_radius + extra_offset
+        a_offset.Offset(current_offset)
+        
+        do_recursive = True
+        
+        if use_zig_zag:
+            zigzag(a_offset, stepover)
+            curve_list = curve_list_for_zigs
         else:
-            while(a_offset.num_curves() > 0):
-                if from_center:
-                    arealist.insert(0, a_offset)
-                else:
-                    arealist.append(a_offset)
-                current_offset = current_offset + stepover
-                a_offset = area.Area(a)
-                a_offset.Offset(current_offset)
-        curve_list = get_curve_list(arealist)
+            if do_recursive:
+                recur(arealist, a_offset, stepover, from_center)
+            else:
+                while(a_offset.num_curves() > 0):
+                    if from_center:
+                        arealist.insert(0, a_offset)
+                    else:
+                        arealist.append(a_offset)
+                    current_offset = current_offset + stepover
+                    a_offset = area.Area(a)
+                    a_offset.Offset(current_offset)
+            curve_list = get_curve_list(arealist)
         
     layer_count = int((start_depth - final_depth) / stepdown)
 

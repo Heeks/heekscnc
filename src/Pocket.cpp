@@ -34,7 +34,6 @@ CPocketParams::CPocketParams()
 {
 	m_step_over = 0.0;
 	m_material_allowance = 0.0;
-	m_round_corner_factor = 0.0;
 	m_starting_place = true;
 	m_keep_tool_down_if_poss = true;
 	m_use_zig_zag = true;
@@ -62,12 +61,6 @@ static void on_set_step_over(double value, HeeksObj* object)
 static void on_set_material_allowance(double value, HeeksObj* object)
 {
 	((CPocket*)object)->m_pocket_params.m_material_allowance = value;
-	((CPocket*)object)->WriteDefaultValues();
-}
-
-static void on_set_round_corner_factor(double value, HeeksObj* object)
-{
-	((CPocket*)object)->m_pocket_params.m_round_corner_factor = value;
 	((CPocket*)object)->WriteDefaultValues();
 }
 
@@ -99,8 +92,6 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("step over"), m_step_over, parent, on_set_step_over));
 	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, parent, on_set_material_allowance));
-	list->push_back(new PropertyDouble(_("round corner factor"), m_round_corner_factor, parent, on_set_round_corner_factor));
-	list->push_back(new PropertyString(wxString(_T("( ")) + _("for 90 degree corners") + _T(" )"), wxString(_T("( ")) + _("1.5 for square, 1.0 for round")  + _T(" )"), NULL));
 	{
 		std::list< wxString > choices;
 		choices.push_back(_("Boundary"));
@@ -119,7 +110,6 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	root->LinkEndChild( element );
 	element->SetDoubleAttribute("step", m_step_over);
 	element->SetDoubleAttribute("mat", m_material_allowance);
-	element->SetDoubleAttribute("rf", m_round_corner_factor);
 	element->SetAttribute("from_center", m_starting_place);
 	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
 	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
@@ -130,7 +120,6 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	pElem->Attribute("step", &m_step_over);
 	pElem->Attribute("mat", &m_material_allowance);
-	pElem->Attribute("rf", &m_round_corner_factor);
 	pElem->Attribute("from_center", &m_starting_place);
 	int int_for_bool = false;
 	pElem->Attribute("keep_tool_down", &int_for_bool);
@@ -364,9 +353,7 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
 	python << _T(", rapid_down_to_height, start_depth, final_depth, ");
 	python << m_pocket_params.m_step_over / theApp.m_program->m_units;
-	python << _T(", step_down, ");
-	python << m_pocket_params.m_round_corner_factor;
-	python << _T(", clearance, ");
+	python << _T(", step_down, clearance, ");
 	python << m_pocket_params.m_starting_place;
 	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
 	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
@@ -388,7 +375,6 @@ void CPocket::WriteDefaultValues()
 	CNCConfig config(CPocketParams::ConfigScope());
 	config.Write(_T("StepOver"), m_pocket_params.m_step_over);
 	config.Write(_T("MaterialAllowance"), m_pocket_params.m_material_allowance);
-	config.Write(_T("RoundCornerFactor"), m_pocket_params.m_round_corner_factor);
 	config.Write(_T("FromCenter"), m_pocket_params.m_starting_place);
 	config.Write(_T("KeepToolDown"), m_pocket_params.m_keep_tool_down_if_poss);
 	config.Write(_T("UseZigZag"), m_pocket_params.m_use_zig_zag);
@@ -402,7 +388,6 @@ void CPocket::ReadDefaultValues()
 	CNCConfig config(CPocketParams::ConfigScope());
 	config.Read(_T("StepOver"), &m_pocket_params.m_step_over, 1.0);
 	config.Read(_T("MaterialAllowance"), &m_pocket_params.m_material_allowance, 0.2);
-	config.Read(_T("RoundCornerFactor"), &m_pocket_params.m_round_corner_factor, 1.0);
 	config.Read(_T("FromCenter"), &m_pocket_params.m_starting_place, 1);
 	config.Read(_T("KeepToolDown"), &m_pocket_params.m_keep_tool_down_if_poss, true);
 	config.Read(_T("UseZigZag"), &m_pocket_params.m_use_zig_zag, false);
@@ -691,10 +676,10 @@ void CPocket::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
     CDepthOp::GetTools( t_list, p );
 }
+
 bool CPocketParams::operator==(const CPocketParams & rhs) const
 {
 	if (m_starting_place != rhs.m_starting_place) return(false);
-	if (m_round_corner_factor != rhs.m_round_corner_factor) return(false);
 	if (m_material_allowance != rhs.m_material_allowance) return(false);
 	if (m_step_over != rhs.m_step_over) return(false);
 	if (m_keep_tool_down_if_poss != rhs.m_keep_tool_down_if_poss) return(false);
