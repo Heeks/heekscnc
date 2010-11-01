@@ -284,11 +284,6 @@ std::list<gp_Pnt> PathArc::Interpolate( const PathObject *prev_po, const unsigne
 		angle_step = (end_angle - start_angle) / number_of_points;
 	} // End if - else
 
-	if (m_dir == -1)
-	{
-		// fix preview problem for cw arcs
-		angle_step = -angle_step;
-	} // End if - else
 	points.push_back( gp_Pnt( prev_po->m_x[0], prev_po->m_x[1], prev_po->m_x[2] ) );
 
 	for(unsigned int i = 0; i< number_of_points; i++)
