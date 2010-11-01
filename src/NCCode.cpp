@@ -277,6 +277,10 @@ std::list<gp_Pnt> PathArc::Interpolate( const PathObject *prev_po, const unsigne
 	{
 		// It's a full circle.
 		angle_step = (2 * PI) / number_of_points;
+		if (m_dir == -1)
+		{
+			angle_step = -angle_step; // fix preview of full cw arcs
+		}
 	} // End if - then
 	else
 	{
