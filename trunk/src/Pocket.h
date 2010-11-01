@@ -14,7 +14,6 @@ class CPocket;
 class CPocketParams{
 public:
 	int m_starting_place;
-	double m_round_corner_factor;
 	double m_material_allowance;
 	double m_step_over;
 	bool m_keep_tool_down_if_poss;
