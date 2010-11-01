@@ -27,12 +27,12 @@ This file contains two sketches.  Each sketch is a 1" x 1" square.  One is profi
 http://img510.imageshack.us/img510/9512/screenshot005dd.png
 
 == Profiling leaving rims: ==
-When using profiling to cut around a sketch all the way to the bottom of the material the center would disconnect from the surrounding material when reaching the bottom. To avoid this, tags can be set at the sketch which leave material at the bottom - the cutter "hops" over the tags. This example shows a rectangular cutout with four tags producing rims. Note that the effect cannot be seen in XY preview.
+When using profiling to cut around a sketch all the way to the bottom of the material the center would disconnect from the surrounding material when reaching the bottom. To avoid this, tags can be set at the sketch which leave material at the bottom - the cutter "hops" over the tags. This example shows a rectangular cutout with four tags at the middle of each edge producing rims. Note that the effect cannot be seen in XY preview.
 
 
 [http://heekscnc.googlecode.com/files/profile-tag-example.heeks profile-tag-example.heeks]
 
-http://heekscnc.googlecode.com/files/tags-heeks.png
+http://heekscnc.googlecode.com/files/tags-example-heeks.png
 
 == Drilling: ==
 This file contains a sketch with a square and 8 circles.  The circles have been selected and a drilling operation applied.  Note that the size of the drawn circle doesn't affect the size of the final hole.  The circle's center is used to locate the center of the hole, but the tool selected ultimately determines the hole size.  To learn more about drilling refer to the [Drilling] page.
