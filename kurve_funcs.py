@@ -165,12 +165,9 @@ def add_roll_on(k, roll_on_k, direction, roll_radius, offset_extra, roll_on):
     
     # add a start roll on point
     kurve.add_point(roll_on_k, 0, rollstartx, rollstarty, 0, 0)
+
     # add the roll on arc
     kurve.add_point(roll_on_k, rdir, sx, sy, rcx, rcy)
-    
-    # add the start of the original kurve
-    sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, 0)
-    kurve.add_point(roll_on_k, sp, ex, ey, cx, cy)
     
 def add_roll_off(k, roll_off_k, direction, roll_radius, offset_extra, roll_off):
     if direction == "on": return
@@ -206,7 +203,6 @@ def add_roll_off(k, roll_off_k, direction, roll_radius, offset_extra, roll_off):
 def cut_kurve(k):
     for span in range(0, kurve.num_spans(k)):
         sp, sx, sy, ex, ey, cx, cy = kurve.get_span(k, span)
-        
         if sp == 0:#line
             feed(ex, ey)
         else:
@@ -299,6 +295,7 @@ def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius =
         
         # cut the main kurve
         current_perim = 0.0
+        
         for span in range(0, kurve.num_spans(offset_k)):
             sp, sx, sy, ex, ey, cx, cy = kurve.get_span(offset_k, span)
 
