@@ -172,7 +172,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 				span_object->GetStartPoint(s);
 				CNCPoint start(pMachineState->Fixture().Adjustment(s));
 
-				if(started && (fabs(s[0] - prev_e[0]) > 0.000000001 || fabs(s[1] - prev_e[1]) > 0.000000001))
+				if(started && (fabs(s[0] - prev_e[0]) > 0.0001 || fabs(s[1] - prev_e[1]) > 0.0001))
 				{
 					gcode << _T("a.append(c)\n");
 					started = false;
