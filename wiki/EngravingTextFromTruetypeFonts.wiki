@@ -1,9 +1,9 @@
-#How to generate engravable text using TrueType fonts.
+#summary How to generate engravable text using TrueType fonts.
 
 = Introduction =
 There is an _Add Text_ function in HeeksCAD but it's not usable for engraving text. 
 
-An easy way to create text outlines is TrueTypeTracer by Chris Radek.
+An easy way to create text outlines is TrueTypeTracer by Chris Radek. This program creates a DXF file which can be imported into HeeksCAD.
 
 = Details =
 
@@ -21,7 +21,7 @@ This is a Linux - only program. It shouldnt be too hard to compile for Windows b
 $ truetype-tracer-dxf -f/usr/share/fonts/truetype/freefont/FreeSansOblique.ttf HeeksCNC >heekscnc.dxf
 }}}
 
-* Import heekscnc.dxf into HeeksCAD.
+* Import [http://heekscnc.googlecode.com/files/heekscnc.dxf heekscnc.dxf] into HeeksCAD.
 
 The text will come out really huge. Scale it to desired size. 
 
@@ -40,9 +40,20 @@ Select sketches ID 3 and 4, and _Combine sketches_ . The two sketches will be re
 ** Repeat these steps for all letters with islands.
 
 * Select all sketches (one per character now) and _Combine sketches_.
+
 Again, _order_ comes out _bad_ and needs reordering.
 
 * Pocket and/or Contour and/or Profile the resulting sketch.
+
+However, the Contour operation currently gives me an 'Error converting sketch to face: BRep_API: command not done' on the same sketch whereas Profiling and Pocketing worked fine (r1227). 
+
+Example files: 
+
+[http://heekscnc.googlecode.com/files/heekscnc.dxf Example dxf input from TrueTypetracer]   
+
+[http://heekscnc.googlecode.com/files/textpocketing.heeks resulting .heeks file]
+
+http://heekscnc.googlecode.com/files/textpocket.png
 
 === Note on Inkscape ===
 
@@ -51,4 +62,3 @@ Neil Underwood did a nice [http://www.youtube.com/watch?v=wThpU-XJ19o video tuto
 This worked as well but I had a lot more massaging to do before I had useful results.
 
 TrueTypeTracer is a bit cleverer in exporting the outlines. It uses biarcs wheras the Big Blue Saw DXF export plugin simplifies everything to lines.
-
