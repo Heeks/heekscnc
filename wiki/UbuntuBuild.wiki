@@ -73,3 +73,5 @@ If you want to use adaptive roughing operations you will need to build actp.so, 
 
 
 If you are having trouble, come and ask some real people on the IRC channel #cam on FreeNode,  quite a few people there have built it, for example:   archivist, celeron55, crotchet1, DanielFalck, fenn, Sliptonic,  or email me danheeks@gmail.com
+
+the #cam IRC channel is logged at http://camlog.archivist.info/
