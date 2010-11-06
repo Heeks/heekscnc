@@ -1,7 +1,7 @@
 #summary How to generate engravable text using TrueType fonts.
 
 = Introduction =
-There is an _Add Text_ function in HeeksCAD but it's not usable for engraving text. 
+There is an _Add Text_ function in HeeksCAD but the Qcad fonts it's using arent that great for engraving text. 
 
 An easy way to create text outlines is TrueTypeTracer by Chris Radek. This program creates a DXF file which can be imported into HeeksCAD.
 
@@ -28,20 +28,6 @@ The text will come out really huge. Scale it to desired size.
 * Reorder the sketch
 
 The sketch will be named 'ENTITIES 0' . Look at the properties of this sketch - _order_ will likely be _bad_. Choose _reorder_ - order should now be _multiple_.
-
-* Split the sketch. 
-
-This will result in one sketch for each closed kurve - letters with islands like the 'e' in the example result in several sketches.
-
-* Combine outlines and islands. 
-
-Select sketches ID 3 and 4, and _Combine sketches_ . The two sketches will be replaces by a single sketch which has order _bad_. Reorder the result, it should now have order _multiple_ .
-
-** Repeat these steps for all letters with islands.
-
-* Select all sketches (one per character now) and _Combine sketches_.
-
-Again, _order_ comes out _bad_ and needs reordering.
 
 * Pocket and/or Contour and/or Profile the resulting sketch.
 
