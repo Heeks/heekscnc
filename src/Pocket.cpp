@@ -38,6 +38,7 @@ CPocketParams::CPocketParams()
 	m_keep_tool_down_if_poss = true;
 	m_use_zig_zag = true;
 	m_zig_angle = 0.0;
+	m_descent_strategy = ePlunge;
 }
 
 void CPocketParams::set_initial_values(const CTool::ToolNumber_t tool_number)
@@ -50,6 +51,12 @@ void CPocketParams::set_initial_values(const CTool::ToolNumber_t tool_number)
             m_step_over = pTool->CuttingRadius() * 3.0 / 5.0;
         }
     }
+}
+
+static void on_set_descent_strategy(int value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_descent_strategy = (CPocketParams::eDescentStrategy) value;
+	((CPocket*)object)->WriteDefaultValues();
 }
 
 static void on_set_step_over(double value, HeeksObj* object)
@@ -98,6 +105,13 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 		choices.push_back(_("Center"));
 		list->push_back(new PropertyChoice(_("starting_place"), choices, m_starting_place, parent, on_set_starting_place));
 	}
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("Plunge"));
+		choices.push_back(_("Ramp"));
+		choices.push_back(_("Helical"));
+		list->push_back(new PropertyChoice(_("descent_strategy"), choices, m_descent_strategy, parent, on_set_descent_strategy));
+	}
 	list->push_back(new PropertyCheck(_("keep tool down"), m_keep_tool_down_if_poss, parent, on_set_keep_tool_down));
 	list->push_back(new PropertyCheck(_("use zig zag"), m_use_zig_zag, parent, on_set_use_zig_zag));
 	if(m_use_zig_zag)list->push_back(new PropertyDouble(_("zig angle"), m_zig_angle, parent, on_set_zig_angle));
@@ -114,6 +128,7 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
 	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
 	element->SetDoubleAttribute("zig_angle", m_zig_angle);
+	element->SetAttribute("descent_strategy", (int) m_descent_strategy);
 }
 
 void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -127,6 +142,9 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("use_zig_zag", &int_for_bool);
 	m_use_zig_zag = (int_for_bool != 0);
 	pElem->Attribute("zig_angle", &m_zig_angle);
+	int int_for_descent_strategy = (int) ePlunge;
+	pElem->Attribute("descent_strategy", &int_for_descent_strategy);
+	m_descent_strategy = (eDescentStrategy) int_for_descent_strategy;
 }
 
 static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
@@ -348,6 +366,10 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 
 	// start - assume we are at a suitable clearance height
 
+	// make a parameter of area_funcs.pocket() eventually
+	// 0..plunge, 1..ramp, 2..helical
+	python << _T("descent_strategy = ") <<  m_pocket_params.m_descent_strategy << _T("\n");
+
 	// Pocket the area
 	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
 	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
@@ -379,6 +401,7 @@ void CPocket::WriteDefaultValues()
 	config.Write(_T("KeepToolDown"), m_pocket_params.m_keep_tool_down_if_poss);
 	config.Write(_T("UseZigZag"), m_pocket_params.m_use_zig_zag);
 	config.Write(_T("ZigAngle"), m_pocket_params.m_zig_angle);
+	config.Write(_T("DecentStrategy"), m_pocket_params.m_descent_strategy);
 }
 
 void CPocket::ReadDefaultValues()
@@ -392,6 +415,9 @@ void CPocket::ReadDefaultValues()
 	config.Read(_T("KeepToolDown"), &m_pocket_params.m_keep_tool_down_if_poss, true);
 	config.Read(_T("UseZigZag"), &m_pocket_params.m_use_zig_zag, false);
 	config.Read(_T("ZigAngle"), &m_pocket_params.m_zig_angle);
+	int int_for_descent_strategy = CPocketParams::ePlunge;
+	config.Read(_T("DecentStrategy"), &int_for_descent_strategy);
+	m_pocket_params.m_descent_strategy = (CPocketParams::eDescentStrategy) int_for_descent_strategy;
 }
 
 void CPocket::glCommands(bool select, bool marked, bool no_color)
@@ -685,6 +711,7 @@ bool CPocketParams::operator==(const CPocketParams & rhs) const
 	if (m_keep_tool_down_if_poss != rhs.m_keep_tool_down_if_poss) return(false);
 	if (m_use_zig_zag != rhs.m_use_zig_zag) return(false);
 	if (m_zig_angle != rhs.m_zig_angle) return(false);
+	if (m_descent_strategy != rhs.m_descent_strategy) return(false);
 
 	return(true);
 }

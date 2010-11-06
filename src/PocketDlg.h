@@ -27,11 +27,13 @@ class PocketDlg : public HDialog
 	static wxBitmap* m_start_depth_bitmap;
 	static wxBitmap* m_final_depth_bitmap;
 	static wxBitmap* m_step_down_bitmap;
+	static wxBitmap* m_descent_strategy_bitmap;
 
 	CObjectIdsCtrl *m_idsSketches;
 	CLengthCtrl *m_lgthStepOver;
 	CLengthCtrl *m_lgthMaterialAllowance;
 	wxComboBox *m_cmbStartingPlace;
+	wxComboBox *m_cmbDescentStrategy;
 	wxComboBox *m_cmbTool;
 	wxCheckBox *m_chkKeepToolDown;
 	wxCheckBox *m_chkUseZigZag;
