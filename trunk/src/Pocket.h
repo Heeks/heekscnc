@@ -26,6 +26,14 @@ public:
 	}eCutMode;
 	eCutMode m_cut_mode;
 
+    typedef enum {
+            ePlunge = 0,
+            eRamp,
+            eHelical,
+            eUndefinedeDescentStrategy
+    } eDescentStrategy;
+    eDescentStrategy m_descent_strategy;
+
 	CPocketParams();
 
     void set_initial_values(const CTool::ToolNumber_t tool_number);
