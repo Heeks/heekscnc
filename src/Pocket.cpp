@@ -38,7 +38,7 @@ CPocketParams::CPocketParams()
 	m_keep_tool_down_if_poss = true;
 	m_use_zig_zag = true;
 	m_zig_angle = 0.0;
-	m_descent_strategy = ePlunge;
+	m_entry_move = ePlunge;
 }
 
 void CPocketParams::set_initial_values(const CTool::ToolNumber_t tool_number)
@@ -53,9 +53,9 @@ void CPocketParams::set_initial_values(const CTool::ToolNumber_t tool_number)
     }
 }
 
-static void on_set_descent_strategy(int value, HeeksObj* object)
+static void on_set_entry_move(int value, HeeksObj* object)
 {
-	((CPocket*)object)->m_pocket_params.m_descent_strategy = (CPocketParams::eDescentStrategy) value;
+	((CPocket*)object)->m_pocket_params.m_entry_move = (CPocketParams::eEntryStyle) value;
 	((CPocket*)object)->WriteDefaultValues();
 }
 
@@ -110,7 +110,7 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 		choices.push_back(_("Plunge"));
 		choices.push_back(_("Ramp"));
 		choices.push_back(_("Helical"));
-		list->push_back(new PropertyChoice(_("descent_strategy"), choices, m_descent_strategy, parent, on_set_descent_strategy));
+		list->push_back(new PropertyChoice(_("entry_move"), choices, m_entry_move, parent, on_set_entry_move));
 	}
 	list->push_back(new PropertyCheck(_("keep tool down"), m_keep_tool_down_if_poss, parent, on_set_keep_tool_down));
 	list->push_back(new PropertyCheck(_("use zig zag"), m_use_zig_zag, parent, on_set_use_zig_zag));
@@ -128,7 +128,7 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
 	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
 	element->SetDoubleAttribute("zig_angle", m_zig_angle);
-	element->SetAttribute("descent_strategy", (int) m_descent_strategy);
+	element->SetAttribute("entry_move", (int) m_entry_move);
 }
 
 void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -142,11 +142,48 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("use_zig_zag", &int_for_bool);
 	m_use_zig_zag = (int_for_bool != 0);
 	pElem->Attribute("zig_angle", &m_zig_angle);
-	int int_for_descent_strategy = (int) ePlunge;
-	pElem->Attribute("descent_strategy", &int_for_descent_strategy);
-	m_descent_strategy = (eDescentStrategy) int_for_descent_strategy;
+	int int_for_entry_move = (int) ePlunge;
+	pElem->Attribute("entry_move", &int_for_entry_move);
+	m_entry_move = (eEntryStyle) int_for_entry_move;
 }
 
+//static wxString WriteCircleDefn(HeeksObj* sketch, CMachineState *pMachineState) {
+//#ifdef UNICODE
+//	std::wostringstream gcode;
+//#else
+//	std::ostringstream gcode;
+//#endif
+//	gcode.imbue(std::locale("C"));
+//	gcode << std::setprecision(10);
+//	std::list<std::pair<int, gp_Pnt> > points;
+//	span_object->GetCentrePoint(c);
+//
+//	// Setup the four arcs that will make up the circle using UNadjusted
+//	// coordinates first so that the offsets align with the X and Y axes.
+//	double small_amount = 0.001;
+//	double radius = heeksCAD->CircleGetRadius(span_object);
+//
+//	points.push_back(std::make_pair(LINEAR, gp_Pnt(c[0], c[1] + radius, c[2]))); // north
+//	points.push_back(std::make_pair(CW, gp_Pnt(c[0] + radius, c[1], c[2]))); // east
+//	points.push_back(std::make_pair(CW, gp_Pnt(c[0], c[1] - radius, c[2]))); // south
+//	points.push_back(std::make_pair(CW, gp_Pnt(c[0] - radius, c[1], c[2]))); // west
+//	points.push_back(std::make_pair(CW, gp_Pnt(c[0], c[1] + radius, c[2]))); // north
+//
+//	CNCPoint centre(pMachineState->Fixture().Adjustment(c));
+//
+//	gcode << _T("c = area.Curve()\n");
+//	for (std::list<std::pair<int, gp_Pnt> >::iterator l_itPoint =
+//			points.begin(); l_itPoint != points.end(); l_itPoint++) {
+//		CNCPoint pnt = pMachineState->Fixture().Adjustment(l_itPoint->second);
+//
+//		gcode << _T("c.append(area.Vertex(") << l_itPoint->first
+//				<< _T(", area.Point(");
+//		gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
+//		gcode << _T("), area.Point(") << centre.X(true) << _T(", ")
+//				<< centre.Y(true) << _T(")))\n");
+//	} // End for
+//	gcode << _T("a.append(c)\n");
+//}
 static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 {
 #ifdef UNICODE
@@ -305,11 +342,47 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 	python << CDepthOp::AppendTextToProgram(pMachineState);
 
 	python << _T("a = area.Area()\n");
+	python << _T("entry_moves = []\n");
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
-		if(object == NULL || object->GetNumChildren() == 0){
+		if(object == NULL) {
 			wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
+			continue;
+		}
+		int type = object->GetType();
+		double c[3] = {0, 0, 0};
+		double radius;
+
+		switch (type) {
+
+		case CircleType:
+			if (m_pocket_params.m_entry_move == CPocketParams::eHelical) {
+				GetCentrePoint(c);
+				radius = heeksCAD->CircleGetRadius(object);
+				python << _T("# entry_moves.append(circle(") << c[0]/theApp.m_program->m_units << _T(", ") << c[1]/theApp.m_program->m_units << _T(", ")<< c[2]/theApp.m_program->m_units << _T(", ") << radius/theApp.m_program->m_units ;
+				python << _T("))\n") ;
+			} else {
+				wxLogMessage(_T("circle found in pocket operation (id=%d) but entry move is not helical, id=%d"), GetID(),object->GetID());
+			}
+			continue;
+
+		case PointType:
+			if (m_pocket_params.m_entry_move == CPocketParams::eHelical) {
+				memset( c, 0, sizeof(c) );
+				heeksCAD->VertexGetPoint( object, c);
+				python << _T("# entry_moves.append(point(") << c[0]/theApp.m_program->m_units << _T(", ") << c[1]/theApp.m_program->m_units << _T("))\n");
+
+			} else {
+				wxLogMessage(_T("point found in pocket operation (id=%d) but entry move is not helical, id=%d"), GetID(), object->GetID());
+			}
+			continue;
+
+		default:
+			break;
+		}
+		if (object->GetNumChildren() == 0){
+			wxMessageBox(wxString::Format(_("Pocket operation - Sketch %d has no children"), object->GetID()));
 			continue;
 		}
 
@@ -368,7 +441,7 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 
 	// make a parameter of area_funcs.pocket() eventually
 	// 0..plunge, 1..ramp, 2..helical
-	python << _T("descent_strategy = ") <<  m_pocket_params.m_descent_strategy << _T("\n");
+	python << _T("entry_style = ") <<  m_pocket_params.m_entry_move << _T("\n");
 
 	// Pocket the area
 	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
@@ -401,7 +474,7 @@ void CPocket::WriteDefaultValues()
 	config.Write(_T("KeepToolDown"), m_pocket_params.m_keep_tool_down_if_poss);
 	config.Write(_T("UseZigZag"), m_pocket_params.m_use_zig_zag);
 	config.Write(_T("ZigAngle"), m_pocket_params.m_zig_angle);
-	config.Write(_T("DecentStrategy"), m_pocket_params.m_descent_strategy);
+	config.Write(_T("DecentStrategy"), m_pocket_params.m_entry_move);
 }
 
 void CPocket::ReadDefaultValues()
@@ -415,9 +488,9 @@ void CPocket::ReadDefaultValues()
 	config.Read(_T("KeepToolDown"), &m_pocket_params.m_keep_tool_down_if_poss, true);
 	config.Read(_T("UseZigZag"), &m_pocket_params.m_use_zig_zag, false);
 	config.Read(_T("ZigAngle"), &m_pocket_params.m_zig_angle);
-	int int_for_descent_strategy = CPocketParams::ePlunge;
-	config.Read(_T("DecentStrategy"), &int_for_descent_strategy);
-	m_pocket_params.m_descent_strategy = (CPocketParams::eDescentStrategy) int_for_descent_strategy;
+	int int_for_entry_move = CPocketParams::ePlunge;
+	config.Read(_T("DecentStrategy"), &int_for_entry_move);
+	m_pocket_params.m_entry_move = (CPocketParams::eEntryStyle) int_for_entry_move;
 }
 
 void CPocket::glCommands(bool select, bool marked, bool no_color)
@@ -711,7 +784,7 @@ bool CPocketParams::operator==(const CPocketParams & rhs) const
 	if (m_keep_tool_down_if_poss != rhs.m_keep_tool_down_if_poss) return(false);
 	if (m_use_zig_zag != rhs.m_use_zig_zag) return(false);
 	if (m_zig_angle != rhs.m_zig_angle) return(false);
-	if (m_descent_strategy != rhs.m_descent_strategy) return(false);
+	if (m_entry_move != rhs.m_entry_move) return(false);
 
 	return(true);
 }

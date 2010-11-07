@@ -31,8 +31,8 @@ public:
             eRamp,
             eHelical,
             eUndefinedeDescentStrategy
-    } eDescentStrategy;
-    eDescentStrategy m_descent_strategy;
+    } eEntryStyle;
+    eEntryStyle m_entry_move;
 
 	CPocketParams();
 
