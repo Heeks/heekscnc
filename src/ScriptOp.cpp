@@ -208,6 +208,7 @@ This is a simple way to insert datum parameters for translating gcode around lat
 
 		python << _T("\040\040\040\040sketches = []\n");
 		python << _T("\040\040\040\040points = []\n");
+		python << _T("\040\040\040\040circles = []\n");
 	}
 
     for (std::list<HeeksObj *>::iterator itObject = objects.begin(); itObject != objects.end(); itObject++)
@@ -215,8 +216,21 @@ This is a simple way to insert datum parameters for translating gcode around lat
 		std::vector<TopoDS_Edge> edges;
 		switch ((*itObject)->GetType())
 		{
-		case PointType:
 			double p[3];
+
+		case CircleType:
+			memset( p, 0, sizeof(p) );
+			double radius;
+			heeksCAD->GetArcCentre( *itObject, p );
+			radius = heeksCAD->CircleGetRadius( *itObject);
+			// start and end at north pole, ccw
+			python << _T("\040\040\040\040circles.append(ocl.Arc(ocl.Point(") << p[0] / theApp.m_program->m_units << _T(",") << (p[1]+radius) / theApp.m_program->m_units << _T(",") << p[2] / theApp.m_program->m_units;
+			python << _T("), ocl.Point(") << p[0] / theApp.m_program->m_units << _T(",") << (p[1]+radius) / theApp.m_program->m_units << _T(",") << p[2] / theApp.m_program->m_units << _T("),");
+			python << _T(" ocl.Point(") << p[0] / theApp.m_program->m_units << _T(",") <<  p[1] / theApp.m_program->m_units << _T(",") << p[2] / theApp.m_program->m_units << _T("), True))\n");
+			break;
+
+
+		case PointType:
 			memset( p, 0, sizeof(p) );
 			heeksCAD->VertexGetPoint( *itObject, p );
 			python << _T("\040\040\040\040points.append(ocl.Point(") << p[0] / theApp.m_program->m_units << _T(",") << p[1] / theApp.m_program->m_units << _T(",") << p[2] / theApp.m_program->m_units << _T("))\n");
