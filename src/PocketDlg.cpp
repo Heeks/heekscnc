@@ -55,7 +55,7 @@ wxBitmap* PocketDlg::m_rapid_down_to_bitmap = NULL;
 wxBitmap* PocketDlg::m_start_depth_bitmap = NULL;
 wxBitmap* PocketDlg::m_final_depth_bitmap = NULL;
 wxBitmap* PocketDlg::m_step_down_bitmap = NULL;
-wxBitmap* PocketDlg::m_descent_strategy_bitmap = NULL;
+wxBitmap* PocketDlg::m_entry_move_bitmap = NULL;
 
 static std::vector< std::pair< int, wxString > > tools_for_combo;
 
@@ -100,8 +100,8 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 	wxString starting_place_choices[] = {_("boundary"), _("center")};
 	AddLabelAndControl(sizerLeft, _("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices));
 
-	wxString descent_strategy_choices[] = {_("Plunge"), _("Ramp"), _("Helical")};
-	AddLabelAndControl(sizerLeft, _("descent strategy"), m_cmbDescentStrategy = new wxComboBox(this, ID_DESCENT_STRATGEY, _T(""), wxDefaultPosition, wxDefaultSize, 3, descent_strategy_choices));
+	wxString entry_move_choices[] = {_("Plunge"), _("Ramp"), _("Helical")};
+	AddLabelAndControl(sizerLeft, _("entry move"), m_cmbEntryMove = new wxComboBox(this, ID_DESCENT_STRATGEY, _T(""), wxDefaultPosition, wxDefaultSize, 3, entry_move_choices));
 
 	tools_for_combo = CTool::FindAllTools();
 
@@ -144,14 +144,14 @@ void PocketDlg::GetData(CPocket* object)
 	object->m_pocket_params.m_step_over = m_lgthStepOver->GetValue();
 	object->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	object->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
-	if ( m_cmbDescentStrategy->GetValue().CmpNoCase(_("Plunge")) == 0) {
-		object->m_pocket_params.m_descent_strategy = CPocketParams::ePlunge;
+	if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Plunge")) == 0) {
+		object->m_pocket_params.m_entry_move = CPocketParams::ePlunge;
 	}
-	else if ( m_cmbDescentStrategy->GetValue().CmpNoCase(_("Ramp")) == 0) {
-		object->m_pocket_params.m_descent_strategy = CPocketParams::eRamp;
+	else if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Ramp")) == 0) {
+		object->m_pocket_params.m_entry_move = CPocketParams::eRamp;
 	}
-	else if ( m_cmbDescentStrategy->GetValue().CmpNoCase(_("Helical")) == 0) {
-		object->m_pocket_params.m_descent_strategy = CPocketParams::eHelical;
+	else if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Helical")) == 0) {
+		object->m_pocket_params.m_entry_move = CPocketParams::eHelical;
 	}
 	object->m_pocket_params.m_keep_tool_down_if_poss = m_chkKeepToolDown->GetValue();
 	object->m_pocket_params.m_use_zig_zag = m_chkUseZigZag->GetValue();
@@ -183,15 +183,15 @@ void PocketDlg::SetFromData(CPocket* object)
 	m_lgthStepOver->SetValue(object->m_pocket_params.m_step_over);
 	m_lgthMaterialAllowance->SetValue(object->m_pocket_params.m_material_allowance);
 	m_cmbStartingPlace->SetValue((object->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));
-	switch (object->m_pocket_params.m_descent_strategy) {
+	switch (object->m_pocket_params.m_entry_move) {
 	case CPocketParams::ePlunge:
-		m_cmbDescentStrategy->SetValue(_("Plunge"));
+		m_cmbEntryMove->SetValue(_("Plunge"));
 		break;
 	case CPocketParams::eRamp:
-		m_cmbDescentStrategy->SetValue(_("Ramp"));
+		m_cmbEntryMove->SetValue(_("Ramp"));
 		break;
 	case CPocketParams::eHelical:
-		m_cmbDescentStrategy->SetValue(_("Helical"));
+		m_cmbEntryMove->SetValue(_("Helical"));
 		break;
 	default: ;
 	}
