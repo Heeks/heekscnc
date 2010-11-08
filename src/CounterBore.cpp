@@ -57,8 +57,8 @@ void CCounterBoreParams::write_values_to_config()
 }
 
 
-static void on_set_diameter(double value, HeeksObj* object){((CCounterBore*)object)->m_params.m_diameter = value;}
-static void on_set_sort_locations(int value, HeeksObj* object){((CCounterBore*)object)->m_params.m_sort_locations = value;}
+static void on_set_diameter(double value, HeeksObj*  object){((CCounterBore*)object)->m_params.m_diameter = value;}
+static void on_set_sort_locations(int value, HeeksObj*  object){((CCounterBore*)object)->m_params.m_sort_locations = value;}
 
 
 void CCounterBoreParams::GetProperties(CCounterBore* parent, std::list<Property *> *list)
@@ -117,6 +117,7 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 
 	double cutting_depth = m_depth_op_params.m_start_depth;
 	double final_depth   = m_depth_op_params.m_final_depth;
+	double tool_overlap_proportion = 0.95;
 
 	CNCPoint point( location );
 	CNCPoint centre( point );
@@ -147,7 +148,7 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 		// the hole.  We don't want it to be more than the tool's radius but we also don't
 		// want it to be wider than the hole.
 
-		double radius_of_spiral = pTool->CuttingRadius(false) * 0.75;
+		double radius_of_spiral = pTool->CuttingRadius(false) * tool_overlap_proportion;
 		if (radius_of_spiral > max_radius_of_spiral)
 		{
 			// Reduce the radius of the spiral so that we don't run outside the hole.
@@ -162,47 +163,69 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 					_T("z=") << drawing_units(cutting_depth) << _T(")\n");
 		point.SetX( centre.X(false) );
 		point.SetY( centre.Y(false) + radius_of_spiral );
+		point.SetZ( cutting_depth );
 
-		// First quadrant (12 O'Clock to 9 O'Clock)
-		python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
-					_T("y=") << centre.Y(true) << _T(", ") <<
-					_T("z=") << drawing_units(cutting_depth - (0.5 * step_down)) << _T(", ") <<
-					_T("i=") << drawing_units(centre.X(false) - point.X()) << _T(", ") <<
-					_T("j=") << drawing_units(centre.Y(false) - point.Y()) << _T(")\n");
-		point.SetX( centre.X(false) - radius_of_spiral );
-		point.SetY( centre.Y(false) );
+		while ((point.Z() - (cutting_depth - step_down)) > tolerance)
+		{
+			// Use the gradient of the cutting tool to determine how many circles need to
+			// be made before we have stepped down appropriately.
 
-		// Second quadrant (9 O'Clock to 6 O'Clock)
-		python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
-					_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
-					_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
-					_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-					_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
-		point.SetX( centre.X(false) );
-		point.SetY( centre.Y(false) - radius_of_spiral );
+			double circumference = 2.0 * PI * radius_of_spiral;
+			double gradient = fabs(pTool->m_params.m_gradient);
 
-		// Third quadrant (6 O'Clock to 3 O'Clock)
-		python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
-					_T("y=") << centre.Y(true) << _T(", ") <<
-					_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
-					_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-					_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
-		point.SetX( centre.X(false) + radius_of_spiral );
-		point.SetY( centre.Y(false) );
+			// If the gradient would have us cutting too deep in one circumference, reduce the
+			// gradient for this pass.
+			if ((point.Z() - (gradient * circumference)) <= (cutting_depth - step_down))
+			{
+				// Last pass.
+				gradient = fabs((point.Z() - (cutting_depth - step_down)) / circumference);
+			}
 
-		// Fourth quadrant (3 O'Clock to 12 O'Clock)
-		python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
-					_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
-					_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
-					_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-					_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
-		point.SetX( centre.X(false) );
-		point.SetY( centre.Y(false) + radius_of_spiral );
+			// First quadrant (12 O'Clock to 9 O'Clock)
+			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
+						_T("y=") << centre.Y(true) << _T(", ") <<
+						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<
+						_T("i=") << drawing_units(centre.X(false) - point.X()) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y()) << _T(")\n");
+			point.SetX( centre.X(false) - radius_of_spiral );
+			point.SetY( centre.Y(false) );
+			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
+
+			// Second quadrant (9 O'Clock to 6 O'Clock)
+			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+						_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
+						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<	// full depth now
+						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+			point.SetX( centre.X(false) );
+			point.SetY( centre.Y(false) - radius_of_spiral );
+			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
+
+			// Third quadrant (6 O'Clock to 3 O'Clock)
+			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
+						_T("y=") << centre.Y(true) << _T(", ") <<
+						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<	// full depth now
+						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+			point.SetX( centre.X(false) + radius_of_spiral );
+			point.SetY( centre.Y(false) );
+			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
+
+			// Fourth quadrant (3 O'Clock to 12 O'Clock)
+			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
+						_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
+						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<	// full depth now
+						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+			point.SetX( centre.X(false) );
+			point.SetY( centre.Y(false) + radius_of_spiral );
+			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
+		} // End while
 
 		python << _T("comment('Now spiral outwards to the counterbore perimeter')\n");
 
 		do {
-			radius_of_spiral += (pTool->CuttingRadius(false) * 0.75);
+			radius_of_spiral += (pTool->CuttingRadius(false) * tool_overlap_proportion);
 			if (radius_of_spiral > max_radius_of_spiral)
 			{
 				// Reduce the radius of the spiral so that we don't run outside the hole.
@@ -475,12 +498,12 @@ void CCounterBore::GetProperties(std::list<Property *> *list)
 	CDepthOp::GetProperties(list);
 }
 
-HeeksObj *CCounterBore::MakeACopy(void)const
+HeeksObj* CCounterBore::MakeACopy(void)const
 {
 	return new CCounterBore(*this);
 }
 
-void CCounterBore::CopyFrom(const HeeksObj* object)
+void CCounterBore::CopyFrom(const HeeksObj*  object)
 {
 	if (object->GetType() == GetType())
 	{
@@ -488,7 +511,7 @@ void CCounterBore::CopyFrom(const HeeksObj* object)
 	}
 }
 
-bool CCounterBore::CanAddTo(HeeksObj* owner)
+bool CCounterBore::CanAddTo(HeeksObj*  owner)
 {
 	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
@@ -515,7 +538,7 @@ void CCounterBore::WriteXML(TiXmlNode *root)
 }
 
 // static member function
-HeeksObj* CCounterBore::ReadFromXMLElement(TiXmlElement* element)
+HeeksObj*  CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 {
 	CCounterBore* new_object = new CCounterBore;
 
@@ -563,7 +586,7 @@ void CCounterBore::ReloadPointers()
 {
 	for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
 	{
-		HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+		HeeksObj* object = heeksCAD->GetIDObject( symbol->first, symbol->second );
 		if (object != NULL)
 		{
 			Add( object, NULL );
@@ -589,7 +612,7 @@ std::pair< double, double > CCounterBore::SelectSizeForHead( const double drill_
 } // End SelectSizeForHead() method
 
 
-bool CCounterBore::CanAdd(HeeksObj* object)
+bool CCounterBore::CanAdd(HeeksObj*  object)
 {
 	return((object != NULL) && (CCounterBore::ValidType(object->GetType())));
 }
@@ -626,7 +649,7 @@ CCounterBore::CCounterBore(	const Symbols_t &symbols,
 {
     for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
     {
-        HeeksObj *object = heeksCAD->GetIDObject( symbol->first, symbol->second );
+        HeeksObj* object = heeksCAD->GetIDObject( symbol->first, symbol->second );
         if (object != NULL)
         {
             Add(object,NULL);
@@ -645,7 +668,7 @@ CCounterBore::CCounterBore(	const Symbols_t &symbols,
 
         for (std::list<int>::const_iterator drillbit = drillbits.begin(); drillbit != drillbits.end(); drillbit++)
         {
-            HeeksObj *object = heeksCAD->GetIDObject( ToolType, *drillbit );
+            HeeksObj* object = heeksCAD->GetIDObject( ToolType, *drillbit );
             if (object != NULL)
             {
                 std::pair< double, double > screw_size = SelectSizeForHead( ((CTool *) object)->m_params.m_diameter );
