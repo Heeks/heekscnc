@@ -1,0 +1,2034 @@
+# depslib dependency file v1.0
+1250495126 source:/home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiBuffer.cpp
+	"../../../juce_core/basics/juce_StandardHeader.h"
+	"juce_MidiBuffer.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_StandardHeader.h
+	"../../../juce_Config.h"
+	"juce_PlatformDefs.h"
+	<cstdlib>
+	<cstdarg>
+	<climits>
+	<cmath>
+	<cwchar>
+	<stdexcept>
+	<typeinfo>
+	<cstring>
+	<cstdio>
+	<intrin.h>
+	<CoreServices/CoreServices.h>
+	<libkern/OSAtomic.h>
+	<signal.h>
+	<crtdbg.h>
+	"juce_Memory.h"
+	"juce_MathsFunctions.h"
+	"juce_DataConversions.h"
+	"juce_Logger.h"
+
+1272624986 /home/david/src/juce/juce_Config.h
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_PlatformDefs.h
+	<CoreFoundation/CoreFoundation.h>
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_Memory.h
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_MathsFunctions.h
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_DataConversions.h
+	"juce_PlatformDefs.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_Logger.h
+	"../text/juce_String.h"
+
+1272624989 /home/david/src/juce/src/juce_core/text/juce_String.h
+	"juce_CharacterFunctions.h"
+
+1272624989 /home/david/src/juce/src/juce_core/text/juce_CharacterFunctions.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiBuffer.h
+	"../../../juce_core/containers/juce_ArrayAllocationBase.h"
+	"juce_MidiMessage.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_ArrayAllocationBase.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiMessage.h
+	"../../../juce_core/text/juce_String.h"
+
+1250495126 source:/home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiFile.cpp
+	"../../../juce_core/basics/juce_StandardHeader.h"
+	"juce_MidiFile.h"
+	"../../../juce_core/io/streams/juce_MemoryOutputStream.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiFile.h
+	"juce_MidiMessageSequence.h"
+	"../../../juce_core/io/juce_InputStream.h"
+	"../../../juce_core/io/juce_OutputStream.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiMessageSequence.h
+	"juce_MidiMessage.h"
+	"../../../juce_core/containers/juce_OwnedArray.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_OwnedArray.h
+	"juce_ArrayAllocationBase.h"
+	"juce_ElementComparator.h"
+	"../threads/juce_CriticalSection.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_ElementComparator.h
+
+1272624989 /home/david/src/juce/src/juce_core/threads/juce_CriticalSection.h
+
+1272624990 /home/david/src/juce/src/juce_core/io/juce_InputStream.h
+	"../text/juce_String.h"
+	"../containers/juce_MemoryBlock.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_MemoryBlock.h
+	"../text/juce_String.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/juce_OutputStream.h
+	"../text/juce_String.h"
+	"juce_InputStream.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_MemoryOutputStream.h
+	"../juce_OutputStream.h"
+	"../../containers/juce_MemoryBlock.h"
+
+1250495126 source:/home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiKeyboardState.cpp
+	"../../../juce_core/basics/juce_StandardHeader.h"
+	"juce_MidiKeyboardState.h"
+	"../../../juce_core/basics/juce_Time.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiKeyboardState.h
+	"juce_MidiBuffer.h"
+	"../../../juce_core/threads/juce_ScopedLock.h"
+	"../../../juce_core/containers/juce_VoidArray.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_ScopedLock.h
+	"juce_CriticalSection.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_VoidArray.h
+	"juce_Array.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_Array.h
+	"juce_ArrayAllocationBase.h"
+	"juce_ElementComparator.h"
+	"../threads/juce_CriticalSection.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_Time.h
+	"juce_RelativeTime.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_RelativeTime.h
+	"../text/juce_String.h"
+
+1250495126 source:/home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiMessage.cpp
+	"../../../juce_core/basics/juce_StandardHeader.h"
+	"juce_MidiMessage.h"
+	"../../../juce_core/containers/juce_MemoryBlock.h"
+
+1250495126 source:/home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiMessageCollector.cpp
+	"../../../juce_core/basics/juce_StandardHeader.h"
+	"juce_MidiMessageCollector.h"
+	"../../../juce_core/threads/juce_ScopedLock.h"
+	"../../../juce_core/basics/juce_Time.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiMessageCollector.h
+	"../devices/juce_MidiInput.h"
+	"juce_MidiKeyboardState.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/devices/juce_MidiInput.h
+	"../midi/juce_MidiMessage.h"
+	"../../../juce_core/text/juce_StringArray.h"
+
+1272624989 /home/david/src/juce/src/juce_core/text/juce_StringArray.h
+	"juce_String.h"
+	"../containers/juce_VoidArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_appframework/audio/midi/juce_MidiMessageSequence.cpp
+	"../../../juce_core/basics/juce_StandardHeader.h"
+	"juce_MidiMessageSequence.h"
+	"../../../juce_core/containers/juce_Array.h"
+
+1289598569 source:/home/david/src/midi_to_gcode/MIDI to GCode/main.cpp
+	<iostream>
+	<set>
+	<list>
+	<string>
+	<vector>
+	<sstream>
+	<algorithm>
+	<iterator>
+	"juce.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/basics/juce_FileLogger.cpp
+	"juce_StandardHeader.h"
+	"juce_FileLogger.h"
+	"../io/files/juce_FileOutputStream.h"
+	"../io/files/juce_FileInputStream.h"
+	"../threads/juce_ScopedLock.h"
+	"../basics/juce_SystemStats.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_FileLogger.h
+	"juce_Logger.h"
+	"../io/files/juce_File.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/files/juce_File.h
+	"../../containers/juce_OwnedArray.h"
+	"../../basics/juce_Time.h"
+	"../../text/juce_StringArray.h"
+	"../../containers/juce_MemoryBlock.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/files/juce_FileOutputStream.h
+	"juce_File.h"
+	"../juce_OutputStream.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/files/juce_FileInputStream.h
+	"juce_File.h"
+	"../juce_InputStream.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_SystemStats.h
+
+1250495126 source:/home/david/src/juce/src/juce_core/basics/juce_Logger.cpp
+	"juce_StandardHeader.h"
+	"juce_Logger.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/basics/juce_Random.cpp
+	"juce_StandardHeader.h"
+	"juce_Random.h"
+	"juce_Time.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_Random.h
+	"../containers/juce_BitArray.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_BitArray.h
+	"../text/juce_String.h"
+	"juce_Array.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/basics/juce_RelativeTime.cpp
+	"juce_StandardHeader.h"
+	"juce_RelativeTime.h"
+	"../text/juce_LocalisedStrings.h"
+
+1272624989 /home/david/src/juce/src/juce_core/text/juce_LocalisedStrings.h
+	"juce_StringPairArray.h"
+	"../basics/juce_Singleton.h"
+	"../io/files/juce_File.h"
+
+1272624989 /home/david/src/juce/src/juce_core/text/juce_StringPairArray.h
+	"juce_StringArray.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_Singleton.h
+	"../threads/juce_ScopedLock.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/basics/juce_SystemStats.cpp
+	"juce_StandardHeader.h"
+	"../text/juce_String.h"
+	"juce_SystemStats.h"
+	"juce_Random.h"
+	"juce_Time.h"
+	"juce_Atomic.h"
+	"../threads/juce_Thread.h"
+	"../text/juce_LocalisedStrings.h"
+	"../../juce_core/misc/juce_PlatformUtilities.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_Atomic.h
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_Thread.h
+	"juce_WaitableEvent.h"
+	"juce_CriticalSection.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_WaitableEvent.h
+	"../text/juce_String.h"
+
+1272624989 /home/david/src/juce/src/juce_core/misc/juce_PlatformUtilities.h
+	"../text/juce_StringArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/basics/juce_Time.cpp
+	"juce_StandardHeader.h"
+	<sys/time.h>
+	<ctime>
+	<sys/timeb.h>
+	"juce_Time.h"
+	"../threads/juce_Thread.h"
+	"../containers/juce_MemoryBlock.h"
+	"../text/juce_LocalisedStrings.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/containers/juce_BitArray.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_BitArray.h"
+	"juce_MemoryBlock.h"
+	"../basics/juce_Random.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/containers/juce_MemoryBlock.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_MemoryBlock.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/containers/juce_PropertySet.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_PropertySet.h"
+	"../threads/juce_ScopedLock.h"
+	"../text/juce_XmlDocument.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_PropertySet.h
+	"../text/juce_StringPairArray.h"
+	"../text/juce_XmlElement.h"
+
+1272624989 /home/david/src/juce/src/juce_core/text/juce_XmlElement.h
+	"juce_String.h"
+	"../io/juce_OutputStream.h"
+	"../io/files/juce_File.h"
+
+1272624989 /home/david/src/juce/src/juce_core/text/juce_XmlDocument.h
+	"juce_XmlElement.h"
+	"juce_StringArray.h"
+	"../io/files/juce_File.h"
+	"../io/streams/juce_InputSource.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_InputSource.h
+	"../juce_InputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/containers/juce_Variant.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_Variant.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_Variant.h
+	"juce_ReferenceCountedObject.h"
+	"juce_OwnedArray.h"
+	"../text/juce_StringArray.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_ReferenceCountedObject.h
+	"../basics/juce_Atomic.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/cryptography/juce_BlowFish.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_BlowFish.h"
+
+1272624990 /home/david/src/juce/src/juce_core/cryptography/juce_BlowFish.h
+
+1250495126 source:/home/david/src/juce/src/juce_core/cryptography/juce_MD5.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_MD5.h"
+	"../io/files/juce_FileInputStream.h"
+
+1272624990 /home/david/src/juce/src/juce_core/cryptography/juce_MD5.h
+	"../containers/juce_MemoryBlock.h"
+	"../io/juce_InputStream.h"
+	"../io/files/juce_File.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/cryptography/juce_Primes.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_Primes.h"
+	"../basics/juce_Random.h"
+
+1272624990 /home/david/src/juce/src/juce_core/cryptography/juce_Primes.h
+	"../containers/juce_BitArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/cryptography/juce_RSAKey.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_RSAKey.h"
+	"juce_Primes.h"
+
+1272624990 /home/david/src/juce/src/juce_core/cryptography/juce_RSAKey.h
+	"../containers/juce_BitArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/files/juce_DirectoryIterator.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_DirectoryIterator.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/files/juce_DirectoryIterator.h
+	"juce_File.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/files/juce_File.cpp
+	"../../basics/juce_StandardHeader.h"
+	<pwd.h>
+	"juce_File.h"
+	"juce_FileInputStream.h"
+	"juce_FileOutputStream.h"
+	"../../basics/juce_SystemStats.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/files/juce_FileInputStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_FileInputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/files/juce_FileOutputStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_FileOutputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/files/juce_FileSearchPath.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_FileSearchPath.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/files/juce_FileSearchPath.h
+	"juce_File.h"
+	"../../text/juce_StringArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/files/juce_NamedPipe.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_NamedPipe.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/files/juce_NamedPipe.h
+	"../juce_OutputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/juce_InputStream.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_InputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/juce_OutputStream.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_OutputStream.h"
+	"../threads/juce_CriticalSection.h"
+	"../containers/juce_VoidArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/network/juce_Socket.cpp
+	<winsock2.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<sys/errno.h>
+	<unistd.h>
+	<netinet/in.h>
+	<CoreServices/CoreServices.h>
+	<fcntl.h>
+	<netdb.h>
+	<arpa/inet.h>
+	<netinet/tcp.h>
+	"../../basics/juce_StandardHeader.h"
+	"juce_Socket.h"
+	"../../threads/juce_ScopedLock.h"
+	"../../threads/juce_Thread.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/network/juce_Socket.h
+	"../../text/juce_String.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/network/juce_URL.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_URL.h"
+	"../../basics/juce_Random.h"
+	"../../text/juce_XmlDocument.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/network/juce_URL.h
+	"../../text/juce_StringPairArray.h"
+	"../../text/juce_XmlElement.h"
+	"../juce_InputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/juce_BufferedInputStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_BufferedInputStream.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_BufferedInputStream.h
+	"../juce_InputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/juce_FileInputSource.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_FileInputSource.h"
+	"../files/juce_FileInputStream.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_FileInputSource.h
+	"juce_InputSource.h"
+	"../files/juce_File.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/juce_GZIPCompressorOutputStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"zlib/zlib.h"
+	<zlib.h>
+	"juce_GZIPCompressorOutputStream.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/zlib.h
+	"zconf.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/zconf.h
+	<windows.h>
+	<sys/types.h>
+	<unistd.h>
+	<unixio.h>
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_GZIPCompressorOutputStream.h
+	"../juce_OutputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/juce_GZIPDecompressorInputStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"zlib/zlib.h"
+	"zlib/adler32.c"
+	"zlib/compress.c"
+	"zlib/crc32.c"
+	"zlib/deflate.c"
+	"zlib/inffast.c"
+	"zlib/inflate.c"
+	"zlib/inftrees.c"
+	"zlib/trees.c"
+	"zlib/zutil.c"
+	<zlib.h>
+	"juce_GZIPDecompressorInputStream.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/adler32.c
+	"zlib.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/compress.c
+	"zlib.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/crc32.c
+	<stdio.h>
+	"zutil.h"
+	<limits.h>
+	"crc32.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/zutil.h
+	"zlib.h"
+	<stddef.h>
+	<string.h>
+	<stdlib.h>
+	<errno.h>
+	<alloc.h>
+	<malloc.h>
+	<malloc.h>
+	<unix.h>
+	<stdio.h>
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/crc32.h
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/deflate.c
+	"deflate.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/deflate.h
+	"zutil.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/inffast.c
+	"zutil.h"
+	"inftrees.h"
+	"inflate.h"
+	"inffast.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/inftrees.h
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/inflate.h
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/inffast.h
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/inflate.c
+	"zutil.h"
+	"inftrees.h"
+	"inflate.h"
+	"inffast.h"
+	"inffixed.h"
+	<stdio.h>
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/inffixed.h
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/inftrees.c
+	"zutil.h"
+	"inftrees.h"
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/trees.c
+	"deflate.h"
+	<ctype.h>
+	"trees.h"
+	<stdio.h>
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/trees.h
+
+1250495126 /home/david/src/juce/src/juce_core/io/streams/zlib/zutil.c
+	"zutil.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_GZIPDecompressorInputStream.h
+	"../juce_InputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/juce_MemoryInputStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_MemoryInputStream.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_MemoryInputStream.h
+	"../juce_InputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/juce_MemoryOutputStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_MemoryOutputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/juce_SubregionStream.cpp
+	"../../basics/juce_StandardHeader.h"
+	"juce_SubregionStream.h"
+
+1272624990 /home/david/src/juce/src/juce_core/io/streams/juce_SubregionStream.h
+	"../juce_InputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/adler32.c
+	"zlib.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/compress.c
+	"zlib.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/crc32.c
+	<stdio.h>
+	"zutil.h"
+	<limits.h>
+	"crc32.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/deflate.c
+	"deflate.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/infback.c
+	"zutil.h"
+	"inftrees.h"
+	"inflate.h"
+	"inffast.h"
+	"inffixed.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/inffast.c
+	"zutil.h"
+	"inftrees.h"
+	"inflate.h"
+	"inffast.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/inflate.c
+	"zutil.h"
+	"inftrees.h"
+	"inflate.h"
+	"inffast.h"
+	"inffixed.h"
+	<stdio.h>
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/inftrees.c
+	"zutil.h"
+	"inftrees.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/trees.c
+	"deflate.h"
+	<ctype.h>
+	"trees.h"
+	<stdio.h>
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/uncompr.c
+	"zlib.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/io/streams/zlib/zutil.c
+	"zutil.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/misc/juce_PerformanceCounter.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_PerformanceCounter.h"
+	"../basics/juce_Time.h"
+
+1272624989 /home/david/src/juce/src/juce_core/misc/juce_PerformanceCounter.h
+	"../io/files/juce_File.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/misc/juce_Uuid.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_Uuid.h"
+	"../basics/juce_Random.h"
+	"../basics/juce_Time.h"
+	"../basics/juce_SystemStats.h"
+
+1272624989 /home/david/src/juce/src/juce_core/misc/juce_Uuid.h
+	"../text/juce_String.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/misc/juce_ZipFile.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_ZipFile.h"
+	"../io/streams/juce_GZIPDecompressorInputStream.h"
+	"../io/streams/juce_BufferedInputStream.h"
+	"../io/streams/juce_FileInputSource.h"
+	"../io/files/juce_FileInputStream.h"
+	"../io/files/juce_FileOutputStream.h"
+	"../threads/juce_ScopedLock.h"
+
+1272624989 /home/david/src/juce/src/juce_core/misc/juce_ZipFile.h
+	"../io/files/juce_File.h"
+	"../io/juce_InputStream.h"
+	"../io/streams/juce_InputSource.h"
+	"../threads/juce_CriticalSection.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/text/juce_CharacterFunctions.cpp
+	"../basics/juce_StandardHeader.h"
+	<cwctype>
+	<cctype>
+	<ctime>
+	"juce_CharacterFunctions.h"
+	"juce_String.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/text/juce_LocalisedStrings.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_LocalisedStrings.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/text/juce_String.cpp
+	<locale>
+	"../basics/juce_StandardHeader.h"
+	<float.h>
+	"juce_String.h"
+	"../basics/juce_Atomic.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/text/juce_StringArray.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_StringArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/text/juce_StringPairArray.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_StringPairArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/text/juce_XmlDocument.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_XmlDocument.h"
+	"../io/streams/juce_FileInputSource.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/text/juce_XmlElement.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_XmlElement.h"
+	"../io/streams/juce_MemoryOutputStream.h"
+	"../io/files/juce_FileOutputStream.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/threads/juce_InterProcessLock.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_InterProcessLock.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_InterProcessLock.h
+	"../text/juce_String.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/threads/juce_ReadWriteLock.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_ReadWriteLock.h"
+	"juce_ScopedLock.h"
+	"juce_Thread.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_ReadWriteLock.h
+	"juce_CriticalSection.h"
+	"juce_WaitableEvent.h"
+	"juce_Thread.h"
+	"../containers/juce_Array.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/threads/juce_Thread.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_Thread.h"
+	"juce_ScopedLock.h"
+	"../basics/juce_Time.h"
+	"../containers/juce_VoidArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/threads/juce_ThreadPool.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_ThreadPool.h"
+	"../basics/juce_Time.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_ThreadPool.h
+	"juce_Thread.h"
+	"juce_ScopedLock.h"
+	"../text/juce_StringArray.h"
+	"../containers/juce_VoidArray.h"
+
+1250495126 source:/home/david/src/juce/src/juce_core/threads/juce_TimeSliceThread.cpp
+	"../basics/juce_StandardHeader.h"
+	"juce_TimeSliceThread.h"
+	"juce_ScopedLock.h"
+
+1272624989 /home/david/src/juce/src/juce_core/threads/juce_TimeSliceThread.h
+	"juce_Thread.h"
+	"../containers/juce_Array.h"
+
+1272624987 /home/david/src/juce/juce.h
+	"src/juce_core/basics/juce_StandardHeader.h"
+	"src/juce_core_includes.h"
+	"src/juce_app_includes.h"
+	"build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h"
+
+1272624989 /home/david/src/juce/src/juce_core_includes.h
+	"juce_core/basics/juce_Atomic.h"
+	"juce_core/basics/juce_FileLogger.h"
+	"juce_core/basics/juce_Initialisation.h"
+	"juce_core/basics/juce_Logger.h"
+	"juce_core/basics/juce_MathsFunctions.h"
+	"juce_core/basics/juce_Memory.h"
+	"juce_core/basics/juce_PlatformDefs.h"
+	"juce_core/basics/juce_Random.h"
+	"juce_core/basics/juce_Time.h"
+	"juce_core/basics/juce_RelativeTime.h"
+	"juce_core/basics/juce_Singleton.h"
+	"juce_core/basics/juce_SystemStats.h"
+	"juce_core/basics/juce_DataConversions.h"
+	"juce_core/basics/juce_StandardHeader.h"
+	"juce_core/containers/juce_ArrayAllocationBase.h"
+	"juce_core/containers/juce_Array.h"
+	"juce_core/containers/juce_BitArray.h"
+	"juce_core/containers/juce_ElementComparator.h"
+	"juce_core/containers/juce_MemoryBlock.h"
+	"juce_core/containers/juce_PropertySet.h"
+	"juce_core/containers/juce_ReferenceCountedObject.h"
+	"juce_core/containers/juce_SparseSet.h"
+	"juce_core/containers/juce_VoidArray.h"
+	"juce_core/containers/juce_SortedSet.h"
+	"juce_core/containers/juce_ReferenceCountedArray.h"
+	"juce_core/containers/juce_OwnedArray.h"
+	"juce_core/containers/juce_Variant.h"
+	"juce_core/io/juce_InputStream.h"
+	"juce_core/io/juce_OutputStream.h"
+	"juce_core/io/files/juce_DirectoryIterator.h"
+	"juce_core/io/files/juce_File.h"
+	"juce_core/io/files/juce_FileInputStream.h"
+	"juce_core/io/files/juce_FileOutputStream.h"
+	"juce_core/io/files/juce_FileSearchPath.h"
+	"juce_core/io/files/juce_NamedPipe.h"
+	"juce_core/cryptography/juce_BlowFish.h"
+	"juce_core/cryptography/juce_MD5.h"
+	"juce_core/cryptography/juce_Primes.h"
+	"juce_core/cryptography/juce_RSAKey.h"
+	"juce_core/io/network/juce_Socket.h"
+	"juce_core/io/network/juce_URL.h"
+	"juce_core/io/streams/juce_BufferedInputStream.h"
+	"juce_core/io/streams/juce_FileInputSource.h"
+	"juce_core/io/streams/juce_GZIPCompressorOutputStream.h"
+	"juce_core/io/streams/juce_GZIPDecompressorInputStream.h"
+	"juce_core/io/streams/juce_InputSource.h"
+	"juce_core/io/streams/juce_MemoryInputStream.h"
+	"juce_core/io/streams/juce_MemoryOutputStream.h"
+	"juce_core/io/streams/juce_SubregionStream.h"
+	"juce_core/misc/juce_PerformanceCounter.h"
+	"juce_core/misc/juce_PlatformUtilities.h"
+	"juce_core/misc/juce_Uuid.h"
+	"juce_core/misc/juce_ZipFile.h"
+	"juce_core/text/juce_CharacterFunctions.h"
+	"juce_core/text/juce_LocalisedStrings.h"
+	"juce_core/text/juce_String.h"
+	"juce_core/text/juce_StringArray.h"
+	"juce_core/text/juce_StringPairArray.h"
+	"juce_core/text/juce_XmlDocument.h"
+	"juce_core/text/juce_XmlElement.h"
+	"juce_core/threads/juce_CriticalSection.h"
+	"juce_core/threads/juce_InterProcessLock.h"
+	"juce_core/threads/juce_Process.h"
+	"juce_core/threads/juce_ReadWriteLock.h"
+	"juce_core/threads/juce_ScopedLock.h"
+	"juce_core/threads/juce_ScopedReadLock.h"
+	"juce_core/threads/juce_ScopedTryLock.h"
+	"juce_core/threads/juce_ScopedWriteLock.h"
+	"juce_core/threads/juce_Thread.h"
+	"juce_core/threads/juce_ThreadPool.h"
+	"juce_core/threads/juce_TimeSliceThread.h"
+	"juce_core/threads/juce_WaitableEvent.h"
+
+1272624989 /home/david/src/juce/src/juce_core/basics/juce_Initialisation.h
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_SparseSet.h
+	"juce_ArrayAllocationBase.h"
+	"../threads/juce_CriticalSection.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_SortedSet.h
+	"juce_ArrayAllocationBase.h"
+	"../threads/juce_CriticalSection.h"
+
+1272624990 /home/david/src/juce/src/juce_core/containers/juce_ReferenceCountedArray.h
+	"juce_ReferenceCountedObject.h"
+	"juce_ArrayAllocationBase.h"
+	"juce_ElementComparator.h"
+	"../threads/juce_CriticalSection.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_Process.h
+	"../text/juce_String.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_ScopedReadLock.h
+	"juce_ReadWriteLock.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_ScopedTryLock.h
+	"juce_CriticalSection.h"
+
+1272624990 /home/david/src/juce/src/juce_core/threads/juce_ScopedWriteLock.h
+	"juce_ReadWriteLock.h"
+
+1272624990 /home/david/src/juce/src/juce_app_includes.h
+	"juce_appframework/application/juce_Application.h"
+	"juce_appframework/application/juce_ApplicationCommandID.h"
+	"juce_appframework/application/juce_DeletedAtShutdown.h"
+	"juce_appframework/application/juce_ApplicationCommandInfo.h"
+	"juce_appframework/application/juce_ApplicationCommandManager.h"
+	"juce_appframework/application/juce_ApplicationCommandTarget.h"
+	"juce_appframework/application/juce_ApplicationProperties.h"
+	"juce_appframework/application/juce_PropertiesFile.h"
+	"juce_appframework/application/juce_SystemClipboard.h"
+	"juce_appframework/audio/midi/juce_MidiBuffer.h"
+	"juce_appframework/audio/midi/juce_MidiFile.h"
+	"juce_appframework/audio/midi/juce_MidiKeyboardState.h"
+	"juce_appframework/audio/midi/juce_MidiMessage.h"
+	"juce_appframework/audio/midi/juce_MidiMessageSequence.h"
+	"juce_appframework/audio/midi/juce_MidiMessageCollector.h"
+	"juce_appframework/audio/dsp/juce_AudioDataConverters.h"
+	"juce_appframework/audio/dsp/juce_AudioSampleBuffer.h"
+	"juce_appframework/audio/dsp/juce_IIRFilter.h"
+	"juce_appframework/audio/processors/juce_AudioPlayHead.h"
+	"juce_appframework/audio/processors/juce_AudioProcessor.h"
+	"juce_appframework/audio/processors/juce_AudioProcessorEditor.h"
+	"juce_appframework/audio/processors/juce_AudioProcessorListener.h"
+	"juce_appframework/audio/processors/juce_AudioProcessorGraph.h"
+	"juce_appframework/audio/processors/juce_AudioProcessorPlayer.h"
+	"juce_appframework/audio/processors/juce_GenericAudioProcessorEditor.h"
+	"juce_appframework/audio/audio_sources/juce_AudioFormatReaderSource.h"
+	"juce_appframework/audio/audio_sources/juce_AudioSource.h"
+	"juce_appframework/audio/audio_sources/juce_AudioSourcePlayer.h"
+	"juce_appframework/audio/audio_sources/juce_AudioTransportSource.h"
+	"juce_appframework/audio/audio_sources/juce_BufferingAudioSource.h"
+	"juce_appframework/audio/audio_sources/juce_ChannelRemappingAudioSource.h"
+	"juce_appframework/audio/audio_sources/juce_IIRFilterAudioSource.h"
+	"juce_appframework/audio/audio_sources/juce_MixerAudioSource.h"
+	"juce_appframework/audio/audio_sources/juce_PositionableAudioSource.h"
+	"juce_appframework/audio/audio_sources/juce_ResamplingAudioSource.h"
+	"juce_appframework/audio/audio_sources/juce_ToneGeneratorAudioSource.h"
+	"juce_appframework/audio/devices/juce_AudioIODevice.h"
+	"juce_appframework/audio/devices/juce_MidiInput.h"
+	"juce_appframework/audio/devices/juce_AudioDeviceManager.h"
+	"juce_appframework/audio/devices/juce_MidiOutput.h"
+	"juce_appframework/audio/devices/juce_AudioIODeviceType.h"
+	"juce_appframework/audio/synthesisers/juce_Sampler.h"
+	"juce_appframework/audio/synthesisers/juce_Synthesiser.h"
+	"juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.h"
+	"juce_appframework/audio/plugins/formats/juce_DirectXPluginFormat.h"
+	"juce_appframework/audio/plugins/formats/juce_LADSPAPluginFormat.h"
+	"juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
+	"juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.h"
+	"juce_appframework/audio/plugins/juce_AudioPluginFormat.h"
+	"juce_appframework/audio/plugins/juce_AudioPluginFormatManager.h"
+	"juce_appframework/audio/plugins/juce_AudioPluginInstance.h"
+	"juce_appframework/audio/plugins/juce_KnownPluginList.h"
+	"juce_appframework/audio/plugins/juce_PluginDescription.h"
+	"juce_appframework/audio/plugins/juce_PluginDirectoryScanner.h"
+	"juce_appframework/audio/plugins/juce_PluginListComponent.h"
+	"juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioFormat.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioFormatManager.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioFormatWriter.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioThumbnail.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioThumbnailCache.h"
+	"juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.h"
+	"juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.h"
+	"juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioFormatReader.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioCDReader.h"
+	"juce_appframework/audio/audio_file_formats/juce_QuickTimeAudioFormat.h"
+	"juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.h"
+	"juce_appframework/events/juce_ActionBroadcaster.h"
+	"juce_appframework/events/juce_ActionListener.h"
+	"juce_appframework/events/juce_ActionListenerList.h"
+	"juce_appframework/events/juce_AsyncUpdater.h"
+	"juce_appframework/events/juce_CallbackMessage.h"
+	"juce_appframework/events/juce_ChangeBroadcaster.h"
+	"juce_appframework/events/juce_ChangeListener.h"
+	"juce_appframework/events/juce_ChangeListenerList.h"
+	"juce_appframework/events/juce_InterprocessConnection.h"
+	"juce_appframework/events/juce_InterprocessConnectionServer.h"
+	"juce_appframework/events/juce_Message.h"
+	"juce_appframework/events/juce_MessageListener.h"
+	"juce_appframework/events/juce_MultiTimer.h"
+	"juce_appframework/events/juce_Timer.h"
+	"juce_appframework/events/juce_MessageManager.h"
+	"juce_appframework/gui/graphics/brushes/juce_Brush.h"
+	"juce_appframework/gui/graphics/brushes/juce_GradientBrush.h"
+	"juce_appframework/gui/graphics/brushes/juce_ImageBrush.h"
+	"juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.h"
+	"juce_appframework/gui/graphics/colour/juce_Colour.h"
+	"juce_appframework/gui/graphics/colour/juce_ColourGradient.h"
+	"juce_appframework/gui/graphics/colour/juce_Colours.h"
+	"juce_appframework/gui/graphics/colour/juce_PixelFormats.h"
+	"juce_appframework/gui/graphics/fonts/juce_Font.h"
+	"juce_appframework/gui/graphics/fonts/juce_GlyphArrangement.h"
+	"juce_appframework/gui/graphics/fonts/juce_TextLayout.h"
+	"juce_appframework/gui/graphics/fonts/juce_Typeface.h"
+	"juce_appframework/gui/graphics/contexts/juce_EdgeTable.h"
+	"juce_appframework/gui/graphics/contexts/juce_Graphics.h"
+	"juce_appframework/gui/graphics/contexts/juce_Justification.h"
+	"juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsContext.h"
+	"juce_appframework/gui/graphics/contexts/juce_RectanglePlacement.h"
+	"juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsPostScriptRenderer.h"
+	"juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
+	"juce_appframework/gui/graphics/geometry/juce_AffineTransform.h"
+	"juce_appframework/gui/graphics/geometry/juce_BorderSize.h"
+	"juce_appframework/gui/graphics/geometry/juce_Line.h"
+	"juce_appframework/gui/graphics/geometry/juce_Path.h"
+	"juce_appframework/gui/graphics/geometry/juce_PathIterator.h"
+	"juce_appframework/gui/graphics/geometry/juce_PathStrokeType.h"
+	"juce_appframework/gui/graphics/geometry/juce_Point.h"
+	"juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.h"
+	"juce_appframework/gui/graphics/geometry/juce_Rectangle.h"
+	"juce_appframework/gui/graphics/geometry/juce_RectangleList.h"
+	"juce_appframework/gui/graphics/imaging/juce_Image.h"
+	"juce_appframework/gui/graphics/imaging/juce_ImageCache.h"
+	"juce_appframework/gui/graphics/imaging/juce_ImageConvolutionKernel.h"
+	"juce_appframework/gui/graphics/imaging/juce_CameraDevice.h"
+	"juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.h"
+	"juce_appframework/gui/graphics/drawables/juce_Drawable.h"
+	"juce_appframework/gui/graphics/drawables/juce_DrawableComposite.h"
+	"juce_appframework/gui/graphics/drawables/juce_DrawableImage.h"
+	"juce_appframework/gui/graphics/drawables/juce_DrawablePath.h"
+	"juce_appframework/gui/graphics/drawables/juce_DrawableText.h"
+	"juce_appframework/gui/components/juce_ComponentDeletionWatcher.h"
+	"juce_appframework/gui/components/juce_ComponentListener.h"
+	"juce_appframework/gui/components/juce_Desktop.h"
+	"juce_appframework/gui/components/juce_Component.h"
+	"juce_appframework/gui/components/buttons/juce_ArrowButton.h"
+	"juce_appframework/gui/components/buttons/juce_DrawableButton.h"
+	"juce_appframework/gui/components/buttons/juce_HyperlinkButton.h"
+	"juce_appframework/gui/components/buttons/juce_ImageButton.h"
+	"juce_appframework/gui/components/buttons/juce_Button.h"
+	"juce_appframework/gui/components/buttons/juce_ShapeButton.h"
+	"juce_appframework/gui/components/buttons/juce_TextButton.h"
+	"juce_appframework/gui/components/buttons/juce_ToggleButton.h"
+	"juce_appframework/gui/components/buttons/juce_ToolbarButton.h"
+	"juce_appframework/gui/graphics/effects/juce_DropShadowEffect.h"
+	"juce_appframework/gui/graphics/effects/juce_GlowEffect.h"
+	"juce_appframework/gui/graphics/effects/juce_ImageEffectFilter.h"
+	"juce_appframework/gui/graphics/effects/juce_ReduceOpacityEffect.h"
+	"juce_appframework/gui/components/keyboard/juce_KeyboardFocusTraverser.h"
+	"juce_appframework/gui/components/keyboard/juce_KeyPress.h"
+	"juce_appframework/gui/components/keyboard/juce_KeyMappingEditorComponent.h"
+	"juce_appframework/gui/components/keyboard/juce_ModifierKeys.h"
+	"juce_appframework/gui/components/keyboard/juce_KeyListener.h"
+	"juce_appframework/gui/components/keyboard/juce_KeyPressMappingSet.h"
+	"juce_appframework/gui/components/menus/juce_MenuBarComponent.h"
+	"juce_appframework/gui/components/menus/juce_MenuBarModel.h"
+	"juce_appframework/gui/components/menus/juce_PopupMenu.h"
+	"juce_appframework/gui/components/menus/juce_PopupMenuCustomComponent.h"
+	"juce_appframework/gui/components/mouse/juce_ComponentDragger.h"
+	"juce_appframework/gui/components/mouse/juce_DragAndDropContainer.h"
+	"juce_appframework/gui/components/mouse/juce_DragAndDropTarget.h"
+	"juce_appframework/gui/components/mouse/juce_FileDragAndDropTarget.h"
+	"juce_appframework/gui/components/mouse/juce_LassoComponent.h"
+	"juce_appframework/gui/components/mouse/juce_MouseCursor.h"
+	"juce_appframework/gui/components/mouse/juce_MouseEvent.h"
+	"juce_appframework/gui/components/mouse/juce_MouseHoverDetector.h"
+	"juce_appframework/gui/components/mouse/juce_MouseListener.h"
+	"juce_appframework/gui/components/mouse/juce_TooltipClient.h"
+	"juce_appframework/gui/components/controls/juce_Label.h"
+	"juce_appframework/gui/components/controls/juce_ProgressBar.h"
+	"juce_appframework/gui/components/controls/juce_Slider.h"
+	"juce_appframework/gui/components/controls/juce_SliderListener.h"
+	"juce_appframework/gui/components/controls/juce_TableHeaderComponent.h"
+	"juce_appframework/gui/components/controls/juce_TableListBox.h"
+	"juce_appframework/gui/components/controls/juce_Toolbar.h"
+	"juce_appframework/gui/components/controls/juce_ToolbarItemFactory.h"
+	"juce_appframework/gui/components/controls/juce_ToolbarItemComponent.h"
+	"juce_appframework/gui/components/controls/juce_ToolbarItemPalette.h"
+	"juce_appframework/gui/components/controls/juce_TreeView.h"
+	"juce_appframework/gui/components/controls/juce_TextEditor.h"
+	"juce_appframework/gui/components/controls/juce_ListBox.h"
+	"juce_appframework/gui/components/controls/juce_ComboBox.h"
+	"juce_appframework/gui/components/properties/juce_BooleanPropertyComponent.h"
+	"juce_appframework/gui/components/properties/juce_ButtonPropertyComponent.h"
+	"juce_appframework/gui/components/properties/juce_ChoicePropertyComponent.h"
+	"juce_appframework/gui/components/properties/juce_PropertyComponent.h"
+	"juce_appframework/gui/components/properties/juce_PropertyPanel.h"
+	"juce_appframework/gui/components/properties/juce_SliderPropertyComponent.h"
+	"juce_appframework/gui/components/properties/juce_TextPropertyComponent.h"
+	"juce_appframework/gui/components/layout/juce_ComponentAnimator.h"
+	"juce_appframework/gui/components/layout/juce_ComponentBoundsConstrainer.h"
+	"juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h"
+	"juce_appframework/gui/components/layout/juce_GroupComponent.h"
+	"juce_appframework/gui/components/layout/juce_MultiDocumentPanel.h"
+	"juce_appframework/gui/components/layout/juce_ResizableBorderComponent.h"
+	"juce_appframework/gui/components/layout/juce_ResizableCornerComponent.h"
+	"juce_appframework/gui/components/layout/juce_ScrollBar.h"
+	"juce_appframework/gui/components/layout/juce_TabbedButtonBar.h"
+	"juce_appframework/gui/components/layout/juce_TabbedComponent.h"
+	"juce_appframework/gui/components/layout/juce_StretchableLayoutManager.h"
+	"juce_appframework/gui/components/layout/juce_StretchableLayoutResizerBar.h"
+	"juce_appframework/gui/components/layout/juce_StretchableObjectResizer.h"
+	"juce_appframework/gui/components/layout/juce_Viewport.h"
+	"juce_appframework/gui/components/filebrowser/juce_DirectoryContentsDisplayComponent.h"
+	"juce_appframework/gui/components/filebrowser/juce_DirectoryContentsList.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileBrowserListener.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileChooserDialogBox.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileFilter.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileListComponent.h"
+	"juce_appframework/gui/components/filebrowser/juce_FilePreviewComponent.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileTreeComponent.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileSearchPathListComponent.h"
+	"juce_appframework/gui/components/filebrowser/juce_WildcardFileFilter.h"
+	"juce_appframework/gui/components/filebrowser/juce_ImagePreviewComponent.h"
+	"juce_appframework/gui/components/filebrowser/juce_FilenameComponent.h"
+	"juce_appframework/gui/components/filebrowser/juce_FileBrowserComponent.h"
+	"juce_appframework/gui/components/windows/juce_AlertWindow.h"
+	"juce_appframework/gui/components/windows/juce_DialogWindow.h"
+	"juce_appframework/gui/components/windows/juce_DocumentWindow.h"
+	"juce_appframework/gui/components/windows/juce_ResizableWindow.h"
+	"juce_appframework/gui/components/windows/juce_SplashScreen.h"
+	"juce_appframework/gui/components/windows/juce_ThreadWithProgressWindow.h"
+	"juce_appframework/gui/components/windows/juce_TopLevelWindow.h"
+	"juce_appframework/gui/components/windows/juce_ComponentPeer.h"
+	"juce_appframework/gui/components/windows/juce_TooltipWindow.h"
+	"juce_appframework/gui/components/special/juce_ActiveXControlComponent.h"
+	"juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.h"
+	"juce_appframework/gui/components/special/juce_BubbleComponent.h"
+	"juce_appframework/gui/components/special/juce_BubbleMessageComponent.h"
+	"juce_appframework/gui/components/special/juce_ColourSelector.h"
+	"juce_appframework/gui/components/special/juce_DropShadower.h"
+	"juce_appframework/gui/components/special/juce_NSViewComponent.h"
+	"juce_appframework/gui/components/special/juce_OpenGLComponent.h"
+	"juce_appframework/gui/components/special/juce_PreferencesPanel.h"
+	"juce_appframework/gui/components/special/juce_MagnifierComponent.h"
+	"juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
+	"juce_appframework/gui/components/special/juce_QuickTimeMovieComponent.h"
+	"juce_appframework/gui/components/special/juce_SystemTrayIconComponent.h"
+	"juce_appframework/gui/components/special/juce_MidiKeyboardComponent.h"
+	"juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"
+	"juce_appframework/gui/components/lookandfeel/juce_OldSchoolLookAndFeel.h"
+	"juce_appframework/documents/juce_FileBasedDocument.h"
+	"juce_appframework/documents/juce_RecentlyOpenedFilesList.h"
+	"juce_appframework/documents/juce_SelectedItemSet.h"
+	"juce_appframework/documents/juce_UndoableAction.h"
+	"juce_appframework/documents/juce_UndoManager.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_Application.h
+	"juce_ApplicationCommandTarget.h"
+	"../events/juce_ActionListener.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_ApplicationCommandTarget.h
+	"../gui/components/juce_Component.h"
+	"juce_ApplicationCommandInfo.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/juce_Component.h
+	"mouse/juce_MouseCursor.h"
+	"mouse/juce_MouseListener.h"
+	"juce_ComponentListener.h"
+	"keyboard/juce_KeyListener.h"
+	"keyboard/juce_KeyboardFocusTraverser.h"
+	"../graphics/effects/juce_ImageEffectFilter.h"
+	"../graphics/geometry/juce_RectangleList.h"
+	"../graphics/geometry/juce_BorderSize.h"
+	"windows/juce_ComponentPeer.h"
+	"../../events/juce_MessageListener.h"
+	"../../../juce_core/text/juce_StringArray.h"
+	"../../../juce_core/containers/juce_VoidArray.h"
+	"../../../juce_core/containers/juce_PropertySet.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_MouseCursor.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_MouseListener.h
+	"juce_MouseEvent.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_MouseEvent.h
+	"../keyboard/juce_ModifierKeys.h"
+	"../../../../juce_core/basics/juce_Time.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/keyboard/juce_ModifierKeys.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/juce_ComponentListener.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/keyboard/juce_KeyListener.h
+	"juce_KeyPress.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/keyboard/juce_KeyPress.h
+	"juce_ModifierKeys.h"
+	"../../../../juce_core/text/juce_String.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/keyboard/juce_KeyboardFocusTraverser.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/effects/juce_ImageEffectFilter.h
+	"../../graphics/contexts/juce_Graphics.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/contexts/juce_Graphics.h
+	"../fonts/juce_Font.h"
+	"../geometry/juce_Rectangle.h"
+	"../geometry/juce_PathStrokeType.h"
+	"../geometry/juce_Line.h"
+	"../colour/juce_Colours.h"
+	"../brushes/juce_SolidColourBrush.h"
+	"juce_RectanglePlacement.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/fonts/juce_Font.h
+	"juce_Typeface.h"
+	"../../../../juce_core/text/juce_StringArray.h"
+	"../../../../juce_core/containers/juce_ReferenceCountedObject.h"
+	"../../../../juce_core/containers/juce_OwnedArray.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/fonts/juce_Typeface.h
+	"../../../../juce_core/containers/juce_ReferenceCountedObject.h"
+	"../../../../juce_core/containers/juce_VoidArray.h"
+	"../../../../juce_core/io/juce_InputStream.h"
+	"../../../../juce_core/io/juce_OutputStream.h"
+	"../geometry/juce_Path.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_Path.h
+	"juce_AffineTransform.h"
+	"juce_Point.h"
+	"../contexts/juce_Justification.h"
+	"../../../../juce_core/containers/juce_Array.h"
+	"../../../../juce_core/io/juce_InputStream.h"
+	"../../../../juce_core/io/juce_OutputStream.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_AffineTransform.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_Point.h
+	"juce_AffineTransform.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/contexts/juce_Justification.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_Rectangle.h
+	"../../../../juce_core/text/juce_String.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_PathStrokeType.h
+	"juce_Path.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_Line.h
+	"juce_Path.h"
+	"juce_Point.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/colour/juce_Colours.h
+	"juce_Colour.h"
+	"../../../../juce_core/text/juce_String.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/colour/juce_Colour.h
+	"../colour/juce_PixelFormats.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/colour/juce_PixelFormats.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.h
+	"juce_Brush.h"
+	"../colour/juce_Colour.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/brushes/juce_Brush.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/contexts/juce_RectanglePlacement.h
+	"../geometry/juce_AffineTransform.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_RectangleList.h
+	"juce_Rectangle.h"
+	"juce_Path.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_BorderSize.h
+	"juce_Rectangle.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_ComponentPeer.h
+	"../mouse/juce_MouseCursor.h"
+	"../../../events/juce_MessageListener.h"
+	"../../../../juce_core/text/juce_StringArray.h"
+	"../../graphics/geometry/juce_RectangleList.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_MessageListener.h
+	"juce_Message.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_Message.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_ApplicationCommandInfo.h
+	"../../juce_core/text/juce_String.h"
+	"../../juce_core/containers/juce_Array.h"
+	"../gui/components/keyboard/juce_KeyPress.h"
+	"juce_ApplicationCommandID.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_ApplicationCommandID.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_ActionListener.h
+	"../../juce_core/text/juce_String.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_DeletedAtShutdown.h
+	"../../juce_core/containers/juce_Array.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_ApplicationCommandManager.h
+	"juce_ApplicationCommandTarget.h"
+	"../events/juce_AsyncUpdater.h"
+	"../gui/components/juce_Desktop.h"
+	"../../juce_core/containers/juce_SortedSet.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_AsyncUpdater.h
+	"juce_MessageListener.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/juce_Desktop.h
+	"juce_Component.h"
+	"../../application/juce_DeletedAtShutdown.h"
+	"../../events/juce_Timer.h"
+	"../../events/juce_AsyncUpdater.h"
+	"../../../juce_core/containers/juce_SortedSet.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_Timer.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_ApplicationProperties.h
+	"juce_PropertiesFile.h"
+	"juce_DeletedAtShutdown.h"
+	"../../juce_core/basics/juce_Singleton.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_PropertiesFile.h
+	"../../juce_core/io/files/juce_File.h"
+	"../../juce_core/containers/juce_PropertySet.h"
+	"../events/juce_Timer.h"
+	"../events/juce_ChangeBroadcaster.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_ChangeBroadcaster.h
+	"juce_ChangeListenerList.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_ChangeListenerList.h
+	"juce_ChangeListener.h"
+	"juce_MessageListener.h"
+	"../../juce_core/containers/juce_SortedSet.h"
+	"../../juce_core/threads/juce_ScopedLock.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_ChangeListener.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/application/juce_SystemClipboard.h
+	"../../juce_core/text/juce_String.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/dsp/juce_AudioDataConverters.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/dsp/juce_AudioSampleBuffer.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/dsp/juce_IIRFilter.h
+	"../../../juce_core/threads/juce_CriticalSection.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/processors/juce_AudioPlayHead.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/processors/juce_AudioProcessor.h
+	"juce_AudioProcessorEditor.h"
+	"../dsp/juce_AudioSampleBuffer.h"
+	"../midi/juce_MidiBuffer.h"
+	"../../../juce_core/containers/juce_BitArray.h"
+	"juce_AudioProcessorListener.h"
+	"juce_AudioPlayHead.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/processors/juce_AudioProcessorEditor.h
+	"../../gui/components/juce_Component.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/processors/juce_AudioProcessorListener.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/processors/juce_AudioProcessorGraph.h
+	"juce_AudioProcessor.h"
+	"../plugins/juce_AudioPluginFormatManager.h"
+	"../plugins/juce_KnownPluginList.h"
+	"../../../juce_core/containers/juce_ReferenceCountedArray.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/juce_AudioPluginFormatManager.h
+	"juce_AudioPluginFormat.h"
+	"../../application/juce_DeletedAtShutdown.h"
+	"../../../juce_core/basics/juce_Singleton.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/juce_AudioPluginFormat.h
+	"juce_AudioPluginInstance.h"
+	"../../../juce_core/io/files/juce_FileSearchPath.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/juce_AudioPluginInstance.h
+	"../processors/juce_AudioProcessor.h"
+	"juce_PluginDescription.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/juce_PluginDescription.h
+	"../../../juce_core/io/files/juce_File.h"
+	"../../../juce_core/text/juce_XmlElement.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/juce_KnownPluginList.h
+	"juce_PluginDescription.h"
+	"juce_AudioPluginFormat.h"
+	"../../events/juce_ChangeBroadcaster.h"
+	"../../gui/components/menus/juce_PopupMenu.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/menus/juce_PopupMenu.h
+	"juce_PopupMenuCustomComponent.h"
+	"../../../application/juce_ApplicationCommandManager.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/menus/juce_PopupMenuCustomComponent.h
+	"../juce_Component.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/processors/juce_AudioProcessorPlayer.h
+	"juce_AudioProcessor.h"
+	"../devices/juce_AudioIODevice.h"
+	"../devices/juce_MidiInput.h"
+	"../midi/juce_MidiMessageCollector.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/devices/juce_AudioIODevice.h
+	"../../../juce_core/text/juce_StringArray.h"
+	"../../../juce_core/containers/juce_BitArray.h"
+	"../../../juce_core/containers/juce_OwnedArray.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/processors/juce_GenericAudioProcessorEditor.h
+	"juce_AudioProcessorEditor.h"
+	"../../gui/components/properties/juce_PropertyPanel.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/properties/juce_PropertyPanel.h
+	"juce_PropertyComponent.h"
+	"../layout/juce_Viewport.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/properties/juce_PropertyComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_Viewport.h
+	"juce_ScrollBar.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_ScrollBar.h
+	"../../../events/juce_AsyncUpdater.h"
+	"../../../events/juce_Timer.h"
+	"../buttons/juce_Button.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_Button.h
+	"../juce_Component.h"
+	"../keyboard/juce_KeyListener.h"
+	"../../../application/juce_ApplicationCommandManager.h"
+	"../../../../juce_core/containers/juce_SortedSet.h"
+	"../windows/juce_TooltipWindow.h"
+	"../../../events/juce_Timer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_TooltipWindow.h
+	"../juce_Component.h"
+	"../../../events/juce_Timer.h"
+	"../mouse/juce_TooltipClient.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_TooltipClient.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_AudioFormatReaderSource.h
+	"juce_PositionableAudioSource.h"
+	"../../../juce_core/threads/juce_Thread.h"
+	"../audio_file_formats/juce_AudioFormatReader.h"
+	"../dsp/juce_AudioSampleBuffer.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_PositionableAudioSource.h
+	"juce_AudioSource.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_AudioSource.h
+	"../dsp/juce_AudioSampleBuffer.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioFormatReader.h
+	"../../../juce_core/io/juce_InputStream.h"
+	"../../../juce_core/text/juce_StringPairArray.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_AudioSourcePlayer.h
+	"juce_AudioSource.h"
+	"../devices/juce_AudioIODevice.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_AudioTransportSource.h
+	"juce_BufferingAudioSource.h"
+	"juce_ResamplingAudioSource.h"
+	"../../events/juce_ChangeBroadcaster.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_BufferingAudioSource.h
+	"juce_PositionableAudioSource.h"
+	"../../../juce_core/threads/juce_Thread.h"
+	"../dsp/juce_AudioSampleBuffer.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_ResamplingAudioSource.h
+	"juce_AudioSource.h"
+	"../../../juce_core/threads/juce_CriticalSection.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_ChannelRemappingAudioSource.h
+	"juce_AudioSource.h"
+	"../../../juce_core/text/juce_XmlElement.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_IIRFilterAudioSource.h
+	"juce_AudioSource.h"
+	"../dsp/juce_IIRFilter.h"
+	"../../../juce_core/containers/juce_OwnedArray.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_MixerAudioSource.h
+	"juce_AudioSource.h"
+	"../../../juce_core/threads/juce_CriticalSection.h"
+	"../../../juce_core/containers/juce_VoidArray.h"
+	"../../../juce_core/containers/juce_BitArray.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_sources/juce_ToneGeneratorAudioSource.h
+	"juce_AudioSource.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/devices/juce_AudioDeviceManager.h
+	"juce_AudioIODeviceType.h"
+	"juce_MidiInput.h"
+	"juce_MidiOutput.h"
+	"../../../juce_core/text/juce_XmlElement.h"
+	"../../gui/components/controls/juce_ComboBox.h"
+	"../dsp/juce_AudioSampleBuffer.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/devices/juce_AudioIODeviceType.h
+	"juce_AudioIODevice.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/devices/juce_MidiOutput.h
+	"../../../juce_core/text/juce_StringArray.h"
+	"../../../juce_core/threads/juce_Thread.h"
+	"../midi/juce_MidiMessage.h"
+	"../midi/juce_MidiBuffer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_ComboBox.h
+	"juce_Label.h"
+	"../../../../juce_core/text/juce_StringArray.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_Label.h
+	"../juce_ComponentDeletionWatcher.h"
+	"juce_TextEditor.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/juce_ComponentDeletionWatcher.h
+	"juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_TextEditor.h
+	"../juce_Component.h"
+	"../../../events/juce_Timer.h"
+	"../../../documents/juce_UndoManager.h"
+	"../layout/juce_Viewport.h"
+	"../menus/juce_PopupMenu.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/documents/juce_UndoManager.h
+	"../../juce_core/text/juce_String.h"
+	"../../juce_core/containers/juce_OwnedArray.h"
+	"../../juce_core/text/juce_StringArray.h"
+	"../events/juce_ChangeBroadcaster.h"
+	"juce_UndoableAction.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/documents/juce_UndoableAction.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/synthesisers/juce_Sampler.h
+	"../../../juce_core/containers/juce_BitArray.h"
+	"juce_Synthesiser.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/synthesisers/juce_Synthesiser.h
+	"../dsp/juce_AudioSampleBuffer.h"
+	"../midi/juce_MidiBuffer.h"
+	"../../../juce_core/containers/juce_OwnedArray.h"
+	"../../../juce_core/containers/juce_ReferenceCountedObject.h"
+	"../../../juce_core/containers/juce_ReferenceCountedArray.h"
+	"../../../juce_core/threads/juce_CriticalSection.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.h
+	"../juce_AudioPluginFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/formats/juce_DirectXPluginFormat.h
+	"../juce_AudioPluginFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/formats/juce_LADSPAPluginFormat.h
+	"../juce_AudioPluginFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.h
+	"../juce_AudioPluginFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/juce_PluginDirectoryScanner.h
+	"juce_KnownPluginList.h"
+	"juce_AudioPluginFormatManager.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/plugins/juce_PluginListComponent.h
+	"juce_KnownPluginList.h"
+	"juce_AudioPluginFormat.h"
+	"../../gui/components/controls/juce_ListBox.h"
+	"../../gui/components/buttons/juce_TextButton.h"
+	"../../application/juce_PropertiesFile.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_ListBox.h
+	"../layout/juce_Viewport.h"
+	"../../../../juce_core/containers/juce_SparseSet.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_TextButton.h
+	"juce_Button.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.h
+	"juce_AudioFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioFormat.h
+	"juce_AudioFormatReader.h"
+	"juce_AudioFormatWriter.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioFormatWriter.h
+	"../../../juce_core/io/files/juce_FileOutputStream.h"
+	"juce_AudioFormatReader.h"
+	"../audio_sources/juce_AudioSource.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h
+	"juce_AudioFormatReader.h"
+	"../audio_sources/juce_AudioSource.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioFormatManager.h
+	"juce_AudioFormat.h"
+	"../../../juce_core/basics/juce_Singleton.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioThumbnail.h
+	"../../../juce_core/threads/juce_TimeSliceThread.h"
+	"../../../juce_core/io/streams/juce_InputSource.h"
+	"../../../juce_core/io/juce_OutputStream.h"
+	"../../events/juce_ChangeBroadcaster.h"
+	"../../events/juce_Timer.h"
+	"../../gui/graphics/contexts/juce_Graphics.h"
+	"juce_AudioFormatReader.h"
+	"juce_AudioFormatManager.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioThumbnailCache.h
+	"juce_AudioThumbnail.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.h
+	"juce_AudioFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.h
+	"juce_AudioFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.h
+	"juce_AudioFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.h
+	"juce_AudioFormatReader.h"
+	"../../../juce_core/text/juce_StringArray.h"
+	"../../../juce_core/io/files/juce_File.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_QuickTimeAudioFormat.h
+	"juce_AudioFormat.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.h
+	"juce_AudioFormatReader.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_ActionBroadcaster.h
+	"juce_ActionListenerList.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_ActionListenerList.h
+	"juce_ActionListener.h"
+	"juce_MessageListener.h"
+	"../../juce_core/containers/juce_SortedSet.h"
+	"../../juce_core/threads/juce_CriticalSection.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_CallbackMessage.h
+	"juce_Message.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_InterprocessConnection.h
+	"juce_MessageListener.h"
+	"../../juce_core/threads/juce_Thread.h"
+	"../../juce_core/io/network/juce_Socket.h"
+	"../../juce_core/io/files/juce_NamedPipe.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_InterprocessConnectionServer.h
+	"juce_InterprocessConnection.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_MultiTimer.h
+	"juce_Timer.h"
+	"../../juce_core/containers/juce_VoidArray.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/events/juce_MessageManager.h
+	"../application/juce_DeletedAtShutdown.h"
+	"../../juce_core/containers/juce_SortedSet.h"
+	"../../juce_core/containers/juce_VoidArray.h"
+	"../../juce_core/threads/juce_Thread.h"
+	"../../juce_core/threads/juce_ThreadPool.h"
+	"juce_ActionListenerList.h"
+	"juce_CallbackMessage.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/brushes/juce_GradientBrush.h
+	"juce_Brush.h"
+	"../colour/juce_ColourGradient.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/colour/juce_ColourGradient.h
+	"juce_Colour.h"
+	"../geometry/juce_AffineTransform.h"
+	"../../../../juce_core/containers/juce_Array.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/brushes/juce_ImageBrush.h
+	"juce_Brush.h"
+	"../imaging/juce_Image.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/imaging/juce_Image.h
+	"../colour/juce_Colour.h"
+	"../contexts/juce_Graphics.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/fonts/juce_GlyphArrangement.h
+	"juce_Font.h"
+	"../contexts/juce_Graphics.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/fonts/juce_TextLayout.h
+	"juce_Font.h"
+	"../contexts/juce_Justification.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/contexts/juce_EdgeTable.h
+	"../geometry/juce_AffineTransform.h"
+	"../../../../juce_core/containers/juce_MemoryBlock.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsContext.h
+	"../imaging/juce_Image.h"
+	"../geometry/juce_Path.h"
+	"../geometry/juce_RectangleList.h"
+	"../colour/juce_ColourGradient.h"
+	"juce_EdgeTable.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsPostScriptRenderer.h
+	"juce_LowLevelGraphicsContext.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h
+	"juce_LowLevelGraphicsContext.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_PathIterator.h
+	"juce_Path.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.h
+	"../../components/juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/imaging/juce_ImageCache.h
+	"juce_Image.h"
+	"../../../../juce_core/io/files/juce_File.h"
+	"../../../events/juce_Timer.h"
+	"../../../application/juce_DeletedAtShutdown.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/imaging/juce_ImageConvolutionKernel.h
+	"juce_Image.h"
+
+1272624987 /home/david/src/juce/src/juce_appframework/gui/graphics/imaging/juce_CameraDevice.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.h
+	"juce_Image.h"
+	"../../../../juce_core/io/files/juce_File.h"
+	"../../../../juce_core/io/juce_InputStream.h"
+	"../../../../juce_core/io/juce_OutputStream.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/drawables/juce_Drawable.h
+	"../contexts/juce_Graphics.h"
+	"../../../../juce_core/text/juce_XmlElement.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/drawables/juce_DrawableComposite.h
+	"juce_Drawable.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/drawables/juce_DrawableImage.h
+	"juce_Drawable.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/drawables/juce_DrawablePath.h
+	"juce_Drawable.h"
+	"../colour/juce_ColourGradient.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/drawables/juce_DrawableText.h
+	"juce_Drawable.h"
+	"../fonts/juce_GlyphArrangement.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_ArrowButton.h
+	"juce_Button.h"
+	"../../graphics/effects/juce_DropShadowEffect.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/effects/juce_DropShadowEffect.h
+	"juce_ImageEffectFilter.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_DrawableButton.h
+	"juce_Button.h"
+	"../../graphics/drawables/juce_Drawable.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_HyperlinkButton.h
+	"juce_Button.h"
+	"../../../../juce_core/io/network/juce_URL.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_ImageButton.h
+	"juce_Button.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_ShapeButton.h
+	"juce_Button.h"
+	"../../graphics/geometry/juce_Path.h"
+	"../../graphics/effects/juce_DropShadowEffect.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_ToggleButton.h
+	"juce_Button.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/buttons/juce_ToolbarButton.h
+	"../controls/juce_ToolbarItemComponent.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_ToolbarItemComponent.h
+	"../buttons/juce_Button.h"
+	"../../graphics/drawables/juce_Drawable.h"
+	"juce_Toolbar.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_Toolbar.h
+	"../mouse/juce_DragAndDropContainer.h"
+	"../layout/juce_ComponentAnimator.h"
+	"../buttons/juce_Button.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_DragAndDropContainer.h
+	"juce_DragAndDropTarget.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_DragAndDropTarget.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_ComponentAnimator.h
+	"../juce_Component.h"
+	"../juce_ComponentDeletionWatcher.h"
+	"../../../events/juce_ChangeBroadcaster.h"
+	"../../../events/juce_Timer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/effects/juce_GlowEffect.h
+	"juce_ImageEffectFilter.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/graphics/effects/juce_ReduceOpacityEffect.h
+	"juce_ImageEffectFilter.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/keyboard/juce_KeyMappingEditorComponent.h
+	"../keyboard/juce_KeyPressMappingSet.h"
+	"../controls/juce_TreeView.h"
+	"../buttons/juce_TextButton.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/keyboard/juce_KeyPressMappingSet.h
+	"juce_KeyListener.h"
+	"../../../application/juce_ApplicationCommandManager.h"
+	"../../../events/juce_ChangeBroadcaster.h"
+	"../../../../juce_core/text/juce_StringArray.h"
+	"../../../../juce_core/text/juce_XmlElement.h"
+	"../../../../juce_core/containers/juce_OwnedArray.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_TreeView.h
+	"../layout/juce_Viewport.h"
+	"../../../../juce_core/text/juce_XmlElement.h"
+	"../../../events/juce_AsyncUpdater.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/menus/juce_MenuBarComponent.h
+	"juce_MenuBarModel.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/menus/juce_MenuBarModel.h
+	"juce_PopupMenu.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_ComponentDragger.h
+	"juce_MouseEvent.h"
+	"../layout/juce_ComponentBoundsConstrainer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_ComponentBoundsConstrainer.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_FileDragAndDropTarget.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_LassoComponent.h
+	"../juce_Component.h"
+	"../../../documents/juce_SelectedItemSet.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/documents/juce_SelectedItemSet.h
+	"../events/juce_ChangeBroadcaster.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/mouse/juce_MouseHoverDetector.h
+	"juce_MouseListener.h"
+	"../../../events/juce_Timer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_ProgressBar.h
+	"../juce_Component.h"
+	"../mouse/juce_TooltipClient.h"
+	"../../../events/juce_Timer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_Slider.h
+	"juce_SliderListener.h"
+	"juce_Label.h"
+	"../buttons/juce_Button.h"
+	"../../../events/juce_AsyncUpdater.h"
+	"../../../../juce_core/containers/juce_SortedSet.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_SliderListener.h
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_TableHeaderComponent.h
+	"../menus/juce_PopupMenu.h"
+	"../../../events/juce_AsyncUpdater.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_TableListBox.h
+	"juce_TableHeaderComponent.h"
+	"juce_ListBox.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_ToolbarItemFactory.h
+	"juce_ToolbarItemComponent.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/controls/juce_ToolbarItemPalette.h
+	"juce_Toolbar.h"
+	"../layout/juce_Viewport.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/properties/juce_BooleanPropertyComponent.h
+	"juce_PropertyComponent.h"
+	"../buttons/juce_ToggleButton.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/properties/juce_ButtonPropertyComponent.h
+	"juce_PropertyComponent.h"
+	"../buttons/juce_TextButton.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/properties/juce_ChoicePropertyComponent.h
+	"juce_PropertyComponent.h"
+	"../controls/juce_ComboBox.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/properties/juce_SliderPropertyComponent.h
+	"juce_PropertyComponent.h"
+	"../controls/juce_Slider.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/properties/juce_TextPropertyComponent.h
+	"juce_PropertyComponent.h"
+	"../controls/juce_Label.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h
+	"../juce_Component.h"
+	"../juce_ComponentDeletionWatcher.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_GroupComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_MultiDocumentPanel.h
+	"juce_TabbedComponent.h"
+	"../windows/juce_DocumentWindow.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_TabbedComponent.h
+	"juce_TabbedButtonBar.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_TabbedButtonBar.h
+	"../buttons/juce_Button.h"
+	"../../../events/juce_ChangeBroadcaster.h"
+	"../../graphics/effects/juce_DropShadowEffect.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_DocumentWindow.h
+	"juce_ResizableWindow.h"
+	"../buttons/juce_Button.h"
+	"../menus/juce_MenuBarComponent.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_ResizableWindow.h
+	"juce_TopLevelWindow.h"
+	"../mouse/juce_ComponentDragger.h"
+	"../layout/juce_ResizableBorderComponent.h"
+	"../layout/juce_ResizableCornerComponent.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_TopLevelWindow.h
+	"../juce_Component.h"
+	"../special/juce_DropShadower.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_DropShadower.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_ResizableBorderComponent.h
+	"juce_ComponentBoundsConstrainer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_ResizableCornerComponent.h
+	"juce_ComponentBoundsConstrainer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_StretchableLayoutManager.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_StretchableLayoutResizerBar.h
+	"../juce_Component.h"
+	"juce_StretchableLayoutManager.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/layout/juce_StretchableObjectResizer.h
+	"../../../../juce_core/containers/juce_OwnedArray.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_DirectoryContentsDisplayComponent.h
+	"juce_DirectoryContentsList.h"
+	"juce_FileBrowserListener.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_DirectoryContentsList.h
+	"juce_FileFilter.h"
+	"../../../events/juce_ChangeBroadcaster.h"
+	"../../../../juce_core/threads/juce_TimeSliceThread.h"
+	"../../graphics/imaging/juce_Image.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileFilter.h
+	"../../../../juce_core/io/files/juce_File.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileBrowserListener.h
+	"../mouse/juce_MouseEvent.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h
+	"juce_FilePreviewComponent.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FilePreviewComponent.h
+	"../../../../juce_core/io/files/juce_File.h"
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileChooserDialogBox.h
+	"juce_FileBrowserComponent.h"
+	"../windows/juce_ResizableWindow.h"
+	"../buttons/juce_TextButton.h"
+	"../../graphics/fonts/juce_GlyphArrangement.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileBrowserComponent.h
+	"juce_DirectoryContentsDisplayComponent.h"
+	"juce_FilePreviewComponent.h"
+	"../../../../juce_core/io/files/juce_File.h"
+	"../../../../juce_core/containers/juce_BitArray.h"
+	"../controls/juce_TextEditor.h"
+	"../controls/juce_ComboBox.h"
+	"../buttons/juce_DrawableButton.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileListComponent.h
+	"juce_DirectoryContentsDisplayComponent.h"
+	"juce_FileBrowserListener.h"
+	"../controls/juce_ListBox.h"
+	"../controls/juce_TreeView.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileTreeComponent.h
+	"juce_DirectoryContentsDisplayComponent.h"
+	"../controls/juce_TreeView.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FileSearchPathListComponent.h
+	"../controls/juce_ListBox.h"
+	"../buttons/juce_Button.h"
+	"../mouse/juce_FileDragAndDropTarget.h"
+	"../../../../juce_core/io/files/juce_FileSearchPath.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_WildcardFileFilter.h
+	"juce_FileFilter.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_ImagePreviewComponent.h
+	"juce_FilePreviewComponent.h"
+	"../../../events/juce_Timer.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/filebrowser/juce_FilenameComponent.h
+	"../controls/juce_ComboBox.h"
+	"../../../events/juce_AsyncUpdater.h"
+	"../buttons/juce_TextButton.h"
+	"../../../../juce_core/io/files/juce_File.h"
+	"../mouse/juce_FileDragAndDropTarget.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_AlertWindow.h
+	"juce_TopLevelWindow.h"
+	"../../graphics/fonts/juce_TextLayout.h"
+	"../controls/juce_ComboBox.h"
+	"../mouse/juce_ComponentDragger.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_DialogWindow.h
+	"juce_DocumentWindow.h"
+	"../buttons/juce_Button.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_SplashScreen.h
+	"../juce_Component.h"
+	"../../../events/juce_Timer.h"
+	"../../../application/juce_DeletedAtShutdown.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/windows/juce_ThreadWithProgressWindow.h
+	"../windows/juce_AlertWindow.h"
+	"../../../events/juce_Timer.h"
+	"../../../../juce_core/threads/juce_Thread.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_ActiveXControlComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.h
+	"../controls/juce_ComboBox.h"
+	"../controls/juce_ListBox.h"
+	"../../../audio/devices/juce_AudioDeviceManager.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_BubbleComponent.h
+	"../juce_Component.h"
+	"../../graphics/effects/juce_DropShadowEffect.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_BubbleMessageComponent.h
+	"juce_BubbleComponent.h"
+	"../../../events/juce_Timer.h"
+	"../../graphics/fonts/juce_TextLayout.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_ColourSelector.h
+	"../controls/juce_Slider.h"
+	"../../../events/juce_ChangeBroadcaster.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_NSViewComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_OpenGLComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_PreferencesPanel.h
+	"../juce_Component.h"
+	"../buttons/juce_Button.h"
+	"../../graphics/drawables/juce_Drawable.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_MagnifierComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_WebBrowserComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_QuickTimeMovieComponent.h
+	"../../../../juce_core/io/files/juce_File.h"
+	"juce_ActiveXControlComponent.h"
+	"juce_NSViewComponent.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_SystemTrayIconComponent.h
+	"../juce_Component.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/special/juce_MidiKeyboardComponent.h
+	"../buttons/juce_Button.h"
+	"../../../events/juce_AsyncUpdater.h"
+	"../../../events/juce_ChangeBroadcaster.h"
+	"../../../audio/midi/juce_MidiKeyboardState.h"
+	"../../../../juce_core/containers/juce_BitArray.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h
+	"../../graphics/contexts/juce_Graphics.h"
+	"../../graphics/effects/juce_DropShadowEffect.h"
+	"../controls/juce_Slider.h"
+	"../layout/juce_TabbedComponent.h"
+	"../windows/juce_AlertWindow.h"
+
+1272624988 /home/david/src/juce/src/juce_appframework/gui/components/lookandfeel/juce_OldSchoolLookAndFeel.h
+	"juce_LookAndFeel.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/documents/juce_FileBasedDocument.h
+	"../../juce_core/io/files/juce_File.h"
+	"../events/juce_ChangeBroadcaster.h"
+
+1272624989 /home/david/src/juce/src/juce_appframework/documents/juce_RecentlyOpenedFilesList.h
+	"../../juce_core/io/files/juce_File.h"
+	"../gui/components/menus/juce_PopupMenu.h"
+
+1272624992 /home/david/src/juce/build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h
+
