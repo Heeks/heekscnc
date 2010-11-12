@@ -274,7 +274,6 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 
 					// Setup the four arcs that will make up the circle using UNadjusted
 					// coordinates first so that the offsets align with the X and Y axes.
-					double small_amount = 0.001;
 					double radius = heeksCAD->CircleGetRadius(span_object);
 
 					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
