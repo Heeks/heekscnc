@@ -24,7 +24,7 @@ enum{
 	SpeedReferenceType,
 	SpeedReferencesType,
 	CuttingRateType,
-	LocatingType,
+	PositioningType,
 	BOMType,
 	TrsfNCCodeType,
 	ProbeCentreType,
