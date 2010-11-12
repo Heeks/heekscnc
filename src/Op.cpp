@@ -245,7 +245,7 @@ void COp::ReadDefaultValues()
 		case TurnRoughType:
 			default_tool = FIND_FIRST_TOOL( CToolParams::eTurningTool );
 			break;
-        case LocatingType:
+        case PositioningType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
 		case ProbeGridType:
