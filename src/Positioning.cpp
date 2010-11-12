@@ -1,4 +1,4 @@
-// Locating.cpp
+// Positioning.cpp
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
  * This program is released under the BSD license. See the file COPYING for
@@ -6,7 +6,7 @@
  */
 
 #include "stdafx.h"
-#include "Locating.h"
+#include "Positioning.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "interface/HeeksObj.h"
@@ -29,7 +29,7 @@
 extern CHeeksCADInterface* heeksCAD;
 
 
-void CLocatingParams::set_initial_values()
+void CPositioningParams::set_initial_values()
 {
 	CNCConfig config(ConfigScope());
 
@@ -37,7 +37,7 @@ void CLocatingParams::set_initial_values()
 	config.Read(_T("m_sort_locations"), &m_sort_locations, 1);
 }
 
-void CLocatingParams::write_values_to_config()
+void CPositioningParams::write_values_to_config()
 {
 	// We always want to store the parameters in mm and convert them back later on.
 
@@ -51,18 +51,18 @@ void CLocatingParams::write_values_to_config()
 
 static void on_set_standoff(double value, HeeksObj* object)
 {
-	((CLocating*)object)->m_params.m_standoff = value;
-	((CLocating*)object)->m_params.write_values_to_config();
+	((CPositioning*)object)->m_params.m_standoff = value;
+	((CPositioning*)object)->m_params.write_values_to_config();
 }
 
 static void on_set_sort_locations(int value, HeeksObj* object)
 {
-	((CLocating*)object)->m_params.m_sort_locations = value;
-	((CLocating*)object)->m_params.write_values_to_config();
+	((CPositioning*)object)->m_params.m_sort_locations = value;
+	((CPositioning*)object)->m_params.write_values_to_config();
 }
 
 
-void CLocatingParams::GetProperties(CLocating* parent, std::list<Property *> *list)
+void CPositioningParams::GetProperties(CPositioning* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("standoff"), m_standoff, parent, on_set_standoff));
 	{ // Begin choice scope
@@ -76,7 +76,7 @@ void CLocatingParams::GetProperties(CLocating* parent, std::list<Property *> *li
 	} // End choice scope
 }
 
-void CLocatingParams::WriteXMLAttributes(TiXmlNode *root)
+void CPositioningParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
 	element = new TiXmlElement( "params" );
@@ -86,13 +86,13 @@ void CLocatingParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("sort_locations", m_sort_locations);
 }
 
-void CLocatingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
+void CPositioningParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	if (pElem->Attribute("standoff")) pElem->Attribute("standoff", &m_standoff);
 	if (pElem->Attribute("sort_locations")) pElem->Attribute("sort_locations", &m_sort_locations);
 }
 
-const wxBitmap &CLocating::GetIcon()
+const wxBitmap &CPositioning::GetIcon()
 {
 	static wxBitmap* icon = NULL;
 	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/locating.png")));
@@ -104,13 +104,13 @@ const wxBitmap &CLocating::GetIcon()
 	Python source code whose job will be to generate RS-274 GCode.  It's done in two steps so that
 	the Python code can be configured to generate GCode suitable for various CNC interpreters.
  */
-Python CLocating::AppendTextToProgram( CMachineState *pMachineState )
+Python CPositioning::AppendTextToProgram( CMachineState *pMachineState )
 {
 	Python python;
 
 	python << COp::AppendTextToProgram( pMachineState );
 
-	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_locations, NULL);
+	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), (m_params.m_sort_locations != 0), NULL);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
 		CNCPoint location( *l_itLocation );
@@ -138,45 +138,45 @@ Python CLocating::AppendTextToProgram( CMachineState *pMachineState )
 	This is the Graphics Library Commands (from the OpenGL set).  This method calls the OpenGL
 	routines to paint the drill action in the graphics window.  The graphics is transient.
 
-	Part of its job is to re-paint the elements that this CLocating object refers to so that
+	Part of its job is to re-paint the elements that this CPositioning object refers to so that
 	we know what CAD objects this CNC operation is referring to.
  */
-void CLocating::glCommands(bool select, bool marked, bool no_color)
+void CPositioning::glCommands(bool select, bool marked, bool no_color)
 {
 	COp::glCommands(select, marked, no_color);
 }
 
 
-void CLocating::GetProperties(std::list<Property *> *list)
+void CPositioning::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
 	COp::GetProperties(list);
 }
 
-HeeksObj *CLocating::MakeACopy(void)const
+HeeksObj *CPositioning::MakeACopy(void)const
 {
-	return new CLocating(*this);
+	return new CPositioning(*this);
 }
 
-void CLocating::CopyFrom(const HeeksObj* object)
+void CPositioning::CopyFrom(const HeeksObj* object)
 {
-	operator=(*((CLocating*)object));
+	operator=(*((CPositioning*)object));
 }
 
-bool CLocating::CanAddTo(HeeksObj* owner)
+bool CPositioning::CanAddTo(HeeksObj* owner)
 {
 	return ((owner != NULL) && (owner->GetType() == OperationsType));
 }
 
-CLocating::CLocating( const CLocating & rhs ) : COp(rhs)
+CPositioning::CPositioning( const CPositioning & rhs ) : COp(rhs)
 {
 	m_symbols.clear();
 	std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ));
 	m_params = rhs.m_params;
 }
 
-CLocating::CLocating(	const Symbols_t &symbols )
-		: COp(GetTypeString(), 0, LocatingType), m_symbols(symbols)
+CPositioning::CPositioning(	const Symbols_t &symbols )
+		: COp(GetTypeString(), 0, PositioningType), m_symbols(symbols)
 {
     m_params.set_initial_values();
 
@@ -193,7 +193,7 @@ CLocating::CLocating(	const Symbols_t &symbols )
 }
 
 
-CLocating & CLocating::operator= ( const CLocating & rhs )
+CPositioning & CPositioning::operator= ( const CPositioning & rhs )
 {
 	if (this != &rhs)
 	{
@@ -208,9 +208,9 @@ CLocating & CLocating::operator= ( const CLocating & rhs )
 	return(*this);
 }
 
-void CLocating::WriteXML(TiXmlNode *root)
+void CPositioning::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Locating" );
+	TiXmlElement * element = new TiXmlElement( "Positioning" );
 	root->LinkEndChild( element );
 	m_params.WriteXMLAttributes(element);
 
@@ -230,9 +230,9 @@ void CLocating::WriteXML(TiXmlNode *root)
 }
 
 // static member function
-HeeksObj* CLocating::ReadFromXMLElement(TiXmlElement* element)
+HeeksObj* CPositioning::ReadFromXMLElement(TiXmlElement* element)
 {
-	CLocating* new_object = new CLocating;
+	CPositioning* new_object = new CPositioning;
 
 	std::list<TiXmlElement *> elements_to_remove;
 
@@ -274,7 +274,7 @@ HeeksObj* CLocating::ReadFromXMLElement(TiXmlElement* element)
 	list will have data in it for which we don't have children.  This routine converts
 	these type/id pairs into the HeeksObj pointers as children.
  */
-void CLocating::ReloadPointers()
+void CPositioning::ReloadPointers()
 {
 	for (Symbols_t::iterator symbol = m_symbols.begin(); symbol != m_symbols.end(); symbol++)
 	{
@@ -295,7 +295,7 @@ void CLocating::ReloadPointers()
 	This method adjusts any parameters that don't make sense.  It should report a list
 	of changes in the list of strings.
  */
-std::list<wxString> CLocating::DesignRulesAdjustment(const bool apply_changes)
+std::list<wxString> CPositioning::DesignRulesAdjustment(const bool apply_changes)
 {
 	std::list<wxString> changes;
 	return(changes);
@@ -306,7 +306,7 @@ std::list<wxString> CLocating::DesignRulesAdjustment(const bool apply_changes)
 /**
     This method returns TRUE if the type of symbol is suitable for reference as a source of location
  */
-/* static */ bool CLocating::ValidType( const int object_type )
+/* static */ bool CPositioning::ValidType( const int object_type )
 {
     switch (object_type)
     {
@@ -321,13 +321,13 @@ std::list<wxString> CLocating::DesignRulesAdjustment(const bool apply_changes)
     }
 }
 
-void CLocating::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+void CPositioning::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     COp::GetTools( t_list, p );
 }
 
 
-bool CLocatingParams::operator== ( const CLocatingParams & rhs ) const
+bool CPositioningParams::operator== ( const CPositioningParams & rhs ) const
 {
 	if (m_standoff != rhs.m_standoff) return(false);
 	if (m_sort_locations != rhs.m_sort_locations) return(false);
@@ -335,7 +335,7 @@ bool CLocatingParams::operator== ( const CLocatingParams & rhs ) const
 	return(true);
 }
 
-bool CLocating::operator== ( const CLocating & rhs ) const
+bool CPositioning::operator== ( const CPositioning & rhs ) const
 {
 	if (m_params != rhs.m_params) return(false);
 
