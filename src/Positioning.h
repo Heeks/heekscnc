@@ -1,8 +1,8 @@
 
-#ifndef LOCATING_CYCLE_CLASS_DEFINITION
-#define LOCATING_CYCLE_CLASS_DEFINITION
+#ifndef POSITIONING_CYCLE_CLASS_DEFINITION
+#define POSITIONING_CYCLE_CLASS_DEFINITION
 
-// Locating.h
+// Positioning.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
  * This program is released under the BSD license. See the file COPYING for
@@ -15,9 +15,9 @@
 #include <vector>
 #include "CNCPoint.h"
 
-class CLocating;
+class CPositioning;
 
-class CLocatingParams{
+class CPositioningParams{
 
 public:
 	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
@@ -28,20 +28,20 @@ public:
 
 	void set_initial_values();
 	void write_values_to_config();
-	void GetProperties(CLocating* parent, std::list<Property *> *list);
+	void GetProperties(CPositioning* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
-	wxString ConfigScope() const { return(_("Locating")); }
+	wxString ConfigScope() const { return(_("Positioning")); }
 
-	bool operator== ( const CLocatingParams & rhs ) const;
-	bool operator!= ( const CLocatingParams & rhs ) const { return(! (*this == rhs)); }
+	bool operator== ( const CPositioningParams & rhs ) const;
+	bool operator!= ( const CPositioningParams & rhs ) const { return(! (*this == rhs)); }
 };
 
 /**
-	The CLocating class stores a list of symbols (by type/id pairs) of elements that represent some point
+	The CPositioning class stores a list of symbols (by type/id pairs) of elements that represent some point
 	at which the user wants the to place the machine and then pause.  One scenario being where a previous
-	drilling operation drilled a series of holes and then a Locating operation moves the machine to
+	drilling operation drilled a series of holes and then a Positioning operation moves the machine to
 	a position immediately above these holes and then pauses operations.  This allows a manual tapping
 	head to be used.  When the hole has been tapped, the user can then resume operations at which point
 	the machine will be located above the next hole ready for another manual operation.
@@ -49,11 +49,11 @@ public:
 	It also accepts references to circle objects.  For this special case, the circle may not intersect any of
 	the other objects.  If this is the case then the circle's centre will be used as a hole location.
 
-	Finally the code tries to intersect all selected objects and places holes (Locating Cycles) at all
+	Finally the code tries to intersect all selected objects and places holes (Positioning Cycles) at all
 	intersection points.
  */
 
-class CLocating: public COp {
+class CPositioning: public COp {
 public:
 	/**
 		Define some data structures to hold references to CAD elements.  We store both the type and id because
@@ -68,28 +68,28 @@ public:
 	typedef std::list< Symbol_t > Symbols_t;
 
 public:
-	//	These are references to the CAD elements whose position indicate where the Locating Operation occurs.
+	//	These are references to the CAD elements whose position indicate where the Positioning Operation occurs.
 	//	If the m_params.m_sort_locations is false then the order of symbols in this list should
 	//	be respected when generating GCode.  We will, eventually, allow a user to sort the sub-elements
 	//	visually from within the main user interface.  When this occurs, the change in order should be
 	//	reflected in the ordering of symbols in the m_symbols list.
 
 	Symbols_t m_symbols;
-	CLocatingParams m_params;
+	CPositioningParams m_params;
 
 	//	Constructors.
-	CLocating():COp(GetTypeString(), 0, LocatingType){}
-	CLocating(	const Symbols_t &symbols );
+	CPositioning():COp(GetTypeString(), 0, PositioningType){}
+	CPositioning(	const Symbols_t &symbols );
 
-	CLocating( const CLocating & rhs );
-	CLocating & operator= ( const CLocating & rhs );
+	CPositioning( const CPositioning & rhs );
+	CPositioning & operator= ( const CPositioning & rhs );
 
-	bool operator==(const CLocating & rhs ) const;
-	bool operator!=(const CLocating & rhs ) const { return(! (*this == rhs)); }
+	bool operator==(const CPositioning & rhs ) const;
+	bool operator!=(const CPositioning & rhs ) const { return(! (*this == rhs)); }
 
 	// HeeksObj's virtual functions
-	int GetType()const{return LocatingType;}
-	const wxChar* GetTypeString(void)const{return _T("Locating");}
+	int GetType()const{return PositioningType;}
+	const wxChar* GetTypeString(void)const{return _T("Positioning");}
 	void glCommands(bool select, bool marked, bool no_color);
 
 	const wxBitmap &GetIcon();
@@ -115,4 +115,4 @@ public:
 };
 
 
-#endif // LOCATING_CYCLE_CLASS_DEFINITION
+#endif // POSITIONING_CYCLE_CLASS_DEFINITION
