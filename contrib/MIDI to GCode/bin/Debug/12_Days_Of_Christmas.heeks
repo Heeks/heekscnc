@@ -1,0 +1,914 @@
+<Text text="untitled" font="OpenGL" col="0" m0="-0.0443342566" m1="-0.999016753" m2="0" m3="0" m4="0.999016753" m5="-0.0443342566" m6="0" m7="0" m8="0" m9="0" ma="1" mb="0" id="1" />
+<Sketch title="Sketch" id="2">
+<Line col="0" id="3">
+<Point col="0" x="0" y="-21" z="0" id="4" />
+<Point col="0" x="1591.91" y="-21" z="0" id="5" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="6">
+<Line col="0" id="7">
+<Point col="0" x="0" y="-18" z="0" id="8" />
+<Point col="0" x="1591.91" y="-18" z="0" id="9" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="10">
+<Line col="0" id="11">
+<Point col="0" x="0" y="-15" z="0" id="12" />
+<Point col="0" x="1591.91" y="-15" z="0" id="13" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="14">
+<Line col="0" id="15">
+<Point col="0" x="0" y="-12" z="0" id="16" />
+<Point col="0" x="1591.91" y="-12" z="0" id="17" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="18">
+<Line col="0" id="19">
+<Point col="0" x="0" y="-9" z="0" id="20" />
+<Point col="0" x="1591.91" y="-9" z="0" id="21" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="22">
+<Line col="0" id="23">
+<Point col="0" x="0" y="-6" z="0" id="24" />
+<Point col="0" x="1591.91" y="-6" z="0" id="25" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="26">
+<Line col="0" id="27">
+<Point col="0" x="0" y="-3" z="0" id="28" />
+<Point col="0" x="1591.91" y="-3" z="0" id="29" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="30">
+<Line col="0" id="31">
+<Point col="0" x="0" y="0" z="0" id="32" />
+<Point col="0" x="1591.91" y="0" z="0" id="33" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="34">
+<Line col="0" id="35">
+<Point col="0" x="0" y="3" z="0" id="36" />
+<Point col="0" x="1591.91" y="3" z="0" id="37" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="38">
+<Line col="0" id="39">
+<Point col="0" x="0" y="6" z="0" id="40" />
+<Point col="0" x="1591.91" y="6" z="0" id="41" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="42">
+<Line col="0" id="43">
+<Point col="0" x="0" y="9" z="0" id="44" />
+<Point col="0" x="1591.91" y="9" z="0" id="45" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="46">
+<Line col="0" id="47">
+<Point col="0" x="0" y="12" z="0" id="48" />
+<Point col="0" x="1591.91" y="12" z="0" id="49" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="50">
+<Line col="0" id="51">
+<Point col="0" x="0" y="15" z="0" id="52" />
+<Point col="0" x="1591.91" y="15" z="0" id="53" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="54">
+<Line col="0" id="55">
+<Point col="0" x="0" y="18" z="0" id="56" />
+<Point col="0" x="1591.91" y="18" z="0" id="57" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="58">
+<Line col="0" id="59">
+<Point col="0" x="0" y="21" z="0" id="60" />
+<Point col="0" x="1591.91" y="21" z="0" id="61" />
+</Line>
+</Sketch>
+
+<Text text="SOPSAX 166" font="OpenGL" col="0" m0="-0.0443342566" m1="-0.999016753" m2="0" m3="0" m4="0.999016753" m5="-0.0443342566" m6="0" m7="78.75" m8="0" m9="0" ma="1" mb="0" id="62" />
+<Point col="0" x="22.2222" y="99.75" z="0" id="63" />
+<Point col="0" x="25.9259" y="99.75" z="0" id="64" />
+<Point col="0" x="29.6296" y="99.75" z="0" id="65" />
+<Point col="0" x="62.9629" y="93.75" z="0" id="66" />
+<Point col="0" x="74.074" y="93.75" z="0" id="67" />
+<Point col="0" x="103.704" y="93.75" z="0" id="68" />
+<Point col="0" x="140.741" y="99.75" z="0" id="69" />
+<Point col="0" x="144.444" y="99.75" z="0" id="70" />
+<Point col="0" x="148.148" y="99.75" z="0" id="71" />
+<Point col="0" x="181.481" y="93.75" z="0" id="72" />
+<Point col="0" x="192.592" y="93.75" z="0" id="73" />
+<Point col="0" x="218.518" y="93.75" z="0" id="74" />
+<Point col="0" x="229.629" y="93.75" z="0" id="75" />
+<Point col="0" x="251.852" y="93.75" z="0" id="76" />
+<Point col="0" x="288.889" y="99.75" z="0" id="77" />
+<Point col="0" x="292.592" y="99.75" z="0" id="78" />
+<Point col="0" x="296.296" y="99.75" z="0" id="79" />
+<Point col="0" x="329.629" y="93.75" z="0" id="80" />
+<Point col="0" x="340.74" y="93.75" z="0" id="81" />
+<Point col="0" x="366.666" y="93.75" z="0" id="82" />
+<Point col="0" x="388.888" y="93.75" z="0" id="83" />
+<Point col="0" x="400" y="93.75" z="0" id="84" />
+<Point col="0" x="422.222" y="93.75" z="0" id="85" />
+<Point col="0" x="459.259" y="99.75" z="0" id="86" />
+<Point col="0" x="462.962" y="99.75" z="0" id="87" />
+<Point col="0" x="466.666" y="99.75" z="0" id="88" />
+<Point col="0" x="500" y="93.75" z="0" id="89" />
+<Point col="0" x="511.111" y="93.75" z="0" id="90" />
+<Point col="0" x="537.037" y="93.75" z="0" id="91" />
+<Point col="0" x="559.259" y="93.75" z="0" id="92" />
+<Point col="0" x="581.481" y="93.75" z="0" id="93" />
+<Point col="0" x="592.592" y="93.75" z="0" id="94" />
+<Point col="0" x="614.814" y="93.75" z="0" id="95" />
+<Point col="0" x="651.851" y="99.75" z="0" id="96" />
+<Point col="0" x="655.555" y="99.75" z="0" id="97" />
+<Point col="0" x="659.259" y="99.75" z="0" id="98" />
+<Point col="0" x="692.592" y="93.75" z="0" id="99" />
+<Point col="0" x="703.703" y="93.75" z="0" id="100" />
+<Point col="0" x="740.74" y="96.75" z="0" id="101" />
+<Point col="0" x="785.184" y="93.75" z="0" id="102" />
+<Point col="0" x="837.036" y="99.75" z="0" id="103" />
+<Point col="0" x="844.444" y="93.75" z="0" id="104" />
+<Point col="0" x="868.456" y="93.75" z="0" id="105" />
+<Sketch title="Sketch" id="106">
+<Line col="0" id="107">
+<Point col="0" x="0" y="57.75" z="0" id="108" />
+<Point col="0" x="928.643" y="57.75" z="0" id="109" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="110">
+<Line col="0" id="111">
+<Point col="0" x="0" y="60.75" z="0" id="112" />
+<Point col="0" x="928.643" y="60.75" z="0" id="113" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="114">
+<Line col="0" id="115">
+<Point col="0" x="0" y="63.75" z="0" id="116" />
+<Point col="0" x="928.643" y="63.75" z="0" id="117" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="118">
+<Line col="0" id="119">
+<Point col="0" x="0" y="66.75" z="0" id="120" />
+<Point col="0" x="928.643" y="66.75" z="0" id="121" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="122">
+<Line col="0" id="123">
+<Point col="0" x="0" y="69.75" z="0" id="124" />
+<Point col="0" x="928.643" y="69.75" z="0" id="125" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="126">
+<Line col="0" id="127">
+<Point col="0" x="0" y="72.75" z="0" id="128" />
+<Point col="0" x="928.643" y="72.75" z="0" id="129" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="130">
+<Line col="0" id="131">
+<Point col="0" x="0" y="75.75" z="0" id="132" />
+<Point col="0" x="928.643" y="75.75" z="0" id="133" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="134">
+<Line col="0" id="135">
+<Point col="0" x="0" y="78.75" z="0" id="136" />
+<Point col="0" x="928.643" y="78.75" z="0" id="137" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="138">
+<Line col="0" id="139">
+<Point col="0" x="0" y="81.75" z="0" id="140" />
+<Point col="0" x="928.643" y="81.75" z="0" id="141" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="142">
+<Line col="0" id="143">
+<Point col="0" x="0" y="84.75" z="0" id="144" />
+<Point col="0" x="928.643" y="84.75" z="0" id="145" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="146">
+<Line col="0" id="147">
+<Point col="0" x="0" y="87.75" z="0" id="148" />
+<Point col="0" x="928.643" y="87.75" z="0" id="149" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="150">
+<Line col="0" id="151">
+<Point col="0" x="0" y="90.75" z="0" id="152" />
+<Point col="0" x="928.643" y="90.75" z="0" id="153" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="154">
+<Line col="0" id="155">
+<Point col="0" x="0" y="93.75" z="0" id="156" />
+<Point col="0" x="928.643" y="93.75" z="0" id="157" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="158">
+<Line col="0" id="159">
+<Point col="0" x="0" y="96.75" z="0" id="160" />
+<Point col="0" x="928.643" y="96.75" z="0" id="161" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="162">
+<Line col="0" id="163">
+<Point col="0" x="0" y="99.75" z="0" id="164" />
+<Point col="0" x="928.643" y="99.75" z="0" id="165" />
+</Line>
+</Sketch>
+
+<Text text="FLUTE" font="OpenGL" col="0" m0="-0.0443342566" m1="-0.999016753" m2="0" m3="0" m4="0.999016753" m5="-0.0443342566" m6="0" m7="157.5" m8="0" m9="0" ma="1" mb="0" id="166" />
+<Point col="0" x="22.2222" y="178.5" z="0" id="167" />
+<Point col="0" x="25.9259" y="178.5" z="0" id="168" />
+<Point col="0" x="29.6296" y="178.5" z="0" id="169" />
+<Point col="0" x="62.9629" y="172.5" z="0" id="170" />
+<Point col="0" x="74.074" y="172.5" z="0" id="171" />
+<Point col="0" x="103.704" y="172.5" z="0" id="172" />
+<Point col="0" x="140.741" y="178.5" z="0" id="173" />
+<Point col="0" x="144.444" y="178.5" z="0" id="174" />
+<Point col="0" x="148.148" y="178.5" z="0" id="175" />
+<Point col="0" x="181.481" y="172.5" z="0" id="176" />
+<Point col="0" x="192.592" y="172.5" z="0" id="177" />
+<Point col="0" x="218.518" y="172.5" z="0" id="178" />
+<Point col="0" x="229.629" y="172.5" z="0" id="179" />
+<Point col="0" x="251.852" y="172.5" z="0" id="180" />
+<Point col="0" x="288.889" y="178.5" z="0" id="181" />
+<Point col="0" x="292.592" y="178.5" z="0" id="182" />
+<Point col="0" x="296.296" y="178.5" z="0" id="183" />
+<Point col="0" x="329.629" y="172.5" z="0" id="184" />
+<Point col="0" x="340.74" y="172.5" z="0" id="185" />
+<Point col="0" x="366.666" y="172.5" z="0" id="186" />
+<Point col="0" x="388.888" y="172.5" z="0" id="187" />
+<Point col="0" x="400" y="172.5" z="0" id="188" />
+<Point col="0" x="422.222" y="172.5" z="0" id="189" />
+<Point col="0" x="459.259" y="178.5" z="0" id="190" />
+<Point col="0" x="462.962" y="178.5" z="0" id="191" />
+<Point col="0" x="466.666" y="178.5" z="0" id="192" />
+<Point col="0" x="500" y="172.5" z="0" id="193" />
+<Point col="0" x="511.111" y="172.5" z="0" id="194" />
+<Point col="0" x="537.037" y="172.5" z="0" id="195" />
+<Point col="0" x="559.259" y="172.5" z="0" id="196" />
+<Point col="0" x="581.481" y="172.5" z="0" id="197" />
+<Point col="0" x="592.592" y="172.5" z="0" id="198" />
+<Point col="0" x="614.814" y="172.5" z="0" id="199" />
+<Point col="0" x="651.851" y="178.5" z="0" id="200" />
+<Point col="0" x="655.555" y="178.5" z="0" id="201" />
+<Point col="0" x="659.259" y="178.5" z="0" id="202" />
+<Point col="0" x="692.592" y="172.5" z="0" id="203" />
+<Point col="0" x="703.703" y="172.5" z="0" id="204" />
+<Point col="0" x="740.74" y="175.5" z="0" id="205" />
+<Point col="0" x="785.184" y="172.5" z="0" id="206" />
+<Point col="0" x="837.036" y="178.5" z="0" id="207" />
+<Point col="0" x="844.444" y="172.5" z="0" id="208" />
+<Point col="0" x="868.456" y="172.5" z="0" id="209" />
+<Sketch title="Sketch" id="210">
+<Line col="0" id="211">
+<Point col="0" x="0" y="136.5" z="0" id="212" />
+<Point col="0" x="928.643" y="136.5" z="0" id="213" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="214">
+<Line col="0" id="215">
+<Point col="0" x="0" y="139.5" z="0" id="216" />
+<Point col="0" x="928.643" y="139.5" z="0" id="217" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="218">
+<Line col="0" id="219">
+<Point col="0" x="0" y="142.5" z="0" id="220" />
+<Point col="0" x="928.643" y="142.5" z="0" id="221" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="222">
+<Line col="0" id="223">
+<Point col="0" x="0" y="145.5" z="0" id="224" />
+<Point col="0" x="928.643" y="145.5" z="0" id="225" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="226">
+<Line col="0" id="227">
+<Point col="0" x="0" y="148.5" z="0" id="228" />
+<Point col="0" x="928.643" y="148.5" z="0" id="229" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="230">
+<Line col="0" id="231">
+<Point col="0" x="0" y="151.5" z="0" id="232" />
+<Point col="0" x="928.643" y="151.5" z="0" id="233" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="234">
+<Line col="0" id="235">
+<Point col="0" x="0" y="154.5" z="0" id="236" />
+<Point col="0" x="928.643" y="154.5" z="0" id="237" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="238">
+<Line col="0" id="239">
+<Point col="0" x="0" y="157.5" z="0" id="240" />
+<Point col="0" x="928.643" y="157.5" z="0" id="241" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="242">
+<Line col="0" id="243">
+<Point col="0" x="0" y="160.5" z="0" id="244" />
+<Point col="0" x="928.643" y="160.5" z="0" id="245" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="246">
+<Line col="0" id="247">
+<Point col="0" x="0" y="163.5" z="0" id="248" />
+<Point col="0" x="928.643" y="163.5" z="0" id="249" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="250">
+<Line col="0" id="251">
+<Point col="0" x="0" y="166.5" z="0" id="252" />
+<Point col="0" x="928.643" y="166.5" z="0" id="253" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="254">
+<Line col="0" id="255">
+<Point col="0" x="0" y="169.5" z="0" id="256" />
+<Point col="0" x="928.643" y="169.5" z="0" id="257" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="258">
+<Line col="0" id="259">
+<Point col="0" x="0" y="172.5" z="0" id="260" />
+<Point col="0" x="928.643" y="172.5" z="0" id="261" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="262">
+<Line col="0" id="263">
+<Point col="0" x="0" y="175.5" z="0" id="264" />
+<Point col="0" x="928.643" y="175.5" z="0" id="265" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="266">
+<Line col="0" id="267">
+<Point col="0" x="0" y="178.5" z="0" id="268" />
+<Point col="0" x="928.643" y="178.5" z="0" id="269" />
+</Line>
+</Sketch>
+
+<Text text="GLOCKIN" font="OpenGL" col="0" m0="-0.0443342566" m1="-0.999016753" m2="0" m3="0" m4="0.999016753" m5="-0.0443342566" m6="0" m7="236.25" m8="0" m9="0" ma="1" mb="0" id="270" />
+<Point col="0" x="22.2222" y="257.25" z="0" id="271" />
+<Point col="0" x="25.9259" y="257.25" z="0" id="272" />
+<Point col="0" x="29.6296" y="257.25" z="0" id="273" />
+<Point col="0" x="62.9629" y="251.25" z="0" id="274" />
+<Point col="0" x="74.074" y="251.25" z="0" id="275" />
+<Point col="0" x="103.704" y="251.25" z="0" id="276" />
+<Point col="0" x="140.741" y="257.25" z="0" id="277" />
+<Point col="0" x="144.444" y="257.25" z="0" id="278" />
+<Point col="0" x="148.148" y="257.25" z="0" id="279" />
+<Point col="0" x="181.481" y="251.25" z="0" id="280" />
+<Point col="0" x="192.592" y="251.25" z="0" id="281" />
+<Point col="0" x="218.518" y="251.25" z="0" id="282" />
+<Point col="0" x="229.629" y="251.25" z="0" id="283" />
+<Point col="0" x="251.852" y="251.25" z="0" id="284" />
+<Point col="0" x="288.889" y="257.25" z="0" id="285" />
+<Point col="0" x="292.592" y="257.25" z="0" id="286" />
+<Point col="0" x="296.296" y="257.25" z="0" id="287" />
+<Point col="0" x="329.629" y="251.25" z="0" id="288" />
+<Point col="0" x="340.74" y="251.25" z="0" id="289" />
+<Point col="0" x="366.666" y="251.25" z="0" id="290" />
+<Point col="0" x="388.888" y="251.25" z="0" id="291" />
+<Point col="0" x="400" y="251.25" z="0" id="292" />
+<Point col="0" x="422.222" y="251.25" z="0" id="293" />
+<Point col="0" x="459.259" y="257.25" z="0" id="294" />
+<Point col="0" x="462.962" y="257.25" z="0" id="295" />
+<Point col="0" x="466.666" y="257.25" z="0" id="296" />
+<Point col="0" x="500" y="251.25" z="0" id="297" />
+<Point col="0" x="511.111" y="251.25" z="0" id="298" />
+<Point col="0" x="537.037" y="251.25" z="0" id="299" />
+<Point col="0" x="559.259" y="251.25" z="0" id="300" />
+<Point col="0" x="581.481" y="251.25" z="0" id="301" />
+<Point col="0" x="592.592" y="251.25" z="0" id="302" />
+<Point col="0" x="614.814" y="251.25" z="0" id="303" />
+<Point col="0" x="651.851" y="257.25" z="0" id="304" />
+<Point col="0" x="655.555" y="257.25" z="0" id="305" />
+<Point col="0" x="659.259" y="257.25" z="0" id="306" />
+<Point col="0" x="692.592" y="251.25" z="0" id="307" />
+<Point col="0" x="703.703" y="251.25" z="0" id="308" />
+<Point col="0" x="740.74" y="254.25" z="0" id="309" />
+<Point col="0" x="785.184" y="251.25" z="0" id="310" />
+<Point col="0" x="837.036" y="257.25" z="0" id="311" />
+<Point col="0" x="844.444" y="251.25" z="0" id="312" />
+<Point col="0" x="868.456" y="251.25" z="0" id="313" />
+<Sketch title="Sketch" id="314">
+<Line col="0" id="315">
+<Point col="0" x="0" y="215.25" z="0" id="316" />
+<Point col="0" x="928.643" y="215.25" z="0" id="317" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="318">
+<Line col="0" id="319">
+<Point col="0" x="0" y="218.25" z="0" id="320" />
+<Point col="0" x="928.643" y="218.25" z="0" id="321" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="322">
+<Line col="0" id="323">
+<Point col="0" x="0" y="221.25" z="0" id="324" />
+<Point col="0" x="928.643" y="221.25" z="0" id="325" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="326">
+<Line col="0" id="327">
+<Point col="0" x="0" y="224.25" z="0" id="328" />
+<Point col="0" x="928.643" y="224.25" z="0" id="329" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="330">
+<Line col="0" id="331">
+<Point col="0" x="0" y="227.25" z="0" id="332" />
+<Point col="0" x="928.643" y="227.25" z="0" id="333" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="334">
+<Line col="0" id="335">
+<Point col="0" x="0" y="230.25" z="0" id="336" />
+<Point col="0" x="928.643" y="230.25" z="0" id="337" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="338">
+<Line col="0" id="339">
+<Point col="0" x="0" y="233.25" z="0" id="340" />
+<Point col="0" x="928.643" y="233.25" z="0" id="341" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="342">
+<Line col="0" id="343">
+<Point col="0" x="0" y="236.25" z="0" id="344" />
+<Point col="0" x="928.643" y="236.25" z="0" id="345" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="346">
+<Line col="0" id="347">
+<Point col="0" x="0" y="239.25" z="0" id="348" />
+<Point col="0" x="928.643" y="239.25" z="0" id="349" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="350">
+<Line col="0" id="351">
+<Point col="0" x="0" y="242.25" z="0" id="352" />
+<Point col="0" x="928.643" y="242.25" z="0" id="353" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="354">
+<Line col="0" id="355">
+<Point col="0" x="0" y="245.25" z="0" id="356" />
+<Point col="0" x="928.643" y="245.25" z="0" id="357" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="358">
+<Line col="0" id="359">
+<Point col="0" x="0" y="248.25" z="0" id="360" />
+<Point col="0" x="928.643" y="248.25" z="0" id="361" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="362">
+<Line col="0" id="363">
+<Point col="0" x="0" y="251.25" z="0" id="364" />
+<Point col="0" x="928.643" y="251.25" z="0" id="365" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="366">
+<Line col="0" id="367">
+<Point col="0" x="0" y="254.25" z="0" id="368" />
+<Point col="0" x="928.643" y="254.25" z="0" id="369" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="370">
+<Line col="0" id="371">
+<Point col="0" x="0" y="257.25" z="0" id="372" />
+<Point col="0" x="928.643" y="257.25" z="0" id="373" />
+</Line>
+</Sketch>
+
+<Text text="STRINGS" font="OpenGL" col="0" m0="-0.0443342566" m1="-0.999016753" m2="0" m3="0" m4="0.999016753" m5="-0.0443342566" m6="0" m7="315" m8="0" m9="0" ma="1" mb="0" id="374" />
+<Point col="0" x="296.296" y="309" z="0" id="375" />
+<Point col="0" x="311.111" y="315" z="0" id="376" />
+<Point col="0" x="311.111" y="336" z="0" id="377" />
+<Point col="0" x="325.926" y="318" z="0" id="378" />
+<Point col="0" x="333.333" y="321" z="0" id="379" />
+<Point col="0" x="337.037" y="294" z="0" id="380" />
+<Point col="0" x="340.74" y="324" z="0" id="381" />
+<Point col="0" x="355.555" y="321" z="0" id="382" />
+<Point col="0" x="355.555" y="294" z="0" id="383" />
+<Point col="0" x="370.37" y="324" z="0" id="384" />
+<Point col="0" x="370.37" y="297" z="0" id="385" />
+<Point col="0" x="377.777" y="321" z="0" id="386" />
+<Point col="0" x="377.777" y="294" z="0" id="387" />
+<Point col="0" x="392.592" y="324" z="0" id="388" />
+<Point col="0" x="392.592" y="297" z="0" id="389" />
+<Point col="0" x="400" y="321" z="0" id="390" />
+<Point col="0" x="400" y="294" z="0" id="391" />
+<Point col="0" x="407.407" y="324" z="0" id="392" />
+<Point col="0" x="414.814" y="324" z="0" id="393" />
+<Point col="0" x="422.222" y="324" z="0" id="394" />
+<Point col="0" x="422.222" y="294" z="0" id="395" />
+<Point col="0" x="429.629" y="321" z="0" id="396" />
+<Point col="0" x="437.037" y="318" z="0" id="397" />
+<Point col="0" x="444.444" y="315" z="0" id="398" />
+<Point col="0" x="444.444" y="336" z="0" id="399" />
+<Point col="0" x="466.666" y="309" z="0" id="400" />
+<Point col="0" x="481.481" y="315" z="0" id="401" />
+<Point col="0" x="481.481" y="336" z="0" id="402" />
+<Point col="0" x="496.296" y="318" z="0" id="403" />
+<Point col="0" x="503.703" y="321" z="0" id="404" />
+<Point col="0" x="507.407" y="294" z="0" id="405" />
+<Point col="0" x="511.111" y="324" z="0" id="406" />
+<Point col="0" x="525.925" y="321" z="0" id="407" />
+<Point col="0" x="525.925" y="294" z="0" id="408" />
+<Point col="0" x="540.74" y="324" z="0" id="409" />
+<Point col="0" x="540.74" y="297" z="0" id="410" />
+<Point col="0" x="548.148" y="321" z="0" id="411" />
+<Point col="0" x="548.148" y="294" z="0" id="412" />
+<Point col="0" x="562.962" y="324" z="0" id="413" />
+<Point col="0" x="562.962" y="297" z="0" id="414" />
+<Point col="0" x="570.37" y="321" z="0" id="415" />
+<Point col="0" x="570.37" y="294" z="0" id="416" />
+<Point col="0" x="585.185" y="324" z="0" id="417" />
+<Point col="0" x="585.185" y="297" z="0" id="418" />
+<Point col="0" x="592.592" y="321" z="0" id="419" />
+<Point col="0" x="592.592" y="294" z="0" id="420" />
+<Point col="0" x="599.999" y="324" z="0" id="421" />
+<Point col="0" x="607.407" y="324" z="0" id="422" />
+<Point col="0" x="614.814" y="324" z="0" id="423" />
+<Point col="0" x="614.814" y="294" z="0" id="424" />
+<Point col="0" x="622.222" y="321" z="0" id="425" />
+<Point col="0" x="629.629" y="318" z="0" id="426" />
+<Point col="0" x="637.036" y="315" z="0" id="427" />
+<Point col="0" x="637.036" y="336" z="0" id="428" />
+<Point col="0" x="659.259" y="309" z="0" id="429" />
+<Point col="0" x="674.073" y="315" z="0" id="430" />
+<Point col="0" x="674.073" y="336" z="0" id="431" />
+<Point col="0" x="688.888" y="318" z="0" id="432" />
+<Point col="0" x="696.296" y="321" z="0" id="433" />
+<Point col="0" x="699.999" y="294" z="0" id="434" />
+<Point col="0" x="703.703" y="324" z="0" id="435" />
+<Point col="0" x="718.518" y="324" z="0" id="436" />
+<Point col="0" x="718.518" y="294" z="0" id="437" />
+<Point col="0" x="733.333" y="324" z="0" id="438" />
+<Point col="0" x="740.74" y="297" z="0" id="439" />
+<Point col="0" x="748.147" y="321" z="0" id="440" />
+<Point col="0" x="748.147" y="294" z="0" id="441" />
+<Point col="0" x="762.962" y="294" z="0" id="442" />
+<Point col="0" x="844.444" y="294" z="0" id="443" />
+<Point col="0" x="844.444" y="321" z="0" id="444" />
+<Point col="0" x="844.444" y="294" z="0" id="445" />
+<Point col="0" x="851.851" y="324" z="0" id="446" />
+<Point col="0" x="859.822" y="324" z="0" id="447" />
+<Point col="0" x="868.456" y="294" z="0" id="448" />
+<Point col="0" x="868.456" y="324" z="0" id="449" />
+<Point col="0" x="868.456" y="294" z="0" id="450" />
+<Point col="0" x="877.788" y="321" z="0" id="451" />
+<Point col="0" x="887.826" y="318" z="0" id="452" />
+<Point col="0" x="898.031" y="315" z="0" id="453" />
+<Point col="0" x="898.031" y="336" z="0" id="454" />
+<Sketch title="Sketch" id="455">
+<Line col="0" id="456">
+<Point col="0" x="0" y="294" z="0" id="457" />
+<Point col="0" x="928.643" y="294" z="0" id="458" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="459">
+<Line col="0" id="460">
+<Point col="0" x="0" y="297" z="0" id="461" />
+<Point col="0" x="928.643" y="297" z="0" id="462" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="463">
+<Line col="0" id="464">
+<Point col="0" x="0" y="300" z="0" id="465" />
+<Point col="0" x="928.643" y="300" z="0" id="466" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="467">
+<Line col="0" id="468">
+<Point col="0" x="0" y="303" z="0" id="469" />
+<Point col="0" x="928.643" y="303" z="0" id="470" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="471">
+<Line col="0" id="472">
+<Point col="0" x="0" y="306" z="0" id="473" />
+<Point col="0" x="928.643" y="306" z="0" id="474" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="475">
+<Line col="0" id="476">
+<Point col="0" x="0" y="309" z="0" id="477" />
+<Point col="0" x="928.643" y="309" z="0" id="478" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="479">
+<Line col="0" id="480">
+<Point col="0" x="0" y="312" z="0" id="481" />
+<Point col="0" x="928.643" y="312" z="0" id="482" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="483">
+<Line col="0" id="484">
+<Point col="0" x="0" y="315" z="0" id="485" />
+<Point col="0" x="928.643" y="315" z="0" id="486" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="487">
+<Line col="0" id="488">
+<Point col="0" x="0" y="318" z="0" id="489" />
+<Point col="0" x="928.643" y="318" z="0" id="490" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="491">
+<Line col="0" id="492">
+<Point col="0" x="0" y="321" z="0" id="493" />
+<Point col="0" x="928.643" y="321" z="0" id="494" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="495">
+<Line col="0" id="496">
+<Point col="0" x="0" y="324" z="0" id="497" />
+<Point col="0" x="928.643" y="324" z="0" id="498" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="499">
+<Line col="0" id="500">
+<Point col="0" x="0" y="327" z="0" id="501" />
+<Point col="0" x="928.643" y="327" z="0" id="502" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="503">
+<Line col="0" id="504">
+<Point col="0" x="0" y="330" z="0" id="505" />
+<Point col="0" x="928.643" y="330" z="0" id="506" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="507">
+<Line col="0" id="508">
+<Point col="0" x="0" y="333" z="0" id="509" />
+<Point col="0" x="928.643" y="333" z="0" id="510" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="511">
+<Line col="0" id="512">
+<Point col="0" x="0" y="336" z="0" id="513" />
+<Point col="0" x="928.643" y="336" z="0" id="514" />
+</Line>
+</Sketch>
+
+<Text text="ACC. GUITAR" font="OpenGL" col="0" m0="-0.0443342566" m1="-0.999016753" m2="0" m3="0" m4="0.999016753" m5="-0.0443342566" m6="0" m7="393.75" m8="0" m9="0" ma="1" mb="0" id="515" />
+<Point col="0" x="29.6296" y="387.75" z="0" id="516" />
+<Point col="0" x="29.6296" y="408.75" z="0" id="517" />
+<Point col="0" x="29.6296" y="381.75" z="0" id="518" />
+<Point col="0" x="44.4444" y="414.75" z="0" id="519" />
+<Point col="0" x="66.6666" y="384.75" z="0" id="520" />
+<Point col="0" x="70.3703" y="393.75" z="0" id="521" />
+<Point col="0" x="74.074" y="381.75" z="0" id="522" />
+<Point col="0" x="85.1851" y="384.75" z="0" id="523" />
+<Point col="0" x="103.704" y="393.75" z="0" id="524" />
+<Point col="0" x="111.111" y="372.75" z="0" id="525" />
+<Point col="0" x="118.518" y="381.75" z="0" id="526" />
+<Point col="0" x="125.926" y="414.75" z="0" id="527" />
+<Point col="0" x="148.148" y="387.75" z="0" id="528" />
+<Point col="0" x="148.148" y="408.75" z="0" id="529" />
+<Point col="0" x="148.148" y="381.75" z="0" id="530" />
+<Point col="0" x="162.963" y="414.75" z="0" id="531" />
+<Point col="0" x="185.185" y="384.75" z="0" id="532" />
+<Point col="0" x="188.889" y="393.75" z="0" id="533" />
+<Point col="0" x="192.592" y="381.75" z="0" id="534" />
+<Point col="0" x="207.407" y="393.75" z="0" id="535" />
+<Point col="0" x="222.222" y="396.75" z="0" id="536" />
+<Point col="0" x="229.629" y="393.75" z="0" id="537" />
+<Point col="0" x="251.852" y="393.75" z="0" id="538" />
+<Point col="0" x="259.259" y="372.75" z="0" id="539" />
+<Point col="0" x="266.666" y="381.75" z="0" id="540" />
+<Point col="0" x="274.074" y="414.75" z="0" id="541" />
+<Point col="0" x="466.666" y="387.75" z="0" id="542" />
+<Point col="0" x="466.666" y="408.75" z="0" id="543" />
+<Point col="0" x="466.666" y="381.75" z="0" id="544" />
+<Point col="0" x="481.481" y="414.75" z="0" id="545" />
+<Point col="0" x="503.703" y="384.75" z="0" id="546" />
+<Point col="0" x="507.407" y="393.75" z="0" id="547" />
+<Point col="0" x="511.111" y="381.75" z="0" id="548" />
+<Point col="0" x="525.925" y="393.75" z="0" id="549" />
+<Point col="0" x="540.74" y="396.75" z="0" id="550" />
+<Point col="0" x="548.148" y="393.75" z="0" id="551" />
+<Point col="0" x="562.962" y="396.75" z="0" id="552" />
+<Point col="0" x="570.37" y="393.75" z="0" id="553" />
+<Point col="0" x="585.185" y="396.75" z="0" id="554" />
+<Point col="0" x="592.592" y="393.75" z="0" id="555" />
+<Point col="0" x="614.814" y="393.75" z="0" id="556" />
+<Point col="0" x="622.222" y="372.75" z="0" id="557" />
+<Point col="0" x="629.629" y="381.75" z="0" id="558" />
+<Point col="0" x="637.036" y="414.75" z="0" id="559" />
+<Point col="0" x="659.259" y="387.75" z="0" id="560" />
+<Point col="0" x="659.259" y="408.75" z="0" id="561" />
+<Point col="0" x="659.259" y="381.75" z="0" id="562" />
+<Point col="0" x="674.073" y="414.75" z="0" id="563" />
+<Point col="0" x="696.296" y="384.75" z="0" id="564" />
+<Point col="0" x="699.999" y="393.75" z="0" id="565" />
+<Point col="0" x="703.703" y="381.75" z="0" id="566" />
+<Point col="0" x="718.518" y="393.75" z="0" id="567" />
+<Point col="0" x="740.74" y="396.75" z="0" id="568" />
+<Point col="0" x="748.147" y="393.75" z="0" id="569" />
+<Point col="0" x="755.555" y="384.75" z="0" id="570" />
+<Point col="0" x="762.962" y="393.75" z="0" id="571" />
+<Point col="0" x="785.184" y="393.75" z="0" id="572" />
+<Point col="0" x="822.221" y="384.75" z="0" id="573" />
+<Point col="0" x="829.629" y="390.75" z="0" id="574" />
+<Point col="0" x="829.629" y="411.75" z="0" id="575" />
+<Point col="0" x="829.629" y="384.75" z="0" id="576" />
+<Point col="0" x="833.332" y="381.75" z="0" id="577" />
+<Point col="0" x="837.036" y="414.75" z="0" id="578" />
+<Point col="0" x="837.036" y="378.75" z="0" id="579" />
+<Point col="0" x="844.444" y="393.75" z="0" id="580" />
+<Point col="0" x="868.456" y="393.75" z="0" id="581" />
+<Point col="0" x="877.788" y="372.75" z="0" id="582" />
+<Point col="0" x="887.826" y="381.75" z="0" id="583" />
+<Point col="0" x="898.031" y="414.75" z="0" id="584" />
+<Sketch title="Sketch" id="585">
+<Line col="0" id="586">
+<Point col="0" x="0" y="372.75" z="0" id="587" />
+<Point col="0" x="928.643" y="372.75" z="0" id="588" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="589">
+<Line col="0" id="590">
+<Point col="0" x="0" y="375.75" z="0" id="591" />
+<Point col="0" x="928.643" y="375.75" z="0" id="592" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="593">
+<Line col="0" id="594">
+<Point col="0" x="0" y="378.75" z="0" id="595" />
+<Point col="0" x="928.643" y="378.75" z="0" id="596" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="597">
+<Line col="0" id="598">
+<Point col="0" x="0" y="381.75" z="0" id="599" />
+<Point col="0" x="928.643" y="381.75" z="0" id="600" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="601">
+<Line col="0" id="602">
+<Point col="0" x="0" y="384.75" z="0" id="603" />
+<Point col="0" x="928.643" y="384.75" z="0" id="604" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="605">
+<Line col="0" id="606">
+<Point col="0" x="0" y="387.75" z="0" id="607" />
+<Point col="0" x="928.643" y="387.75" z="0" id="608" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="609">
+<Line col="0" id="610">
+<Point col="0" x="0" y="390.75" z="0" id="611" />
+<Point col="0" x="928.643" y="390.75" z="0" id="612" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="613">
+<Line col="0" id="614">
+<Point col="0" x="0" y="393.75" z="0" id="615" />
+<Point col="0" x="928.643" y="393.75" z="0" id="616" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="617">
+<Line col="0" id="618">
+<Point col="0" x="0" y="396.75" z="0" id="619" />
+<Point col="0" x="928.643" y="396.75" z="0" id="620" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="621">
+<Line col="0" id="622">
+<Point col="0" x="0" y="399.75" z="0" id="623" />
+<Point col="0" x="928.643" y="399.75" z="0" id="624" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="625">
+<Line col="0" id="626">
+<Point col="0" x="0" y="402.75" z="0" id="627" />
+<Point col="0" x="928.643" y="402.75" z="0" id="628" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="629">
+<Line col="0" id="630">
+<Point col="0" x="0" y="405.75" z="0" id="631" />
+<Point col="0" x="928.643" y="405.75" z="0" id="632" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="633">
+<Line col="0" id="634">
+<Point col="0" x="0" y="408.75" z="0" id="635" />
+<Point col="0" x="928.643" y="408.75" z="0" id="636" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="637">
+<Line col="0" id="638">
+<Point col="0" x="0" y="411.75" z="0" id="639" />
+<Point col="0" x="928.643" y="411.75" z="0" id="640" />
+</Line>
+</Sketch>
+
+<Sketch title="Sketch" id="641">
+<Line col="0" id="642">
+<Point col="0" x="0" y="414.75" z="0" id="643" />
+<Point col="0" x="928.643" y="414.75" z="0" id="644" />
+</Line>
+</Sketch>
+
