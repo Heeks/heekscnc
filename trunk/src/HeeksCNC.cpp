@@ -37,7 +37,7 @@
 #endif
 #include "Drilling.h"
 #include "Tapping.h"
-#include "Locating.h"
+#include "Positioning.h"
 #include "CTool.h"
 #include "CounterBore.h"
 #ifndef STABLE_OPS_ONLY
@@ -598,7 +598,7 @@ static void NewUnattachOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Changed();
 }
 
-static void NewLocatingOpMenuCallback(wxCommandEvent &event)
+static void NewPositioningOpMenuCallback(wxCommandEvent &event)
 {
 	std::vector<CNCPoint> intersections;
 	CDrilling::Symbols_t symbols;
@@ -609,7 +609,7 @@ static void NewLocatingOpMenuCallback(wxCommandEvent &event)
 		HeeksObj* object = *It;
 		if (object != NULL)
 		{
-		    if (CLocating::ValidType( object->GetType() ))
+		    if (CPositioning::ValidType( object->GetType() ))
 		    {
                 symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
 		    }
@@ -623,7 +623,7 @@ static void NewLocatingOpMenuCallback(wxCommandEvent &event)
     }
 
 	heeksCAD->CreateUndoPoint();
-	CLocating *new_object = new CLocating( symbols );
+	CPositioning *new_object = new CPositioning( symbols );
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
@@ -1320,7 +1320,7 @@ static void AddToolBars()
 #endif
 
 		heeksCAD->StartToolBarFlyout(_("Other operations"));
-		heeksCAD->AddFlyoutButton(_("Locating"), ToolImage(_T("locating")), _("New Locating Operation..."), NewLocatingOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Positioning"), ToolImage(_T("locating")), _("New Positioning Operation..."), NewPositioningOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
 		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
 		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
@@ -1474,7 +1474,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Adjustment..."), ToolImage(_T("design_rules_adjustment")), DesignRulesAdjustmentMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Speed Reference..."), ToolImage(_T("speed_reference")), NewSpeedReferenceMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Cutting Rate Reference..."), ToolImage(_T("cutting_rate")), NewCuttingRateMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Locating Operation..."), ToolImage(_T("locating")), NewLocatingOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Positioning Operation..."), ToolImage(_T("locating")), NewPositioningOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Probe Centre Operation..."), ToolImage(_T("probe")), NewProbe_Centre_MenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Probe Edge Operation..."), ToolImage(_T("probe")), NewProbe_Edge_MenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Probe Grid Operation..."), ToolImage(_T("probe")), NewProbe_Grid_MenuCallback);
@@ -1577,7 +1577,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
 #endif
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("Locating", CLocating::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Locating", CPositioning::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Positioning", CPositioning::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ProbeCentre", CProbe_Centre::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ProbeEdge", CProbe_Edge::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ProbeGrid", CProbe_Grid::ReadFromXMLElement);
@@ -1916,7 +1917,7 @@ wxString HeeksCNCType( const int type )
 	case SpeedReferenceType:       return(_("SpeedReference"));
 	case SpeedReferencesType:       return(_("SpeedReferences"));
 	case CuttingRateType:       return(_("CuttingRate"));
-	case LocatingType:       return(_("Locating"));
+	case PositioningType:       return(_("Positioning"));
 	case BOMType:       return(_("BOM"));
 	case TrsfNCCodeType:      return(_("TrsfNCCode"));
 	case ProbeCentreType:       return(_("ProbeCentre"));

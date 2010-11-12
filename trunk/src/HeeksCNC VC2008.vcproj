@@ -557,14 +557,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Locating.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Locating.h"
-			>
-		</File>
-		<File
 			RelativePath=".\MachineState.cpp"
 			>
 		</File>
@@ -654,6 +646,14 @@
 		</File>
 		<File
 			RelativePath=".\PocketDlg.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Positioning.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Positioning.h"
 			>
 		</File>
 		<File

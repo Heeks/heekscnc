@@ -168,7 +168,7 @@ bool COperations::IsAnOperation(int object_type)
 		case DrillingType:
 		case CounterBoreType:
 		case TurnRoughType:
-		case LocatingType:
+		case PositioningType:
 		case ProbeCentreType:
 		case ProbeEdgeType:
 		case ProbeGridType:
