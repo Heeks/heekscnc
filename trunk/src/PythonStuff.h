@@ -34,4 +34,23 @@ bool HeeksPyBackplot(const CProgram* program, HeeksObj* into, const wxString &fi
 void HeeksPyCancel(void);
 
 
+class CSendToMachine : public CPyProcess
+{
+	wxString m_gcode;
+	static int m_serial;
+
+public:
+	static wxString m_command;
+
+	CSendToMachine(void) { };
+	void SendGCode(const wxChar *gcode);
+	void Cancel();
+
+    static wxString ConfigScope(void)  {return _T("SendToMachine");}
+	static void GetOptions(std::list<Property *> *list);
+	static void ReadFromConfig();
+	static void WriteToConfig();
+};
+
+bool HeeksSendToMachine(const wxString &gcode);
 

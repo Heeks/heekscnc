@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<HeeksCAD_Document>
+    <Program machine="emc2b" output_file="/tmp/test.tap" output_file_name_follows_data_file_name="1" program='# coding=UTF8&#x0A;# No troubled Microsoft Windows detected&#x0A;import sys&#x0A;sys.path.insert(0,&apos;/home/mah/HeeksCAD/heekscnc&apos;)&#x0A;import math&#x0A;import nc.attach&#x0A;import ocl&#x0A;import ocl_funcs&#x0A;from nc.nc import *&#x0A;import nc.emc2b&#x0A;&#x0A;output(&apos;/tmp/test.tap&apos;)&#x0A;program_begin(123, &apos;Test program&apos;)&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;#(3 mm Carbide Drill Bit)&#x0A;tool_defn( id=1, name=&apos;3 mm Carbide Drill Bit&apos;, radius=1.5, length=15, gradient=0)&#x0A;#(3 mm Carbide Centre Drill Bit)&#x0A;tool_defn( id=2, name=&apos;3 mm Carbide Centre Drill Bit&apos;, radius=1.5, length=15, gradient=0)&#x0A;#(3 mm Carbide End Mill)&#x0A;tool_defn( id=3, name=&apos;3 mm Carbide End Mill&apos;, radius=1.5, length=15, gradient=-0.1)&#x0A;#(3 mm Carbide Slot Cutter)&#x0A;tool_defn( id=4, name=&apos;3 mm Carbide Slot Cutter&apos;, radius=1.5, length=15, gradient=-0.1)&#x0A;#(3 mm Carbide Ball End Mill)&#x0A;tool_defn( id=5, name=&apos;3 mm Carbide Ball End Mill&apos;, radius=1.5, length=15, gradient=-0.1)&#x0A;#(45 degreee Chamfering Bit)&#x0A;tool_defn( id=6, name=&apos;45 degreee Chamfering Bit&apos;, radius=5, length=50, gradient=0)&#x0A;#(Carbide Turning Tool)&#x0A;tool_defn( id=7, name=&apos;Carbide Turning Tool&apos;, radius=6.35, length=127, gradient=0)&#x0A;#(Touch Probe)&#x0A;tool_defn( id=8, name=&apos;Touch Probe&apos;, radius=2, length=20, gradient=0)&#x0A;#(Tool Length Switch)&#x0A;tool_defn( id=9, name=&apos;Tool Length Switch&apos;, radius=10, length=100, gradient=0)&#x0A;workplane(1)&#x0A;spindle(7000)&#x0A;feedrate_hv(100, 100)&#x0A;flush_nc()&#x0A;clearance = float(5)&#x0A;rapid_down_to_height = float(2)&#x0A;start_depth = float(0)&#x0A;step_down = float(1)&#x0A;final_depth = float(-1)&#x0A;#absolute() mode&#x0A;# text for a ScriptOp to verifiy signal handling (Cancel button)&#x0A;#&#x0A;# also set python output unbuffered so it immediately shows up &#x0A;# in the Trace Log window &#x0A;#&#x0A;# paste into a ScriptOp and run it, also try the cancel button&#x0A;&#x0A;import os&#x0A;import sys&#x0A;import signal&#x0A;import time&#x0A;&#x0A;sys.stdout = os.fdopen(sys.stdout.fileno(), &apos;w&apos;, 0)&#x0A;sys.stderr = os.fdopen(sys.stderr.fileno(), &apos;w&apos;, 0)&#x0A;&#x0A;pid = os.getpid()&#x0A;&#x0A;def sighandler(signum, frame):&#x0A;    print &apos;process %d got signal %d &apos; % (pid,signum)&#x0A;    sys.exit(-1)&#x0A;&#x0A;# trap every signal under the sun&#x0A;for i in [x for x in dir(signal) if x.startswith(&quot;SIG&quot;)]:&#x0A;  try:&#x0A;    signum = getattr(signal,i)&#x0A;    signal.signal(signum,sighandler)&#x0A;  except Exception,m:&#x0A;    pass&#x0A;    &#x0A;    &#x0A;print &quot;process %d running &quot; % (pid),&#x0A;&#x0A;for s in sys.argv:&#x0A;    print &apos;&quot;%s&quot; &apos; % (s), &#x0A;print &quot;\n&quot;&#x0A;&#x0A;print &gt;&gt; sys.stderr, &quot;some text on stderr&quot; &#x0A;&#x0A;# give heekscnc some time to hit Cancel button&#x0A;time.sleep(10)&#x0A;# so the exit value shows up in Trace Log&#x0A;sys.exit(123)&#x0A;&#x0A;&#x0A;program_end()&#x0A;' units="1" brinell_hardness="0" raw_material_name="" max_spindle_speed="0" safety_height_defined="0" safety_height="0" id="1">
+        <Tools>
+            <Tool title="3 mm Carbide Drill Bit" tool_number="1" id="1">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="0" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide Centre Drill Bit" tool_number="2" id="2">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="1" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="3" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide End Mill" tool_number="3" id="3">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="2" corner_radius="0" flat_radius="1.5" cutting_edge_angle="0" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="-0.1" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide Slot Cutter" tool_number="4" id="4">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="3" corner_radius="0" flat_radius="1.5" cutting_edge_angle="0" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="-0.1" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide Ball End Mill" tool_number="5" id="5">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="4" corner_radius="1.5" flat_radius="0" cutting_edge_angle="0" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="-0.1" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="45 degreee Chamfering Bit" tool_number="6" id="6">
+                <params diameter="10" x_offset="0" tool_length_offset="50" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="5" corner_radius="0" flat_radius="0" cutting_edge_angle="45" cutting_edge_height="5" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="Carbide Turning Tool" tool_number="7" id="7">
+                <params diameter="12.7" x_offset="0" tool_length_offset="127" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="6" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="Touch Probe" tool_number="8" id="8">
+                <params diameter="4" x_offset="0" tool_length_offset="20" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="7" corner_radius="2" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="Tool Length Switch" tool_number="9" id="9">
+                <params diameter="20" x_offset="0" tool_length_offset="100" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="8" corner_radius="10" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="0" probe_offset_y="0" width_over_thickness="1.8" feedrate="50" extrusion_material="0" layer_height="0.35" temperature="220" filament_diameter="3" flowrate="255" gradient="0" pitch="1" direction="0" />
+            </Tool>
+        </Tools>
+        <Fixtures />
+        <Operations>
+            <ScriptOp script='# text for a ScriptOp to verifiy signal handling (Cancel button)&#x0A;#&#x0A;# also set python output unbuffered so it immediately shows up &#x0A;# in the Trace Log window &#x0A;#&#x0A;# paste into a ScriptOp and run it, also try the cancel button&#x0A;&#x0A;import os&#x0A;import sys&#x0A;import signal&#x0A;import time&#x0A;&#x0A;sys.stdout = os.fdopen(sys.stdout.fileno(), &apos;w&apos;, 0)&#x0A;sys.stderr = os.fdopen(sys.stderr.fileno(), &apos;w&apos;, 0)&#x0A;&#x0A;pid = os.getpid()&#x0A;&#x0A;def sighandler(signum, frame):&#x0A;    print &apos;process %d got signal %d &apos; % (pid,signum)&#x0A;    sys.exit(-1)&#x0A;&#x0A;# trap every signal under the sun&#x0A;for i in [x for x in dir(signal) if x.startswith(&quot;SIG&quot;)]:&#x0A;  try:&#x0A;    signum = getattr(signal,i)&#x0A;    signal.signal(signum,sighandler)&#x0A;  except Exception,m:&#x0A;    pass&#x0A;    &#x0A;    &#x0A;print &quot;process %d running &quot; % (pid),&#x0A;&#x0A;for s in sys.argv:&#x0A;    print &apos;&quot;%s&quot; &apos; % (s), &#x0A;print &quot;\n&quot;&#x0A;&#x0A;print &gt;&gt; sys.stderr, &quot;some text on stderr&quot; &#x0A;&#x0A;# give heekscnc some time to hit Cancel button&#x0A;time.sleep(10)&#x0A;# so the exit value shows up in Trace Log&#x0A;sys.exit(123)&#x0A;&#x0A;&#x0A;' emit_depthop_params="-1381912" active="1" title="Signal handler test" execution_order="0" tool_number="10030" id="1">
+                <depthop clear="5" down="1" startdepth="0" depth="-1" r="2" abs_mode="0" />
+                <speedop hfeed="100" vfeed="100" spin="7000" />
+            </ScriptOp>
+        </Operations>
+        <SpeedReferences estimate_when_possible="1" id="1">
+            <SpeedReference title="Aluminium (15) with Carbide" surface_speed="182" tool_material="1" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="1" />
+            <SpeedReference title="Aluminium (15) with Carbide" surface_speed="33" tool_material="1" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="2" />
+            <SpeedReference title="Mild Steel (150) with Carbide" surface_speed="182" tool_material="1" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="3" />
+            <SpeedReference title="Mild Steel (150) with Carbide" surface_speed="59" tool_material="1" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="4" />
+            <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with Carbide" surface_speed="106" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="5" />
+            <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with Carbide" surface_speed="24" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="6" />
+            <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with Carbide" surface_speed="99" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="7" />
+            <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with Carbide" surface_speed="24" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="8" />
+            <CuttingRate title="Brinell (15) at 400 (mm^3/min)" brinell_hardness_of_raw_material="15" max_material_removal_rate="400" id="1" />
+            <CuttingRate title="Brinell (150) at 1600 (mm^3/min)" brinell_hardness_of_raw_material="150" max_material_removal_rate="1600" id="2" />
+        </SpeedReferences>
+        <nccode edited="0" id="1">
+            <ncblock id="0">
+                <text col="comment">(Created with emc2b post processor 2010/11/13 20:19)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text>G54</text>
+                <text>&#x09; </text>
+                <text col="comment">(Select Relative Coordinate System)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text> </text>
+                <text>G90</text>
+                <text> </text>
+                <text col="prep">G21</text>
+                <text> </text>
+                <text>G17</text>
+            </ncblock>
+        </nccode>
+    </Program>
+</HeeksCAD_Document>

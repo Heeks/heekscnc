@@ -13,6 +13,8 @@
 #include "ProgramCanvas.h"
 #include "OutputCanvas.h"
 #include "Program.h"
+#include "CNCConfig.h"
+#include "interface/PropertyString.h"
 
 //static
 bool CPyProcess::redirect = true;
@@ -31,59 +33,83 @@ void CPyProcess::OnTimer(wxTimerEvent& event)
   HandleInput();
 }
 
-void CPyProcess::HandleInput(void)
-{
-  wxInputStream *m_in,*m_err;
+void CPyProcess::HandleInput(void) {
+	wxInputStream *m_in, *m_err;
 
-  m_in = GetInputStream();
-  m_err = GetErrorStream();
+	m_in = GetInputStream();
+	m_err = GetErrorStream();
 
-  if (m_in) 
-    {
-	  wxString s;
-
-      while (m_in->CanRead()) {
-	char buffer[4096];
-	m_in->Read(buffer, sizeof(buffer));
-	s += wxString::From8BitData(buffer, m_in->LastRead());
-      }
-      if (s.Length() > 0) {
-	wxLogMessage(_T("> %s"),s.c_str());
-      }
-    }
-  if (m_err) 
-    {
-	  wxString s;
-
-      while (m_err->CanRead()) {
-	char buffer[4096];
-	m_err->Read(buffer, sizeof(buffer));
-	s += wxString::From8BitData(buffer, m_err->LastRead());
-      }
-      if (s.Length() > 0) {
-	wxLogMessage(_T("! %s"),s.c_str());
-      }
-    }
+	if (m_in) {
+		wxString s;
+		while (m_in->CanRead()) {
+			char buffer[4096];
+			m_in->Read(buffer, sizeof(buffer));
+			s += wxString::From8BitData(buffer, m_in->LastRead());
+		}
+		if (s.Length() > 0) {
+			wxLogMessage(_T("> %s"), s.c_str());
+		}
+	}
+	if (m_err) {
+		wxString s;
+		while (m_err->CanRead()) {
+			char buffer[4096];
+			m_err->Read(buffer, sizeof(buffer));
+			s += wxString::From8BitData(buffer, m_err->LastRead());
+		}
+		if (s.Length() > 0) {
+			wxLogMessage(_T("! %s"), s.c_str());
+		}
+	}
 }
 
 void CPyProcess::Execute(const wxChar* cmd)
 {
-	if(redirect)Redirect();
-	m_pid = wxExecute(cmd, wxEXEC_ASYNC, this);
+	if(redirect) {
+		Redirect();
+	}
+	// make process group leader so Cancel kan terminate process including children
+	m_pid = wxExecute(cmd, wxEXEC_ASYNC|wxEXEC_MAKE_GROUP_LEADER, this);
 	if (!m_pid) {
 	  wxLogMessage(_T("could not execute '%s'"),cmd);
 	} else {
 	  wxLogMessage(_T("starting '%s' (%d)"),cmd,m_pid);
 	}
-	m_timer.Start(100);   //msec
-
+	if (redirect) {
+		m_timer.Start(100);   //msec
+	}
 }
 
 void CPyProcess::Cancel(void)
 {
 	if (m_pid)
 	{
-		wxProcess::Kill(m_pid);
+		wxKillError kerror;
+		wxSignal sig = wxSIGTERM;
+		int retcode;
+
+		if ( wxProcess::Exists(m_pid) ) {
+			retcode = wxKill(m_pid, sig, &kerror, wxKILL_CHILDREN);
+			switch (kerror) {
+			case wxKILL_OK:
+				wxLogMessage(_T("sent signal %d to process %d"),sig, m_pid);
+				break;
+			case wxKILL_NO_PROCESS:
+				wxLogMessage(_T("process %d already exited"),m_pid);
+				break;
+			case wxKILL_ACCESS_DENIED:
+				wxLogMessage(_T("sending signal %d to process %d - access denied"),sig, m_pid);
+				break;
+			case wxKILL_BAD_SIGNAL:      // no such signal
+				wxLogMessage(_T("no such signal: %d"),sig);
+				break;
+			case wxKILL_ERROR:            // another, unspecified error
+				wxLogMessage(_T("unspecified error sending signal %d to process %d"),sig, m_pid);
+				break;
+			}
+		} else {
+			wxLogMessage(_T("process %d has gone away"), m_pid);
+		}
 		m_pid = 0;
 	}
 }
@@ -92,16 +118,19 @@ void CPyProcess::OnTerminate(int pid, int status)
 {
 	if (pid == m_pid)
 	{
-	  m_timer.Stop(); 
-	  HandleInput();   // anything left?
+	  if (redirect) {
+		  m_timer.Stop();
+		  HandleInput();   // anything left?
+	  }
 	  if (status) {
-	    wxLogMessage(_T("process %d exit(%d)"),pid, status);
+		  wxLogMessage(_T("process %d exit(%d)"),pid, status);
 	  } else {
-	    wxLogDebug(_T("process %d exit(0)"),pid);
+		  wxLogDebug(_T("process %d exit(0)"),pid);
 	  }
 	  m_pid = 0;
 	  ThenDo();
 	}
+	// else: the process already was already treated with Cancel() so m_pid is 0
 }
 
 ////////////////////////////////////////////////////////
@@ -293,5 +322,81 @@ void HeeksPyCancel(void)
 {
 	CPyBackPlot::StaticCancel();
 	CPyPostProcess::StaticCancel();
+}
+
+
+// create a temporary ngc file
+// make your favorite machine load it
+void CSendToMachine::Cancel(void) { CPyProcess::Cancel(); }
+void CSendToMachine::SendGCode(const wxChar *gcode)
+	{
+		wxBusyCursor wait; // show an hour glass until the end of this function
+
+		// write the ngc file
+		wxStandardPaths standard_paths;
+		wxFileName ngcpath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("heekscnc-%d.ngc"), m_serial));
+		m_serial++;
+		{
+			wxFile ofs(ngcpath.GetFullPath(), wxFile::write);
+			if(!ofs.IsOpened())
+			{
+				wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + ngcpath.GetFullPath());
+				return;
+			}
+			ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
+		}
+		wxLogDebug(_T("created '%s')"), ngcpath.GetFullPath().c_str());
+
+#ifdef WIN32
+        Execute(wxString(_T("\"")) + theApp.GetDllFolder() +wxString(_T("\\")) + m_command + wxString(_T("\" \"")) + ngcpath.GetFullPath() + wxString(_T("\"")));
+#else
+        wxString sendto_cmdline = m_command + wxString(_T(" ")) + ngcpath.GetFullPath();
+        wxLogDebug(_T("executing '%s')"), sendto_cmdline.c_str());
+		Execute(sendto_cmdline);
+#endif
+	}
+
+
+int CSendToMachine::m_serial;
+wxString CSendToMachine::m_command;
+
+static void on_set_to_machine_command(const wxChar *value, HeeksObj* object)
+{
+	CSendToMachine::m_command = value;
+	CSendToMachine::WriteToConfig();
+}
+
+// static
+void CSendToMachine::GetOptions(std::list<Property *> *list)
+{
+	list->push_back(new PropertyString(_("send-to-machine command"), m_command, NULL, on_set_to_machine_command));
+}
+
+// static
+void CSendToMachine::ReadFromConfig()
+{
+        CNCConfig config(CSendToMachine::ConfigScope());
+        config.Read(_T("SendToMachineCommand"), &m_command , _T("axis-remote"));
+}
+// static
+void CSendToMachine::WriteToConfig()
+{
+        CNCConfig config(CSendToMachine::ConfigScope());
+        config.Write(_T("SendToMachineCommand"), m_command);
+}
+
+
+static CSendToMachine *sendto;
+
+bool HeeksSendToMachine(const wxString &gcode)
+{
+	if (sendto != NULL) {
+		sendto->Cancel();
+		delete sendto;
+	}
+	sendto = new CSendToMachine;
+	sendto->SendGCode(gcode);
+
+	return false;
 }
 

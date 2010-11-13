@@ -1190,6 +1190,16 @@ static void OpenNcFileMenuCallback(wxCommandEvent& event)
 	}
 }
 
+// create a temporary file for ngc output
+// run appropriate command to make 'Machine' read ngc file
+// linux/emc/axis: this would typically entail calling axis-remote <filename>
+
+static void SendToMachineMenuCallback(wxCommandEvent& event)
+{
+	HeeksSendToMachine(theApp.m_output_canvas->m_textCtrl->GetValue());
+}
+
+
 static void OpenBOMFileMenuCallback(wxCommandEvent& event)
 {
 	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
@@ -1348,6 +1358,7 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("Post-Process"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
 		heeksCAD->AddFlyoutButton(_("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
 		heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Send to Machine"), ToolImage(_T("tomachine")), _("Send to Machine"), SendToMachineMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
@@ -1523,6 +1534,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), ToolImage(_T("postprocess")), PostProcessMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Open NC File"), ToolImage(_T("opennc")), OpenNcFileMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Save NC File"), ToolImage(_T("savenc")), SaveNcFileMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), ToolImage(_T("tomachine")), SendToMachineMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Open BOM File"), ToolImage(_T("opennc")), OpenBOMFileMenuCallback);
 	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
 
@@ -1548,6 +1560,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #ifndef STABLE_OPS_ONLY
 	CRaft::ReadFromConfig();
 #endif
+	CSendToMachine::ReadFromConfig();
 
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
@@ -1829,6 +1842,7 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 #ifndef STABLE_OPS_ONLY
 	CInlay::GetOptions(&(machining_options->m_list));
 #endif
+	CSendToMachine::GetOptions(&(machining_options->m_list));
 
 	list->push_back(machining_options);
 
@@ -1852,6 +1866,7 @@ void CHeeksCNCApp::OnFrameDelete()
 	CRaft::WriteToConfig();
 #endif
 	CSpeedOp::WriteToConfig();
+	CSendToMachine::WriteToConfig();
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
