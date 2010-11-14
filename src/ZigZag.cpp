@@ -362,6 +362,7 @@ bool CZigZag::CanAdd(HeeksObj* object)
 
 	switch (object->GetType())
 	{
+	case StlSolidType:  
 	case SolidType:
 	case SketchType:
 	case FixtureType:
