@@ -386,16 +386,16 @@ void CSendToMachine::WriteToConfig()
 }
 
 
-static CSendToMachine *sendto;
+static CSendToMachine *send_to;
 
 bool HeeksSendToMachine(const wxString &gcode)
 {
-	if (sendto != NULL) {
-		sendto->Cancel();
-		delete sendto;
+	if (send_to != NULL) {
+		send_to->Cancel();
+		delete send_to;
 	}
-	sendto = new CSendToMachine;
-	sendto->SendGCode(gcode);
+	send_to = new CSendToMachine;
+	send_to->SendGCode(gcode);
 
 	return false;
 }
