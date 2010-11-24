@@ -357,8 +357,8 @@ class CreatorEMC2(iso.CreatorIso):
 					self.write(iso_codes.codes.PECK_DRILL() + iso_codes.codes.PECK_DEPTH(self.fmt, peck_depth))  
 
 					self.prev_drill = iso_codes.codes.PECK_DRILL() + iso_codes.codes.PECK_DEPTH(self.fmt, peck_depth)
-				else:	   
-					self.write(iso_codes.codes.PECK_DRILL() + iso_codes.codes.PECK_DEPTH(self.fmt, peck_depth)) 
+			else:	   
+				self.write(iso_codes.codes.PECK_DRILL() + iso_codes.codes.PECK_DEPTH(self.fmt, peck_depth)) 
 						   
 		else:	  
 			if (spindle_mode == 1) or (retract_mode == 1):
