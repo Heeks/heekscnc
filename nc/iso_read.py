@@ -59,6 +59,8 @@ class ParserIso(nc.Parser):
             self.no_move = True		            
         elif (word == 'L1' or word == 'l1'):
             self.no_move = True
+        elif (word == 'G61.1' or word == 'g61.1' or word == 'G61' or word == 'g61' or word == 'G64' or word == 'g64'):
+            self.no_move = True
         elif (word == 'G20' or word == 'G70'):
             self.col = "prep"
             self.set_mode(units=25.4)
@@ -101,13 +103,15 @@ class ParserIso(nc.Parser):
         elif (word[0] == 'N') : self.col = "blocknum"
         elif (word[0] == 'O') : self.col = "program"
         elif (word[0] == 'P' or word[0] == 'p'):
-            self.col = "axis"
-            self.p = eval(word[1:])
-            self.move = True
+             if (self.no_move != True):
+                 self.col = "axis"
+                 self.p = eval(word[1:])
+                 self.move = True
         elif (word[0] == 'Q' or word[0] == 'q'):
-            self.col = "axis"
-            self.q = eval(word[1:])
-            self.move = True
+             if (self.no_move != True):
+                 self.col = "axis"
+                 self.q = eval(word[1:])
+                 self.move = True
         elif (word[0] == 'R' or word[0] == 'r'):
             self.col = "axis"
             self.r = eval(word[1:])

@@ -979,8 +979,6 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 
                         for (double depth = m_depth_op_params.m_start_depth - step_down; ((step_down > tolerance) && (depth >= max_depth)); /* increment within loop */ )
                         {
-
-
 							if (std::find(depths.begin(), depths.end(), depth) == depths.end()) depths.push_back( depth );
 
 							// Machine here with the chamfering bit.
@@ -1095,14 +1093,13 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
             for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
             {
                 // We don't want a toolpath at the top surface.
-                if (fabs(*itDepth - m_depth_op_params.m_start_depth) > tolerance)
+                if (fabs(fabs(*itDepth) - fabs(m_depth_op_params.m_start_depth)) > tolerance)
                 {
                     Path path;
                     path.Offset(*itOffset);
                     path.Depth(*itDepth);
 
                     Valley_t::iterator itPath = std::find(itValley->begin(),  itValley->end(), path);
-                    // for (Valley_t::iterator itPath = itValley->begin(); itPath != itValley->end(); itPath++)
                     if (itPath != itValley->end())
                     {
                         TopoDS_Wire wire(itPath->Wire());

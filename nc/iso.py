@@ -794,6 +794,15 @@ class CreatorIso(nc.Creator):
     	self.write_blocknum();
 	self.write( iso.codes.RAPID() + ' X [ #4 + #6 ] Y [ #5 + #7 ]\n' )
 
+    def set_path_control_mode(self, mode, motion_blending_tolerance, naive_cam_tolerance ):
+	self.write_blocknum()
+	if (mode == 0):
+		self.write( iso.codes.EXACT_PATH_MODE() + '\n' )
+	if (mode == 1):
+		self.write( iso.codes.EXACT_STOP_MODE() + '\n' )
+	if (mode == 2):
+		self.write( iso.codes.BEST_POSSIBLE_SPEED( motion_blending_tolerance, naive_cam_tolerance ) + '\n' )
+
 ################################################################################
 
 nc.creator = CreatorIso()

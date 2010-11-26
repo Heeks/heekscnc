@@ -64,6 +64,18 @@ private:
 public:
 	static wxString ConfigScope(void) {return _T("Program");}
 
+	typedef enum
+	{
+		eExactPathMode = 0,
+		eExactStopMode,
+		eBestPossibleSpeed,
+		ePathControlUndefined
+	} ePathControlMode_t;
+
+	ePathControlMode_t m_path_control_mode;
+	double m_motion_blending_tolerance;	// Only valid if m_path_control_mode == eBestPossibleSpeed
+	double m_naive_cam_tolerance;		// Only valid if m_path_control_mode == eBestPossibleSpeed
+
 public:
 	static wxString alternative_machines_file;
 	CRawMaterial m_raw_material;	// for material hardness - to determine feeds and speeds.

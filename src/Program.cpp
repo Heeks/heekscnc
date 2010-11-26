@@ -62,6 +62,9 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed
 	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
 
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
+	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
+	config.Read(_("ProgramMotionBlendingTolerance"), &m_motion_blending_tolerance, 0.0001);
+	config.Read(_("ProgramNaiveCamTolerance"), &m_naive_cam_tolerance, 0.0001);
 }
 
 const wxBitmap &CProgram::GetIcon()
@@ -93,6 +96,10 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
 
     m_script_edited = rhs.m_script_edited;
     m_units = rhs.m_units;
+
+	m_path_control_mode = rhs.m_path_control_mode;
+	m_motion_blending_tolerance = rhs.m_motion_blending_tolerance;
+	m_naive_cam_tolerance = rhs.m_naive_cam_tolerance;
 
     ReloadPointers();
     AddMissingChildren();
@@ -139,6 +146,10 @@ void CProgram::CopyFrom(const HeeksObj* object)
 
 		m_script_edited = rhs->m_script_edited;
 		m_units = rhs->m_units;
+
+		m_path_control_mode = rhs->m_path_control_mode;
+		m_motion_blending_tolerance = rhs->m_motion_blending_tolerance;
+		m_naive_cam_tolerance = rhs->m_naive_cam_tolerance;
 	}
 }
 
@@ -162,6 +173,10 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 
 		m_script_edited = rhs.m_script_edited;
 		m_units = rhs.m_units;
+
+		m_path_control_mode = rhs.m_path_control_mode;
+		m_motion_blending_tolerance = rhs.m_motion_blending_tolerance;
+		m_naive_cam_tolerance = rhs.m_naive_cam_tolerance;
 	}
 
 	return(*this);
@@ -247,6 +262,33 @@ static void on_set_output_file_name_follows_data_file_name(int zero_based_choice
 }
 
 
+static void on_set_path_control_mode(int zero_based_choice, HeeksObj *object)
+{
+	CProgram *pProgram = (CProgram *) object;
+	pProgram->m_path_control_mode = CProgram::ePathControlMode_t(zero_based_choice);
+
+	CNCConfig config(CProgram::ConfigScope());
+	config.Write(_T("ProgramPathControlMode"), (int) pProgram->m_path_control_mode );
+}
+
+static void on_set_motion_blending_tolerance(double value, HeeksObj *object)
+{
+	CProgram *pProgram = (CProgram *) object;
+	pProgram->m_motion_blending_tolerance = value;
+
+	CNCConfig config(CProgram::ConfigScope());
+	config.Write(_T("ProgramMotionBlendingTolerance"), pProgram->m_motion_blending_tolerance );
+}
+
+static void on_set_naive_cam_tolerance(double value, HeeksObj *object)
+{
+	CProgram *pProgram = (CProgram *) object;
+	pProgram->m_naive_cam_tolerance = value;
+
+	CNCConfig config(CProgram::ConfigScope());
+	config.Write(_T("ProgramNaiveCamTolerance"), pProgram->m_naive_cam_tolerance );
+}
+
 
 void CProgram::GetProperties(std::list<Property *> *list)
 {
@@ -290,6 +332,23 @@ void CProgram::GetProperties(std::list<Property *> *list)
 
 	m_machine.GetProperties(this, list);
 	m_raw_material.GetProperties(this, list);
+
+	{
+		std::list< wxString > choices;
+		choices.push_back(_("Exact Path Mode"));
+		choices.push_back(_("Exact Stop Mode"));
+		choices.push_back(_("Best Possible Speed"));
+		choices.push_back(_("Undefined"));
+
+		list->push_back ( new PropertyChoice ( _("Path Control Mode"),  choices, (int) m_path_control_mode, this, on_set_path_control_mode ) );
+
+		if (m_path_control_mode == eBestPossibleSpeed)
+		{
+			list->push_back( new PropertyLength( _("Motion Blending Tolerance"), m_motion_blending_tolerance, this, on_set_motion_blending_tolerance ) );
+			list->push_back( new PropertyLength( _("Naive CAM Tolerance"), m_naive_cam_tolerance, this, on_set_naive_cam_tolerance ) );
+		} // End if - then
+	}
+
 	HeeksObj::GetProperties(list);
 }
 
@@ -376,6 +435,10 @@ void CProgram::WriteXML(TiXmlNode *root)
 	element->SetAttribute("program", theApp.m_program_canvas->m_textCtrl->GetValue().utf8_str());
 	element->SetDoubleAttribute("units", m_units);
 
+	element->SetAttribute("ProgramPathControlMode", int(m_path_control_mode));
+	element->SetDoubleAttribute("ProgramMotionBlendingTolerance", m_motion_blending_tolerance);
+	element->SetDoubleAttribute("ProgramNaiveCamTolerance", m_naive_cam_tolerance);
+
 	m_raw_material.WriteBaseXML(element);
 	m_machine.WriteBaseXML(element);
 	WriteBaseXML(element);
@@ -447,6 +510,9 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 		else if(name == "output_file_name_follows_data_file_name"){new_object->m_output_file_name_follows_data_file_name = (atoi(a->Value()) != 0); }
 		else if(name == "program"){theApp.m_program_canvas->m_textCtrl->SetValue(Ctt(a->Value()));}
 		else if(name == "units"){new_object->m_units = a->DoubleValue();}
+		else if(name == "ProgramPathControlMode"){new_object->m_path_control_mode = ePathControlMode_t(atoi(a->Value()));}
+		else if(name == "ProgramMotionBlendingTolerance"){new_object->m_motion_blending_tolerance = a->DoubleValue();}
+		else if(name == "ProgramNaiveCamTolerance"){new_object->m_naive_cam_tolerance = a->DoubleValue();}
 	}
 
 	new_object->ReadBaseXML(pElem);
@@ -787,6 +853,11 @@ Python CProgram::RewritePythonProgram()
 	}
 	python << _T("set_plane(0)\n");
 	python << _T("\n");
+
+	if (m_path_control_mode != ePathControlUndefined)
+	{
+		python << _T("set_path_control_mode(") << (int) m_path_control_mode << _T(",") << m_motion_blending_tolerance << _T(",") << m_naive_cam_tolerance << _T(")\n");
+	}
 
 	python << m_raw_material.AppendTextToProgram();
 
