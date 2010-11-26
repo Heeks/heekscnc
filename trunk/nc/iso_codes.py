@@ -81,4 +81,17 @@ class Codes():
 
     def MACHINE_COORDINATES(self): return('G53' + self.SPACE())
 
+    def EXACT_PATH_MODE(self): return('G61' + self.SPACE())
+    def EXACT_STOP_MODE(self): return('G61.1' + self.SPACE())
+    def BEST_POSSIBLE_SPEED(self, motion_blending_tolerance, naive_cam_tolerance): 
+	    statement = 'G64'
+
+	    if (motion_blending_tolerance > 0):
+		    statement += ' P ' + str(motion_blending_tolerance)
+
+	    if (naive_cam_tolerance > 0):
+		    statement += ' Q ' + str(naive_cam_tolerance)
+
+	    return(statement + self.SPACE())
+
 codes = Codes()

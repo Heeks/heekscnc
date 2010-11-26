@@ -1803,12 +1803,12 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 					heeksCAD->Changed();
 					speed_references_found = true;
 				} // End if - then
-				else if ((tool_table_found == false) && (lowercase_file_name.Find(_T("feed")) != -1))
+				else if ((speed_references_found == false) && (lowercase_file_name.Find(_T("feed")) != -1))
 				{
 					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
 					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
 					heeksCAD->Changed();
-					tool_table_found = true;
+					speed_references_found = true;
 				} // End if - then
 				else if ((tool_table_found == false) && (lowercase_file_name.Find(_T("tool")) != -1))
 				{

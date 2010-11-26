@@ -97,8 +97,6 @@
 		<Unit filename="src/Inlay.h" />
 		<Unit filename="src/Interface.cpp" />
 		<Unit filename="src/Interface.h" />
-		<Unit filename="src/Locating.cpp" />
-		<Unit filename="src/Locating.h" />
 		<Unit filename="src/MachineState.cpp" />
 		<Unit filename="src/MachineState.h" />
 		<Unit filename="src/NCCode.cpp" />
@@ -112,6 +110,8 @@
 		<Unit filename="src/Pocket.h" />
 		<Unit filename="src/PocketDlg.cpp" />
 		<Unit filename="src/PocketDlg.h" />
+		<Unit filename="src/Positioning.cpp" />
+		<Unit filename="src/Positioning.h" />
 		<Unit filename="src/Probe.h" />
 		<Unit filename="src/Probing.cpp" />
 		<Unit filename="src/Probing.h" />
