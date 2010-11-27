@@ -498,6 +498,8 @@ class CreatorEMC2(iso.CreatorIso):
 
 		self.z = retract_height	# this cycle returns to the start position, so remember that as z value
 
+	def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+		pass
 			
 nc.creator = CreatorEMC2()
 
