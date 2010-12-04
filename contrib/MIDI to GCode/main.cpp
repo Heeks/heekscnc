@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     File file(l_pszFileName);
 
     const double mm_per_second = 1000.0 / 60.0;  // How fast does the tape move through the music box? (1 meter per minute - by observation)
-    const double distance_between_notes_in_mm = 3.0; // across the paper.
+    const double distance_between_notes_in_mm = 2.0; // across the paper.
 
     std::list<std::string> gcode;
     std::list<std::string> heeks;
@@ -52,12 +52,26 @@ int main(int argc, char **argv)
     int id=1;
 
     typedef std::vector<std::string> Keys_t;
-    Keys_t keys;
+    Keys_t keys, legal_keys;
     Keys_t::size_type middle_c_key;
 
     // Which integer tells us it's the 'C' in the middle or the 'C' in the
     // octave above or below.
     const int middle_c_octave = 5;
+
+    for (int octave=2; octave <= 8; octave++)
+    {
+        for (char key='A'; key<='G'; key++)
+        {
+            std::ostringstream l_ossKey;
+
+            // l_ossKey << key << middle_c_octave - 0;
+            l_ossKey << key << octave;
+            keys.push_back( l_ossKey.str() );
+
+            if ((key == 'C') && (octave == middle_c_octave)) middle_c_key = keys.size()-1;
+        }
+    }
 
     // Setup our scale of notes that will work with the music box.  It covers from 'C' to 'C' over two octaves.
     // Octave below middle C
@@ -66,7 +80,7 @@ int main(int argc, char **argv)
         std::ostringstream l_ossKey;
 
         l_ossKey << key << middle_c_octave - 1;
-        keys.push_back( l_ossKey.str() );
+        legal_keys.push_back( l_ossKey.str() );
     }
 
     // Octave that includes middle C
@@ -75,9 +89,7 @@ int main(int argc, char **argv)
         std::ostringstream l_ossKey;
 
         l_ossKey << key << middle_c_octave - 0;
-        keys.push_back( l_ossKey.str() );
-
-        if (key == 'C') middle_c_key = keys.size()-1;
+        legal_keys.push_back( l_ossKey.str() );
     }
 
     // Octave above middle C
@@ -86,8 +98,9 @@ int main(int argc, char **argv)
         std::ostringstream l_ossKey;
 
         l_ossKey << key << middle_c_octave + 1;
-        keys.push_back( l_ossKey.str() );
+        legal_keys.push_back( l_ossKey.str() );
     }
+
 
     const double track_width = distance_between_notes_in_mm * keys.size();
     const double space_between_tracks = track_width * 0.75;
@@ -165,6 +178,27 @@ int main(int argc, char **argv)
 				notes.insert( message.getNoteNumber() );
 
 				// printf("time %lf note %s\n", time_stamp, note_name );
+				std::string l_ssNoteName(note_name);
+				std::string::size_type offset;
+				bool sharp_found = false;
+				while ((offset = l_ssNoteName.find("#")) != std::string::npos)
+				{
+				    l_ssNoteName = l_ssNoteName.erase(offset,1);
+				    sharp_found = true;
+                }
+
+                strncpy( note_name, l_ssNoteName.c_str(), sizeof(note_name)-1 );
+
+                const int blue = 16711680;
+                const int black = 0;
+                const int red = 255;
+
+                int colour = blue;
+                Keys_t::iterator l_itLegalKey = std::find( legal_keys.begin(), legal_keys.end(), note_name );
+                if (l_itLegalKey == legal_keys.end())
+                {
+                    colour = red;
+                }
 
 				// Find the note name in the keys we're interested in.
 				Keys_t::iterator l_itKey = std::find( keys.begin(), keys.end(), note_name );
@@ -174,14 +208,32 @@ int main(int argc, char **argv)
 					double y = double(double(std::distance( keys.begin(), l_itKey )) - double(middle_c_key)) * distance_between_notes_in_mm;
 
 					y += ((track_width + space_between_tracks) * track);
+
+					if (sharp_found)
+					{
+					    y += (distance_between_notes_in_mm / 2.0);
+					    colour = red;
+					}
+
 					// It's a key we have to play.  Generate the GCode.
 					std::ostringstream l_ossGCode;
 					l_ossGCode << "G83 X " << x << " Y " << y << "\t(" << note_name << ")";
 					gcode.push_back( l_ossGCode.str() );
 
-					std::ostringstream l_ossHeeks;
-					l_ossHeeks << "<Point col=\"0\" x=\"" << x << "\" y=\"" << y << "\" z=\"0\" id=\"" << id++ << "\" />";
-					heeks.push_back( l_ossHeeks.str() );
+                    if (sharp_found)
+                    {
+                        std::ostringstream l_ossHeeks;
+                        l_ossHeeks << "<Circle col=\"" << colour << "\" r=\"" << (distance_between_notes_in_mm / 2.0) * 0.85 << "\" cx=\"" << x << "\" cy=\"" << y << "\" cz=\"0\" ax=\"0\" ay=\"0\" az=\"1\" id=\"" << id++ << "\">\n";
+                        l_ossHeeks << "   <Point col=\"" << colour << "\" x=\"" << x << "\" y=\"" << y << "\" z=\"0\" id=\"" << id++ << "\" />\n";
+                        l_ossHeeks << "</Circle>\n";
+                        heeks.push_back( l_ossHeeks.str() );
+                    }
+                    else
+                    {
+                        std::ostringstream l_ossHeeks;
+                        l_ossHeeks << "<Point col=\"" << colour << "\" x=\"" << x << "\" y=\"" << y << "\" z=\"0\" id=\"" << id++ << "\" />";
+                        heeks.push_back( l_ossHeeks.str() );
+                    }
 
 					// printf("G83 Want hole for key %s at %lf,%lf\n", note_name, x, y );
 					number_of_notes_included++;
@@ -190,6 +242,7 @@ int main(int argc, char **argv)
 				{
 					// This key doesn't fall exactly on our scale.  Ignore it.
 					number_of_notes_ignored++;
+					printf("Missed note %s\n", note_name);
 				}
 			}
 		}
@@ -216,15 +269,18 @@ int main(int argc, char **argv)
 
 			y += ((track_width + space_between_tracks) * track);
 
-			std::ostringstream l_ossHeeks;
-			l_ossHeeks.str("");
-			l_ossHeeks << "<Sketch title=\"Sketch\" id=\"" << id++ << "\">\n";
-			l_ossHeeks << "<Line col=\"0\" id=\"" << id++ << "\">\n";
-			l_ossHeeks << "<Point col=\"0\" x=\"" << (double) (start_time * mm_per_second) << "\" y=\"" << y << "\" z=\"0\" id=\"" << id++ << "\" />\n";
-			l_ossHeeks << "<Point col=\"0\" x=\"" << (double) (end_time * mm_per_second) << "\" y=\"" << y << "\" z=\"0\" id=\"" << id++ << "\" />\n";
-			l_ossHeeks << "</Line>\n";
-			l_ossHeeks << "</Sketch>\n";
-			heeks.push_back(l_ossHeeks.str());
+            if (std::find(legal_keys.begin(), legal_keys.end(), *l_itKey) != legal_keys.end())
+            {
+                std::ostringstream l_ossHeeks;
+                l_ossHeeks.str("");
+                l_ossHeeks << "<Sketch title=\"Sketch\" id=\"" << id++ << "\">\n";
+                l_ossHeeks << "<Line col=\"0\" id=\"" << id++ << "\">\n";
+                l_ossHeeks << "<Point col=\"0\" x=\"" << (double) (start_time * mm_per_second) << "\" y=\"" << y << "\" z=\"0\" id=\"" << id++ << "\" />\n";
+                l_ossHeeks << "<Point col=\"0\" x=\"" << (double) (end_time * mm_per_second) << "\" y=\"" << y << "\" z=\"0\" id=\"" << id++ << "\" />\n";
+                l_ossHeeks << "</Line>\n";
+                l_ossHeeks << "</Sketch>\n";
+                heeks.push_back(l_ossHeeks.str());
+            }
 		}
 	}
 
