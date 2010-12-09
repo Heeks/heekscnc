@@ -213,7 +213,7 @@ This is a simple way to insert datum parameters for translating gcode around lat
 
     for (std::list<HeeksObj *>::iterator itObject = objects.begin(); itObject != objects.end(); itObject++)
     {
-		std::vector<TopoDS_Edge> edges;
+		std::list< std::vector<TopoDS_Edge> > edges_list;
 		switch ((*itObject)->GetType())
 		{
 			double p[3];
@@ -238,7 +238,7 @@ This is a simple way to insert datum parameters for translating gcode around lat
 
 
 		case SketchType:
-			if (! heeksCAD->ConvertSketchToEdges( *itObject, edges ))
+			if (! heeksCAD->ConvertSketchToEdges( *itObject, edges_list ))
 			{
 				Python empty;
 				return(empty);
@@ -248,24 +248,36 @@ This is a simple way to insert datum parameters for translating gcode around lat
 				// The edges will already have been sorted.  We need to traverse them in order and separate
 				// connected sequences of them.  As we start new connected sequences, we should check to see
 				// if they connect back to their beginning and mark them as 'periodic'.
-				if (edges.size() > 0)
+				unsigned int num_edges = 0;
+
+				for(std::list< std::vector<TopoDS_Edge> >::iterator It = edges_list.begin(); It != edges_list.end(); It++)
+				{
+					std::vector<TopoDS_Edge> &edges = *It;
+					num_edges += edges.size();
+				}
+
+				if (num_edges > 0)
 				{
 					python << _T("\040\040\040\040sketch_id_") << (int) (*itObject)->m_id << _T(" = ocl.Path()\n");
 				}
 
-				for (std::vector<TopoDS_Edge>::size_type offset = 0; offset < edges.size(); offset++)
+				for(std::list< std::vector<TopoDS_Edge> >::iterator It = edges_list.begin(); It != edges_list.end(); It++)
 				{
-				    Python prefix;
-				    Python suffix;
-					prefix << _T("\040\040\040\040sketch_id_") << (int) (*itObject)->m_id << _T(".append(");
-					suffix << _T(")\n");
-					python << OpenCamLibDefinition(edges[offset], prefix, suffix);
+					std::vector<TopoDS_Edge> &edges = *It;
+					for (std::vector<TopoDS_Edge>::size_type offset = 0; offset < edges.size(); offset++)
+					{
+						Python prefix;
+						Python suffix;
+						prefix << _T("\040\040\040\040sketch_id_") << (int) (*itObject)->m_id << _T(".append(");
+						suffix << _T(")\n");
+						python << OpenCamLibDefinition(edges[offset], prefix, suffix);
+					}
 				}
 
-				if (edges.size() > 0)
+				if (num_edges > 0)
 				{
 					python << _T("\040\040\040\040sketches.append(")
-							<< _T("sketch_id_") << (int) (*itObject)->m_id << _T(")\n");
+						<< _T("sketch_id_") << (int) (*itObject)->m_id << _T(")\n");
 				}
 			} // End if - else
 			break;
@@ -319,13 +331,13 @@ Python CScriptOp::AppendTextToProgram(CMachineState *pMachineState)
 
 static void on_set_emit_depthop_params(bool value, HeeksObj* object)
 {
-	((CScriptOp*)object)->m_emit_depthop_params = int(value);
+	((CScriptOp*)object)->m_emit_depthop_params = (value ? 1:0);
 	((CScriptOp*)object)->WriteDefaultValues();
 }
 
 void CScriptOp::GetProperties(std::list<Property *> *list)
 {
-    list->push_back(new PropertyCheck(_("emit_depthop_params"), m_emit_depthop_params, this, on_set_emit_depthop_params));
+    list->push_back(new PropertyCheck(_("emit_depthop_params"), m_emit_depthop_params != 0, this, on_set_emit_depthop_params));
     CDepthOp::GetProperties(list);
 }
 
