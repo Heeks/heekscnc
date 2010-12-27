@@ -1517,7 +1517,11 @@ Python CProbing::GeneratePythonPreamble()
         python << _T("import sys\n");
 
     #ifndef WIN32
+    #ifndef CMAKE_UNIX
         python << _T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n");
+    #else
+        python << _T("sys.path.insert(0,'/usr/lib/heekscnc/')\n");
+    #endif
     #endif
 
     python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");

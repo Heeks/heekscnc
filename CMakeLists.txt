@@ -6,7 +6,6 @@ endif( ${CMAKE_VERSION} STREQUAL "2.8.2" )
 
 set( CMAKE_BUILD_TYPE Debug )
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
 add_definitions ( -Wall )
 FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl )
 find_package ( OpenCASCADE REQUIRED COMPONENTS TKernel )
@@ -34,13 +33,15 @@ set(CPACK_PACKAGE_VERSION_MINOR 15)
 set(CPACK_PACKAGE_VERSION_PATCH 1)
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_beta-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}_${PKG_ARCH}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "HeeksCNC, CNC machining add-in for HeeksCAD
-HeeksCNC is a CNC machining (CAM) add-in for HeeksCAD , producing g-code for CNC machines, such as linuxcnc.org's EMC2")
+ HeeksCNC is a CNC machining (CAM) add-in for HeeksCAD. It produces
+ g-code for CNC machines, such as those run by linuxcnc.org's EMC2")
 set(CPACK_DEBIAN_PACKAGE_SECTION "Science")
 set(CPACK_DEBIAN_PACKAGE_VERSION "")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.14.0), libwxbase2.8 (>= 2.8.5), libwxgtk2.8 (>= 2.8.5), libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python (>= 1.42)" )
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.15.1)" )
 include(CPack)
 
-#---------------put these down here so that the package version vars above would be visible-------------
+#--------------- these are down here so that the package version vars above are visible -------------
 add_subdirectory( src )
 add_subdirectory( kurve )
+set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CPACK_PACKAGE_FILE_NAME}.deb" )

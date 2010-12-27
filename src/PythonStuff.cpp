@@ -167,7 +167,11 @@ public:
 #ifdef RUNINPLACE
             wxString path(_T("/nc/"));
 #else
+#ifndef CMAKE_UNIX
             wxString path(_T("/../heekscnc/nc/"));
+#else
+            wxString path(_T("/usr/lib/heekscnc/nc/"));
+#endif
 #endif
 
 			Execute(wxString(_T("python \"")) + theApp.GetDllFolder() + path + m_program->m_machine.file_name + wxString(_T("_read.py\" \"")) + m_filename + wxString(_T("\"")) );

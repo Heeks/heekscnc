@@ -11,9 +11,11 @@ include_directories (
     ${wxWidgets_INCLUDE_DIRS} ${OpenCASCADE_INCLUDE_DIR}
     ${HeeksCadDir} ../kurve/geometry ../kurve/messages
     )
+set ( LIBRARY_OUTPUT_PATH ../bin )
 
 if( UNIX )
   #set( platform_SRCS some_necessary_linux_file.cpp )
+  add_definitions( -DCMAKE_UNIX ) #defining this changes resource and script locations
 else( UNIX )
   #windows
   set( platform_SRCS dllmain.cpp stdafx.cpp )
@@ -44,20 +46,20 @@ set( heekscnc_SRCS
     CuttingRate.cpp  Inlay.cpp              Profile.cpp        SpeedReferences.cpp
     Interface.cpp    ProgramCanvas.cpp
    )
-
+set( mylibs -L../bin -lheekskurve )
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
-target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} )
+target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} ${mylibs} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
-install( TARGETS heekscnc DESTINATION local/lib/heekscnc )
+install( TARGETS heekscnc DESTINATION lib )
 
 #file( GLOB bitmaps  ) ${bitmaps}
-install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION local/share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )
+install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )
 
 file( GLOB icons "${CMAKE_CURRENT_SOURCE_DIR}/../icons/*.png" )
-install( FILES ${icons} DESTINATION local/share/heekscnc/icons )
+install( FILES ${icons} DESTINATION share/heekscnc/icons )
 
 file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt")
-install(FILES ${nc} DESTINATION local/lib/heekscnc/nc )
+install(FILES ${nc} DESTINATION lib/heekscnc/nc )
 
 file( GLOB hcnc_misc
                "${CMAKE_CURRENT_SOURCE_DIR}/../*_funcs.py"
@@ -66,4 +68,4 @@ file( GLOB hcnc_misc
                "${CMAKE_CURRENT_SOURCE_DIR}/../turning.py"
                "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
                )
-install( FILES ${hcnc_misc} DESTINATION local/lib/heekscnc/ )
+install( FILES ${hcnc_misc} DESTINATION lib/heekscnc/ )
