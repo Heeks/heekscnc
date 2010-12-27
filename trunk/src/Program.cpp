@@ -762,7 +762,11 @@ Python CProgram::RewritePythonProgram()
 
 #ifndef WIN32
 #ifndef RUNINPLACE
+#ifndef CMAKE_UNIX
 	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/")) << _T(")\n");
+#else
+    python << _T("sys.path.insert(0,") << PythonString(_T("/usr/lib/heekscnc/")) << _T(")\n");
+#endif
 #endif
 #endif
 
@@ -986,8 +990,12 @@ void CProgram::UpdateFromUserType()
 void CProgram::GetMachines(std::vector<CMachine> &machines)
 {
 	wxString machines_file = CProgram::alternative_machines_file;
+#ifdef CMAKE_UNIX
+    if(machines_file.Len() == 0)machines_file = _T("/usr/lib/heekscnc/nc/machines.txt");
+#else
 	if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
-	ifstream ifs(Ttc(machines_file.c_str()));
+#endif
+    ifstream ifs(Ttc(machines_file.c_str()));
 	if(!ifs)
 	{
 #ifdef UNICODE
