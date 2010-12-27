@@ -1879,7 +1879,11 @@ wxString CHeeksCNCApp::GetResFolder()
 #if defined(WIN32) || defined(RUNINPLACE) //compile with 'RUNINPLACE=yes make' then skip 'sudo make install'
 	return m_dll_path;
 #else
+#ifdef CMAKE_UNIX
+    return (m_dll_path + _T("/../share/heekscnc"));
+#else
 	return (m_dll_path + _T("/../../share/heekscnc"));
+#endif
 #endif
 }
 
