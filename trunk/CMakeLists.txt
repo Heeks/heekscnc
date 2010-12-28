@@ -26,7 +26,7 @@ ENDIF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
 
 #-------------------- package generation -------------------------
 set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dan Heeks")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "HeeksCAD Developers <heekscad-devel@googlegroups.com>")
 set(CPACK_PACKAGE_NAME "heekscnc")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 15)
@@ -42,6 +42,6 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.15.1)" )
 include(CPack)
 
 #--------------- these are down here so that the package version vars above are visible -------------
-add_subdirectory( src )
 add_subdirectory( kurve )
+add_subdirectory( src )
 set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CPACK_PACKAGE_FILE_NAME}.deb" )
