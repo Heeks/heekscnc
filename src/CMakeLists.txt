@@ -4,7 +4,7 @@ set ( CMAKE_BUILD_TYPE Debug )
 add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL -DOPEN_SOURCE_GEOMETRY )
 find_package( OpenCASCADE REQUIRED COMPONENTS TKernel TKBRep TKTopAlgo TKMath TKV3d TKGeomBase TKGeomAlgo TKShHealing TKBO TKBool TKOffset TKLCAF TKMath TKService )
 FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl )
-find_path( HeeksCadDir interface/HeeksObj.h ~/HeeksCAD c:/heekscad )
+find_path( HeeksCadDir interface/HeeksObj.h ~/HeeksCAD .. c:/heekscad )
 INCLUDE(${wxWidgets_USE_FILE})
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
@@ -50,9 +50,11 @@ set( mylibs -L../bin -lheekskurve )
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
 target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} ${mylibs} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
+
+
+#------------------- the lines below tell cmake what files get installed where. this is used for 'make install' and 'make package' --------------------- 
 install( TARGETS heekscnc DESTINATION lib )
 
-#file( GLOB bitmaps  ) ${bitmaps}
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )
 
 file( GLOB icons "${CMAKE_CURRENT_SOURCE_DIR}/../icons/*.png" )
