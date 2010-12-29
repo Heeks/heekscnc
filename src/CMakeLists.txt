@@ -1,7 +1,7 @@
 project( HeeksCNC )
 cmake_minimum_required( VERSION 2.6 )
 set ( CMAKE_BUILD_TYPE Debug )
-add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL -DOPEN_SOURCE_GEOMETRY )
+add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL -DOPEN_SOURCE_GEOMETRY -DXUSINGDLL )
 find_package( OpenCASCADE REQUIRED COMPONENTS TKernel TKBRep TKTopAlgo TKMath TKV3d TKGeomBase TKGeomAlgo TKShHealing TKBO TKBool TKOffset TKLCAF TKMath TKService )
 FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl )
 find_path( HeeksCadDir interface/HeeksObj.h ~/HeeksCAD .. c:/heekscad )
@@ -30,7 +30,7 @@ set( heekscnc_HDRS
     CNCPoint.h     Program.h      Interface.h          Probing.h        ScriptOp.h         TrsfNCCode.h
     Contour.h      Excellon.h     MachineState.h       Profile.h        SpeedOp.h          TurnRough.h
     CounterBore.h  Fixture.h      NCCode.h             ProgramCanvas.h  SpeedReference.h   Waterline.h
-    CToolDlg.h     Fixtures.h     Operations.h         SpeedReferences.h
+    CToolDlg.h     Fixtures.h     Operations.h         SpeedReferences.h 
    )
 
 set( heekscnc_SRCS
@@ -45,6 +45,18 @@ set( heekscnc_SRCS
     CToolDlg.cpp     HeeksCNCInterface.cpp  Probing.cpp        SpeedReference.cpp
     CuttingRate.cpp  Inlay.cpp              Profile.cpp        SpeedReferences.cpp
     Interface.cpp    ProgramCanvas.cpp
+  ${HeeksCadDir}/interface/HDialogs.cpp          ${HeeksCadDir}/interface/PropertyColor.cpp
+  ${HeeksCadDir}/interface/HeeksColor.cpp        ${HeeksCadDir}/interface/PropertyDouble.cpp
+  ${HeeksCadDir}/interface/HeeksObj.cpp          ${HeeksCadDir}/interface/PropertyFile.cpp
+  ${HeeksCadDir}/interface/LeftAndRight.cpp      ${HeeksCadDir}/interface/PropertyInt.cpp
+  ${HeeksCadDir}/interface/LeftAndRight.h        ${HeeksCadDir}/interface/PropertyLength.cpp
+  ${HeeksCadDir}/interface/MarkedObject.cpp      ${HeeksCadDir}/interface/PropertyList.cpp
+  ${HeeksCadDir}/interface/NiceTextCtrl.cpp      ${HeeksCadDir}/interface/PropertyString.cpp
+  ${HeeksCadDir}/interface/ObjectCanvas.cpp      ${HeeksCadDir}/interface/PropertyVertex.cpp
+  ${HeeksCadDir}/interface/ObjList.cpp           ${HeeksCadDir}/interface/strconv.cpp
+  ${HeeksCadDir}/interface/PictureFrame.cpp      ${HeeksCadDir}/interface/ToolImage.cpp
+  ${HeeksCadDir}/interface/PropertyCheck.cpp     ${HeeksCadDir}/interface/TransientObject.cpp
+  ${HeeksCadDir}/interface/PropertyChoice.cpp
    )
 set( mylibs -L../bin -lheekskurve )
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )

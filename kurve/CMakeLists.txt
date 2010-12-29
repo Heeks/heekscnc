@@ -8,8 +8,8 @@ set ( LIBRARY_OUTPUT_PATH ../bin )
 include_directories ( ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${PYTHON_INCLUDE_DIRS} )
 
 set( heekskurve_SRCS geometry/Construction.cpp geometry/Finite.cpp geometry/kurve.cpp
-                geometry/Matrix.cpp geometry/offset.cpp )
-set( heekskurve_HDRS geometry/geometry.h )
+                geometry/Matrix.cpp geometry/offset.cpp PythonStuff.cpp )
+set( heekskurve_HDRS geometry/geometry.h PythonStuff.h )
 
 add_library( heekskurve SHARED ${heekskurve_SRCS} ${heekskurve_HDRS} )
 target_link_libraries( heekskurve ${PYTHON_LIBRARIES} )
