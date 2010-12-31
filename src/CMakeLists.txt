@@ -1,10 +1,10 @@
 project( HeeksCNC )
 cmake_minimum_required( VERSION 2.6 )
 set ( CMAKE_BUILD_TYPE Debug )
-add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL -DOPEN_SOURCE_GEOMETRY -DXUSINGDLL )
+add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL -DOPEN_SOURCE_GEOMETRY -DWXUSINGDLL )
 find_package( OpenCASCADE REQUIRED COMPONENTS TKernel TKBRep TKTopAlgo TKMath TKV3d TKGeomBase TKGeomAlgo TKShHealing TKBO TKBool TKOffset TKLCAF TKMath TKService )
 FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl )
-find_path( HeeksCadDir interface/HeeksObj.h ~/HeeksCAD .. c:/heekscad )
+find_path( HeeksCadDir interface/HeeksObj.h ~/HeeksCAD ../.. c:/heekscad )
 INCLUDE(${wxWidgets_USE_FILE})
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
@@ -30,7 +30,7 @@ set( heekscnc_HDRS
     CNCPoint.h     Program.h      Interface.h          Probing.h        ScriptOp.h         TrsfNCCode.h
     Contour.h      Excellon.h     MachineState.h       Profile.h        SpeedOp.h          TurnRough.h
     CounterBore.h  Fixture.h      NCCode.h             ProgramCanvas.h  SpeedReference.h   Waterline.h
-    CToolDlg.h     Fixtures.h     Operations.h         SpeedReferences.h 
+    CToolDlg.h     Fixtures.h     Operations.h         SpeedReferences.h
    )
 
 set( heekscnc_SRCS
@@ -64,7 +64,7 @@ target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES}
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
 
 
-#------------------- the lines below tell cmake what files get installed where. this is used for 'make install' and 'make package' --------------------- 
+#------------------- the lines below tell cmake what files get installed where. this is used for 'make install' and 'make package' ---------------------
 install( TARGETS heekscnc DESTINATION lib )
 
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )
