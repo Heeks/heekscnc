@@ -35,7 +35,7 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_beta-${CPACK_PACKAGE_VERSION_
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "HeeksCNC, CNC machining add-in for HeeksCAD
  HeeksCNC is a CNC machining (CAM) add-in for HeeksCAD. It produces
  g-code for CNC machines, such as those run by linuxcnc.org's EMC2")
-set(CPACK_DEBIAN_PACKAGE_SECTION "Science")
+set(CPACK_DEBIAN_PACKAGE_SECTION "science")
 set(CPACK_DEBIAN_PACKAGE_VERSION "")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.15.1)" )
