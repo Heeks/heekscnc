@@ -1,4 +1,6 @@
-=For more current build instructions for Ubuntu please refer to http://code.google.com/p/heekscad/wiki/UbuntuInstallation=
+#labels Featured
+==The latest build instructions (with CMake and Ubuntu) are at http://code.google.com/p/heekscad/wiki/BuildWithCmakeOnUbuntu==
+===Another page, explaining how to build with CMake or Makefiles, is at http://code.google.com/p/heekscad/wiki/UbuntuInstallation===
 
 #summary How to build for Ubuntu
 
