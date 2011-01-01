@@ -1,9 +1,12 @@
-#labels Featured
-==The latest build instructions (with CMake and Ubuntu) are at http://code.google.com/p/heekscad/wiki/BuildWithCmakeOnUbuntu==
-===Another page, explaining how to build with CMake or Makefiles, is at http://code.google.com/p/heekscad/wiki/UbuntuInstallation===
-
 #summary How to build for Ubuntu
+#labels Featured
 
+==The latest build instructions (geared towards Ubuntu 10.04) are [http://code.google.com/p/heekscad/wiki/BuildWithCmakeOnUbuntu in the HeeksCAD wiki]==
+*Another page, explaining how to build with the older Makefile system, is [http://code.google.com/p/heekscad/wiki/UbuntuInstallation here]*
+
+----
+
+===Old instructions===
 First build HeeksCAD for Ubuntu. ( see http://code.google.com/p/heekscad/wiki/CompilingForUbuntu )
 
 go to System->Administration->"Synaptic Package Manager"
