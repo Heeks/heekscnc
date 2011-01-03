@@ -322,7 +322,7 @@ def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, fina
     if rapid_down_to_height > clearance_height:
        rapid_down_to_height = clearance_height
 
-    use_internal_function = True
+    use_internal_function = False
     
     if use_internal_function:
         curve_list = a.MakePocketToolpath(tool_radius, extra_offset, stepover, from_center, use_zig_zag, zig_angle)
