@@ -80,12 +80,6 @@ def register_callbacks():
         heekscad.register_callbacks(on_new_or_open)
     
 def on_new_or_open(open, res):
-    from PyQt4 import QtGui
-
-    app = QtGui.QApplication([])
-    w = QtGui.QWidget()
-    w.show()
-
     if open == 0:
         # new file
         add_program_with_children()
