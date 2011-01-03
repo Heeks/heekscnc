@@ -56,6 +56,7 @@ CProfileParams::CProfileParams()
 	m_do_finishing_pass = false;
 	m_finishing_h_feed_rate = 0.0;
 	m_finishing_cut_mode = eConventional;
+	m_finishing_step_down = 1.0;
 }
 
 static void on_set_tool_on_side(int value, HeeksObj* object){
@@ -105,6 +106,12 @@ static void on_set_finishing_h_feed_rate(double value, HeeksObj* object)
 static void on_set_finish_cut_mode(int value, HeeksObj* object)
 {
 	((CProfile*)object)->m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)value;
+	((CProfile*)object)->WriteDefaultValues();
+}
+
+static void on_set_finish_step_down(double value, HeeksObj* object)
+{
+	((CProfile*)object)->m_profile_params.m_finishing_step_down = value;
 	((CProfile*)object)->WriteDefaultValues();
 }
 
@@ -205,6 +212,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 			choices.push_back(_("Climb"));
 			list->push_back(new PropertyChoice(_("finish cut mode"), choices, m_finishing_cut_mode, parent, on_set_finish_cut_mode));
 		}
+		list->push_back(new PropertyLength(_("finishing step down"), m_finishing_step_down, parent, on_set_finish_step_down));
 	}
 }
 
@@ -256,6 +264,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("do_finishing_pass", m_do_finishing_pass ? 1:0);
 	element->SetDoubleAttribute("finishing_feed_rate", m_finishing_h_feed_rate);
 	element->SetAttribute("finish_cut_mode", m_finishing_cut_mode);
+	element->SetDoubleAttribute("finishing_step_down", m_finishing_step_down);
 }
 
 void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -287,6 +296,7 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	if(pElem->Attribute("do_finishing_pass", &int_for_bool))m_do_finishing_pass = (int_for_bool != 0);
 	pElem->Attribute("finishing_feed_rate", &m_finishing_h_feed_rate);
 	if(pElem->Attribute("finish_cut_mode", &int_for_enum))m_finishing_cut_mode = (eCutMode)int_for_enum;
+	pElem->Attribute("finishing_step_down", &m_finishing_step_down);
 }
 
 CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
@@ -702,6 +712,7 @@ void CProfile::WriteDefaultValues()
 	config.Write(_T("DoFinishPass"), m_profile_params.m_do_finishing_pass);
 	config.Write(_T("FinishFeedRate"), m_profile_params.m_finishing_h_feed_rate);
 	config.Write(_T("FinishCutMode"), m_profile_params.m_finishing_cut_mode);
+	config.Write(_T("FinishStepDown"), m_profile_params.m_finishing_step_down);
 }
 
 void CProfile::ReadDefaultValues()
@@ -721,6 +732,7 @@ void CProfile::ReadDefaultValues()
 	config.Read(_T("FinishFeedRate"), &m_profile_params.m_finishing_h_feed_rate, 100.0);
 	config.Read(_T("FinishCutMode"), &int_mode, CProfileParams::eConventional);
 	m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)int_mode;
+	config.Read(_T("FinishStepDown"), &m_profile_params.m_finishing_step_down, 1.0);
 
 	ConfirmAutoRollRadius(true);
 
@@ -759,6 +771,7 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 		python << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
 		python << _T("flush_nc()\n");
 		python << _T("offset_extra = 0.0\n");
+		python << _T("step_down = ") << m_profile_params.m_finishing_step_down << _T("\n");
 	}
 	else
 	{

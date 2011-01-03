@@ -46,6 +46,7 @@ public:
 	bool m_do_finishing_pass;
 	double m_finishing_h_feed_rate;
 	eCutMode m_finishing_cut_mode;
+	double m_finishing_step_down;
 
 	CProfileParams();
 
