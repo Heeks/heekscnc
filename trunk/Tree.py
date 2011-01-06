@@ -6,12 +6,10 @@ class Tree:
         #create self.window and add it to the CAD system
         if HeeksCNC.widgets == HeeksCNC.WIDGETS_WX:
             import wx
-            from hwx.CAMWindow import CAMWindow
+            from wxCAMWindow import CAMWindow
 
             if platform.system() == "Windows":
-                hwnd = HeeksCNC.get_frame_hwnd()
-                frame = wx.Window_FromHWND(None, hwnd)
-                self.window = CAMWindow(frame)
+                self.window = CAMWindow()
                 HeeksCNC.add_window(self.window.GetHandle())
             else:
                 ID = HeeksCNC.get_frame_id()
@@ -36,18 +34,18 @@ class Tree:
                 #HeeksCNC.add_window(widget.GetId())
                 self.window.show()
                 
-    def add(self, object, parent = None):
+    def Add(self, object):
         # adds a TreeObject to the tree
-        self.window.add(object, parent)
+        self.window.add(object, object.parent)
         
         # add its children too
-        try:
+        if object.children != None:
             for child in object.children:
-                self.add(child, object)
-                
-        except:
-            # no "children" member
-            pass
+                self.Add(child)
+        
+    def Remove(self, object):
+        # remove a TreeObject from the tree
+        self.window.remove(object)
         
     def Refresh(self):
         self.window.Refresh()

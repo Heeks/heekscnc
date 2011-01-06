@@ -1,12 +1,13 @@
 from Object import Object
 import HeeksCNC
+from Profile import Profile
+from Pocket import Pocket
 
 class Operations(Object):
     def __init__(self):
         Object.__init__(self)
         
-    def name(self):
-        # the name of the item in the tree
+    def TypeName(self):
         return "Operations"
     
     def icon(self):
@@ -18,9 +19,15 @@ def AddOperationMenuItems(CAM_menu):
     HeeksCNC.add_menu_item(CAM_menu, 'Pocket Operation', on_pocket_operation, HeeksCNC.heekscnc_path + '/bitmaps/pocket.png')
 
 def on_profile_operation():
-    import wx
-    wx.MessageBox("profile operation")
+    op = Profile()
+    HeeksCNC.program.operations.Add(op)
+    HeeksCNC.tree.Add(op)
+    HeeksCNC.tree.Refresh()
 
 def on_pocket_operation():
-    import wx
-    wx.MessageBox("pocket operation")
+    op = Pocket()
+    op.sketches = HeeksCNC.get_selected_sketches()
+    if op.Edit():
+        HeeksCNC.program.operations.Add(op)
+        HeeksCNC.tree.Add(op)
+        HeeksCNC.tree.Refresh()

@@ -24,6 +24,10 @@ def on_polar_array():
     import polar_array
     frame_1 = polar_array.MyFrame(None, -1, "")
     frame_1.Show()
+    
+def on_reload_modules():
+    reload(Program)
+    reload(Operations)
 
 def add_menus():
     CAM_menu = addmenu('CAM')
@@ -32,12 +36,13 @@ def add_menus():
     add_menu_item(CAM_menu, 'Post Process', on_post_process, heekscnc_path + '/bitmaps/postprocess.png')
     if platform.system() != "Windows":
         add_menu_item(CAM_menu, 'Bolt Circle', on_polar_array, heekscnc_path + '/polar_array/polar_array.png')
+    add_menu_item(CAM_menu, 'Reload Python Modules', on_reload_modules, heekscnc_path + '/bitmaps/postprocess.png')
     
 def add_windows():
-    from ui.Tree import Tree
+    from Tree import Tree
     global tree
     tree = Tree()
-    tree.add(program)
+    tree.Add(program)
     tree.Refresh()
 
 def start():
@@ -90,3 +95,27 @@ def add_program_with_children():
     global program
     program = Program()
     program.add_initial_children()
+    
+def get_view_units():
+    if cad_system == CAD_SYSTEM_HEEKS:
+        return heekscad.get_view_units()
+    return 1.0
+
+def get_selected_sketches():
+    if cad_system == CAD_SYSTEM_HEEKS:
+        sketches = heekscad.get_selected_sketches()
+        str_sketches = []
+        for sketch in sketches:
+            str_sketches.append(str(sketch))
+        return str_sketches
+    return []
+
+def pick_sketches():
+    # returns a list of strings, one name for each sketch
+    if cad_system == CAD_SYSTEM_HEEKS:
+        sketches = heekscad.getsketches()
+        str_sketches = []
+        for sketch in sketches:
+            str_sketches.append(str(sketch))
+        return str_sketches
+    
