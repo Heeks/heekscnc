@@ -5,9 +5,9 @@ from Operations import Operations
 class Program(Object):
     def __init__(self):
         Object.__init__(self)
+        self.units = 1.0 # set to 25.4 for inches
         
-    def name(self):
-        # the name of the item in the tree
+    def TypeName(self):
         return "Program"
     
     def icon(self):
@@ -17,8 +17,8 @@ class Program(Object):
     def add_initial_children(self):
         # add tools, operations, etc.
         self.children = []
-        tools = Tools()
-        tools.load_default()
-        self.children.append(tools)
-        operations = Operations()
-        self.children.append(operations)
+        self.tools = Tools()
+        self.tools.load_default()
+        self.Add(self.tools)
+        self.operations = Operations()
+        self.Add(self.operations)
