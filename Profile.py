@@ -4,8 +4,7 @@ class Profile(Operation):
     def __init__(self):
         Operation.__init__(self)
         
-    def name(self):
-        # the name of the item in the tree
+    def TypeName(self):
         return "Profile"
     
     def op_icon(self):
