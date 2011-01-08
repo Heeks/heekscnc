@@ -27,5 +27,5 @@ class Pocket(DepthOp):
         if HeeksCNC.widgets == HeeksCNC.WIDGETS_WX:
             from wxPocketDlg import PocketDlg
             dlg = PocketDlg(self)
-            if dlg.ShowModal() == wx.ID_OK: return True
+            return dlg.ShowModal()
         return False
