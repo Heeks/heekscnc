@@ -2,12 +2,15 @@ import wx
 import HeeksCNC
 
 class DoubleCtrl(wx.TextCtrl):
-    def __init__(self, parent, id, factor = 1.0):
+    def __init__(self, parent, id = wx.ID_ANY, factor = 1.0):
         wx.TextCtrl.__init__(self, parent, id)
         self.factor = factor
         
     def GetValue(self):
-        return float(wx.TextCtrl.GetValue())/self.factor
+        try:
+            return float(wx.TextCtrl.GetValue(self))/self.factor
+        except:
+            return 0.0
 
     def DoubleToString(self, value):
         return str(value * self.factor)
@@ -16,7 +19,7 @@ class DoubleCtrl(wx.TextCtrl):
         wx.TextCtrl.SetValue(self, self.DoubleToString(value))
         
 class LengthCtrl(DoubleCtrl):
-    def __init__(self, parent, id):
+    def __init__(self, parent, id = wx.ID_ANY):
         #factor = 1.0/HeeksCNC.get_view_units()
         factor = 1.0
         DoubleCtrl.__init__(self, parent, id, factor)
@@ -27,7 +30,7 @@ class GeomCtrl(wx.TextCtrl):
         wx.TextCtrl.__init__(self, parent, id)
         
     def GetGeomList(self):
-        str = wx.TextCtrl.GetValue()
+        str = wx.TextCtrl.GetValue(self)
         s = ""
         geom_list = []
         length = len(str)

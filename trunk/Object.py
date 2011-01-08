@@ -3,7 +3,7 @@ import HeeksCNC
 class Object:
     def __init__(self):
         self.parent = None
-        self.children = None
+        self.children = []
             
     def name(self):
         # the name of the item in the tree
@@ -32,8 +32,6 @@ class Object:
     
     def Add(self, child):
         child.parent = self
-        if self.children == None:
-            self.children = []
         self.children.append(child)
 
     def OnDelete(self):
