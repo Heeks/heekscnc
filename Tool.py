@@ -279,3 +279,38 @@ class Tool(Object):
     def ResetTitle(self):
         if self.automatically_generate_title:
             self.title = self.GenerateMeaningfulName()
+
+    def AppendTextToProgram(self):
+        # The G10 command can be used (within EMC2) to add a tool to the tool
+        # table from within a program.
+        # G10 L1 P[tool number] R[radius] X[offset] Z[offset] Q[orientation]
+        #
+        # The radius value must be expressed in MACHINE CONFIGURATION UNITS.  This may be different
+        # to this model's drawing units.  The value is interpreted, at lease for EMC2, in terms
+        # of the units setup for the machine's configuration (something.ini in EMC2 parlence).  At
+        # the moment we don't have a MACHINE CONFIGURATION UNITS parameter so we've got a 50%
+        # chance of getting it right.
+
+        if len(self.title) > 0:
+            HeeksCNC.program.python_program += "#('" + self.title + "')\n"
+
+        HeeksCNC.program.python_program += "tool_defn( id=" + str(self.tool_number) + ", "
+
+        if len(self.title) > 0:
+            HeeksCNC.program.python_program += "name='" + self.title + "', "
+        else:
+            HeeksCNC.program.python_program += "name=None, "
+
+        if self.diameter > 0.0:
+            HeeksCNC.program.python_program += "radius=" + str(self.diameter / 2 / HeeksCNC.program.units) + ", "
+        else:
+            HeeksCNC.program.python_program += "radius=None, "
+
+        if self.tool_length_offset > 0.0:
+            HeeksCNC.program.python_program += "length=" + str(self.tool_length_offset / HeeksCNC.program.units) + ", "
+        else:
+            HeeksCNC.program.python_program += "length=None, "
+
+        HeeksCNC.program.python_program += "gradient=" + str(self.gradient)
+
+        HeeksCNC.program.python_program += ")\n"

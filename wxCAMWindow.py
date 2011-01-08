@@ -3,10 +3,8 @@ import HeeksCNC
 from PopupMenu import PopupMenu
 
 class CAMWindow(wx.ScrolledWindow):
-    def __init__(self):
-        hwnd = HeeksCNC.get_frame_hwnd()
-        self.frame = wx.Window_FromHWND(None, hwnd)
-        wx.ScrolledWindow.__init__(self, self.frame, name = 'CAM')
+    def __init__(self, parent):
+        wx.ScrolledWindow.__init__(self, parent, name = 'CAM')
         self.image_list = wx.ImageList(16, 16)
         self.image_map = dict()
         self.tree = wx.TreeCtrl(self, style=wx.TR_HAS_BUTTONS + wx.TR_LINES_AT_ROOT + wx.TR_HIDE_ROOT)

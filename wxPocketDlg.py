@@ -33,7 +33,7 @@ ID_PICK_SKETCHES = 121
 
 class PocketDlg(HDialog):
     def __init__(self, pocket):
-        HDialog.__init__(self, "Pocket Dialog")
+        HDialog.__init__(self, "Pocket Operation")
         self.pocket = pocket
         
         self.general_bitmap = None
