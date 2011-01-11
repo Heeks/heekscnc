@@ -1,19 +1,22 @@
-project( HeeksCNC )
+project( libheekscnc )
 cmake_minimum_required( VERSION 2.6 )
 if( NOT DEFINED BUILD_STARTED_IN_RIGHT_DIR )
   message( FATAL_ERROR "Don't start a build in the src directory. Do a 'cd ..', then run cmake ." )
 endif( NOT DEFINED BUILD_STARTED_IN_RIGHT_DIR )
 
 set ( CMAKE_BUILD_TYPE Debug )
-add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL -DOPEN_SOURCE_GEOMETRY -DWXUSINGDLL )
-find_package( OpenCASCADE REQUIRED COMPONENTS TKernel TKBRep TKTopAlgo TKMath TKV3d TKGeomBase TKGeomAlgo TKShHealing TKBO TKBool TKOffset TKLCAF TKMath TKService )
-FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl )
+add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL
+                  -DOPEN_SOURCE_GEOMETRY -DWXUSINGDLL )
+find_package( OpenCASCADE REQUIRED COMPONENTS TKernel TKBRep TKTopAlgo TKMath TKV3d
+              TKGeomBase TKGeomAlgo TKShHealing TKBO TKBool TKOffset TKLCAF TKMath TKService )
+find_package( wxWidgets REQUIRED COMPONENTS base core gl )
 find_path( HeeksCadDir interface/HeeksObj.h ~/HeeksCAD ../.. c:/heekscad )
-INCLUDE(${wxWidgets_USE_FILE})
+include(${wxWidgets_USE_FILE})
+
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     ${wxWidgets_INCLUDE_DIRS} ${OpenCASCADE_INCLUDE_DIR}
-    ${HeeksCadDir} ../kurve/geometry ../kurve/messages
+    ${HeeksCadDir} ../kurve/geometry ../kurve/messages .
     )
 set ( LIBRARY_OUTPUT_PATH ../bin )
 
@@ -62,7 +65,7 @@ set( heekscnc_SRCS
   ${HeeksCadDir}/interface/PropertyCheck.cpp     ${HeeksCadDir}/interface/TransientObject.cpp
   ${HeeksCadDir}/interface/PropertyChoice.cpp
    )
-set( mylibs -L../bin -lheekskurve )
+#set( mylibs -L../bin -lkurve )
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
 target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} ${mylibs} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
@@ -79,11 +82,8 @@ install( FILES ${icons} DESTINATION share/heekscnc/icons )
 file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt")
 install(FILES ${nc} DESTINATION lib/heekscnc/nc )
 
-file( GLOB hcnc_misc
-               "${CMAKE_CURRENT_SOURCE_DIR}/../*_funcs.py"
-               "${CMAKE_CURRENT_SOURCE_DIR}/../PyCamToHeeks.py"
-               "${CMAKE_CURRENT_SOURCE_DIR}/../circular_pocket.py"
-               "${CMAKE_CURRENT_SOURCE_DIR}/../turning.py"
+file( GLOB hcnc_defaults
                "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
                )
-install( FILES ${hcnc_misc} DESTINATION lib/heekscnc/ )
+install( FILES ${hcnc_defaults} DESTINATION lib/heekscnc/ )
+

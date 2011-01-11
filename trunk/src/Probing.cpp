@@ -1516,15 +1516,14 @@ Python CProbing::GeneratePythonPreamble()
 		//hackhack, make it work on unix with FHS
         python << _T("import sys\n");
 
-    #ifndef WIN32
-    #ifndef CMAKE_UNIX
-        python << _T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n");
-    #else
+    #ifdef CMAKE_UNIX
         python << _T("sys.path.insert(0,'/usr/lib/heekscnc/')\n");
+    #else
+      #ifndef WIN32
+        python << _T("sys.path.insert(0,'/usr/local/lib/heekscnc/')\n");
+      #endif
+      python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");
     #endif
-    #endif
-
-    python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");
     python << _T("import math\n");
 
 
