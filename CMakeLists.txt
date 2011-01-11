@@ -1,3 +1,4 @@
+project( HeeksCNC )
 cmake_minimum_required( VERSION 2.6 )
 if( ${CMAKE_VERSION} STREQUAL "2.8.2" )
   # bug http://vtk.org/Bug/view.php?id=11020
@@ -9,15 +10,27 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 set( BUILD_STARTED_IN_RIGHT_DIR "true" )  #used in src/CMakeLists.txt to print a message
 
 add_definitions ( -Wall )
-FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl )
+find_package( wxWidgets REQUIRED COMPONENTS base core gl )
 find_package ( OpenCASCADE REQUIRED COMPONENTS TKernel )
+find_package( PythonInterp REQUIRED )
 
-INCLUDE(${wxWidgets_USE_FILE})
+include(${wxWidgets_USE_FILE})
 include_directories (
 	${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	${wxWidgets_INCLUDE_DIRS}
 	${OpenCASCADE_INCLUDE_DIR}
 	)
+
+#string( REGEX REPLACE "^.*python" "" PY_VERS ${PYTHON_EXECUTABLE} ) #for .py install location
+#file( WRITE "${CMAKE_CURRENT_SOURCE_DIR}/__init__.py" "" ) #create an empty file __init__.py
+file( GLOB hcnc_py "${CMAKE_CURRENT_SOURCE_DIR}/*.py" )
+list( REMOVE_ITEM hcnc_py
+                  "${CMAKE_CURRENT_SOURCE_DIR}/post.py"
+                  "${CMAKE_CURRENT_SOURCE_DIR}/POST_TEST.py"
+                  "${CMAKE_CURRENT_SOURCE_DIR}/STLTools.py"   )
+install( FILES ${hcnc_py} DESTINATION lib/heekscnc ) #lib/python${PY_VERS}/dist-packages/heekscnc )
+#file( GLOB kurve_path "${CMAKE_CURRENT_SOURCE_DIR}/kurve.pth" )
+#install( FILES ${kurve_path} DESTINATION lib/python${PY_VERS}/dist-packages )
 
 
 IF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
@@ -40,7 +53,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "HeeksCNC, CNC machining add-in for HeeksC
 set(CPACK_DEBIAN_PACKAGE_SECTION "science")
 set(CPACK_DEBIAN_PACKAGE_VERSION "")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.15.1)" )
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.15.1), python (>= 2.5)" )
 include(CPack)
 
 #--------------- these are down here so that the package version vars above are visible -------------

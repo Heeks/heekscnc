@@ -760,17 +760,16 @@ Python CProgram::RewritePythonProgram()
 	//hackhack, make it work on unix with FHS
 	python << _T("import sys\n");
 
+#ifdef CMAKE_UNIX
+        python << _T("sys.path.insert(0,'/usr/lib/heekscnc/')\n");
+#else
 #ifndef WIN32
 #ifndef RUNINPLACE
-#ifndef CMAKE_UNIX
 	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/")) << _T(")\n");
-#else
-    python << _T("sys.path.insert(0,") << PythonString(_T("/usr/lib/heekscnc/")) << _T(")\n");
 #endif
 #endif
-#endif
-
 	python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");
+#endif
 	python << _T("import math\n");
 
 	// kurve related things
