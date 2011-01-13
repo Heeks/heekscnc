@@ -18,7 +18,7 @@
 #include "interface/PropertyString.h"
 #include "interface/PropertyList.h"
 #include "interface/Observer.h"
-#include "interface/ToolImage.h"
+#include "interface/PToolImage.h"
 #include "PythonStuff.h"
 #include "Program.h"
 #include "ProgramCanvas.h"
@@ -1298,67 +1298,67 @@ static void AddToolBars()
 		wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
 		if(theApp.m_machiningBar)delete theApp.m_machiningBar;
 		theApp.m_machiningBar = new wxToolBar(frame, -1, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
-		theApp.m_machiningBar->SetToolBitmapSize(wxSize(ToolImage::GetBitmapSize(), ToolImage::GetBitmapSize()));
+		theApp.m_machiningBar->SetToolBitmapSize(wxSize(PToolImage::GetBitmapSize(), PToolImage::GetBitmapSize()));
 
 		heeksCAD->StartToolBarFlyout(_("Milling operations"));
-		heeksCAD->AddFlyoutButton(_("Profile"), ToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Pocket"), ToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Profile"), PToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Pocket"), PToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
 #ifndef STABLE_OPS_ONLY
-		heeksCAD->AddFlyoutButton(_("Adaptive"), ToolImage(_T("adapt")), _("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Adaptive"), PToolImage(_T("adapt")), _("New Special Adaptive Roughing Operation..."), NewAdaptiveOpMenuCallback);
 #endif
-		heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("CounterBore"), ToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Contour"), ToolImage(_T("opcontour")), _("New Contour Operation..."), NewContourOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Drill"), PToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("CounterBore"), PToolImage(_T("counterbore")), _("New CounterBore Cycle Operation..."), NewCounterBoreOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Contour"), PToolImage(_T("opcontour")), _("New Contour Operation..."), NewContourOpMenuCallback);
 #ifndef STABLE_OPS_ONLY
-		heeksCAD->AddFlyoutButton(_("Inlay"), ToolImage(_T("opinlay")), _("New Inlay Operation..."), NewInlayOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Inlay"), PToolImage(_T("opinlay")), _("New Inlay Operation..."), NewInlayOpMenuCallback);
 #endif
-		heeksCAD->AddFlyoutButton(_("Chamfer"), ToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Tap"), ToolImage(_T("optap")), _("New Tapping Operation..."), NewTappingOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Chamfer"), PToolImage(_T("opchamfer")), _("New Chamfer Operation..."), NewChamferOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Tap"), PToolImage(_T("optap")), _("New Tapping Operation..."), NewTappingOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
-		heeksCAD->AddFlyoutButton(_("ZigZag"), ToolImage(_T("zigzag")), _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Waterline"), ToolImage(_T("waterline")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Attach"), ToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Unattach"), ToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("ZigZag"), PToolImage(_T("zigzag")), _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Waterline"), PToolImage(_T("waterline")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Attach"), PToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Unattach"), PToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 #ifndef STABLE_OPS_ONLY
 		heeksCAD->StartToolBarFlyout(_("Additive operations"));
-		heeksCAD->AddFlyoutButton(_("Raft"), ToolImage(_T("raft")), _("New Raft Operation..."), NewRaftOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Raft"), PToolImage(_T("raft")), _("New Raft Operation..."), NewRaftOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 #endif
 
 		heeksCAD->StartToolBarFlyout(_("Other operations"));
-		heeksCAD->AddFlyoutButton(_("Positioning"), ToolImage(_T("locating")), _("New Positioning Operation..."), NewPositioningOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
-		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
-		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
-		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Positioning"), PToolImage(_T("locating")), _("New Positioning Operation..."), NewPositioningOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Probing"), PToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
+		heeksCAD->AddFlyoutButton(_("Probing"), PToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
+		heeksCAD->AddFlyoutButton(_("Probing"), PToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
+		heeksCAD->AddFlyoutButton(_("ScriptOp"), PToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Tool"), ToolImage(_T("drill")), _("New Tool Definition..."), NewDrillMenuCallback);
+		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Tool"), PToolImage(_T("drill")), _("New Tool Definition..."), NewDrillMenuCallback);
 
-		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Fixture"), ToolImage(_T("fixture")), _("New Fixture..."), NewFixtureMenuCallback);
+		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Fixture"), PToolImage(_T("fixture")), _("New Fixture..."), NewFixtureMenuCallback);
 
 		heeksCAD->StartToolBarFlyout(_("Design Rules"));
-		heeksCAD->AddFlyoutButton(_("Design Rules Check"), ToolImage(_("design_rules_check")), _("Design Rules Check..."), DesignRulesCheckMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Design Rules Adjustment"), ToolImage(_("design_rules_adjustment")), _("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Design Rules Check"), PToolImage(_("design_rules_check")), _("Design Rules Check..."), DesignRulesCheckMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Design Rules Adjustment"), PToolImage(_("design_rules_adjustment")), _("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Speeds"));
-		heeksCAD->AddFlyoutButton(_("Speed Reference"), ToolImage(_T("speed_reference")), _("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Cutting Rate"), ToolImage(_T("cutting_rate")), _("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Speed Reference"), PToolImage(_T("speed_reference")), _("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Cutting Rate"), PToolImage(_T("cutting_rate")), _("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Post Processing"));
-		heeksCAD->AddFlyoutButton(_("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Make Python Script"), ToolImage(_T("python")), _("Make Python Script"), MakeScriptMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Run Python Script"), ToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
-		heeksCAD->AddFlyoutButton(_("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
-		heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Send to Machine"), ToolImage(_T("tomachine")), _("Send to Machine"), SendToMachineMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
+		heeksCAD->AddFlyoutButton(_("PostProcess"), PToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Make Python Script"), PToolImage(_T("python")), _("Make Python Script"), MakeScriptMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Run Python Script"), PToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
+		heeksCAD->AddFlyoutButton(_("OpenNC"), PToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
+		heeksCAD->AddFlyoutButton(_("SaveNC"), PToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Send to Machine"), PToolImage(_T("tomachine")), _("Send to Machine"), SendToMachineMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Cancel"), PToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		theApp.m_machiningBar->Realize();
@@ -1449,92 +1449,92 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// Milling Operations menu
 	wxMenu *menuMillingOperations = new wxMenu;
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Profile Operation..."), ToolImage(_T("opprofile")), NewProfileOpMenuCallback);
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Pocket Operation..."), ToolImage(_T("pocket")), NewPocketOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Profile Operation..."), PToolImage(_T("opprofile")), NewProfileOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Pocket Operation..."), PToolImage(_T("pocket")), NewPocketOpMenuCallback);
 #ifndef STABLE_OPS_ONLY
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Adaptive Roughing Operation..."), ToolImage(_T("adapt")), NewAdaptiveOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Adaptive Roughing Operation..."), PToolImage(_T("adapt")), NewAdaptiveOpMenuCallback);
 #endif
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Drilling Operation..."), ToolImage(_T("drilling")), NewDrillingOpMenuCallback);
-	heeksCAD->AddMenuItem(menuMillingOperations, _("CounterBore Operation..."), ToolImage(_T("counterbore")), NewCounterBoreOpMenuCallback);
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Chamfer Operation..."), ToolImage(_T("opchamfer")), NewChamferOpMenuCallback);
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Contour Operation..."), ToolImage(_T("opcontour")), NewContourOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Drilling Operation..."), PToolImage(_T("drilling")), NewDrillingOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("CounterBore Operation..."), PToolImage(_T("counterbore")), NewCounterBoreOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Chamfer Operation..."), PToolImage(_T("opchamfer")), NewChamferOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Contour Operation..."), PToolImage(_T("opcontour")), NewContourOpMenuCallback);
 #ifndef STABLE_OPS_ONLY
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Inlay Operation..."), ToolImage(_T("opinlay")), NewInlayOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Inlay Operation..."), PToolImage(_T("opinlay")), NewInlayOpMenuCallback);
 #endif
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Tapping Operation..."), ToolImage(_T("optap")), NewTappingOpMenuCallback);
+	heeksCAD->AddMenuItem(menuMillingOperations, _("Tapping Operation..."), PToolImage(_T("optap")), NewTappingOpMenuCallback);
 
 	wxMenu *menu3dMillingOperations = new wxMenu;
-	heeksCAD->AddMenuItem(menu3dMillingOperations, _("ZigZag Operation..."), ToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
-	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Waterline Operation..."), ToolImage(_T("waterline")), NewWaterlineOpMenuCallback);
-	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), ToolImage(_T("attach")), NewAttachOpMenuCallback);
-	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), ToolImage(_T("unattach")), NewUnattachOpMenuCallback);
+	heeksCAD->AddMenuItem(menu3dMillingOperations, _("ZigZag Operation..."), PToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
+	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Waterline Operation..."), PToolImage(_T("waterline")), NewWaterlineOpMenuCallback);
+	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), PToolImage(_T("attach")), NewAttachOpMenuCallback);
+	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), PToolImage(_T("unattach")), NewUnattachOpMenuCallback);
 
 	// Additive Operations menu
 #ifndef STABLE_OPS_ONLY
 	wxMenu *menuAdditiveMillingOperations = new wxMenu;
-	heeksCAD->AddMenuItem(menuAdditiveMillingOperations, _("Raft Operation..."), ToolImage(_T("raft")), NewRaftOpMenuCallback);
+	heeksCAD->AddMenuItem(menuAdditiveMillingOperations, _("Raft Operation..."), PToolImage(_T("raft")), NewRaftOpMenuCallback);
 #endif
 
 	wxMenu *menuOperations = new wxMenu;
 #ifndef STABLE_OPS_ONLY
-	heeksCAD->AddMenuItem(menuOperations, _("Rough Turning Operation..."), ToolImage(_T("turnrough")), NewRoughTurnOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Rough Turning Operation..."), PToolImage(_T("turnrough")), NewRoughTurnOpMenuCallback);
 #endif
-	heeksCAD->AddMenuItem(menuOperations, _("Script Operation..."), ToolImage(_T("scriptop")), NewScriptOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Check..."), ToolImage(_T("design_rules_check")), DesignRulesCheckMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Adjustment..."), ToolImage(_T("design_rules_adjustment")), DesignRulesAdjustmentMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Speed Reference..."), ToolImage(_T("speed_reference")), NewSpeedReferenceMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Cutting Rate Reference..."), ToolImage(_T("cutting_rate")), NewCuttingRateMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Positioning Operation..."), ToolImage(_T("locating")), NewPositioningOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Probe Centre Operation..."), ToolImage(_T("probe")), NewProbe_Centre_MenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Probe Edge Operation..."), ToolImage(_T("probe")), NewProbe_Edge_MenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Probe Grid Operation..."), ToolImage(_T("probe")), NewProbe_Grid_MenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Script Operation..."), PToolImage(_T("scriptop")), NewScriptOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Check..."), PToolImage(_T("design_rules_check")), DesignRulesCheckMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Adjustment..."), PToolImage(_T("design_rules_adjustment")), DesignRulesAdjustmentMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Speed Reference..."), PToolImage(_T("speed_reference")), NewSpeedReferenceMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Cutting Rate Reference..."), PToolImage(_T("cutting_rate")), NewCuttingRateMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Positioning Operation..."), PToolImage(_T("locating")), NewPositioningOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Probe Centre Operation..."), PToolImage(_T("probe")), NewProbe_Centre_MenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Probe Edge Operation..."), PToolImage(_T("probe")), NewProbe_Edge_MenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Probe Grid Operation..."), PToolImage(_T("probe")), NewProbe_Grid_MenuCallback);
 
     // Tapping tools menu
 	wxMenu *menuTappingTools = new wxMenu;
-	heeksCAD->AddMenuItem(menuTappingTools, _("Any sized tap..."), ToolImage(_T("tap")), NewTapToolMenuCallback);
-	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Metric standard sizes"), ToolImage(_T("tap")), NewMetricTappingToolMenuCallback);
-	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Unified Threading Standard (UNC, UNF or UNEF)"), ToolImage(_T("tap")), NewUnifiedThreadingStandardTappingToolMenuCallback);
-	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from British Standard Whitworth standard sizes"), ToolImage(_T("tap")), NewBritishStandardWhitworthTappingToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTappingTools, _("Any sized tap..."), PToolImage(_T("tap")), NewTapToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Metric standard sizes"), PToolImage(_T("tap")), NewMetricTappingToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Unified Threading Standard (UNC, UNF or UNEF)"), PToolImage(_T("tap")), NewUnifiedThreadingStandardTappingToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from British Standard Whitworth standard sizes"), PToolImage(_T("tap")), NewBritishStandardWhitworthTappingToolMenuCallback);
 
 	// Tools menu
 	wxMenu *menuTools = new wxMenu;
-	heeksCAD->AddMenuItem(menuTools, _("Drill..."), ToolImage(_T("drill")), NewDrillMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Centre Drill..."), ToolImage(_T("centredrill")), NewCentreDrillMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("End Mill..."), ToolImage(_T("endmill")), NewEndmillMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Slot Drill..."), ToolImage(_T("slotdrill")), NewSlotCutterMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Ball End Mill..."), ToolImage(_T("ballmill")), NewBallEndMillMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Chamfer Mill..."), ToolImage(_T("chamfmill")), NewChamferMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Drill..."), PToolImage(_T("drill")), NewDrillMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Centre Drill..."), PToolImage(_T("centredrill")), NewCentreDrillMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("End Mill..."), PToolImage(_T("endmill")), NewEndmillMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Slot Drill..."), PToolImage(_T("slotdrill")), NewSlotCutterMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Ball End Mill..."), PToolImage(_T("ballmill")), NewBallEndMillMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Chamfer Mill..."), PToolImage(_T("chamfmill")), NewChamferMenuCallback);
 #ifndef STABLE_OPS_ONLY
-	heeksCAD->AddMenuItem(menuTools, _("Turning Tool..."), ToolImage(_T("turntool")), NewTurningToolMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Turning Tool..."), PToolImage(_T("turntool")), NewTurningToolMenuCallback);
 #endif
-	heeksCAD->AddMenuItem(menuTools, _("Touch Probe..."), ToolImage(_T("probe")), NewTouchProbeMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Tool Length Switch..."), ToolImage(_T("probe")), NewToolLengthSwitchMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Touch Probe..."), PToolImage(_T("probe")), NewTouchProbeMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Tool Length Switch..."), PToolImage(_T("probe")), NewToolLengthSwitchMenuCallback);
 #ifndef STABLE_OPS_ONLY
-	heeksCAD->AddMenuItem(menuTools, _("Extrusion..."), ToolImage(_T("extrusion")), NewExtrusionMenuCallback);
+	heeksCAD->AddMenuItem(menuTools, _("Extrusion..."), PToolImage(_T("extrusion")), NewExtrusionMenuCallback);
 #endif
-	heeksCAD->AddMenuItem(menuTools, _("Tap Tool..."), ToolImage(_T("tap")), NULL, NULL, menuTappingTools);
+	heeksCAD->AddMenuItem(menuTools, _("Tap Tool..."), PToolImage(_T("tap")), NULL, NULL, menuTappingTools);
 
 	// Fixtures menu
 	wxMenu *menuFixtures = new wxMenu;
-	heeksCAD->AddMenuItem(menuFixtures, _("New Fixture..."), ToolImage(_T("fixture")), NewFixtureMenuCallback);
+	heeksCAD->AddMenuItem(menuFixtures, _("New Fixture..."), PToolImage(_T("fixture")), NewFixtureMenuCallback);
 
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;
-	heeksCAD->AddMenuItem(menuMachining, _("Add New Milling Operation"), ToolImage(_T("ops")), NULL, NULL, menuMillingOperations);
-	heeksCAD->AddMenuItem(menuMachining, _("Add New 3D Operation"), ToolImage(_T("ops")), NULL, NULL, menu3dMillingOperations);
+	heeksCAD->AddMenuItem(menuMachining, _("Add New Milling Operation"), PToolImage(_T("ops")), NULL, NULL, menuMillingOperations);
+	heeksCAD->AddMenuItem(menuMachining, _("Add New 3D Operation"), PToolImage(_T("ops")), NULL, NULL, menu3dMillingOperations);
 #ifndef STABLE_OPS_ONLY
-	heeksCAD->AddMenuItem(menuMachining, _("Add New Additive Operation"), ToolImage(_T("ops")), NULL, NULL, menuAdditiveMillingOperations);
+	heeksCAD->AddMenuItem(menuMachining, _("Add New Additive Operation"), PToolImage(_T("ops")), NULL, NULL, menuAdditiveMillingOperations);
 #endif
-	heeksCAD->AddMenuItem(menuMachining, _("Add Other Operation"), ToolImage(_T("ops")), NULL, NULL, menuOperations);
-	heeksCAD->AddMenuItem(menuMachining, _("Add New Tool"), ToolImage(_T("tools")), NULL, NULL, menuTools);
-	heeksCAD->AddMenuItem(menuMachining, _("Fixtures"), ToolImage(_T("fixtures")), NULL, NULL, menuFixtures);
-	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), ToolImage(_T("python")), MakeScriptMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Run Python Script"), ToolImage(_T("runpython")), RunScriptMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), ToolImage(_T("postprocess")), PostProcessMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Open NC File"), ToolImage(_T("opennc")), OpenNcFileMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Save NC File"), ToolImage(_T("savenc")), SaveNcFileMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), ToolImage(_T("tomachine")), SendToMachineMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Open BOM File"), ToolImage(_T("opennc")), OpenBOMFileMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Add Other Operation"), PToolImage(_T("ops")), NULL, NULL, menuOperations);
+	heeksCAD->AddMenuItem(menuMachining, _("Add New Tool"), PToolImage(_T("tools")), NULL, NULL, menuTools);
+	heeksCAD->AddMenuItem(menuMachining, _("Fixtures"), PToolImage(_T("fixtures")), NULL, NULL, menuFixtures);
+	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), PToolImage(_T("python")), MakeScriptMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Run Python Script"), PToolImage(_T("runpython")), RunScriptMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), PToolImage(_T("postprocess")), PostProcessMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Open NC File"), PToolImage(_T("opennc")), OpenNcFileMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Save NC File"), PToolImage(_T("savenc")), SaveNcFileMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), PToolImage(_T("tomachine")), SendToMachineMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Open BOM File"), PToolImage(_T("opennc")), OpenBOMFileMenuCallback);
 	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
 
 	// add the program canvas
