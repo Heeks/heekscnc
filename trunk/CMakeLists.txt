@@ -21,16 +21,12 @@ include_directories (
 	${OpenCASCADE_INCLUDE_DIR}
 	)
 
-#string( REGEX REPLACE "^.*python" "" PY_VERS ${PYTHON_EXECUTABLE} ) #for .py install location
-#file( WRITE "${CMAKE_CURRENT_SOURCE_DIR}/__init__.py" "" ) #create an empty file __init__.py
 file( GLOB hcnc_py "${CMAKE_CURRENT_SOURCE_DIR}/*.py" )
 list( REMOVE_ITEM hcnc_py
                   "${CMAKE_CURRENT_SOURCE_DIR}/post.py"
                   "${CMAKE_CURRENT_SOURCE_DIR}/POST_TEST.py"
                   "${CMAKE_CURRENT_SOURCE_DIR}/STLTools.py"   )
 install( FILES ${hcnc_py} DESTINATION lib/heekscnc ) #lib/python${PY_VERS}/dist-packages/heekscnc )
-#file( GLOB kurve_path "${CMAKE_CURRENT_SOURCE_DIR}/kurve.pth" )
-#install( FILES ${kurve_path} DESTINATION lib/python${PY_VERS}/dist-packages )
 
 
 IF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
