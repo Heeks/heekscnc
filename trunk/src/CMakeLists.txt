@@ -38,6 +38,27 @@ set( heekscnc_HDRS
     Contour.h      Excellon.h     MachineState.h       Profile.h        SpeedOp.h          TurnRough.h
     CounterBore.h  Fixture.h      NCCode.h             ProgramCanvas.h  SpeedReference.h   Waterline.h
     CToolDlg.h     Fixtures.h     Operations.h         SpeedReferences.h
+    ${HeeksCadDir}/interface/Box.h                ${HeeksCadDir}/interface/Plugin.h
+    ${HeeksCadDir}/interface/DoubleInput.h        ${HeeksCadDir}/interface/PropertyCheck.h
+    ${HeeksCadDir}/interface/GripData.h           ${HeeksCadDir}/interface/PropertyChoice.h
+    ${HeeksCadDir}/interface/GripperTypes.h       ${HeeksCadDir}/interface/PropertyColor.h
+    ${HeeksCadDir}/interface/HDialogs.h           ${HeeksCadDir}/interface/PropertyDouble.h
+    ${HeeksCadDir}/interface/HeeksCADInterface.h  ${HeeksCadDir}/interface/PropertyFile.h
+    ${HeeksCadDir}/interface/HeeksColor.h         ${HeeksCadDir}/interface/Property.h
+    ${HeeksCadDir}/interface/HeeksObj.h           ${HeeksCadDir}/interface/PropertyInt.h
+    ${HeeksCadDir}/interface/InputMode.h          ${HeeksCadDir}/interface/PropertyLength.h
+    ${HeeksCadDir}/interface/LeftAndRight.h       ${HeeksCadDir}/interface/PropertyList.h
+    ${HeeksCadDir}/interface/MarkedObject.h       ${HeeksCadDir}/interface/PropertyString.h
+    ${HeeksCadDir}/interface/Material.h           ${HeeksCadDir}/interface/PropertyVertex.h
+    ${HeeksCadDir}/interface/NiceTextCtrl.h       ${HeeksCadDir}/interface/SketchOrder.h
+    ${HeeksCadDir}/interface/NurbSurfaceParams.h  ${HeeksCadDir}/interface/strconv.h
+    ${HeeksCadDir}/interface/ObjectCanvas.h       ${HeeksCadDir}/interface/Tool.h
+    ${HeeksCadDir}/interface/ObjList.h            ${HeeksCadDir}/interface/PToolImage.h
+    ${HeeksCadDir}/interface/Observer.h           ${HeeksCadDir}/interface/ToolList.h
+    ${HeeksCadDir}/interface/PictureFrame.h       ${HeeksCadDir}/interface/TransientObject.h
+    ${HeeksCadDir}/src/Geom.h                     ${HeeksCadDir}/src/Gripper.h
+    ${HeeksCadDir}/src/HeeksFrame.h               ${HeeksCadDir}/src/MarkedList.h
+    ${HeeksCadDir}/src/ObjPropsCanvas.h
    )
 
 set( heekscnc_SRCS
@@ -52,18 +73,18 @@ set( heekscnc_SRCS
     CToolDlg.cpp     HeeksCNCInterface.cpp  Probing.cpp        SpeedReference.cpp
     CuttingRate.cpp  Inlay.cpp              Profile.cpp        SpeedReferences.cpp
     Interface.cpp    ProgramCanvas.cpp
-  ${HeeksCadDir}/interface/HDialogs.cpp          ${HeeksCadDir}/interface/PropertyColor.cpp
-  ${HeeksCadDir}/interface/HeeksColor.cpp        ${HeeksCadDir}/interface/PropertyDouble.cpp
-  ${HeeksCadDir}/interface/HeeksObj.cpp          ${HeeksCadDir}/interface/PropertyFile.cpp
-  ${HeeksCadDir}/interface/LeftAndRight.cpp      ${HeeksCadDir}/interface/PropertyInt.cpp
-  ${HeeksCadDir}/interface/LeftAndRight.h        ${HeeksCadDir}/interface/PropertyLength.cpp
-  ${HeeksCadDir}/interface/MarkedObject.cpp      ${HeeksCadDir}/interface/PropertyList.cpp
-  ${HeeksCadDir}/interface/NiceTextCtrl.cpp      ${HeeksCadDir}/interface/PropertyString.cpp
-  ${HeeksCadDir}/interface/ObjectCanvas.cpp      ${HeeksCadDir}/interface/PropertyVertex.cpp
-  ${HeeksCadDir}/interface/ObjList.cpp           ${HeeksCadDir}/interface/strconv.cpp
-  ${HeeksCadDir}/interface/PictureFrame.cpp      ${HeeksCadDir}/interface/ToolImage.cpp
-  ${HeeksCadDir}/interface/PropertyCheck.cpp     ${HeeksCadDir}/interface/TransientObject.cpp
-  ${HeeksCadDir}/interface/PropertyChoice.cpp
+    ${HeeksCadDir}/interface/HDialogs.cpp          ${HeeksCadDir}/interface/PropertyColor.cpp
+    ${HeeksCadDir}/interface/HeeksColor.cpp        ${HeeksCadDir}/interface/PropertyDouble.cpp
+    ${HeeksCadDir}/interface/HeeksObj.cpp          ${HeeksCadDir}/interface/PropertyFile.cpp
+    ${HeeksCadDir}/interface/LeftAndRight.cpp      ${HeeksCadDir}/interface/PropertyInt.cpp
+    ${HeeksCadDir}/interface/LeftAndRight.h        ${HeeksCadDir}/interface/PropertyLength.cpp
+    ${HeeksCadDir}/interface/MarkedObject.cpp      ${HeeksCadDir}/interface/PropertyList.cpp
+    ${HeeksCadDir}/interface/NiceTextCtrl.cpp      ${HeeksCadDir}/interface/PropertyString.cpp
+    ${HeeksCadDir}/interface/ObjectCanvas.cpp      ${HeeksCadDir}/interface/PropertyVertex.cpp
+    ${HeeksCadDir}/interface/ObjList.cpp           ${HeeksCadDir}/interface/strconv.cpp
+    ${HeeksCadDir}/interface/PictureFrame.cpp      ${HeeksCadDir}/interface/PToolImage.cpp
+    ${HeeksCadDir}/interface/PropertyCheck.cpp     ${HeeksCadDir}/interface/TransientObject.cpp
+    ${HeeksCadDir}/interface/PropertyChoice.cpp    ${HeeksCadDir}/src/Geom.cpp
    )
 #set( mylibs -L../bin -lkurve )
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
