@@ -33,6 +33,9 @@ class Program(Object):
         # the name of the PNG file in the HeeksCNC icons folder
         return "program"
     
+    def CanBeDeleted(self):
+        return False
+    
     def add_initial_children(self):
         # add tools, operations, etc.
         self.children = []
@@ -142,7 +145,7 @@ class Program(Object):
         if kurve_funcs_needed: self.python_program += "import kurve_funcs\n"
         if area_module_needed:
             self.python_program += "import area\n"
-            self.python_program += "area.set_units(" + self.units + ")\n"
+            self.python_program += "area.set_units(" + str(self.units) + ")\n"
         if area_funcs_needed: self.python_program += "import area_funcs\n"
 
         # machine general stuff
@@ -201,7 +204,7 @@ class Program(Object):
         if self.output_file_name_follows_data_file_name == False:
             return self.output_file
         
-        filepath = HeeksCNC.GetFileFullPath()
+        filepath = HeeksCNC.cad.GetFileFullPath()
         if filepath == None:
             # The user hasn't assigned a filename yet.  Use the default.
             return self.output_file
@@ -252,6 +255,6 @@ class Program(Object):
         if HeeksCNC.widgets == HeeksCNC.WIDGETS_WX:
             from wxProgramDlg import ProgramDlg
             dlg = ProgramDlg(self)
-            return dlg.ShowModal()
+            return dlg.ShowModal() == wx.ID_OK
         return False
         

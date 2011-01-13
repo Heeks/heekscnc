@@ -38,7 +38,7 @@ class GeomCtrl(wx.TextCtrl):
         for i in range(0, length):
             if str[i] == '"':
                 if name_started:
-                    geom_list.append[s]
+                    geom_list.append(s)
                     s = ""
                     name_started = False
                 else:
