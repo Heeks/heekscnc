@@ -12,8 +12,7 @@ class HDialog(wx.Dialog):
         result = wx.Dialog.ShowModal(self)
         if result == wx.ID_OK:
             self.GetData()
-            return True
-        return False
+        return result
         
     def AddLabelAndControl(self, sizer, label, control):
         sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
@@ -38,9 +37,17 @@ class HDialog(wx.Dialog):
     def MakeOkAndCancel(self, orient):
         sizerOKCancel = wx.BoxSizer(orient)
         buttonOK = wx.Button(self, wx.ID_OK, "OK")
-        sizerOKCancel.Add( buttonOK, 0, wx.ALL + wx.DOWN, self.control_border )
+        if orient == wx.RIGHT:
+            ok_flag = wx.LEFT
+            cancel_flag = wx.UP
+        else:
+            ok_flag = wx.DOWN
+            cancel_flag = wx.UP
+        ok_flag = 0
+        cancel_flag = 0
+        sizerOKCancel.Add( buttonOK, 0, wx.ALL + ok_flag, self.control_border )
         buttonCancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
-        sizerOKCancel.Add( buttonCancel, 0, wx.ALL + wx.UP, self.control_border )
+        sizerOKCancel.Add( buttonCancel, 0, wx.ALL + cancel_flag, self.control_border )
         buttonOK.SetDefault()
         return sizerOKCancel
     

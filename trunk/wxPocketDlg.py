@@ -216,7 +216,7 @@ class PocketDlg(HDialog):
         # get the tool number
         self.pocket.tool_number = 0
         if self.cmbTool.GetSelection() >= 0:
-            self.pocket.tool_number = tools_for_combo[self.cmbTool.GetSelection()][0]
+            self.pocket.tool_number = self.tools_for_combo[self.cmbTool.GetSelection()][0]
 
         self.pocket.title = self.txtTitle.GetValue()
         self.ignore_event_functions = False

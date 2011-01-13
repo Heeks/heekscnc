@@ -6,7 +6,8 @@ class CAMWindow(wx.ScrolledWindow):
     def __init__(self, parent):
         wx.ScrolledWindow.__init__(self, parent, name = 'CAM')
         self.image_list = wx.ImageList(16, 16)
-        self.image_map = dict()
+        self.image_map = {}
+        self.object_map = {}
         self.tree = wx.TreeCtrl(self, style=wx.TR_HAS_BUTTONS + wx.TR_LINES_AT_ROOT + wx.TR_HIDE_ROOT)
 
         self.tree.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.OnItemRightClick, self.tree)
@@ -43,7 +44,7 @@ class CAMWindow(wx.ScrolledWindow):
             if object.CanEdit():
                 object.Edit()
         
-    def add(self, object, parent):
+    def add(self, object):
         #add a tree object to the tree control
         
         icon_name = object.icon()
@@ -54,12 +55,14 @@ class CAMWindow(wx.ScrolledWindow):
             self.image_map[icon_name] = icon
  
         parent_tree_item = self.root
-        if parent != None:
-            parent_tree_item = parent.tree_item
+        if object.parent_index != None:
+            parent_tree_item = self.object_map[object.parent_index]
 
-        object.tree_item = self.tree.AppendItem(parent_tree_item, object.name(), icon)
-        self.tree.SetPyData(object.tree_item, object)
+        tree_item = self.tree.AppendItem(parent_tree_item, object.name(), icon)
+        self.object_map[object.index] = tree_item
+        self.tree.SetPyData(tree_item, object)
         
     def remove(self, object):
         #add a tree object to the tree control
-        self.tree.Delete(object.tree_item)
+        self.tree.Delete(self.object_map[object.index])
+        self.object_map.remove(object.index)
