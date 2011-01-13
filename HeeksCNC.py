@@ -1,19 +1,18 @@
-CAD_SYSTEM_HEEKS = 1
-
 WIDGETS_WX = 1
 WIDGETS_QT = 2
 
 tree = None
 program = None
-cad_system = CAD_SYSTEM_HEEKS
+
+# change the CAD system here, to another class derived from "Cad"
+from HeeksCAD import HeeksCAD
+cad = HeeksCAD()
+
 widgets = WIDGETS_WX
 heekscnc_path = None
 program_window = None
 output_window = None
 frame = None
-
-if cad_system == CAD_SYSTEM_HEEKS:
-    import HeeksPython as heekscad
     
 import platform
 from Program import Program
@@ -32,12 +31,6 @@ def RunPythonScript():
     global program
     # clear the output file
     f = open(program.GetOutputFileName(), "w")
-    f.write("\n")
-    f.close()
-    
-    # clear the backplot file
-    backplot_path = program.GetOutputFileName() + ".nc.xml"
-    f = open(backplot_path, "w")
     f.write("\n")
     f.close()
     
@@ -104,25 +97,26 @@ def on_cancel_script():
     HeeksPyCancel()
     
 def add_menus():
-    CAM_menu = addmenu('CAM')
+    global cad
+    CAM_menu = cad.addmenu('CAM')
     global heekscnc_path
     AddOperationMenuItems(CAM_menu)
-    add_menu_item(CAM_menu, 'Make Program Script', on_make_python_script, heekscnc_path + '/bitmaps/python.png')
-    add_menu_item(CAM_menu, 'Run Program Script', on_run_program_script, heekscnc_path + '/bitmaps/runpython.png')
-    add_menu_item(CAM_menu, 'Post Process', on_post_process, heekscnc_path + '/bitmaps/postprocess.png')
-    add_menu_item(CAM_menu, 'Open NC File', on_open_nc_file, heekscnc_path + '/bitmaps/opennc.png')
-    add_menu_item(CAM_menu, 'Save NC File', on_save_nc_file, heekscnc_path + '/bitmaps/savenc.png')
-    add_menu_item(CAM_menu, 'Cancel Python Script', on_cancel_script, heekscnc_path + '/bitmaps/cancel.png')
+    cad.add_menu_item(CAM_menu, 'Make Program Script', on_make_python_script, heekscnc_path + '/bitmaps/python.png')
+    cad.add_menu_item(CAM_menu, 'Run Program Script', on_run_program_script, heekscnc_path + '/bitmaps/runpython.png')
+    cad.add_menu_item(CAM_menu, 'Post Process', on_post_process, heekscnc_path + '/bitmaps/postprocess.png')
+    cad.add_menu_item(CAM_menu, 'Open NC File', on_open_nc_file, heekscnc_path + '/bitmaps/opennc.png')
+    cad.add_menu_item(CAM_menu, 'Save NC File', on_save_nc_file, heekscnc_path + '/bitmaps/savenc.png')
+    cad.add_menu_item(CAM_menu, 'Cancel Python Script', on_cancel_script, heekscnc_path + '/bitmaps/cancel.png')
     
 def add_windows():
     if widgets == WIDGETS_WX:
         import wx
         global frame
         if platform.system() == "Windows":
-            hwnd = get_frame_hwnd()
+            hwnd = cad.get_frame_hwnd()
             frame = wx.Window_FromHWND(None, hwnd)
         else:
-            ID = get_frame_id()
+            ID = cad.get_frame_id()
             frame = wx.FindWindowById(ID)
             
     elif widgets == WIDGETS_QT:
@@ -135,6 +129,7 @@ def add_windows():
     tree = Tree()
     tree.Add(program)
     tree.Refresh()
+    global cad
     if widgets == WIDGETS_WX:
         from wxProgramWindow import ProgramWindow
         from wxOutputWindow import OutputWindow
@@ -142,8 +137,20 @@ def add_windows():
         global output_window
         program_window = ProgramWindow(frame)
         output_window = OutputWindow(frame)
-        add_window(program_window)
-        add_window(output_window)
+        cad.add_window(program_window)
+        cad.add_window(output_window)
+    
+def on_new(self):
+    add_program_with_children()
+    tree.Recreate()
+
+def on_open(self):
+    # to do, load the program
+    pass
+
+def on_save(self):
+    # to do, save the program
+    pass
 
 def start():
     global heekscnc_path
@@ -158,79 +165,9 @@ def start():
     add_program_with_children()
     add_menus()
     add_windows()
-    register_callbacks() 
-    
-def add_menu_item(menu, label, callback, icon):
-    if cad_system == CAD_SYSTEM_HEEKS:
-        heekscad.add_menu_item(menu, label, callback, icon)
-        
-def addmenu(name):
-    if cad_system == CAD_SYSTEM_HEEKS:
-        return heekscad.addmenu(name)
-    
-def add_window(window):
-    if platform.system() == "Windows":
-        hwnd_or_id = window.GetHandle()
-    else:
-        hwnd_or_id = window.GetId()
-    
-    if cad_system == CAD_SYSTEM_HEEKS:
-        return heekscad.add_window(hwnd_or_id)
-    
-def get_frame_hwnd():
-    if cad_system == CAD_SYSTEM_HEEKS:
-        return heekscad.get_frame_hwnd()    
-    
-def get_frame_id():
-    if cad_system == CAD_SYSTEM_HEEKS:
-        return heekscad.get_frame_id()
-        
-def register_callbacks():
-    if cad_system == CAD_SYSTEM_HEEKS:
-        heekscad.register_callbacks(on_new_or_open)
-    
-def on_new_or_open(open, res):
-    if open == 0:
-        # new file
-        add_program_with_children()
-        tree.Recreate()
-    #else: to do, load the program
+    cad.register_callbacks() 
 
 def add_program_with_children():
     global program
     program = Program()
     program.add_initial_children()
-    
-def get_view_units():
-    if cad_system == CAD_SYSTEM_HEEKS:
-        return heekscad.get_view_units()
-    return 1.0
-
-def get_selected_sketches():
-    if cad_system == CAD_SYSTEM_HEEKS:
-        sketches = heekscad.get_selected_sketches()
-        str_sketches = []
-        for sketch in sketches:
-            str_sketches.append(str(sketch))
-        return str_sketches
-    return []
-
-def pick_sketches():
-    # returns a list of strings, one name for each sketch
-    if cad_system == CAD_SYSTEM_HEEKS:
-        sketches = heekscad.getsketches()
-        str_sketches = []
-        for sketch in sketches:
-            str_sketches.append(str(sketch))
-        return str_sketches
-    
-def repaint():
-    # repaints the CAD system
-    if cad_system == CAD_SYSTEM_HEEKS:
-        heekscad.redraw()
-        
-def GetFileFullPath():
-    if cad_system == CAD_SYSTEM_HEEKS:
-        s = heekscad.GetFileFullPath()
-        if s == None: return None
-        return s.replace('\\', '/')

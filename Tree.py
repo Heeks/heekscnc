@@ -8,7 +8,7 @@ class Tree:
             import wx
             from wxCAMWindow import CAMWindow
             self.window = CAMWindow(HeeksCNC.frame)
-            HeeksCNC.add_window(self.window)
+            HeeksCNC.cad.add_window(self.window)
             
         elif HeeksCNC.widgets == HeeksCNC.WIDGETS_QT:
             from PyQt4 import QtGui
@@ -18,12 +18,12 @@ class Tree:
             tree_item = QtGui.QTreeWidgetItem(tree)
             tree_item.setText(0, "Program")
             tree.addTopLevelItem(tree_item)
-            HeeksCNC.add_window(self.window)
+            HeeksCNC.cad.add_window(self.window)
             self.window.show()
                 
     def Add(self, object):
         # adds a TreeObject to the tree
-        self.window.add(object, object.parent)
+        self.window.add(object)
         
         # add its children too
         if object.children != None:
@@ -36,3 +36,11 @@ class Tree:
         
     def Refresh(self):
         self.window.Refresh()
+        
+    def AddObjects(objects):
+        for object in objects:
+            self.window.add(object)
+
+    def RemoveObjects(objects):
+        for object in objects:
+            self.window.remove(object)

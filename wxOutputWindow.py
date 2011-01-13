@@ -5,14 +5,14 @@ class OutputTextCtrl(wx.TextCtrl):
     def __init__(self, parent):
         wx.TextCtrl.__init__(self, parent, style = wx.TE_MULTILINE + wx.TE_DONTWRAP + wx.TE_RICH + wx.TE_RICH2)
         self.painting = False
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        #self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
+        #self.Bind(wx.EVT_PAINT, self.OnPaint)
         
     def OnMouse(self, event):
         if event.LeftUp():
             pos = self.GetInsertionPoint()
             HeeksCNC.program.nccode.HighlightBlock(pos)
-            HeeksCNC.repaint()
+            HeeksCNC.cad.repaint()
         event.Skip()
     
     def OnPaint(self, event):
