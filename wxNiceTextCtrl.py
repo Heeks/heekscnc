@@ -20,8 +20,7 @@ class DoubleCtrl(wx.TextCtrl):
         
 class LengthCtrl(DoubleCtrl):
     def __init__(self, parent, id = wx.ID_ANY):
-        #factor = 1.0/HeeksCNC.get_view_units()
-        factor = 1.0
+        factor = 1.0/HeeksCNC.cad.get_view_units()
         DoubleCtrl.__init__(self, parent, id, factor)
         
 class GeomCtrl(wx.TextCtrl):
@@ -31,6 +30,7 @@ class GeomCtrl(wx.TextCtrl):
         
     def GetGeomList(self):
         str = wx.TextCtrl.GetValue(self)
+        str = str.replace('\\', '/')
         s = ""
         geom_list = []
         length = len(str)
@@ -59,7 +59,7 @@ class GeomCtrl(wx.TextCtrl):
         str = ""
         for geom in geom_list:
             if first == False:
-                str = str + ""
+                str = str + " "
             else:
                 first = False
             str += geom

@@ -89,13 +89,14 @@ class NoCad(Cad):
 
     def pick_sketches(self):
         # returns a list of strings, one name for each sketch
-        # to doopen dxf file
         str_sketches = []
+
+        # open dxf file
         dialog = wx.FileDialog(HeeksCNC.frame, "Choose sketch DXF file", wildcard = "DXF files" + " |*.dxf")
         dialog.CentreOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
-            str_sketches = dialog.GetPath()
+            str_sketches.append(dialog.GetPath())
         return str_sketches
         
     def repaint(self):
