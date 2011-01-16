@@ -24,6 +24,9 @@ class Operation(Object):
     def CanBeDeleted(self):
         return True
     
+    def UsesTool(self): # some operations don't use the tool number
+        return True
+    
     def ReadDefaultValues(self):
         config = CNCConfig()
         
@@ -53,4 +56,11 @@ class Operation(Object):
         config = CNCConfig()
         if self.tool_number != 0:
             config.WriteInt("OpTool", self.tool_number)
+        
+    def AppendTextToProgram(self):
+        if len(self.comment) > 0:
+            HeeksCNC.program.python_program += "comment(" + self.comment + ")\n"        
+
+        if self.UsesTool():
+            HeeksCNC.machine_state.AppendToolChangeText(self.tool_number) # Select the correct  tool.
             

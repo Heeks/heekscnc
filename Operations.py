@@ -33,10 +33,8 @@ def on_profile_operation():
 def on_pocket_operation():
     op = Pocket()
     op.ReadDefaultValues()
-    op.sketches = HeeksCNC.get_selected_sketches()
-    print "before edit op"
+    op.sketches = HeeksCNC.cad.get_selected_sketches()
     if op.Edit():
-        print "adding op"
         HeeksCNC.program.operations.Add(op)
         HeeksCNC.tree.Add(op)
         HeeksCNC.tree.Refresh()

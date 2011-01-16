@@ -33,7 +33,6 @@ class NCCode(Object):
             str += block + "\n"
         
         textCtrl.SetValue(str)
-        print "str = ", str
 
         '''
         import platform

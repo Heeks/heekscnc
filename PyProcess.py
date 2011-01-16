@@ -21,6 +21,7 @@ def HeeksPyPostProcess(include_backplot_processing):
 
 def HeeksPyBackplot(filepath):
     HeeksCNC.output_window.Clear()
+    HeeksCNC.program.nccode.blocks = []    
     from nc.pyemc2b_read import ParserEMC2
     parser = ParserEMC2()
     parser.Parse(filepath)
@@ -29,5 +30,6 @@ def HeeksPyBackplot(filepath):
 def write_python_file(python_file_path):
     f = open(python_file_path, "w")
     f.write(HeeksCNC.program.python_program)
+    f.close()
     return True
 

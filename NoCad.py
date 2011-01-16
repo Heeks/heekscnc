@@ -1,0 +1,102 @@
+from Cad import Cad
+import HeeksCNC
+import wx
+import wx.aui
+
+# this is an example of how to plugin HeeksCNC into a cad system
+# here we make a wxWidgets application with a menu to represent the CAD system
+
+class NoCad(Cad):
+    def __init__(self):
+        Cad.__init__(self)
+        
+        # make a wxWidgets application
+        self.frame= wx.Frame(None, -1, 'Dxf CAD, all you need to make gcode')
+        self.menubar = wx.MenuBar()
+        self.menu = wx.Menu("File")
+        self.frame.Bind(wx.EVT_MENU_RANGE, self.OnMenu, id=100, id2=1000)
+        self.menu_map = {}
+        self.next_menu_id = 100
+        #self.add_menu_item(self.menu, "Open", self.OnMenuOpen)
+        self.aui_manager = wx.aui.AuiManager()
+        self.aui_manager.SetManagedWindow(self.frame)
+        
+    def OnMenu(self, event):
+        callback = self.menu_map[event.GetId()]
+        callback()
+    
+    def OnMenuOpen(self):
+        pass
+
+    def add_menu_item(self, menu, label, callback, icon = None):
+        item = wx.MenuItem(menu, self.next_menu_id, label)
+        self.menu_map[self.next_menu_id] = callback
+        self.next_menu_id = self.next_menu_id + 1
+        menu.AppendItem(item)
+        
+    def addmenu(self, name):
+        menu = wx.Menu()
+        self.menubar.Append(menu, name)
+        return menu
+        
+    def add_window(self, window):
+        self.aui_manager.AddPane(window, wx.aui.AuiPaneInfo().Name(window.GetLabel()).Caption(window.GetLabel()).Center())
+        
+    def get_frame_hwnd(self):
+        return self.frame.GetHandle()  
+        
+    def get_frame_id(self):
+        return self.frame.GetId()
+    
+    def on_new_or_open(self, open, res):
+        if open == 0:
+            pass
+        else:
+            pass
+            
+    def register_callbacks(self):
+        #heekscad.register_callbacks(self.on_new_or_open)
+        pass
+        # to do, on_save
+        
+    def get_view_units(self):
+        return 1.0
+
+    def get_selected_sketches(self):
+        str_sketches = []
+        return str_sketches
+
+    def pick_sketches(self):
+        # returns a list of strings, one name for each sketch
+        # to doopen dxf file
+        str_sketches = []
+        return str_sketches
+        
+    def repaint(self):
+        # repaints the CAD system
+        #heekscad.redraw()
+        pass
+            
+    def GetFileFullPath(self):
+        return None
+    
+    def GetSketchShape(self, sketch):
+        # to do, open dxf file
+        # convert to string
+        s = "x0y0\nx10y0\nx10y10\nx0y10\nx0y0\n"
+        return s
+
+def main():
+    import wx
+    app = wx.App()
+    nocad = NoCad()
+    HeeksCNC.cad = nocad
+    HeeksCNC.start()
+    nocad.frame.SetMenuBar(nocad.menubar)
+    nocad.frame.Center()
+    nocad.aui_manager.Update()
+    nocad.frame.Show()
+    app.MainLoop()
+
+if __name__ == '__main__':
+    main()

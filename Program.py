@@ -7,6 +7,7 @@ from NCCode import NCCode
 from CNCConfig import CNCConfig
 from consts import *
 import HeeksCNC
+from MachineState import MachineState
 
 class Program(Object):
     def __init__(self):
@@ -114,6 +115,8 @@ class Program(Object):
     def RewritePythonProgram(self):
         HeeksCNC.program_window.Clear()
         self.python_program = ""
+        del HeeksCNC.machine_state
+        HeeksCNC.machine_state = MachineState()
 
         kurve_module_needed = False
         kurve_funcs_needed = False
@@ -179,9 +182,11 @@ class Program(Object):
             tool.AppendTextToProgram()
 
         for operation in active_operations:
-            tool.AppendTextToProgram()
+            operation.AppendTextToProgram()
 
         self.python_program += "program_end()\n"
+        self.python_program += "from nc.nc import creator\n"
+        self.python_program += "creator.file_close()\n"
         
         HeeksCNC.program_window.AppendText(self.python_program)
         if len(self.python_program) > len(HeeksCNC.program_window.textCtrl.GetValue()):
@@ -254,6 +259,7 @@ class Program(Object):
     def Edit(self):
         if HeeksCNC.widgets == HeeksCNC.WIDGETS_WX:
             from wxProgramDlg import ProgramDlg
+            import wx
             dlg = ProgramDlg(self)
             return dlg.ShowModal() == wx.ID_OK
         return False
