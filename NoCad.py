@@ -70,6 +70,11 @@ class NoCad(Cad):
         # returns a list of strings, one name for each sketch
         # to doopen dxf file
         str_sketches = []
+        dialog = wx.FileDialog(HeeksCNC.frame, "Choose sketch DXF file", wildcard = "DXF files" + " |*.dxf")
+        dialog.CentreOnParent()
+        
+        if dialog.ShowModal() == wx.ID_OK:
+            str_sketches = dialog.GetPath()
         return str_sketches
         
     def repaint(self):
@@ -80,11 +85,13 @@ class NoCad(Cad):
     def GetFileFullPath(self):
         return None
     
-    def GetSketchShape(self, sketch):
-        # to do, open dxf file
-        # convert to string
-        s = "x0y0\nx10y0\nx10y10\nx0y10\nx0y0\n"
-        return s
+    def WriteAreaToProgram(self, sketches):
+        HeeksCNC.program.python_program += "a = area.Area()\n"
+        for sketch in sketches:
+            HeeksCNC.program.python_program += 'sub_a = area.AreaFromDxf("' + sketch + '")\n'
+            HeeksCNC.program.python_program += "for curve in sub_a.getCurves():\n"
+            HeeksCNC.program.python_program += " a.append(curve)\n"
+        HeeksCNC.program.python_program += "\n"
 
 def main():
     import wx
