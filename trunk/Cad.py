@@ -35,5 +35,5 @@ class Cad:
     def GetFileFullPath(self):
         return ""
     
-    def GetSketchShape(self, sketch):
-        return ""
+    def WriteAreaToProgram(self, sketches):
+        pass

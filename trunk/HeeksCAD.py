@@ -1,6 +1,8 @@
 import HeeksPython as heekscad
 from Cad import Cad
 import HeeksCNC
+import re
+pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
 
 class HeeksCAD(Cad):
     def __init__(self):
@@ -63,6 +65,58 @@ class HeeksCAD(Cad):
         if s == None: return None
         return s.replace('\\', '/')
     
-    def GetSketchShape(self, sketch):
-        s = heekscad.GetSketchShape(int(sketch))
-        return s
+    def WriteAreaToProgram(self, sketches):
+        HeeksCNC.program.python_program += "a = area.Area()\n"
+        for sketch in sketches:
+            sketch_shape = heekscad.GetSketchShape(int(sketch))
+            if sketch_shape:
+                length = len(sketch_shape)
+                i = 0
+                s = ""
+                HeeksCNC.program.python_program += "c = area.Curve()\n"
+                while i < length:
+                    if sketch_shape[i] == '\n':
+                        WriteSpan(s)
+                        s = ""
+                    else:
+                        s += sketch_shape[i]
+                    i = i + 1
+                HeeksCNC.program.python_program += "a.append(c)\n"
+        HeeksCNC.program.python_program += "\n"
+
+def WriteLine(words):
+    if words[0][0] != "x":return
+    x = words[0][1:]
+    if words[1][0] != "y":return
+    y = words[1][1:]
+    HeeksCNC.program.python_program += "c.append(area.Point(" + x + ", " + y + "))\n"
+
+def WriteArc(direction, words):
+    type_str = "-1"
+    if direction: type_str = "1"
+    if words[1][0] != "x":return
+    x = words[1][1:]
+    if words[2][0] != "y":return
+    y = words[2][1:]
+    if words[3][0] != "i":return
+    i = words[3][1:]
+    if words[4][0] != "j":return
+    j = words[4][1:]
+    HeeksCNC.program.python_program += "c.append(area.Vertex(" + type_str + ", area.Point(" + x + ", " + y + "), area.Point(" + i + ", " + j + ")))\n"
+
+def WriteSpan(span_str):
+    global pattern_main
+    words = pattern_main.findall(span_str)
+    length = len(words)
+    if length < 1:return
+    print "words[0] = ", words[0]
+    if words[0][0] == 'a':
+        if length != 5:return
+        WriteArc(True, words)
+    elif words[0][0] == 't':
+        if length != 5:return
+        WriteArc(False, words)
+    else:
+        if length != 2:return
+        WriteLine(words)
+        
