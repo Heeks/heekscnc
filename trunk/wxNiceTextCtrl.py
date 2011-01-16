@@ -43,6 +43,15 @@ class GeomCtrl(wx.TextCtrl):
                     name_started = False
                 else:
                     name_started = True
+            elif str[i] == " " and (name_started == False):
+                if len(s)>0:
+                    geom_list.append(s)
+                    s = ""
+            else:
+                s += str[i]
+        if len(s)>0:
+            geom_list.append(s)
+            s = ""
         return geom_list
     
     def SetFromGeomList(self, geom_list):
@@ -53,6 +62,6 @@ class GeomCtrl(wx.TextCtrl):
                 str = str + " "
             else:
                 first = False
-            str = str + '"' + geom + '"'
+            str += geom
         wx.TextCtrl.SetValue(self, str)
         
