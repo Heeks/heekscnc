@@ -1,10 +1,8 @@
-import HeeksPython as heekscad
-
 class Cad:
     def __init__(self):
         pass
     
-    def add_menu_item(self, menu, label, callback, icon):
+    def add_menu_item(self, menu, label, callback, icon = None):
         pass
         
     def addmenu(self, name):
@@ -37,3 +35,5 @@ class Cad:
     def GetFileFullPath(self):
         return ""
     
+    def GetSketchShape(self, sketch):
+        return ""

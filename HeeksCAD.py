@@ -18,7 +18,7 @@ class HeeksCAD(Cad):
             hwnd_or_id = window.GetHandle()
         else:
             hwnd_or_id = window.GetId()
-        return heekscad.add_window(hwnd_or_id)
+        heekscad.add_window(hwnd_or_id)
         
     def get_frame_hwnd(self):
         return heekscad.get_frame_hwnd()    
@@ -62,3 +62,7 @@ class HeeksCAD(Cad):
         s = heekscad.GetFileFullPath()
         if s == None: return None
         return s.replace('\\', '/')
+    
+    def GetSketchShape(self, sketch):
+        s = heekscad.GetSketchShape(int(sketch))
+        return s

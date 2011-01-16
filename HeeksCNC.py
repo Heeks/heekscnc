@@ -3,16 +3,13 @@ WIDGETS_QT = 2
 
 tree = None
 program = None
-
-# change the CAD system here, to another class derived from "Cad"
-from HeeksCAD import HeeksCAD
-cad = HeeksCAD()
-
+cad = None
 widgets = WIDGETS_WX
 heekscnc_path = None
 program_window = None
 output_window = None
 frame = None
+machine_state = None
     
 import platform
 from Program import Program
@@ -109,6 +106,7 @@ def add_menus():
     cad.add_menu_item(CAM_menu, 'Cancel Python Script', on_cancel_script, heekscnc_path + '/bitmaps/cancel.png')
     
 def add_windows():
+    global cad
     if widgets == WIDGETS_WX:
         import wx
         global frame
@@ -123,13 +121,11 @@ def add_windows():
         from PyQt4 import QtGui
         app = QtGui.QApplication([])
         
-        
     from Tree import Tree
     global tree
     tree = Tree()
     tree.Add(program)
     tree.Refresh()
-    global cad
     if widgets == WIDGETS_WX:
         from wxProgramWindow import ProgramWindow
         from wxOutputWindow import OutputWindow
