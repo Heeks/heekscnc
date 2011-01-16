@@ -182,9 +182,7 @@ class PocketDlg(HDialog):
         #self.SetPicture()
     
     def OnPickSketches(self, event):
-        self.Show(False)
         sketches = HeeksCNC.cad.pick_sketches()
-        self.Show()
         self.idsSketches.SetFromGeomList(sketches)
 
     def GetData(self):
