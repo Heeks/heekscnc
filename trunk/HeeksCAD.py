@@ -50,7 +50,9 @@ class HeeksCAD(Cad):
 
     def pick_sketches(self):
         # returns a list of strings, one name for each sketch
+        self.Show(False)
         sketches = heekscad.getsketches()
+        self.Show()
         str_sketches = []
         for sketch in sketches:
             str_sketches.append(str(sketch))
