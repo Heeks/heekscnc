@@ -1,3 +1,5 @@
+import sys
+import getopt
 from Cad import Cad
 import HeeksCNC
 import wx
@@ -8,7 +10,27 @@ import wx.aui
 
 class NoCad(Cad):
     def __init__(self):
+        self.current_profile_dxf = []
+        
         Cad.__init__(self)
+        
+        try:
+            opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+        except getopt.error, msg:
+            print msg
+            print "for help use --help"
+            sys.exit(2)
+        # process options
+        for o, a in opts:
+            if o in ("-h", "--help"):
+                print __doc__
+                sys.exit(0)
+        # process arguments
+        for arg in args:
+            self.current_profile_dxf.append('"')
+            self.current_profile_dxf.append(arg)
+            self.current_profile_dxf.append('" ')
+            #self.current_profile_dxf = arg # process() is defined elsewhere
         
         # make a wxWidgets application
         self.frame= wx.Frame(None, -1, 'Dxf CAD, all you need to make gcode')
@@ -62,9 +84,8 @@ class NoCad(Cad):
     def get_view_units(self):
         return 1.0
 
-    def get_selected_sketches(self):
-        str_sketches = []
-        return str_sketches
+    def get_selected_sketches(self):        
+        return self.current_profile_dxf
 
     def pick_sketches(self):
         # returns a list of strings, one name for each sketch
