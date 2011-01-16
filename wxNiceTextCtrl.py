@@ -59,7 +59,7 @@ class GeomCtrl(wx.TextCtrl):
         str = ""
         for geom in geom_list:
             if first == False:
-                str = str + " "
+                str = str + ""
             else:
                 first = False
             str += geom
