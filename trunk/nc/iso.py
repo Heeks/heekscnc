@@ -47,6 +47,7 @@ class CreatorIso(nc.Creator):
         self.fmt = iso.codes.FORMAT_MM()
         self.absolute_flag = True
         self.ffmt = iso.codes.FORMAT_FEEDRATE()
+        
     ############################################################################
     ##  Internals
 
@@ -149,20 +150,20 @@ class CreatorIso(nc.Creator):
         elif (plane == 2) : self.g += iso.codes.PLANE_YZ()
 
     def set_temporary_origin(self, x=None, y=None, z=None, a=None, b=None, c=None):
-	self.write_blocknum()
-	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM()))
-	if (x != None): self.write( iso.codes.SPACE() + 'X ' + (self.fmt % x) )
-	if (y != None): self.write( iso.codes.SPACE() + 'Y ' + (self.fmt % y) )
-	if (z != None): self.write( iso.codes.SPACE() + 'Z ' + (self.fmt % z) )
-	if (a != None): self.write( iso.codes.SPACE() + 'A ' + (self.fmt % a) )
-	if (b != None): self.write( iso.codes.SPACE() + 'B ' + (self.fmt % b) )
-	if (c != None): self.write( iso.codes.SPACE() + 'C ' + (self.fmt % c) )
-	self.write('\n')
+        self.write_blocknum()
+        self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM()))
+        if (x != None): self.write( iso.codes.SPACE() + 'X ' + (self.fmt % x) )
+        if (y != None): self.write( iso.codes.SPACE() + 'Y ' + (self.fmt % y) )
+        if (z != None): self.write( iso.codes.SPACE() + 'Z ' + (self.fmt % z) )
+        if (a != None): self.write( iso.codes.SPACE() + 'A ' + (self.fmt % a) )
+        if (b != None): self.write( iso.codes.SPACE() + 'B ' + (self.fmt % b) )
+        if (c != None): self.write( iso.codes.SPACE() + 'C ' + (self.fmt % c) )
+        self.write('\n')
 
     def remove_temporary_origin(self):
-	self.write_blocknum()
-	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM()))
-	self.write('\n')
+        self.write_blocknum()
+        self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM()))
+        self.write('\n')
 
     ############################################################################
     ##  Tools
@@ -174,16 +175,16 @@ class CreatorIso(nc.Creator):
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         self.write_blocknum()
-	self.write(iso.codes.TOOL_DEFINITION())
-	self.write(('P%i' % id) + ' ')
+        self.write(iso.codes.TOOL_DEFINITION())
+        self.write(('P%i' % id) + ' ')
 
-	if (radius != None):
-		self.write(('R%.3f' % radius) + ' ')
+        if (radius != None):
+            self.write(('R%.3f' % radius) + ' ')
 
-	if (length != None):
-		self.write('Z%.3f' % length)
+        if (length != None):
+            self.write('Z%.3f' % length)
 
-	self.write('\n')
+        self.write('\n')
 
     def offset_radius(self, id, radius=None):
         pass
@@ -230,13 +231,13 @@ class CreatorIso(nc.Creator):
             self.f = iso.codes.FEEDRATE() + (self.ffmt % self.fh)
 
     def spindle(self, s, clockwise):
-	if s < 0: clockwise = not clockwise
-	s = abs(s)
+        if s < 0: clockwise = not clockwise
+        s = abs(s)
         self.s = iso.codes.SPINDLE(iso.codes.FORMAT_ANG(), s)
-	if clockwise:
-		self.s = self.s + iso.codes.SPINDLE_CW()
-	else:
-		self.s = self.s + iso.codes.SPINDLE_CCW()
+        if clockwise:
+            self.s = self.s + iso.codes.SPINDLE_CW()
+        else:
+            self.s = self.s + iso.codes.SPINDLE_CCW()
 
     def coolant(self, mode=0):
         if (mode <= 0) : self.m.append(iso.codes.COOLANT_OFF())
@@ -441,13 +442,16 @@ class CreatorIso(nc.Creator):
         # set up prep code, to be output on next line
         if self.t == None:
             raise "No tool specified for start_CRC()"
-        self.g = ('G41' + iso.codes.SPACE() + 'D%i') % self.t
+        self.write_blocknum()
+        if left:
+            self.write('G41')
+        else:
+            self.write('G42')
+        self.write((iso.codes.SPACE() + 'D%i\n') % self.t)
 
     def end_CRC(self):
-        self.g = 'G40'
         self.write_blocknum()
-        self.write_preps()
-        self.write_misc()
+        self.write('G40\n')
         self.write('\n')
 
     ############################################################################
@@ -462,41 +466,41 @@ class CreatorIso(nc.Creator):
     def profile(self):
         pass
 
-	# The drill routine supports drilling (G81), drilling with dwell (G82) and peck drilling (G83).
-	# The x,y,z values are INITIAL locations (above the hole to be made.  This is in contrast to
-	# the Z value used in the G8[1-3] cycles where the Z value is that of the BOTTOM of the hole.
-	# Instead, this routine combines the Z value and the depth value to determine the bottom of
-	# the hole.
-	#
-	# The standoff value is the distance up from the 'z' value (normally just above the surface) where the bit retracts
-	# to in order to clear the swarf.  This combines with 'z' to form the 'R' value in the G8[1-3] cycles.
-	#
-	# The peck_depth value is the incremental depth (Q value) that tells the peck drilling
-	# cycle how deep to go on each peck until the full depth is achieved.
-	#
-	# NOTE: This routine forces the mode to absolute mode so that the values  passed into
-	# the G8[1-3] cycles make sense.  I don't know how to find the mode to revert it so I won't
-	# revert it.  I must set the mode so that I can be sure the values I'm passing in make
-	# sense to the end-machine.
-	#
+    # The drill routine supports drilling (G81), drilling with dwell (G82) and peck drilling (G83).
+    # The x,y,z values are INITIAL locations (above the hole to be made.  This is in contrast to
+    # the Z value used in the G8[1-3] cycles where the Z value is that of the BOTTOM of the hole.
+    # Instead, this routine combines the Z value and the depth value to determine the bottom of
+    # the hole.
+    #
+    # The standoff value is the distance up from the 'z' value (normally just above the surface) where the bit retracts
+    # to in order to clear the swarf.  This combines with 'z' to form the 'R' value in the G8[1-3] cycles.
+    #
+    # The peck_depth value is the incremental depth (Q value) that tells the peck drilling
+    # cycle how deep to go on each peck until the full depth is achieved.
+    #
+    # NOTE: This routine forces the mode to absolute mode so that the values  passed into
+    # the G8[1-3] cycles make sense.  I don't know how to find the mode to revert it so I won't
+    # revert it.  I must set the mode so that I can be sure the values I'm passing in make
+    # sense to the end-machine.
+    #
     def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None):
         if (standoff == None):        
         # This is a bad thing.  All the drilling cycles need a retraction (and starting) height.        
             return
            
         if (z == None): 
-            return	# We need a Z value as well.  This input parameter represents the top of the hole    	          
+            return    # We need a Z value as well.  This input parameter represents the top of the hole                  
         self.write_preps()
         self.write_blocknum()                
         
         if (peck_depth != 0):        
             # We're pecking.  Let's find a tree. 
-                if self.drill_modal:       
-                    if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
-                        self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
-                        self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
-                else:       
-                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
+            if self.drill_modal:       
+                if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
+                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
+                    self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
+            else:       
+                self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
                            
         else:        
             # We're either just drilling or drilling with dwell.        
@@ -540,9 +544,9 @@ class CreatorIso(nc.Creator):
             if z != self.prev_z:
                 self.write(iso.codes.Z() + (self.fmt % (z - depth)))
                 self.prev_z=z
-        else: 			
-	    self.write(iso.codes.Z() + (self.fmt % (z - depth)))	# This is the 'z' value for the bottom of the hole.
-	self.z = (z + standoff)			# We want to remember where z is at the end (at the top of the hole)
+        else:             
+            self.write(iso.codes.Z() + (self.fmt % (z - depth)))    # This is the 'z' value for the bottom of the hole.
+            self.z = (z + standoff)            # We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
             if self.prev_retract  != iso.codes.RETRACT(self.fmt, retract_height) :
@@ -615,113 +619,113 @@ class CreatorIso(nc.Creator):
     # original location.  This is important so that the results of multiple calls to this
     # routine may be compared meaningfully.
     def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_offset_x_component=None, probe_offset_y_component=None ):
-	self.write_blocknum()
-	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
-	if (self.fhv) : self.calc_feedrate_hv(1, 0)
-	self.write_blocknum()
-	self.write_feedrate()
-	self.write('\t(Set the feed rate for probing)\n')
+        self.write_blocknum()
+        self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+        if (self.fhv) : self.calc_feedrate_hv(1, 0)
+        self.write_blocknum()
+        self.write_feedrate()
+        self.write('\t(Set the feed rate for probing)\n')
 
-	self.rapid(point_along_edge_x,point_along_edge_y)
-	self.rapid(retracted_point_x,retracted_point_y)
-	self.rapid(z=depth)
+        self.rapid(point_along_edge_x,point_along_edge_y)
+        self.rapid(retracted_point_x,retracted_point_y)
+        self.rapid(z=depth)
 
-	self.write_blocknum()
-	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+        self.write_blocknum()
+        self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
 
-	self.comment('Back off the workpiece and re-probe more slowly')
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '= [#5061 - [ 0.5 * ' + probe_offset_x_component + ']]\n'))
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '= [#5062 - [ 0.5 * ' + probe_offset_y_component + ']]\n'))
-    	self.write_blocknum();
-	self.write(iso.codes.RAPID())
-	self.write(' X #' + intersection_variable_x + ' Y #' + intersection_variable_y + '\n')
+        self.comment('Back off the workpiece and re-probe more slowly')
+        self.write_blocknum()
+        self.write(('#' + intersection_variable_x + '= [#5061 - [ 0.5 * ' + probe_offset_x_component + ']]\n'))
+        self.write_blocknum()
+        self.write(('#' + intersection_variable_y + '= [#5062 - [ 0.5 * ' + probe_offset_y_component + ']]\n'))
+        self.write_blocknum();
+        self.write(iso.codes.RAPID())
+        self.write(' X #' + intersection_variable_x + ' Y #' + intersection_variable_y + '\n')
 
-	self.write_blocknum()
-	self.write(iso.codes.FEEDRATE() + (self.ffmt % (self.fh / 2.0)) + '\n')
+        self.write_blocknum()
+        self.write(iso.codes.FEEDRATE() + (self.ffmt % (self.fh / 2.0)) + '\n')
 
-	self.write_blocknum()
-	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+        self.write_blocknum()
+        self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
 
-	self.comment('Store the probed location somewhere we can get it again later')
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '=' + probe_offset_x_component + ' (Portion of probe radius that contributes to the X coordinate)\n'))
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_x + '=[#' + intersection_variable_x + ' + #5061]\n'))
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '=' + probe_offset_y_component + ' (Portion of probe radius that contributes to the Y coordinate)\n'))
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_y + '=[#' + intersection_variable_y + ' + #5062]\n'))
+        self.comment('Store the probed location somewhere we can get it again later')
+        self.write_blocknum()
+        self.write(('#' + intersection_variable_x + '=' + probe_offset_x_component + ' (Portion of probe radius that contributes to the X coordinate)\n'))
+        self.write_blocknum()
+        self.write(('#' + intersection_variable_x + '=[#' + intersection_variable_x + ' + #5061]\n'))
+        self.write_blocknum()
+        self.write(('#' + intersection_variable_y + '=' + probe_offset_y_component + ' (Portion of probe radius that contributes to the Y coordinate)\n'))
+        self.write_blocknum()
+        self.write(('#' + intersection_variable_y + '=[#' + intersection_variable_y + ' + #5062]\n'))
 
-	self.comment('Now move back to the original location')
-	self.rapid(retracted_point_x,retracted_point_y)
-	self.rapid(z=0)
-	self.rapid(point_along_edge_x,point_along_edge_y)
-	self.rapid(x=0, y=0)
+        self.comment('Now move back to the original location')
+        self.rapid(retracted_point_x,retracted_point_y)
+        self.rapid(z=0)
+        self.rapid(point_along_edge_x,point_along_edge_y)
+        self.rapid(x=0, y=0)
 
-	self.write_blocknum()
-	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
+        self.write_blocknum()
+        self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
     def probe_downward_point(self, x=None, y=None, depth=None, intersection_variable_z=None):
-	self.write_blocknum()
-	self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
-	if (self.fhv) : self.calc_feedrate_hv(1, 0)
-	self.write_blocknum()
-	self.write(iso.codes.FEEDRATE() + ' [' + (self.ffmt % self.fh) + ' / 5.0 ]')
-	self.write('\t(Set the feed rate for probing)\n')
+        self.write_blocknum()
+        self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+        if (self.fhv) : self.calc_feedrate_hv(1, 0)
+        self.write_blocknum()
+        self.write(iso.codes.FEEDRATE() + ' [' + (self.ffmt % self.fh) + ' / 5.0 ]')
+        self.write('\t(Set the feed rate for probing)\n')
 
-    	self.write_blocknum();
-	self.write(iso.codes.RAPID())
-	self.write(' X ' + x + ' Y ' + y + '\n')
+        self.write_blocknum();
+        self.write(iso.codes.RAPID())
+        self.write(' X ' + x + ' Y ' + y + '\n')
 
-	self.write_blocknum()
-	self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + ' Z ' + (self.fmt % depth) + ('\t(Probe towards our destination point)\n')))
+        self.write_blocknum()
+        self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + ' Z ' + (self.fmt % depth) + ('\t(Probe towards our destination point)\n')))
 
-	self.comment('Store the probed location somewhere we can get it again later')
-	self.write_blocknum()
-	self.write(('#' + intersection_variable_z + '= #5063\n'))
+        self.comment('Store the probed location somewhere we can get it again later')
+        self.write_blocknum()
+        self.write(('#' + intersection_variable_z + '= #5063\n'))
 
-	self.comment('Now move back to the original location')
-	self.rapid(z=0)
-	self.rapid(x=0, y=0)
+        self.comment('Now move back to the original location')
+        self.rapid(z=0)
+        self.rapid(x=0, y=0)
 
-	self.write_blocknum()
-	self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
+        self.write_blocknum()
+        self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
 
     def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
-	pass
+        pass
 
     def open_log_file(self, xml_file_name=None ):
-	pass
+        pass
 
     def log_coordinate(self, x=None, y=None, z=None):
-	pass
+        pass
 
     def log_message(self, message=None):
-	pass
+        pass
 
     def close_log_file(self):
-	pass
+        pass
 
     # Rapid movement to the midpoint between the two points specified.
     # NOTE: The points are specified either as strings representing numbers or as strings
     # representing variable names.  This allows the HeeksCNC module to determine which
     # variable names are used in these various routines.
     def rapid_to_midpoint(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
-	self.write_blocknum()
-	self.write(iso.codes.RAPID())
-	if ((x1 != None) and (x2 != None)):
-		self.write((' X ' + '[[[' + x1 + '-' + x2 + '] / 2.0] + ' + x2 + ']'))
+        self.write_blocknum()
+        self.write(iso.codes.RAPID())
+        if ((x1 != None) and (x2 != None)):
+            self.write((' X ' + '[[[' + x1 + '-' + x2 + '] / 2.0] + ' + x2 + ']'))
 
-	if ((y1 != None) and (y2 != None)):
-		self.write((' Y ' + '[[[' + y1 + '-' + y2 + '] / 2.0] + ' + y2 + ']'))
+        if ((y1 != None) and (y2 != None)):
+            self.write((' Y ' + '[[[' + y1 + '-' + y2 + '] / 2.0] + ' + y2 + ']'))
 
-	if ((z1 != None) and (z2 != None)):
-		self.write((' Z ' + '[[[' + z1 + '-' + z2 + '] / 2.0] + ' + z2 + ']'))
+        if ((z1 != None) and (z2 != None)):
+            self.write((' Z ' + '[[[' + z1 + '-' + z2 + '] / 2.0] + ' + z2 + ']'))
 
-	self.write('\n')
+        self.write('\n')
 
     # Rapid movement to the intersection of two lines (in the XY plane only). This routine
     # is based on information found in http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
@@ -738,83 +742,71 @@ class CreatorIso(nc.Creator):
     # representing variable names.  This allows the HeeksCNC module to determine which
     # variable names are used in these various routines.
     def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
-	self.comment('Find the intersection of the two lines made up by the four probed points')
-    	self.write_blocknum();
-	self.write(ua_numerator + '=[[[' + x4 + '-' + x3 + '] * [' + y1 + '-' + y3 + ']] - [[' + y4 + '-' + y3 + '] * [' + x1 + '-' + x3 + ']]]\n')
-    	self.write_blocknum();
-	self.write(ua_denominator + '=[[[' + y4 + '-' + y3 + '] * [' + x2 + '-' + x1 + ']] - [[' + x4 + '-' + x3 + '] * [' + y2 + '-' + y1 + ']]]\n')
-    	self.write_blocknum();
-	self.write(ub_numerator + '=[[[' + x2 + '-' + x1 + '] * [' + y1 + '-' + y3 + ']] - [[' + y2 + '-' + y1 + '] * [' + x1 + '-' + x3 + ']]]\n')
+        self.comment('Find the intersection of the two lines made up by the four probed points')
+        self.write_blocknum();
+        self.write(ua_numerator + '=[[[' + x4 + '-' + x3 + '] * [' + y1 + '-' + y3 + ']] - [[' + y4 + '-' + y3 + '] * [' + x1 + '-' + x3 + ']]]\n')
+        self.write_blocknum();
+        self.write(ua_denominator + '=[[[' + y4 + '-' + y3 + '] * [' + x2 + '-' + x1 + ']] - [[' + x4 + '-' + x3 + '] * [' + y2 + '-' + y1 + ']]]\n')
+        self.write_blocknum();
+        self.write(ub_numerator + '=[[[' + x2 + '-' + x1 + '] * [' + y1 + '-' + y3 + ']] - [[' + y2 + '-' + y1 + '] * [' + x1 + '-' + x3 + ']]]\n')
 
-	self.comment('If they are not parallel')
-	self.write('O900 IF [' + ua_denominator + ' NE 0]\n')
-	self.comment('And if they are not coincident')
-	self.write('O901    IF [' + ua_numerator + ' NE 0 ]\n')
+        self.comment('If they are not parallel')
+        self.write('O900 IF [' + ua_denominator + ' NE 0]\n')
+        self.comment('And if they are not coincident')
+        self.write('O901    IF [' + ua_numerator + ' NE 0 ]\n')
 
-    	self.write_blocknum();
-	self.write('       ' + ua + '=[' + ua_numerator + ' / ' + ua_denominator + ']\n')
-    	self.write_blocknum();
-	self.write('       ' + ub + '=[' + ub_numerator + ' / ' + ua_denominator + ']\n') # NOTE: ub denominator is the same as ua denominator
-    	self.write_blocknum();
-	self.write('       ' + intersection_x + '=[' + x1 + ' + [[' + ua + ' * [' + x2 + ' - ' + x1 + ']]]]\n')
-    	self.write_blocknum();
-	self.write('       ' + intersection_y + '=[' + y1 + ' + [[' + ua + ' * [' + y2 + ' - ' + y1 + ']]]]\n')
-    	self.write_blocknum();
-	self.write('       ' + iso.codes.RAPID())
-	self.write(' X ' + intersection_x + ' Y ' + intersection_y + '\n')
+        self.write_blocknum();
+        self.write('       ' + ua + '=[' + ua_numerator + ' / ' + ua_denominator + ']\n')
+        self.write_blocknum();
+        self.write('       ' + ub + '=[' + ub_numerator + ' / ' + ua_denominator + ']\n') # NOTE: ub denominator is the same as ua denominator
+        self.write_blocknum();
+        self.write('       ' + intersection_x + '=[' + x1 + ' + [[' + ua + ' * [' + x2 + ' - ' + x1 + ']]]]\n')
+        self.write_blocknum();
+        self.write('       ' + intersection_y + '=[' + y1 + ' + [[' + ua + ' * [' + y2 + ' - ' + y1 + ']]]]\n')
+        self.write_blocknum();
+        self.write('       ' + iso.codes.RAPID())
+        self.write(' X ' + intersection_x + ' Y ' + intersection_y + '\n')
 
-	self.write('O901    ENDIF\n')
-	self.write('O900 ENDIF\n')
+        self.write('O901    ENDIF\n')
+        self.write('O900 ENDIF\n')
 
-	# We need to calculate the rotation angle based on the line formed by the
-	# x1,y1 and x2,y2 coordinate pair.  With that angle, we need to move
-	# x_offset and y_offset distance from the current (0,0,0) position.
-	#
-	# The x1,y1,x2 and y2 parameters are all variable names that contain the actual
-	# values.
-	# The x_offset and y_offset are both numeric (floating point) values
+    # We need to calculate the rotation angle based on the line formed by the
+    # x1,y1 and x2,y2 coordinate pair.  With that angle, we need to move
+    # x_offset and y_offset distance from the current (0,0,0) position.
+    #
+    # The x1,y1,x2 and y2 parameters are all variable names that contain the actual
+    # values.
+    # The x_offset and y_offset are both numeric (floating point) values
     def rapid_to_rotated_coordinate(self, x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
-	self.comment('Rapid to rotated coordinate')
-    	self.write_blocknum();
-	self.write( '#1 = [atan[' + y2 + '-' + y1 + ']/[' + x2 +' - ' + x1 + ']] (nominal_angle)\n')
-    	self.write_blocknum();
-	self.write( '#2 = [atan[' + ref_y + ']/[' + ref_x + ']] (reference angle)\n')
-    	self.write_blocknum();
-	self.write( '#3 = [#1 - #2] (angle)\n' )
-    	self.write_blocknum();
-	self.write( '#4 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * COS[ #3 ]] - [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * SIN[ #3 ]]]\n' )
-    	self.write_blocknum();
-	self.write( '#5 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * SIN[ #3 ]] + [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * COS[ #3 ]]]\n' )
+        self.comment('Rapid to rotated coordinate')
+        self.write_blocknum();
+        self.write( '#1 = [atan[' + y2 + '-' + y1 + ']/[' + x2 +' - ' + x1 + ']] (nominal_angle)\n')
+        self.write_blocknum();
+        self.write( '#2 = [atan[' + ref_y + ']/[' + ref_x + ']] (reference angle)\n')
+        self.write_blocknum();
+        self.write( '#3 = [#1 - #2] (angle)\n' )
+        self.write_blocknum();
+        self.write( '#4 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * COS[ #3 ]] - [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * SIN[ #3 ]]]\n' )
+        self.write_blocknum();
+        self.write( '#5 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * SIN[ #3 ]] + [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * COS[ #3 ]]]\n' )
 
-    	self.write_blocknum();
-	self.write( '#6 = [[' + (self.fmt % x_final) + ' * COS[ #3 ]] - [' + (self.fmt % y_final) + ' * SIN[ #3 ]]]\n' )
-    	self.write_blocknum();
-	self.write( '#7 = [[' + (self.fmt % y_final) + ' * SIN[ #3 ]] + [' + (self.fmt % y_final) + ' * COS[ #3 ]]]\n' )
+        self.write_blocknum();
+        self.write( '#6 = [[' + (self.fmt % x_final) + ' * COS[ #3 ]] - [' + (self.fmt % y_final) + ' * SIN[ #3 ]]]\n' )
+        self.write_blocknum();
+        self.write( '#7 = [[' + (self.fmt % y_final) + ' * SIN[ #3 ]] + [' + (self.fmt % y_final) + ' * COS[ #3 ]]]\n' )
 
-    	self.write_blocknum();
-	self.write( iso.codes.RAPID() + ' X [ #4 + #6 ] Y [ #5 + #7 ]\n' )
+        self.write_blocknum();
+        self.write( iso.codes.RAPID() + ' X [ #4 + #6 ] Y [ #5 + #7 ]\n' )
 
     def set_path_control_mode(self, mode, motion_blending_tolerance, naive_cam_tolerance ):
-	self.write_blocknum()
-	if (mode == 0):
-		self.write( iso.codes.EXACT_PATH_MODE() + '\n' )
-	if (mode == 1):
-		self.write( iso.codes.EXACT_STOP_MODE() + '\n' )
-	if (mode == 2):
-		self.write( iso.codes.BEST_POSSIBLE_SPEED( motion_blending_tolerance, naive_cam_tolerance ) + '\n' )
+        self.write_blocknum()
+        if (mode == 0):
+            self.write( iso.codes.EXACT_PATH_MODE() + '\n' )
+        if (mode == 1):
+            self.write( iso.codes.EXACT_STOP_MODE() + '\n' )
+        if (mode == 2):
+            self.write( iso.codes.BEST_POSSIBLE_SPEED( motion_blending_tolerance, naive_cam_tolerance ) + '\n' )
         
-    def start_CRC(self, left = True, radius = 0.0):
-        self.write_blocknum();
-        if left:
-            self.write('G42\n')
-        else:
-            self.write('G41\n')
-        pass
-
-    def end_CRC(self):
-        self.write_blocknum();
-        self.write('G40\n')
-        pass
 
 ################################################################################
 
