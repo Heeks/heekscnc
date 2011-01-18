@@ -376,6 +376,9 @@ creator = Creator()
 ############################################################################
 ##  Internals
 
+def write(s):
+    creator.write(s)
+    
 def output(filename):
     creator.file_open(filename)
 
