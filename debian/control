@@ -1,7 +1,7 @@
 Source: heekscnc
 Priority: extra
 Maintainer: Joachim Steiger <ubuntu@hyte.de>
-Build-Depends: debhelper (>= 7), libwxgtk2.8-dev, libwxbase2.8-dev, libgtkglext1-dev, heekscad
+Build-Depends: cdbs, cmake, debhelper (>= 7), libwxgtk2.8-dev, libwxbase2.8-dev, libgtkglext1-dev, heekscad
 Standards-Version: 3.7.3
 Section: libs
 Homepage: http://code.google.com/p/heekscnc
