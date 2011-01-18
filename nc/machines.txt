@@ -1,5 +1,6 @@
 emc2 Linux Enhanced Machine Controller 0
 emc2b Linux EMC2 Controller -simplified 0
+emc2b_crc EMC2 with Cutter Radius Compensation 0
 mach3 Mach3 Machine Controller 0
 iso Standard ISO output 0
 iso_modal Standard ISO modal output 0
