@@ -233,14 +233,6 @@ class Creator:
         """CRC"""
         return False
         
-    def start_CRC(self, left = True, radius = 0.0):
-        """start_CRC"""
-        pass
-
-    def end_CRC(self):
-        """end_CRC"""
-        pass
-
     ############################################################################
     ##  Cycles
 

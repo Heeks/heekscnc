@@ -802,6 +802,19 @@ class CreatorIso(nc.Creator):
 		self.write( iso.codes.EXACT_STOP_MODE() + '\n' )
 	if (mode == 2):
 		self.write( iso.codes.BEST_POSSIBLE_SPEED( motion_blending_tolerance, naive_cam_tolerance ) + '\n' )
+        
+    def start_CRC(self, left = True, radius = 0.0):
+        self.write_blocknum();
+        if left:
+            self.write('G42\n')
+        else:
+            self.write('G41\n')
+        pass
+
+    def end_CRC(self):
+        self.write_blocknum();
+        self.write('G40\n')
+        pass
 
 ################################################################################
 

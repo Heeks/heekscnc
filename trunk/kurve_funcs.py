@@ -213,6 +213,10 @@ def cut_kurve(k):
             else:
                 arc_cw(ex, ey, i = cx, j = cy)
     
+def add_CRC_start_line(offset_k, radius):
+    # to do
+    pass
+
 # profile command,
 # direction should be 'left' or 'right' or 'on'
 def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_down_to_height = None, clearance = None, start_depth = None, step_down = None, final_depth = None):
@@ -221,7 +225,7 @@ def profile(k, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius =
         raise "kurve doesn't exist, number %d" % (k)
 
     offset_k = k
-
+    
     if direction != "on":
         if direction != "left" and direction != "right":
             raise "direction must be left or right", direction
