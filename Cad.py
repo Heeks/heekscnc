@@ -26,6 +26,9 @@ class Cad:
     def get_selected_sketches(self):
         return []
 
+    def hide_window_on_pick_sketches(self):
+        return True
+
     def pick_sketches(self):
         return []
         
