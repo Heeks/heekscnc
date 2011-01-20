@@ -87,6 +87,9 @@ class NoCad(Cad):
     def get_selected_sketches(self):        
         return self.current_profile_dxf
 
+    def hide_window_on_pick_sketches(self):
+        return False
+    
     def pick_sketches(self):
         # returns a list of strings, one name for each sketch
         str_sketches = []
