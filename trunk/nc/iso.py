@@ -452,7 +452,6 @@ class CreatorIso(nc.Creator):
     def end_CRC(self):
         self.write_blocknum()
         self.write('G40\n')
-        self.write('\n')
 
     ############################################################################
     ##  Cycles
