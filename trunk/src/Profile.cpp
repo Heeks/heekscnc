@@ -30,8 +30,6 @@
 #include <gp_Ax1.hxx>
 #include <gp_Trsf.hxx>
 
-#include "geometry.h"	// from the kurve directory.
-
 #include <sstream>
 #include <iomanip>
 
@@ -369,7 +367,7 @@ void CProfile::Remove(HeeksObj* object)
 	CDepthOp::Remove(object);
 }
 
-Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState, bool reversed )
+Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, bool reversed )
 {
 	// write the python code for the sketch
 	Python python;
@@ -379,13 +377,10 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 		python << (wxString::Format(_T("comment(%s)\n"), PythonString(sketch->GetShortString()).c_str()));
 	}
 
-	python << (wxString::Format(_T("k%d = kurve.new()\n"), id_to_use > 0 ? id_to_use : sketch->m_id));
+	python << _T("curve = area.Curve()\n");
 
 	bool started = false;
-	int sketch_id = (id_to_use > 0 ? id_to_use : sketch->m_id);
-
 	std::list<HeeksObj*> spans;
-
 	for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
 	{
 		if(reversed)spans.push_front(span_object);
@@ -431,13 +426,11 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 					else span_object->GetStartPoint(s);
 					CNCPoint start(pMachineState->Fixture().Adjustment(s));
 
-					python << _T("kurve.add_point(k");
-					python << sketch_id;
-					python << _T(", ") << LINEAR << _T(", ");
+					python << _T("curve.append(area.Point(");
 					python << start.X(true);
 					python << _T(", ");
 					python << start.Y(true);
-					python << _T(", 0.0, 0.0)\n");
+					python << _T("))\n");
 					started = true;
 				}
 				if(reversed)span_object->GetStartPoint(e);
@@ -446,13 +439,11 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 
 				if(type == LineType)
 				{
-					python << _T("kurve.add_point(k");
-					python << sketch_id;
-					python << _T(", ") << LINEAR << _T(", ");
+					python << _T("curve.append(area.Point(");
 					python << end.X(true);
-					python << (_T(", "));
+					python << _T(", ");
 					python << end.Y(true);
-					python << (_T(", 0.0, 0.0)\n"));
+					python << _T("))\n");
 				}
 				else if(type == ArcType)
 				{
@@ -461,20 +452,18 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
-					int span_type = ((pos[2] >=0) != reversed) ? ACW: CW;
-					python << (_T("kurve.add_point(k"));
-					python << (sketch_id);
-					python << (_T(", "));
+					int span_type = ((pos[2] >=0) != reversed) ? 1: -1;
+					python << _T("curve.append(area.Vertex(");
 					python << (span_type);
-					python << (_T(", "));
+					python << (_T(", area.Point("));
 					python << end.X(true);
 					python << (_T(", "));
 					python << end.Y(true);
-					python << (_T(", "));
+					python << (_T("), area.Point("));
 					python << centre.X(true);
 					python << (_T(", "));
 					python << centre.Y(true);
-					python << (_T(")\n"));
+					python << (_T(")))\n"));
 				}
 				else if(type == CircleType)
 				{
@@ -488,20 +477,20 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 					// X and Y axes.  We will adjust the resultant points later.
 
 					// The kurve code needs a start point first.
-					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					points.push_back( std::make_pair(0, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 					if(reversed)
 					{
-						points.push_back( std::make_pair(ACW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
-						points.push_back( std::make_pair(ACW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
-						points.push_back( std::make_pair(ACW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
-						points.push_back( std::make_pair(ACW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+						points.push_back( std::make_pair(1, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
+						points.push_back( std::make_pair(1, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
+						points.push_back( std::make_pair(1, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
+						points.push_back( std::make_pair(1, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 					}
 					else
 					{
-						points.push_back( std::make_pair(CW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
-						points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
-						points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
-						points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+						points.push_back( std::make_pair(-1, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
+						points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
+						points.push_back( std::make_pair(-1, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
+						points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 					}
 
 					pMachineState->Fixture().Adjustment(c);
@@ -511,17 +500,16 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 					{
 						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
 
-						python << (_T("kurve.add_point(k"));
-						python << (sketch_id);
-						python << _T(", ") << l_itPoint->first << _T(", ");
+						python << (_T("curve.append(area.Vertex("));
+						python << l_itPoint->first << _T(", area.Point(");
 						python << pnt.X(true);
 						python << (_T(", "));
 						python << pnt.Y(true);
-						python << (_T(", "));
+						python << (_T("), area.Point("));
 						python << centre.X(true);
 						python << (_T(", "));
 						python << centre.Y(true);
-						python << (_T(")\n"));
+						python << (_T(")))\n"));
 					} // End for
 				}
 			}
@@ -561,7 +549,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 
 			ss.imbue(std::locale("C"));
 			ss<<std::setprecision(10);
-			ss << ", startx = " << startx << ", starty = " << starty;
+			ss << ", start = area.Point(" << startx << ", " << starty << ")";
 			start_string = ss.str().c_str();
 		}
 
@@ -586,17 +574,17 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState 
 
 			ss.imbue(std::locale("C"));
 			ss<<std::setprecision(10);
-			ss << ", finishx = " << finishx << ", finishy = " << finishy;
+			ss << ", finish = area.Point(" << finishx << ", " << finishy << ")";
 			finish_string = ss.str().c_str();
 		}
 
-		python << (wxString::Format(_T("kurve_funcs.make_smaller( k%d%s%s)\n"), sketch_id, start_string.c_str(), finish_string.c_str())).c_str();
+		python << (wxString::Format(_T("kurve_funcs.make_smaller( curve%s%s)\n"), start_string.c_str(), finish_string.c_str())).c_str();
 	}
 
 	return(python);
 }
 
-Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode)
+Python CProfile::AppendTextForOneSketch(HeeksObj* object, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode)
 {
     Python python;
 
@@ -616,7 +604,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 		}
 
 		// write the kurve definition
-		python << WriteSketchDefn(object, sketch, pMachineState, initially_ccw != reversed);
+		python << WriteSketchDefn(object, pMachineState, initially_ccw != reversed);
 
 		// start - assume we are at a suitable clearance height
 
@@ -649,7 +637,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 				}
 				else
 				{
-					python << wxString(_T("roll_on = [")) << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << wxString(_T(", ")) << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units << wxString(_T("]\n"));
+					python << wxString(_T("roll_on = area.Point(")) << m_profile_params.m_roll_on_point[0] / theApp.m_program->m_units << wxString(_T(", ")) << m_profile_params.m_roll_on_point[1] / theApp.m_program->m_units << wxString(_T(")\n"));
 				}
 			}
 			break;
@@ -674,7 +662,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 				}
 				else
 				{
-					python << wxString(_T("roll_off = [")) << m_profile_params.m_roll_off_point[0] / theApp.m_program->m_units << wxString(_T(", ")) << m_profile_params.m_roll_off_point[1] / theApp.m_program->m_units << wxString(_T("]\n"));
+					python << wxString(_T("roll_off = area.Point(")) << m_profile_params.m_roll_off_point[0] / theApp.m_program->m_units << wxString(_T(", ")) << m_profile_params.m_roll_off_point[1] / theApp.m_program->m_units << wxString(_T(")\n"));
 				}
 			}
 			break;
@@ -690,11 +678,11 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineSt
 		{
 			if(!tags_cleared)python << _T("kurve_funcs.clear_tags()\n");
 			tags_cleared = true;
-			python << _T("kurve_funcs.add_tag(") << tag->m_pos[0] / theApp.m_program->m_units << _T(", ") << tag->m_pos[1] / theApp.m_program->m_units << _T(", ") << tag->m_width / theApp.m_program->m_units << _T(", ") << tag->m_angle * PI/180 << _T(", ") << tag->m_height / theApp.m_program->m_units << _T(")\n");
+			python << _T("kurve_funcs.add_tag(area.Point(") << tag->m_pos[0] / theApp.m_program->m_units << _T(", ") << tag->m_pos[1] / theApp.m_program->m_units << _T("), ") << tag->m_width / theApp.m_program->m_units << _T(", ") << tag->m_angle * PI/180 << _T(", ") << tag->m_height / theApp.m_program->m_units << _T(")\n");
 		}
 
 		// profile the kurve
-		python << wxString::Format(_T("kurve_funcs.profile(k%d, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_down_to_height, clearance, start_depth, step_down, final_depth)\n"), sketch, side_string.c_str());
+		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_down_to_height, clearance, start_depth, step_down, final_depth)\n"), side_string.c_str());
 	}
 	python << _T("absolute()\n");
 	return(python);
@@ -811,13 +799,13 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				python << AppendTextForOneSketch(one_curve_sketch, object->m_id, pMachineState, cut_mode).c_str();
+				python << AppendTextForOneSketch(one_curve_sketch, pMachineState, cut_mode).c_str();
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			python << AppendTextForOneSketch(object, object->m_id, pMachineState, cut_mode).c_str();
+			python << AppendTextForOneSketch(object, pMachineState, cut_mode).c_str();
 		}
 
 		if(re_ordered_sketch)

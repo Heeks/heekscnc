@@ -21,7 +21,6 @@
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "CTool.h"
-#include "geometry.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
 #include "MachineState.h"
@@ -313,12 +312,12 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, 
 					double small_amount = 0.001;
 					double radius = heeksCAD->CircleGetRadius(span_object);
 
-					points.push_back( std::make_pair(LINEAR, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
-					points.push_back( std::make_pair(CW, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
+					points.push_back( std::make_pair(0, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
+					points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
+					points.push_back( std::make_pair(-1, gp_Pnt( c[0] + radius, c[1], c[2] )) ); // east
+					points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] - radius, c[2] )) ); // south
+					points.push_back( std::make_pair(-1, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
+					points.push_back( std::make_pair(-1, gp_Pnt( c[0] - small_amount, c[1] + radius, c[2] )) ); // north (almost)
 
 					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
 

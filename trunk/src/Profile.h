@@ -103,8 +103,8 @@ public:
 	// Data access methods.
 	CTags* Tags(){return m_tags;}
 
-	Python WriteSketchDefn(HeeksObj* sketch, int id_to_use, CMachineState *pMachineState, bool reversed );
-	Python AppendTextForOneSketch(HeeksObj* object, int sketch, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode);
+	Python WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, bool reversed );
+	Python AppendTextForOneSketch(HeeksObj* object, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode);
 
 	// COp's virtual functions
 	Python AppendTextToProgram(CMachineState *pMachineState);
