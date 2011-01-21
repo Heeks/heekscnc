@@ -53,6 +53,5 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.15.1), python (>= 2.5)" )
 include(CPack)
 
 #--------------- these are down here so that the package version vars above are visible -------------
-add_subdirectory( kurve )
 add_subdirectory( src )
 set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CPACK_PACKAGE_FILE_NAME}.deb" )
