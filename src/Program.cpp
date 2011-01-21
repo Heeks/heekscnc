@@ -631,7 +631,6 @@ Python CProgram::RewritePythonProgram()
 		(*callbackfunc)();
 	}
 
-	bool kurve_module_needed = false;
 	bool kurve_funcs_needed = false;
 	bool area_module_needed = false;
 	bool area_funcs_needed = false;
@@ -661,7 +660,7 @@ Python CProgram::RewritePythonProgram()
 			switch(object->GetType())
 			{
 			case ProfileType:
-				kurve_module_needed = true;
+				area_module_needed = true;
 				kurve_funcs_needed = true;
 				break;
 
@@ -687,7 +686,6 @@ Python CProgram::RewritePythonProgram()
 				break;
 
 			case TurnRoughType:
-				kurve_module_needed = true;
 				area_module_needed = true;
 				turning_module_needed = true;
 			}
@@ -773,11 +771,6 @@ Python CProgram::RewritePythonProgram()
 	python << _T("import math\n");
 
 	// kurve related things
-	if(kurve_module_needed)
-	{
-		python << _T("import kurve\n");
-	}
-
 	if(kurve_funcs_needed)
 	{
 		python << _T("import kurve_funcs\n");
