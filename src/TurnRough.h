@@ -9,7 +9,6 @@
 
 #include "HeeksCNCTypes.h"
 #include "SpeedOp.h"
-#include "geometry.h"
 #include "Drilling.h"
 
 #include <vector>

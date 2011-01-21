@@ -16,7 +16,6 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include "PythonStuff.h"
-#include "../kurve/geometry/geometry.h"
 #include "CTool.h"
 #include "MachineState.h"
 #include "Program.h"
