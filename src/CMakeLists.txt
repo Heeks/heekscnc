@@ -86,13 +86,14 @@ set( heekscnc_SRCS
     ${HeeksCadDir}/interface/PropertyCheck.cpp     ${HeeksCadDir}/interface/TransientObject.cpp
     ${HeeksCadDir}/interface/PropertyChoice.cpp    ${HeeksCadDir}/src/Geom.cpp
    )
-#set( mylibs -L../bin -lkurve )
+
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
-target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} ${mylibs} )
+target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
 
 
-#------------------- the lines below tell cmake what files get installed where. this is used for 'make install' and 'make package' ---------------------
+#------------------- the lines below tell cmake what files get installed where.---------------------
+#---------------------- this is used for 'make install' and 'make package' -------------------------
 install( TARGETS heekscnc DESTINATION lib )
 
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )

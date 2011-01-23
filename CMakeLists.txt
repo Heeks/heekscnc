@@ -49,9 +49,13 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "HeeksCNC, CNC machining add-in for HeeksC
 set(CPACK_DEBIAN_PACKAGE_SECTION "science")
 set(CPACK_DEBIAN_PACKAGE_VERSION "")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "heekscad (>= 0.15.1), python (>= 2.5)" )
-include(CPack)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "python-wxgtk2.8, libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python1.40.0 | libboost-python1.42.0, python" )
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "heekscad (>= 0.15.1), libopencascade-ocaf-6.3.0")
+
 
 #--------------- these are down here so that the package version vars above are visible -------------
 add_subdirectory( src )
 set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CPACK_PACKAGE_FILE_NAME}.deb" )
+
+#------------- include(CPack) should be the last line in this file
+include(CPack)
