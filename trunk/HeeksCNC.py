@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 WIDGETS_WX = 1
 WIDGETS_QT = 2
 
@@ -152,11 +153,15 @@ def start():
     global heekscnc_path
     
     import os
-    full_path_here = os.path.abspath( __file__ )
-    bslash = full_path_here.rfind('\\')
-    fslash = full_path_here.rfind('/')
-    slash = bslash if bslash > fslash else fslash
-    heekscnc_path = full_path_here[0:slash].replace('\\', '/')
+    import sys
+    if sys.platform == 'linux2' and not os.path.exists("icons/nccode.png"):
+        heekscnc_path = "/usr/share/heekscnc"
+    else:
+        full_path_here = os.path.abspath( __file__ )
+        bslash = full_path_here.rfind('\\')
+        fslash = full_path_here.rfind('/')
+        slash = bslash if bslash > fslash else fslash
+        heekscnc_path = full_path_here[0:slash].replace('\\', '/')
     
     add_program_with_children()
     add_menus()
