@@ -96,15 +96,15 @@ def on_cancel_script():
     
 def add_menus():
     global cad
-    CAM_menu = cad.addmenu('CAM')
+    macining_menu = cad.addmenu('Machining')
     global heekscnc_path
-    AddOperationMenuItems(CAM_menu)
-    cad.add_menu_item(CAM_menu, 'Make Program Script', on_make_python_script, heekscnc_path + '/bitmaps/python.png')
-    cad.add_menu_item(CAM_menu, 'Run Program Script', on_run_program_script, heekscnc_path + '/bitmaps/runpython.png')
-    cad.add_menu_item(CAM_menu, 'Post Process', on_post_process, heekscnc_path + '/bitmaps/postprocess.png')
-    cad.add_menu_item(CAM_menu, 'Open NC File', on_open_nc_file, heekscnc_path + '/bitmaps/opennc.png')
-    cad.add_menu_item(CAM_menu, 'Save NC File', on_save_nc_file, heekscnc_path + '/bitmaps/savenc.png')
-    cad.add_menu_item(CAM_menu, 'Cancel Python Script', on_cancel_script, heekscnc_path + '/bitmaps/cancel.png')
+    AddOperationMenuItems(macining_menu)
+    cad.add_menu_item(macining_menu, 'Make Program Script', on_make_python_script, heekscnc_path + '/bitmaps/python.png')
+    cad.add_menu_item(macining_menu, 'Run Program Script', on_run_program_script, heekscnc_path + '/bitmaps/runpython.png')
+    cad.add_menu_item(macining_menu, 'Post Process', on_post_process, heekscnc_path + '/bitmaps/postprocess.png')
+    cad.add_menu_item(macining_menu, 'Open NC File', on_open_nc_file, heekscnc_path + '/bitmaps/opennc.png')
+    cad.add_menu_item(macining_menu, 'Save NC File', on_save_nc_file, heekscnc_path + '/bitmaps/savenc.png')
+    cad.add_menu_item(macining_menu, 'Cancel Python Script', on_cancel_script, heekscnc_path + '/bitmaps/cancel.png')
     
 def add_windows():
     global cad
@@ -152,16 +152,11 @@ def on_save(self):
 def start():
     global heekscnc_path
     
+    import wx
     import os
     import sys
-    if sys.platform == 'linux2' and not os.path.exists("icons/nccode.png"):
+    if not os.path.exists("icons/nccode.png"):
         heekscnc_path = "../"
-    else:
-        full_path_here = os.path.abspath( __file__ )
-        bslash = full_path_here.rfind('\\')
-        fslash = full_path_here.rfind('/')
-        slash = bslash if bslash > fslash else fslash
-        heekscnc_path = full_path_here[0:slash].replace('\\', '/')
     
     add_program_with_children()
     add_menus()
