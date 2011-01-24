@@ -33,13 +33,11 @@ class NoCad(Cad):
             #self.current_profile_dxf = arg # process() is defined elsewhere
         
         # make a wxWidgets application
-        self.frame= wx.Frame(None, -1, 'Dxf CAD, all you need to make gcode')
+        self.frame= wx.Frame(None, -1, 'CAM ( Computer Aided Manufacturing ) from DXF files')
         self.menubar = wx.MenuBar()
-        self.menu = wx.Menu("File")
         self.frame.Bind(wx.EVT_MENU_RANGE, self.OnMenu, id=100, id2=1000)
         self.menu_map = {}
         self.next_menu_id = 100
-        #self.add_menu_item(self.menu, "Open", self.OnMenuOpen)
         self.aui_manager = wx.aui.AuiManager()
         self.aui_manager.SetManagedWindow(self.frame)
         
@@ -119,7 +117,6 @@ class NoCad(Cad):
         HeeksCNC.program.python_program += "\n"
 
 def main():
-    import wx
     app = wx.App()
     nocad = NoCad()
     HeeksCNC.cad = nocad
