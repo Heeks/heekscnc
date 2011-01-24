@@ -32,7 +32,7 @@ class Profiledlg ( wx.Dialog ):
 		self.m_staticText30.Wrap( -1 )
 		bSizer36.Add( self.m_staticText30, 0, wx.ALIGN_CENTER_VERTICAL, 5 )
 		
-		self.m_filePicker2 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE|wx.FLP_SAVE|wx.FLP_USE_TEXTCTRL )
+		self.m_filePicker2 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_SAVE|wx.FLP_USE_TEXTCTRL )
 		bSizer36.Add( self.m_filePicker2, 0, wx.ALL, 5 )
 		
 		sbSizer8.Add( bSizer36, 0, wx.ALIGN_RIGHT, 5 )
