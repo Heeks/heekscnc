@@ -24,7 +24,7 @@ def AddOperationMenuItems(CAM_menu):
 def on_profile_operation():
     op = Profile()
     op.ReadDefaultValues()
-    op.sketches = HeeksCNC.get_selected_sketches()
+    op.sketches = HeeksCNC.cad.get_selected_sketches()
     if op.Edit():
         HeeksCNC.program.operations.Add(op)
         HeeksCNC.tree.Add(op)
