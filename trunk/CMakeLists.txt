@@ -21,12 +21,12 @@ include_directories (
 	${OpenCASCADE_INCLUDE_DIR}
 	)
 
-file( GLOB hcnc_py "${CMAKE_CURRENT_SOURCE_DIR}/*.py" )
+file( GLOB hcnc_py "${CMAKE_CURRENT_SOURCE_DIR}/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/pycnc/*.py")
 list( REMOVE_ITEM hcnc_py
                   "${CMAKE_CURRENT_SOURCE_DIR}/post.py"
                   "${CMAKE_CURRENT_SOURCE_DIR}/POST_TEST.py"
                   "${CMAKE_CURRENT_SOURCE_DIR}/STLTools.py"   )
-install( FILES ${hcnc_py} DESTINATION lib/heekscnc ) #lib/python${PY_VERS}/dist-packages/heekscnc )
+install( FILES ${hcnc_py} DESTINATION lib/heekscnc )
 
 
 IF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
