@@ -266,7 +266,7 @@ Python CZigZag::AppendTextToProgram(CMachineState *pMachineState)
 	gp_Pnt min = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
 	gp_Pnt max = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
 
-	python << _T("ocl_funcs.zigzag(") << PythonString(filepath.GetFullPath()) << _T(", tool_diameter, corner_radius, ") << m_params.m_step_over / theApp.m_program->m_units << _T(", ") << min.X() / theApp.m_program->m_units << _T(", ") << max.X() / theApp.m_program->m_units << _T(", ") << min.Y() / theApp.m_program->m_units << _T(", ") << max.Y() / theApp.m_program->m_units << _T(", ") << ((m_params.m_direction == 0) ? _T("'X'") : _T("'Y'")) << _T(", ") << m_params.m_material_allowance / theApp.m_program->m_units << _T(", ") << m_params.m_style << _T(", clearance, rapid_down_to_height, start_depth, step_down, final_depth, ") << theApp.m_program->m_units << _T(")\n");
+	python << _T("ocl_funcs.zigzag(") << PythonString(filepath.GetFullPath()) << _T(", tool_diameter, corner_radius, float(") << m_params.m_step_over / theApp.m_program->m_units << _T("), float(") << min.X() / theApp.m_program->m_units << _T("), float(") << max.X() / theApp.m_program->m_units << _T("), float(") << min.Y() / theApp.m_program->m_units << _T("), float(") << max.Y() / theApp.m_program->m_units << _T("), ") << ((m_params.m_direction == 0) ? _T("'X'") : _T("'Y'")) << _T(", float(") << m_params.m_material_allowance / theApp.m_program->m_units << _T("), ") << m_params.m_style << _T(", clearance, rapid_down_to_height, start_depth, step_down, final_depth, ") << theApp.m_program->m_units << _T(")\n");
 
 	return(python);
 }
