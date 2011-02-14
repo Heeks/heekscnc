@@ -7,6 +7,42 @@ def STLSurfFromFile(filepath):
     ocl.STLReader(filepath, s)
     return s
 
+def cut_path(path, z0, z1, s, cutter, mat_allowance, mm, units, rapid_to, incremental_rapid_to):
+    dcf = ocl.PathDropCutter()
+    dcf.setZ(z0)
+    dcf.setSTL(s)
+    dcf.setCutter(cutter)
+    dcf.setPath(path)
+    dcf.setSampling(0.1) # FIXME: this should be adjustable by the (advanced) user
+    dcf.run()
+    plist = dcf.getCLPoints()
+    f = ocl.LineCLFilter()
+    f.setTolerance(0.01) # FIXME: this should be adjustable by and advanced user
+    for p in plist:
+        f.addCLPoint(p)
+    f.run()
+    plist = f.getCLPoints()
+    n = 0
+    for p in plist:
+       p.z = p.z + mat_allowance
+       if n == 0:
+          if mm: rapid(p.x, p.y)
+          else: rapid(p.x / units, p.y / units)
+          rz = rapid_to
+          if p.z > z1: rz = p.z + incremental_rapid_to
+          if mm:
+             rapid(z = rz)
+             feed(z = p.z)
+          else:
+             rapid(z = rz / units)
+             feed(z = p.z / units)
+       else:
+          if mm:
+             feed(p.x, p.y, p.z)
+          else:
+             feed(p.x / units, p.y / units, p.z / units)
+       n = n + 1
+       
 def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0):
    mm = True
    if math.fabs(units)>0.000000001:
@@ -49,14 +85,21 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
       sub_step_over = (y1 - y0)/ steps
       if direction == 'Y': sub_step_over = (x1 - x0)/ steps
       rapid_to = z1 + incremental_rapid_to
+      path = ocl.Path()
       for i in range(0, steps + 1):
          odd_numbered_pass = (i%2 == 1)
          u = y0 + float(i) * sub_step_over
          if direction == 'Y': u = x0 + float(i) * sub_step_over
-         path = ocl.Path()
          if style == 0: # one way
             if direction == 'Y': path.append(ocl.Line(ocl.Point(u, y0, 0), ocl.Point(u, y1, 0)))
             else: path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
+            cut_path(path, z0, z1, s, cutter, mat_allowance, mm, units, rapid_to, incremental_rapid_to)
+            path = ocl.Path()
+            if mm:
+               rapid(z = clearance)
+            else:
+               rapid(z = clearance / units)
+               
          else: # back and forth
             if direction == 'Y':
                if odd_numbered_pass:
@@ -72,53 +115,9 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
                else:
                   path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
                   if i < steps: path.append(ocl.Line(ocl.Point(x1, u, 0), ocl.Point(x1, u + sub_step_over, 0))) # feed across to next pass
-         dcf = ocl.PathDropCutter()
-         dcf.setZ(z0)
-         dcf.setSTL(s)
-         dcf.setCutter(cutter)
-         dcf.setPath(path)
-         dcf.setSampling(0.1) # FIXME: this should be adjustable by the (advanced) user
-         dcf.run()
-         plist = dcf.getCLPoints()
-         f = ocl.LineCLFilter()
-         f.setTolerance(0.01) # FIXME: this should be adjustable by and advanced user
-         for p in plist:
-             f.addCLPoint(p)
-         f.run()
-         plist = f.getCLPoints()
-         n = 0
-         for p in plist:
-            p.z = p.z + mat_allowance
-            if i == 0 or style == 0:
-               if n == 0:
-                  if mm: rapid(p.x, p.y)
-                  else: rapid(p.x / units, p.y / units)
-                  rz = rapid_to
-                  if p.z > z1: rz = p.z + incremental_rapid_to
-                  if mm:
-                     rapid(z = rz)
-                     feed(z = p.z)
-                  else:
-                     rapid(z = rz / units)
-                     feed(z = p.z / units)
-               else:
-                  if mm:
-                     feed(p.x, p.y, p.z)
-                  else:
-                     feed(p.x / units, p.y / units, p.z / units)
-            else:
-               if n > 0:
-                  if mm:
-                     feed(p.x, p.y, p.z)
-                  else:
-                     feed(p.x / units, p.y / units, p.z / units)
-            n = n + 1
-         if style == 0: # one way
-            if mm:
-               rapid(z = clearance)
-            else:
-               rapid(z = clearance / units)
+
       if style != 0: # back and forth
+         cut_path(path, z0, z1, s, cutter, mat_allowance, mm, units, rapid_to, incremental_rapid_to)
          if mm:
             rapid(z = clearance)
          else:
