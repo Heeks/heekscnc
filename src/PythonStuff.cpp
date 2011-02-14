@@ -17,7 +17,11 @@
 #include "interface/PropertyString.h"
 
 //static
+#ifdef WIN32
+bool CPyProcess::redirect = false; // it's very hard to find what's going wrong, if redirect = true, I like to see the progress happening too
+#else
 bool CPyProcess::redirect = true;
+#endif
 
 CPyProcess::CPyProcess(void)
 {

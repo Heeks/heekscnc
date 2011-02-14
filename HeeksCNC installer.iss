@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
 AppName=HeeksCNC
-AppVerName=HeeksCNC 0.16.0
+AppVerName=HeeksCNC 0.17.0
 AppPublisher=Heeks Software
 AppPublisherURL=http://heeks.net/
 AppSupportURL=http://code.google.com/p/heekscnc/
@@ -15,7 +15,7 @@ AppUpdatesURL=http://code.google.com/p/heekscnc/
 DefaultDirName={pf}\HeeksCNC
 DefaultGroupName=HeeksCNC
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.16.0
+OutputBaseFilename=HeeksCNC 0.17.0
 Compression=lzma
 SolidCompression=yes
 
@@ -42,13 +42,12 @@ Source: "C:\Users\Dan\HeeksCAD\wxbase28u_vc_custom.dll"; DestDir: "{app}"; Flags
 Source: "C:\Users\Dan\HeeksCNC\post.bat"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\nc_read.bat"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\libarea\Release\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\kurve_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\ocl_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\ocl.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\circular_pocket.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\*.speeds"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\*.tooltable"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\nc\*.py"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion
