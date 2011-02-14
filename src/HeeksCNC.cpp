@@ -580,8 +580,34 @@ static void NewChamferOpMenuCallback(wxCommandEvent &event)
 
 static void NewAttachOpMenuCallback(wxCommandEvent &event)
 {
+	// check for at least one solid selected
+	std::list<int> solids;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+	}
+
+	// if no selected solids,
+	if(solids.size() == 0)
+	{
+		// use all the solids in the drawing
+		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
+		{
+			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+		}
+	}
+
+	if(solids.size() == 0)
+	{
+		wxMessageBox(_("There are no solids!"));
+		return;
+	}
+
 	heeksCAD->CreateUndoPoint();
-	CAttachOp *new_object = new CAttachOp();
+	CAttachOp *new_object = new CAttachOp(solids, 0.01, 0.0);
 	theApp.m_program->Operations()->Add(new_object, NULL);
 	heeksCAD->ClearMarkedList();
 	heeksCAD->Mark(new_object);
