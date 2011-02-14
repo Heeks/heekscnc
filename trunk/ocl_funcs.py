@@ -7,11 +7,7 @@ def STLSurfFromFile(filepath):
     ocl.STLReader(filepath, s)
     return s
 
-def cut_path(path, z0, z1, s, cutter, mat_allowance, mm, units, rapid_to, incremental_rapid_to):
-    dcf = ocl.PathDropCutter()
-    dcf.setZ(z0)
-    dcf.setSTL(s)
-    dcf.setCutter(cutter)
+def cut_path(path, dcf, z1, mat_allowance, mm, units, rapid_to, incremental_rapid_to):
     dcf.setPath(path)
     dcf.setSampling(0.1) # FIXME: this should be adjustable by the (advanced) user
     dcf.run()
@@ -77,9 +73,13 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
    zstep_down = height / zsteps
    incremental_rapid_to = rapid_down_to_height - start_depth
    if incremental_rapid_to < 0: incremental_rapid_to = 0.1
+   dcf = ocl.PathDropCutter()
+   dcf.setSTL(s)
+   dcf.setCutter(cutter)
    for k in range(0, zsteps):
       z1 = start_depth - k * zstep_down
       z0 = start_depth - (k + 1) * zstep_down
+      dcf.setZ(z0)
       steps = int((y1 - y0)/step_over) + 1
       if direction == 'Y': steps = int((x1 - x0)/step_over) + 1
       sub_step_over = (y1 - y0)/ steps
@@ -93,7 +93,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
          if style == 0: # one way
             if direction == 'Y': path.append(ocl.Line(ocl.Point(u, y0, 0), ocl.Point(u, y1, 0)))
             else: path.append(ocl.Line(ocl.Point(x0, u, 0), ocl.Point(x1, u, 0)))
-            cut_path(path, z0, z1, s, cutter, mat_allowance, mm, units, rapid_to, incremental_rapid_to)
+            cut_path(path, dcf, z1, mat_allowance, mm, units, rapid_to, incremental_rapid_to)
             path = ocl.Path()
             if mm:
                rapid(z = clearance)
@@ -117,7 +117,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
                   if i < steps: path.append(ocl.Line(ocl.Point(x1, u, 0), ocl.Point(x1, u + sub_step_over, 0))) # feed across to next pass
 
       if style != 0: # back and forth
-         cut_path(path, z0, z1, s, cutter, mat_allowance, mm, units, rapid_to, incremental_rapid_to)
+         cut_path(path, dcf, z1, mat_allowance, mm, units, rapid_to, incremental_rapid_to)
          if mm:
             rapid(z = clearance)
          else:
