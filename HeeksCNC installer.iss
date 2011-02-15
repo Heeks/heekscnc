@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
 AppName=HeeksCNC
-AppVerName=HeeksCNC 0.17.0
+AppVerName=HeeksCNC 0.17.1
 AppPublisher=Heeks Software
 AppPublisherURL=http://heeks.net/
 AppSupportURL=http://code.google.com/p/heekscnc/
@@ -15,7 +15,7 @@ AppUpdatesURL=http://code.google.com/p/heekscnc/
 DefaultDirName={pf}\HeeksCNC
 DefaultGroupName=HeeksCNC
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.17.0
+OutputBaseFilename=HeeksCNC 0.17.1
 Compression=lzma
 SolidCompression=yes
 
@@ -28,6 +28,7 @@ Name: it; MessagesFile: "compiler:Languages\Italian.isl"
 [Files]
 Source: "C:\Users\Dan\HeeksCAD\src\Unicode Release\HeeksCAD.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\bitmaps\*.png"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\bitmaps\angle\*.png"; DestDir: "{app}\bitmaps\angle"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\bitmaps\font.glf"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\icons\*.png"; DestDir: "{app}\icons"; Flags: ignoreversion
 Source: "C:\Users\Dan\OCC dlls for HeeksCAD\*"; DestDir: "{app}"; Flags: ignoreversion
