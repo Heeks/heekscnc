@@ -191,7 +191,12 @@ class CreatorAttach(nc.Creator):
         if self.path == None: return
         self.setPdcfIfNotSet()
         
-        # get the points on the surface
+        if (self.z>self.minz):
+            self.pdcf.setZ(self.z)  # Adjust Z if we have gotten a higher limit (Fix pocketing loosing steps when using attach?)
+        else:
+            self.pdcf.setZ(self.minz) # Else use minz
+            
+       # get the points on the surface
         self.pdcf.setPath(self.path)
         self.pdcf.run()
         plist = self.pdcf.getCLPoints()
