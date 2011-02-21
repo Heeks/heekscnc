@@ -23,6 +23,7 @@ class CreatorEMC2(iso_modal.CreatorIsoModal):
         iso_modal.CreatorIsoModal.__init__(self)
         self.absolute_flag = True
         self.prev_g91 = ''
+        self.useCrc = False
 
 
 
@@ -31,7 +32,12 @@ class CreatorEMC2(iso_modal.CreatorIsoModal):
 
 
     def program_begin(self, id, comment):
-        self.write( ('(Created with emc2b post processor ' + str(now.strftime("%Y/%m/%d %H:%M")) + ')' + '\n') )
+        if (self.useCrc == False):
+            self.write( ('(Created with emc2b post processor ' + str(now.strftime("%Y/%m/%d %H:%M")) + ')' + '\n') )
+        else:  
+            self.write( ('(Created with emc2b Cutter Radius Compensation post processor ' + str(now.strftime("%Y/%m/%d %H:%M")) + ')' + '\n') )
+
+	
 
 
 ############################################################################
@@ -253,31 +259,6 @@ class CreatorEMC2(iso_modal.CreatorIsoModal):
 
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         self.arc(False, x, y, z, i, j, k, r)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ############################################################################
