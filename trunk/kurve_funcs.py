@@ -132,6 +132,11 @@ def add_roll_on(curve, roll_on_curve, direction, roll_radius, offset_extra, roll
             off_v = area.Point(-v.y, v.x)
             
         rollstart = first_span.p + off_v * roll_radius - v * roll_radius
+        global crc_dir
+        if '-' in str(off_v.x):
+            crc_dir = "inside"
+        else:
+            crc_dir = "outside"
     else:
         rollstart = roll_on       
 
@@ -253,7 +258,22 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
 
         # rapid across to the start
         s = roll_on_curve.FirstVertex().p
-        rapid(s.x, s.y)
+        # crc_start point
+        crc_diameter = radius*2
+        if use_CRC():
+            if crc_dir == "inside":
+                if direction == "right":
+                    rapid(s.x+crc_diameter, s.y-crc_diameter)
+                else:
+                    rapid(s.x-crc_diameter, s.y-crc_diameter)
+            else:
+                if direction == "right":
+                    rapid(s.x-crc_diameter, s.y+crc_diameter)
+                else:
+                    rapid(s.x+crc_diameter, s.y+crc_diameter)
+
+        else:
+            rapid(s.x, s.y)
         
         # rapid down to just above the material
         rapid(z = mat_depth + rapid_down_to_height)
@@ -265,6 +285,9 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
 
         if use_CRC():
             start_CRC(direction == "left", radius)
+            # move to the startpoint
+            feed(s.x, s.y)
+            
         
         # cut the roll on arc
         cut_curve(roll_on_curve)
@@ -289,9 +312,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         # cut the roll off arc
         cut_curve(roll_off_curve)
 
-        if use_CRC():
-            end_CRC()
-                    
+                  
         # restore the unsplit kurve
         if len(tags) > 0:
             offset_curve = area.Curve(copy_of_offset_curve)
@@ -299,6 +320,9 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         # rapid up to the clearance height
         rapid(z = clearance)
         
+        if use_CRC():
+            end_CRC()
+
     del offset_curve
                 
     if len(tags) > 0:
