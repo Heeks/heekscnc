@@ -130,13 +130,7 @@ def add_roll_on(curve, roll_on_curve, direction, roll_radius, offset_extra, roll
             off_v = area.Point(v.y, -v.x)
         else:
             off_v = area.Point(-v.y, v.x)
-            
         rollstart = first_span.p + off_v * roll_radius - v * roll_radius
-        global crc_dir
-        if '-' in str(off_v.x):
-            crc_dir = "inside"
-        else:
-            crc_dir = "outside"
     else:
         rollstart = roll_on       
 
@@ -148,7 +142,6 @@ def add_roll_on(curve, roll_on_curve, direction, roll_radius, offset_extra, roll
         v = first_span.GetVector(0.0) # get start direction
         rvertex.c, rvertex.type = area.TangentialArc(first_span.p, rollstart, -v)
         rvertex.type = -rvertex.type # because TangentialArc was used in reverse
-    
     # add a start roll on point
     roll_on_curve.append(rollstart)
 
@@ -194,10 +187,19 @@ def cut_curve(curve):
             else:
                 arc_cw(span.v.p.x, span.v.p.y, i = c.x, j = c.y)
     
-def add_CRC_start_line(curve, radius):
-    # to do
-    pass
+def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_start_point):
+    first_span = curve.GetFirstSpan()
+    v = first_span.GetVector(0.0)
+    if direction == 'right':
+        off_v = area.Point(v.y, -v.x)
+    else:
+        off_v = area.Point(-v.y, v.x)
+    startpoint_roll_on = roll_on_curve.FirstVertex().p
+    crc_start = startpoint_roll_on + off_v * radius + v * radius
+    crc_start_point.x = crc_start.x 
+    crc_start_point.y = crc_start.y 
 
+    
 # profile command,
 # direction should be 'left' or 'right' or 'on'
 def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_down_to_height = None, clearance = None, start_depth = None, step_down = None, final_depth = None):
@@ -251,6 +253,9 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         add_roll_on(offset_curve, roll_on_curve, direction, roll_radius, offset_extra, roll_on)
         roll_off_curve = area.Curve()
         add_roll_off(offset_curve, roll_off_curve, direction, roll_radius, offset_extra, roll_off)
+        if use_CRC():
+            crc_start_point = area.Point()
+            add_CRC_start_line(offset_curve,roll_on_curve,roll_off_curve,radius,direction,crc_start_point)
         
         # get the tag depth at the start
         start_z = get_tag_z_for_span(0, offset_curve, radius, start_depth, depth, final_depth)
@@ -258,20 +263,10 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
 
         # rapid across to the start
         s = roll_on_curve.FirstVertex().p
-        # crc_start point
-        crc_diameter = radius*2
+        
+        # start point 
         if use_CRC():
-            if crc_dir == "inside":
-                if direction == "right":
-                    rapid(s.x+crc_diameter, s.y-crc_diameter)
-                else:
-                    rapid(s.x-crc_diameter, s.y-crc_diameter)
-            else:
-                if direction == "right":
-                    rapid(s.x-crc_diameter, s.y+crc_diameter)
-                else:
-                    rapid(s.x+crc_diameter, s.y+crc_diameter)
-
+            rapid(crc_start_point.x,crc_start_point.y)
         else:
             rapid(s.x, s.y)
         
