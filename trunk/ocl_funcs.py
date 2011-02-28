@@ -125,7 +125,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
 
 
 def cutting_tool( diameter, corner_radius, length ):
-   cutter = ocl.CylCutter(1.0,1.0) # dummy cutter
+   cutter = ocl.CylCutter(1.0, length) # dummy cutter
    if corner_radius == 0.0:
       cutter = ocl.CylCutter(diameter, length)
    elif corner_radius > diameter / 2 - 0.000000001:

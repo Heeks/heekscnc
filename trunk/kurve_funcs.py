@@ -4,10 +4,20 @@ import area
 
 def make_smaller( curve, start = None, finish = None ):
     if start != None:
-        curve.ChangeStart(start)
+        curve.ChangeStart(curve.NearestPoint(start))
 
     if finish != None:
-        curve.ChangeEnd(finish)
+        more_than_once_around = False # maybe this will be a parameter passed in, if it is useful to others
+        if more_than_once_around:
+            curve2 = area.Curve(curve)
+            curve2.ChangeEnd(curve2.NearestPoint(finish))
+            first = True
+            for vertex in curve2.getVertices():
+                if first == False: curve.append(vertex)
+                first = False
+        else:
+            curve.ChangeEnd(curve.NearestPoint(finish))
+        curve.text()
         
 class Tag:
     def __init__(self, p, width, angle, height):
