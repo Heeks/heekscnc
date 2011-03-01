@@ -40,6 +40,7 @@ public:
 	bool m_end_given;
 	double m_start[3];
 	double m_end[3];
+	bool m_end_beyond_full_profile;
 	int m_sort_sketches;
 
 	double m_offset_extra; // in mm

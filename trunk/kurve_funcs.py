@@ -2,13 +2,12 @@ import math
 from nc.nc import *
 import area
 
-def make_smaller( curve, start = None, finish = None ):
+def make_smaller( curve, start = None, finish = None, end_beyond = False ):
     if start != None:
         curve.ChangeStart(curve.NearestPoint(start))
 
     if finish != None:
-        more_than_once_around = False # maybe this will be a parameter passed in, if it is useful to others
-        if more_than_once_around:
+        if end_beyond:
             curve2 = area.Curve(curve)
             curve2.ChangeEnd(curve2.NearestPoint(finish))
             first = True
@@ -17,7 +16,6 @@ def make_smaller( curve, start = None, finish = None ):
                 first = False
         else:
             curve.ChangeEnd(curve.NearestPoint(finish))
-        curve.text()
         
 class Tag:
     def __init__(self, p, width, angle, height):
