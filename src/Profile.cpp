@@ -49,6 +49,7 @@ CProfileParams::CProfileParams()
 	m_end_given = false;
 	m_start[0] = m_start[1] = m_start[2] = 0.0;
 	m_end[0] = m_end[1] = m_end[2] = 0.0;
+	m_end_beyond_full_profile = false;
 	m_sort_sketches = 1;
 	m_offset_extra = 0.0;
 	m_do_finishing_pass = false;
@@ -88,6 +89,7 @@ static void on_set_start_given(bool value, HeeksObj* object){((CProfile*)object)
 static void on_set_start(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_start, vt, 3*sizeof(double));}
 static void on_set_end_given(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_given = value; heeksCAD->RefreshProperties();}
 static void on_set_end(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_end, vt, 3*sizeof(double));}
+static void on_set_end_beyond_full_profile(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_beyond_full_profile = value;}
 static void on_set_sort_sketches(const int value, HeeksObj* object)
 {
 	((CProfile*)object)->m_profile_params.m_sort_sketches = value;
@@ -182,7 +184,11 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		list->push_back(new PropertyCheck(_("use start point"), m_start_given, parent, on_set_start_given));
 		if(m_start_given)list->push_back(new PropertyVertex(_("start point"), m_start, parent, on_set_start));
 		list->push_back(new PropertyCheck(_("use end point"), m_end_given, parent, on_set_end_given));
-		if(m_end_given)list->push_back(new PropertyVertex(_("end point"), m_end, parent, on_set_end));
+		if(m_end_given)
+		{
+			list->push_back(new PropertyVertex(_("end point"), m_end, parent, on_set_end));
+			list->push_back(new PropertyCheck(_("end beyond full profile"), m_end_beyond_full_profile, parent, on_set_end_beyond_full_profile));
+		}
 	}
 	else
 	{
@@ -252,6 +258,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 		element->SetDoubleAttribute("endx", m_end[0]);
 		element->SetDoubleAttribute("endy", m_end[1]);
 		element->SetDoubleAttribute("endz", m_end[2]);
+		element->SetAttribute("end_beyond_full_profile", m_end_beyond_full_profile ? 1:0);
 	}
 
 	std::ostringstream l_ossValue;
@@ -289,6 +296,7 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("endx", &m_end[0]);
 	pElem->Attribute("endy", &m_end[1]);
 	pElem->Attribute("endz", &m_end[2]);
+	if(pElem->Attribute("end_beyond_full_profile", &int_for_bool))m_end_beyond_full_profile = (int_for_bool != 0);
 	if(pElem->Attribute("sort_sketches"))m_sort_sketches = atoi(pElem->Attribute("sort_sketches"));
 	pElem->Attribute("offset_extra", &m_offset_extra);
 	if(pElem->Attribute("do_finishing_pass", &int_for_bool))m_do_finishing_pass = (int_for_bool != 0);
@@ -555,6 +563,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 
 
 		wxString finish_string;
+		wxString beyond_string;
 		if(m_profile_params.m_end_given)
 		{
 #ifdef UNICODE
@@ -576,9 +585,11 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 			ss<<std::setprecision(10);
 			ss << ", finish = area.Point(" << finishx << ", " << finishy << ")";
 			finish_string = ss.str().c_str();
+
+			if(m_profile_params.m_end_beyond_full_profile)beyond_string = _T(", end_beyond = True");
 		}
 
-		python << (wxString::Format(_T("kurve_funcs.make_smaller( curve%s%s)\n"), start_string.c_str(), finish_string.c_str())).c_str();
+		python << (wxString::Format(_T("kurve_funcs.make_smaller( curve%s%s%s)\n"), start_string.c_str(), finish_string.c_str(), beyond_string.c_str())).c_str();
 	}
 
 	return(python);
@@ -701,6 +712,7 @@ void CProfile::WriteDefaultValues()
 	config.Write(_T("FinishFeedRate"), m_profile_params.m_finishing_h_feed_rate);
 	config.Write(_T("FinishCutMode"), m_profile_params.m_finishing_cut_mode);
 	config.Write(_T("FinishStepDown"), m_profile_params.m_finishing_step_down);
+	config.Write(_T("EndBeyond"), m_profile_params.m_end_beyond_full_profile);
 }
 
 void CProfile::ReadDefaultValues()
@@ -721,6 +733,7 @@ void CProfile::ReadDefaultValues()
 	config.Read(_T("FinishCutMode"), &int_mode, CProfileParams::eConventional);
 	m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)int_mode;
 	config.Read(_T("FinishStepDown"), &m_profile_params.m_finishing_step_down, 1.0);
+	config.Read(_T("EndBeyond"), &m_profile_params.m_end_beyond_full_profile, false);
 
 	ConfirmAutoRollRadius(true);
 
@@ -883,7 +896,7 @@ static CProfile* object_for_tools = NULL;
 class PickStart: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick Start");}
-	void Run(){if(heeksCAD->PickPosition(_("Pick new start point"), object_for_tools->m_profile_params.m_start))object_for_tools->m_profile_params.m_start_given = true;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick new start point"), object_for_tools->m_profile_params.m_start))object_for_tools->m_profile_params.m_start_given = true; heeksCAD->RefreshProperties();}
 	wxString BitmapPath(){ return _T("pickstart");}
 };
 
@@ -892,7 +905,7 @@ static PickStart pick_start;
 class PickEnd: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick End");}
-	void Run(){if(heeksCAD->PickPosition(_("Pick new end point"), object_for_tools->m_profile_params.m_end))object_for_tools->m_profile_params.m_end_given = true;}
+	void Run(){if(heeksCAD->PickPosition(_("Pick new end point"), object_for_tools->m_profile_params.m_end))object_for_tools->m_profile_params.m_end_given = true; heeksCAD->RefreshProperties();}
 	wxString BitmapPath(){ return _T("pickend");}
 };
 
@@ -1256,6 +1269,7 @@ bool CProfileParams::operator==( const CProfileParams & rhs ) const
 	for (::size_t i=0; i<sizeof(m_roll_off_point)/sizeof(m_roll_off_point[0]); i++) if (m_roll_off_point[i] != rhs.m_roll_off_point[i]) return(false);
 	if (m_start_given != rhs.m_start_given) return(false);
 	if (m_end_given != rhs.m_end_given) return(false);
+	if (m_end_beyond_full_profile != rhs.m_end_beyond_full_profile) return(false);
 	for (::size_t i=0; i<sizeof(m_start)/sizeof(m_start[0]); i++) if (m_start[i] != rhs.m_start[i]) return(false);
 	for (::size_t i=0; i<sizeof(m_end)/sizeof(m_end[0]); i++) if (m_end[i] != rhs.m_end[i]) return(false);
 	if (m_sort_sketches != rhs.m_sort_sketches) return(false);
