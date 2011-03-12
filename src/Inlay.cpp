@@ -86,9 +86,17 @@ static void on_set_min_cornering_angle(double value, HeeksObj* object)
 	((CInlay*)object)->WriteDefaultValues();
 }
 
-static void on_set_clearance_tool(int value, HeeksObj* object)
+static void on_set_clearance_tool(int zero_based_choice, HeeksObj* object)
 {
-	((CInlay*)object)->m_params.m_clearance_tool = value;
+	if (zero_based_choice < 0) return;	// An error has occured.
+
+	std::vector< std::pair< int, wxString > > tools = CTool::FindAllTools();
+
+	if ((zero_based_choice >= int(0)) && (zero_based_choice <= int(tools.size()-1)))
+	{
+                ((CInlay*)object)->m_params.m_clearance_tool = tools[zero_based_choice].first;	// Convert the choice offset to the tool number for that choice
+	} // End if - then
+
 	((CInlay*)object)->WriteDefaultValues();
 }
 
