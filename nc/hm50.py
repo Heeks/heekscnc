@@ -13,7 +13,7 @@ class CreatorHM50(emc2.CreatorEMC2):
 
 	def tool_change(self, id):
 		self.write_blocknum()
-		self.write('G53 G00 Z350\n')
+		self.write('G53 G00 Z30\n')
 		self.write_blocknum()
 		self.write((iso_codes.codes.TOOL() % id) + '\n')
 		self.write_blocknum()
