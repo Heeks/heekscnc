@@ -161,21 +161,21 @@ public:
 		} // End if - then
 		else
 		{
-#ifdef WIN32
-			Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
-#else
-#ifdef RUNINPLACE
-            wxString path(theApp.GetDllFolder() +_T("/nc/"));
-#else
-#ifdef CMAKE_UNIX
-            wxString path(_T("/usr/lib/heekscnc/nc/"));
-#else
-            wxString path(theApp.GetDllFolder() + _T("/../heekscnc/nc/"));
-#endif
-#endif
+			#ifdef WIN32
+				Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
+			#else
+				#ifdef RUNINPLACE
+					wxString path(theApp.GetDllFolder() +_T("/../nc/"));
+				#else
+					#ifdef CMAKE_UNIX
+						wxString path(_T("/usr/lib/heekscnc/nc/"));
+					#else
+						wxString path(theApp.GetDllFolder() + _T("/../heekscnc/nc/"));
+					#endif
+				#endif
 
-			Execute(wxString(_T("python \"")) + path + m_program->m_machine.file_name + wxString(_T("_read.py\" \"")) + m_filename + wxString(_T("\"")) );
-#endif
+				Execute(wxString(_T("python \"")) + path + m_program->m_machine.file_name + wxString(_T("_read.py\" \"")) + m_filename + wxString(_T("\"")) );
+			#endif
 		} // End if - else
 	}
 	void ThenDo(void)

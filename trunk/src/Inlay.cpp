@@ -307,11 +307,12 @@ Python CInlay::AppendTextToProgram( CMachineState *pMachineState )
 
 	python << CDepthOp::AppendTextToProgram( pMachineState );
 
-	CTool *pChamferingBit = (CTool *) heeksCAD->GetIDObject( ToolType, m_tool_number );
+	CTool *pChamferingBit = CTool::Find( m_tool_number );
 
 	if (! pChamferingBit)
 	{
 	    // No shirt, no shoes, no service.
+		printf("No chamfering bit defined\n");
 		return(python);
 	}
 
@@ -902,11 +903,17 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 
 	typedef double Depth_t;
 
-	CTool *pChamferingBit = (CTool *) heeksCAD->GetIDObject( ToolType, m_tool_number );
+	CTool *pChamferingBit = CTool::Find( m_tool_number );
 
     // For all selected sketches.
 	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
 	{
+		if (object->GetType() != SketchType)
+		{
+			printf("Skipping non-sketch child\n");
+			continue;
+		}
+
 	    // Convert them to a list of wire objects.
 		std::list<TopoDS_Shape> wires;
 		if (heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
@@ -940,6 +947,7 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 
                     // If this is too far for this sketch's geometry, figure out what the maximum offset is.
                     max_offset = FindMaxOffset( max_offset, TopoDS::Wire(wire), m_depth_op_params.m_step_down * tan(angle) / 10.0 );
+
 
                     double max_plunge_possible = max_offset * tan(angle);
 
@@ -1059,6 +1067,10 @@ CInlay::Valleys_t CInlay::DefineValleys(CMachineState *pMachineState)
 					Handle_Standard_Failure e = Standard_Failure::Caught();
 			} // End catch
 		} // End if - then
+		else
+		{
+			printf("Could not convert sketch id%d to wire\n", object->m_id );
+		}
 	} // End for
 
 	return(valleys);
@@ -1101,7 +1113,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
             for (std::list<double>::iterator itDepth = depths.begin(); itDepth != depths.end(); itDepth++)
             {
                 // We don't want a toolpath at the top surface.
-                if (fabs(fabs(*itDepth) - fabs(m_depth_op_params.m_start_depth)) > tolerance)
+                if (fabs(fabs(*itDepth) - fabs(m_depth_op_params.m_start_depth)) > (3.0 * tolerance))
                 {
                     Path path;
                     path.Offset(*itOffset);
