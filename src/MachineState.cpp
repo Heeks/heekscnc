@@ -118,20 +118,17 @@ Python CMachineState::Fixture( CFixture new_fixture )
 				// Both fixtures have a safety height defined.  Move the highest of the two.
 				if (m_fixture.m_params.m_safety_height > new_fixture.m_params.m_safety_height)
 				{
-					python << _T("machine_coordinates()");
-					python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(")\n");
+					python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(", machine_coordinates=True)\n");
 				} // End if - then
 				else
 				{
-					python << _T("machine_coordinates()");
-					python << _T("rapid(z=") << new_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(")\n");
+					python << _T("rapid(z=") << new_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(", machine_coordinates=True)\n");
 				} // End if - else
 			} // End if - then
 			else
 			{
 				// The old fixture has a safety height but the new one doesn't
-				python << _T("machine_coordinates()");
-				python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(")\n");
+				python << _T("rapid(z=") << m_fixture.m_params.m_safety_height / PROGRAM->m_units << _T(", machine_coordinates=True)\n");
 			} // End if - else
         }
 

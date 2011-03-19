@@ -1789,7 +1789,11 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 		directories.push_back( standard_paths.GetUserConfigDir() );	// Look for a user-specific file first
 		directories.push_back( GetDllFolder() );	// And then look in the application-delivered directory
 #ifdef CMAKE_UNIX
+	#ifdef RUNINPLACE
+		directories.push_back( GetResFolder() );
+	#else
 		directories.push_back( _T("/usr/lib/heekscnc") ); //Location if installed by CMAKE
+	#endif
 #endif //CMAKE_UNIX
 		bool tool_table_found = false;
 		bool speed_references_found = false;
@@ -1904,7 +1908,11 @@ wxString CHeeksCNCApp::GetDllFolder()
 wxString CHeeksCNCApp::GetResFolder()
 {
 #if defined(WIN32) || defined(RUNINPLACE) //compile with 'RUNINPLACE=yes make' then skip 'sudo make install'
-	return m_dll_path;
+	#ifdef CMAKE_UNIX
+		return (m_dll_path + _T("/.."));
+	#else
+		return m_dll_path;
+	#endif
 #else
 #ifdef CMAKE_UNIX
     return (_T("/usr/share/heekscnc"));

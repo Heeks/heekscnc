@@ -759,14 +759,18 @@ Python CProgram::RewritePythonProgram()
 	python << _T("import sys\n");
 
 #ifdef CMAKE_UNIX
-        python << _T("sys.path.insert(0,'/usr/lib/heekscnc/')\n");
+	#ifdef RUNINPLACE
+	        python << _T("sys.path.insert(0,'") << theApp.GetResFolder() << _T("/')\n");
+	#else
+	        python << _T("sys.path.insert(0,'/usr/lib/heekscnc/')\n");
+	#endif
 #else
 #ifndef WIN32
 #ifndef RUNINPLACE
 	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/")) << _T(")\n");
 #endif
 #endif
-	python << _T("sys.path.insert(0,") << PythonString(theApp.GetDllFolder()) << _T(")\n");
+	python << _T("sys.path.insert(0,") << PythonString(theApp.GetResFolder()) << _T(")\n");
 #endif
 	python << _T("import math\n");
 
@@ -983,7 +987,11 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 {
 	wxString machines_file = CProgram::alternative_machines_file;
 #ifdef CMAKE_UNIX
-    if(machines_file.Len() == 0)machines_file = _T("/usr/lib/heekscnc/nc/machines.txt");
+	#ifdef RUNINPLACE
+		if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
+	#else
+		if(machines_file.Len() == 0)machines_file = _T("/usr/lib/heekscnc/nc/machines.txt");
+	#endif
 #else
 	if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
 #endif
