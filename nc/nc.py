@@ -194,7 +194,7 @@ class Creator:
     ############################################################################
     ##  Moves
     
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
         """Rapid move"""
         pass
 
@@ -512,8 +512,8 @@ def gearrange(gear=0):
 ############################################################################
 ##  Moves
 
-def rapid(x=None, y=None, z=None, a=None, b=None, c=None):
-    creator.rapid(x, y, z, a, b, c)
+def rapid(x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
+    creator.rapid(x, y, z, a, b, c, machine_coordinates)
 
 def feed(x=None, y=None, z=None):
     creator.feed(x, y, z)
