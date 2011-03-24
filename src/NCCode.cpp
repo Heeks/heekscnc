@@ -725,7 +725,7 @@ void CNCCode::glCommands(bool select, bool marked, bool no_color)
 		for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 		{
 			CNCCodeBlock* block = *It;
-			glPushName((unsigned long)block);
+			glPushName(block->GetIndex());
 			block->glCommands(true, block == m_highlighted_block, false);
 			glPopName();
 		}
