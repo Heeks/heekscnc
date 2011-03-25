@@ -9,7 +9,6 @@
 import nc
 import iso_modal
 import math
-import iso_codes as iso
 
 import datetime
 
@@ -18,15 +17,16 @@ now = datetime.datetime.now()
 
 
 ################################################################################
-class CreatorCentroid1(iso_modal.CreatorIsoModal):
+class Creator(iso_modal.Creator):
 
     def __init__(self):
-        iso_modal.CreatorIsoModal.__init__(self)
+        iso_modal.Creator.__init__(self)
 
 
         self.absolute_flag = True
         self.prev_g91 = ''
 
+    def SPINDLE(self, format, speed): return(self.SPACE() + 'S' + (format % speed))
 ################################################################################
 # general 
 
@@ -38,11 +38,11 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
 ################################################################################
 # settings for absolute or incremental mode
     def absolute(self):
-        self.write(iso.codes.ABSOLUTE()+'\n')        
+        self.write(self.ABSOLUTE()+'\n')        
         self.absolute_flag = True
 
     def incremental(self):
-        self.write(iso.codes.INCREMENTAL()+'\n')
+        self.write(self.INCREMENTAL()+'\n')
         self.absolute_flag = False
 
 ################################################################################
@@ -69,11 +69,11 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
     def program_stop(self, optional=False):
         self.write_blocknum()
         if (optional) : 
-            self.write(iso.codes.STOP_OPTIONAL() + '\n')
+            self.write(self.STOP_OPTIONAL() + '\n')
         else : 
             self.write('M05\n')
             self.write('G49 M25\n')
-            self.write(iso.codes.STOP() + '\n')
+            self.write(self.STOP() + '\n')
             self.prev_g0123 = ''
 ################################################################################
 # coordinate system ie G54-G59
@@ -81,9 +81,9 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
     def workplane(self, id):
         self.write('M25\n')
         if ((id >= 1) and (id <= 6)):
-            self.g += iso.codes.WORKPLANE() % (id + iso.codes.WORKPLANE_BASE())
+            self.g_list.append(self.WORKPLANE() % (id + self.WORKPLANE_BASE()))
         if ((id >= 7) and (id <= 9)):
-            self.g += ((iso.codes.WORKPLANE() % (6 + iso.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6)))
+            self.g_list.append(((self.WORKPLANE() % (6 + self.WORKPLANE_BASE())) + ('.%i' % (id - 6))))
         self.prev_g0123 = ''            
 
 ################################################################################
@@ -94,16 +94,16 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
         """Rapid relative to home position"""
         self.write('M05\n')              
         self.write('M25\n')
-	self.write(iso.codes.RAPID())
-        self.write(iso.codes.X() + (self.fmt % x))
-        self.write(iso.codes.Y() + (self.fmt % y))
+	self.write(self.RAPID())
+        self.write(self.X() + (self.fmt % x))
+        self.write(self.Y() + (self.fmt % y))
         self.write('\n')                     
                      
 ################################################################################
 # tool info
     def tool_change(self, id):
         self.write_blocknum()
-        self.write((iso.codes.TOOL() % id) + '\n')
+        self.write((self.TOOL() % id) + '\n')
         self.t = id
         self.write('G49 M25\n')
         self.write('G43 H'+ str(id) + 'Z.75 \n')
@@ -122,195 +122,15 @@ class CreatorCentroid1(iso_modal.CreatorIsoModal):
             clockwise = not clockwise
             s = abs(s)
         
-        self.s = iso.codes.SPINDLE(iso.codes.FORMAT_ANG(), s)
+        self.s = self.SPINDLE(self.FORMAT_ANG(), s)
         if clockwise:
-           #self.s =  iso.codes.SPINDLE_CW() + self.s
-            self.s =  iso.codes.SPINDLE_CW()                
+           #self.s =  self.SPINDLE_CW() + self.s
+            self.s =  self.SPINDLE_CW()                
             self.write(self.s +  '\n')
             self.write('G04 P2.0 \n')
                 
         else:
-            self.s =  iso.codes.SPINDLE_CCW() + self.s
-
-############################################################################
-##  Moves
-
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False ):
-        self.write_blocknum()
-        if (machine_coordinates != False):
-            self.write(iso.codes.MACHINE_COORDINATES())
-            self.prev_g0123 != iso.codes.RAPID()
-        if self.g0123_modal:
-            if self.prev_g0123 != iso.codes.RAPID():
-                self.write(iso.codes.RAPID())
-                self.prev_g0123 = iso.codes.RAPID()
-        else:
-            self.write(iso.codes.RAPID())
-        self.write_preps()
-        if (x != None):
-            dx = x - self.x
-            if (self.absolute_flag ):
-                self.write(iso.codes.X() + (self.fmt % x))
-            else:
-                self.write(iso.codes.X() + (self.fmt % dx))
-            self.x = x
-        if (y != None):
-            dy = y - self.y
-            if (self.absolute_flag ):
-                self.write(iso.codes.Y() + (self.fmt % y))
-            else:
-                self.write(iso.codes.Y() + (self.fmt % dy))
-
-            self.y = y
-        if (z != None):
-            dz = z - self.z
-            if (self.absolute_flag ):
-                self.write(iso.codes.Z() + (self.fmt % z))
-            else:
-                self.write(iso.codes.Z() + (self.fmt % dz))
-
-            self.z = z
-
-        if (a != None):
-            da = a - self.a
-            if (self.absolute_flag ):
-                self.write(iso.codes.A() + (self.fmt % a))
-            else:
-                self.write(iso.codes.A() + (self.fmt % da))
-            self.a = a
-
-        if (b != None):
-            db = b - self.b
-            if (self.absolute_flag ):
-                self.write(iso.codes.B() + (self.fmt % b))
-            else:
-                self.write(iso.codes.B() + (self.fmt % db))
-            self.b = b
-
-        if (c != None):
-            dc = c - self.c
-            if (self.absolute_flag ):
-                self.write(iso.codes.C() + (self.fmt % c))
-            else:
-                self.write(iso.codes.C() + (self.fmt % dc))
-            self.c = c
-
-        self.write_spindle()
-        self.write_misc()
-        self.write('\n')
-
-    def feed(self, x=None, y=None, z=None, machine_coordinates=False):
-        if self.same_xyz(x, y, z): return
-        self.write_blocknum()
-        if (machine_coordinates != False):
-            self.write(iso.codes.MACHINE_COORDINATES())
-            self.prev_g0123 = ''
-        if self.g0123_modal:
-            if self.prev_g0123 != iso.codes.FEED():
-                self.write(iso.codes.FEED())
-                self.prev_g0123 = iso.codes.FEED()
-        else:
-            self.write(iso.codes.FEED())
-        self.write_preps()
-        dx = dy = dz = 0
-        if (x != None):
-            dx = x - self.x
-            if (self.absolute_flag ):
-                self.write(iso.codes.X() + (self.fmt % x))
-            else:
-                self.write(iso.codes.X() + (self.fmt % dx))
-            self.x = x
-        if (y != None):
-            dy = y - self.y
-            if (self.absolute_flag ):
-                self.write(iso.codes.Y() + (self.fmt % y))
-            else:
-                self.write(iso.codes.Y() + (self.fmt % dy))
-            self.y = y
-        if (z != None):
-            dz = z - self.z
-            if (self.absolute_flag ):
-                self.write(iso.codes.Z() + (self.fmt % z))
-            else:
-                self.write(iso.codes.Z() + (self.fmt % dz))
-            self.z = z
+            self.s =  self.SPINDLE_CCW() + self.s
 
 
-        if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
-        self.write_feedrate()
-        self.write_spindle()
-        self.write_misc()
-        self.write('\n')
-
-    def same_xyz(self, x=None, y=None, z=None):
-        if (x != None):
-            if (self.fmt % x) != (self.fmt % self.x):
-                return False
-        if (y != None):
-            if (self.fmt % y) != (self.fmt % self.y):
-                return False
-        if (z != None):
-            if (self.fmt % z) != (self.fmt % self.z):
-                return False
-            
-        return True
-
-    def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        if self.same_xyz(x, y, z): return
-        self.write_blocknum()
-        arc_g_code = ''
-        if cw: arc_g_code = iso.codes.ARC_CW()
-        else: arc_g_code = iso.codes.ARC_CCW()
-        if self.g0123_modal:
-            if self.prev_g0123 != arc_g_code:
-                self.write(arc_g_code)
-                self.prev_g0123 = arc_g_code
-        else:
-            self.write(arc_g_code)
-        self.write_preps()
-        if (x != None):
-            dx = x - self.x
-            if (self.absolute_flag ):
-                self.write(iso.codes.X() + (self.fmt % x))
-            else:
-                self.write(iso.codes.X() + (self.fmt % dx))
-            self.x = x
-        if (y != None):
-            dy = y - self.y
-            if (self.absolute_flag ):
-                self.write(iso.codes.Y() + (self.fmt % y))
-            else:
-                self.write(iso.codes.Y() + (self.fmt % dy))
-            self.y = y
-        if (z != None):
-            dz = z - self.z
-            if (self.absolute_flag ):
-                self.write(iso.codes.Z() + (self.fmt % z))
-            else:
-                self.write(iso.codes.Z() + (self.fmt % dz))
-            self.z = z
-        if (i != None) : self.write(iso.codes.CENTRE_X() + (self.fmt % i))
-        if (j != None) : self.write(iso.codes.CENTRE_Y() + (self.fmt % j))
-        if (k != None) : self.write(iso.codes.CENTRE_Z() + (self.fmt % k))
-        if (r != None) : self.write(iso.codes.RADIUS() + (self.fmt % r))
-#       use horizontal feed rate
-        if (self.fhv) : self.calc_feedrate_hv(1, 0)
-        self.write_feedrate()
-        self.write_spindle()
-        self.write_misc()
-        self.write('\n')
-
-    def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.arc(True, x, y, z, i, j, k, r)
-
-    def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.arc(False, x, y, z, i, j, k, r)
-
-
-
-
-
-
-
-
-nc.creator = CreatorCentroid1()
+nc.creator = Creator()

@@ -7,7 +7,7 @@
 import nc
 import math
 
-class CreatorHpgl2d(nc.Creator):
+class Creator(nc.Creator):
     def __init__(self):
         nc.Creator.__init__(self) 
         self.x = int(0)
@@ -61,7 +61,7 @@ class CreatorHpgl2d(nc.Creator):
             machine_y = self.closest_int(y * self.units_to_mc_units)
         return machine_x, machine_y
         
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
         # ignore the z, any rapid will be assumed to be done with the pen up
         mx, my = self.get_machine_x_y(x, y)
         if mx != self.x or my != self.y:
@@ -106,4 +106,4 @@ class CreatorHpgl2d(nc.Creator):
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         self.arc(False, x, y, z, i, j, k, r)
 
-nc.creator = CreatorHpgl2d()
+nc.creator = Creator()

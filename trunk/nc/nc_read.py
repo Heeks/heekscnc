@@ -96,7 +96,7 @@ class Parser:
         if (b != None) : self.file_out.write(' b="%.6f"' % b)
         if (c != None) : self.file_out.write(' c="%.6f"' % c)
         self.file_out.write(' />\n')
-
+        
     def add_arc(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None, d=None):
         if (x == None and y == None and z == None and i == None and j == None and k == None and r == None and d == None) : return
         self.file_out.write('\t\t\t<arc')

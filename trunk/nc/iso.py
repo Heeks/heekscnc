@@ -5,12 +5,13 @@
 #
 # Hirutso Enni, 2009-01-13
 
-import iso_codes as iso
 import nc
 import math
+from format import Format
+from format import *
 
 ################################################################################
-class CreatorIso(nc.Creator):
+class Creator(nc.Creator):
 
     def __init__(self):
         nc.Creator.__init__(self)
@@ -18,23 +19,23 @@ class CreatorIso(nc.Creator):
         self.a = 0
         self.b = 0
         self.c = 0
-        self.f = ''
+        self.f = Address('F', fmt = Format(number_of_decimal_places = 2))
         self.fh = None
         self.fv = None
         self.fhv = False
-        self.g = ''
+        self.g_plane = Address('G', fmt = Format(number_of_decimal_places = 0))
+        self.g_list = []
         self.i = 0
         self.j = 0
         self.k = 0
         self.m = []
         self.n = 10
         self.r = 0
-        self.s = ''
+        self.s = AddressPlusMinus('S', fmt = Format(number_of_decimal_places = 2), modal = False)
         self.t = None
         self.x = 0
         self.y = 0
         self.z = 500
-        self.f_modal = False
         self.g0123_modal = False
         self.drill_modal = False
         self.prev_f = ''
@@ -44,61 +45,140 @@ class CreatorIso(nc.Creator):
         self.prev_z = ''
         self.useCrc = False
         self.gCRC = ''
-        self.fmt = iso.codes.FORMAT_MM()
+        self.fmt = Format()
         self.absolute_flag = True
-        self.ffmt = iso.codes.FORMAT_FEEDRATE()
+        self.ffmt = Format(number_of_decimal_places = 2)
+        self.sfmt = Format(number_of_decimal_places = 1)
+        
+    ############################################################################
+    ##  Codes
+
+    def SPACE(self): return('')
+    def FORMAT_FEEDRATE(self): return('%.2f') 
+    def FORMAT_ANG(self): return('%.1f')
+    def FORMAT_TIME(self): return('%.2f')
+    def FORMAT_DWELL(self): return('P%f')
+
+    def BLOCK(self): return('N%i')
+    def COMMENT(self,comment): return( ('(%s)' % comment ) )
+    def VARIABLE(self): return( '#%i')
+    def VARIABLE_SET(self): return( '=%.3f')
+
+    def PROGRAM(self): return( 'O%i')
+    def PROGRAM_END(self): return( 'M02')
+
+    def SUBPROG_CALL(self): return( 'M98' + self.SPACE() + 'P%i')
+    def SUBPROG_END(self): return( 'M99')
+
+    def STOP_OPTIONAL(self): return('M01')
+    def STOP(self): return('M00')
+
+    def IMPERIAL(self): return('G20')
+    def METRIC(self): return('G21')
+    def ABSOLUTE(self): return('G90')
+    def INCREMENTAL(self): return('G91')
+    def SET_TEMPORARY_COORDINATE_SYSTEM(self): return('G92')
+    def REMOVE_TEMPORARY_COORDINATE_SYSTEM(self): return('G92.1')
+    def POLAR_ON(self): return('G16')
+    def POLAR_OFF(self): return('G15')
+    def PLANE_XY(self): return('17')
+    def PLANE_XZ(self): return('18')
+    def PLANE_YZ(self): return('19')
+
+    def TOOL(self): return('T%i' + self.SPACE() + 'M06')
+    def TOOL_DEFINITION(self): return('G10' + self.SPACE() + 'L1')
+
+    def WORKPLANE(self): return('G%i')
+    def WORKPLANE_BASE(self): return(53)
+
+    def SPINDLE_CW(self): return('M03')
+    def SPINDLE_CCW(self): return('M04')
+    def COOLANT_OFF(self): return('M09')
+    def COOLANT_MIST(self): return('M07')
+    def COOLANT_FLOOD(self): return('M08')
+    def GEAR_OFF(self): return('?')
+    def GEAR(self): return('M%i')
+    def GEAR_BASE(self): return(37)
+
+    def RAPID(self): return('G00')
+    def FEED(self): return('G01')
+    def ARC_CW(self): return('G02')
+    def ARC_CCW(self): return('G03')
+    def DWELL(self): return('G04')
+    def DRILL(self): return('G81')
+    def DRILL_WITH_DWELL(self, format, dwell): return('G82' + self.SPACE() + (format % dwell))
+    def PECK_DRILL(self): return('G83')
+    def PECK_DEPTH(self, format, depth): return('Q' + self.SPACE() + (format % depth))
+    def RETRACT(self, format, height): return('R' + self.SPACE() + (format % height))
+    def END_CANNED_CYCLE(self): return('G80')
+
+    def X(self): return('X')
+    def Y(self): return('Y')
+    def Z(self): return('Z')
+    def A(self): return('A')
+    def B(self): return('B')
+    def C(self): return('C')
+    def CENTRE_X(self): return('I')
+    def CENTRE_Y(self): return('J')
+    def CENTRE_Z(self): return('K')
+    def RADIUS(self): return('R')
+    def TIME(self): return('P')
+
+    def PROBE_TOWARDS_WITH_SIGNAL(self): return('G38.2')
+    def PROBE_TOWARDS_WITHOUT_SIGNAL(self): return('G38.3')
+    def PROBE_AWAY_WITH_SIGNAL(self): return('G38.4')
+    def PROBE_AWAY_WITHOUT_SIGNAL(self): return('G38.5')
+
+    def MACHINE_COORDINATES(self): return('G53')
+
+    def EXACT_PATH_MODE(self): return('G61')
+    def EXACT_STOP_MODE(self): return('G61.1')
         
     ############################################################################
     ##  Internals
 
     def write_feedrate(self):
-        if self.f_modal:
-            if self.f != self.prev_f:
-                self.write(self.f)
-                self.prev_f = self.f
-        else:
-            self.write(self.f)
-            self.f = ''
+        self.f.write(self)
 
     def write_preps(self):
-        self.write(self.g)
-        self.g = ''
+        self.g_plane.write(self)
+        for g in self.g_list:
+            self.write(self.SPACE() + g)
+        self.g_list = []
 
     def write_misc(self):
         if (len(self.m)) : self.write(self.m.pop())
 
     def write_blocknum(self):
-        self.write(iso.codes.BLOCK() % self.n)
-        self.write(iso.codes.SPACE())
+        self.write(self.BLOCK() % self.n)
         self.n += 10
-
+        
     def write_spindle(self):
-        self.write(self.s)
-        self.s = ''
+        self.s.write(self)
 
     ############################################################################
     ##  Programs
 
     def program_begin(self, id, name=''):
-        self.write((iso.codes.PROGRAM() % id) + iso.codes.SPACE() + (iso.codes.COMMENT(name)))
+        self.write((self.PROGRAM() % id) + self.SPACE() + (self.COMMENT(name)))
         self.write('\n')
 
     def program_stop(self, optional=False):
         self.write_blocknum()
         if (optional) : 
-            self.write(iso.codes.STOP_OPTIONAL() + '\n')
+            self.write(self.SPACE() + self.STOP_OPTIONAL() + '\n')
             self.prev_g0123 = ''
         else : 
-            self.write(iso.codes.STOP() + '\n')
+            self.write(self.STOP() + '\n')
             self.prev_g0123 = ''
 
 
     def program_end(self):
         self.write_blocknum()
-        self.write(iso.codes.PROGRAM_END() + '\n')
+        self.write(self.SPACE() + self.PROGRAM_END() + '\n')
 
     def flush_nc(self):
-        if len(self.g) == 0 and len(self.m) == 0: return
+        if len(self.g_list) == 0 and len(self.m) == 0: return
         self.write_blocknum()
         self.write_preps()
         self.write_misc()
@@ -108,61 +188,61 @@ class CreatorIso(nc.Creator):
     ##  Subprograms
     
     def sub_begin(self, id, name=''):
-        self.write((iso.codes.PROGRAM() % id) + iso.codes.SPACE() + (iso.codes.COMMENT(name)))
+        self.write((self.PROGRAM() % id) + self.SPACE() + (self.COMMENT(name)))
         self.write('\n')
 
     def sub_call(self, id):
         self.write_blocknum()
-        self.write((iso.codes.SUBPROG_CALL() % id) + '\n')
+        self.write(self.SPACE() + (self.SUBPROG_CALL() % id) + '\n')
 
     def sub_end(self):
         self.write_blocknum()
-        self.write(iso.codes.SUBPROG_END() + '\n')
+        self.write(self.SPACE() + self.SUBPROG_END() + '\n')
 
     ############################################################################
     ##  Settings
     
     def imperial(self):
-        self.g += iso.codes.IMPERIAL()
-        self.fmt = iso.codes.FORMAT_IN()
+        self.g_list.append(self.IMPERIAL())
+        self.fmt.number_of_decimal_places = 4
 
     def metric(self):
-        self.g += iso.codes.METRIC()
-        self.fmt = iso.codes.FORMAT_MM()
+        self.g_list.append(self.METRIC())
+        self.fmt.number_of_decimal_places = 3
 
     def absolute(self):
         #self.write_blocknum()
-        self.g += iso.codes.ABSOLUTE()
+        self.g_list.append(self.ABSOLUTE())
         self.absolute_flag = True
 
     def incremental(self):
         #self.write_blocknum()
-        self.g += iso.codes.INCREMENTAL()
+        self.g_list.append(self.INCREMENTAL())
         self.absolute_flag = False
 
     def polar(self, on=True):
-        if (on) : self.g += iso.codes.POLAR_ON()
-        else : self.g += iso.codes.POLAR_OFF()
+        if (on) : self.g_list.append(self.POLAR_ON())
+        else : self.g_list.append(self.POLAR_OFF())
 
     def set_plane(self, plane):
-        if (plane == 0) : self.g += iso.codes.PLANE_XY()
-        elif (plane == 1) : self.g += iso.codes.PLANE_XZ()
-        elif (plane == 2) : self.g += iso.codes.PLANE_YZ()
+        if (plane == 0) : self.g_plane.set(self.PLANE_XY())
+        elif (plane == 1) : self.g_plane.set(self.PLANE_XZ())
+        elif (plane == 2) : self.g_plane.set(self.PLANE_YZ())
 
     def set_temporary_origin(self, x=None, y=None, z=None, a=None, b=None, c=None):
         self.write_blocknum()
-        self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM()))
-        if (x != None): self.write( iso.codes.SPACE() + 'X ' + (self.fmt % x) )
-        if (y != None): self.write( iso.codes.SPACE() + 'Y ' + (self.fmt % y) )
-        if (z != None): self.write( iso.codes.SPACE() + 'Z ' + (self.fmt % z) )
-        if (a != None): self.write( iso.codes.SPACE() + 'A ' + (self.fmt % a) )
-        if (b != None): self.write( iso.codes.SPACE() + 'B ' + (self.fmt % b) )
-        if (c != None): self.write( iso.codes.SPACE() + 'C ' + (self.fmt % c) )
+        self.write(self.SPACE() + (self.SET_TEMPORARY_COORDINATE_SYSTEM()))
+        if (x != None): self.write( self.SPACE() + 'X ' + (self.fmt.string(x)) )
+        if (y != None): self.write( self.SPACE() + 'Y ' + (self.fmt.string(y)) )
+        if (z != None): self.write( self.SPACE() + 'Z ' + (self.fmt.string(z)) )
+        if (a != None): self.write( self.SPACE() + 'A ' + (self.fmt.string(a)) )
+        if (b != None): self.write( self.SPACE() + 'B ' + (self.fmt.string(b)) )
+        if (c != None): self.write( self.SPACE() + 'C ' + (self.fmt.string(c)) )
         self.write('\n')
 
     def remove_temporary_origin(self):
         self.write_blocknum()
-        self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM()))
+        self.write(self.SPACE() + (self.REMOVE_TEMPORARY_COORDINATE_SYSTEM()))
         self.write('\n')
 
     ############################################################################
@@ -170,19 +250,19 @@ class CreatorIso(nc.Creator):
 
     def tool_change(self, id):
         self.write_blocknum()
-        self.write((iso.codes.TOOL() % id) + '\n')
+        self.write(self.SPACE() + (self.TOOL() % id) + '\n')
         self.t = id
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         self.write_blocknum()
-        self.write(iso.codes.TOOL_DEFINITION())
-        self.write(('P%i' % id) + ' ')
+        self.write(self.SPACE() + self.TOOL_DEFINITION())
+        self.write(self.SPACE() + ('P%i' % id) + ' ')
 
         if (radius != None):
-            self.write(('R%.3f' % radius) + ' ')
+            self.write(self.SPACE() + ('R%.3f' % radius))
 
         if (length != None):
-            self.write('Z%.3f' % length)
+            self.write(self.SPACE() + 'Z%.3f' % length)
 
         self.write('\n')
 
@@ -205,16 +285,16 @@ class CreatorIso(nc.Creator):
     # These are selected by values from 1 to 9 inclusive.
     def workplane(self, id):
         if ((id >= 1) and (id <= 6)):
-            self.g += iso.codes.WORKPLANE() % (id + iso.codes.WORKPLANE_BASE())
+            self.g_list.append(self.WORKPLANE() % (id + self.WORKPLANE_BASE()))
         if ((id >= 7) and (id <= 9)):
-            self.g += ((iso.codes.WORKPLANE() % (6 + iso.codes.WORKPLANE_BASE())) + ('.%i' % (id - 6)))
+            self.g_list.append(((self.WORKPLANE() % (6 + self.WORKPLANE_BASE())) + ('.%i' % (id - 6))))
         
 
     ############################################################################
     ##  Rates + Modes
 
     def feedrate(self, f):
-        self.f = iso.codes.FEEDRATE() + (self.ffmt % f)
+        self.f = self.SPACE() + self.FEEDRATE() + self.ffmt.string(f)
         self.fhv = False
 
     def feedrate_hv(self, fh, fv):
@@ -225,28 +305,25 @@ class CreatorIso(nc.Creator):
     def calc_feedrate_hv(self, h, v):
         if math.fabs(v) > math.fabs(h * 2):
             # some horizontal, so it should be fine to use the horizontal feed rate
-            self.f = iso.codes.FEEDRATE() + (self.ffmt % self.fv)
+            self.f.set(self.fv)
         else:
             # not much, if any horizontal component, so use the vertical feed rate
-            self.f = iso.codes.FEEDRATE() + (self.ffmt % self.fh)
+            self.f.set(self.fh)
 
     def spindle(self, s, clockwise):
-        if s < 0: clockwise = not clockwise
-        s = abs(s)
-        self.s = iso.codes.SPINDLE(iso.codes.FORMAT_ANG(), s)
-        if clockwise:
-            self.s = self.s + iso.codes.SPINDLE_CW()
+        if clockwise == True:
+            self.s.set(s, self.SPACE() + self.SPINDLE_CW(), self.SPACE() + self.SPINDLE_CCW())
         else:
-            self.s = self.s + iso.codes.SPINDLE_CCW()
+            self.s.set(s, self.SPACE() + self.SPINDLE_CCW(), self.SPACE() + self.SPINDLE_CW())
 
     def coolant(self, mode=0):
-        if (mode <= 0) : self.m.append(iso.codes.COOLANT_OFF())
-        elif (mode == 1) : self.m.append(iso.codes.COOLANT_MIST())
-        elif (mode == 2) : self.m.append(iso.codes.COOLANT_FLOOD())
+        if (mode <= 0) : self.m.append(self.SPACE() + self.COOLANT_OFF())
+        elif (mode == 1) : self.m.append(self.SPACE() + self.COOLANT_MIST())
+        elif (mode == 2) : self.m.append(self.SPACE() + self.COOLANT_FLOOD())
 
     def gearrange(self, gear=0):
-        if (gear <= 0) : self.m.append(iso.codes.GEAR_OFF())
-        elif (gear <= 4) : self.m.append(iso.codes.GEAR() % (gear + GEAR_BASE()))
+        if (gear <= 0) : self.m.append(self.SPACE() + self.GEAR_OFF())
+        elif (gear <= 4) : self.m.append(self.SPACE() + self.GEAR() % (gear + GEAR_BASE()))
 
     ############################################################################
     ##  Moves
@@ -255,61 +332,61 @@ class CreatorIso(nc.Creator):
         self.write_blocknum()
 
         if machine_coordinates != False:
-            self.write( iso.codes.MACHINE_COORDINATES() )
+            self.write( self.SPACE() + self.MACHINE_COORDINATES() )
 
         if self.g0123_modal:
-            if self.prev_g0123 != iso.codes.RAPID():
-                self.write(iso.codes.RAPID())
-                self.prev_g0123 = iso.codes.RAPID()
+            if self.prev_g0123 != self.RAPID():
+                self.write(self.SPACE() + self.RAPID())
+                self.prev_g0123 = self.RAPID()
         else:
-            self.write(iso.codes.RAPID())
+            self.write(self.SPACE() + self.RAPID())
         self.write_preps()
         if (x != None):
             dx = x - self.x
             if (self.absolute_flag ):
-                self.write(iso.codes.X() + (self.fmt % x))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(x)))
             else:
-                self.write(iso.codes.X() + (self.fmt % dx))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(dx)))
             self.x = x
         if (y != None):
             dy = y - self.y
             if (self.absolute_flag ):
-                self.write(iso.codes.Y() + (self.fmt % y))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))
             else:
-                self.write(iso.codes.Y() + (self.fmt % dy))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(dy)))
 
             self.y = y
         if (z != None):
             dz = z - self.z
             if (self.absolute_flag ):
-                self.write(iso.codes.Z() + (self.fmt % z))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(z)))
             else:
-                self.write(iso.codes.Z() + (self.fmt % dz))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
 
             self.z = z
 
         if (a != None):
             da = a - self.a
             if (self.absolute_flag ):
-                self.write(iso.codes.A() + (self.fmt % a))
+                self.write(self.SPACE() + self.A() + (self.fmt.string(a)))
             else:
-                self.write(iso.codes.A() + (self.fmt % da))
+                self.write(self.SPACE() + self.A() + (self.fmt.string(da)))
             self.a = a
 
         if (b != None):
             db = b - self.b
             if (self.absolute_flag ):
-                self.write(iso.codes.B() + (self.fmt % b))
+                self.write(self.SPACE() + self.B() + (self.fmt.string(b)))
             else:
-                self.write(iso.codes.B() + (self.fmt % db))
+                self.write(self.SPACE() + self.B() + (self.fmt.string(db)))
             self.b = b
 
         if (c != None):
             dc = c - self.c
             if (self.absolute_flag ):
-                self.write(iso.codes.C() + (self.fmt % c))
+                self.write(self.SPACE() + self.C() + (self.fmt.string(c)))
             else:
-                self.write(iso.codes.C() + (self.fmt % dc))
+                self.write(self.SPACE() + self.C() + (self.fmt.string(dc)))
             self.c = c
         self.write_spindle()
         self.write_misc()
@@ -319,34 +396,34 @@ class CreatorIso(nc.Creator):
         if self.same_xyz(x, y, z): return
         self.write_blocknum()
         if self.g0123_modal:
-            if self.prev_g0123 != iso.codes.FEED():
-                self.write(iso.codes.FEED())
-                self.prev_g0123 = iso.codes.FEED()
+            if self.prev_g0123 != self.FEED():
+                self.write(self.SPACE() + self.FEED())
+                self.prev_g0123 = self.FEED()
         else:
-            self.write(iso.codes.FEED())
+            self.write(self.FEED())
         self.write_preps()
         dx = dy = dz = 0
         if (x != None):
             dx = x - self.x
             if (self.absolute_flag ):
-                self.write(iso.codes.X() + (self.fmt % x))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(x)))
             else:
-                self.write(iso.codes.X() + (self.fmt % dx))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(dx)))
             self.x = x
         if (y != None):
             dy = y - self.y
             if (self.absolute_flag ):
-                self.write(iso.codes.Y() + (self.fmt % y))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))
             else:
-                self.write(iso.codes.Y() + (self.fmt % dy))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(dy)))
 
             self.y = y
         if (z != None):
             dz = z - self.z
             if (self.absolute_flag ):
-                self.write(iso.codes.Z() + (self.fmt % z))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(z)))
             else:
-                self.write(iso.codes.Z() + (self.fmt % dz))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
 
             self.z = z
         if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
@@ -357,13 +434,13 @@ class CreatorIso(nc.Creator):
 
     def same_xyz(self, x=None, y=None, z=None):
         if (x != None):
-            if (self.fmt % x) != (self.fmt % self.x):
+            if (self.fmt.string(x)) != (self.fmt.string(self.x)):
                 return False
         if (y != None):
-            if (self.fmt % y) != (self.fmt % self.y):
+            if (self.fmt.string(y)) != (self.fmt.string(self.y)):
                 return False
         if (z != None):
-            if (self.fmt % z) != (self.fmt % self.z):
+            if (self.fmt.string(z)) != (self.fmt.string(self.z)):
                 return False
             
         return True
@@ -372,8 +449,8 @@ class CreatorIso(nc.Creator):
         #if self.same_xyz(x, y, z): return
         self.write_blocknum()
         arc_g_code = ''
-        if cw: arc_g_code = iso.codes.ARC_CW()
-        else: arc_g_code = iso.codes.ARC_CCW()
+        if cw: arc_g_code = self.ARC_CW()
+        else: arc_g_code = self.ARC_CCW()
         if self.g0123_modal:
             if self.prev_g0123 != arc_g_code:
                 self.write(arc_g_code)
@@ -384,28 +461,28 @@ class CreatorIso(nc.Creator):
         if (x != None):
             dx = x - self.x
             if (self.absolute_flag ):
-                self.write(iso.codes.X() + (self.fmt % x))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(x)))
             else:
-                self.write(iso.codes.X() + (self.fmt % dx))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(dx)))
             self.x = x
         if (y != None):
             dy = y - self.y
             if (self.absolute_flag ):
-                self.write(iso.codes.Y() + (self.fmt % y))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))
             else:
-                self.write(iso.codes.Y() + (self.fmt % dy))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(dy)))
             self.y = y
         if (z != None):
             dz = z - self.z
             if (self.absolute_flag ):
-                self.write(iso.codes.Z() + (self.fmt % z))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(z)))
             else:
-                self.write(iso.codes.Z() + (self.fmt % dz))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
             self.z = z
-        if (i != None) : self.write(iso.codes.CENTRE_X() + (self.fmt % i))
-        if (j != None) : self.write(iso.codes.CENTRE_Y() + (self.fmt % j))
-        if (k != None) : self.write(iso.codes.CENTRE_Z() + (self.fmt % k))
-        if (r != None) : self.write(iso.codes.RADIUS() + (self.fmt % r))
+        if (i != None) : self.write(self.SPACE() + self.CENTRE_X() + (self.fmt.string(i)))
+        if (j != None) : self.write(self.SPACE() + self.CENTRE_Y() + (self.fmt.string(j)))
+        if (k != None) : self.write(self.SPACE() + self.CENTRE_Z() + (self.fmt.string(k)))
+        if (r != None) : self.write(self.SPACE() + self.RADIUS() + (self.fmt.string(r)))
 #       use horizontal feed rate
         if (self.fhv) : self.calc_feedrate_hv(1, 0)
         self.write_feedrate()
@@ -422,7 +499,7 @@ class CreatorIso(nc.Creator):
     def dwell(self, t):
         self.write_blocknum()
         self.write_preps()
-        self.write(iso.codes.DWELL() + (iso.codes.TIME() % t))
+        self.write(self.DWELL() + (self.TIME() % t))
         self.write_misc()
         self.write('\n')
 
@@ -433,7 +510,7 @@ class CreatorIso(nc.Creator):
         pass
 
     def set_machine_coordinates(self):
-        self.write(iso.codes.MACHINE_COORDINATES())
+        self.write(self.SPACE() + self.MACHINE_COORDINATES())
         self.prev_g0123 = ''
 
     ############################################################################
@@ -448,14 +525,14 @@ class CreatorIso(nc.Creator):
             raise "No tool specified for start_CRC()"
         self.write_blocknum()
         if left:
-            self.write('G41')
+            self.write(self.SPACE() + 'G41')
         else:
-            self.write('G42')
-        self.write((iso.codes.SPACE() + 'D%i\n') % self.t)
+            self.write(self.SPACE() + 'G42')
+        self.write((self.SPACE() + 'D%i\n') % self.t)
 
     def end_CRC(self):
         self.write_blocknum()
-        self.write('G40\n')
+        self.write(self.SPACE() + 'G40\n')
 
     ############################################################################
     ##  Cycles
@@ -499,74 +576,74 @@ class CreatorIso(nc.Creator):
         if (peck_depth != 0):        
             # We're pecking.  Let's find a tree. 
             if self.drill_modal:       
-                if  iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
-                    self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth))  
-                    self.prev_drill = iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)
+                if  self.PECK_DRILL() + self.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
+                    self.write(self.SPACE() + self.PECK_DRILL() + self.SPACE() + self.PECK_DEPTH(self.fmt, peck_depth))  
+                    self.prev_drill = self.PECK_DRILL() + self.PECK_DEPTH(self.fmt, peck_depth)
             else:       
-                self.write(iso.codes.PECK_DRILL() + iso.codes.PECK_DEPTH(self.fmt, peck_depth)) 
+                self.write(self.PECK_DRILL() + self.PECK_DEPTH(self.fmt, peck_depth)) 
                            
         else:        
             # We're either just drilling or drilling with dwell.        
             if (dwell == 0):        
                 # We're just drilling. 
                 if self.drill_modal:       
-                    if  iso.codes.DRILL() != self.prev_drill:
-                        self.write(iso.codes.DRILL())  
-                        self.prev_drill = iso.codes.DRILL()
+                    if  self.DRILL() != self.prev_drill:
+                        self.write(self.SPACE() + self.DRILL())  
+                        self.prev_drill = self.DRILL()
                 else:
-                    self.write(iso.codes.DRILL())
+                    self.write(self.SPACE() + self.DRILL())
       
             else:        
                 # We're drilling with dwell.
 
                 if self.drill_modal:       
-                    if  iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell) != self.prev_drill:
-                        self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))  
-                        self.prev_drill = iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell)
+                    if  self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell) != self.prev_drill:
+                        self.write(self.SPACE() + self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell))  
+                        self.prev_drill = self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell)
                 else:
-                    self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))
+                    self.write(self.SPACE() + self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell))
 
         
-                #self.write(iso.codes.DRILL_WITH_DWELL(iso.codes.FORMAT_DWELL(),dwell))                
+                #self.write(self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell))                
     
     # Set the retraction point to the 'standoff' distance above the starting z height.        
         retract_height = z + standoff        
         if (x != None):        
             dx = x - self.x        
-            self.write(iso.codes.X() + (self.fmt % x))        
+            self.write(self.SPACE() + self.X() + (self.fmt % x))        
             self.x = x 
        
         if (y != None):        
             dy = y - self.y        
-            self.write(iso.codes.Y() + (self.fmt % y))        
+            self.write(self.SPACE() + self.Y() + (self.fmt % y))        
             self.y = y
                       
         dz = (z + standoff) - self.z # In the end, we will be standoff distance above the z value passed in.
 
         if self.drill_modal:
             if z != self.prev_z:
-                self.write(iso.codes.Z() + (self.fmt % (z - depth)))
+                self.write(self.SPACE() + self.Z() + (self.fmt % (z - depth)))
                 self.prev_z=z
         else:             
-            self.write(iso.codes.Z() + (self.fmt % (z - depth)))    # This is the 'z' value for the bottom of the hole.
+            self.write(self.SPACE() + self.Z() + (self.fmt % (z - depth)))    # This is the 'z' value for the bottom of the hole.
             self.z = (z + standoff)            # We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
-            if self.prev_retract  != iso.codes.RETRACT(self.fmt, retract_height) :
-                self.write(iso.codes.RETRACT(self.fmt, retract_height))               
-                self.prev_retract = iso.codes.RETRACT(self.fmt, retract_height)
+            if self.prev_retract  != self.RETRACT(self.fmt, retract_height) :
+                self.write(self.SPACE() + self.RETRACT(self.fmt, retract_height))               
+                self.prev_retract = self.RETRACT(self.fmt, retract_height)
         else:              
-            self.write(iso.codes.RETRACT(self.fmt, retract_height))
+            self.write(self.SPACE() + self.RETRACT(self.fmt, retract_height))
            
         if (self.fhv) : 
             self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
 
         if self.drill_modal:
-            if ( iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE() )!= self.prev_f:
-               self.write(iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE() )        
-               self.prev_f = iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE()
+            if ( self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE() )!= self.prev_f:
+               self.write(self.SPACE() + self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE() )        
+               self.prev_f = self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE()
         else: 
-            self.write( iso.codes.FEEDRATE() + (self.ffmt % self.fv) + iso.codes.SPACE() )            
+            self.write( self.SPACE() + self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE() )            
         self.write_spindle()            
         self.write_misc()    
         self.write('\n')
@@ -587,7 +664,7 @@ class CreatorIso(nc.Creator):
 
     def end_canned_cycle(self):
         self.write_blocknum()
-        self.write(iso.codes.END_CANNED_CYCLE() + '\n')
+        self.write(self.SPACE() + self.END_CANNED_CYCLE() + '\n')
         self.prev_drill = ''
         self.prev_g0123 = ''
         self.prev_z = ''   
@@ -597,7 +674,7 @@ class CreatorIso(nc.Creator):
     ##  Misc
 
     def comment(self, text):
-        self.write((iso.codes.COMMENT(text) + '\n'))
+        self.write((self.COMMENT(text) + '\n'))
 
     def insert(self, text):
         pass
@@ -606,11 +683,11 @@ class CreatorIso(nc.Creator):
         pass
 
     def variable(self, id):
-        return (iso.codes.VARIABLE() % id)
+        return (self.VARIABLE() % id)
 
     def variable_set(self, id, value):
         self.write_blocknum()
-        self.write((iso.codes.VARIABLE() % id) + (iso.codes.VARIABLE_SET() % value) + '\n')
+        self.write(self.SPACE() + (self.VARIABLE() % id) + self.SPACE() + (self.VARIABLE_SET() % value) + '\n')
 
     # This routine uses the G92 coordinate system offsets to establish a temporary coordinate
     # system at the machine's current position.  It can then use absolute coordinates relative
@@ -623,7 +700,7 @@ class CreatorIso(nc.Creator):
     # routine may be compared meaningfully.
     def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_offset_x_component=None, probe_offset_y_component=None ):
         self.write_blocknum()
-        self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+        self.write(self.SPACE() + (self.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
         if (self.fhv) : self.calc_feedrate_hv(1, 0)
         self.write_blocknum()
         self.write_feedrate()
@@ -634,22 +711,22 @@ class CreatorIso(nc.Creator):
         self.rapid(z=depth)
 
         self.write_blocknum()
-        self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+        self.write(self.SPACE() + (self.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
 
         self.comment('Back off the workpiece and re-probe more slowly')
         self.write_blocknum()
-        self.write(('#' + intersection_variable_x + '= [#5061 - [ 0.5 * ' + probe_offset_x_component + ']]\n'))
+        self.write(self.SPACE() + ('#' + intersection_variable_x + '= [#5061 - [ 0.5 * ' + probe_offset_x_component + ']]\n'))
         self.write_blocknum()
-        self.write(('#' + intersection_variable_y + '= [#5062 - [ 0.5 * ' + probe_offset_y_component + ']]\n'))
+        self.write(self.SPACE() + ('#' + intersection_variable_y + '= [#5062 - [ 0.5 * ' + probe_offset_y_component + ']]\n'))
         self.write_blocknum();
-        self.write(iso.codes.RAPID())
-        self.write(' X #' + intersection_variable_x + ' Y #' + intersection_variable_y + '\n')
+        self.write(self.RAPID())
+        self.write(self.SPACE() + ' X #' + intersection_variable_x + ' Y #' + intersection_variable_y + '\n')
 
         self.write_blocknum()
-        self.write(iso.codes.FEEDRATE() + (self.ffmt % (self.fh / 2.0)) + '\n')
+        self.write(self.SPACE() + self.FEEDRATE() + self.ffmt.string(self.fh / 2.0) + '\n')
 
         self.write_blocknum()
-        self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+        self.write(self.SPACE() + (self.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
 
         self.comment('Store the probed location somewhere we can get it again later')
         self.write_blocknum()
@@ -668,22 +745,22 @@ class CreatorIso(nc.Creator):
         self.rapid(x=0, y=0)
 
         self.write_blocknum()
-        self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
+        self.write((self.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
     def probe_downward_point(self, x=None, y=None, depth=None, intersection_variable_z=None):
         self.write_blocknum()
-        self.write((iso.codes.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+        self.write((self.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
         if (self.fhv) : self.calc_feedrate_hv(1, 0)
         self.write_blocknum()
-        self.write(iso.codes.FEEDRATE() + ' [' + (self.ffmt % self.fh) + ' / 5.0 ]')
+        self.write(self.FEEDRATE() + ' [' + self.ffmt.string(self.fh) + ' / 5.0 ]')
         self.write('\t(Set the feed rate for probing)\n')
 
         self.write_blocknum();
-        self.write(iso.codes.RAPID())
+        self.write(self.RAPID())
         self.write(' X ' + x + ' Y ' + y + '\n')
 
         self.write_blocknum()
-        self.write((iso.codes.PROBE_TOWARDS_WITH_SIGNAL() + ' Z ' + (self.fmt % depth) + ('\t(Probe towards our destination point)\n')))
+        self.write((self.PROBE_TOWARDS_WITH_SIGNAL() + ' Z ' + (self.fmt % depth) + ('\t(Probe towards our destination point)\n')))
 
         self.comment('Store the probed location somewhere we can get it again later')
         self.write_blocknum()
@@ -694,7 +771,7 @@ class CreatorIso(nc.Creator):
         self.rapid(x=0, y=0)
 
         self.write_blocknum()
-        self.write((iso.codes.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
+        self.write((self.REMOVE_TEMPORARY_COORDINATE_SYSTEM() + ('\t(Restore the previous coordinate system)\n')))
 
 
     def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
@@ -718,7 +795,7 @@ class CreatorIso(nc.Creator):
     # variable names are used in these various routines.
     def rapid_to_midpoint(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
         self.write_blocknum()
-        self.write(iso.codes.RAPID())
+        self.write(self.RAPID())
         if ((x1 != None) and (x2 != None)):
             self.write((' X ' + '[[[' + x1 + '-' + x2 + '] / 2.0] + ' + x2 + ']'))
 
@@ -767,7 +844,7 @@ class CreatorIso(nc.Creator):
         self.write_blocknum();
         self.write('       ' + intersection_y + '=[' + y1 + ' + [[' + ua + ' * [' + y2 + ' - ' + y1 + ']]]]\n')
         self.write_blocknum();
-        self.write('       ' + iso.codes.RAPID())
+        self.write('       ' + self.RAPID())
         self.write(' X ' + intersection_x + ' Y ' + intersection_y + '\n')
 
         self.write('O901    ENDIF\n')
@@ -799,18 +876,29 @@ class CreatorIso(nc.Creator):
         self.write( '#7 = [[' + (self.fmt % y_final) + ' * SIN[ #3 ]] + [' + (self.fmt % y_final) + ' * COS[ #3 ]]]\n' )
 
         self.write_blocknum();
-        self.write( iso.codes.RAPID() + ' X [ #4 + #6 ] Y [ #5 + #7 ]\n' )
+        self.write( self.RAPID() + ' X [ #4 + #6 ] Y [ #5 + #7 ]\n' )
 
+    def BEST_POSSIBLE_SPEED(self, motion_blending_tolerance, naive_cam_tolerance): 
+	    statement = 'G64'
+
+	    if (motion_blending_tolerance > 0):
+		    statement += ' P ' + str(motion_blending_tolerance)
+
+	    if (naive_cam_tolerance > 0):
+		    statement += ' Q ' + str(naive_cam_tolerance)
+
+	    return(statement)
+            
     def set_path_control_mode(self, mode, motion_blending_tolerance, naive_cam_tolerance ):
         self.write_blocknum()
         if (mode == 0):
-            self.write( iso.codes.EXACT_PATH_MODE() + '\n' )
+            self.write( self.EXACT_PATH_MODE() + '\n' )
         if (mode == 1):
-            self.write( iso.codes.EXACT_STOP_MODE() + '\n' )
+            self.write( self.EXACT_STOP_MODE() + '\n' )
         if (mode == 2):
-            self.write( iso.codes.BEST_POSSIBLE_SPEED( motion_blending_tolerance, naive_cam_tolerance ) + '\n' )
+            self.write( self.BEST_POSSIBLE_SPEED( motion_blending_tolerance, naive_cam_tolerance ) + '\n' )
         
 
 ################################################################################
 
-nc.creator = CreatorIso()
+nc.creator = Creator()
