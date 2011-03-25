@@ -9,9 +9,9 @@
 import nc
 import hpgl2d
 
-class CreatorHpgl2dv(hpgl2d.CreatorHpgl2d):
+class Creator(hpgl2d.Creator):
     def init(self): 
-        hpgl2d.CreatorHpgl2d.init(self) 
+        hpgl2d.Creator.init(self) 
 
     def imperial(self):
         self.units_to_mc_units = 101.6 # multiplier from inches to machine units
@@ -19,4 +19,4 @@ class CreatorHpgl2dv(hpgl2d.CreatorHpgl2d):
     def metric(self):
         self.units_to_mc_units = 4 # multiplier from mm to machine units
 
-nc.creator = CreatorHpgl2dv()
+nc.creator = Creator()

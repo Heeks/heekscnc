@@ -11,14 +11,14 @@ import iso_modal
 import math
 
 ################################################################################
-class Creator(iso_modal.Creator):
+class CreatorSieg(iso_modal.CreatorIsoModal):
 
     def __init__(self):
-        iso_modal.Creator.__init__(self)
+        iso_modal.CreatorIsoModal.__init__(self)
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         pass
             
 ################################################################################
 
-nc.creator = Creator()
+nc.creator = CreatorSieg()
