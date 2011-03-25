@@ -6,13 +6,12 @@
 #
 # Hirutso Enni, 2009-01-13
 
-import iso_codes as iso
 import nc
 import math
 import circular_pocket as circular
 
 ################################################################################
-class CreatorIso(nc.Creator):
+class Creator(nc.Creator):
 
     def __init__(self):
         nc.Creator.__init__(self)
@@ -43,10 +42,13 @@ class CreatorIso(nc.Creator):
 	self.y2=0
 	self.SPACE=' '
 
-        self.fmt = iso.codes.FORMAT_MM()
+        self.fmt = self.FORMAT_MM()
 	pass
     ############################################################################
     ##  Internals
+    def FORMAT_IN(self): return('%.5f')
+    def FORMAT_MM(self): return('%.3f')
+    def COMMENT(self,comment): return( ('(%s)' % comment ) )
 
     def write_feedrate(self):
         #self.write(self.f)
@@ -548,7 +550,7 @@ class CreatorIso(nc.Creator):
     ##  Misc
 
     def comment(self, text):
-        self.write('// ' + (iso.codes.COMMENT( text)) + '\n')
+        self.write('// ' + (self.COMMENT( text)) + '\n')
 
     def variable(self, id):
         return (iso.VARIABLE % id)
@@ -559,4 +561,4 @@ class CreatorIso(nc.Creator):
 
 ################################################################################
 
-nc.creator = CreatorIso()
+nc.creator = Creator()

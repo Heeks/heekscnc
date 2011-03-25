@@ -10,12 +10,12 @@ import iso
 import math
 
 ################################################################################
-class CreatorIsoCrc(iso.CreatorIso):
+class Creator(iso.Creator):
 
     def __init__(self):
-        iso.CreatorIso.__init__(self)
+        iso.Creator.__init__(self)
         self.useCrc = True
 
 ################################################################################
 
-nc.creator = CreatorIsoCrc()
+nc.creator = Creator()

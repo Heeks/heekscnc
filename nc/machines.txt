@@ -4,7 +4,6 @@ emc2b_crc EMC2 with Cutter Radius Compensation 0
 mach3 Mach3 Machine Controller 0
 iso Standard ISO output 0
 iso_modal Standard ISO modal output 0
-iso_with_spaces Standard ISO with spaces 0
 iso_crc ISO with Cutter Radius Compensation 0
 siegkx1 Sieg KX1 machine 0
 hpgl2d 2.5D HPGL 0.01mm 0
@@ -18,4 +17,4 @@ anilam_crusader_m Anilam Crusader M 0
 makerbotHBP makerbotHBP 0
 lathe1 Lathe post-not finished 0
 emc2tap Linux Enhanced Machine Controller - tapping test 0
-printbot3d Print Bot 3D 0
+tnc151 Heidenhain TNC151

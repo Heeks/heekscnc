@@ -1,9 +1,9 @@
 import nc
 import emc2
 
-class CreatorGantryRouter(emc2.CreatorEMC2):
+class Creator(emc2.Creator):
     def init(self): 
-        emc2.CreatorEMC2.init(self) 
+        emc2.Creator.init(self) 
 
     def program_begin(self, id, comment):
 	self.write( ('(' + comment + ')' + '\n') )
@@ -14,5 +14,5 @@ class CreatorGantryRouter(emc2.CreatorEMC2):
     def spindle(self, s, clockwise):
 	pass
 
-nc.creator = CreatorGantryRouter()
+nc.creator = Creator()
 

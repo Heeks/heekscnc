@@ -10,12 +10,12 @@ import emc2b
 import math
 
 ################################################################################
-class CreatorEmc2bCrc(emc2b.CreatorEMC2):
+class Creator(emc2b.Creator):
 
     def __init__(self):
-        emc2b.CreatorEMC2.__init__(self)
+        emc2b.Creator.__init__(self)
         self.useCrc = True
 
 ################################################################################
 
-nc.creator = CreatorEmc2bCrc()
+nc.creator = Creator()
