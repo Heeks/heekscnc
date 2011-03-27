@@ -49,6 +49,9 @@ class Creator(nc.Creator):
         self.absolute_flag = True
         self.ffmt = Format(number_of_decimal_places = 2)
         self.sfmt = Format(number_of_decimal_places = 1)
+        self.arc_centre_absolute = False
+        self.arc_centre_positive = False
+        self.in_arc_splitting = False
         
     ############################################################################
     ##  Codes
@@ -211,12 +214,10 @@ class Creator(nc.Creator):
         self.fmt.number_of_decimal_places = 3
 
     def absolute(self):
-        #self.write_blocknum()
         self.g_list.append(self.ABSOLUTE())
         self.absolute_flag = True
 
     def incremental(self):
-        #self.write_blocknum()
         self.g_list.append(self.INCREMENTAL())
         self.absolute_flag = False
 
@@ -444,8 +445,76 @@ class Creator(nc.Creator):
                 return False
             
         return True
+    
+    def get_quadrant(self, dx, dy):
+        if dx < 0:
+            if dy < 0:
+                return 2
+            else:
+                return 1
+        else:
+            if dy < 0:
+                return 3
+            else:
+                return 0
+    
+    def quadrant_start(self, q, i, j, rad):
+        while q > 3: q = q - 4
+        if q == 0:
+            return i + rad, j
+        if q == 1:
+            return i, j + rad
+        if q == 2:
+            return i - rad, j
+        return i, j - rad
+
+    def quadrant_end(self, q, i, j, rad):
+        return self.quadrant_start(q + 1, i, j, rad)
 
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+        if self.arc_centre_positive == True and self.in_arc_splitting == False:
+            # split in to quadrant arcs
+            self.in_arc_splitting = True
+            
+            if x == None: x = self.x
+            if y == None: y = self.y
+            sdx = self.x - i
+            sdy = self.y - j
+            edx = x - i
+            edy = y - j
+            
+            qs = self.get_quadrant(sdx, sdy)
+            qe = self.get_quadrant(edx, edy)
+            
+            if qs == qe:
+                self.arc(cw, x, y, z, i, j, k, r)
+            else:
+                rad = math.sqrt(sdx * sdx + sdy * sdy)
+                if cw:
+                    if qs < qe: qs = qs + 4
+                else:
+                    if qe < qs: qe = qe + 4
+                    
+                q = qs
+                while 1:
+                    x1 = x
+                    y1 = y
+                    if q != qe:
+                        if cw:
+                            x1, y1 = self.quadrant_start(q, i, j, rad)
+                        else:
+                            x1, y1 = self.quadrant_end(q, i, j, rad)
+                    self.arc(cw, x1, y1, z, i, j, k, r)
+                    if q == qe:
+                        break
+                    if cw:
+                        q = q - 1
+                    else:
+                        q = q + 1                        
+                    
+            self.in_arc_splitting = False
+            return
+            
         #if self.same_xyz(x, y, z): return
         self.write_blocknum()
         arc_g_code = ''
@@ -464,31 +533,60 @@ class Creator(nc.Creator):
                 self.write(self.SPACE() + self.X() + (self.fmt.string(x)))
             else:
                 self.write(self.SPACE() + self.X() + (self.fmt.string(dx)))
-            self.x = x
         if (y != None):
             dy = y - self.y
             if (self.absolute_flag ):
                 self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))
             else:
                 self.write(self.SPACE() + self.Y() + (self.fmt.string(dy)))
-            self.y = y
         if (z != None):
             dz = z - self.z
             if (self.absolute_flag ):
                 self.write(self.SPACE() + self.Z() + (self.fmt.string(z)))
             else:
                 self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
-            self.z = z
-        if (i != None) : self.write(self.SPACE() + self.CENTRE_X() + (self.fmt.string(i)))
-        if (j != None) : self.write(self.SPACE() + self.CENTRE_Y() + (self.fmt.string(j)))
-        if (k != None) : self.write(self.SPACE() + self.CENTRE_Z() + (self.fmt.string(k)))
-        if (r != None) : self.write(self.SPACE() + self.RADIUS() + (self.fmt.string(r)))
+        if (i != None):
+            if self.arc_centre_absolute == False:
+                i = i - self.x
+            s = self.fmt.string(i)
+            if self.arc_centre_positive == True:
+                if s[0] == '-':
+                    s = s[1:]
+            self.write(self.SPACE() + self.CENTRE_X() + s)
+        if (j != None):
+            if self.arc_centre_absolute == False:
+                j = j - self.y
+            s = self.fmt.string(j)
+            if self.arc_centre_positive == True:
+                if s[0] == '-':
+                    s = s[1:]
+            self.write(self.SPACE() + self.CENTRE_Y() + s)
+        if (k != None):
+            if self.arc_centre_absolute == False:
+                k = k - self.z
+            s = self.fmt.string(k)
+            if self.arc_centre_positive == True:
+                if s[0] == '-':
+                    s = s[1:]
+            self.write(self.SPACE() + self.CENTRE_Z() + s)
+        if (r != None):
+            s = self.fmt.string(r)
+            if self.arc_centre_positive == True:
+                if s[0] == '-':
+                    s = s[1:]
+            self.write(self.SPACE() + self.RADIUS() + s)
 #       use horizontal feed rate
         if (self.fhv) : self.calc_feedrate_hv(1, 0)
         self.write_feedrate()
         self.write_spindle()
         self.write_misc()
         self.write('\n')
+        if (x != None):
+            self.x = x
+        if (y != None):
+            self.y = y
+        if (z != None):
+            self.z = z
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         self.arc(True, x, y, z, i, j, k, r)

@@ -11,15 +11,16 @@ class Format:
         self.round_down = round_down
 
     def string(self, number):
-        s = str(number)
-        if len(s) == 0: return ''
+        f = float(number) * math.pow(10, self.number_of_decimal_places)
+        s = str(f)
         
         if self.round_down == False:
-            f = float(number)
-            half = .5 * math.pow(10, -self.number_of_decimal_places)
-            if f < 0: number = f - .5 * math.pow(10, -self.number_of_decimal_places)
-            else: number = f + .5 * math.pow(10, -self.number_of_decimal_places)
+            if f < 0: f = f - .5
+            else: f = f + .5
             s = str(number)
+            
+        if math.fabs(f) < 1.0:
+            s = '0'
             
         minus = False
         if s[0] == '-':
@@ -51,7 +52,7 @@ class Format:
         if len(after_dp):
             if self.dp_wanted: s += '.'
             s += after_dp
-        
+            
         return s
     
 class Address:
