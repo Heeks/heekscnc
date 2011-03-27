@@ -23,11 +23,10 @@ def cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, f
 
             first = False
         else:
-            dc = vertex.c - prev_p
             if vertex.type == 1:
-                arc_ccw(vertex.p.x, vertex.p.y, i = dc.x, j = dc.y)
+                arc_ccw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
             elif vertex.type == -1:
-                arc_cw(vertex.p.x, vertex.p.y, i = dc.x, j = dc.y)
+                arc_cw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
             else:
                 feed(vertex.p.x, vertex.p.y)
 

@@ -10,12 +10,17 @@ import re
 import sys
 
 ################################################################################
-class ParserIso(nc.Parser):
+class Parser(nc.Parser):
 
     def __init__(self):
         nc.Parser.__init__(self)
 
         self.pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
+        self.arc_centre_absolute = False
+        self.arc_centre_positive = False
+        self.oldx = None
+        self.oldy = None
+        self.oldz = None
 
         #if ( or ! or ; at least one space or a letter followed by some character or not followed by a +/- followed by decimal, with a possible decimal point
          #  followed by a possible deimcal, or a letter followed by # with a decimal . deimcal
@@ -63,10 +68,10 @@ class ParserIso(nc.Parser):
             self.no_move = True
         elif (word == 'G20' or word == 'G70'):
             self.col = "prep"
-            self.set_mode(units=25.4)
+            self.writer.set_mode(units=25.4)
         elif (word == 'G21' or word == 'G71'):
             self.col = "prep"
-            self.set_mode(units=1.0)
+            self.writer.set_mode(units=1.0)
         elif (word == 'G81' or word == 'g81'):
             self.drill = True
             self.no_move = True
@@ -122,7 +127,7 @@ class ParserIso(nc.Parser):
             self.move = True
         elif (word[0] == 'T') :
             self.col = "tool"
-            self.set_tool( eval(word[1:]) )
+            self.writer.set_tool( eval(word[1:]) )
         elif (word[0] == 'X' or word[0] == 'x'):
             self.col = "axis"
             self.x = eval(word[1:])
@@ -142,14 +147,8 @@ class ParserIso(nc.Parser):
         elif (word[0] == ':') : self.col = "blocknum"
         elif (ord(word[0]) <= 32) : self.cdata = True
 
-    def Parse(self, name, oname=None):
-        self.files_open(name,oname)
-        
-        #self.begin_ncblock()
-        #self.begin_path(None)
-        #self.add_line(z=500)
-        #self.end_path()
-        #self.end_ncblock()
+    def Parse(self, name):
+        self.files_open(name)
         
         self.path_col = None
         self.f = None
@@ -171,7 +170,7 @@ class ParserIso(nc.Parser):
             self.y = None
             self.z = None
 
-            self.begin_ncblock()
+            self.writer.begin_ncblock()
 
             self.move = False
             self.drill = False
@@ -182,40 +181,48 @@ class ParserIso(nc.Parser):
                 self.col = None
                 self.cdata = False
                 self.ParseWord(word)
-                self.add_text(word, self.col, self.cdata)
+                self.writer.add_text(word, self.col, self.cdata)
 
             if (self.drill):
-                self.begin_path("rapid")
-                self.add_line(self.x, self.y, self.r)
-                self.end_path()
+                self.writer.begin_path("rapid")
+                self.writer.add_line(self.x, self.y, self.r)
+                self.writer.end_path()
 
-                self.begin_path("feed")
-                self.add_line(self.x, self.y, self.z)
-                self.end_path()
+                self.writer.begin_path("feed")
+                self.writer.add_line(self.x, self.y, self.z)
+                self.writer.end_path()
 
-                self.begin_path("feed")
-                self.add_line(self.x, self.y, self.r)
-                self.end_path()
+                self.writer.begin_path("feed")
+                self.writer.add_line(self.x, self.y, self.r)
+                self.writer.end_path()
             else:
                 if (self.move and not self.no_move):
-                    self.begin_path(self.path_col)
-                    if (self.arc==-1): 
-                        self.add_arc(self.x, self.y, self.z, self.i, self.j, self.k, self.r, self.arc)
-                    elif (self.arc==1):
-                        #self.add_arc(x, y, z, i, j, k, -r, arc) #if you want to use arcs with R values uncomment the first part of this line and comment the next one
-                        self.add_arc(self.x, self.y, self.z, self.i, self.j, self.k, self.r, self.arc)
-                    else     : self.add_line(self.x, self.y, self.z, self.a, self.b, self.c)
-   	            self.end_path()
+                    self.writer.begin_path(self.path_col)
+                    if (self.arc==0): 
+                        self.writer.add_line(self.x, self.y, self.z, self.a, self.b, self.c)
+                    else:
+                        i = self.i
+                        j = self.j
+                        k = self.k
+                        if self.arc_centre_absolute == True:
+                            i = i - self.oldx
+                            j = j - self.oldy
+                        else:
+                            if (self.arc_centre_positive == True) and (self.oldx != None) and (self.oldy != None):
+                                x = self.oldx
+                                if self.x: x = self.x
+                                if (self.x > self.oldx) != (self.arc > 0):
+                                    j = -j
+                                y = self.oldy
+                                if self.y: y = self.y
+                                if (self.y > self.oldy) != (self.arc < 0):
+                                    i = -i
+                        self.writer.add_arc(self.x, self.y, self.z, i, j, k, self.r, self.arc)
+                    self.writer.end_path()
+                    if self.x != None: self.oldx = self.x
+                    if self.y != None: self.oldy = self.y
+                    if self.z != None: self.oldz = self.z
 
-            self.end_ncblock()
+            self.writer.end_ncblock()
 
         self.files_close()
-
-################################################################################
-
-if __name__ == '__main__':
-    parser = ParserIso()
-    if len(sys.argv)>2:
-        parser.Parse(sys.argv[1],sys.argv[2])
-    else:
-        parser.Parse(sys.argv[1])
