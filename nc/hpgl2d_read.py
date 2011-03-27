@@ -2,7 +2,7 @@ import num_reader
 import sys
 import math
 
-class ParserHgpl2d(num_reader.NumReader):
+class Parser(num_reader.NumReader):
 
     def __init__(self):
         num_reader.NumReader.__init__(self)
@@ -88,11 +88,3 @@ class ParserHgpl2d(num_reader.NumReader):
                 if c1 == 'A': # AA, arc absolute
                     self.ParseAA()
 
-################################################################################
-
-if __name__ == '__main__':
-    parser = ParserHgpl2d()
-    if len(sys.argv)>2:
-        parser.Parse(sys.argv[1],sys.argv[2])
-    else:
-        parser.Parse(sys.argv[1])

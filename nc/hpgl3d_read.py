@@ -2,7 +2,7 @@ import num_reader
 import sys
 import math
 
-class ParserHgpl3d(num_reader.NumReader):
+class Parser(num_reader.NumReader):
 
     def __init__(self):
         num_reader.NumReader.__init__(self)
@@ -43,12 +43,3 @@ class ParserHgpl3d(num_reader.NumReader):
         elif c == 'V':
             self.ParseV()
                     
-
-################################################################################
-
-if __name__ == '__main__':
-    parser = ParserHgpl3d()
-    if len(sys.argv)>2:
-        parser.Parse(sys.argv[1],sys.argv[2])
-    else:
-        parser.Parse(sys.argv[1])

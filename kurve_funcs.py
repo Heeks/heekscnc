@@ -189,11 +189,10 @@ def cut_curve(curve):
         if span.v.type == 0:#line
             feed(span.v.p.x, span.v.p.y)
         else:
-            c = span.v.c - span.p # make relative to the start position
             if span.v.type == 1:# anti-clockwise arc
-                arc_ccw(span.v.p.x, span.v.p.y, i = c.x, j = c.y)
+                arc_ccw(span.v.p.x, span.v.p.y, i = span.v.c.x, j = span.v.c.y)
             else:
-                arc_cw(span.v.p.x, span.v.p.y, i = c.x, j = c.y)
+                arc_cw(span.v.p.x, span.v.p.y, i = span.v.c.x, j = span.v.c.y)
     
 def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_start_point):
     first_span = curve.GetFirstSpan()
@@ -306,11 +305,10 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
             if span.v.type == 0:#line
                 feed(span.v.p.x, span.v.p.y, ez)
             else:
-                c = span.v.c - span.p # make relative to the start position
                 if span.v.type == 1:# anti-clockwise arc
-                    arc_ccw(span.v.p.x, span.v.p.y, ez, i = c.x, j = c.y)
+                    arc_ccw(span.v.p.x, span.v.p.y, ez, i = span.v.c.x, j = span.v.c.y)
                 else:
-                    arc_cw(span.v.p.x, span.v.p.y, ez, i = c.x, j = c.y)
+                    arc_cw(span.v.p.x, span.v.p.y, ez, i = span.v.c.x, j = span.v.c.y)
                     
         # cut the roll off arc
         cut_curve(roll_off_curve)

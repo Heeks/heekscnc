@@ -10,7 +10,7 @@ import re
 import sys
 
 ################################################################################
-class ParserIso(nc.Parser):
+class Parser(nc.Parser):
 
     def __init__(self):
         nc.Parser.__init__(self)
@@ -223,12 +223,3 @@ class ParserIso(nc.Parser):
             self.end_ncblock()
 
         self.files_close()
-
-################################################################################
-
-if __name__ == '__main__':
-    parser = ParserIso()
-    if len(sys.argv)>2:
-        parser.Parse(sys.argv[1],sys.argv[2])
-    else:
-        parser.Parse(sys.argv[1])

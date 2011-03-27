@@ -2,9 +2,6 @@
 ################################################################################
 # iso_.py
 #
-# Simple ISO NC code parsing
-#
-# Hirutso Enni, 2009-01-13
 
 import nc_read as nc
 import re
@@ -12,7 +9,7 @@ import sys
 import math
 
 ################################################################################
-class ParserRez(nc.Parser):
+class Parser(nc.Parser):
      
 
     def __init__(self):
@@ -292,12 +289,3 @@ class ParserRez(nc.Parser):
             self.end_ncblock()
 
         self.files_close()
-
-################################################################################
-
-if __name__ == '__main__':
-    parser = ParserRez()
-    if len(sys.argv)>2:
-        parser.Parse(sys.argv[1],sys.argv[2])
-    else:
-        parser.Parse(sys.argv[1])
