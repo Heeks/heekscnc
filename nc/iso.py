@@ -52,6 +52,7 @@ class Creator(nc.Creator):
         self.arc_centre_absolute = False
         self.arc_centre_positive = False
         self.in_arc_splitting = False
+        self.machine_coordinates = False
         
     ############################################################################
     ##  Codes
@@ -329,10 +330,10 @@ class Creator(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False ):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
         self.write_blocknum()
 
-        if machine_coordinates != False:
+        if self.machine_coordinates != False:
             self.write( self.SPACE() + self.MACHINE_COORDINATES() )
 
         if self.g0123_modal:

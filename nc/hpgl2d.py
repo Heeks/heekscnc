@@ -61,7 +61,7 @@ class Creator(nc.Creator):
             machine_y = self.closest_int(y * self.units_to_mc_units)
         return machine_x, machine_y
         
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=False):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
         # ignore the z, any rapid will be assumed to be done with the pen up
         mx, my = self.get_machine_x_y(x, y)
         if mx != self.x or my != self.y:
