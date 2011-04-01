@@ -13,6 +13,7 @@ public:
 	std::list<int> m_solids;
 	double m_tolerance;
 	double m_min_z;
+	double m_material_allowance;
 	static int number_for_stl_file;
 
 	CAttachOp();

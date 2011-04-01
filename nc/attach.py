@@ -10,9 +10,10 @@ import ocl
 import ocl_funcs
 
 units = 1.0
+attached = False
 
 ################################################################################
-class CreatorAttach(nc.Creator):
+class Creator(nc.Creator):
 
     def __init__(self, original):
         nc.Creator.__init__(self)
@@ -27,6 +28,7 @@ class CreatorAttach(nc.Creator):
         self.minz = None
         self.path = None
         self.pdcf = None
+        self.material_allowance = 0.0
 
     ############################################################################
     ##  Shift in Z
@@ -44,11 +46,15 @@ class CreatorAttach(nc.Creator):
         # use a line with no length
         path.append(ocl.Line(ocl.Point(self.x, self.y, self.z), ocl.Point(self.x, self.y, self.z)))
         self.setPdcfIfNotSet()
+        if (self.z>self.minz):
+            self.pdcf.setZ(self.z)  # Adjust Z if we have gotten a higher limit (Fix pocketing loosing steps when using attach?)
+        else:
+            self.pdcf.setZ(self.minz) # Else use minz
         self.pdcf.setPath(path)
         self.pdcf.run()
         plist = self.pdcf.getCLPoints()
         p = plist[0]
-        return p.z
+        return p.z + self.material_allowance
 
     ############################################################################
     ##  Programs
@@ -212,7 +218,7 @@ class CreatorAttach(nc.Creator):
         i = 0
         for p in plist:
             if i > 0:
-                self.original.feed(p.x/units, p.y/units, p.z/units)
+                self.original.feed(p.x/units, p.y/units, p.z/units + self.material_allowance)
             i = i + 1
             
         self.path = ocl.Path()
@@ -250,7 +256,7 @@ class CreatorAttach(nc.Creator):
         
         # add an arc to the path
         if self.path == None: self.path = ocl.Path()
-        self.path.append(ocl.Arc(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z), ocl.Point(px + i, py + j, pz), ccw))
+        self.path.append(ocl.Arc(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z), ocl.Point(i, j, pz), ccw))
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         self.arc(x, y, z, i, j, k, r, False)
@@ -336,8 +342,16 @@ class CreatorAttach(nc.Creator):
 ################################################################################
 
 def attach_begin():
-    nc.creator = CreatorAttach(nc.creator)
+    global attached
+    if attached == True:
+        attach_end()
+    nc.creator = Creator(nc.creator)
+    attached = True
+    nc.creator.pdcf = None
+    nc.creator.path = None
 
 def attach_end():
-    self.cut_path()
+    global attached
+    nc.creator.cut_path()
     nc.creator = nc.creator.original
+    attached = False

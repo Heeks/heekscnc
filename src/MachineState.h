@@ -16,6 +16,7 @@
 class Python;
 class CFixture;
 class CNCPoint;
+class CAttachOp;
 
 /**
     The CMachineState class stores information about the machine for use
@@ -62,7 +63,7 @@ private:
     }; // End Instance class definition
 
 public:
-	bool m_attached_to_surface;
+	CAttachOp* m_attached_to_surface;
 
 	CMachineState();
     ~CMachineState();
