@@ -10,6 +10,7 @@
 #include "CTool.h"
 #include "CNCPoint.h"
 #include "Program.h"
+#include "AttachOp.h"
 
 class CFixture;
 
@@ -24,7 +25,7 @@ CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54, false, 0.0)
         m_location = CNCPoint(0.0, 0.0, 0.0);
         m_tool_number = 0;  // No tool assigned.
         m_fixture_has_been_set = false;
-		m_attached_to_surface = false;
+		m_attached_to_surface = NULL;
 }
 
 CMachineState::~CMachineState() { }
@@ -81,7 +82,7 @@ Python CMachineState::Tool( const int new_tool )
             python << _T("tool_change( id=") << new_tool << _T(")\n");
 			if(m_attached_to_surface)
 			{
-				python << _T("nc.nc.creator.cutter = ") << pTool->OCLDefinition() << _T("\n");
+				python << _T("nc.nc.creator.cutter = ") << pTool->OCLDefinition(m_attached_to_surface) << _T("\n");
 			}
         } // End if - then
     }

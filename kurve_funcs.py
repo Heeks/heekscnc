@@ -133,6 +133,8 @@ def add_roll_on(curve, roll_on_curve, direction, roll_radius, offset_extra, roll
     if roll_on == None:
         rollstart = first_span.p
     elif roll_on == 'auto':
+        if roll_radius < 0.0000000001:
+            rollstart = first_span.p
         v = first_span.GetVector(0.0)
         if direction == 'right':
             off_v = area.Point(v.y, -v.x)
@@ -164,6 +166,7 @@ def add_roll_off(curve, roll_off_curve, direction, roll_radius, offset_extra, ro
     last_span = curve.GetLastSpan()
     
     if roll_off == 'auto':
+        if roll_radius < 0.0000000001: return
         v = last_span.GetVector(1.0) # get end direction
         if direction == 'right':
             off_v = area.Point(v.y, -v.x)

@@ -31,7 +31,7 @@ def cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, f
                 feed(vertex.p.x, vertex.p.y)
 
         prev_p = vertex.p
-
+        
     return prev_p
         
 def area_distance(a, old_area):
@@ -72,7 +72,9 @@ def make_obround(p0, p1, radius):
     obround.append(c)
     return obround
     
-def feed_possible(p0, p1):    
+def feed_possible(p0, p1):
+    if p0 == p1:
+        return True
     obround = make_obround(p0, p1, tool_radius_for_pocket)
     a = area.Area(area_for_feed_possible)
     obround.Subtract(a)
@@ -97,6 +99,7 @@ def cut_curvelist(curve_list, rapid_down_to_height, current_start_depth, depth, 
             rapid(z = clearance_height)
         p = cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, depth)
         first = False
+        
     rapid(z = clearance_height)
     
 def recur(arealist, a1, stepover, from_center):
