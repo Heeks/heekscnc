@@ -15,6 +15,7 @@
 #include <algorithm>
 
 class CTool;
+class CAttachOp;
 
 class CToolParams{
 
@@ -268,7 +269,7 @@ public:
 
 	// program whose job is to generate RS-274 GCode.
 	Python AppendTextToProgram();
-	Python OCLDefinition()const;
+	Python OCLDefinition(CAttachOp* attach_op)const;
 
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);

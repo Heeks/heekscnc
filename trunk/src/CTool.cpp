@@ -22,6 +22,7 @@
 #include "PythonStuff.h"
 #include "MachineState.h"
 #include "Program.h"
+#include "AttachOp.h"
 
 #include <sstream>
 #include <string>
@@ -1984,21 +1985,25 @@ TopoDS_Shape CTool::GetShape() const
    } // End catch
 } // End GetShape() method
 
-Python CTool::OCLDefinition() const
+Python CTool::OCLDefinition(CAttachOp* attach_op) const
 {
 	Python python;
 
 	switch (m_params.m_type)
 	{
-		case CToolParams::eEndmill:
-		case CToolParams::eSlotCutter:
 		case CToolParams::eBallEndMill:
-			// to do, not just CylCutter for everything
-			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("), 1000)\n");
+			python << _T("ocl.BallCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance << _T("), 1000)\n");
 			break;
 
 		default:
-			python << _T("ocl.CylCutter(float(") << m_params.m_diameter << _T("), 1000)\n");
+			if(this->m_params.m_corner_radius > 0.000000001)
+			{
+				python << _T("ocl.BullCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance << _T("), float(") << m_params.m_corner_radius << _T("), 1000)\n");
+			}
+			else
+			{
+				python << _T("ocl.CylCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance << _T("), 1000)\n");
+			}
 			break;
 	} // End switch
 

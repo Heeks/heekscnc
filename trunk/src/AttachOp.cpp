@@ -149,20 +149,23 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 	python << _T("nc.attach.attach_begin()\n");
 	python << _T("nc.nc.creator.stl = ocl_funcs.STLSurfFromFile(") << PythonString(filepath.GetFullPath()) << _T(")\n");
 	python << _T("nc.nc.creator.minz = ") << m_min_z << _T("\n");
+	python << _T("nc.nc.creator.material_allowance = ") << m_material_allowance << _T("\n");
 
-	pMachineState->m_attached_to_surface = true;
+	pMachineState->m_attached_to_surface = this;
 
 	return(python);
 } // End AppendTextToProgram() method
 
 static void on_set_tolerance(double value, HeeksObj* object){((CAttachOp*)object)->m_tolerance = value;}
 static void on_set_min_z(double value, HeeksObj* object){((CAttachOp*)object)->m_min_z = value;}
+static void on_set_material_allowance(double value, HeeksObj* object){((CAttachOp*)object)->m_material_allowance = value;}
 
 void CAttachOp::GetProperties(std::list<Property *> *list)
 {
 	AddSolidsProperties(list, this);
 	list->push_back(new PropertyLength(_("tolerance"), m_tolerance, this, on_set_tolerance));
 	list->push_back(new PropertyLength(_("minimum z"), m_min_z, this, on_set_min_z));
+	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, this, on_set_material_allowance));
 	COp::GetProperties(list);
 }
 
@@ -202,6 +205,7 @@ void CAttachOp::WriteXML(TiXmlNode *root)
 
 	element->SetDoubleAttribute("tolerance", m_tolerance);
 	element->SetDoubleAttribute("minz", m_min_z);
+	element->SetDoubleAttribute("material_allowance", m_material_allowance);
 
 	// write solid ids
 	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
@@ -223,6 +227,7 @@ HeeksObj* CAttachOp::ReadFromXMLElement(TiXmlElement* element)
 
 	element->Attribute("tolerance", &new_object->m_tolerance);
 	element->Attribute("minz", &new_object->m_min_z);
+	element->Attribute("material_allowance", &new_object->m_material_allowance);
 
 	std::list<TiXmlElement *> elements_to_remove;
 
@@ -260,6 +265,7 @@ void CAttachOp::WriteDefaultValues()
 	CNCConfig config(ConfigScope());
 	config.Write(wxString(GetTypeString()) + _T("Tolerance"), m_tolerance);
 	config.Write(wxString(GetTypeString()) + _T("MinZ"), m_min_z);
+	config.Write(wxString(GetTypeString()) + _T("MatAllowance"), m_material_allowance);
 }
 
 void CAttachOp::ReadDefaultValues()
@@ -269,12 +275,14 @@ void CAttachOp::ReadDefaultValues()
 	CNCConfig config(ConfigScope());
 	config.Read(wxString(GetTypeString()) + _T("Tolerance"), &m_tolerance, 0.01);
 	config.Read(wxString(GetTypeString()) + _T("MinZ"), &m_min_z, 0.0);
+	config.Read(wxString(GetTypeString()) + _T("MatAllowance"), &m_material_allowance, 0.0);
 }
 
 bool CAttachOp::operator==( const CAttachOp & rhs ) const
 {
 	if (m_tolerance != rhs.m_tolerance) return false;
 	if (m_min_z != rhs.m_min_z) return false;
+	if (m_material_allowance != rhs.m_material_allowance) return(false);
 	if (m_solids.size() != rhs.m_solids.size()) return false;
 
 	std::list<int>::const_iterator It = m_solids.begin();
@@ -298,8 +306,11 @@ Python CUnattachOp::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
-	python << _T("nc.attach.attach_end()\n");
-	pMachineState->m_attached_to_surface = false;
+	if(pMachineState->m_attached_to_surface)
+	{
+		python << _T("nc.attach.attach_end()\n");
+	}
+	pMachineState->m_attached_to_surface = NULL;
 
 	return python;
 }
