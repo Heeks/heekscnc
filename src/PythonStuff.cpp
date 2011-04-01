@@ -174,7 +174,7 @@ public:
 					#endif
 				#endif
 
-				Execute(wxString(_T("python \"")) + path + m_program->m_machine.file_name + wxString(_T("_read.py\" \"")) + m_filename + wxString(_T("\"")) );
+				Execute(wxString(_T("python \"")) + path + wxString(_T("backplot.py\" \"")) + m_program->m_machine.file_name + wxString(_T("\" \"")) + m_filename + wxString(_T("\"")) );
 			#endif
 		} // End if - else
 	}
