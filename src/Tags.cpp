@@ -44,12 +44,14 @@ public:
 
 	void Run()
 	{
+      if (object_for_tools) { // jcoffland: object_for_tools can be NULL
 		heeksCAD->CreateUndoPoint();
 		CTag* new_object = new CTag();
 		object_for_tools->Add(new_object, NULL);
 		heeksCAD->Changed();
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
+      }
 	}
 	bool CallChangedOnRun(){return false;}
 	wxString BitmapPath(){ return _T("addtag");}
