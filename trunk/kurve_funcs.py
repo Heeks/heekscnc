@@ -228,7 +228,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
                 offset = -offset
             offset_success = offset_curve.Offset(offset)
             if offset_success == False:
-                raise "couldn't offset kurve " + offset_curve
+                raise Exception, "couldn't offset kurve " + str(offset_curve)
                 
     # remove tags further than radius from the offset kurve
     new_tags = []
