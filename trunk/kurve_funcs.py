@@ -212,7 +212,7 @@ def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_s
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_down_to_height = None, clearance = None, start_depth = None, step_down = None, final_depth = None):
+def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_down_to_height = None, clearance = None, start_depth = None, step_down = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0):
     global tags
 
     offset_curve = area.Curve(curve)
@@ -229,6 +229,21 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
             offset_success = offset_curve.Offset(offset)
             if offset_success == False:
                 raise Exception, "couldn't offset kurve " + str(offset_curve)
+            
+    # extend curve
+    if extend_at_start > 0.0:
+        span = offset_curve.GetFirstSpan()
+        new_start = span.p + span.GetVector(0.0) * ( -extend_at_start)
+        new_curve = area.Curve()
+        new_curve.append(new_start)
+        for vertex in offset_curve.getVertices():
+            new_curve.append(vertex)
+        offset_curve = new_curve
+        
+    if extend_at_end > 0.0:
+        span = offset_curve.GetLastSpan()
+        new_end = span.v.p + span.GetVector(1.0) * extend_at_end
+        offset_curve.append(new_end)
                 
     # remove tags further than radius from the offset kurve
     new_tags = []
