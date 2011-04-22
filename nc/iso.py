@@ -44,6 +44,7 @@ class Creator(nc.Creator):
         self.prev_retract = ''
         self.prev_z = ''
         self.useCrc = False
+        self.useCrcCenterline = False
         self.gCRC = ''
         self.fmt = Format()
         self.absolute_flag = True
@@ -617,6 +618,9 @@ class Creator(nc.Creator):
     
     def use_CRC(self):
         return self.useCrc
+
+    def CRC_nominal_path(self):
+        return self.useCrcCenterline
 
     def start_CRC(self, left = True, radius = 0.0):
         # set up prep code, to be output on next line
