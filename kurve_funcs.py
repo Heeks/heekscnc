@@ -205,9 +205,24 @@ def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_s
     else:
         off_v = area.Point(-v.y, v.x)
     startpoint_roll_on = roll_on_curve.FirstVertex().p
-    crc_start = startpoint_roll_on + off_v * radius + v * radius
+    #crc_start = startpoint_roll_on + off_v * radius + v * radius
+    crc_start = startpoint_roll_on  + off_v * radius
     crc_start_point.x = crc_start.x 
     crc_start_point.y = crc_start.y 
+
+def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end_point):
+    last_span = curve.GetLastSpan()
+    v = last_span.GetVector(0.0)
+    if direction == 'right':
+        off_v = area.Point(v.y, -v.x)
+    else:
+        off_v = area.Point(-v.y, v.x)
+    endpoint_roll_off = roll_off_curve.LastVertex().p
+    #crc_start = startpoint_roll_on + off_v * radius + v * radius
+    crc_end = endpoint_roll_off  + off_v * radius
+    crc_end_point.x = crc_end.x 
+    crc_end_point.y = crc_end.y 
+
 
     
 # profile command,
@@ -223,7 +238,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
 
         # get tool diameter
         offset = radius + offset_extra
-        if use_CRC() == False:
+        if use_CRC() == False or (use_CRC()==True and CRC_nominal_path()==True):
             if direction == "right":
                 offset = -offset
             offset_success = offset_curve.Offset(offset)
@@ -331,6 +346,12 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         # cut the roll off arc
         cut_curve(roll_off_curve)
 
+        #add CRC end_line
+        if use_CRC():
+            crc_end_point = area.Point()
+            add_CRC_end_line(offset_curve,roll_on_curve,roll_off_curve,radius,direction,crc_end_point)
+            feed(crc_end_point.x, crc_end_point.y)
+            
                   
         # restore the unsplit kurve
         if len(tags) > 0:
