@@ -53,7 +53,7 @@ All NC operation objects have a title.  The cutting tool's title may be set auto
 
 ==== Diameter ====
 
-The diameter should be expressed in the same units as for the rest of the model.
+The diameter should be expressed in the same units as for the rest of the model. For a chamfering tool, this should be the diameter at the tool's widest point.
 
 ==== Tool Length Offset ====
 
@@ -62,7 +62,7 @@ This is the length of the cutting tool in the same units as for the rest of the 
 
 ==== Flat Radius ====
 
-This represents the area directly beneath the end of a milling cutter that forms a flat surface.  An endmill would have a flat radius that is half the tool's diameter.  A ball-endmill would have a flat radius of zero.
+This represents the area directly beneath the end of a milling cutter that forms a flat surface.  An endmill would have a flat radius that is half the tool's diameter.  A ball-endmill would have a flat radius of zero.  A chamfering tool that uses replaceable carbide inserts might have a positive flat radius.  A 'V-Carve' bit would be represented as a chamfering tool with a flat radius of zero (i.e. a pointed end)
 
 ==== Corner Radius ====
 
@@ -116,7 +116,7 @@ The angle behind the tool. In degrees.
 
 ==== Tool Angle ====
 
-The angle of the tip of the tool. In degrees.
+The angle of the tip of the tool. In degrees.  i.e. the angle from the tool's centre-line to the cutting edge.
 
 http://heekscnc.googlecode.com/svn/wiki/turning/angles.png
 
