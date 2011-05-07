@@ -17,7 +17,7 @@ ID_USE_ZIG_ZAG = 105
 ID_ZIG_ANGLE = 106
 ID_ABS_MODE = 107
 ID_CLEARANCE_HEIGHT = 108
-ID_RAPID_DOWN_TO_HEIGHT = 109
+ID_RAPID_SAFETY_SPACE = 109
 ID_START_DEPTH = 110
 ID_FINAL_DEPTH = 111
 ID_STEP_DOWN = 112
@@ -127,7 +127,7 @@ class PocketDlg(HDialog):
         self.lgthClearanceHeight = LengthCtrl(self, ID_CLEARANCE_HEIGHT)
         self.AddLabelAndControl(sizerLeft, "clearance height", self.lgthClearanceHeight)
         
-        self.lgthRapidDownToHeight = LengthCtrl(self, ID_RAPID_DOWN_TO_HEIGHT)
+        self.lgthRapidDownToHeight = LengthCtrl(self, ID_RAPID_SAFETY_SPACE)
         self.AddLabelAndControl(sizerLeft, "rapid safety space", self.lgthRapidDownToHeight)
         
         self.lgthStartDepth = LengthCtrl(self, ID_START_DEPTH)
@@ -205,7 +205,7 @@ class PocketDlg(HDialog):
         if self.cmbAbsMode.GetValue() == "incremental": self.pocket.abs_mode = ABS_MODE_INCREMENTAL
         else: self.pocket.abs_mode = ABS_MODE_ABSOLUTE
         self.pocket.clearance_height = self.lgthClearanceHeight.GetValue()
-        self.pocket.rapid_down_to_height = self.lgthRapidDownToHeight.GetValue()
+        self.pocket.rapid_safety_space = self.lgthRapidDownToHeight.GetValue()
         self.pocket.start_depth = self.lgthStartDepth.GetValue()
         self.pocket.final_depth = self.lgthFinalDepth.GetValue()
         self.pocket.step_down = self.lgthStepDown.GetValue()
@@ -245,7 +245,7 @@ class PocketDlg(HDialog):
         if self.pocket.abs_mode == ABS_MODE_ABSOLUTE: self.cmbAbsMode.SetValue("absolute")
         else: self.cmbAbsMode.SetValue("incremental")
         self.lgthClearanceHeight.SetValue(self.pocket.clearance_height)
-        self.lgthRapidDownToHeight.SetValue(self.pocket.rapid_down_to_height)
+        self.lgthRapidDownToHeight.SetValue(self.pocket.rapid_safety_space)
         self.lgthStartDepth.SetValue(self.pocket.start_depth)
         self.lgthFinalDepth.SetValue(self.pocket.final_depth)
         self.lgthStepDown.SetValue(self.pocket.step_down)

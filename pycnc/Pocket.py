@@ -74,7 +74,7 @@ class Pocket(DepthOp):
         # Pocket the area
         HeeksCNC.program.python_program += "area_funcs.pocket(a, tool_diameter/2, "
         HeeksCNC.program.python_program += str(self.material_allowance / HeeksCNC.program.units)
-        HeeksCNC.program.python_program += ", rapid_down_to_height, start_depth, final_depth, "
+        HeeksCNC.program.python_program += ", rapid_safety_space, start_depth, final_depth, "
         HeeksCNC.program.python_program += str(self.step_over / HeeksCNC.program.units)
         HeeksCNC.program.python_program += ", step_down, clearance"
         HeeksCNC.program.python_program += (", True" if self.starting_place else ", False")

@@ -33,6 +33,7 @@ public:
 		eToolLengthSwitch,
 		eExtrusion,
 		eTapTool,
+		eEngravingTool,
 		eUndefinedToolType
 	} eToolType;
 
@@ -60,6 +61,7 @@ public:
 #ifndef STABLE_OPS_ONLY
 		types_list.push_back( ToolTypeDescription_t( eTapTool, wxString(_("Tapping Tool")) ));
 #endif
+		types_list.push_back( ToolTypeDescription_t( eEngravingTool, wxString(_("Engraving Tool")) ));
 		return(types_list);
 	} // End GetToolTypesList() method
 
@@ -122,17 +124,17 @@ public:
 			- m_corner_radius = m_diameter / 2
 			- m_flat_radius = 0;	// No middle bit at the bottom of the cutter that remains flat
 						// before the corner radius starts.
-			- m_vertical_cutting_edge_angle = 0
+			- m_cutting_edge_angle = 0
 
 		For an end-mill we would have;
 			- m_corner_radius = 0;
 			- m_flat_radius = m_diameter / 2
-			- m_vertical_cutting_edge_angle = 0
+			- m_cutting_edge_angle = 0
 
 		For a chamfering bit we would have;
 			- m_corner_radius = 0;
 			- m_flat_radius = 0;	// sharp pointed end.  This may be larger if we can't use the centre point.
-			- m_vertical_cutting_edge_angle = 45	// degrees from centre line of tool
+			- m_cutting_edge_angle = 45	// degrees from centre line of tool
 	 */
 	double m_corner_radius;
 	double m_flat_radius;

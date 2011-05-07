@@ -177,7 +177,7 @@ void CWaterline::SetDepthOpParamsFromBox()
 	m_depth_op_params.m_start_depth = m_params.m_box.MaxZ();
 	m_depth_op_params.m_clearance_height = m_params.m_box.MaxZ() + 5.0;
 	m_depth_op_params.m_final_depth = m_params.m_box.MinZ();
-	m_depth_op_params.m_rapid_down_to_height = m_params.m_box.MaxZ() + 2.0;
+	m_depth_op_params.m_rapid_safety_space = m_params.m_box.MaxZ() + 2.0;
 	m_depth_op_params.m_step_down = m_params.m_box.Depth(); // set it to a finishing pass
 }
 
@@ -253,7 +253,7 @@ Python CWaterline::AppendTextToProgram(CMachineState *pMachineState)
             << _T("step_over = ") << m_params.m_step_over / theApp.m_program->m_units << _T(", ")
             << _T("mat_allowance = ") << m_params.m_material_allowance / theApp.m_program->m_units << _T(", ")
             << _T("clearance = clearance, ")
-            << _T("rapid_down_to_height = rapid_down_to_height, ")
+            << _T("rapid_safety_space = rapid_safety_space, ")
             << _T("start_depth = start_depth, ")
             << _T("step_down = step_down, ")
             << _T("final_depth = final_depth, ")

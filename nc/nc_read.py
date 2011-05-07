@@ -20,10 +20,10 @@ class Parser:
 
     def files_open(self, name):
         self.file_in = open(name, 'r')
-        self.writer.files_open(name)
+        self.writer.on_parse_start(name)
         
     def files_close(self):
-        self.writer.files_close()
+        self.writer.on_parse_end()
         self.file_in.close()
 
     def readline(self):

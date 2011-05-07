@@ -15,7 +15,7 @@ class DepthOp(SpeedOp):
         self.start_depth = config.ReadFloat("DepthOpStartDepth", 0.0)
         self.step_down = config.ReadFloat("DepthOpStepDown", 1.0)
         self.final_depth = config.ReadFloat("DepthOpFinalDepth", -1.0)
-        self.rapid_down_to_height = config.ReadFloat("DepthOpRapidSpace", 2.0)
+        self.rapid_safety_space = config.ReadFloat("DepthOpRapidSpace", 2.0)
 
     def WriteDefaultValues(self):
         SpeedOp.WriteDefaultValues(self)
@@ -25,13 +25,13 @@ class DepthOp(SpeedOp):
         config.WriteFloat("DepthOpStartDepth", self.start_depth)
         config.WriteFloat("DepthOpStepDown", self.step_down)
         config.WriteFloat("DepthOpFinalDepth", self.final_depth)
-        config.WriteFloat("DepthOpRapidSpace", self.rapid_down_to_height)
+        config.WriteFloat("DepthOpRapidSpace", self.rapid_safety_space)
         
     def AppendTextToProgram(self):
         SpeedOp.AppendTextToProgram(self)
 
         HeeksCNC.program.python_program += "clearance = float(" + str(self.clearance_height / HeeksCNC.program.units) + ")\n"
-        HeeksCNC.program.python_program += "rapid_down_to_height = float(" + str(self.rapid_down_to_height / HeeksCNC.program.units) + ")\n"
+        HeeksCNC.program.python_program += "rapid_safety_space = float(" + str(self.rapid_safety_space / HeeksCNC.program.units) + ")\n"
         HeeksCNC.program.python_program += "start_depth = float(" + str(self.start_depth / HeeksCNC.program.units) + ")\n"
         HeeksCNC.program.python_program += "step_down = float(" + str(self.step_down / HeeksCNC.program.units) + ")\n"
         HeeksCNC.program.python_program += "final_depth = float(" + str(self.final_depth / HeeksCNC.program.units) + ")\n"

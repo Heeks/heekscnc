@@ -108,12 +108,12 @@ class Profiledlg ( wx.Dialog ):
 		
 		bSizer3 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.rapid_down_to_height = wx.StaticText( self, wx.ID_ANY, u"Rapid to Z", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.rapid_down_to_height.Wrap( -1 )
-		bSizer3.Add( self.rapid_down_to_height, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+		self.rapid_safety_space = wx.StaticText( self, wx.ID_ANY, u"Rapid to Z", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.rapid_safety_space.Wrap( -1 )
+		bSizer3.Add( self.rapid_safety_space, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 		
-		self.m_rapid_down_to_height = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer3.Add( self.m_rapid_down_to_height, 0, wx.ALL, 5 )
+		self.m_rapid_safety_space = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer3.Add( self.m_rapid_safety_space, 0, wx.ALL, 5 )
 		
 		gSizer3.Add( bSizer3, 1, wx.ALIGN_RIGHT, 5 )
 		

@@ -39,7 +39,7 @@ def cut_path(path, dcf, z1, mat_allowance, mm, units, rapid_to, incremental_rapi
              feed(p.x / units, p.y / units, p.z / units)
        n = n + 1
        
-def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0):
+def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, direction = 'X', mat_allowance = 0.0, style = 0, clearance = 5.0, rapid_safety_space = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0):
    mm = True
    if math.fabs(units)>0.000000001:
       # ocl works in mm, so convert all values to mm
@@ -53,7 +53,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
       y1 *= units
       mat_allowance *= units
       clearance *= units
-      rapid_down_to_height *= units
+      rapid_safety_space *= units
       start_depth *= units
       step_down *= units
       final_depth *= units
@@ -71,7 +71,7 @@ def zigzag( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0,
    height = start_depth - final_depth
    zsteps = int( height / math.fabs(step_down) + 0.999999 )
    zstep_down = height / zsteps
-   incremental_rapid_to = rapid_down_to_height - start_depth
+   incremental_rapid_to = rapid_safety_space - start_depth
    if incremental_rapid_to < 0: incremental_rapid_to = 0.1
    dcf = ocl.PathDropCutter()
    dcf.setSTL(s)
@@ -136,7 +136,7 @@ def cutting_tool( diameter, corner_radius, length ):
    return(cutter)
 
 
-def waterline( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, mat_allowance = 0.0, clearance = 5.0, rapid_down_to_height = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0, tolerance = 0.01 ):
+def waterline( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1.0, x0= -10.0, x1 = 10.0, y0 = -10.0, y1 = 10.0, mat_allowance = 0.0, clearance = 5.0, rapid_safety_space = 2.0, start_depth = 0.0, step_down = 2.0, final_depth = -10.0, units = 1.0, tolerance = 0.01 ):
    mm = True
    if math.fabs(units)>0.000000001:
       # ocl works in mm, so convert all values to mm
@@ -150,7 +150,7 @@ def waterline( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1
       y1 *= units
       mat_allowance *= units
       clearance *= units
-      rapid_down_to_height *= units
+      rapid_safety_space *= units
       start_depth *= units
       step_down *= units
       final_depth *= units
@@ -164,7 +164,7 @@ def waterline( filepath, tool_diameter = 3.0, corner_radius = 0.0, step_over = 1
    height = start_depth - final_depth
    zsteps = int( height / math.fabs(step_down) + 0.999999 )
    zstep_down = height / zsteps
-   incremental_rapid_to = rapid_down_to_height - start_depth
+   incremental_rapid_to = rapid_safety_space - start_depth
    if incremental_rapid_to < 0: incremental_rapid_to = 0.1
 
    tool_location = ocl.Point(0.0, 0.0, 0.0)

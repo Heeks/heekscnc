@@ -1086,7 +1086,7 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
                             python << GeneratePathFromWire(	tool_path_wire,
                                                             pMachineState,
                                                             m_depth_op_params.m_clearance_height,
-                                                            m_depth_op_params.m_rapid_down_to_height,
+                                                            m_depth_op_params.m_rapid_safety_space,
                                                             m_depth_op_params.m_start_depth,
                                                             m_params.m_entry_move_type );
                         } // End if - then

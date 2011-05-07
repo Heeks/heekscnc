@@ -1,6 +1,58 @@
 import wx
 import HeeksCNC
 
+class NcWriter:
+    def __init__(self):
+        self.currentx = 0.0
+        self.currenty = 0.0
+        self.currentz = 0.0
+        self.absolute_flag = True
+
+    ############################################################################
+    ##  Internals
+
+    def on_parse_start(self, name):
+        pass
+
+    def on_parse_end(self):
+        pass
+
+    ############################################################################
+    ##  send to cad
+
+    def begin_ncblock(self):
+        self.block = ""
+
+    def end_ncblock(self):
+        HeeksCNC.program.nccode.blocks.append(self.block)
+
+    def add_text(self, s, col=None, cdata=False):
+        self.block += s
+
+    def set_mode(self, units=None):
+        pass # to do
+
+    def set_tool(self, number=None):
+        pass # to do
+
+    def begin_path(self, col=None):
+        pass # to do
+
+    def end_path(self):
+        pass # to do
+
+    def add_line(self, x=None, y=None, z=None, a=None, b=None, c=None):
+        pass # to do
+
+    def add_arc(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None, d=None):
+        pass # to do
+        
+    def incremental(self):
+        pass # to do
+        
+    def absolute(self):
+        pass # to do
+
 def HeeksPyPostProcess(include_backplot_processing):
     HeeksCNC.output_window.Clear()
 
@@ -22,9 +74,14 @@ def HeeksPyPostProcess(include_backplot_processing):
 def HeeksPyBackplot(filepath):
     HeeksCNC.output_window.Clear()
     HeeksCNC.program.nccode.blocks = []    
-    from nc.pyemc2b_read import ParserEMC2
-    parser = ParserEMC2()
+    
+    machine_module = __import__('nc.' + HeeksCNC.program.machine.file_name + '_read', fromlist = ['dummy'])
+        
+    parser = machine_module.Parser()
+    
+    parser.writer = NcWriter()
     parser.Parse(filepath)
+
     HeeksCNC.program.nccode.SetTextCtrl(HeeksCNC.output_window.textCtrl)
             
 def write_python_file(python_file_path):

@@ -21,6 +21,7 @@ class PocketDlg : public HDialog
 	static wxBitmap* m_not_tool_down_bitmap;
 	static wxBitmap* m_use_zig_zag_bitmap;
 	static wxBitmap* m_zig_angle_bitmap;
+	static wxBitmap* m_zig_unidirectional_bitmap;
 	static wxBitmap* m_not_use_zig_zag_bitmap;
 	static wxBitmap* m_clearance_height_bitmap;
 	static wxBitmap* m_rapid_down_to_bitmap;
@@ -38,6 +39,7 @@ class PocketDlg : public HDialog
 	wxCheckBox *m_chkKeepToolDown;
 	wxCheckBox *m_chkUseZigZag;
 	CDoubleCtrl *m_dblZigAngle;
+	wxCheckBox *m_chkZigUnidirectional;
 	wxComboBox *m_cmbAbsMode;
 	CLengthCtrl *m_lgthClearanceHeight;
 	CLengthCtrl *m_lgthRapidDownToHeight;
@@ -64,7 +66,7 @@ public:
 	void OnCheckKeepToolDown(wxCommandEvent& event);
 	void OnCheckUseZigZag(wxCommandEvent& event);
 	void OnComboTool(wxCommandEvent& event);
-
+	void OnCheckZigUnidirectional(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
