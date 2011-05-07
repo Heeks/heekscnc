@@ -2,12 +2,12 @@ class HxmlWriter:
     def __init__(self):
         pass
     
-    def files_open(self, name):
+    def on_parse_start(self, name):
         self.file_out = open(name+'.nc.xml', 'w')
         self.file_out.write('<?xml version="1.0" ?>\n')
         self.file_out.write('<nccode>\n')
 
-    def files_close(self):
+    def on_parse_end(self):
         self.file_out.write('</nccode>\n')
         self.file_out.close()
 
@@ -50,7 +50,7 @@ class HxmlWriter:
     def end_path(self):
         self.file_out.write('\t\t</path>\n')
 
-    def add_line(self, x, y, z, a, b, c):
+    def add_line(self, x, y, z, a = None, b = None, c = None):
         self.file_out.write('\t\t\t<line')
         if (x != None) :
             self.file_out.write(' x="%.6f"' % x)
@@ -63,7 +63,7 @@ class HxmlWriter:
         if (c != None) : self.file_out.write(' c="%.6f"' % c)
         self.file_out.write(' />\n')
         
-    def add_arc(self, x, y, z, i, j, k, r, d):
+    def add_arc(self, x, y, z, i, j, k, r = None, d = None):
         self.file_out.write('\t\t\t<arc')
         if (x != None) :
             self.file_out.write(' x="%.6f"' % x)

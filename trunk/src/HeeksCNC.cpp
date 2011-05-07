@@ -1096,6 +1096,11 @@ static void NewTapToolMenuCallback(wxCommandEvent &event)
 	AddNewTool(CToolParams::eTapTool);
 }
 
+static void NewEngraverToolMenuCallback(wxCommandEvent &event)
+{
+	AddNewTool(CToolParams::eEngravingTool);
+}
+
 static void NewCentreDrillMenuCallback(wxCommandEvent &event)
 {
 	AddNewTool(CToolParams::eCentreDrill);
@@ -1296,6 +1301,7 @@ static CCallbackTool new_extrusion(_("New Extrusion..."), _T("extrusion"), NewEx
 #endif
 static CCallbackTool new_tool_length_switch(_("New Tool Length Switch..."), _T("probe"), NewToolLengthSwitchMenuCallback);
 static CCallbackTool new_tap_tool(_("New Tap Tool..."), _T("tap"), NewTapToolMenuCallback);
+static CCallbackTool new_engraver_tool(_("New Engraver Tool..."), _T("engraver"), NewEngraverToolMenuCallback);
 
 void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 {
@@ -1314,6 +1320,7 @@ void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 #endif
 	t_list->push_back(&new_tool_length_switch);
 	t_list->push_back(&new_tap_tool);
+	t_list->push_back(&new_engraver_tool);
 }
 
 static void AddToolBars()

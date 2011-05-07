@@ -15,7 +15,7 @@ class PopupMenu:
             self.next_id = self.next_id + 1
             item = self.menu.Append(id, label)
             self.functions[id] = func
-            HeeksCNC.frame.Bind(wx.EVT_MENU, self.OnPopupItemSelected, item)
+            HeeksCNC.cad.frame.Bind(wx.EVT_MENU, self.OnPopupItemSelected, item)
 
     def OnPopupItemSelected(self, event):
         func = self.functions[event.GetId()]

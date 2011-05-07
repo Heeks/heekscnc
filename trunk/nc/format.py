@@ -65,8 +65,6 @@ class Address:
         
     def set(self, number):
         self.str = self.text + self.fmt.string(number)
-        if number == 17:
-            print self.str
         
     def write(self, writer):
         if self.str == None: return ''

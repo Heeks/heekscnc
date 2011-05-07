@@ -327,7 +327,7 @@ void CToolParams::write_values_to_config()
 void CTool::SetDiameter( const double diameter )
 {
 	m_params.m_diameter = diameter;
-	if (m_params.m_type == CToolParams::eChamfer)
+	if (m_params.m_type == CToolParams::eChamfer || m_params.m_type == CToolParams::eEngravingTool)
 	{
 		// Recalculate the cutting edge length based on this new diameter
 		// and the cutting angle.
@@ -504,6 +504,9 @@ double CToolParams::ReasonableGradient( const eToolType type ) const
 		case CToolParams::eTurningTool:
 				return(0.0);
 
+		case CToolParams::eEngravingTool:
+				return(0.0);
+
         default:
             return(0.0);
 	} // End switch
@@ -579,9 +582,10 @@ void CTool::ResetParametersToReasonableValues()
 				break;
 
 		case CToolParams::eChamfer:
+		case CToolParams::eEngravingTool:
 				m_params.m_corner_radius = 0;
 				m_params.m_flat_radius = 0;
-				m_params.m_cutting_edge_angle = 45;
+				m_params.m_cutting_edge_angle = (m_params.m_type == CToolParams::eChamfer) ? 45.0 : 30.0;
 				height = (m_params.m_diameter / 2.0) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
 				m_params.m_cutting_edge_height = height;
 				ResetTitle();
@@ -626,7 +630,7 @@ static void on_set_flat_radius(double value, HeeksObj* object)
 
 	((CTool*)object)->m_params.m_flat_radius = value;
 
-	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer)
+	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer || ((CTool*)object)->m_params.m_type == CToolParams::eEngravingTool)
 	{
 		// Recalculate the cutting edge length based on this new diameter
 		// and the cutting angle.
@@ -650,7 +654,7 @@ static void on_set_cutting_edge_angle(double value, HeeksObj* object)
 	}
 
 	((CTool*)object)->m_params.m_cutting_edge_angle = value;
-	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer)
+	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer || ((CTool*)object)->m_params.m_type == CToolParams::eEngravingTool)
 	{
 		// Recalculate the cutting edge length based on this new diameter
 		// and the cutting angle.
@@ -674,7 +678,7 @@ static void on_set_cutting_edge_height(double value, HeeksObj* object)
 		return;
 	}
 
-	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer)
+	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer || ((CTool*)object)->m_params.m_type == CToolParams::eEngravingTool)
 	{
 		wxMessageBox(_T("Cutting edge height is generated from diameter, flat radius and cutting edge angle for chamfering bits."));
 		return;
@@ -1253,6 +1257,12 @@ const wxBitmap &CTool::GetIcon()
 				if(tapToolIcon == NULL)tapToolIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/tap.png")));
 				return *tapToolIcon;
 			}
+		case CToolParams::eEngravingTool:
+			{
+				static wxBitmap* engraverIcon = NULL;
+				if(engraverIcon == NULL)engraverIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/engraver.png")));
+				return *engraverIcon;
+			}
 		default:
 			{
 				static wxBitmap* toolIcon = NULL;
@@ -1597,6 +1607,11 @@ wxString CTool::GenerateMeaningfulName() const
                     }
                 }
 		  break;
+                case CToolParams::eEngravingTool:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
+							l_ossName << m_params.m_cutting_edge_angle << (_T(" degreee "));
+                					l_ossName << (_("Engraving Bit"));
+							break;
+
 
 		default:				break;
 	} // End switch
@@ -1766,6 +1781,7 @@ TopoDS_Shape CTool::GetShape() const
 		}
 
 		case CToolParams::eChamfer:
+		case CToolParams::eEngravingTool:
 		{
 			// First a cylinder to represent the shaft.
 			double tool_tip_length_a = (diameter / 2) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
@@ -1779,7 +1795,7 @@ TopoDS_Shape CTool::GetShape() const
 
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
-			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2) * 0.5, shaft_length );
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2) * ((m_params.m_type == CToolParams::eEngravingTool) ? 1.0 : 0.5), shaft_length );
 
 			// And a cone for the tip.
 			// double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (2 * PI);
@@ -1992,17 +2008,22 @@ Python CTool::OCLDefinition(CAttachOp* attach_op) const
 	switch (m_params.m_type)
 	{
 		case CToolParams::eBallEndMill:
-			python << _T("ocl.BallCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance << _T("), 1000)\n");
+			python << _T("ocl.BallCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), 1000)\n");
+			break;
+
+		case CToolParams::eChamfer:
+		case CToolParams::eEngravingTool:
+			python << _T("ocl.CylConeCutter(float(") << m_params.m_flat_radius * 2 + attach_op->m_material_allowance << _T("), float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), float(") << m_params.m_cutting_edge_angle * PI/360 << _T("))\n");
 			break;
 
 		default:
 			if(this->m_params.m_corner_radius > 0.000000001)
 			{
-				python << _T("ocl.BullCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance << _T("), float(") << m_params.m_corner_radius << _T("), 1000)\n");
+				python << _T("ocl.BullCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), float(") << m_params.m_corner_radius << _T("), 1000)\n");
 			}
 			else
 			{
-				python << _T("ocl.CylCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance << _T("), 1000)\n");
+				python << _T("ocl.CylCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), 1000)\n");
 			}
 			break;
 	} // End switch
@@ -2112,6 +2133,7 @@ double CTool::CuttingRadius( const bool express_in_drawing_units /* = false */, 
 	switch (m_params.m_type)
 	{
 		case CToolParams::eChamfer:
+		case CToolParams::eEngravingTool:
 			{
 			    if (depth < 0.0)
 			    {
@@ -2389,6 +2411,7 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
     case CToolParams::eToolLengthSwitch:
     case CToolParams::eExtrusion:
     case CToolParams::eTapTool:
+    case CToolParams::eEngravingTool:
     case CToolParams::eUndefinedToolType:
         return(python); // Avoid the compiler warnings.
 	} // End switch

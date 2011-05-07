@@ -3,7 +3,7 @@ import HeeksCNC
 
 class HDialog(wx.Dialog):
     def __init__(self, title):
-        wx.Dialog.__init__(self, HeeksCNC.frame, wx.ID_ANY, title)
+        wx.Dialog.__init__(self, HeeksCNC.cad.frame, wx.ID_ANY, title)
         self.control_border = 3
         self.ignore_event_functions = False
         self.button_id_txt_map = {}
@@ -52,7 +52,7 @@ class HDialog(wx.Dialog):
         return sizerOKCancel
     
     def OnFileBrowseButton(self, event):
-        dialog = wx.FileDialog(HeeksCNC.frame, "Choose File", wildcard = "All files" + " |*.*")
+        dialog = wx.FileDialog(HeeksCNC.cad.frame, "Choose File", wildcard = "All files" + " |*.*")
         dialog.CentreOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:

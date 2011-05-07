@@ -226,6 +226,8 @@ class Program(Object):
         if machines_file == "":
             machines_file = HeeksCNC.heekscnc_path + "/nc/machines2.txt"
             
+        print 'machines_file = ', machines_file
+            
         f = open(machines_file)
 
         machines = []

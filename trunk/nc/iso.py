@@ -111,10 +111,10 @@ class Creator(nc.Creator):
     def ARC_CCW(self): return('G03')
     def DWELL(self): return('G04')
     def DRILL(self): return('G81')
-    def DRILL_WITH_DWELL(self, format, dwell): return('G82' + self.SPACE() + (format % dwell))
+    def DRILL_WITH_DWELL(self, format, dwell): return('G82' + self.SPACE() + (format.string(dwell)))
     def PECK_DRILL(self): return('G83')
-    def PECK_DEPTH(self, format, depth): return('Q' + self.SPACE() + (format % depth))
-    def RETRACT(self, format, height): return('R' + self.SPACE() + (format % height))
+    def PECK_DEPTH(self, format, depth): return('Q' + self.SPACE() + (format.string(depth)))
+    def RETRACT(self, format, height): return('R' + self.SPACE() + (format.string(height)))
     def END_CANNED_CYCLE(self): return('G80')
 
     def X(self): return('X')
@@ -713,22 +713,22 @@ class Creator(nc.Creator):
         retract_height = z + standoff        
         if (x != None):        
             dx = x - self.x        
-            self.write(self.SPACE() + self.X() + (self.fmt % x))        
+            self.write(self.SPACE() + self.X() + (self.fmt.string(x)))        
             self.x = x 
        
         if (y != None):        
             dy = y - self.y        
-            self.write(self.SPACE() + self.Y() + (self.fmt % y))        
+            self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))        
             self.y = y
                       
         dz = (z + standoff) - self.z # In the end, we will be standoff distance above the z value passed in.
 
         if self.drill_modal:
             if z != self.prev_z:
-                self.write(self.SPACE() + self.Z() + (self.fmt % (z - depth)))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(z - depth)))
                 self.prev_z=z
         else:             
-            self.write(self.SPACE() + self.Z() + (self.fmt % (z - depth)))    # This is the 'z' value for the bottom of the hole.
+            self.write(self.SPACE() + self.Z() + (self.fmt.string(z - depth)))    # This is the 'z' value for the bottom of the hole.
             self.z = (z + standoff)            # We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
@@ -741,12 +741,7 @@ class Creator(nc.Creator):
         if (self.fhv) : 
             self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
 
-        if self.drill_modal:
-            if ( self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE() )!= self.prev_f:
-               self.write(self.SPACE() + self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE() )        
-               self.prev_f = self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE()
-        else: 
-            self.write( self.SPACE() + self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE() )            
+        self.write_feedrate()
         self.write_spindle()            
         self.write_misc()    
         self.write('\n')

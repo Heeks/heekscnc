@@ -868,7 +868,7 @@ Python CInlay::FormCorners( Valley_t & paths, CMachineState *pMachineState ) con
 			python << _T("comment(") << PythonString(_("sharpen corner")) << _T(")\n");
 			python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 			python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(")\n");
-			python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+			python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")\n");
 			python << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
 			pMachineState->Location(bottom_corner);
 
@@ -1140,7 +1140,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
                         python << CContour::GeneratePathFromWire(wire,
                                                                 pMachineState,
                                                                 m_depth_op_params.m_clearance_height,
-                                                                m_depth_op_params.m_rapid_down_to_height,
+                                                                m_depth_op_params.m_rapid_safety_space,
                                                                 m_depth_op_params.m_start_depth,
                                                                 CContourParams::ePlunge );
                     } // End for
@@ -1684,7 +1684,7 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
                 python << CContour::GeneratePathFromWire(tool_path_wire,
                                                         pMachineState,
                                                         m_depth_op_params.m_clearance_height,
-                                                        m_depth_op_params.m_rapid_down_to_height,
+                                                        m_depth_op_params.m_rapid_safety_space,
                                                         m_depth_op_params.m_start_depth,
                                                         CContourParams::ePlunge );
 
