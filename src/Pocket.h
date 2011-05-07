@@ -19,6 +19,7 @@ public:
 	bool m_keep_tool_down_if_poss;
 	bool m_use_zig_zag;
 	double m_zig_angle;
+	bool m_zig_unidirectional;
 
 	typedef enum {
 		eConventional,

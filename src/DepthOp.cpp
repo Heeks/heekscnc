@@ -26,7 +26,7 @@ CDepthOpParams::CDepthOpParams()
 	m_start_depth = 0.0;
 	m_step_down = 0.0;
 	m_final_depth = 0.0;
-	m_rapid_down_to_height = 0.0;
+	m_rapid_safety_space = 0.0;
 	
 }
 
@@ -87,9 +87,9 @@ static void on_set_final_depth(double value, HeeksObj* object)
 	((CDepthOp*)object)->WriteDefaultValues();
 }
 
-static void on_set_rapid_down_to_height(double value, HeeksObj* object)
+static void on_set_rapid_safety_space(double value, HeeksObj* object)
 {
-	((CDepthOp*)object)->m_depth_op_params.m_rapid_down_to_height = value;
+	((CDepthOp*)object)->m_depth_op_params.m_rapid_safety_space = value;
 	((CDepthOp*)object)->WriteDefaultValues();
 }
 
@@ -110,7 +110,7 @@ void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list
 		list->push_back(new PropertyChoice(_("ABS/INCR mode"), choices, m_abs_mode, parent, on_set_abs_mode));
 	}
 		list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
-		list->push_back(new PropertyLength(_("rapid down to height"), m_rapid_down_to_height, parent, on_set_rapid_down_to_height));
+		list->push_back(new PropertyLength(_("rapid safety space"), m_rapid_safety_space, parent, on_set_rapid_safety_space));
 	
 	//My initial thought was that extrusion operatons would always start at z=0 and end at z=top of object.  I'm now thinking it might be desireable to preserve this as an option.
 	//It might be good to run an operation that prints the bottom half of the object, pauses to allow insertion of something.  Then another operation could print the top half.
@@ -134,7 +134,7 @@ void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 	element->SetDoubleAttribute("down", m_step_down);
 	element->SetDoubleAttribute("startdepth", m_start_depth);
 	element->SetDoubleAttribute("depth", m_final_depth);
-	element->SetDoubleAttribute("r", m_rapid_down_to_height);
+	element->SetDoubleAttribute("r", m_rapid_safety_space);
 	element->SetAttribute("abs_mode", m_abs_mode);
 }
 
@@ -147,7 +147,7 @@ void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 		depthop->Attribute("down", &m_step_down);
 		depthop->Attribute("startdepth", &m_start_depth);
 		depthop->Attribute("depth", &m_final_depth);
-		depthop->Attribute("r", &m_rapid_down_to_height);
+		depthop->Attribute("r", &m_rapid_safety_space);
 		if(pElem->Attribute("abs_mode", &int_for_enum))m_abs_mode = (eAbsMode)int_for_enum;
 		pElem->RemoveChild(depthop);	// We don't want to interpret this again when
 										// the ObjList::ReadBaseXML() method gets to it.
@@ -186,7 +186,7 @@ void CDepthOp::WriteDefaultValues()
 	config.Write(_T("StartDepth"), m_depth_op_params.m_start_depth);
 	config.Write(_T("StepDown"), m_depth_op_params.m_step_down);
 	config.Write(_T("FinalDepth"), m_depth_op_params.m_final_depth);
-	config.Write(_T("RapidDown"), m_depth_op_params.m_rapid_down_to_height);
+	config.Write(_T("RapidDown"), m_depth_op_params.m_rapid_safety_space);
 	config.Write(_T("ABSMode"), m_depth_op_params.m_abs_mode);
 }
 
@@ -199,7 +199,7 @@ void CDepthOp::ReadDefaultValues()
 	config.Read(_T("StartDepth"), &m_depth_op_params.m_start_depth, 0.0);
 	config.Read(_T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
 	config.Read(_T("FinalDepth"), &m_depth_op_params.m_final_depth, -1.0);
-	config.Read(_T("RapidDown"), &m_depth_op_params.m_rapid_down_to_height, 2.0);
+	config.Read(_T("RapidDown"), &m_depth_op_params.m_rapid_safety_space, 2.0);
 	int int_mode = m_depth_op_params.m_abs_mode;
 	config.Read(_T("ABSMode"), &int_mode, CDepthOpParams::eAbsolute);
 	m_depth_op_params.m_abs_mode = (CDepthOpParams::eAbsMode)int_mode;
@@ -286,7 +286,7 @@ Python CDepthOp::AppendTextToProgram(CMachineState *pMachineState)
     python << CSpeedOp::AppendTextToProgram(pMachineState);
 
 	python << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-	python << _T("rapid_down_to_height = float(") << m_depth_op_params.m_rapid_down_to_height / theApp.m_program->m_units << _T(")\n");
+	python << _T("rapid_safety_space = float(") << m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")\n");
     python << _T("start_depth = float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")\n");
     python << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
     python << _T("final_depth = float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")\n");
@@ -427,7 +427,7 @@ bool CDepthOpParams::operator== ( const CDepthOpParams & rhs ) const
 	if (m_start_depth != rhs.m_start_depth) return(false);
 	if (m_step_down != rhs.m_step_down) return(false);
 	if (m_final_depth != rhs.m_final_depth) return(false);
-	if (m_rapid_down_to_height != rhs.m_rapid_down_to_height) return(false);
+	if (m_rapid_safety_space != rhs.m_rapid_safety_space) return(false);
 
 	return(true);
 }

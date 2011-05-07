@@ -9,21 +9,16 @@ widgets = WIDGETS_WX
 heekscnc_path = None
 program_window = None
 output_window = None
-frame = None
 machine_state = None
     
 import platform
 from Program import Program
 from Operations import AddOperationMenuItems
 
+
 def on_post_process():
     import wx
     wx.MessageBox("post process")
-
-def on_polar_array():
-    import polar_array
-    frame_1 = polar_array.MyFrame(None, -1, "")
-    frame_1.Show()
     
 def RunPythonScript():
     global program
@@ -63,8 +58,7 @@ def on_post_process():
 
 def on_open_nc_file():
     import wx
-    global frame
-    dialog = wx.FileDialog(frame, "Open NC file", wildcard = "NC files" + " |*.*")
+    dialog = wx.FileDialog(cad.frame, "Open NC file", wildcard = "NC files" + " |*.*")
     dialog.CentreOnParent()
     
     if dialog.ShowModal() == wx.ID_OK:
@@ -73,8 +67,7 @@ def on_open_nc_file():
     
 def on_save_nc_file():
     import wx
-    global frame
-    dialog = wx.FileDialog(frame, "Save NC file", wildcard = "NC files" + " |*.*", style = wx.FD_SAVE + wx.FD_OVERWRITE_PROMPT)
+    dialog = wx.FileDialog(cad.frame, "Save NC file", wildcard = "NC files" + " |*.*", style = wx.FD_SAVE + wx.FD_OVERWRITE_PROMPT)
     dialog.CentreOnParent()
     dialog.SetFilterIndex(1)
     
@@ -96,32 +89,18 @@ def on_cancel_script():
     
 def add_menus():
     global cad
-    macining_menu = cad.addmenu('Machining')
+    machining_menu = cad.addmenu('Machining')
     global heekscnc_path
-    AddOperationMenuItems(macining_menu)
-    cad.add_menu_item(macining_menu, 'Make Program Script', on_make_python_script, heekscnc_path + '/bitmaps/python.png')
-    cad.add_menu_item(macining_menu, 'Run Program Script', on_run_program_script, heekscnc_path + '/bitmaps/runpython.png')
-    cad.add_menu_item(macining_menu, 'Post Process', on_post_process, heekscnc_path + '/bitmaps/postprocess.png')
-    cad.add_menu_item(macining_menu, 'Open NC File', on_open_nc_file, heekscnc_path + '/bitmaps/opennc.png')
-    cad.add_menu_item(macining_menu, 'Save NC File', on_save_nc_file, heekscnc_path + '/bitmaps/savenc.png')
-    cad.add_menu_item(macining_menu, 'Cancel Python Script', on_cancel_script, heekscnc_path + '/bitmaps/cancel.png')
+    print "heekscnc_path = ", heekscnc_path    
+    AddOperationMenuItems(machining_menu)
+    cad.add_menu_item(machining_menu, 'Make Program Script', on_make_python_script, heekscnc_path + '/bitmaps/python.png')
+    cad.add_menu_item(machining_menu, 'Run Program Script', on_run_program_script, heekscnc_path + '/bitmaps/runpython.png')
+    cad.add_menu_item(machining_menu, 'Post Process', on_post_process, heekscnc_path + '/bitmaps/postprocess.png')
+    cad.add_menu_item(machining_menu, 'Open NC File', on_open_nc_file, heekscnc_path + '/bitmaps/opennc.png')
+    cad.add_menu_item(machining_menu, 'Save NC File', on_save_nc_file, heekscnc_path + '/bitmaps/savenc.png')
+    cad.add_menu_item(machining_menu, 'Cancel Python Script', on_cancel_script, heekscnc_path + '/bitmaps/cancel.png')
     
 def add_windows():
-    global cad
-    if widgets == WIDGETS_WX:
-        import wx
-        global frame
-        if platform.system() == "Windows":
-            hwnd = cad.get_frame_hwnd()
-            frame = wx.Window_FromHWND(None, hwnd)
-        else:
-            ID = cad.get_frame_id()
-            frame = wx.FindWindowById(ID)
-            
-    elif widgets == WIDGETS_QT:
-        from PyQt4 import QtGui
-        app = QtGui.QApplication([])
-        
     from Tree import Tree
     global tree
     tree = Tree()
@@ -132,8 +111,8 @@ def add_windows():
         from wxOutputWindow import OutputWindow
         global program_window
         global output_window
-        program_window = ProgramWindow(frame)
-        output_window = OutputWindow(frame)
+        program_window = ProgramWindow(cad.frame)
+        output_window = OutputWindow(cad.frame)
         cad.add_window(program_window)
         cad.add_window(output_window)
     
@@ -155,13 +134,23 @@ def start():
     import wx
     import os
     import sys
-    if not os.path.exists("icons/nccode.png"):
-        heekscnc_path = "../"
+
+    full_path_here = os.path.abspath( __file__ )
+    full_path_here = full_path_here.replace("\\", "/")
+    heekscnc_path = full_path_here
+    slash = heekscnc_path.rfind("/")
+    print 'heekscnc_path = ', heekscnc_path
+    
+    if slash != -1:
+        heekscnc_path = heekscnc_path[0:slash]
+        slash = heekscnc_path.rfind("/")
+        if slash != -1: heekscnc_path = heekscnc_path[0:slash]
+    print 'heekscnc_path = ', heekscnc_path
     
     add_program_with_children()
     add_menus()
     add_windows()
-    cad.register_callbacks() 
+    cad.on_start() 
 
 def add_program_with_children():
     global program

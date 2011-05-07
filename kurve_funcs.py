@@ -227,7 +227,7 @@ def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_down_to_height = None, clearance = None, start_depth = None, step_down = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0):
+def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_safety_space = None, clearance = None, start_depth = None, step_down = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0):
     global tags
 
     offset_curve = area.Curve(curve)
@@ -311,7 +311,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
             rapid(s.x, s.y)
         
         # rapid down to just above the material
-        rapid(z = mat_depth + rapid_down_to_height)
+        rapid(z = mat_depth + rapid_safety_space)
         
         # feed down to depth
         mat_depth = depth

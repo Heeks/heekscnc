@@ -37,6 +37,7 @@ CPocketParams::CPocketParams()
 	m_keep_tool_down_if_poss = true;
 	m_use_zig_zag = true;
 	m_zig_angle = 0.0;
+	m_zig_unidirectional = false;
 	m_entry_move = ePlunge;
 }
 
@@ -94,6 +95,12 @@ static void on_set_zig_angle(double value, HeeksObj* object)
 	((CPocket*)object)->WriteDefaultValues();
 }
 
+static void on_set_zig_uni(bool value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_zig_unidirectional = value;
+	((CPocket*)object)->WriteDefaultValues();
+}
+
 void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("step over"), m_step_over, parent, on_set_step_over));
@@ -113,7 +120,11 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 	}
 	list->push_back(new PropertyCheck(_("keep tool down"), m_keep_tool_down_if_poss, parent, on_set_keep_tool_down));
 	list->push_back(new PropertyCheck(_("use zig zag"), m_use_zig_zag, parent, on_set_use_zig_zag));
-	if(m_use_zig_zag)list->push_back(new PropertyDouble(_("zig angle"), m_zig_angle, parent, on_set_zig_angle));
+	if(m_use_zig_zag)
+	{
+		list->push_back(new PropertyDouble(_("zig angle"), m_zig_angle, parent, on_set_zig_angle));
+		list->push_back(new PropertyCheck(_("unidirectional"), m_zig_unidirectional, parent, on_set_zig_uni));
+	}
 }
 
 void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
@@ -127,6 +138,7 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
 	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
 	element->SetDoubleAttribute("zig_angle", m_zig_angle);
+	element->SetAttribute("zig_unidirectional", m_zig_unidirectional ? 1:0);
 	element->SetAttribute("entry_move", (int) m_entry_move);
 }
 
@@ -141,6 +153,8 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("use_zig_zag", &int_for_bool);
 	m_use_zig_zag = (int_for_bool != 0);
 	pElem->Attribute("zig_angle", &m_zig_angle);
+	pElem->Attribute("zig_unidirectional", &int_for_bool);
+	m_zig_unidirectional = (int_for_bool != 0);
 	int int_for_entry_move = (int) ePlunge;
 	pElem->Attribute("entry_move", &int_for_entry_move);
 	m_entry_move = (eEntryStyle) int_for_entry_move;
@@ -444,13 +458,14 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 	// Pocket the area
 	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
 	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
-	python << _T(", rapid_down_to_height, start_depth, final_depth, ");
+	python << _T(", rapid_safety_space, start_depth, final_depth, ");
 	python << m_pocket_params.m_step_over / theApp.m_program->m_units;
 	python << _T(", step_down, clearance, ");
 	python << m_pocket_params.m_starting_place;
 	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
 	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
 	python << _T(", ") << m_pocket_params.m_zig_angle;
+	python << _T(", zig_unidirectional = ") << (m_pocket_params.m_zig_unidirectional ? _T("True") : _T("False"));
 	python << _T(")\n");
 
 	// rapid back up to clearance plane
@@ -472,6 +487,7 @@ void CPocket::WriteDefaultValues()
 	config.Write(_T("KeepToolDown"), m_pocket_params.m_keep_tool_down_if_poss);
 	config.Write(_T("UseZigZag"), m_pocket_params.m_use_zig_zag);
 	config.Write(_T("ZigAngle"), m_pocket_params.m_zig_angle);
+	config.Write(_T("ZigUnidirectional"), m_pocket_params.m_zig_unidirectional);
 	config.Write(_T("DecentStrategy"), m_pocket_params.m_entry_move);
 }
 
@@ -486,6 +502,7 @@ void CPocket::ReadDefaultValues()
 	config.Read(_T("KeepToolDown"), &m_pocket_params.m_keep_tool_down_if_poss, true);
 	config.Read(_T("UseZigZag"), &m_pocket_params.m_use_zig_zag, false);
 	config.Read(_T("ZigAngle"), &m_pocket_params.m_zig_angle);
+	config.Read(_T("ZigUnidirectional"), &m_pocket_params.m_zig_unidirectional, false);
 	int int_for_entry_move = CPocketParams::ePlunge;
 	config.Read(_T("DecentStrategy"), &int_for_entry_move);
 	m_pocket_params.m_entry_move = (CPocketParams::eEntryStyle) int_for_entry_move;
@@ -782,6 +799,7 @@ bool CPocketParams::operator==(const CPocketParams & rhs) const
 	if (m_keep_tool_down_if_poss != rhs.m_keep_tool_down_if_poss) return(false);
 	if (m_use_zig_zag != rhs.m_use_zig_zag) return(false);
 	if (m_zig_angle != rhs.m_zig_angle) return(false);
+	if (m_zig_unidirectional != rhs.m_zig_unidirectional) return(false);
 	if (m_entry_move != rhs.m_entry_move) return(false);
 
 	return(true);

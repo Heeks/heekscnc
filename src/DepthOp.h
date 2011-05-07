@@ -21,7 +21,7 @@ public:
 	double m_start_depth;
 	double m_step_down;
 	double m_final_depth;
-	double m_rapid_down_to_height;
+	double m_rapid_safety_space;
 	//check to see if in Absolute or Incremental mode for moves
 	typedef enum {
 		eAbsolute,

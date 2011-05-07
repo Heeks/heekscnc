@@ -7,7 +7,7 @@ class Tree:
         if HeeksCNC.widgets == HeeksCNC.WIDGETS_WX:
             import wx
             from wxCAMWindow import CAMWindow
-            self.window = CAMWindow(HeeksCNC.frame)
+            self.window = CAMWindow(HeeksCNC.cad.frame)
             HeeksCNC.cad.add_window(self.window)
             
         elif HeeksCNC.widgets == HeeksCNC.WIDGETS_QT:

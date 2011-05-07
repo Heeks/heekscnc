@@ -6,7 +6,7 @@ import math
 area_for_feed_possible = None
 tool_radius_for_pocket = None
 
-def cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, final_depth):
+def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, final_depth):
     prev_p = p
     first = True
 
@@ -16,7 +16,7 @@ def cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, f
             rapid(vertex.p.x, vertex.p.y)
             
             ##rapid down
-            rapid(z = current_start_depth + rapid_down_to_height)
+            rapid(z = current_start_depth + rapid_safety_space)
             
             #feed down
             feed(z = final_depth)
@@ -60,6 +60,7 @@ def make_obround(p0, p1, radius):
     right = area.Point(dir.y, -dir.x)
     obround = area.Area()
     c = area.Curve()
+    print "right = ", right, "  radius = ", radius
     vt0 = p0 + right * radius
     vt1 = p1 + right * radius
     vt2 = p1 - right * radius
@@ -82,7 +83,7 @@ def feed_possible(p0, p1):
         return False
     return True
 
-def cut_curvelist(curve_list, rapid_down_to_height, current_start_depth, depth, clearance_height, keep_tool_down_if_poss):
+def cut_curvelist(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss):
     p = area.Point(0, 0)
     first = True
     for curve in curve_list:
@@ -97,7 +98,7 @@ def cut_curvelist(curve_list, rapid_down_to_height, current_start_depth, depth, 
                 need_rapid = False
         if need_rapid:
             rapid(z = clearance_height)
-        p = cut_curve(curve, need_rapid, p, rapid_down_to_height, current_start_depth, depth)
+        p = cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, depth)
         first = False
         
     rapid(z = clearance_height)
@@ -156,7 +157,7 @@ sin_minus_angle_for_zigs = 0.0
 cos_minus_angle_for_zigs = 1.0
 one_over_units = 1.0
 
-def make_zig_curve(curve, y0, y):
+def make_zig_curve(curve, y0, y, zig_unidirectional):
     if rightward_for_zigs:
         curve.Reverse()
 
@@ -208,11 +209,26 @@ def make_zig_curve(curve, y0, y):
             prev_p = vertex.p
         
     if zig_started:
+        
+        if zig_unidirectional == True:
+            # remove the last bit of zig
+            if math.fabs(zig.LastVertex().p.y - y) < 0.002 * one_over_units:
+                vertices = zig.getVertices()
+                while len(vertices) > 0:
+                    v = vertices[len(vertices)-1]
+                    if math.fabs(v.p.y - y0) < 0.002 * one_over_units:
+                        break
+                    else:
+                        vertices.pop()
+                zig = area.Curve()
+                for v in vertices:
+                    zig.append(v)
+        
         curve_list_for_zigs.append(zig)        
 
-def make_zig(a, y0, y):
+def make_zig(a, y0, y, zig_unidirectional):
     for curve in a.getCurves():
-        make_zig_curve(curve, y0, y)
+        make_zig_curve(curve, y0, y, zig_unidirectional)
         
 reorder_zig_list_list = []
         
@@ -270,7 +286,7 @@ def rotated_area(a):
         an.append(curve_new)
     return an
 
-def zigzag(a, stepover):
+def zigzag(a, stepover, zig_unidirectional):
     if a.num_curves() == 0:
         return
     
@@ -315,28 +331,34 @@ def zigzag(a, stepover):
         a2 = area.Area()
         a2.append(c)
         a2.Intersect(a)
-        make_zig(a2, y0, y)
-        rightward_for_zigs = (rightward_for_zigs == False)
+        make_zig(a2, y0, y, zig_unidirectional)
+        if zig_unidirectional == False:
+            rightward_for_zigs = (rightward_for_zigs == False)
         
     reorder_zigs()
 
-def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle):
-    if rapid_down_to_height > clearance_height:
-       rapid_down_to_height = clearance_height
+def pocket(a, tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False):
+    global tool_radius_for_pocket
+    global area_for_feed_possible
+    tool_radius_for_pocket = tool_radius
+    
+    if keep_tool_down_if_poss:
+        area_for_feed_possible = area.Area(a)
+        area_for_feed_possible.Offset(extra_offset - 0.01)
+    
+    if rapid_safety_space > clearance_height:
+       rapid_safety_space = clearance_height
 
-    use_internal_function = False
+    use_internal_function = (area.holes_linked() == False) # use internal function, if area module is the Clipper library
     
     if use_internal_function:
         curve_list = a.MakePocketToolpath(tool_radius, extra_offset, stepover, from_center, use_zig_zag, zig_angle)
         
     else:    
-        global area_for_feed_possible
-        global tool_radius_for_pocket
         global sin_angle_for_zigs
         global cos_angle_for_zigs
         global sin_minus_angle_for_zigs
         global cos_minus_angle_for_zigs
-        tool_radius_for_pocket = tool_radius
         radians_angle = zig_angle * math.pi / 180
         sin_angle_for_zigs = math.sin(-radians_angle)
         cos_angle_for_zigs = math.cos(-radians_angle)
@@ -344,10 +366,6 @@ def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, fina
         cos_minus_angle_for_zigs = math.cos(radians_angle)
         
         arealist = list()
-        
-        if keep_tool_down_if_poss:
-            area_for_feed_possible = area.Area(a)
-            area_for_feed_possible.Offset(extra_offset - 0.01)
 
         a_offset = area.Area(a)
         current_offset = tool_radius + extra_offset
@@ -356,7 +374,7 @@ def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, fina
         do_recursive = True
         
         if use_zig_zag:
-            zigzag(a_offset, stepover)
+            zigzag(a_offset, stepover, zig_unidirectional)
             curve_list = curve_list_for_zigs
         else:
             if do_recursive:
@@ -385,7 +403,7 @@ def pocket(a, tool_radius, extra_offset, rapid_down_to_height, start_depth, fina
         else:
             depth = start_depth - i * stepdown
         
-        cut_curvelist(curve_list, rapid_down_to_height, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
+        cut_curvelist(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
         current_start_depth = depth
 
 

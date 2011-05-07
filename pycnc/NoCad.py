@@ -74,10 +74,8 @@ class NoCad(Cad):
         else:
             pass
             
-    def register_callbacks(self):
-        #heekscad.register_callbacks(self.on_new_or_open)
+    def on_start(self):
         pass
-        # to do, on_save
         
     def get_view_units(self):
         return 1.0

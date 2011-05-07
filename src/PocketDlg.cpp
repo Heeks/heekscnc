@@ -17,9 +17,10 @@ enum
 	ID_KEEP_TOOL_DOWN,
 	ID_USE_ZIG_ZAG,
 	ID_ZIG_ANGLE,
+	ID_ZIG_UNIDIRECTIONAL,
 	ID_ABS_MODE,
 	ID_CLEARANCE_HEIGHT,
-	ID_RAPID_DOWN_TO_HEIGHT,
+	ID_RAPID_SAFETY_SPACE,
 	ID_START_DEPTH,
 	ID_FINAL_DEPTH,
 	ID_STEP_DOWN,
@@ -38,6 +39,7 @@ BEGIN_EVENT_TABLE(PocketDlg, HDialog)
     EVT_COMBOBOX(ID_STARTING_PLACE,PocketDlg::OnComboStartingPlace)
     EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, PocketDlg::OnCheckKeepToolDown)
     EVT_CHECKBOX(ID_USE_ZIG_ZAG, PocketDlg::OnCheckUseZigZag)
+    EVT_CHECKBOX(ID_ZIG_UNIDIRECTIONAL, PocketDlg::OnCheckZigUnidirectional)
     EVT_COMBOBOX(ID_TOOL,PocketDlg::OnComboTool)
 END_EVENT_TABLE()
 
@@ -50,6 +52,7 @@ wxBitmap* PocketDlg::m_tool_down_bitmap = NULL;
 wxBitmap* PocketDlg::m_not_tool_down_bitmap = NULL;
 wxBitmap* PocketDlg::m_use_zig_zag_bitmap = NULL;
 wxBitmap* PocketDlg::m_zig_angle_bitmap = NULL;
+wxBitmap* PocketDlg::m_zig_unidirectional_bitmap = NULL;
 wxBitmap* PocketDlg::m_clearance_height_bitmap = NULL;
 wxBitmap* PocketDlg::m_rapid_down_to_bitmap = NULL;
 wxBitmap* PocketDlg::m_start_depth_bitmap = NULL;
@@ -112,12 +115,13 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, control_border );
 	sizerLeft->Add( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), 0, wxALL, control_border );
 	AddLabelAndControl(sizerLeft, _("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this, ID_ZIG_ANGLE));
+	sizerLeft->Add( m_chkZigUnidirectional = new wxCheckBox( this, ID_ZIG_UNIDIRECTIONAL, _("zig unidirectional") ), 0, wxALL, control_border );
 
 	wxString abs_mode_choices[] = {_("absolute"), _("incremental")};
 	AddLabelAndControl(sizerLeft, _("absolute mode"), m_cmbAbsMode = new wxComboBox(this, ID_ABS_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, abs_mode_choices));
 
 	AddLabelAndControl(sizerLeft, _("clearance height"), m_lgthClearanceHeight = new CLengthCtrl(this, ID_CLEARANCE_HEIGHT));
-	AddLabelAndControl(sizerLeft, _("rapid safety space"), m_lgthRapidDownToHeight = new CLengthCtrl(this, ID_RAPID_DOWN_TO_HEIGHT));
+	AddLabelAndControl(sizerLeft, _("rapid safety space"), m_lgthRapidDownToHeight = new CLengthCtrl(this, ID_RAPID_SAFETY_SPACE));
 	AddLabelAndControl(sizerLeft, _("start depth"), m_lgthStartDepth = new CLengthCtrl(this, ID_START_DEPTH));
 	AddLabelAndControl(sizerLeft, _("final depth"), m_lgthFinalDepth = new CLengthCtrl(this, ID_FINAL_DEPTH));
 	AddLabelAndControl(sizerLeft, _("step down"), m_lgthStepDown = new CLengthCtrl(this, ID_STEP_DOWN));
@@ -158,7 +162,7 @@ void PocketDlg::GetData(CPocket* object)
 	if(object->m_pocket_params.m_use_zig_zag)object->m_pocket_params.m_zig_angle = m_dblZigAngle->GetValue();
 	object->m_depth_op_params.m_abs_mode = (m_cmbAbsMode->GetValue().CmpNoCase(_("incremental")) == 0) ? CDepthOpParams::eIncremental : CDepthOpParams::eAbsolute;
 	object->m_depth_op_params.m_clearance_height = m_lgthClearanceHeight->GetValue();
-	object->m_depth_op_params.m_rapid_down_to_height = m_lgthRapidDownToHeight->GetValue();
+	object->m_depth_op_params.m_rapid_safety_space = m_lgthRapidDownToHeight->GetValue();
 	object->m_depth_op_params.m_start_depth = m_lgthStartDepth->GetValue();
 	object->m_depth_op_params.m_final_depth = m_lgthFinalDepth->GetValue();
 	object->m_depth_op_params.m_step_down = m_lgthStepDown->GetValue();
@@ -204,7 +208,7 @@ void PocketDlg::SetFromData(CPocket* object)
 	if(object->m_pocket_params.m_use_zig_zag)m_dblZigAngle->SetValue(object->m_pocket_params.m_zig_angle);
 	m_cmbAbsMode->SetValue((object->m_depth_op_params.m_abs_mode == CDepthOpParams::eAbsolute) ? _("absolute") : _("incremental"));
 	m_lgthClearanceHeight->SetValue(object->m_depth_op_params.m_clearance_height);
-	m_lgthRapidDownToHeight->SetValue(object->m_depth_op_params.m_rapid_down_to_height);
+	m_lgthRapidDownToHeight->SetValue(object->m_depth_op_params.m_rapid_safety_space);
 	m_lgthStartDepth->SetValue(object->m_depth_op_params.m_start_depth);
 	m_lgthFinalDepth->SetValue(object->m_depth_op_params.m_final_depth);
 	m_lgthStepDown->SetValue(object->m_depth_op_params.m_step_down);
@@ -244,6 +248,11 @@ void PocketDlg::SetPicture()
 		else SetPicture(&m_general_bitmap, _T("general"));
 	}
 	else if(w == m_dblZigAngle)SetPicture(&m_zig_angle_bitmap, _T("zig angle"));
+	else if(w == m_chkZigUnidirectional)
+	{
+		if(m_chkZigUnidirectional->IsChecked())SetPicture(&m_zig_unidirectional_bitmap, _T("zig unidirectional"));
+		else SetPicture(&m_general_bitmap, _T("general"));
+	}
 	else if(w == m_lgthClearanceHeight)SetPicture(&m_clearance_height_bitmap, _T("clearance height"));
 	else if(w == m_lgthRapidDownToHeight)SetPicture(&m_rapid_down_to_bitmap, _T("rapid down height"));
 	else if(w == m_lgthStartDepth)SetPicture(&m_start_depth_bitmap, _T("start depth"));
@@ -280,6 +289,12 @@ void PocketDlg::OnCheckKeepToolDown(wxCommandEvent& event)
 }
 
 void PocketDlg::OnCheckUseZigZag(wxCommandEvent& event)
+{
+	if(m_ignore_event_functions)return;
+	SetPicture();
+}
+
+void PocketDlg::OnCheckZigUnidirectional(wxCommandEvent& event)
 {
 	if(m_ignore_event_functions)return;
 	SetPicture();
