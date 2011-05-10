@@ -506,7 +506,7 @@ class Creator(nc.Creator):
                             x1, y1 = self.quadrant_start(q, i, j, rad)
                         else:
                             x1, y1 = self.quadrant_end(q, i, j, rad)
-                    self.arc(cw, x1, y1, z, i, j, k, r)
+                    if (self.fmt.string(x1) != self.fmt.string(self.x)) or (self.fmt.string(y1) != self.fmt.string(self.y)): self.arc(cw, x1, y1, z, i, j, k, r)
                     if q == qe:
                         break
                     if cw:
