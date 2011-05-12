@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
 AppName=HeeksCNC
-AppVerName=HeeksCNC 0.17.2
+AppVerName=HeeksCNC 0.18.0
 AppPublisher=Heeks Software
 AppPublisherURL=http://heeks.net/
 AppSupportURL=http://code.google.com/p/heekscnc/
@@ -15,7 +15,7 @@ AppUpdatesURL=http://code.google.com/p/heekscnc/
 DefaultDirName={pf}\HeeksCNC
 DefaultGroupName=HeeksCNC
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.17.2
+OutputBaseFilename=HeeksCNC 0.18.0
 Compression=lzma
 SolidCompression=yes
 
@@ -40,13 +40,16 @@ Source: "C:\Users\Dan\HeeksCAD\wxmsw28u_gl_vc_custom.dll"; DestDir: "{app}"; Fla
 Source: "C:\Users\Dan\HeeksCAD\wxmsw28u_core_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\wxmsw28u_aui_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\wxbase28u_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\post.bat"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\nc_read.bat"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\post for installer.bat"; DestDir: "{app}\HeeksCNC"; DestName: "post.bat"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\nc_read for installer.bat"; DestDir: "{app}\HeeksCNC"; DestName: "nc_read.bat"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\backplot.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\Users\Dan\libarea\Release\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\libarea\Release\area.pyd"; DestDir: "{app}\HeeksCNC\Boolean"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\subdir.manifest"; DestDir: "{app}\HeeksCNC\Boolean"; DestName: "Microsoft.VC90.CRT.manifest"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\kurve_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\area_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\Users\Dan\HeeksCNC\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Users\Dan\libarea\ClipperRelease\area.pyd"; DestDir: "{app}\HeeksCNC\Clipper"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\subdir.manifest"; DestDir: "{app}\HeeksCNC\Clipper"; DestName: "Microsoft.VC90.CRT.manifest"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\ocl_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\ocl.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCNC\*.speeds"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
@@ -59,14 +62,14 @@ Source: "C:\Users\Dan\HeeksCNC\bitmaps\pocket\*.png"; DestDir: "{app}\HeeksCNC\b
 Source: "C:\Users\Dan\HeeksCNC\icons\*.png"; DestDir: "{app}\HeeksCNC\icons"; Flags: ignoreversion
 Source: "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\apps\python-2.6.4.msi"; DestDir: "{tmp}"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCNC\dist\*"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\python26\python.exe"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\HeeksCNC"; Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
 
 [Run]
-Filename: "{tmp}\python-2.6.4.msi"; Flags: shellexec skipifsilent
 Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Description: "{cm:LaunchProgram,HeeksCNC}"; Flags: nowait postinstall skipifsilent
 
 [Registry]

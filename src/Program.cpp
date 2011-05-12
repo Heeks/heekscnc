@@ -715,6 +715,11 @@ Python CProgram::RewritePythonProgram()
 				python << _T("# coding=CP1252\n");
 				python << _T("# German language or it's variant detected in Microsoft Windows\n");
 				break;
+			case wxLANGUAGE_DUTCH  :
+			case wxLANGUAGE_DUTCH_BELGIAN  :
+				python << _T("# coding=CP1252\n");
+				python << _T("# Dutch language or it's variant detected in Microsoft Windows\n");
+				break;
 			case wxLANGUAGE_FRENCH:
 			case wxLANGUAGE_FRENCH_BELGIAN:
 			case wxLANGUAGE_FRENCH_CANADIAN:
@@ -774,17 +779,32 @@ Python CProgram::RewritePythonProgram()
 #endif
 	python << _T("import math\n");
 
+	// area related things
+	if(area_module_needed)
+	{
+#ifdef CMAKE_UNIX
+	#ifdef RUNINPLACE
+	        python << _T("sys.path.insert(0,'") << theApp.GetResFolder() << _T("/") << (theApp.m_use_Clipper_not_Boolean ? _T("Clipper"):_T("Boolean")) << theApp.m_T("/')\n");
+	#else
+	        python << _T("sys.path.insert(0,'/usr/lib/heekscnc/") << (theApp.m_use_Clipper_not_Boolean ? _T("Clipper"):_T("Boolean")) << _T("')\n");
+	#endif
+#else
+#ifndef WIN32
+#ifndef RUNINPLACE
+	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/") + (theApp.m_use_Clipper_not_Boolean ? _T("/Clipper"):_T("/Boolean"))) << _T(")\n");
+#endif
+#endif
+	python << _T("sys.path.insert(0,") << PythonString(theApp.GetResFolder() + (theApp.m_use_Clipper_not_Boolean ? _T("/Clipper"):_T("/Boolean"))) << _T(")\n");
+#endif
+
+		python << _T("import area\n");
+		python << _T("area.set_units(") << m_units << _T(")\n");
+	}
+
 	// kurve related things
 	if(kurve_funcs_needed)
 	{
 		python << _T("import kurve_funcs\n");
-	}
-
-	// area related things
-	if(area_module_needed)
-	{
-		python << _T("import area\n");
-		python << _T("area.set_units(") << m_units << _T(")\n");
 	}
 
 	if(area_funcs_needed)
