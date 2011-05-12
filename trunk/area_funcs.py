@@ -60,7 +60,6 @@ def make_obround(p0, p1, radius):
     right = area.Point(dir.y, -dir.x)
     obround = area.Area()
     c = area.Curve()
-    print "right = ", right, "  radius = ", radius
     vt0 = p0 + right * radius
     vt1 = p1 + right * radius
     vt2 = p1 - right * radius

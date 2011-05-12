@@ -16,6 +16,7 @@
 #include <wx/dynlib.h>
 #include <wx/aui/aui.h>
 #include "interface/PropertyString.h"
+#include "interface/PropertyCheck.h"
 #include "interface/PropertyList.h"
 #include "interface/Observer.h"
 #include "interface/PToolImage.h"
@@ -1593,6 +1594,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	CRaft::ReadFromConfig();
 #endif
 	CSendToMachine::ReadFromConfig();
+	config.Read(_T("UseClipperNotBoolean"), &m_use_Clipper_not_Boolean, false);
 
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
@@ -1867,6 +1869,11 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 	} // End if - then
 }
 
+void on_set_use_clipper(bool value, HeeksObj* object)
+{
+	theApp.m_use_Clipper_not_Boolean = value;
+}
+
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	PropertyList* machining_options = new PropertyList(_("machining options"));
 	CNCCode::GetOptions(&(machining_options->m_list));
@@ -1881,6 +1888,7 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	CInlay::GetOptions(&(machining_options->m_list));
 #endif
 	CSendToMachine::GetOptions(&(machining_options->m_list));
+	machining_options->m_list.push_back ( new PropertyCheck ( _("Use Clipper not Boolean"), m_use_Clipper_not_Boolean, NULL, on_set_use_clipper ) );
 
 	list->push_back(machining_options);
 
@@ -1905,6 +1913,7 @@ void CHeeksCNCApp::OnFrameDelete()
 #endif
 	CSpeedOp::WriteToConfig();
 	CSendToMachine::WriteToConfig();
+	config.Write(_T("UseClipperNotBoolean"), m_use_Clipper_not_Boolean);
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
