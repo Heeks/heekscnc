@@ -782,18 +782,7 @@ Python CProgram::RewritePythonProgram()
 	// area related things
 	if(area_module_needed)
 	{
-#ifdef CMAKE_UNIX
-	#ifdef RUNINPLACE
-	        python << _T("sys.path.insert(0,'") << theApp.GetResFolder() << _T("/") << (theApp.m_use_Clipper_not_Boolean ? _T("Clipper"):_T("Boolean")) << theApp.m_T("/')\n");
-	#else
-	        python << _T("sys.path.insert(0,'/usr/lib/heekscnc/") << (theApp.m_use_Clipper_not_Boolean ? _T("Clipper"):_T("Boolean")) << _T("')\n");
-	#endif
-#else
-#ifndef WIN32
-#ifndef RUNINPLACE
-	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/") + (theApp.m_use_Clipper_not_Boolean ? _T("/Clipper"):_T("/Boolean"))) << _T(")\n");
-#endif
-#endif
+#ifdef WIN32
 	python << _T("sys.path.insert(0,") << PythonString(theApp.GetResFolder() + (theApp.m_use_Clipper_not_Boolean ? _T("/Clipper"):_T("/Boolean"))) << _T(")\n");
 #endif
 
