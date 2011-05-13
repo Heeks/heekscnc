@@ -187,20 +187,20 @@ void CRaftParams::GetProperties(CRaft* parent, std::list<Property *> *list)
 void CRaftParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetDoubleAttribute("step", m_step_over);
-	element->SetDoubleAttribute("mat", m_material_allowance);
-	element->SetDoubleAttribute("rf", m_round_corner_factor);
-	element->SetAttribute("from_center", m_starting_place);
-	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
-	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
-	element->SetDoubleAttribute("zig_angle", m_zig_angle);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetDoubleAttribute( "step", m_step_over);
+	element->SetDoubleAttribute( "mat", m_material_allowance);
+	element->SetDoubleAttribute( "rf", m_round_corner_factor);
+	element->SetAttribute( "from_center", m_starting_place);
+	element->SetAttribute( "keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
+	element->SetAttribute( "use_zig_zag", m_use_zig_zag ? 1:0);
+	element->SetDoubleAttribute( "zig_angle", m_zig_angle);
 
-	element->SetDoubleAttribute("baselayers", m_baselayers);
-	element->SetDoubleAttribute("interfacelayers", m_interfacelayers);
-	element->SetAttribute("Base_Layer_Extrusion", m_baselayerextrusion);
-	element->SetAttribute("Interface_Layer_Extrusion", m_interfacelayerextrusion);
+	element->SetDoubleAttribute( "baselayers", m_baselayers);
+	element->SetDoubleAttribute( "interfacelayers", m_interfacelayers);
+	element->SetAttribute( "Base_Layer_Extrusion", m_baselayerextrusion);
+	element->SetAttribute( "Interface_Layer_Extrusion", m_interfacelayerextrusion);
 }
 
 void CRaftParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -614,17 +614,17 @@ bool CRaft::CanAddTo(HeeksObj* owner)
 
 void CRaft::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Raft" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Raft" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
 	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
-		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );
-		sketch_element->SetAttribute("id", sketch);
+		TiXmlElement * sketch_element = heeksCAD->NewXMLElement( "sketch" );
+		heeksCAD->LinkXMLEndChild( element, sketch_element );
+		sketch_element->SetAttribute( "id", sketch);
 	}
 
 	WriteBaseXML(element);
@@ -638,7 +638,7 @@ HeeksObj* CRaft::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read profile parameters
-	TiXmlElement* params = TiXmlHandle(element).FirstChildElement("params").Element();
+	TiXmlElement* params = heeksCAD->FirstNamedXMLChildElement(element, "params");
 	if(params)
 	{
 		new_object->m_params.ReadFromXMLElement(params);
@@ -646,7 +646,7 @@ HeeksObj* CRaft::ReadFromXMLElement(TiXmlElement* element)
 	}
 
 	// read sketch ids
-	for(TiXmlElement* sketch = TiXmlHandle(element).FirstChildElement("sketch").Element(); sketch; sketch = sketch->NextSiblingElement())
+	for(TiXmlElement* sketch = heeksCAD->FirstNamedXMLChildElement(element, "sketch"); sketch; sketch = sketch->NextSiblingElement())
 	{
 		if ((wxString(Ctt(sketch->Value())) == wxString(_T("sketch"))) &&
 			(sketch->Attribute("id") != NULL) &&
@@ -665,7 +665,7 @@ HeeksObj* CRaft::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	// read common parameters

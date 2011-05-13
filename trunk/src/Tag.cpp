@@ -100,13 +100,13 @@ void CTag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 void CTag::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "Tag" );
-	root->LinkEndChild( element );
-	element->SetDoubleAttribute("x", m_pos[0]);
-	element->SetDoubleAttribute("y", m_pos[1]);
-	element->SetDoubleAttribute("width", m_width);
-	element->SetDoubleAttribute("angle", m_angle);
-	element->SetDoubleAttribute("height", m_height);
+	element = heeksCAD->NewXMLElement( "Tag" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetDoubleAttribute( "x", m_pos[0]);
+	element->SetDoubleAttribute( "y", m_pos[1]);
+	element->SetDoubleAttribute( "width", m_width);
+	element->SetDoubleAttribute( "angle", m_angle);
+	element->SetDoubleAttribute( "height", m_height);
 	WriteBaseXML(element);
 }
 

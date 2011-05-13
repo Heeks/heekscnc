@@ -25,17 +25,6 @@ extern "C" {
 #include <GL/glu.h>
 #endif
 }
-#if 0
-#include <wx/glcanvas.h>
-#include <wx/config.h>
-#include <wx/confbase.h>
-#include <wx/fileconf.h>
-#include <wx/splitter.h>
-#ifdef WIN32
-#include <wx/msw/regconf.h>
-#endif
-#include <wx/aui/aui.h>
-#endif
 
 #include "HeeksCNC.h"
 #include "interface/strconv.h"

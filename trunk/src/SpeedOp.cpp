@@ -190,23 +190,23 @@ void CSpeedOpParams::GetProperties(CSpeedOp* parent, std::list<Property *> *list
 
 void CSpeedOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 {
-	TiXmlElement * element = new TiXmlElement( "speedop" );
-	pElem->LinkEndChild( element );
-	element->SetDoubleAttribute("hfeed", m_horizontal_feed_rate);
-	element->SetDoubleAttribute("vfeed", m_vertical_feed_rate);
-	element->SetDoubleAttribute("spin", m_spindle_speed);
+	TiXmlElement * element = heeksCAD->NewXMLElement( "speedop" );
+	heeksCAD->LinkXMLEndChild( pElem,  element );
+	element->SetDoubleAttribute( "hfeed", m_horizontal_feed_rate);
+	element->SetDoubleAttribute( "vfeed", m_vertical_feed_rate);
+	element->SetDoubleAttribute( "spin", m_spindle_speed);
 }
 
 void CSpeedOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	TiXmlElement* speedop = TiXmlHandle(pElem).FirstChildElement("speedop").Element();
+	TiXmlElement* speedop = heeksCAD->FirstNamedXMLChildElement(pElem, "speedop");
 	if(speedop)
 	{
 		speedop->Attribute("hfeed", &m_horizontal_feed_rate);
 		speedop->Attribute("vfeed", &m_vertical_feed_rate);
 		speedop->Attribute("spin", &m_spindle_speed);
 
-		pElem->RemoveChild(speedop);
+		heeksCAD->RemoveXMLChild(pElem, speedop);
 	}
 }
 

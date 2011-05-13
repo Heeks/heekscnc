@@ -43,11 +43,10 @@ const wxBitmap& COp::GetInactiveIcon()
 
 void COp::WriteBaseXML(TiXmlElement *element)
 {
-	if(m_comment.Len() > 0)element->SetAttribute("comment", m_comment.utf8_str());
-	element->SetAttribute("active", m_active);
-	element->SetAttribute("title", m_title.utf8_str());
-	element->SetAttribute("execution_order", m_execution_order);
-	element->SetAttribute("tool_number", m_tool_number);
+	if(m_comment.Len() > 0)element->SetAttribute( "comment", m_comment.utf8_str());
+	element->SetAttribute( "active", m_active);
+	element->SetAttribute( "title", m_title.utf8_str());
+	element->SetAttribute( "tool_number", m_tool_number);
 
 	ObjList::WriteBaseXML(element);
 }
@@ -70,15 +69,6 @@ void COp::ReadBaseXML(TiXmlElement* element)
 
 	const char* title = element->Attribute("title");
 	if(title)m_title = wxString(Ctt(title));
-
-	if (element->Attribute("execution_order") != NULL)
-	{
-		m_execution_order = atoi(element->Attribute("execution_order"));
-	} // End if - then
-	else
-	{
-		m_execution_order = 0;
-	} // End if - else
 
 	if (element->Attribute("tool_number") != NULL)
 	{
@@ -103,7 +93,6 @@ void COp::ReadBaseXML(TiXmlElement* element)
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
 static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->Changed();}
-static void on_set_execution_order(int value, HeeksObj* object){((COp*)object)->m_execution_order = value;heeksCAD->Changed();}
 
 static void on_set_tool_number(int zero_based_choice, HeeksObj* object)
 {
@@ -125,7 +114,6 @@ void COp::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyString(_("comment"), m_comment, this, on_set_comment));
 	list->push_back(new PropertyCheck(_("active"), m_active, this, on_set_active));
-	list->push_back(new PropertyInt(_("execution_order"), m_execution_order, this, on_set_execution_order));
 
 	if(UsesTool()){
 		std::vector< std::pair< int, wxString > > tools = FIND_ALL_TOOLS();
@@ -171,7 +159,6 @@ COp & COp::operator= ( const COp & rhs )
 		m_comment = rhs.m_comment;
 		m_active = rhs.m_active;
 		m_title = rhs.m_title;
-		m_execution_order = rhs.m_execution_order;
 		m_tool_number = rhs.m_tool_number;
 		m_operation_type = rhs.m_operation_type;
 	}
@@ -379,7 +366,6 @@ bool COp::operator==(const COp & rhs) const
 	if (m_comment != rhs.m_comment) return(false);
 	if (m_active != rhs.m_active) return(false);
 	if (m_title != rhs.m_title) return(false);
-	if (m_execution_order != rhs.m_execution_order) return(false);
 	if (m_tool_number != rhs.m_tool_number) return(false);
 	if (m_operation_type != rhs.m_operation_type) return(false);
 

@@ -80,10 +80,10 @@ void CCounterBoreParams::GetProperties(CCounterBore* parent, std::list<Property 
 void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetDoubleAttribute("diameter", m_diameter);
-	element->SetAttribute("sort_locations", m_sort_locations);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetDoubleAttribute( "diameter", m_diameter);
+	element->SetAttribute( "sort_locations", m_sort_locations);
 }
 
 void CCounterBoreParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -518,17 +518,17 @@ bool CCounterBore::CanAddTo(HeeksObj*  owner)
 
 void CCounterBore::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "CounterBore" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "CounterBore" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
 	TiXmlElement * symbols;
-	symbols = new TiXmlElement( "symbols" );
-	element->LinkEndChild( symbols );
+	symbols = heeksCAD->NewXMLElement( "symbols" );
+	heeksCAD->LinkXMLEndChild( element, symbols );
 
 	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
 	{
-		TiXmlElement * symbol = new TiXmlElement( "symbol" );
+		TiXmlElement * symbol = heeksCAD->NewXMLElement( "symbol" );
 		symbols->LinkEndChild( symbol );
 		symbol->SetAttribute("type", l_itSymbol->first );
 		symbol->SetAttribute("id", l_itSymbol->second );
@@ -545,7 +545,7 @@ HeeksObj*  CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read point and circle ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -553,7 +553,7 @@ HeeksObj*  CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
-			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
+			for(TiXmlElement* child = heeksCAD->FirstXMLChildElement( pElem ) ; child; child = child->NextSiblingElement())
 			{
 				if (child->Attribute("type") && child->Attribute("id"))
 				{
@@ -567,7 +567,7 @@ HeeksObj*  CCounterBore::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);

@@ -223,53 +223,53 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetAttribute("side", m_tool_on_side);
-	element->SetAttribute("cut_mode", m_cut_mode);
-	element->SetAttribute("auto_roll_on", m_auto_roll_on ? 1:0);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "side", m_tool_on_side);
+	element->SetAttribute( "cut_mode", m_cut_mode);
+	element->SetAttribute( "auto_roll_on", m_auto_roll_on ? 1:0);
 	if(!m_auto_roll_on)
 	{
-		element->SetDoubleAttribute("roll_onx", m_roll_on_point[0]);
-		element->SetDoubleAttribute("roll_ony", m_roll_on_point[1]);
-		element->SetDoubleAttribute("roll_onz", m_roll_on_point[2]);
+		element->SetDoubleAttribute( "roll_onx", m_roll_on_point[0]);
+		element->SetDoubleAttribute( "roll_ony", m_roll_on_point[1]);
+		element->SetDoubleAttribute( "roll_onz", m_roll_on_point[2]);
 	}
-	element->SetAttribute("auto_roll_off", m_auto_roll_off ? 1:0);
+	element->SetAttribute( "auto_roll_off", m_auto_roll_off ? 1:0);
 	if(!m_auto_roll_off)
 	{
-		element->SetDoubleAttribute("roll_offx", m_roll_off_point[0]);
-		element->SetDoubleAttribute("roll_offy", m_roll_off_point[1]);
-		element->SetDoubleAttribute("roll_offz", m_roll_off_point[2]);
+		element->SetDoubleAttribute( "roll_offx", m_roll_off_point[0]);
+		element->SetDoubleAttribute( "roll_offy", m_roll_off_point[1]);
+		element->SetDoubleAttribute( "roll_offz", m_roll_off_point[2]);
 	}
 	if(m_auto_roll_on || m_auto_roll_off)
 	{
-		element->SetDoubleAttribute("roll_radius", m_auto_roll_radius);
+		element->SetDoubleAttribute( "roll_radius", m_auto_roll_radius);
 	}
-	element->SetAttribute("start_given", m_start_given ? 1:0);
+	element->SetAttribute( "start_given", m_start_given ? 1:0);
 	if(m_start_given)
 	{
-		element->SetDoubleAttribute("startx", m_start[0]);
-		element->SetDoubleAttribute("starty", m_start[1]);
-		element->SetDoubleAttribute("startz", m_start[2]);
+		element->SetDoubleAttribute( "startx", m_start[0]);
+		element->SetDoubleAttribute( "starty", m_start[1]);
+		element->SetDoubleAttribute( "startz", m_start[2]);
 	}
-	element->SetAttribute("end_given", m_end_given ? 1:0);
+	element->SetAttribute( "end_given", m_end_given ? 1:0);
 	if(m_end_given)
 	{
-		element->SetDoubleAttribute("endx", m_end[0]);
-		element->SetDoubleAttribute("endy", m_end[1]);
-		element->SetDoubleAttribute("endz", m_end[2]);
-		element->SetAttribute("end_beyond_full_profile", m_end_beyond_full_profile ? 1:0);
+		element->SetDoubleAttribute( "endx", m_end[0]);
+		element->SetDoubleAttribute( "endy", m_end[1]);
+		element->SetDoubleAttribute( "endz", m_end[2]);
+		element->SetAttribute( "end_beyond_full_profile", m_end_beyond_full_profile ? 1:0);
 	}
 
 	std::ostringstream l_ossValue;
 	l_ossValue << m_sort_sketches;
-	element->SetAttribute("sort_sketches", l_ossValue.str().c_str());
+	element->SetAttribute( "sort_sketches", l_ossValue.str().c_str());
 
-	element->SetDoubleAttribute("offset_extra", m_offset_extra);
-	element->SetAttribute("do_finishing_pass", m_do_finishing_pass ? 1:0);
-	element->SetDoubleAttribute("finishing_feed_rate", m_finishing_h_feed_rate);
-	element->SetAttribute("finish_cut_mode", m_finishing_cut_mode);
-	element->SetDoubleAttribute("finishing_step_down", m_finishing_step_down);
+	element->SetDoubleAttribute( "offset_extra", m_offset_extra);
+	element->SetAttribute( "do_finishing_pass", m_do_finishing_pass ? 1:0);
+	element->SetDoubleAttribute( "finishing_feed_rate", m_finishing_h_feed_rate);
+	element->SetAttribute( "finish_cut_mode", m_finishing_cut_mode);
+	element->SetDoubleAttribute( "finishing_step_down", m_finishing_step_down);
 }
 
 void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -992,8 +992,8 @@ bool CProfile::CanAddTo(HeeksObj* owner)
 
 void CProfile::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Profile" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Profile" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_profile_params.WriteXMLAttributes(element);
 
 	/*
@@ -1001,9 +1001,9 @@ void CProfile::WriteXML(TiXmlNode *root)
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
-		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );
-		sketch_element->SetAttribute("id", sketch);
+		TiXmlElement * sketch_element = heeksCAD->NewXMLElement( "sketch" );
+		heeksCAD->LinkXMLEndChild( element, sketch_element );
+		sketch_element->SetAttribute( "id", sketch);
 	}
 	*/
 
@@ -1018,7 +1018,7 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read profile parameters
-	TiXmlElement* params = TiXmlHandle(element).FirstChildElement("params").Element();
+	TiXmlElement* params = heeksCAD->FirstNamedXMLChildElement(element, "params");
 	if(params)
 	{
 		new_object->m_profile_params.ReadFromXMLElement(params);
@@ -1026,7 +1026,7 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 	}
 
 	// read sketch ids
-	for(TiXmlElement* sketch = TiXmlHandle(element).FirstChildElement("sketch").Element(); sketch; sketch = sketch->NextSiblingElement())
+	for(TiXmlElement* sketch = heeksCAD->FirstNamedXMLChildElement(element, "sketch"); sketch; sketch = sketch->NextSiblingElement())
 	{
 		if ((wxString(Ctt(sketch->Value())) == wxString(_T("sketch"))) &&
 			(sketch->Attribute("id") != NULL) &&
@@ -1045,7 +1045,7 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	// read common parameters

@@ -130,16 +130,16 @@ void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetDoubleAttribute("step", m_step_over);
-	element->SetDoubleAttribute("mat", m_material_allowance);
-	element->SetAttribute("from_center", m_starting_place);
-	element->SetAttribute("keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
-	element->SetAttribute("use_zig_zag", m_use_zig_zag ? 1:0);
-	element->SetDoubleAttribute("zig_angle", m_zig_angle);
-	element->SetAttribute("zig_unidirectional", m_zig_unidirectional ? 1:0);
-	element->SetAttribute("entry_move", (int) m_entry_move);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetDoubleAttribute( "step", m_step_over);
+	element->SetDoubleAttribute( "mat", m_material_allowance);
+	element->SetAttribute( "from_center", m_starting_place);
+	element->SetAttribute( "keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
+	element->SetAttribute( "use_zig_zag", m_use_zig_zag ? 1:0);
+	element->SetDoubleAttribute( "zig_angle", m_zig_angle);
+	element->SetAttribute( "zig_unidirectional", m_zig_unidirectional ? 1:0);
+	element->SetAttribute( "entry_move", (int) m_entry_move);
 }
 
 void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -559,16 +559,16 @@ bool CPocket::CanAddTo(HeeksObj* owner)
 
 void CPocket::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Pocket" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Pocket" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_pocket_params.WriteXMLAttributes(element);
 
 	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
-		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );
+		TiXmlElement * sketch_element = heeksCAD->NewXMLElement( "sketch" );
+		heeksCAD->LinkXMLEndChild( element, sketch_element );
 		sketch_element->SetAttribute("id", sketch);
 	}
 
@@ -583,7 +583,7 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read profile parameters
-	TiXmlElement* params = TiXmlHandle(element).FirstChildElement("params").Element();
+	TiXmlElement* params = heeksCAD->FirstNamedXMLChildElement(element, "params");
 	if(params)
 	{
 		new_object->m_pocket_params.ReadFromXMLElement(params);
@@ -591,7 +591,7 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 	}
 
 	// read sketch ids
-	for(TiXmlElement* sketch = TiXmlHandle(element).FirstChildElement("sketch").Element(); sketch; sketch = sketch->NextSiblingElement())
+	for(TiXmlElement* sketch = heeksCAD->FirstNamedXMLChildElement(element, "sketch"); sketch; sketch = sketch->NextSiblingElement())
 	{
 		if ((wxString(Ctt(sketch->Value())) == wxString(_T("sketch"))) &&
 			(sketch->Attribute("id") != NULL) &&
@@ -610,7 +610,7 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	// read common parameters

@@ -426,18 +426,18 @@ void CProgram::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_
 void CProgram::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "Program" );
-	root->LinkEndChild( element );
-	element->SetAttribute("machine", m_machine.file_name.utf8_str());
-	element->SetAttribute("output_file", m_output_file.utf8_str());
-	element->SetAttribute("output_file_name_follows_data_file_name", (int) (m_output_file_name_follows_data_file_name?1:0));
+	element = heeksCAD->NewXMLElement( "Program" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "machine", m_machine.file_name.utf8_str());
+	element->SetAttribute( "output_file", m_output_file.utf8_str());
+	element->SetAttribute( "output_file_name_follows_data_file_name", (int) (m_output_file_name_follows_data_file_name?1:0));
 
-	element->SetAttribute("program", theApp.m_program_canvas->m_textCtrl->GetValue().utf8_str());
-	element->SetDoubleAttribute("units", m_units);
+	element->SetAttribute( "program", theApp.m_program_canvas->m_textCtrl->GetValue().utf8_str());
+	element->SetDoubleAttribute( "units", m_units);
 
-	element->SetAttribute("ProgramPathControlMode", int(m_path_control_mode));
-	element->SetDoubleAttribute("ProgramMotionBlendingTolerance", m_motion_blending_tolerance);
-	element->SetDoubleAttribute("ProgramNaiveCamTolerance", m_naive_cam_tolerance);
+	element->SetAttribute( "ProgramPathControlMode", int(m_path_control_mode));
+	element->SetDoubleAttribute( "ProgramMotionBlendingTolerance", m_motion_blending_tolerance);
+	element->SetDoubleAttribute( "ProgramNaiveCamTolerance", m_naive_cam_tolerance);
 
 	m_raw_material.WriteBaseXML(element);
 	m_machine.WriteBaseXML(element);
@@ -527,9 +527,9 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 
 void CMachine::WriteBaseXML(TiXmlElement *element)
 {
-	element->SetDoubleAttribute("max_spindle_speed", m_max_spindle_speed);
-	element->SetAttribute("safety_height_defined", m_safety_height_defined);
-	element->SetDoubleAttribute("safety_height", m_safety_height);
+	element->SetDoubleAttribute( "max_spindle_speed", m_max_spindle_speed);
+	element->SetAttribute( "safety_height_defined", m_safety_height_defined);
+	element->SetDoubleAttribute( "safety_height", m_safety_height);
 } // End WriteBaseXML() method
 
 void CMachine::ReadBaseXML(TiXmlElement* element)
@@ -559,9 +559,6 @@ struct sort_operations : public std::binary_function< bool, COp *, COp * >
 {
 	bool operator() ( const COp *lhs, const COp *rhs ) const
 	{
-		if (lhs->m_execution_order < rhs->m_execution_order) return(true);
-		if (lhs->m_execution_order > rhs->m_execution_order) return(false);
-
 		// We want to run through all the centre drilling, then drilling, then milling then chamfering.
 
 		if ((((HeeksObj *)lhs)->GetType() == ChamferType) && (((HeeksObj *)rhs)->GetType() != ChamferType)) return(false);
@@ -618,8 +615,8 @@ Python CProgram::RewritePythonProgram()
 
 	theApp.m_program_canvas->m_textCtrl->Clear();
 	CZigZag::number_for_stl_file = 1;
-	CWaterline::number_for_stl_file = 1;
 #ifndef STABLE_OPS_ONLY
+	CWaterline::number_for_stl_file = 1;
 	CAdaptive::number_for_stl_file = 1;
 #endif
 	CAttachOp::number_for_stl_file = 1;
@@ -692,8 +689,10 @@ Python CProgram::RewritePythonProgram()
 		}
 	}
 
+#ifndef STABLE_OPS_ONLY
 	// Sort the operations in order of execution_order and then by tool_number
 	std::sort( operations.begin(), operations.end(), sort_operations() );
+#endif
 
 	// Language and Windows codepage detection and correction
 	#ifndef WIN32

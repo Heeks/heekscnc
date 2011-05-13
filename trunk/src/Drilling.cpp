@@ -170,17 +170,17 @@ void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *li
 void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("standoff", m_standoff);
-	element->SetDoubleAttribute("dwell", m_dwell);
-	element->SetDoubleAttribute("depth", m_depth);
-	element->SetDoubleAttribute("peck_depth", m_peck_depth);
+	element->SetDoubleAttribute( "standoff", m_standoff);
+	element->SetDoubleAttribute( "dwell", m_dwell);
+	element->SetDoubleAttribute( "depth", m_depth);
+	element->SetDoubleAttribute( "peck_depth", m_peck_depth);
 
-	element->SetAttribute("sort_drilling_locations", m_sort_drilling_locations);
-	element->SetAttribute("retract_mode", m_retract_mode);
-	element->SetAttribute("spindle_mode", m_spindle_mode);
+	element->SetAttribute( "sort_drilling_locations", m_sort_drilling_locations);
+	element->SetAttribute( "retract_mode", m_retract_mode);
+	element->SetAttribute( "spindle_mode", m_spindle_mode);
 }
 
 void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -480,13 +480,13 @@ bool CDrilling::CanAdd(HeeksObj* object)
 
 void CDrilling::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Drilling" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Drilling" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
 	TiXmlElement * symbols;
-	symbols = new TiXmlElement( "symbols" );
-	element->LinkEndChild( symbols );
+	symbols = heeksCAD->NewXMLElement( "symbols" );
+	heeksCAD->LinkXMLEndChild( element, symbols );
 
 	WriteBaseXML(element);
 }
@@ -499,7 +499,7 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read point and circle ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -507,7 +507,7 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
-			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
+			for(TiXmlElement* child = heeksCAD->FirstXMLChildElement( pElem ) ; child; child = child->NextSiblingElement())
 			{
 				if (child->Attribute("type") && child->Attribute("id"))
 				{
@@ -530,7 +530,7 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);

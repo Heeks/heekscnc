@@ -6,6 +6,8 @@
  */
 
 #include "stdafx.h"
+
+#ifndef STABLE_OPS_ONLY
 #include "Waterline.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -46,15 +48,15 @@ void CWaterlineParams::GetProperties(CWaterline* parent, std::list<Property *> *
 void CWaterlineParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetDoubleAttribute("minx", m_box.m_x[0]);
-	element->SetDoubleAttribute("maxx", m_box.m_x[3]);
-	element->SetDoubleAttribute("miny", m_box.m_x[1]);
-	element->SetDoubleAttribute("maxy", m_box.m_x[4]);
-	element->SetDoubleAttribute("step_over", m_step_over);
-	element->SetDoubleAttribute("material_allowance", m_material_allowance);
-	element->SetDoubleAttribute("tolerance", m_tolerance);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetDoubleAttribute( "minx", m_box.m_x[0]);
+	element->SetDoubleAttribute( "maxx", m_box.m_x[3]);
+	element->SetDoubleAttribute( "miny", m_box.m_x[1]);
+	element->SetDoubleAttribute( "maxy", m_box.m_x[4]);
+	element->SetDoubleAttribute( "step_over", m_step_over);
+	element->SetDoubleAttribute( "material_allowance", m_material_allowance);
+	element->SetDoubleAttribute( "tolerance", m_tolerance);
 }
 
 void CWaterlineParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -296,8 +298,8 @@ bool CWaterline::CanAddTo(HeeksObj* owner)
 
 void CWaterline::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Waterline" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Waterline" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
 	// write solid ids
@@ -305,8 +307,8 @@ void CWaterline::WriteXML(TiXmlNode *root)
 	{
 		if (object->GetIDGroupType() != SolidType)continue;
 		int solid = object->GetID();
-		TiXmlElement * solid_element = new TiXmlElement( "solid" );
-		element->LinkEndChild( solid_element );
+		TiXmlElement * solid_element = heeksCAD->NewXMLElement( "solid" );
+		heeksCAD->LinkXMLEndChild( element, solid_element );
 		solid_element->SetAttribute("id", solid);
 	}
 
@@ -321,7 +323,7 @@ HeeksObj* CWaterline::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read solid ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -343,7 +345,7 @@ HeeksObj* CWaterline::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);
@@ -471,3 +473,4 @@ bool CWaterline::operator==( const CWaterline & rhs ) const
 
 	return(CDepthOp::operator==(rhs));
 }
+#endif

@@ -967,43 +967,43 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 void CToolParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("diameter", m_diameter);
-	element->SetDoubleAttribute("x_offset", m_x_offset);
-	element->SetDoubleAttribute("tool_length_offset", m_tool_length_offset);
-	element->SetDoubleAttribute("max_advance_per_revolution", m_max_advance_per_revolution);
+	element->SetDoubleAttribute( "diameter", m_diameter);
+	element->SetDoubleAttribute( "x_offset", m_x_offset);
+	element->SetDoubleAttribute( "tool_length_offset", m_tool_length_offset);
+	element->SetDoubleAttribute( "max_advance_per_revolution", m_max_advance_per_revolution);
 
-	element->SetAttribute("automatically_generate_title", m_automatically_generate_title );
-	element->SetAttribute("material", m_material );
-	element->SetAttribute("orientation", m_orientation );
-	element->SetAttribute("type", int(m_type) );
+	element->SetAttribute( "automatically_generate_title", m_automatically_generate_title );
+	element->SetAttribute( "material", m_material );
+	element->SetAttribute( "orientation", m_orientation );
+	element->SetAttribute( "type", int(m_type) );
 
-	element->SetDoubleAttribute("corner_radius", m_corner_radius);
-	element->SetDoubleAttribute("flat_radius", m_flat_radius);
-	element->SetDoubleAttribute("cutting_edge_angle", m_cutting_edge_angle);
-	element->SetDoubleAttribute("cutting_edge_height", m_cutting_edge_height);
+	element->SetDoubleAttribute( "corner_radius", m_corner_radius);
+	element->SetDoubleAttribute( "flat_radius", m_flat_radius);
+	element->SetDoubleAttribute( "cutting_edge_angle", m_cutting_edge_angle);
+	element->SetDoubleAttribute( "cutting_edge_height", m_cutting_edge_height);
 
-	element->SetDoubleAttribute("front_angle", m_front_angle);
-	element->SetDoubleAttribute("tool_angle", m_tool_angle);
-	element->SetDoubleAttribute("back_angle", m_back_angle);
+	element->SetDoubleAttribute( "front_angle", m_front_angle);
+	element->SetDoubleAttribute( "tool_angle", m_tool_angle);
+	element->SetDoubleAttribute( "back_angle", m_back_angle);
 
-	element->SetDoubleAttribute("probe_offset_x", m_probe_offset_x);
-	element->SetDoubleAttribute("probe_offset_y", m_probe_offset_y);
+	element->SetDoubleAttribute( "probe_offset_x", m_probe_offset_x);
+	element->SetDoubleAttribute( "probe_offset_y", m_probe_offset_y);
 
-	element->SetDoubleAttribute("width_over_thickness", m_width_over_thickness);
-	element->SetDoubleAttribute("feedrate", m_feedrate);
-	element->SetAttribute("extrusion_material", m_extrusion_material);
-	element->SetAttribute("automatically_generate_title", m_automatically_generate_title );
-	element->SetDoubleAttribute("layer_height", m_layer_height );
-	element->SetDoubleAttribute("temperature", m_temperature );
-	element->SetDoubleAttribute("filament_diameter", m_filament_diameter );
-	element->SetDoubleAttribute("flowrate", m_flowrate );
-	element->SetDoubleAttribute("gradient", m_gradient);
+	element->SetDoubleAttribute( "width_over_thickness", m_width_over_thickness);
+	element->SetDoubleAttribute( "feedrate", m_feedrate);
+	element->SetAttribute( "extrusion_material", m_extrusion_material);
+	element->SetAttribute( "automatically_generate_title", m_automatically_generate_title );
+	element->SetDoubleAttribute( "layer_height", m_layer_height );
+	element->SetDoubleAttribute( "temperature", m_temperature );
+	element->SetDoubleAttribute( "filament_diameter", m_filament_diameter );
+	element->SetDoubleAttribute( "flowrate", m_flowrate );
+	element->SetDoubleAttribute( "gradient", m_gradient);
 
-	element->SetDoubleAttribute("pitch", m_pitch);
-	element->SetAttribute("direction", m_direction);
+	element->SetDoubleAttribute( "pitch", m_pitch);
+	element->SetAttribute( "direction", m_direction);
 }
 
 void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -1274,11 +1274,11 @@ const wxBitmap &CTool::GetIcon()
 
 void CTool::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Tool" );
-	root->LinkEndChild( element );
-	element->SetAttribute("title", m_title.utf8_str());
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Tool" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "title", m_title.utf8_str());
 
-	element->SetAttribute("tool_number", m_tool_number );
+	element->SetAttribute( "tool_number", m_tool_number );
 
 	m_params.WriteXMLAttributes(element);
 	WriteBaseXML(element);
@@ -1295,7 +1295,7 @@ HeeksObj* CTool::ReadFromXMLElement(TiXmlElement* element)
 	CTool* new_object = new CTool( title.c_str(), CToolParams::eDrill, tool_number);
 
 	// read point and circle ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -2243,22 +2243,22 @@ void CTool::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 void CTool::ImportProbeCalibrationData( const wxString & probed_points_xml_file_name )
 {
-	TiXmlDocument xml;
-	if (! xml.LoadFile( probed_points_xml_file_name.utf8_str()) )
+	TiXmlDocument* xml = heeksCAD->NewXMLDocument();
+	if (! xml->LoadFile( probed_points_xml_file_name.utf8_str()) )
 	{
 		printf("Failed to load XML file '%s'\n", Ttc(probed_points_xml_file_name.c_str()) );
 	} // End if - then
 	else
 	{
-		TiXmlElement *root = xml.RootElement();
+		TiXmlElement *root = xml->RootElement();
 		if (root != NULL)
 		{
 			std::vector<CNCPoint> points;
 
-			for(TiXmlElement* pElem = TiXmlHandle(root).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+			for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( root ); pElem; pElem = pElem->NextSiblingElement())
 			{
 				CNCPoint point(0,0,0);
-				for(TiXmlElement* pPoint = TiXmlHandle(pElem).FirstChildElement().Element(); pPoint; pPoint = pPoint->NextSiblingElement())
+				for(TiXmlElement* pPoint = heeksCAD->FirstXMLChildElement( pElem ) ; pPoint; pPoint = pPoint->NextSiblingElement())
 				{
 					std::string name(pPoint->Value());
 

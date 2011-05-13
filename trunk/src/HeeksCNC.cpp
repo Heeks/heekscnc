@@ -323,6 +323,8 @@ static void NewZigZagOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Changed();
 }
 
+#ifndef STABLE_OPS_ONLY
+
 static void NewWaterlineOpMenuCallback(wxCommandEvent &event)
 {
 	// check for at least one solid selected
@@ -358,8 +360,6 @@ static void NewWaterlineOpMenuCallback(wxCommandEvent &event)
 	heeksCAD->Mark(new_object);
 	heeksCAD->Changed();
 }
-
-#ifndef STABLE_OPS_ONLY
 static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> solids;
@@ -398,13 +398,6 @@ static void NewAdaptiveOpMenuCallback(wxCommandEvent &event)
 		wxMessageBox(_("There are no solids!"));
 		return;
 	}
-#if 0
-	if(sketches.size() == 0)
-	{
-		wxMessageBox(_("You must select some sketches first!"));
-		return;
-	}
-#endif
 	heeksCAD->CreateUndoPoint();
 	CAdaptive *new_object = new CAdaptive(	solids,
 						sketches,
@@ -1352,7 +1345,9 @@ static void AddToolBars()
 
 		heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
 		heeksCAD->AddFlyoutButton(_("ZigZag"), PToolImage(_T("zigzag")), _("New ZigZag Operation..."), NewZigZagOpMenuCallback);
+#ifndef STABLE_OPS_ONLY
 		heeksCAD->AddFlyoutButton(_("Waterline"), PToolImage(_T("waterline")), _("New Waterline Operation..."), NewWaterlineOpMenuCallback);
+#endif
 		heeksCAD->AddFlyoutButton(_("Attach"), PToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Unattach"), PToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
@@ -1499,7 +1494,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	wxMenu *menu3dMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("ZigZag Operation..."), PToolImage(_T("zigzag")), NewZigZagOpMenuCallback);
+#ifndef STABLE_OPS_ONLY
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Waterline Operation..."), PToolImage(_T("waterline")), NewWaterlineOpMenuCallback);
+#endif
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), PToolImage(_T("attach")), NewAttachOpMenuCallback);
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), PToolImage(_T("unattach")), NewUnattachOpMenuCallback);
 
@@ -1619,8 +1616,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Raft", CRaft::ReadFromXMLElement);
 #endif
 	heeksCAD->RegisterReadXMLfunction("ZigZag", CZigZag::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("Waterline", CWaterline::ReadFromXMLElement);
 #ifndef STABLE_OPS_ONLY
+	heeksCAD->RegisterReadXMLfunction("Waterline", CWaterline::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Adaptive", CAdaptive::ReadFromXMLElement);
 #endif
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);

@@ -21,8 +21,8 @@ const wxBitmap &CFixtures::GetIcon()
 void CFixtures::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "Fixtures" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "Fixtures" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	WriteBaseXML(element);
 }
 

@@ -8,7 +8,6 @@
 #include "stdafx.h"
 #include <math.h>
 #include "NCCode.h"
-#include "tinyxml/tinyxml.h"
 #include "OutputCanvas.h"
 #include "interface/MarkedObject.h"
 #include "interface/PropertyColor.h"
@@ -40,14 +39,14 @@ int CNCCode::s_arc_interpolation_count = 20;
 void ColouredText::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "text" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "text" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
 	// add actual text as a child object
-   	TiXmlText* text = new TiXmlText(m_str.utf8_str());
+   	TiXmlText* text = heeksCAD->NewXMLText(m_str.utf8_str());
    	element->LinkEndChild(text);
 
-	if(m_color_type != ColorDefaultType)element->SetAttribute("col", CNCCode::GetColor(m_color_type));
+	if(m_color_type != ColorDefaultType)element->SetAttribute( "col", CNCCode::GetColor(m_color_type));
 }
 
 void ColouredText::ReadFromXMLElement(TiXmlElement* element)
@@ -97,8 +96,8 @@ void PathObject::ReadFromXMLElement(TiXmlElement* pElem)
 void PathLine::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "line" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "line" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
 	PathObject::WriteBaseXML(element);
 }
@@ -163,13 +162,13 @@ bool PathArc::IsIncluded(gp_Pnt pnt,const PathObject* prev_po)
 
 void PathArc::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "arc" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "arc" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("i", m_c[0]);
-	element->SetDoubleAttribute("j", m_c[1]);
-	element->SetDoubleAttribute("k", m_c[2]);
-	element->SetDoubleAttribute("d", m_dir);
+	element->SetDoubleAttribute( "i", m_c[0]);
+	element->SetDoubleAttribute( "j", m_c[1]);
+	element->SetDoubleAttribute( "k", m_c[2]);
+	element->SetDoubleAttribute( "d", m_dir);
 
 	PathObject::WriteBaseXML(element);
 }
@@ -358,10 +357,10 @@ void ColouredPath::GetBox(CBox &box)
 void ColouredPath::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "path" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "path" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetAttribute("col", CNCCode::GetColor(m_color_type));
+	element->SetAttribute( "col", CNCCode::GetColor(m_color_type));
 	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
 		PathObject* po = *It;
@@ -375,7 +374,7 @@ void ColouredPath::ReadFromXMLElement(TiXmlElement* element)
 	m_color_type = CNCCode::GetColor(element->Attribute("col"), ColorRapidType);
 
 	// loop through all the objects
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "line")
@@ -467,8 +466,8 @@ void CNCCodeBlock::GetBox(CBox &box)
 void CNCCodeBlock::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "ncblock" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "ncblock" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
 	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
 	{
@@ -492,7 +491,7 @@ HeeksObj* CNCCodeBlock::ReadFromXMLElement(TiXmlElement* element)
 	new_object->m_from_pos = CNCCode::pos;
 
 	// loop through all the objects
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "text")
@@ -933,8 +932,8 @@ void CNCCode::CopyFrom(const HeeksObj* object){operator=(*((CNCCode*)object));}
 void CNCCode::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "nccode" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "nccode" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
 	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
@@ -942,7 +941,7 @@ void CNCCode::WriteXML(TiXmlNode *root)
 		block->WriteXML(element);
 	}
 
-	element->SetAttribute("edited", m_user_edited ? 1:0);
+	element->SetAttribute( "edited", m_user_edited ? 1:0);
 
 	WriteBaseXML(element);
 }
@@ -991,7 +990,7 @@ HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 	PathObject::m_current_x[0] = PathObject::m_current_x[1] = PathObject::m_current_x[2]  = 0.0;
 
 	// loop through all the objects
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem;	pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem;	pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "ncblock")
