@@ -5,9 +5,10 @@
 import cad_iso_read as iso
 import sys
 
+    """use this script to backplot nc files to *.scr file for autocad,bricscad,draftsight,progecad,ares commander, etc....
+        usage: "python cad_read.py temp.nc temp.scr
+    """
 
-#filename = 'test.scr'
-#FILE = open(filename,"w")
 
 # Override some iso parser methods to interpret arc centers as relative to origin, not relative to start of arc.
 
@@ -16,10 +17,10 @@ import sys
     #FILE.write('-LAYER Set %s%s \n' %(name,number))
  
 
-class CAD_backplot(iso.ParserIso):
+class CAD_backplot(iso.Parser):
 
     def __init__(self):
-        iso.ParserIso.__init__(self)
+        iso.Parser.__init__(self)
 
     def Parse(self, name, oname=None):
         self.files_open(name,oname)
