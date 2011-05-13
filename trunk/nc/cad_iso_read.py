@@ -10,7 +10,11 @@ import re
 import sys
 
 ################################################################################
-class ParserIso(nc.Parser):
+class Parser(nc.Parser):
+
+    """use this script to backplot nc files to *.scr file for autocad,bricscad,draftsight,progecad,ares commander, etc....
+        usage: "python cad_iso_read.py temp.nc temp.scr
+    """
 
     def __init__(self):
         nc.Parser.__init__(self)
