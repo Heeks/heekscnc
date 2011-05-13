@@ -2,12 +2,15 @@
 # This code modified from iso_read.py and emc2_read.py distriuted with HeeksCAD as of Sep 2010
 # Dan Falck 2011/01/06
 # 
+
+""" use this script to backplot nc files to *.scr file for autocad,bricscad,
+    draftsight,progecad,ares commander, etc....
+    usage: python cad_read.py temp.nc temp.scr
+"""
+
 import cad_iso_read as iso
 import sys
 
-    """use this script to backplot nc files to *.scr file for autocad,bricscad,draftsight,progecad,ares commander, etc....
-        usage: "python cad_read.py temp.nc temp.scr
-    """
 
 
 # Override some iso parser methods to interpret arc centers as relative to origin, not relative to start of arc.
