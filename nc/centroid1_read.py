@@ -5,4 +5,4 @@ import sys
 
 class Parser(iso.Parser):
     def __init__(self):
-        iso.ParserIso.__init__(self)
+        iso.Parser.__init__(self)
