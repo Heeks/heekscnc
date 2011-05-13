@@ -373,10 +373,10 @@ bool CScriptOp::CanAddTo(HeeksObj* owner)
 
 void CScriptOp::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "ScriptOp" );
-	root->LinkEndChild( element );
-	element->SetAttribute("script", Ttc(m_str.c_str()));
-	element->SetAttribute("emit_depthop_params", int(m_emit_depthop_params) );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "ScriptOp" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "script", Ttc(m_str.c_str()));
+	element->SetAttribute( "emit_depthop_params", int(m_emit_depthop_params) );
 
 	CDepthOp::WriteBaseXML(element);
 }

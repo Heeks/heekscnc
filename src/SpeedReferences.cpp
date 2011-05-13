@@ -128,9 +128,9 @@ void CSpeedReferences::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 void CSpeedReferences::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "SpeedReferences" );
-	root->LinkEndChild( element );
-	element->SetAttribute("estimate_when_possible", int(m_estimate_when_possible?1:0) );
+	element = heeksCAD->NewXMLElement( "SpeedReferences" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "estimate_when_possible", int(m_estimate_when_possible?1:0) );
 	WriteBaseXML(element);
 }
 

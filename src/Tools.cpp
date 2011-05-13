@@ -76,8 +76,8 @@ void CTools::CopyFrom(const HeeksObj* object)
 void CTools::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "Tools" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "Tools" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	WriteBaseXML(element);
 }
 

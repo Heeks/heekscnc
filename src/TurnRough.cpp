@@ -68,12 +68,12 @@ void CTurnRoughParams::GetProperties(CTurnRough* parent, std::list<Property *> *
 void CTurnRoughParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetAttribute("outside", m_outside ? 1:0);
-	element->SetAttribute("front", m_front ? 1:0);
-	element->SetAttribute("facing", m_facing ? 1:0);
-	element->SetDoubleAttribute("clearance", m_clearance);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "outside", m_outside ? 1:0);
+	element->SetAttribute( "front", m_front ? 1:0);
+	element->SetAttribute( "facing", m_facing ? 1:0);
+	element->SetDoubleAttribute( "clearance", m_clearance);
 }
 
 void CTurnRoughParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -325,17 +325,17 @@ bool CTurnRough::CanAddTo(HeeksObj* owner)
 
 void CTurnRough::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "TurnRough" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "TurnRough" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_turn_rough_params.WriteXMLAttributes(element);
 
 	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
-		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );
-		sketch_element->SetAttribute("id", sketch);
+		TiXmlElement * sketch_element = heeksCAD->NewXMLElement( "sketch" );
+		heeksCAD->LinkXMLEndChild( element, sketch_element );
+		sketch_element->SetAttribute( "id", sketch);
 	}
 
 	WriteBaseXML(element);
@@ -347,11 +347,11 @@ HeeksObj* CTurnRough::ReadFromXMLElement(TiXmlElement* element)
 	CTurnRough* new_object = new CTurnRough;
 
 	// read parameters
-	TiXmlElement* params = TiXmlHandle(element).FirstChildElement("params").Element();
+	TiXmlElement* params = heeksCAD->FirstNamedXMLChildElement(element, "params");
 	if(params)new_object->m_turn_rough_params.ReadFromXMLElement(params);
 
 	// read sketch ids
-	for(TiXmlElement* sketch = TiXmlHandle(element).FirstChildElement("sketch").Element(); sketch; sketch = sketch->NextSiblingElement())
+	for(TiXmlElement* sketch = heeksCAD->FirstNamedXMLChildElement(element, "sketch"); sketch; sketch = sketch->NextSiblingElement())
 	{
 		int id = 0;
 		sketch->Attribute("id", &id);

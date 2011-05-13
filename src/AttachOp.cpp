@@ -200,20 +200,20 @@ bool CAttachOp::CanAddTo(HeeksObj* owner)
 
 void CAttachOp::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "AttachOp" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "AttachOp" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("tolerance", m_tolerance);
-	element->SetDoubleAttribute("minz", m_min_z);
-	element->SetDoubleAttribute("material_allowance", m_material_allowance);
+	element->SetDoubleAttribute( "tolerance", m_tolerance);
+	element->SetDoubleAttribute( "minz", m_min_z);
+	element->SetDoubleAttribute( "material_allowance", m_material_allowance);
 
 	// write solid ids
 	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
 	{
 		if (object->GetIDGroupType() != SolidType)continue;
 		int solid = object->GetID();
-		TiXmlElement * solid_element = new TiXmlElement( "solid" );
-		element->LinkEndChild( solid_element );
+		TiXmlElement * solid_element = heeksCAD->NewXMLElement( "solid" );
+		heeksCAD->LinkXMLEndChild( element, solid_element );
 		solid_element->SetAttribute("id", solid);
 	}
 
@@ -232,7 +232,7 @@ HeeksObj* CAttachOp::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read solid ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "solid"){
@@ -250,7 +250,7 @@ HeeksObj* CAttachOp::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);
@@ -335,8 +335,8 @@ bool CUnattachOp::CanAddTo(HeeksObj* owner)
 
 void CUnattachOp::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "UnattachOp" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "UnattachOp" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
 	COp::WriteBaseXML(element);
 }

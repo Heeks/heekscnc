@@ -227,15 +227,15 @@ void CInlayParams::GetProperties(CInlay* parent, std::list<Property *> *list)
 void CInlayParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetAttribute("border", m_border_width);
-	element->SetAttribute("clearance_tool", m_clearance_tool);
-	element->SetAttribute("pass", (int) m_pass);
-	element->SetAttribute("mirror_axis", (int) m_mirror_axis);
-	element->SetAttribute("female_before_male_fixtures", (int) (m_female_before_male_fixtures?1:0));
-	element->SetAttribute("min_cornering_angle", m_min_cornering_angle);
+	element->SetAttribute( "border", m_border_width);
+	element->SetAttribute( "clearance_tool", m_clearance_tool);
+	element->SetAttribute( "pass", (int) m_pass);
+	element->SetAttribute( "mirror_axis", (int) m_mirror_axis);
+	element->SetAttribute( "female_before_male_fixtures", (int) (m_female_before_male_fixtures?1:0));
+	element->SetAttribute( "min_cornering_angle", m_min_cornering_angle);
 }
 
 void CInlayParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -1762,19 +1762,19 @@ bool CInlay::CanAddTo(HeeksObj* owner)
 
 void CInlay::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Inlay" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Inlay" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
     if (m_symbols.size() > 0)
     {
         TiXmlElement * symbols;
-        symbols = new TiXmlElement( "symbols" );
-        element->LinkEndChild( symbols );
+        symbols = heeksCAD->NewXMLElement( "symbols" );
+        heeksCAD->LinkXMLEndChild( element, symbols );
 
         for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
         {
-            TiXmlElement * symbol = new TiXmlElement( "symbol" );
+            TiXmlElement * symbol = heeksCAD->NewXMLElement( "symbol" );
             symbols->LinkEndChild( symbol );
             symbol->SetAttribute("type", l_itSymbol->first );
             symbol->SetAttribute("id", l_itSymbol->second );
@@ -1791,7 +1791,7 @@ HeeksObj* CInlay::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read point and circle ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -1799,7 +1799,7 @@ HeeksObj* CInlay::ReadFromXMLElement(TiXmlElement* element)
 			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
-			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
+			for(TiXmlElement* child = heeksCAD->FirstXMLChildElement( pElem ) ; child; child = child->NextSiblingElement())
 			{
 				if (child->Attribute("type") && child->Attribute("id"))
 				{
@@ -1812,7 +1812,7 @@ HeeksObj* CInlay::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);

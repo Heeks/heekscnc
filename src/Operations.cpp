@@ -69,8 +69,8 @@ void COperations::glCommands(bool select, bool marked, bool no_color)
 void COperations::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "Operations" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "Operations" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	WriteBaseXML(element);
 }
 

@@ -100,11 +100,11 @@ bool CCuttingRate::CanAddTo(HeeksObj* owner)
 
 void CCuttingRate::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "CuttingRate" );
-	root->LinkEndChild( element );
-	element->SetAttribute("title", m_title.utf8_str());
-	element->SetDoubleAttribute("brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
-	element->SetDoubleAttribute("max_material_removal_rate", m_max_material_removal_rate );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "CuttingRate" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "title", m_title.utf8_str());
+	element->SetDoubleAttribute( "brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
+	element->SetDoubleAttribute( "max_material_removal_rate", m_max_material_removal_rate );
 
 	WriteBaseXML(element);
 }

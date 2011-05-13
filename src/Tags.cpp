@@ -68,8 +68,8 @@ void CTags::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 void CTags::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "Tags" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "Tags" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	WriteBaseXML(element);
 }
 

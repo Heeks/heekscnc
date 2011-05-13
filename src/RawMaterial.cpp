@@ -131,8 +131,8 @@ void CRawMaterial::GetProperties(CProgram *parent, std::list<Property *> *list)
 
 void CRawMaterial::WriteBaseXML(TiXmlElement *element)
 {
-	element->SetDoubleAttribute("brinell_hardness", m_brinell_hardness);
-	element->SetAttribute("raw_material_name", m_material_name.utf8_str());
+	element->SetDoubleAttribute( "brinell_hardness", m_brinell_hardness);
+	element->SetAttribute( "raw_material_name", m_material_name.utf8_str());
 } // End WriteBaseXML() method
 
 void CRawMaterial::ReadBaseXML(TiXmlElement* element)

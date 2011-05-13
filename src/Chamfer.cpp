@@ -42,10 +42,10 @@ void CChamferParams::GetProperties(CChamfer * parent, std::list<Property *> *lis
 void CChamferParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("m_chamfer_width", m_chamfer_width);
+	element->SetDoubleAttribute( "m_chamfer_width", m_chamfer_width);
 }
 
 void CChamferParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -377,8 +377,8 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 
 void CChamfer::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Chamfer" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Chamfer" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
 	m_params.WriteXMLAttributes(element);
 
@@ -393,7 +393,7 @@ HeeksObj* CChamfer::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read point and circle ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -401,7 +401,7 @@ HeeksObj* CChamfer::ReadFromXMLElement(TiXmlElement* element)
 			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
-			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
+			for(TiXmlElement* child = heeksCAD->FirstXMLChildElement( pElem ) ; child; child = child->NextSiblingElement())
 			{
 				if (child->Attribute("type") && child->Attribute("id"))
 				{
@@ -424,7 +424,7 @@ HeeksObj* CChamfer::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);
