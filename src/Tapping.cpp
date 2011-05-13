@@ -127,14 +127,14 @@ void CTappingParams::GetProperties(CTapping* parent, std::list<Property *> *list
 void CTappingParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("standoff", m_standoff);
-	element->SetDoubleAttribute("dwell", m_dwell);
-	element->SetDoubleAttribute("depth", m_depth);
-	element->SetAttribute("sort_tapping_locations", m_sort_tapping_locations);
-	element->SetAttribute("tap_mode", m_tap_mode);
+	element->SetDoubleAttribute( "standoff", m_standoff);
+	element->SetDoubleAttribute( "dwell", m_dwell);
+	element->SetDoubleAttribute( "depth", m_depth);
+	element->SetAttribute( "sort_tapping_locations", m_sort_tapping_locations);
+	element->SetAttribute( "tap_mode", m_tap_mode);
 }
 
 void CTappingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -444,13 +444,13 @@ bool CTapping::CanAdd(HeeksObj* object)
 
 void CTapping::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Tapping" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Tapping" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
 	TiXmlElement * symbols;
-	symbols = new TiXmlElement( "symbols" );
-	element->LinkEndChild( symbols );
+	symbols = heeksCAD->NewXMLElement( "symbols" );
+	heeksCAD->LinkXMLEndChild( element, symbols );
 
 	WriteBaseXML(element);
 }
@@ -463,7 +463,7 @@ HeeksObj* CTapping::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read point and circle ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -471,7 +471,7 @@ HeeksObj* CTapping::ReadFromXMLElement(TiXmlElement* element)
 			elements_to_remove.push_back(pElem);
 		}
 		else if(name == "symbols"){
-			for(TiXmlElement* child = TiXmlHandle(pElem).FirstChildElement().Element(); child; child = child->NextSiblingElement())
+			for(TiXmlElement* child = heeksCAD->FirstXMLChildElement( pElem ) ; child; child = child->NextSiblingElement())
 			{
 				if (child->Attribute("type") && child->Attribute("id"))
 				{
@@ -494,7 +494,7 @@ HeeksObj* CTapping::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);

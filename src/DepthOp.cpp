@@ -128,19 +128,19 @@ void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list
 
 void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 {
-	TiXmlElement * element = new TiXmlElement( "depthop" );
-	pElem->LinkEndChild( element );
-	element->SetDoubleAttribute("clear", m_clearance_height);
-	element->SetDoubleAttribute("down", m_step_down);
-	element->SetDoubleAttribute("startdepth", m_start_depth);
-	element->SetDoubleAttribute("depth", m_final_depth);
-	element->SetDoubleAttribute("r", m_rapid_safety_space);
-	element->SetAttribute("abs_mode", m_abs_mode);
+	TiXmlElement * element = heeksCAD->NewXMLElement( "depthop" );
+	heeksCAD->LinkXMLEndChild( pElem,  element );
+	element->SetDoubleAttribute( "clear", m_clearance_height);
+	element->SetDoubleAttribute( "down", m_step_down);
+	element->SetDoubleAttribute( "startdepth", m_start_depth);
+	element->SetDoubleAttribute( "depth", m_final_depth);
+	element->SetDoubleAttribute( "r", m_rapid_safety_space);
+	element->SetAttribute( "abs_mode", m_abs_mode);
 }
 
 void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	TiXmlElement* depthop = TiXmlHandle(pElem).FirstChildElement("depthop").Element();
+	TiXmlElement* depthop = heeksCAD->FirstNamedXMLChildElement(pElem, "depthop");
 	if(depthop)
 	{	int int_for_enum;
 		depthop->Attribute("clear", &m_clearance_height);
@@ -149,7 +149,7 @@ void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 		depthop->Attribute("depth", &m_final_depth);
 		depthop->Attribute("r", &m_rapid_safety_space);
 		if(pElem->Attribute("abs_mode", &int_for_enum))m_abs_mode = (eAbsMode)int_for_enum;
-		pElem->RemoveChild(depthop);	// We don't want to interpret this again when
+		heeksCAD->RemoveXMLChild(pElem, depthop);	// We don't want to interpret this again when
 										// the ObjList::ReadBaseXML() method gets to it.
 	}
 }

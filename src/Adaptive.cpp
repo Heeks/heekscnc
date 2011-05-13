@@ -291,38 +291,38 @@ void CAdaptiveParams::GetProperties(CAdaptive* parent, std::list<Property *> *li
 void CAdaptiveParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetDoubleAttribute("leadoffdz", m_leadoffdz);
-	element->SetDoubleAttribute("leadofflen", m_leadofflen);
-	element->SetDoubleAttribute("leadoffrad", m_leadoffrad);
-	element->SetDoubleAttribute("retractzheight", m_retractzheight);
-	element->SetDoubleAttribute("leadoffsamplestep", m_leadoffsamplestep);
-	element->SetDoubleAttribute("toolcornerrad", m_toolcornerrad);
-	element->SetDoubleAttribute("toolflatrad", m_toolflatrad);
-	element->SetDoubleAttribute("samplestep", m_samplestep);
-	element->SetDoubleAttribute("stepdown", m_stepdown);
-	element->SetDoubleAttribute("clearcuspheight", m_clearcuspheight);
-	element->SetDoubleAttribute("triangleweaveres", m_triangleweaveres);
-	element->SetDoubleAttribute("flatradweaveres", m_flatradweaveres);
-	element->SetDoubleAttribute("dchangright", m_dchangright);
-	element->SetDoubleAttribute("dchangrightoncontour", m_dchangrightoncontour);
-	element->SetDoubleAttribute("dchangleft", m_dchangleft);
-	element->SetDoubleAttribute("dchangefreespace", m_dchangefreespace);
-	element->SetDoubleAttribute("sidecutdisplch", m_sidecutdisplch);
-	element->SetDoubleAttribute("fcut", m_fcut);
-	element->SetDoubleAttribute("fretract", m_fretract);
-	element->SetDoubleAttribute("thintol", m_thintol);
-	element->SetDoubleAttribute("startpoint_x", m_startpoint_x);
-	element->SetDoubleAttribute("startpoint_y", m_startpoint_y);
-	element->SetDoubleAttribute("startvel_x", m_startvel_x);
-	element->SetDoubleAttribute("startvel_y", m_startvel_y);
-	element->SetDoubleAttribute("minz", m_minz);
-	element->SetDoubleAttribute("boundaryclear", m_boundaryclear);
-	element->SetDoubleAttribute("boundary_x0", m_boundary_x0);
-	element->SetDoubleAttribute("boundary_x1", m_boundary_x1);
-	element->SetDoubleAttribute("boundary_y0", m_boundary_y0);
-	element->SetDoubleAttribute("boundary_y1", m_boundary_y1);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetDoubleAttribute( "leadoffdz", m_leadoffdz);
+	element->SetDoubleAttribute( "leadofflen", m_leadofflen);
+	element->SetDoubleAttribute( "leadoffrad", m_leadoffrad);
+	element->SetDoubleAttribute( "retractzheight", m_retractzheight);
+	element->SetDoubleAttribute( "leadoffsamplestep", m_leadoffsamplestep);
+	element->SetDoubleAttribute( "toolcornerrad", m_toolcornerrad);
+	element->SetDoubleAttribute( "toolflatrad", m_toolflatrad);
+	element->SetDoubleAttribute( "samplestep", m_samplestep);
+	element->SetDoubleAttribute( "stepdown", m_stepdown);
+	element->SetDoubleAttribute( "clearcuspheight", m_clearcuspheight);
+	element->SetDoubleAttribute( "triangleweaveres", m_triangleweaveres);
+	element->SetDoubleAttribute( "flatradweaveres", m_flatradweaveres);
+	element->SetDoubleAttribute( "dchangright", m_dchangright);
+	element->SetDoubleAttribute( "dchangrightoncontour", m_dchangrightoncontour);
+	element->SetDoubleAttribute( "dchangleft", m_dchangleft);
+	element->SetDoubleAttribute( "dchangefreespace", m_dchangefreespace);
+	element->SetDoubleAttribute( "sidecutdisplch", m_sidecutdisplch);
+	element->SetDoubleAttribute( "fcut", m_fcut);
+	element->SetDoubleAttribute( "fretract", m_fretract);
+	element->SetDoubleAttribute( "thintol", m_thintol);
+	element->SetDoubleAttribute( "startpoint_x", m_startpoint_x);
+	element->SetDoubleAttribute( "startpoint_y", m_startpoint_y);
+	element->SetDoubleAttribute( "startvel_x", m_startvel_x);
+	element->SetDoubleAttribute( "startvel_y", m_startvel_y);
+	element->SetDoubleAttribute( "minz", m_minz);
+	element->SetDoubleAttribute( "boundaryclear", m_boundaryclear);
+	element->SetDoubleAttribute( "boundary_x0", m_boundary_x0);
+	element->SetDoubleAttribute( "boundary_x1", m_boundary_x1);
+	element->SetDoubleAttribute( "boundary_y0", m_boundary_y0);
+	element->SetDoubleAttribute( "boundary_y1", m_boundary_y1);
 }
 
 void CAdaptiveParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -650,25 +650,25 @@ bool CAdaptive::CanAddTo(HeeksObj* owner)
 
 void CAdaptive::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Adaptive" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Adaptive" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
 	// write solid ids
 	for(std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
 	{
 		int solid = *It;
-		TiXmlElement * solid_element = new TiXmlElement( "solid" );
-		element->LinkEndChild( solid_element );
-		solid_element->SetAttribute("id", solid);
+		TiXmlElement * solid_element = heeksCAD->NewXMLElement( "solid" );
+		heeksCAD->LinkXMLEndChild( element, solid_element );
+		solid_element->SetAttribute( "id", solid);
 	}
 	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
 		int sketch = *It;
-		TiXmlElement * sketch_element = new TiXmlElement( "sketch" );
-		element->LinkEndChild( sketch_element );
-		sketch_element->SetAttribute("id", sketch);
+		TiXmlElement * sketch_element = heeksCAD->NewXMLElement( "sketch" );
+		heeksCAD->LinkXMLEndChild( element, sketch_element );
+		sketch_element->SetAttribute( "id", sketch);
 	}
 
 	WriteBaseXML(element);
@@ -682,7 +682,7 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read solid and sketch ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -715,7 +715,7 @@ HeeksObj* CAdaptive::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);

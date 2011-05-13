@@ -188,25 +188,25 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
 void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("yz_plane", m_yz_plane);
-	element->SetDoubleAttribute("xz_plane", m_xz_plane);
-	element->SetDoubleAttribute("xy_plane", m_xy_plane);
+	element->SetDoubleAttribute( "yz_plane", m_yz_plane);
+	element->SetDoubleAttribute( "xz_plane", m_xz_plane);
+	element->SetDoubleAttribute( "xy_plane", m_xy_plane);
 
-	element->SetDoubleAttribute("pivot_point_x", m_pivot_point.X());
-	element->SetDoubleAttribute("pivot_point_y", m_pivot_point.Y());
-	element->SetDoubleAttribute("pivot_point_z", m_pivot_point.Z());
+	element->SetDoubleAttribute( "pivot_point_x", m_pivot_point.X());
+	element->SetDoubleAttribute( "pivot_point_y", m_pivot_point.Y());
+	element->SetDoubleAttribute( "pivot_point_z", m_pivot_point.Z());
 
-	element->SetAttribute("safety_height_defined", m_safety_height_defined);
-	element->SetDoubleAttribute("safety_height", m_safety_height);
+	element->SetAttribute( "safety_height_defined", m_safety_height_defined);
+	element->SetDoubleAttribute( "safety_height", m_safety_height);
 
-	element->SetAttribute("touch_off_point_defined", m_touch_off_point_defined);
-	element->SetDoubleAttribute("touch_off_point_x", m_touch_off_point.X());
-	element->SetDoubleAttribute("touch_off_point_y", m_touch_off_point.Y());
+	element->SetAttribute( "touch_off_point_defined", m_touch_off_point_defined);
+	element->SetDoubleAttribute( "touch_off_point_x", m_touch_off_point.X());
+	element->SetDoubleAttribute( "touch_off_point_y", m_touch_off_point.Y());
 
-	element->SetAttribute("touch_off_description", m_touch_off_description.utf8_str());
+	element->SetAttribute( "touch_off_description", m_touch_off_description.utf8_str());
 }
 
 void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -340,11 +340,11 @@ bool CFixture::CanAddTo(HeeksObj* owner)
 
 void CFixture::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "Fixture" );
-	root->LinkEndChild( element );
-	element->SetAttribute("title", m_title.utf8_str());
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Fixture" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "title", m_title.utf8_str());
 
-	element->SetAttribute("coordinate_system_number", m_coordinate_system_number );
+	element->SetAttribute( "coordinate_system_number", m_coordinate_system_number );
 
 	m_params.WriteXMLAttributes(element);
 	WriteBaseXML(element);
@@ -361,7 +361,7 @@ HeeksObj* CFixture::ReadFromXMLElement(TiXmlElement* element)
 		wxString title(Ctt(element->Attribute("title")));
 		CFixture* new_object = new CFixture( title.c_str(), CFixture::eCoordinateSystemNumber_t(coordinate_system_number), false, 0.0);
 
-		for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+		for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 		{
 			std::string name(pElem->Value());
 			if(name == "params"){
@@ -630,22 +630,22 @@ double CFixture::AxisAngle( const gp_Pnt & one, const gp_Pnt & two, const gp_Vec
 
 void CFixture::SetRotationsFromProbedPoints( const wxString & probed_points_xml_file_name )
 {
-	TiXmlDocument xml;
-	if (! xml.LoadFile( probed_points_xml_file_name.utf8_str() ))
+	TiXmlDocument* xml = heeksCAD->NewXMLDocument();
+	if (! xml->LoadFile( probed_points_xml_file_name.utf8_str() ))
 	{
 		printf("Failed to load XML file '%s'\n", Ttc(probed_points_xml_file_name.c_str()) );
 	} // End if - then
 	else
 	{
-		TiXmlElement *root = xml.RootElement();
+		TiXmlElement *root = xml->RootElement();
 		if (root != NULL)
 		{
 			std::vector<CNCPoint> points;
 
-			for(TiXmlElement* pElem = TiXmlHandle(root).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+			for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( root ); pElem; pElem = pElem->NextSiblingElement())
 			{
 				CNCPoint point(0,0,0);
-				for(TiXmlElement* pPoint = TiXmlHandle(pElem).FirstChildElement().Element(); pPoint; pPoint = pPoint->NextSiblingElement())
+				for(TiXmlElement* pPoint = heeksCAD->FirstXMLChildElement( pElem ) ; pPoint; pPoint = pPoint->NextSiblingElement())
 				{
 					std::string name(pPoint->Value());
 

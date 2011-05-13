@@ -125,13 +125,13 @@ bool CSpeedReference::CanAddTo(HeeksObj* owner)
 
 void CSpeedReference::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "SpeedReference" );
-	root->LinkEndChild( element );
-	element->SetAttribute("title", m_title.utf8_str());
-	element->SetAttribute("surface_speed", m_surface_speed );
-	element->SetAttribute("tool_material", int(m_tool_material) );
-	element->SetAttribute("brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
-	element->SetAttribute("raw_material_name", m_material_name.utf8_str() );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "SpeedReference" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetAttribute( "title", m_title.utf8_str());
+	element->SetAttribute( "surface_speed", m_surface_speed );
+	element->SetAttribute( "tool_material", int(m_tool_material) );
+	element->SetAttribute( "brinell_hardness_of_raw_material", m_brinell_hardness_of_raw_material );
+	element->SetAttribute( "raw_material_name", m_material_name.utf8_str() );
 
 	WriteBaseXML(element);
 }

@@ -58,16 +58,16 @@ void CZigZagParams::GetProperties(CZigZag* parent, std::list<Property *> *list)
 void CZigZagParams::WriteXMLAttributes(TiXmlNode *root)
 {
 	TiXmlElement * element;
-	element = new TiXmlElement( "params" );
-	root->LinkEndChild( element );
-	element->SetDoubleAttribute("minx", m_box.m_x[0]);
-	element->SetDoubleAttribute("maxx", m_box.m_x[3]);
-	element->SetDoubleAttribute("miny", m_box.m_x[1]);
-	element->SetDoubleAttribute("maxy", m_box.m_x[4]);
-	element->SetDoubleAttribute("step_over", m_step_over);
-	element->SetAttribute("dir", m_direction);
-	element->SetDoubleAttribute("material_allowance", m_material_allowance);
-	element->SetAttribute("style", m_style);
+	element = heeksCAD->NewXMLElement( "params" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+	element->SetDoubleAttribute( "minx", m_box.m_x[0]);
+	element->SetDoubleAttribute( "maxx", m_box.m_x[3]);
+	element->SetDoubleAttribute( "miny", m_box.m_x[1]);
+	element->SetDoubleAttribute( "maxy", m_box.m_x[4]);
+	element->SetDoubleAttribute( "step_over", m_step_over);
+	element->SetAttribute( "dir", m_direction);
+	element->SetDoubleAttribute( "material_allowance", m_material_allowance);
+	element->SetAttribute( "style", m_style);
 }
 
 void CZigZagParams::ReadFromXMLElement(TiXmlElement* pElem)
@@ -300,8 +300,8 @@ bool CZigZag::CanAddTo(HeeksObj* owner)
 
 void CZigZag::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( "ZigZag" );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( "ZigZag" );
+	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
 	// write solid ids
@@ -309,8 +309,8 @@ void CZigZag::WriteXML(TiXmlNode *root)
 	{
 		if (object->GetIDGroupType() != SolidType)continue;
 		int solid = object->GetID();
-		TiXmlElement * solid_element = new TiXmlElement( "solid" );
-		element->LinkEndChild( solid_element );
+		TiXmlElement * solid_element = heeksCAD->NewXMLElement( "solid" );
+		heeksCAD->LinkXMLEndChild( element, solid_element );
 		solid_element->SetAttribute("id", solid);
 	}
 
@@ -325,7 +325,7 @@ HeeksObj* CZigZag::ReadFromXMLElement(TiXmlElement* element)
 	std::list<TiXmlElement *> elements_to_remove;
 
 	// read solid ids
-	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem; pElem = pElem->NextSiblingElement())
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
 		if(name == "params"){
@@ -347,7 +347,7 @@ HeeksObj* CZigZag::ReadFromXMLElement(TiXmlElement* element)
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
-		element->RemoveChild(*itElem);
+		heeksCAD->RemoveXMLChild( element, *itElem);
 	}
 
 	new_object->ReadBaseXML(element);

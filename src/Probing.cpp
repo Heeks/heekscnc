@@ -1239,20 +1239,20 @@ CProbe_Edge & CProbe_Edge::operator= ( const CProbe_Edge & rhs )
 
 void CProbe_Edge::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( wxString(GetTypeString()).utf8_str() );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( wxString(GetTypeString()).utf8_str() );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute("retract", m_retract);
-	element->SetAttribute("number_of_edges", m_number_of_edges);
-	element->SetAttribute("edge", m_edge);
-	element->SetAttribute("corner", m_corner);
-	element->SetAttribute("check_levels", m_check_levels);
-	element->SetDoubleAttribute("corner_coordinate_x", m_corner_coordinate.X());
-	element->SetDoubleAttribute("corner_coordinate_y", m_corner_coordinate.Y());
-	element->SetDoubleAttribute("corner_coordinate_z", m_corner_coordinate.Z());
-	element->SetDoubleAttribute("final_coordinate_x", m_final_coordinate.X());
-	element->SetDoubleAttribute("final_coordinate_y", m_final_coordinate.Y());
-	element->SetDoubleAttribute("final_coordinate_z", m_final_coordinate.Z());
+	element->SetDoubleAttribute( "retract", m_retract);
+	element->SetAttribute( "number_of_edges", m_number_of_edges);
+	element->SetAttribute( "edge", m_edge);
+	element->SetAttribute( "corner", m_corner);
+	element->SetAttribute( "check_levels", m_check_levels);
+	element->SetDoubleAttribute( "corner_coordinate_x", m_corner_coordinate.X());
+	element->SetDoubleAttribute( "corner_coordinate_y", m_corner_coordinate.Y());
+	element->SetDoubleAttribute( "corner_coordinate_z", m_corner_coordinate.Z());
+	element->SetDoubleAttribute( "final_coordinate_x", m_final_coordinate.X());
+	element->SetDoubleAttribute( "final_coordinate_y", m_final_coordinate.Y());
+	element->SetDoubleAttribute( "final_coordinate_z", m_final_coordinate.Z());
 
 	WriteBaseXML(element);
 }
@@ -1290,12 +1290,12 @@ HeeksObj* CProbe_Edge::ReadFromXMLElement(TiXmlElement* element)
 
 void CProbe_Centre::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( Ttc(GetTypeString()) );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( Ttc(GetTypeString()) );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetAttribute("direction", m_direction);
-	element->SetAttribute("number_of_points", m_number_of_points);
-	element->SetAttribute("alignment", m_alignment);
+	element->SetAttribute( "direction", m_direction);
+	element->SetAttribute( "number_of_points", m_number_of_points);
+	element->SetAttribute( "alignment", m_alignment);
 
 	WriteBaseXML(element);
 }
@@ -1316,12 +1316,12 @@ HeeksObj* CProbe_Centre::ReadFromXMLElement(TiXmlElement* element)
 
 void CProbe_Grid::WriteXML(TiXmlNode *root)
 {
-	TiXmlElement * element = new TiXmlElement( Ttc(GetTypeString()) );
-	root->LinkEndChild( element );
+	TiXmlElement * element = heeksCAD->NewXMLElement( Ttc(GetTypeString()) );
+	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetAttribute("num_x_points", m_num_x_points);
-	element->SetAttribute("num_y_points", m_num_y_points);
-	element->SetAttribute("for_fixture_measurement", (m_for_fixture_measurement?1:0));
+	element->SetAttribute( "num_x_points", m_num_x_points);
+	element->SetAttribute( "num_y_points", m_num_y_points);
+	element->SetAttribute( "for_fixture_measurement", (m_for_fixture_measurement?1:0));
 
 	WriteBaseXML(element);
 }
@@ -1343,8 +1343,8 @@ HeeksObj* CProbe_Grid::ReadFromXMLElement(TiXmlElement* element)
 
 void CProbing::WriteBaseXML(TiXmlElement *element)
 {
-	element->SetDoubleAttribute("depth", m_depth);
-	element->SetDoubleAttribute("distance", m_distance);
+	element->SetDoubleAttribute( "depth", m_depth);
+	element->SetDoubleAttribute( "distance", m_distance);
 
 	CSpeedOp::WriteBaseXML(element);
 }
