@@ -49,6 +49,10 @@ CProfileParams::CProfileParams()
 	m_end_given = false;
 	m_start[0] = m_start[1] = m_start[2] = 0.0;
 	m_end[0] = m_end[1] = m_end[2] = 0.0;
+
+    m_extend_at_start = 0.0; 
+    m_extend_at_end = 0.0; 
+
 	m_end_beyond_full_profile = false;
 	m_sort_sketches = 1;
 	m_offset_extra = 0.0;
@@ -89,6 +93,11 @@ static void on_set_start_given(bool value, HeeksObj* object){((CProfile*)object)
 static void on_set_start(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_start, vt, 3*sizeof(double));}
 static void on_set_end_given(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_given = value; heeksCAD->RefreshProperties();}
 static void on_set_end(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_end, vt, 3*sizeof(double));}
+
+static void on_set_extend_at_start(double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_extend_at_start = value; ((CProfile*)object)->WriteDefaultValues();}
+
+static void on_set_extend_at_end(double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_extend_at_end = value; ((CProfile*)object)->WriteDefaultValues();}
+
 static void on_set_end_beyond_full_profile(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_beyond_full_profile = value;}
 static void on_set_sort_sketches(const int value, HeeksObj* object)
 {
@@ -203,6 +212,9 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		// roll on radius
 		list->push_back(new PropertyLength(_("roll radius"), m_auto_roll_radius, parent, on_set_roll_radius));
 	} // End if - else
+    
+    list->push_back(new PropertyLength(_("extend before start"), m_extend_at_start, parent, on_set_extend_at_start));
+    list->push_back(new PropertyLength(_("extend past end"), m_extend_at_end, parent, on_set_extend_at_end));
 
 	list->push_back(new PropertyLength(_("offset_extra"), m_offset_extra, parent, on_set_offset_extra));
 	list->push_back(new PropertyCheck(_("do finishing pass"), m_do_finishing_pass, parent, on_set_do_finishing_pass));
@@ -264,6 +276,8 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	std::ostringstream l_ossValue;
 	l_ossValue << m_sort_sketches;
 	element->SetAttribute( "sort_sketches", l_ossValue.str().c_str());
+//df
+    element->SetDoubleAttribute( "extend at start", m_extend_at_start);
 
 	element->SetDoubleAttribute( "offset_extra", m_offset_extra);
 	element->SetAttribute( "do_finishing_pass", m_do_finishing_pass ? 1:0);
@@ -691,9 +705,12 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CMachineState *pMachin
 			tags_cleared = true;
 			python << _T("kurve_funcs.add_tag(area.Point(") << tag->m_pos[0] / theApp.m_program->m_units << _T(", ") << tag->m_pos[1] / theApp.m_program->m_units << _T("), ") << tag->m_width / theApp.m_program->m_units << _T(", ") << tag->m_angle * PI/180 << _T(", ") << tag->m_height / theApp.m_program->m_units << _T(")\n");
 		}
+        //extend_at_start, extend_at_end
+        python << _T("extend_at_start= ") << m_profile_params.m_extend_at_start / theApp.m_program->m_units << _T("\n");
+        python << _T("extend_at_end= ") << m_profile_params.m_extend_at_end / theApp.m_program->m_units<< _T("\n");
 
 		// profile the kurve
-		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_safety_space, clearance, start_depth, step_down, final_depth)\n"), side_string.c_str());
+		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_safety_space, clearance, start_depth, step_down, final_depth,extend_at_start,extend_at_end)\n"), side_string.c_str());
 	}
 	python << _T("absolute()\n");
 	return(python);
