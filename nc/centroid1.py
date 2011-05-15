@@ -22,7 +22,8 @@ class Creator(iso_modal.Creator):
     def __init__(self):
         iso_modal.Creator.__init__(self)
 
-
+        self.useCrc = True
+        self.useCrcCenterline = True
         self.absolute_flag = True
         self.prev_g91 = ''
 
