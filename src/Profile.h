@@ -40,6 +40,8 @@ public:
 	bool m_end_given;
 	double m_start[3];
 	double m_end[3];
+    double m_extend_at_start; 
+    double m_extend_at_end;
 	bool m_end_beyond_full_profile;
 	int m_sort_sketches;
 
