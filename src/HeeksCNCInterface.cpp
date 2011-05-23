@@ -14,10 +14,12 @@ CProgram* CHeeksCNCInterface::GetProgram()
 	return theApp.m_program;
 }
 
+#ifndef STABLE_OPS_ONLY
 CFixture* CHeeksCNCInterface::FixtureFind(int coordinate_system_number )
 {
 	return theApp.m_program->Fixtures()->Find((CFixture::eCoordinateSystemNumber_t)coordinate_system_number);
 }
+#endif
 
 CTools* CHeeksCNCInterface::GetTools()
 {

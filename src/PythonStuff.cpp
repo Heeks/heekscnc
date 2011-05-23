@@ -180,8 +180,8 @@ public:
 	}
 	void ThenDo(void)
 	{
-		// there should now be a .nc.xml written
-		wxString xml_file_str = m_filename + wxString(_T(".nc.xml"));
+		// there should now be an xml file written
+		wxString xml_file_str = theApp.m_program->GetBackplotFilePath();
 		wxFile ofs(xml_file_str.c_str());
 		if(!ofs.IsOpened())
 		{

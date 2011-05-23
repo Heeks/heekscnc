@@ -180,7 +180,11 @@ Python CTapping::AppendTextToProgram( CMachineState *pMachineState )
 	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_tapping_locations != 0, NULL);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
+#ifdef STABLE_OPS_ONLY
+		gp_Pnt point( *l_itLocation );
+#else
 		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );
+#endif
 
 		python << _T("tap(")
 		       << _T("x=") << point.X()/theApp.m_program->m_units << _T(", ")

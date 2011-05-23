@@ -32,6 +32,7 @@ CAttachOp::CAttachOp(const std::list<int> &solids, double tol, double min_z):COp
 {
 	ReadDefaultValues();
 
+#ifdef OP_SKETCHES_AS_CHILDREN
 	for(std::list<int>::const_iterator It = solids.begin(); It != solids.end(); It++)
 	{
 		int solid = *It;
@@ -42,6 +43,7 @@ CAttachOp::CAttachOp(const std::list<int> &solids, double tol, double min_z):COp
 		}
 	}
 	m_solids.clear();
+#endif
 }
 
 CAttachOp::CAttachOp( const CAttachOp & rhs ) : COp(rhs), m_solids(rhs.m_solids), m_tolerance(rhs.m_tolerance), m_min_z(rhs.m_min_z)
@@ -69,6 +71,7 @@ const wxBitmap &CAttachOp::GetIcon()
 	return *icon;
 }
 
+#ifdef OP_SKETCHES_AS_CHILDREN
 void CAttachOp::ReloadPointers()
 {
 	for (std::list<int>::iterator symbol = m_solids.begin(); symbol != m_solids.end(); symbol++)
@@ -84,31 +87,41 @@ void CAttachOp::ReloadPointers()
 
 	COp::ReloadPointers();
 }
+#endif
 
 Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
-    ReloadPointers();   // Make sure all the solids in m_solids are included as child objects.
+ #ifdef OP_SKETCHES_AS_CHILDREN
+   ReloadPointers();   // Make sure all the solids in m_solids are included as child objects.
+#endif
 
 	python << COp::AppendTextToProgram(pMachineState);
 
 	//write stl file
 	std::list<HeeksObj*> solids;
 	std::list<HeeksObj*> copies_to_delete;
-	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
-	{
+#ifdef OP_SKETCHES_AS_CHILDREN
+    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
+    {
 	    if (object->GetType() != SolidType && object->GetType() != StlSolidType)
 	    {
 	        continue;
 	    }
 
+#else
+	for (std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
+    {
+		HeeksObj* object = heeksCAD->GetIDObject(SolidType, *It);
+#endif
 		if (object != NULL)
 		{
 			if(1/* to do pMachineState->Fixture().GetMatrix() == gp_Trsf()*/)
 			{
 				solids.push_back(object);
 			}
+#ifndef STABLE_OPS_ONLY
 			else
 			{
 				// Need to rotate a COPY of the solid by the fixture settings.
@@ -129,6 +142,7 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 					copies_to_delete.push_back(copy);
 				}
 			}
+#endif
 		} // End if - then
 	} // End for
 
@@ -208,10 +222,16 @@ void CAttachOp::WriteXML(TiXmlNode *root)
 	element->SetDoubleAttribute( "material_allowance", m_material_allowance);
 
 	// write solid ids
+#ifdef OP_SKETCHES_AS_CHILDREN
 	for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
 	{
 		if (object->GetIDGroupType() != SolidType)continue;
 		int solid = object->GetID();
+#else
+	for (std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
+    {
+		int solid = *It;
+#endif
 		TiXmlElement * solid_element = heeksCAD->NewXMLElement( "solid" );
 		heeksCAD->LinkXMLEndChild( element, solid_element );
 		solid_element->SetAttribute("id", solid);

@@ -216,7 +216,11 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_drilling_locations != 0, NULL);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
+#ifdef STABLE_OPS_ONLY
+		gp_Pnt point = *l_itLocation;
+#else
 		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );
+#endif
 
 		python << _T("drill(")
 			<< _T("x=") << point.X()/theApp.m_program->m_units << _T(", ")
@@ -681,9 +685,11 @@ void CDrilling::ReloadPointers()
 			if (lhsPtr->GetType() == ProfileType)
 			{
 				std::vector<CNCPoint> starting_points;
-				CFixture perfectly_aligned_fixture(NULL,CFixture::G54, false, 0.0);
 				CMachineState machine;
+#ifndef STABLE_OPS_ONLY
+				CFixture perfectly_aligned_fixture(NULL,CFixture::G54, false, 0.0);
 				machine.Fixture(perfectly_aligned_fixture);
+#endif
 
 				// to do, make this get the starting point again
 				//((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &machine );
@@ -716,6 +722,7 @@ void CDrilling::ReloadPointers()
                 } // End for
             } // End if - then
 
+#ifndef STABLE_OPS_ONLY
             if (lhsPtr->GetType() == CounterBoreType)
             {
                 std::vector<CNCPoint> holes = CDrilling::FindAllLocations((CCounterBore *)lhsPtr, starting_location, false, NULL);
@@ -727,7 +734,7 @@ void CDrilling::ReloadPointers()
                     } // End if - then
                 } // End for
             } // End if - then
-
+#endif
 
 		} // End if - then
 	} // End for

@@ -20,17 +20,25 @@ class CFixture;
 #define PROGRAM heeksCNC->GetProgram()
 #endif
 
-CMachineState::CMachineState() : m_fixture(NULL, CFixture::G54, false, 0.0)
+CMachineState::CMachineState()
+#ifndef STABLE_OPS_ONLY
+: m_fixture(NULL, CFixture::G54, false, 0.0)
+#endif
 {
         m_location = CNCPoint(0.0, 0.0, 0.0);
         m_tool_number = 0;  // No tool assigned.
+#ifndef STABLE_OPS_ONLY
         m_fixture_has_been_set = false;
+#endif
 		m_attached_to_surface = NULL;
 }
 
 CMachineState::~CMachineState() { }
 
-CMachineState::CMachineState(CMachineState & rhs) : m_fixture(rhs.Fixture())
+CMachineState::CMachineState(CMachineState & rhs)
+#ifndef STABLE_OPS_ONLY
+: m_fixture(rhs.Fixture())
+#endif
 {
     *this = rhs;  // Call the assignment operator
 }
@@ -40,9 +48,11 @@ CMachineState & CMachineState::operator= ( CMachineState & rhs )
     if (this != &rhs)
     {
         m_location = rhs.Location();
-        m_fixture = rhs.Fixture();
-        m_tool_number = rhs.Tool();
+ #ifndef STABLE_OPS_ONLY
+       m_fixture = rhs.Fixture();
         m_fixture_has_been_set = rhs.m_fixture_has_been_set;
+#endif
+        m_tool_number = rhs.Tool();
 		m_attached_to_surface = rhs.m_attached_to_surface;
     }
 
@@ -51,7 +61,9 @@ CMachineState & CMachineState::operator= ( CMachineState & rhs )
 
 bool CMachineState::operator== ( const CMachineState & rhs ) const
 {
+#ifndef STABLE_OPS_ONLY
     if (m_fixture != rhs.Fixture()) return(false);
+#endif
     if (m_tool_number != rhs.m_tool_number) return(false);
     if(m_attached_to_surface != rhs.m_attached_to_surface) return false;
 
@@ -101,6 +113,7 @@ Python CMachineState::Tool( const int new_tool )
 	continuing on with the other machine operations.  This ensures that the tool is somewhere above
 	the new fixture before we start any other movements.
  */
+#ifndef STABLE_OPS_ONLY
 Python CMachineState::Fixture( CFixture new_fixture )
 {
     Python python;
@@ -225,3 +238,4 @@ bool CMachineState::Instance::operator< ( const CMachineState::Instance & rhs ) 
     return(m_fixture < rhs.m_fixture);
 }
 
+#endif

@@ -1,9 +1,11 @@
+import tempfile
+
 class HxmlWriter:
     def __init__(self):
         pass
     
     def on_parse_start(self, name):
-        self.file_out = open(name+'.nc.xml', 'w')
+        self.file_out = open(tempfile.gettempdir()+'/backplot.xml', 'w')
         self.file_out.write('<?xml version="1.0" ?>\n')
         self.file_out.write('<nccode>\n')
 

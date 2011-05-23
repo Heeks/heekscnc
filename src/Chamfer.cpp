@@ -239,11 +239,16 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 			std::vector<CNCPoint> locations = CDrilling::FindAllLocations(pDrilling, pMachineState->Location(), true, NULL);
             for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 			{
+#ifdef STABLE_OPS_ONLY
+				CNCPoint point = *l_itLocation;
+#else
 				CNCPoint point = pMachineState->Fixture().Adjustment( *l_itLocation );
+#endif
 				circles.push_back( Circle( point, hole_diameter, pDrilling->m_params.m_depth ) );
 			} // End for
 		} // End if - then
 
+#ifndef STABLE_OPS_ONLY
 		if (child->GetType() == CounterBoreType)
 		{
 			CCounterBore *pCounterBore = ((CCounterBore *) child);
@@ -256,6 +261,7 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 				circles.push_back( Circle( point, pCounterBore->m_params.m_diameter, max_depth ) );
 			} // End for
 		}
+#endif
 
 		for (Circles_t::iterator l_itCircle = circles.begin(); l_itCircle != circles.end(); l_itCircle++)
 		{

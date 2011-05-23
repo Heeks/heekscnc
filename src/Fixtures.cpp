@@ -3,6 +3,7 @@
 // This program is released under the BSD license. See the file COPYING for details.
 
 #include "stdafx.h"
+#ifndef STABLE_OPS_ONLY
 #include "Fixtures.h"
 #include "tinyxml/tinyxml.h"
 #include "Program.h"
@@ -218,3 +219,4 @@ int CFixtures::GetNextFixture()
 	return(-1);	// None available.
 } // End GetNextFixture() method
 
+#endif

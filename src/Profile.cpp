@@ -133,7 +133,11 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 
 		if(parent->GetNumSketches() == 1)
 		{
+#ifdef OP_SKETCHES_AS_CHILDREN
 			HeeksObj* sketch = parent->GetFirstChild();
+#else
+			HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, parent->m_sketches.front());
+#endif
 			if((sketch) && (sketch->GetType() == SketchType))
 			{
 				order = heeksCAD->GetSketchOrder(sketch);
@@ -334,6 +338,7 @@ CProfile::CProfile(const std::list<int> &sketches, const int tool_number )
 			m_tags(NULL), m_sketches(sketches)
 {
     ReadDefaultValues();
+#ifdef OP_SKETCHES_AS_CHILDREN
     for (std::list<int>::iterator id = m_sketches.begin(); id != m_sketches.end(); id++)
     {
         HeeksObj *object = heeksCAD->GetIDObject( SketchType, *id );
@@ -344,6 +349,7 @@ CProfile::CProfile(const std::list<int> &sketches, const int tool_number )
     }
 
     m_sketches.clear();
+#endif
 } // End constructor
 
 CProfile & CProfile::operator= ( const CProfile & rhs )
@@ -446,7 +452,11 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 				{
 					if(reversed)span_object->GetEndPoint(s);
 					else span_object->GetStartPoint(s);
+#ifdef STABLE_OPS_ONLY
+					CNCPoint start(s);
+#else
 					CNCPoint start(pMachineState->Fixture().Adjustment(s));
+#endif
 
 					python << _T("curve.append(area.Point(");
 					python << start.X(true);
@@ -457,7 +467,11 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 				}
 				if(reversed)span_object->GetStartPoint(e);
 				else span_object->GetEndPoint(e);
+#ifdef STABLE_OPS_ONLY
+				CNCPoint end(e);
+#else
 				CNCPoint end(pMachineState->Fixture().Adjustment( e ));
+#endif
 
 				if(type == LineType)
 				{
@@ -470,7 +484,11 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
+#ifdef STABLE_OPS_ONLY
+					CNCPoint centre(c);
+#else
 					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
+#endif
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
@@ -515,12 +533,18 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 						points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 					}
 
+#ifndef STABLE_OPS_ONLY
 					pMachineState->Fixture().Adjustment(c);
+#endif
 					CNCPoint centre(c);
 
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
+#ifdef STABLE_OPS_ONLY
+						CNCPoint pnt( l_itPoint->second );
+#else
 						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
+#endif
 
 						python << (_T("curve.append(area.Vertex("));
 						python << l_itPoint->first << _T(", area.Point(");
@@ -564,7 +588,9 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 					m_profile_params.m_start[1] / theApp.m_program->m_units,
 					0.0 );
 
+#ifndef STABLE_OPS_ONLY
 			starting = pMachineState->Fixture().Adjustment( starting );
+#endif
 
 			startx = starting.X();
 			starty = starting.Y();
@@ -590,7 +616,9 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 					m_profile_params.m_end[1] / theApp.m_program->m_units,
 					0.0 );
 
+#ifndef STABLE_OPS_ONLY
 			finish = pMachineState->Fixture().Adjustment( finish );
+#endif
 
 			finishx = finish.X();
 			finishy = finish.Y();
@@ -807,11 +835,18 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 
 	CProfileParams::eCutMode cut_mode = finishing_pass ? m_profile_params.m_finishing_cut_mode : m_profile_params.m_cut_mode;
 
+#ifdef OP_SKETCHES_AS_CHILDREN
 	for(std::list<HeeksObj*>::iterator It = m_objects.begin(); It != m_objects.end(); It++)
 	{
 		// write a kurve definition
 		HeeksObj* object = *It;
 		if((object == NULL) || (object->GetType() != SketchType) || (object->GetNumChildren() == 0))continue;
+#else
+	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+    {
+		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
+		if((object == NULL) || (object->GetNumChildren() == 0))continue;
+#endif
 
 		HeeksObj* re_ordered_sketch = NULL;
 		SketchOrderType sketch_order = heeksCAD->GetSketchOrder(object);
@@ -1082,8 +1117,14 @@ void CProfile::AddMissingChildren()
 unsigned int CProfile::GetNumSketches()
 {
 	unsigned int num_sketches = 0;
-	for(HeeksObj* object = GetFirstChild(); object; object = GetNextChild())
-	{
+#ifdef OP_SKETCHES_AS_CHILDREN
+    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
+    {
+#else
+	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+    {
+		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
+#endif
 		if(object->GetType() == SketchType)num_sketches++;
 	}
 	return num_sketches;
@@ -1096,6 +1137,7 @@ unsigned int CProfile::GetNumSketches()
 	list will have data in it for which we don't have children.  This routine converts
 	these type/id pairs into the HeeksObj pointers as children.
  */
+#ifdef OP_SKETCHES_AS_CHILDREN
 void CProfile::ReloadPointers()
 {
 	for (Sketches_t::iterator symbol = m_sketches.begin(); symbol != m_sketches.end(); symbol++)
@@ -1111,7 +1153,7 @@ void CProfile::ReloadPointers()
 
 	CDepthOp::ReloadPointers();
 }
-
+#endif
 
 /**
 	If it's an 'inside' profile then we need to make sure the auto_roll_radius is not so large
