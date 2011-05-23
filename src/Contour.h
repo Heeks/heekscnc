@@ -8,6 +8,7 @@
  * This program is released under the BSD license. See the file COPYING for
  * details.
  */
+#ifndef STABLE_OPS_ONLY
 
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
@@ -207,6 +208,6 @@ public:
 };
 
 
-
+#endif
 
 #endif // CONTOUR_CYCLE_CLASS_DEFINITION

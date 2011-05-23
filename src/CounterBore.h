@@ -2,6 +2,8 @@
 #ifndef COUNTER_BORE_CLASS_DEFINITION
 #define COUNTER_BORE_CLASS_DEFINITION
 
+#ifndef STABLE_OPS_ONLY
+
 // CounterBore.h
 /*
  * Copyright (c) 2009, Dan Heeks, Perttu Ahola
@@ -125,7 +127,6 @@ public:
 
 };
 
-
-
+#endif
 
 #endif // COUNTER_BORE_CLASS_DEFINITION

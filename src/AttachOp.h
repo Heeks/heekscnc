@@ -35,7 +35,9 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CAttachOp *)other)); }
+#ifdef OP_SKETCHES_AS_CHILDREN
 	void ReloadPointers();
+#endif
 
 	const wxString ConfigScope(void)const{return _T("AttachOp");}
 

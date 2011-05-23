@@ -273,6 +273,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 	if(UsesTool())python << MACHINE_STATE_TOOL(m_tool_number);  // Select the correct  tool.
 
 #ifdef HEEKSCNC
+#ifndef STABLE_OPS_ONLY
 	// Check to see if this operation has its own fixture settings.  If so, change to that fixture now.
 	for (HeeksObj *ob = GetFirstChild(); ob != NULL; ob = GetNextChild())
 	{
@@ -284,6 +285,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 		}
 	}
 #endif
+#endif
 
 	return(python);
 }
@@ -294,6 +296,7 @@ void COp::OnEditString(const wxChar* str){
 }
 
 #ifdef HEEKSCNC
+#ifndef STABLE_OPS_ONLY
 class AddFixture: public Tool{
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Add Fixture");}
@@ -324,12 +327,14 @@ public:
 
 static AddFixture add_fixture;
 #endif
+#endif
 
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     ObjList::GetTools( t_list, p );
 
 #ifdef HEEKSCNC
+#ifndef STABLE_OPS_ONLY
 	// See if this operation already has a child fixture.  If so, don't add a second one.
 	unsigned int num_private_fixtures = 0;
 	for (HeeksObj *child = GetFirstChild(); (child != NULL); child = GetNextChild())
@@ -343,8 +348,10 @@ void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 		t_list->push_back(&add_fixture);
 	} // End if - then
 #endif
+#endif
 }
 
+#ifndef STABLE_OPS_ONLY
 
 /* virtual */ std::list<CFixture> COp::PrivateFixtures()
 {
@@ -360,6 +367,7 @@ void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
     return(fixtures);
 } // End PrivateFixtures() method
+#endif
 
 bool COp::operator==(const COp & rhs) const
 {

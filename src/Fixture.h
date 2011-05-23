@@ -7,6 +7,8 @@
  */
 #pragma once
 
+#ifndef STABLE_OPS_ONLY
+
 #include "tinyxml/tinyxml.h"
 #include "HeeksCNCTypes.h"
 #include "interface/Property.h"
@@ -229,3 +231,4 @@ public:
 }; // End CFixture class definition.
 
 
+#endif

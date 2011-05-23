@@ -1586,9 +1586,11 @@ public:
 
 		python << m_pThis->GeneratePythonPreamble();
 
-		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		CMachineState machine;
+#ifndef STABLE_OPS_ONLY
+		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		machine.Fixture(default_fixture);
+#endif
 
 		python << m_pThis->AppendTextToProgram( &machine );
 
@@ -1642,9 +1644,11 @@ public:
 
 		python << m_pThis->GeneratePythonPreamble();
 
-		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		CMachineState machine;
+#ifndef STABLE_OPS_ONLY
+		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		machine.Fixture(default_fixture);
+#endif
 
 		python << m_pThis->AppendTextToProgram( &machine );
 
@@ -1699,9 +1703,11 @@ public:
 
 		python << m_pThis->GeneratePythonPreamble();
 
-		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		CMachineState machine;
+#ifndef STABLE_OPS_ONLY
+		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
 		machine.Fixture(default_fixture);
+#endif
 
 		python << m_pThis->AppendTextToProgram( &machine );
 

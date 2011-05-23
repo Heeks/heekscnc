@@ -6,6 +6,9 @@
  */
 
 #include <stdafx.h>
+
+#ifndef STABLE_OPS_ONLY
+
 #include <math.h>
 #include "Fixture.h"
 #include "Fixtures.h"
@@ -282,11 +285,16 @@ static void on_set_coordinate_system_number(const int zero_based_choice, HeeksOb
         // There is a pre-existing fixture for this coordinate system.  Use the pre-existing one and
         // throw this one away.
 
+#ifdef MULTIPLE_OWNERS
         for (HeeksObj *parent = pFixture->GetFirstOwner(); parent != NULL; parent = pFixture->GetNextOwner())
         {
             parent->Remove(pFixture);
             parent->Add( pExistingFixture, NULL );
         } // End for
+#else
+		pFixture->m_owner->Remove(pFixture);
+		pFixture->m_owner->Add( pExistingFixture, NULL );
+#endif
 	}
 } // End on_set_coordinate_system_number
 
@@ -794,3 +802,5 @@ bool CFixtureParams::operator== ( const CFixtureParams & rhs ) const
 	return(true);
 }
 
+
+#endif

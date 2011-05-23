@@ -75,8 +75,11 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+#ifdef OP_SKETCHES_AS_CHILDREN
 	void ReloadPointers();
+#endif
 	void GetOnEdit(bool(**callback)(HeeksObj*));
+	bool Add(HeeksObj* object, HeeksObj* prev_object);
 
 	// COp's virtual functions
 	Python AppendTextToProgram(CMachineState *pMachineState);
