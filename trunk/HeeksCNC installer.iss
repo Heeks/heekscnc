@@ -26,7 +26,7 @@ Name: fr; MessagesFile: "compiler:Languages\French.isl"
 Name: it; MessagesFile: "compiler:Languages\Italian.isl"
 
 [Files]
-Source: "C:\Users\Dan\HeeksCAD\src\Unicode Release\HeeksCAD.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Dan\HeeksCAD\HeeksCAD.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\bitmaps\*.png"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\bitmaps\angle\*.png"; DestDir: "{app}\bitmaps\angle"; Flags: ignoreversion
 Source: "C:\Users\Dan\HeeksCAD\bitmaps\font.glf"; DestDir: "{app}\bitmaps"; Flags: ignoreversion

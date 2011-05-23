@@ -6,6 +6,8 @@
  */
 
 #include "stdafx.h"
+#ifndef STABLE_OPS_ONLY
+// ( use attach operation followed by pocket operation instead )
 #include "ZigZag.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -228,6 +230,9 @@ Python CZigZag::AppendTextToProgram(CMachineState *pMachineState)
 
 		if (object != NULL)
 		{
+#ifdef STABLE_OPS_ONLY
+            solids.push_back(object);
+#else
 			// Need to rotate a COPY of the solid by the fixture settings.
 			HeeksObj* copy = object->MakeACopy();
 			if (copy != NULL)
@@ -244,7 +249,8 @@ Python CZigZag::AppendTextToProgram(CMachineState *pMachineState)
 
                 solids.push_back(copy);
             } // End if - then
-        } // End if - then
+ #endif
+       } // End if - then
 	} // End for
 
 
@@ -254,17 +260,24 @@ Python CZigZag::AppendTextToProgram(CMachineState *pMachineState)
 
 	heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
 
+#ifndef STABLE_OPS_ONLY
 	// We don't need the duplicate solids any more.  Delete them.
 	for (std::list<HeeksObj*>::iterator l_itSolid = solids.begin(); l_itSolid != solids.end(); l_itSolid++)
 	{
 		heeksCAD->Remove( *l_itSolid );
 	} // End for
+#endif
 	heeksCAD->Changed();
 
 
 	// Rotate the coordinates to align with the fixture.
+#ifdef STABLE_OPS_ONLY
+	gp_Pnt min( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] );
+	gp_Pnt max( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] );
+#else
 	gp_Pnt min = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_box.m_x[0], m_params.m_box.m_x[1], m_params.m_box.m_x[2] ) );
 	gp_Pnt max = pMachineState->Fixture().Adjustment( gp_Pnt( m_params.m_box.m_x[3], m_params.m_box.m_x[4], m_params.m_box.m_x[5] ) );
+#endif
 
 	python << _T("ocl_funcs.zigzag(") << PythonString(filepath.GetFullPath()) << _T(", tool_diameter, corner_radius, float(") << m_params.m_step_over / theApp.m_program->m_units << _T("), float(") << min.X() / theApp.m_program->m_units << _T("), float(") << max.X() / theApp.m_program->m_units << _T("), float(") << min.Y() / theApp.m_program->m_units << _T("), float(") << max.Y() / theApp.m_program->m_units << _T("), ") << ((m_params.m_direction == 0) ? _T("'X'") : _T("'Y'")) << _T(", float(") << m_params.m_material_allowance / theApp.m_program->m_units << _T("), ") << m_params.m_style << _T(", clearance, rapid_safety_space, start_depth, step_down, final_depth, ") << theApp.m_program->m_units << _T(")\n");
 
@@ -480,3 +493,4 @@ bool CZigZag::operator==( const CZigZag & rhs ) const
 
 	return(CDepthOp::operator==(rhs));
 }
+#endif

@@ -2,6 +2,7 @@
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
+#ifndef STABLE_OPS_ONLY
 #include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
 #include "Fixture.h"
@@ -35,3 +36,5 @@ public:
 	bool IsDifferent( HeeksObj *other ) { return( *this != (*(CFixtures *)other) ); }
 
 };
+
+#endif

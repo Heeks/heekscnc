@@ -6,6 +6,9 @@
  */
 
 #include "stdafx.h"
+
+#ifndef STABLE_OPS_ONLY
+
 #include "CounterBore.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -695,3 +698,4 @@ bool CCounterBore::operator== ( const CCounterBore & rhs ) const
 	return(CDepthOp::operator==(rhs));
 }
 
+#endif

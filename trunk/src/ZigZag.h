@@ -2,6 +2,7 @@
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
+#ifndef STABLE_OPS_ONLY
 #include "DepthOp.h"
 #include "HeeksCNCTypes.h"
 
@@ -62,3 +63,4 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
+#endif

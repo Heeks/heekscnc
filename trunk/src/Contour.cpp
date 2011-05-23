@@ -6,6 +6,9 @@
  */
 
 #include "stdafx.h"
+
+#ifndef STABLE_OPS_ONLY
+
 #include "Contour.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
@@ -857,7 +860,11 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 		break;
 
 		case GeomAbs_Circle:
+#ifdef STABLE_OPS_ONLY
+		if(1)
+#else
 		if ((pMachineState->Fixture().m_params.m_xz_plane == 0.0) && (pMachineState->Fixture().m_params.m_yz_plane == 0.0))
+#endif
 		{
 			gp_Pnt PS;
 			gp_Vec VS;
@@ -1320,3 +1327,4 @@ bool CContour::IsDifferent(HeeksObj* other)
 	return(! (*this == (*((CContour *) other))));
 }
 
+#endif

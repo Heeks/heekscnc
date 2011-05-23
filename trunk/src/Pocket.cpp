@@ -238,7 +238,11 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 			if(type == LineType || type == ArcType)
 			{
 				span_object->GetStartPoint(s);
+#ifdef STABLE_OPS_ONLY
+				CNCPoint start(s);
+#else
 				CNCPoint start(pMachineState->Fixture().Adjustment(s));
+#endif
 
 				if(started && (fabs(s[0] - prev_e[0]) > 0.0001 || fabs(s[1] - prev_e[1]) > 0.0001))
 				{
@@ -253,7 +257,11 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 					started = true;
 				}
 				span_object->GetEndPoint(e);
+#ifdef STABLE_OPS_ONLY
+				CNCPoint end(e);
+#else
 				CNCPoint end(pMachineState->Fixture().Adjustment(e));
+#endif
 
 				if(type == LineType)
 				{
@@ -262,7 +270,11 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
+#ifdef STABLE_OPS_ONLY
+					CNCPoint centre(c);
+#else
 					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
+#endif
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
@@ -295,12 +307,20 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 					points.push_back( std::make_pair(-1, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
 					points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 
+#ifdef STABLE_OPS_ONLY
+					CNCPoint centre(c);
+#else
 					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
+#endif
 
 					gcode << _T("c = area.Curve()\n");
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
+#ifdef STABLE_OPS_ONLY
+						CNCPoint pnt( l_itPoint->second );
+#else
 						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
+#endif
 
 						gcode << _T("c.append(area.Vertex(") << l_itPoint->first << _T(", area.Point(");
 						gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
@@ -341,7 +361,9 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
+#ifdef OP_SKETCHES_AS_CHILDREN
 	ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
+#endif
 
 	CTool *pTool = CTool::Find( m_tool_number );
 	if (pTool == NULL)
@@ -356,8 +378,14 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 	python << _T("a = area.Area()\n");
 	python << _T("entry_moves = []\n");
 
+#ifdef OP_SKETCHES_AS_CHILDREN
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
+#else
+	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+    {
+		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
+#endif
 		if(object == NULL) {
 			wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
 			continue;
@@ -625,6 +653,7 @@ CPocket::CPocket(const std::list<int> &sketches, const int tool_number )
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
 
+#ifdef OP_SKETCHES_AS_CHILDREN
 	for (Sketches_t::iterator sketch = m_sketches.begin(); sketch != m_sketches.end(); sketch++)
 	{
 		HeeksObj *object = heeksCAD->GetIDObject( SketchType, *sketch );
@@ -635,6 +664,7 @@ CPocket::CPocket(const std::list<int> &sketches, const int tool_number )
 	}
 
 	m_sketches.clear();
+#endif
 }
 
 CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
@@ -643,10 +673,12 @@ CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
 
+#ifdef OP_SKETCHES_AS_CHILDREN
 	for (std::list<HeeksObj *>::const_iterator sketch = sketches.begin(); sketch != sketches.end(); sketch++)
 	{
 		Add( *sketch, NULL );
 	}
+#endif
 }
 
 
@@ -658,6 +690,7 @@ CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
 	list will have data in it for which we don't have children.  This routine converts
 	these type/id pairs into the HeeksObj pointers as children.
  */
+#ifdef OP_SKETCHES_AS_CHILDREN
 void CPocket::ReloadPointers()
 {
 	for (Sketches_t::iterator symbol = m_sketches.begin(); symbol != m_sketches.end(); symbol++)
@@ -673,6 +706,7 @@ void CPocket::ReloadPointers()
 
 	CDepthOp::ReloadPointers();
 }
+#endif
 
 
 
@@ -685,12 +719,18 @@ std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
 	std::list<wxString> changes;
 
 	int num_sketches = 0;
-	for(HeeksObj *obj = GetFirstChild(); obj != NULL; obj = GetNextChild())
-	{
-		if (obj->GetType() == SketchType)
+#ifdef OP_SKETCHES_AS_CHILDREN
+    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
+    {
+		if (object->GetType() == SketchType)
 		{
 		    num_sketches++;
 		}
+#else
+	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+    {
+		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
+#endif
 	} // End if - then
 
 	if (num_sketches == 0)
@@ -827,4 +867,9 @@ static bool OnEdit(HeeksObj* object)
 void CPocket::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
+}
+
+bool CPocket::Add(HeeksObj* object, HeeksObj* prev_object)
+{
+	return CDepthOp::Add(object, prev_object);
 }
