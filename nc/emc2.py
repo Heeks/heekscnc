@@ -6,12 +6,13 @@ class Creator(iso.Creator):
 	def init(self): 
 		iso.Creator.init(self) 
 
-	def SPACE(self): return(' ')
+	def SPACE(self): return('')
 	def TAP(self): return('G33.1')
 	def TAP_DEPTH(self, format, depth): return(self.SPACE() + 'K' + (format % depth))
 	def BORE_FEED_OUT(self): return('G85')
 	def BORE_SPINDLE_STOP_RAPID_OUT(self): return('G86')
 	def BORE_DWELL_FEED_OUT(self, format, dwell): return('G89') + self.SPACE() + (format % dwell)
+	def FEEDRATE(self): return((self.SPACE() + ' F'))
 
 	def program_begin(self, id, comment):
 		self.write( ('(' + comment + ')' + '\n') )
@@ -392,22 +393,22 @@ class Creator(iso.Creator):
 		retract_height = z + standoff		
 		if (x != None):		
 			dx = x - self.x		
-			self.write(self.X() + (self.fmt % x))		
+			self.write(self.X() + (self.fmt.string(x)))		
 			self.x = x 
 	   
 		if (y != None):		
 			dy = y - self.y		
-			self.write(self.Y() + (self.fmt % y))		
+			self.write(self.Y() + (self.fmt.string(y)))		
 			self.y = y
 					  
 		dz = (z + standoff) - self.z # In the end, we will be standoff distance above the z value passed in.
 
 		if self.drill_modal:
 			if z != self.prev_z:
-				self.write(self.Z() + (self.fmt % (z - depth)))
+				self.write(self.Z() + (self.fmt.string(z - depth)))
 				self.prev_z = z
 		else:			 
-			 self.write(self.Z() + (self.fmt % (z - depth)))	# This is the 'z' value for the bottom of the hole.
+			 self.write(self.Z() + (self.fmt.string(z - depth)))	# This is the 'z' value for the bottom of the hole.
 		self.z = (z + standoff)			# We want to remember where z is at the end (at the top of the hole)
 
 		if self.drill_modal:
@@ -421,11 +422,11 @@ class Creator(iso.Creator):
 			self.calc_feedrate_hv(math.sqrt(dx * dx + dy * dy), math.fabs(dz))
 
 		if self.drill_modal:
-			if (self.FEEDRATE() + (self.ffmt % self.fv) + self.SPACE()) != self.prev_f:
-			   self.write(self.FEEDRATE() + (self.ffmt % self.fv) + self.SPACE())		
-			   self.prev_f = self.FEEDRATE() + (self.ffmt % self.fv) + self.SPACE()
+			if (self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE()) != self.prev_f:
+			   self.write(self.FEEDRATE() + self.ffmt.string(self.fv) + self.SPACE())		
+			   self.prev_f = self.FEEDRATE() + self.ffmt.stirng(self.fv) + self.SPACE()
 		else: 
-			self.write(self.FEEDRATE() + (self.ffmt % self.fv) + self.SPACE())			
+			self.write(self.FEEDRATE() + (self.ffmt.string(self.fv) + self.SPACE())	)		
 		self.write_spindle()			
 		self.write_misc()	
 		self.write('\n')
@@ -472,18 +473,18 @@ class Creator(iso.Creator):
 				self.write(self.RAPID() )		   
 
 				if (x != None):		
-						self.write(self.X() + (self.fmt % x))		
+						self.write(self.X() + self.fmt.string(x))		
 						self.x = x 
 
 				if (y != None):		
-						self.write(self.Y() + (self.fmt % y))		
+						self.write(self.Y() + self.fmt.string(y))		
 						self.y = y
 				self.write('\n')
        
 		self.write_blocknum()				
 		self.write( self.TAP() )
 		self.write( self.TAP_DEPTH(self.ffmt,pitch) + self.SPACE() )			
-		self.write(self.Z() + (self.fmt % (z - depth)))	# This is the 'z' value for the bottom of the tap.
+		self.write(self.Z() + self.fmt.string(z - depth))	# This is the 'z' value for the bottom of the tap.
 		self.write_misc()	
 		self.write('\n')
 
