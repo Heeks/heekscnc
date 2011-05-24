@@ -281,7 +281,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	l_ossValue << m_sort_sketches;
 	element->SetAttribute( "sort_sketches", l_ossValue.str().c_str());
 //df
-    element->SetDoubleAttribute( "extend at start", m_extend_at_start);
+	element->SetDoubleAttribute( "extend_at_start", m_extend_at_start);
 
 	element->SetDoubleAttribute( "offset_extra", m_offset_extra);
 	element->SetAttribute( "do_finishing_pass", m_do_finishing_pass ? 1:0);
