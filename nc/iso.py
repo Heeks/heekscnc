@@ -113,8 +113,8 @@ class Creator(nc.Creator):
     def DRILL(self): return('G81')
     def DRILL_WITH_DWELL(self, format, dwell): return('G82' + self.SPACE() + (format.string(dwell)))
     def PECK_DRILL(self): return('G83')
-    def PECK_DEPTH(self, format, depth): return('Q' + self.SPACE() + (format.string(depth)))
-    def RETRACT(self, format, height): return('R' + self.SPACE() + (format.string(height)))
+    def PECK_DEPTH(self, format, depth): return(self.SPACE() + 'Q' + (format.string(depth)))
+    def RETRACT(self, format, height): return(self.SPACE() + 'R' + (format.string(height)))
     def END_CANNED_CYCLE(self): return('G80')
 
     def X(self): return('X')
