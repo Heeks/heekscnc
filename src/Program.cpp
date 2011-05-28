@@ -569,69 +569,6 @@ void CMachine::ReadBaseXML(TiXmlElement* element)
 
 } // End ReadBaseXML() method
 
-
-
-/**
-	Sort the NC operations by;
-		- execution order
-		- centre drilling operations
-		- drilling operations
-		- all other operations (sorted by tool number to avoid unnecessary tool changes)
- */
-struct sort_operations : public std::binary_function< bool, COp *, COp * >
-{
-	bool operator() ( const COp *lhs, const COp *rhs ) const
-	{
-		// We want to run through all the centre drilling, then drilling, then milling then chamfering.
-
-		if ((((HeeksObj *)lhs)->GetType() == ChamferType) && (((HeeksObj *)rhs)->GetType() != ChamferType)) return(false);
-		if ((((HeeksObj *)lhs)->GetType() != ChamferType) && (((HeeksObj *)rhs)->GetType() == ChamferType)) return(true);
-
-		if ((((HeeksObj *)lhs)->GetType() == DrillingType) && (((HeeksObj *)rhs)->GetType() != DrillingType)) return(true);
-		if ((((HeeksObj *)lhs)->GetType() != DrillingType) && (((HeeksObj *)rhs)->GetType() == DrillingType)) return(false);
-
-		if ((((HeeksObj *)lhs)->GetType() == DrillingType) && (((HeeksObj *)rhs)->GetType() == DrillingType))
-		{
-			// They're both drilling operations.  Select centre drilling over normal drilling.
-			CTool *lhsPtr = (CTool *) CTool::Find( lhs->m_tool_number );
-			CTool *rhsPtr = (CTool *) CTool::Find( rhs->m_tool_number );
-
-			if ((lhsPtr != NULL) && (rhsPtr != NULL))
-			{
-				if ((lhsPtr->m_params.m_type == CToolParams::eCentreDrill) &&
-				    (rhsPtr->m_params.m_type != CToolParams::eCentreDrill)) return(true);
-
-				if ((lhsPtr->m_params.m_type != CToolParams::eCentreDrill) &&
-				    (rhsPtr->m_params.m_type == CToolParams::eCentreDrill)) return(false);
-
-				// There is no preference for centre drill.  Neither tool is a centre drill.  Give preference
-				// to a normal drill bit over a milling bit now.
-
-				if ((lhsPtr->m_params.m_type == CToolParams::eDrill) &&
-				    (rhsPtr->m_params.m_type != CToolParams::eDrill)) return(true);
-
-				if ((lhsPtr->m_params.m_type != CToolParams::eDrill) &&
-				    (rhsPtr->m_params.m_type == CToolParams::eDrill)) return(false);
-
-				// Finally, give preference to a milling bit over a chamfer bit.
-				if ((lhsPtr->m_params.m_type == CToolParams::eChamfer) &&
-				    (rhsPtr->m_params.m_type != CToolParams::eChamfer)) return(false);
-
-				if ((lhsPtr->m_params.m_type != CToolParams::eChamfer) &&
-				    (rhsPtr->m_params.m_type == CToolParams::eChamfer)) return(true);
-			} // End if - then
-		} // End if - then
-
-		// The execution orders are the same.  Let's group on tool number so as
-		// to avoid unnecessary tool change operations.
-
-		if (lhs->m_tool_number < rhs->m_tool_number) return(true);
-		if (lhs->m_tool_number > rhs->m_tool_number) return(false);
-
-		return(false);
-	} // End operator
-};
-
 Python CProgram::RewritePythonProgram()
 {
 	Python python;
@@ -711,11 +648,6 @@ Python CProgram::RewritePythonProgram()
 			}
 		}
 	}
-
-#ifndef STABLE_OPS_ONLY
-	// Sort the operations in order of execution_order and then by tool_number
-	std::sort( operations.begin(), operations.end(), sort_operations() );
-#endif
 
 	// Language and Windows codepage detection and correction
 	#ifndef WIN32
