@@ -212,7 +212,7 @@ def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_s
 
 def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end_point):
     last_span = curve.GetLastSpan()
-    v = last_span.GetVector(0.0)
+    v = last_span.GetVector(1.0)
     if direction == 'right':
         off_v = area.Point(v.y, -v.x)
     else:
