@@ -493,7 +493,7 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
 	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
 	python << _T(", ") << m_pocket_params.m_zig_angle;
-	python << _T(", zig_unidirectional = ") << (m_pocket_params.m_zig_unidirectional ? _T("True") : _T("False"));
+	python << _T(",") << (m_pocket_params.m_zig_unidirectional ? _T("True") : _T("False"));
 	python << _T(")\n");
 
 	// rapid back up to clearance plane
