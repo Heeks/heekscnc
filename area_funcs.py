@@ -1,6 +1,7 @@
 import area
 from nc.nc import *
 import math
+import kurve_funcs
 
 # some globals, to save passing variables as parameters too much
 area_for_feed_possible = None
@@ -13,14 +14,11 @@ def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, fin
     for vertex in curve.getVertices():
         if need_rapid and first:
             # rapid across
-            rapid(vertex.p.x, vertex.p.y)
-            
+            rapid(vertex.p.x, vertex.p.y)            
             ##rapid down
-            rapid(z = current_start_depth + rapid_safety_space)
-            
+            rapid(z = current_start_depth + rapid_safety_space)           
             #feed down
             feed(z = final_depth)
-
             first = False
         else:
             if vertex.type == 1:
@@ -29,9 +27,7 @@ def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, fin
                 arc_cw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
             else:
                 feed(vertex.p.x, vertex.p.y)
-
-        prev_p = vertex.p
-        
+        prev_p = vertex.p        
     return prev_p
         
 def area_distance(a, old_area):
@@ -82,7 +78,7 @@ def feed_possible(p0, p1):
         return False
     return True
 
-def cut_curvelist(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss):
+def cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss):
     p = area.Point(0, 0)
     first = True
     for curve in curve_list:
@@ -100,6 +96,30 @@ def cut_curvelist(curve_list, rapid_safety_space, current_start_depth, depth, cl
         p = cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, depth)
         first = False
         
+    rapid(z = clearance_height)
+
+def cut_curvelist2(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss,start_point):
+    p = area.Point(0, 0)
+    start_x,start_y=start_point
+    first = True
+    for curve in curve_list:
+        need_rapid = True
+        if first == True:
+            direction = "on";radius = 0.0;offset_extra = 0.0; roll_radius = 0.0;roll_on = 0.0; roll_off = 0.0; rapid_safety_space; step_down = math.fabs(depth);extend_at_start = 0.0;extend_at_end = 0.0
+            kurve_funcs.make_smaller( curve, start = area.Point(start_x,start_y))
+            kurve_funcs.profile(curve, direction, radius , offset_extra, roll_radius, roll_on, roll_off, rapid_safety_space , clearance_height, current_start_depth, step_down , depth, extend_at_start, extend_at_end)
+        else:
+            s = curve.FirstVertex().p
+            if keep_tool_down_if_poss == True:
+
+                # see if we can feed across
+                if feed_possible(p, s):
+                    need_rapid = False
+            elif s.x == p.x and s.y == p.y:
+                need_rapid = False
+
+        cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, depth)
+        first = False #change to True if you want to rapid back to start side before zigging again with unidirectional set        
     rapid(z = clearance_height)
     
 def recur(arealist, a1, stepover, from_center):
@@ -145,7 +165,7 @@ def get_curve_list(arealist):
     curve_list = list()
     for a in arealist:
         for curve in a.getCurves():
-            curve_list.append(curve)
+            curve_list.append(curve)       
     return curve_list
 
 curve_list_for_zigs = []
@@ -336,11 +356,11 @@ def zigzag(a, stepover, zig_unidirectional):
         
     reorder_zigs()
 
-def pocket(a, tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False):
+def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None):
     global tool_radius_for_pocket
     global area_for_feed_possible
     tool_radius_for_pocket = tool_radius
-    
+
     if keep_tool_down_if_poss:
         area_for_feed_possible = area.Area(a)
         area_for_feed_possible.Offset(extra_offset - 0.01)
@@ -388,7 +408,7 @@ def pocket(a, tool_radius, extra_offset, rapid_safety_space, start_depth, final_
                     a_offset = area.Area(a)
                     a_offset.Offset(current_offset)
             curve_list = get_curve_list(arealist)
-        
+            
     layer_count = int((start_depth - final_depth) / stepdown)
 
     if layer_count * stepdown + 0.00001 < start_depth - final_depth:
@@ -396,13 +416,21 @@ def pocket(a, tool_radius, extra_offset, rapid_safety_space, start_depth, final_
         
     current_start_depth = start_depth
 
-    for i in range(1, layer_count+1):
-        if i == layer_count:
-            depth = final_depth
-        else:
-            depth = start_depth - i * stepdown
-        
-        cut_curvelist(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
-        current_start_depth = depth
+    if start_point==None:
 
+        for i in range(1, layer_count+1): 
+            if i == layer_count:
+                depth = final_depth
+            else:
+                depth = start_depth - i * stepdown 
+            cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
+            current_start_depth = depth
 
+    else:
+        for i in range(1, layer_count+1): 
+            if i == layer_count:
+                depth = final_depth
+            else:
+                depth = start_depth - i * stepdown 
+            cut_curvelist2(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss, start_point)
+            current_start_depth = depth
