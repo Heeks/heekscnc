@@ -231,7 +231,9 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
     global tags
 
     offset_curve = area.Curve(curve)
-    
+    if direction == "on":
+        use_CRC() == False 
+        
     if direction != "on":
         if direction != "left" and direction != "right":
             raise "direction must be left or right", direction
