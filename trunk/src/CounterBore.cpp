@@ -188,8 +188,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
 						_T("y=") << centre.Y(true) << _T(", ") <<
 						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<
-						_T("i=") << drawing_units(centre.X(false) - point.X()) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y()) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) - radius_of_spiral );
 			point.SetY( centre.Y(false) );
 			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
@@ -198,8 +198,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
 						_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
 						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<	// full depth now
-						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) );
 			point.SetY( centre.Y(false) - radius_of_spiral );
 			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
@@ -208,8 +208,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
 						_T("y=") << centre.Y(true) << _T(", ") <<
 						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<	// full depth now
-						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) + radius_of_spiral );
 			point.SetY( centre.Y(false) );
 			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
@@ -218,8 +218,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
 						_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
 						_T("z=") << drawing_units(point.Z() - (gradient * (circumference * 0.25))) << _T(", ") <<	// full depth now
-						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false) ) << _T(")\n");
 			point.SetX( centre.X(false) );
 			point.SetY( centre.Y(false) + radius_of_spiral );
 			point.SetZ( point.Z() - (gradient * (circumference * 0.25)) );
@@ -246,8 +246,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
 						_T("y=") << centre.Y(true) << _T(", ") <<
 						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth
-						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) - radius_of_spiral );
 			point.SetY( centre.Y(false) );
 
@@ -255,8 +255,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
 						_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
 						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
-						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) );
 			point.SetY( centre.Y(false) - radius_of_spiral );
 
@@ -264,8 +264,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
 						_T("y=") << centre.Y(true) << _T(", ") <<
 						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
-						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) + radius_of_spiral );
 			point.SetY( centre.Y(false) );
 
@@ -273,8 +273,8 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 			python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
 						_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
 						_T("z=") << drawing_units(cutting_depth - (1.0 * step_down)) << _T(", ") <<	// full depth now
-						_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-						_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+						_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+						_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 			point.SetX( centre.X(false) );
 			point.SetY( centre.Y(false) + radius_of_spiral );
 		} while ((max_radius_of_spiral - radius_of_spiral) > tolerance);
