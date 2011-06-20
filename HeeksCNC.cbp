@@ -35,6 +35,7 @@
 			<Add option="-Wall" />
 			<Add option="`wx-config --cxxflags`\" />
 			<Add option='-Wall -fPIC -g -I &quot;./&quot; $(WXCFLAGS) -I$(HEEKSCADPATH) -D__WXGTK__ -DHEEKSPLUGIN -DUNICODE -DWXUSINGDLL -DTIXML_USE_STL -DRUNINPLACE -DCODEBLOCKS -DOPEN_SOURCE_GEOMETRY -DHEEKSCNC' />
+			<Add option="-DRUNINPLACE" />
 			<Add directory="/usr/include/opencascade" />
 			<Add directory="../../heekscad" />
 			<Add directory="../heekscad" />
@@ -46,7 +47,8 @@
 			<Add option="`wx-config --libs`" />
 			<Add option="`wx-config --gl-libs`" />
 			<Add option="-lTKVRML -lTKSTL -lTKBRep -lTKIGES -lTKShHealing -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKXSBase -lTKShapeSchema -lFWOSPlugin -lTKBool -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKMath -lTKOffset -lTKPrim -lTKPShape -lTKService -lTKTopAlgo -lTKV2d -lTKV3d -lTKMesh -lTKAdvTools -lTKBO -lTKXDESTEP -lTKXCAF -lTKXCAFSchema -lTKLCAF -lTKPLCAF -lstdc++ -lGLU -lGL ${WXLIBS}" />
-			<Add option="-lpthread -ldl -lutil -lm -lpython2.6" />
+			<Add option="-lpthread -ldl -lutil -lm" />
+			<Add option="`python-config --libs`" />
 		</Linker>
 		<Unit filename="src/Adaptive.cpp" />
 		<Unit filename="src/Adaptive.h" />
@@ -173,6 +175,8 @@
 		<Unit filename="../interface/ObjList.h" />
 		<Unit filename="../interface/ObjectCanvas.cpp" />
 		<Unit filename="../interface/ObjectCanvas.h" />
+		<Unit filename="../interface/PToolImage.cpp" />
+		<Unit filename="../interface/PToolImage.h" />
 		<Unit filename="../interface/PictureFrame.cpp" />
 		<Unit filename="../interface/PictureFrame.h" />
 		<Unit filename="../interface/PropertyCheck.cpp" />
