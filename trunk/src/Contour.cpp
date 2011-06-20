@@ -926,9 +926,8 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
             {
                 if (itPoint->Distance(pMachineState->Location()) > tolerance)
                 {
-                    CNCPoint offset = centre - pMachineState->Location();
                     python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
-                        << _T("i=") << offset.X(true) << _T(", j=") << offset.Y(true);
+                        << _T("i=") << centre.X(true) << _T(", j=") << centre.Y(true);
                     // if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
                     python << _T(")\n");
                     pMachineState->Location(*itPoint);
