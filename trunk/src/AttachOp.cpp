@@ -176,7 +176,11 @@ static void on_set_material_allowance(double value, HeeksObj* object){((CAttachO
 
 void CAttachOp::GetProperties(std::list<Property *> *list)
 {
+#ifdef OP_SKETCHES_AS_CHILDREN
 	AddSolidsProperties(list, this);
+#else
+	AddSolidsProperties(list, m_solids);
+#endif
 	list->push_back(new PropertyLength(_("tolerance"), m_tolerance, this, on_set_tolerance));
 	list->push_back(new PropertyLength(_("minimum z"), m_min_z, this, on_set_min_z));
 	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, this, on_set_material_allowance));

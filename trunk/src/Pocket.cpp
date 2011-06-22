@@ -543,7 +543,11 @@ void CPocket::glCommands(bool select, bool marked, bool no_color)
 
 void CPocket::GetProperties(std::list<Property *> *list)
 {
+#ifdef OP_SKETCHES_AS_CHILDREN
 	AddSketchesProperties(list, this);
+#else
+	AddSketchesProperties(list, m_sketches);
+#endif
 	m_pocket_params.GetProperties(this, list);
 	CDepthOp::GetProperties(list);
 }
