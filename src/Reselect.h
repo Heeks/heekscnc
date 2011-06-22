@@ -28,5 +28,10 @@ public:
 	wxString BitmapPath(){ return _T("selsolid");}
 };
 
+#ifdef OP_SKETCHES_AS_CHILDREN
 void AddSolidsProperties(std::list<Property *> *list, HeeksObj* object);
 void AddSketchesProperties(std::list<Property *> *list, HeeksObj* object);
+#else
+void AddSolidsProperties(std::list<Property *> *list, const std::list<int> &sketches);
+void AddSketchesProperties(std::list<Property *> *list, const std::list<int> &sketches);
+#endif
