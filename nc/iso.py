@@ -54,6 +54,7 @@ class Creator(nc.Creator):
         self.arc_centre_positive = False
         self.in_arc_splitting = False
         self.machine_coordinates = False
+        self.drillExpanded = False
         
     ############################################################################
     ##  Codes
@@ -672,7 +673,25 @@ class Creator(nc.Creator):
             return
            
         if (z == None): 
-            return    # We need a Z value as well.  This input parameter represents the top of the hole                  
+            return    # We need a Z value as well.  This input parameter represents the top of the hole   
+        
+        if self.drillExpanded:
+            # my homemade machine control doesn't understand G81, G82 etc.
+            if peck_depth == None:
+                peck_depth = depth
+            current_z = z
+            self.rapid(x, y)
+            self.rapid(z = z + standoff)
+            while current_z > z - depth - 0.00001:
+                self.feed(z = current_z)
+                self.rapid(z = z + standoff)
+                current_z = current_z - peck_depth
+                
+            # we should pass clearance height into here, but my machine is on and I'm in a hurry... 22nd June 2011 danheeks
+            self.rapid(z = z + 5.0)
+            
+            return
+            
         self.write_preps()
         self.write_blocknum()                
         
@@ -761,6 +780,8 @@ class Creator(nc.Creator):
         pass
 
     def end_canned_cycle(self):
+        if self.drillExpanded:
+            return
         self.write_blocknum()
         self.write(self.SPACE() + self.END_CANNED_CYCLE() + '\n')
         self.prev_drill = ''
