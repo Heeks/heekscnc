@@ -926,7 +926,11 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 
 void CProfile::GetProperties(std::list<Property *> *list)
 {
+#ifdef OP_SKETCHES_AS_CHILDREN
 	AddSketchesProperties(list, this);
+#else
+	AddSketchesProperties(list, m_sketches);
+#endif
 	m_profile_params.GetProperties(this, list);
 
 	CDepthOp::GetProperties(list);
@@ -1048,7 +1052,7 @@ void CProfile::WriteXML(TiXmlNode *root)
 	heeksCAD->LinkXMLEndChild( root,  element );
 	m_profile_params.WriteXMLAttributes(element);
 
-	/*
+#ifndef OP_SKETCHES_AS_CHILDREN
 	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -1057,7 +1061,7 @@ void CProfile::WriteXML(TiXmlNode *root)
 		heeksCAD->LinkXMLEndChild( element, sketch_element );
 		sketch_element->SetAttribute( "id", sketch);
 	}
-	*/
+#endif
 
 	CDepthOp::WriteBaseXML(element);
 }
@@ -1343,6 +1347,14 @@ bool CProfileParams::operator==( const CProfileParams & rhs ) const
 bool CProfile::operator==( const CProfile & rhs ) const
 {
 	if (m_profile_params != rhs.m_profile_params) return(false);
+#ifndef OP_SKETCHES_AS_CHILDREN
+	if(m_sketches.size() != rhs.m_sketches.size())return false;
+	std::list<int>::const_iterator It1 = m_sketches.begin(), It2 = rhs.m_sketches.begin();
+	for(;It1 != m_sketches.end(); It1++, It2++)
+	{
+		if(*It1 != *It2)return false;
+	}
+#endif
 
 	return(CDepthOp::operator==(rhs));
 }
