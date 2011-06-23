@@ -473,6 +473,15 @@ class Creator(nc.Creator):
 
     def quadrant_end(self, q, i, j, rad):
         return self.quadrant_start(q + 1, i, j, rad)
+    
+    def get_arc_angle(self, sdx, sdy, edx, edy, cw):
+        angle_s = math.atan2(sdy, sdx);        
+        angle_e = math.atan2(edy, edx);
+        if cw:
+            if angle_s < angle_e: angle_s = angle_s + 2 * math.pi
+        else:
+            if angle_e < angle_s: angle_e = angle_e + 2 * math.pi
+        return angle_e - angle_s
 
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         if self.arc_centre_positive == True and self.in_arc_splitting == False:
@@ -489,6 +498,15 @@ class Creator(nc.Creator):
             qs = self.get_quadrant(sdx, sdy)
             qe = self.get_quadrant(edx, edy)
             
+            if qs == qe:
+                arc_angle = math.fabs(self.get_arc_angle(sdx, sdy, edx, edy, cw))
+                # arc_angle will be either less than pi/2 or greater than 3pi/2
+                if arc_angle > 3.14:
+                    if cw:
+                        qs = qs + 4
+                    else:
+                        qe = qe + 4
+                        
             if qs == qe:
                 self.arc(cw, x, y, z, i, j, k, r)
             else:
@@ -507,7 +525,9 @@ class Creator(nc.Creator):
                             x1, y1 = self.quadrant_start(q, i, j, rad)
                         else:
                             x1, y1 = self.quadrant_end(q, i, j, rad)
-                    if (self.fmt.string(x1) != self.fmt.string(self.x)) or (self.fmt.string(y1) != self.fmt.string(self.y)): self.arc(cw, x1, y1, z, i, j, k, r)
+                            
+                    if ((math.fabs(x1 - self.x) > 0.000001) or (math.fabs(y1 - self.y) > 0.000001)) and ((self.fmt.string(x1) != self.fmt.string(self.x)) or (self.fmt.string(y1) != self.fmt.string(self.y))):
+                        self.arc(cw, x1, y1, z, i, j, k, r)
                     if q == qe:
                         break
                     if cw:
@@ -600,7 +620,7 @@ class Creator(nc.Creator):
     def dwell(self, t):
         self.write_blocknum()
         self.write_preps()
-        self.write(self.DWELL() + (self.TIME() % t))
+        self.write(self.FORMAT_DWELL() % t)
         self.write_misc()
         self.write('\n')
 
@@ -674,24 +694,38 @@ class Creator(nc.Creator):
            
         if (z == None): 
             return    # We need a Z value as well.  This input parameter represents the top of the hole   
-        
+            
         if self.drillExpanded:
-            # my homemade machine control doesn't understand G81, G82 etc.
+            # for machines which don't understand G81, G82 etc.
             if peck_depth == None:
                 peck_depth = depth
             current_z = z
             self.rapid(x, y)
-            self.rapid(z = z + standoff)
-            while current_z > z - depth - 0.00001:
-                self.feed(z = current_z)
+            
+            first = True
+            
+            while True:
+                next_z = current_z - peck_depth
+                if next_z < z - depth:
+                    next_z = z - depth
+                if next_z >= current_z:
+                    break;
+                if first:
+                    self.rapid(z = z + standoff)
+                else:
+                    self.rapid(z = current_z)
+                self.feed(z = next_z)
                 self.rapid(z = z + standoff)
-                current_z = current_z - peck_depth
+                current_z = next_z
+                if dwell:
+                    self.dwell(dwell)        
+                first = False
                 
             # we should pass clearance height into here, but my machine is on and I'm in a hurry... 22nd June 2011 danheeks
             self.rapid(z = z + 5.0)
             
             return
-            
+
         self.write_preps()
         self.write_blocknum()                
         

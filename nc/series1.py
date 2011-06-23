@@ -12,6 +12,10 @@ class Creator(iso_modal.Creator):
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         pass
+    
+    def dwell(self, t):
+        # to do, find out what dwell is on this machine
+        pass
             
 ################################################################################
 
