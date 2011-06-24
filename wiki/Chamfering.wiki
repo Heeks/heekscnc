@@ -2,7 +2,7 @@
 
 = Introduction =
 
-The chamfering operation uses a chamfering bit to either plunge directly into a hole or navigate its outer edge (depending on geometry).  At the moment the chamfering operation may be added to either a drilling operation or a counterbore operation.
+The chamfering operation uses a chamfering bit to either plunge directly into a hole or navigate its outer edge (depending on geometry).  At the moment the chamfering operation may refer to (i.e. have as children) either a drilling operation or a counterbore operation.
 
 The GCode is generated such that, if the chamfering bit will make the required chamfer width by plunging straight down, it will do so.  It checks for the hole's depth as well as the maximum plunge distance based on the tool's geometry.
 
@@ -11,6 +11,10 @@ If the geometry precludes a straight plunge, a circular tool path is chosen inst
 The operator may set the chamfer width and the speed settings but the start and end depth values are ignored so that they may be calculated at GCode generation time.
 
 = Example =
+
+- Create a drilling operation (i.e. place points, select a drill bit tool etc.).
+- Select the drilling operation and then press the 'Create Chamfer' menu option.
+- Set the chamfer operation's "Chamfer Width" (see below for description).
 
 See video of operation in action.  The holes are small enough that a straight plunge is sufficient.  The two counterbores must be chamfered via a circular arc.  The closest counterbore is deep enough to allow a full-depth chamfer for this bit's geometry.  The counterbore at the back is slightly too shallow to allow a full-depth operation so that depth is reduced and the radius of the circular tool path is increased so as to provide the required chamfering width.
 
