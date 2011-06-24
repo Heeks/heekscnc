@@ -1306,6 +1306,7 @@ void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_endmill_tool);
 	t_list->push_back(&new_slotdrill_tool);
 	t_list->push_back(&new_ball_end_mill_tool);
+	t_list->push_back(&new_chamfer_mill_tool);
 	// t_list->push_back(&new_chamfer_mill_tool);
 #ifndef STABLE_OPS_ONLY
 	t_list->push_back(&new_turn_tool);
