@@ -341,8 +341,8 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 				python << _T("arc_ccw( x=") << drawing_units(centre.X(false) - radius_of_spiral) << _T(", ") <<
 							_T("y=") << centre.Y(true) << _T(", ") <<
 							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth
-							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+							_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) - radius_of_spiral );
 				point.SetY( centre.Y(false) );
 
@@ -350,8 +350,8 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 				python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
 							_T("y=") << drawing_units(centre.Y(false) - radius_of_spiral) << _T(", ") <<
 							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth now
-							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+							_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) );
 				point.SetY( centre.Y(false) - radius_of_spiral );
 
@@ -359,8 +359,8 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 				python << _T("arc_ccw( x=") << drawing_units(centre.X(false) + radius_of_spiral) << _T(", ") <<
 							_T("y=") << centre.Y(true) << _T(", ") <<
 							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth now
-							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+							_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) + radius_of_spiral );
 				point.SetY( centre.Y(false) );
 
@@ -368,8 +368,8 @@ Python CChamfer::AppendTextToProgram(CMachineState *pMachineState)
 				python << _T("arc_ccw( x=") << centre.X(true) << _T(", ") <<
 							_T("y=") << drawing_units(centre.Y(false) + radius_of_spiral) << _T(", ") <<
 							_T("z=") << drawing_units(cutting_depth) << _T(", ") <<	// full depth now
-							_T("i=") << drawing_units(centre.X(false) - point.X(false)) << _T(", ") <<
-							_T("j=") << drawing_units(centre.Y(false) - point.Y(false)) << _T(")\n");
+							_T("i=") << drawing_units(centre.X(false)) << _T(", ") <<
+							_T("j=") << drawing_units(centre.Y(false)) << _T(")\n");
 				point.SetX( centre.X(false) );
 				point.SetY( centre.Y(false) + radius_of_spiral );
 
