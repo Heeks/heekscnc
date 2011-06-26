@@ -18,7 +18,7 @@ now = datetime.datetime.now()
 
 ################################################################################
 class Creator(iso_modal.Creator):
-
+    
     def __init__(self):
         iso_modal.Creator.__init__(self)
 
@@ -26,7 +26,7 @@ class Creator(iso_modal.Creator):
         self.useCrcCenterline = True
         self.absolute_flag = True
         self.prev_g91 = ''
-
+        self.safe_z =None
     def SPINDLE(self, format, speed): return(self.SPACE() + 'S' + (format % speed))
 ################################################################################
 #cutter comp
