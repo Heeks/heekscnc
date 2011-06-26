@@ -295,6 +295,8 @@ Python CDepthOp::AppendTextToProgram(CMachineState *pMachineState)
 	if (pTool != NULL)
 	{
 		python << _T("tool_diameter = float(") << (pTool->CuttingRadius(true) * 2.0) << _T(")\n");
+		python << _T("cutting_edge_angle = float(") << pTool->m_params.m_cutting_edge_angle<< _T(")\n");
+
 	} // End if - then
 
 	if(m_depth_op_params.m_abs_mode == CDepthOpParams::eAbsolute){

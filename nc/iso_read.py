@@ -44,6 +44,10 @@ class Parser(nc.Parser):
             self.col = "axis"
             self.f = eval(word[1:])
             self.move = True
+        elif (word[0] == 'H' or word[0] == 'h'):
+            self.col = "axis"
+            self.h = eval(word[1:])
+            self.move = True
         elif (word == 'G0' or word == 'G00' or word == 'g0' or word == 'g00'):
             self.path_col = "rapid"
             self.col = "rapid"
@@ -61,7 +65,7 @@ class Parser(nc.Parser):
             self.col = "feed"
             self.arc = +1
         elif (word == 'G10' or word == 'g10'):
-            self.no_move = True		            
+            self.no_move = True
         elif (word == 'L1' or word == 'l1'):
             self.no_move = True
         elif (word == 'G61.1' or word == 'g61.1' or word == 'G61' or word == 'g61' or word == 'G64' or word == 'g64'):
@@ -72,6 +76,11 @@ class Parser(nc.Parser):
         elif (word == 'G21' or word == 'G71'):
             self.col = "prep"
             self.writer.set_mode(units=1.0)
+        elif (word == 'G43' or word == 'g43'):
+            self.height_offset = True
+            self.move = True
+            self.path_col = "rapid"
+            self.col = "rapid"
         elif (word == 'G81' or word == 'g81'):
             self.drill = True
             self.no_move = True
@@ -159,6 +168,7 @@ class Parser(nc.Parser):
             self.a = None
             self.b = None
             self.c = None
+            self.h = None
             self.i = None
             self.j = None
             self.k = None
@@ -173,6 +183,7 @@ class Parser(nc.Parser):
             self.writer.begin_ncblock()
 
             self.move = False
+            self.height_offset = False
             self.drill = False
             self.no_move = False
 
@@ -182,6 +193,7 @@ class Parser(nc.Parser):
                 self.cdata = False
                 self.ParseWord(word)
                 self.writer.add_text(word, self.col, self.cdata)
+
 
             if (self.drill):
                 self.writer.begin_path("rapid")
@@ -195,6 +207,13 @@ class Parser(nc.Parser):
                 self.writer.begin_path("feed")
                 self.writer.add_line(self.x, self.y, self.r)
                 self.writer.end_path()
+
+            elif(self.height_offset):
+                self.writer.begin_path("rapid")
+                self.writer.add_line(self.x, self.y, self.z)
+                self.writer.end_path()
+
+
             else:
                 if (self.move and not self.no_move):
                     self.writer.begin_path(self.path_col)
