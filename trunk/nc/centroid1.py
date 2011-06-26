@@ -29,6 +29,16 @@ class Creator(iso_modal.Creator):
 
     def SPINDLE(self, format, speed): return(self.SPACE() + 'S' + (format % speed))
 ################################################################################
+#cutter comp
+
+    #def crc_on(self):
+    #    self.useCrc = True
+    #    self.useCrcCenterline = True
+
+    #def crc_off(self):
+    #    self.useCrc = False
+
+################################################################################
 # general 
 
     def comment(self, text):
@@ -57,12 +67,12 @@ class Creator(iso_modal.Creator):
 
     def program_begin(self, id, name=''):
         self.write(';time:'+str(now)+'\n')
-        #self.write('G17 G80 G40 G90\n')
+        self.write('G17 G20 G80 G40 G90\n')
         
 
     def program_end(self):
         self.write('M05\n')
-        self.write('G49 M25\n')
+        self.write('M25\n')
         self.write('G00 X-1.0 Y1.0\n')
         self.write('G17 G80 G40 G90\n')
         self.write('M99\n')
@@ -73,7 +83,7 @@ class Creator(iso_modal.Creator):
             self.write(self.STOP_OPTIONAL() + '\n')
         else : 
             self.write('M05\n')
-            self.write('G49 M25\n')
+            self.write('M25\n')
             self.write(self.STOP() + '\n')
             self.prev_g0123 = ''
 ################################################################################
@@ -88,14 +98,17 @@ class Creator(iso_modal.Creator):
         self.prev_g0123 = ''            
 
 ################################################################################
+# clearance plane
+
+    def clearanceplane(self,z=None):
+        self.safe_z = z
+################################################################################
 # return to home
-
-
     def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None):
         """Rapid relative to home position"""
         self.write('M05\n')              
         self.write('M25\n')
-	self.write(self.RAPID())
+        self.write(self.RAPID())
         self.write(self.X() + (self.fmt % x))
         self.write(self.Y() + (self.fmt % y))
         self.write('\n')                     
@@ -106,8 +119,15 @@ class Creator(iso_modal.Creator):
         self.write_blocknum()
         self.write((self.TOOL() % id) + '\n')
         self.t = id
-        self.write('G49 M25\n')
-        self.write('G43 H'+ str(id) + 'Z.75 \n')
+        self.write('M25\n')
+        if self.safe_z == None:
+            self.write('G43 H'+ str(id) + ' Z')
+            self.write('1.0')
+            self.write ('\n')
+        else:
+            self.write('G43 H'+ str(id) + ' Z')
+            self.write(str(self.safe_z))
+            self.write ('\n')
 
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
@@ -133,5 +153,16 @@ class Creator(iso_modal.Creator):
         else:
             self.s =  self.SPINDLE_CCW() + self.s
 
+    def end_canned_cycle(self):
+        self.write_blocknum()
+        self.write(self.SPACE() + self.END_CANNED_CYCLE() + '\n')
+        self.prev_drill = ''
+        self.prev_g0123 = ''
+        self.prev_z = ''   
+        self.prev_f = '' 
+        self.prev_retract = '' 
+        self.write('M05\n')
+        self.write('M25\n') 
+        self.write('G00 X-1.0 Y1.0\n')
 
 nc.creator = Creator()

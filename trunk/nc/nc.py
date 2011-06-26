@@ -100,12 +100,12 @@ class Creator:
         pass
 
     def set_temporary_origin(self, x=None, y=None, z=None, a=None, b=None, c=None):
-	"""Set temporary origin G92"""
-	pass
+        """Set temporary origin G92"""
+        pass
 
     def remove_temporary_origin(self):
-	"""Remote temporary origin G92.1"""
-	pass
+        """Remote temporary origin G92.1"""
+        pass
  
     ############################################################################
     ##  Tools
@@ -140,6 +140,11 @@ class Creator:
     def workplane(self, id):
         """Set the workplane"""
         pass
+
+    def clearanceplane(self,z=None):
+        """set clearance plane"""
+        pass
+
     ############################################################################
     ##  APT360 like Transformation Definitions
     ##  These definitions were created while looking at Irvin Kraal's book on APT
@@ -294,13 +299,13 @@ class Creator:
         pass
 
     def probe_linear_centre_outside(self, x1=None, y1=None, depth=None, x2=None, y2=None ):
-	pass
+        pass
 
     def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_offset_x_component=None, probe_offset_y_component=None ):
         pass
 
     def probe_downward_point(self, x=None, y=None, depth=None, intersection_variable_z=None):
-	pass
+        pass
 
     def report_probe_results(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None, x3=None, y3=None, z3=None, x4=None, y4=None, z4=None, x5=None, y5=None, z5=None, x6=None, y6=None, z6=None, xml_file_name=None ):
         pass
@@ -318,13 +323,13 @@ class Creator:
         pass
 
     def rapid_to_midpoint(self, x1=None, y1=None, z1=None, x2=None, y2=None, z2=None):
-	pass
+        pass
 
     def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
-	pass
+        pass
 
     def rapid_to_rotated_coordinate(self, x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
-	pass
+        pass
 
     def set_path_control_mode(self, mode, motion_blending_tolerance, naive_cam_tolerance ):
         pass
@@ -338,37 +343,37 @@ class Creator:
         pass
 
     def extruder_on(self):
-	"""Turn on the extruder"""
-	pass
+        """Turn on the extruder"""
+        pass
 
     def extruder_off(self):
-	"""turn off the extruder"""
-	pass
+        """turn off the extruder"""
+        pass
 
     def set_extruder_flowrate(self, flowrate):
-	"""Set the flowrate for the extruder"""
-	pass
+        """Set the flowrate for the extruder"""
+        pass
 
     def extruder_temp(self, temp):
-	"""Set the extruder temp in celsius"""
-	pass
+        """Set the extruder temp in celsius"""
+        pass
 
     def fan_on(self):
-	"""turn on the cooling fan"""
-	pass
+        """turn on the cooling fan"""
+        pass
 
     def fan_off(self):
-	"""turn off the cooling fan"""
-	pass
+        """turn off the cooling fan"""
+        pass
 
     def build_bed_temp(self, temp):
-	"""Set the bed temp in celsius"""
-	pass
+        """Set the bed temp in celsius"""
+        pass
 
     def chamber_temp(self, temp):
-	"""Set the chamber temp in celsius"""
-	pass
- 	
+        """Set the chamber temp in celsius"""
+        pass
+
 ################################################################################
 
 creator = Creator()
@@ -462,6 +467,9 @@ def datum_set(x=None, y=None, z=None, a=None, b=None, c=None):
 
 def workplane(id):
     creator.workplane(id)
+
+def clearanceplane(z=None):
+    creator.clearanceplane(z)
 
 ############################################################################
 ##  APT360 like Transformation Definitions
