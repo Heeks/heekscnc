@@ -12,8 +12,24 @@ set( BUILD_STARTED_IN_RIGHT_DIR "true" )  #used in src/CMakeLists.txt to print a
 add_definitions ( -Wall -DOP_SKETCHES_AS_CHILDREN  )
 
 find_package( wxWidgets REQUIRED COMPONENTS base core gl )
-find_package ( OpenCASCADE REQUIRED COMPONENTS TKernel )
 find_package( PythonInterp REQUIRED )
+
+#find OCE or OpenCASCADE
+set( CASCADE_LIBS TKernel )
+if( UNIX )
+  set( OCE_DIR "/usr/local/share/cmake/" )
+else()
+  set( OCE_DIR "c:/OCE-0.3.0/share/cmake" )
+endif()
+find_package ( OCE )
+if( ${OCE_FOUND} )
+  add_definitions ( -DHAVE_CONFIG_H )
+  set( OpenCASCADE_LIBRARIES ${CASCADE_LIBS} )
+  set( OpenCASCADE_INCLUDE_DIR ${OCE_INCLUDE_DIRS} )
+else() #look for OpenCASCADE
+  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" )
+  find_package ( OpenCASCADE REQUIRED COMPONENTS ${CASCADE_LIBS} )
+endif()
 
 include(${wxWidgets_USE_FILE})
 include_directories (
