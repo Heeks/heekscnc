@@ -7,9 +7,19 @@ endif( NOT DEFINED BUILD_STARTED_IN_RIGHT_DIR )
 set ( CMAKE_BUILD_TYPE Debug )
 add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL
                   -DOPEN_SOURCE_GEOMETRY -DWXUSINGDLL )
-find_package( OpenCASCADE REQUIRED COMPONENTS TKernel TKBRep TKTopAlgo TKMath TKV3d
-              TKGeomBase TKGeomAlgo TKShHealing TKBO TKBool TKOffset TKLCAF TKMath TKService )
 find_package( wxWidgets REQUIRED COMPONENTS base core gl )
+
+#find OCE or OpenCASCADE
+set( CASCADE_LIBS "TKernel;TKBRep;TKTopAlgo;TKMath;TKV3d;TKGeomBase;TKGeomAlgo;TKShHealing;TKBO;TKBool;TKOffset;TKLCAF;TKMath;TKService" )
+#inherits variables from parent dir - don't need to 'find_package ( OCE )' again
+if( ${OCE_FOUND} )
+  set( OpenCASCADE_LIBRARIES ${CASCADE_LIBS} )
+  set( OpenCASCADE_INCLUDE_DIR ${OCE_INCLUDE_DIRS} )
+else() #look for OpenCASCADE
+  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+  find_package ( OpenCASCADE REQUIRED COMPONENTS ${CASCADE_LIBS} )
+endif()
+
 find_path( HeeksCadDir interface/HeeksObj.h ~/HeeksCAD ../.. c:/heekscad )
 include(${wxWidgets_USE_FILE})
 
@@ -90,10 +100,10 @@ set( heekscnc_SRCS
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
 target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
+set_target_properties( heekscnc PROPERTIES LINK_FLAGS -Bsymbolic-functions )
 
-
-#------------------- the lines below tell cmake what files get installed where.---------------------
-#---------------------- this is used for 'make install' and 'make package' -------------------------
+#---------------- the lines below tell cmake what files get installed where.---------------------
+#------------------- this is used for 'make install' and 'make package' -------------------------
 install( TARGETS heekscnc DESTINATION lib )
 
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )
