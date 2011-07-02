@@ -63,7 +63,7 @@ set( heekscnc_HDRS
     ${HeeksCadDir}/interface/NiceTextCtrl.h       ${HeeksCadDir}/interface/SketchOrder.h
     ${HeeksCadDir}/interface/NurbSurfaceParams.h  ${HeeksCadDir}/interface/strconv.h
     ${HeeksCadDir}/interface/ObjectCanvas.h       ${HeeksCadDir}/interface/Tool.h
-    ${HeeksCadDir}/interface/ObjList.h            ${HeeksCadDir}/interface/PToolImage.h
+    ${HeeksCadDir}/interface/ObjList.h            ${HeeksCadDir}/interface/ToolImage.h
     ${HeeksCadDir}/interface/Observer.h           ${HeeksCadDir}/interface/ToolList.h
     ${HeeksCadDir}/interface/PictureFrame.h       ${HeeksCadDir}/interface/TransientObject.h
     ${HeeksCadDir}/src/Geom.h                     ${HeeksCadDir}/src/Gripper.h
@@ -92,7 +92,7 @@ set( heekscnc_SRCS
     ${HeeksCadDir}/interface/NiceTextCtrl.cpp      ${HeeksCadDir}/interface/PropertyString.cpp
     ${HeeksCadDir}/interface/ObjectCanvas.cpp      ${HeeksCadDir}/interface/PropertyVertex.cpp
     ${HeeksCadDir}/interface/ObjList.cpp           ${HeeksCadDir}/interface/strconv.cpp
-    ${HeeksCadDir}/interface/PictureFrame.cpp      ${HeeksCadDir}/interface/PToolImage.cpp
+    ${HeeksCadDir}/interface/PictureFrame.cpp      ${HeeksCadDir}/interface/ToolImage.cpp
     ${HeeksCadDir}/interface/PropertyCheck.cpp     ${HeeksCadDir}/interface/TransientObject.cpp
     ${HeeksCadDir}/interface/PropertyChoice.cpp    ${HeeksCadDir}/src/Geom.cpp
    )
@@ -100,7 +100,7 @@ set( heekscnc_SRCS
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
 target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
-set_target_properties( heekscnc PROPERTIES LINK_FLAGS -Bsymbolic-functions )
+set_target_properties( heekscnc PROPERTIES LINK_FLAGS -Wl,-Bsymbolic-functions )
 
 #---------------- the lines below tell cmake what files get installed where.---------------------
 #------------------- this is used for 'make install' and 'make package' -------------------------
