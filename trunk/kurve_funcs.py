@@ -197,7 +197,7 @@ def cut_curve(curve):
             else:
                 arc_cw(span.v.p.x, span.v.p.y, i = span.v.c.x, j = span.v.c.y)
     
-def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_start_point):
+def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_start_point,lead_in_line_len):
     first_span = curve.GetFirstSpan()
     v = first_span.GetVector(0.0)
     if direction == 'right':
@@ -205,12 +205,11 @@ def add_CRC_start_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_s
     else:
         off_v = area.Point(-v.y, v.x)
     startpoint_roll_on = roll_on_curve.FirstVertex().p
-    #crc_start = startpoint_roll_on + off_v * radius + v * radius
-    crc_start = startpoint_roll_on  + off_v * radius
+    crc_start = startpoint_roll_on  + off_v * lead_in_line_len
     crc_start_point.x = crc_start.x 
     crc_start_point.y = crc_start.y 
 
-def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end_point):
+def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end_point,lead_out_line_len):
     last_span = curve.GetLastSpan()
     v = last_span.GetVector(1.0)
     if direction == 'right':
@@ -218,8 +217,7 @@ def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end
     else:
         off_v = area.Point(-v.y, v.x)
     endpoint_roll_off = roll_off_curve.LastVertex().p
-    #crc_start = startpoint_roll_on + off_v * radius + v * radius
-    crc_end = endpoint_roll_off  + off_v * radius
+    crc_end = endpoint_roll_off  + off_v * lead_out_line_len
     crc_end_point.x = crc_end.x 
     crc_end_point.y = crc_end.y 
 
@@ -227,12 +225,13 @@ def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_safety_space = None, clearance = None, start_depth = None, step_down = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0):
+def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_safety_space = None, clearance = None, start_depth = None, step_down = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0, lead_in_line_len=0.0,lead_out_line_len= 0.0):
     global tags
 
     offset_curve = area.Curve(curve)
     if direction == "on":
         use_CRC() == False 
+        
         
     if direction != "on":
         if direction != "left" and direction != "right":
@@ -297,7 +296,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         add_roll_off(offset_curve, roll_off_curve, direction, roll_radius, offset_extra, roll_off)
         if use_CRC():
             crc_start_point = area.Point()
-            add_CRC_start_line(offset_curve,roll_on_curve,roll_off_curve,radius,direction,crc_start_point)
+            add_CRC_start_line(offset_curve,roll_on_curve,roll_off_curve,radius,direction,crc_start_point,lead_in_line_len)
         
         # get the tag depth at the start
         start_z = get_tag_z_for_span(0, offset_curve, radius, start_depth, depth, final_depth)
@@ -345,25 +344,29 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
                 else:
                     arc_cw(span.v.p.x, span.v.p.y, ez, i = span.v.c.x, j = span.v.c.y)
                     
+    
         # cut the roll off arc
         cut_curve(roll_off_curve)
 
         #add CRC end_line
         if use_CRC():
             crc_end_point = area.Point()
-            add_CRC_end_line(offset_curve,roll_on_curve,roll_off_curve,radius,direction,crc_end_point)
-            feed(crc_end_point.x, crc_end_point.y)
+            add_CRC_end_line(offset_curve,roll_on_curve,roll_off_curve,radius,direction,crc_end_point,lead_out_line_len)
+            if direction == "on":
+                rapid(z = clearance)
+            else:
+                feed(crc_end_point.x, crc_end_point.y)
             
-                  
+              
         # restore the unsplit kurve
         if len(tags) > 0:
             offset_curve = area.Curve(copy_of_offset_curve)
-            
+        if use_CRC():
+            end_CRC()            
         # rapid up to the clearance height
         rapid(z = clearance)
         
-        if use_CRC():
-            end_CRC()
+
 
     del offset_curve
                 
