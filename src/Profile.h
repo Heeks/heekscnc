@@ -34,6 +34,8 @@ public:
 	bool m_auto_roll_on;
 	bool m_auto_roll_off;
 	double m_auto_roll_radius;
+    double m_lead_in_line_len;
+    double m_lead_out_line_len;
 	double m_roll_on_point[3];
 	double m_roll_off_point[3];
 	bool m_start_given;
