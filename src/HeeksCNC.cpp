@@ -1245,16 +1245,15 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 {   wxStandardPaths sp;
     wxString user_docs =sp.GetDocumentsDir();
     wxString ncdir;
-    ncdir =  user_docs + _T("/nc");
+    //ncdir =  user_docs + _T("/nc");
+    ncdir =  user_docs; //I was getting tired of having to start out at the root directory in linux
 	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
 	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
-	//wxString defaultDir = wxString(_T("/home/danfalck/nc"));
     wxString defaultDir = ncdir;
 	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, wxEmptyString, wildcard_string, wxSAVE|wxOVERWRITE_PROMPT);
 	fd.SetFilterIndex(1);
 	if (fd.ShowModal() == wxID_OK)
-	{   
-        
+	{           
 		wxString nc_file_str = fd.GetPath().c_str();
 		{
 			wxFile ofs(nc_file_str.c_str(), wxFile::write);
@@ -1263,8 +1262,6 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 				wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + nc_file_str);
 				return;
 			}
-
-
                
 
           if(theApp.m_use_DOS_not_Unix == true)   //DF -added to get DOS line endings HeeksCNC running on Unix 
