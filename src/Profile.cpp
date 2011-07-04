@@ -53,6 +53,9 @@ CProfileParams::CProfileParams()
     m_extend_at_start = 0.0; 
     m_extend_at_end = 0.0; 
 
+    m_lead_in_line_len = 1.0;
+    m_lead_out_line_len= 1.0;
+
 	m_end_beyond_full_profile = false;
 	m_sort_sketches = 1;
 	m_offset_extra = 0.0;
@@ -95,8 +98,12 @@ static void on_set_end_given(bool value, HeeksObj* object){((CProfile*)object)->
 static void on_set_end(const double* vt, HeeksObj* object){memcpy(((CProfile*)object)->m_profile_params.m_end, vt, 3*sizeof(double));}
 
 static void on_set_extend_at_start(double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_extend_at_start = value; ((CProfile*)object)->WriteDefaultValues();}
-
 static void on_set_extend_at_end(double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_extend_at_end = value; ((CProfile*)object)->WriteDefaultValues();}
+
+//lead in lead out line length
+static void on_set_lead_in_line_len(double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_lead_in_line_len = value; ((CProfile*)object)->WriteDefaultValues();}
+static void on_set_lead_out_line_len(double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_lead_out_line_len = value; ((CProfile*)object)->WriteDefaultValues();}
+
 
 static void on_set_end_beyond_full_profile(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_beyond_full_profile = value;}
 static void on_set_sort_sketches(const int value, HeeksObj* object)
@@ -220,6 +227,10 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
     list->push_back(new PropertyLength(_("extend before start"), m_extend_at_start, parent, on_set_extend_at_start));
     list->push_back(new PropertyLength(_("extend past end"), m_extend_at_end, parent, on_set_extend_at_end));
 
+    //lead in lead out line length
+    list->push_back(new PropertyLength(_("lead in line length"), m_lead_in_line_len, parent, on_set_lead_in_line_len));
+    list->push_back(new PropertyLength(_("lead out line length"), m_lead_out_line_len, parent, on_set_lead_out_line_len));
+
 	list->push_back(new PropertyLength(_("offset_extra"), m_offset_extra, parent, on_set_offset_extra));
 	list->push_back(new PropertyCheck(_("do finishing pass"), m_do_finishing_pass, parent, on_set_do_finishing_pass));
 	if(m_do_finishing_pass)
@@ -280,8 +291,11 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 	std::ostringstream l_ossValue;
 	l_ossValue << m_sort_sketches;
 	element->SetAttribute( "sort_sketches", l_ossValue.str().c_str());
-//df
 	element->SetDoubleAttribute( "extend_at_start", m_extend_at_start);
+    element->SetDoubleAttribute( "extend_at_end",m_extend_at_end);
+
+	element->SetDoubleAttribute( "lead_in_line_len", m_lead_in_line_len);
+    element->SetDoubleAttribute( "lead_out_line_len",m_lead_out_line_len);
 
 	element->SetDoubleAttribute( "offset_extra", m_offset_extra);
 	element->SetAttribute( "do_finishing_pass", m_do_finishing_pass ? 1:0);
@@ -321,6 +335,12 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	pElem->Attribute("finishing_feed_rate", &m_finishing_h_feed_rate);
 	if(pElem->Attribute("finish_cut_mode", &int_for_enum))m_finishing_cut_mode = (eCutMode)int_for_enum;
 	pElem->Attribute("finishing_step_down", &m_finishing_step_down);
+    pElem->Attribute("extend_at_start", &m_extend_at_start);
+    pElem->Attribute("extend_at_end",&m_extend_at_end);
+
+    pElem->Attribute("lead_in_line_len", &m_lead_in_line_len);
+    pElem->Attribute("lead_out_line_len",&m_lead_out_line_len);
+
 }
 
 CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
@@ -737,8 +757,12 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CMachineState *pMachin
         python << _T("extend_at_start= ") << m_profile_params.m_extend_at_start / theApp.m_program->m_units << _T("\n");
         python << _T("extend_at_end= ") << m_profile_params.m_extend_at_end / theApp.m_program->m_units<< _T("\n");
 
+        //lead in lead out line length
+        python << _T("lead_in_line_len= ") << m_profile_params.m_lead_in_line_len / theApp.m_program->m_units << _T("\n");
+        python << _T("lead_out_line_len= ") << m_profile_params.m_lead_out_line_len / theApp.m_program->m_units<< _T("\n");
+
 		// profile the kurve
-		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_safety_space, clearance, start_depth, step_down, final_depth,extend_at_start,extend_at_end)\n"), side_string.c_str());
+		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_safety_space, clearance, start_depth, step_down, final_depth,extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )\n"), side_string.c_str());
 	}
 	python << _T("absolute()\n");
 	return(python);
@@ -758,6 +782,12 @@ void CProfile::WriteDefaultValues()
 	config.Write(_T("FinishCutMode"), m_profile_params.m_finishing_cut_mode);
 	config.Write(_T("FinishStepDown"), m_profile_params.m_finishing_step_down);
 	config.Write(_T("EndBeyond"), m_profile_params.m_end_beyond_full_profile);
+
+	config.Write(_T("ExtendAtStart"), m_profile_params.m_extend_at_start);
+	config.Write(_T("ExtendAtEnd"), m_profile_params.m_extend_at_end);
+	config.Write(_T("LeadInLineLen"), m_profile_params.m_lead_in_line_len);
+	config.Write(_T("LeadOutLineLen"), m_profile_params.m_lead_out_line_len);
+
 }
 
 void CProfile::ReadDefaultValues()
@@ -779,6 +809,11 @@ void CProfile::ReadDefaultValues()
 	m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)int_mode;
 	config.Read(_T("FinishStepDown"), &m_profile_params.m_finishing_step_down, 1.0);
 	config.Read(_T("EndBeyond"), &m_profile_params.m_end_beyond_full_profile, false);
+
+	config.Read(_T("ExtendAtStart"), &m_profile_params.m_extend_at_start, 0.0);
+	config.Read(_T("ExtendAtEnd"), &m_profile_params.m_extend_at_end, 0.0);
+	config.Read(_T("LeadInLineLen"), &m_profile_params.m_lead_in_line_len, 0.0);
+	config.Read(_T("LeadOutLineLen"), &m_profile_params.m_lead_out_line_len, 0.0);
 
 	ConfirmAutoRollRadius(true);
 
@@ -954,6 +989,9 @@ class PickStart: public Tool{
 	const wxChar* GetTitle(){return _("Pick Start");}
 	void Run(){if(heeksCAD->PickPosition(_("Pick new start point"), object_for_tools->m_profile_params.m_start))object_for_tools->m_profile_params.m_start_given = true; heeksCAD->RefreshProperties();}
 	wxString BitmapPath(){ return _T("pickstart");}
+    
+	
+	
 };
 
 static PickStart pick_start;
