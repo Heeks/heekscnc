@@ -1242,13 +1242,19 @@ static void OpenBOMFileMenuCallback(wxCommandEvent& event)
 
 
 static void SaveNcFileMenuCallback(wxCommandEvent& event)
-{
+{   wxStandardPaths sp;
+    wxString user_docs =sp.GetDocumentsDir();
+    wxString ncdir;
+    ncdir =  user_docs + _T("/nc");
 	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
 	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
-	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), wxEmptyString, wxEmptyString, wildcard_string, wxSAVE|wxOVERWRITE_PROMPT);
+	//wxString defaultDir = wxString(_T("/home/danfalck/nc"));
+    wxString defaultDir = ncdir;
+	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, wxEmptyString, wildcard_string, wxSAVE|wxOVERWRITE_PROMPT);
 	fd.SetFilterIndex(1);
 	if (fd.ShowModal() == wxID_OK)
-	{
+	{   
+        
 		wxString nc_file_str = fd.GetPath().c_str();
 		{
 			wxFile ofs(nc_file_str.c_str(), wxFile::write);
@@ -1258,7 +1264,23 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 				return;
 			}
 
-			ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
+
+               
+
+          if(theApp.m_use_DOS_not_Unix == true)   //DF -added to get DOS line endings HeeksCNC running on Unix 
+            {
+                long line_num= 0;
+                bool ok = true;
+                int nLines = theApp.m_output_canvas->m_textCtrl->GetNumberOfLines();
+            for ( int nLine = 0; ok && nLine < nLines; nLine ++)
+                {   
+                    ok = ofs.Write(theApp.m_output_canvas->m_textCtrl->GetLineText(line_num) + _T("\r\n") );
+                    line_num = line_num+1;
+                }
+            }
+
+            else
+			    ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
 		}
 		HeeksPyBackplot(theApp.m_program, theApp.m_program, nc_file_str);
 	}
@@ -1600,7 +1622,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #endif
 	CSendToMachine::ReadFromConfig();
 	config.Read(_T("UseClipperNotBoolean"), &m_use_Clipper_not_Boolean, false);
-
+	config.Read(_T("UseDOSNotUnix"), &m_use_DOS_not_Unix, false);
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
 
@@ -1885,6 +1907,12 @@ void on_set_use_clipper(bool value, HeeksObj* object)
 	theApp.m_use_Clipper_not_Boolean = value;
 }
 
+void on_set_use_DOS(bool value, HeeksObj* object)
+{
+    theApp.m_use_DOS_not_Unix = value;
+
+}
+
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 	PropertyList* machining_options = new PropertyList(_("machining options"));
 	CNCCode::GetOptions(&(machining_options->m_list));
@@ -1898,6 +1926,7 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 #endif
 	CSendToMachine::GetOptions(&(machining_options->m_list));
 	machining_options->m_list.push_back ( new PropertyCheck ( _("Use Clipper not Boolean"), m_use_Clipper_not_Boolean, NULL, on_set_use_clipper ) );
+	machining_options->m_list.push_back ( new PropertyCheck ( _("Use DOS Line Endings"), m_use_DOS_not_Unix, NULL, on_set_use_DOS ) );
 
 	list->push_back(machining_options);
 
@@ -1923,6 +1952,7 @@ void CHeeksCNCApp::OnFrameDelete()
 	CSpeedOp::WriteToConfig();
 	CSendToMachine::WriteToConfig();
 	config.Write(_T("UseClipperNotBoolean"), m_use_Clipper_not_Boolean);
+    config.Write(_T("UseDOSNotUnix"), m_use_DOS_not_Unix);
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
@@ -1931,7 +1961,7 @@ wxString CHeeksCNCApp::GetDllFolder()
 }
 
 wxString CHeeksCNCApp::GetResFolder()
-{
+{wxStandardPaths sp;
 #if defined(WIN32) || defined(RUNINPLACE) //compile with 'RUNINPLACE=yes make' then skip 'sudo make install'
 	#ifdef CMAKE_UNIX
 		return (m_dll_path + _T("/.."));
@@ -1941,8 +1971,10 @@ wxString CHeeksCNCApp::GetResFolder()
 #else
 #ifdef CMAKE_UNIX
     return (_T("/usr/share/heekscnc"));
+    //return sp.GetResourcesDir();
 #else
 	return (m_dll_path + _T("/../../share/heekscnc"));
+	//return sp.GetResourcesDir();
 #endif
 #endif
 }
