@@ -74,7 +74,7 @@ CRawMaterial::CRawMaterial()
 {
 	CNCConfig config(ConfigScope());
 	config.Read(_T("RawMaterial_BrinellHardness"), &m_brinell_hardness, 0.0);
-	//config.Read(_T("RawMaterial_MaterialName"), &m_material_name, _T("Please select a material to machine"));
+	config.Read(_T("RawMaterial_MaterialName"), &m_material_name, _T("Please select a material to machine"));
 }
 
 double CRawMaterial::Hardness() const
@@ -157,7 +157,7 @@ Python CRawMaterial::AppendTextToProgram()
 {
 	Python python;
 
-	//python << _T("comment(") << PythonString(wxString(_("Feeds and Speeds set for machining ")) + m_material_name) << _T(")\n");
+	python << _T("comment(") << PythonString(wxString(_("Feeds and Speeds set for machining ")) + m_material_name) << _T(")\n");
 	return(python);
 }
 
