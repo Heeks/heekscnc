@@ -7,11 +7,11 @@ class Creator(iso.Creator):
 		iso.Creator.init(self) 
 
 	def SPACE(self): return('')
-	def TAP(self): return('G33.1')
-	def TAP_DEPTH(self, format, depth): return(self.SPACE() + 'K' + (format % depth))
+        def TAP(self): return('G33.1')
+        def TAP_DEPTH(self, format, depth): return(self.SPACE() + 'K' + (format.string(depth)))
 	def BORE_FEED_OUT(self): return('G85')
 	def BORE_SPINDLE_STOP_RAPID_OUT(self): return('G86')
-	def BORE_DWELL_FEED_OUT(self, format, dwell): return('G89') + self.SPACE() + (format % dwell)
+	def BORE_DWELL_FEED_OUT(self, format, dwell): return('G89') + self.SPACE() + (format.string(dwell))
 	def FEEDRATE(self): return((self.SPACE() + ' F'))
 
 	def program_begin(self, id, comment):
@@ -431,64 +431,6 @@ class Creator(iso.Creator):
 		self.write_misc()	
 		self.write('\n')
 		
-        
-	# G33.1 tapping with EMC for now
-	# unsynchronized (chuck) taps NIY (tap_mode = 1)
-    
-	def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None, tap_mode=None, direction=None):
-		# mystery parameters: 
-		# zretract=None, dwell_bottom=None,pitch=None, stoppos=None, spin_in=None, spin_out=None):
-		# I dont see how to map these to EMC Gcode
-
-		if (standoff == None):		
-			# This is a bad thing.  All the drilling cycles need a retraction (and starting) height.		
-			return
-		if (z == None): 
-			return	# We need a Z value as well.  This input parameter represents the top of the hole 
-		if (pitch == None): 
-			return	# We need a pitch value.
-		if (direction == None): 
-			return	# We need a direction value.
-
-		if (tap_mode != 0):
-			raise "only rigid tapping currently supported"
-
-		self.write_preps()
-		self.write_blocknum()				
-		self.write_spindle()
-		self.write('\n')
-
-		# rapid to starting point; z first, then x,y iff given
-
-		# Set the retraction point to the 'standoff' distance above the starting z height.		
-		retract_height = z + standoff		
-
-		# unsure if this is needed:
-		if self.z != retract_height:
-				self.rapid(z = retract_height)
-
-		# then continue to x,y if given
-		if (x != None) or (y != None):
-				self.write_blocknum()				
-				self.write(self.RAPID() )		   
-
-				if (x != None):		
-						self.write(self.X() + self.fmt.string(x))		
-						self.x = x 
-
-				if (y != None):		
-						self.write(self.Y() + self.fmt.string(y))		
-						self.y = y
-				self.write('\n')
-       
-		self.write_blocknum()				
-		self.write( self.TAP() )
-		self.write( self.TAP_DEPTH(self.ffmt,pitch) + self.SPACE() )			
-		self.write(self.Z() + self.fmt.string(z - depth))	# This is the 'z' value for the bottom of the tap.
-		self.write_misc()	
-		self.write('\n')
-
-		self.z = retract_height	# this cycle returns to the start position, so remember that as z value
 
 	def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
 		pass
