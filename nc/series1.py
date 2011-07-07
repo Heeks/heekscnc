@@ -9,6 +9,7 @@ class Creator(iso_modal.Creator):
         iso_modal.Creator.__init__(self)
         self.arc_centre_positive = True
         self.drillExpanded = True
+        self.can_do_helical_arcs = False
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         pass
@@ -16,6 +17,9 @@ class Creator(iso_modal.Creator):
     def dwell(self, t):
         # to do, find out what dwell is on this machine
         pass
+    
+    def SPACE(self):
+         return('')
             
 ################################################################################
 

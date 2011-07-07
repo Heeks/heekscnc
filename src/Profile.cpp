@@ -1167,7 +1167,7 @@ unsigned int CProfile::GetNumSketches()
     {
 		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
 #endif
-		if(object->GetType() == SketchType)num_sketches++;
+		if(object && object->GetType() == SketchType)num_sketches++;
 	}
 	return num_sketches;
 }
