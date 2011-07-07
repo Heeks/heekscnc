@@ -52,9 +52,10 @@ class Creator(nc.Creator):
         self.sfmt = Format(number_of_decimal_places = 1)
         self.arc_centre_absolute = False
         self.arc_centre_positive = False
-        self.in_arc_splitting = False
+        self.in_quadrant_splitting = False
         self.machine_coordinates = False
         self.drillExpanded = False
+        self.can_do_helical_arcs = True
         
     ############################################################################
     ##  Codes
@@ -117,6 +118,8 @@ class Creator(nc.Creator):
     def PECK_DEPTH(self, format, depth): return(self.SPACE() + 'Q' + (format.string(depth)))
     def RETRACT(self, format, height): return(self.SPACE() + 'R' + (format.string(height)))
     def END_CANNED_CYCLE(self): return('G80')
+    def TAP(self): return('G84')
+    def TAP_DEPTH(self, format, depth): return(self.SPACE() + 'K' + (format.string(depth)))
 
     def X(self): return('X')
     def Y(self): return('Y')
@@ -484,9 +487,35 @@ class Creator(nc.Creator):
         return angle_e - angle_s
 
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        if self.arc_centre_positive == True and self.in_arc_splitting == False:
+        if self.can_do_helical_arcs == False and self.in_quadrant_splitting == False and (z != None) and (math.fabs(z - self.z) > 0.000001) and (self.fmt.string(z) != self.fmt.string(self.z)):
+            # split the helical arc into little line feed moves
+            if x == None: x = self.x
+            if y == None: y = self.y
+            sdx = self.x - i
+            sdy = self.y - j
+            edx = x - i
+            edy = y - j
+            radius = math.sqrt(sdx*sdx + sdy*sdy)
+            arc_angle = self.get_arc_angle(sdx, sdy, edx, edy, cw)
+            angle_start = math.atan2(sdy, sdx);
+            tolerance = 0.02
+            angle_step = 2.0 * math.atan( math.sqrt ( tolerance /(radius - tolerance) ))
+            segments = int(math.fabs(arc_angle / angle_step) + 1)
+            angle_step = arc_angle / segments
+            angle = angle_start
+            z_step = float(z - self.z)/segments
+            next_z = self.z
+            for p in range(0, segments):
+                angle = angle + angle_step
+                next_x = i + radius * math.cos(angle)
+                next_y = j + radius * math.sin(angle)
+                next_z = next_z + z_step
+                self.feed(next_x, next_y, next_z)
+            return
+
+        if self.arc_centre_positive == True and self.in_quadrant_splitting == False:
             # split in to quadrant arcs
-            self.in_arc_splitting = True
+            self.in_quadrant_splitting = True
             
             if x == None: x = self.x
             if y == None: y = self.y
@@ -535,7 +564,7 @@ class Creator(nc.Creator):
                     else:
                         q = q + 1                        
                     
-            self.in_arc_splitting = False
+            self.in_quadrant_splitting = False
             return
             
         #if self.same_xyz(x, y, z): return
@@ -799,17 +828,64 @@ class Creator(nc.Creator):
         self.write_misc()    
         self.write('\n')
         
-
-
-
-#    def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None):
-#        pass
-
-    # argument list adapted for compatibility with Tapping module
+    # G33.1 tapping with EMC for now
+    # unsynchronized (chuck) taps NIY (tap_mode = 1)
+    
     def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None, tap_mode=None, direction=None):
-        pass
+        # mystery parameters: 
+        # zretract=None, dwell_bottom=None,pitch=None, stoppos=None, spin_in=None, spin_out=None):
+        # I dont see how to map these to EMC Gcode
 
+        if (standoff == None):		
+                # This is a bad thing.  All the drilling cycles need a retraction (and starting) height.		
+                return
+        if (z == None): 
+                return	# We need a Z value as well.  This input parameter represents the top of the hole 
+        if (pitch == None): 
+                return	# We need a pitch value.
+        if (direction == None): 
+                return	# We need a direction value.
 
+        if (tap_mode != 0):
+                raise "only rigid tapping currently supported"
+
+        self.write_preps()
+        self.write_blocknum()				
+        self.write_spindle()
+        self.write('\n')
+
+        # rapid to starting point; z first, then x,y iff given
+
+        # Set the retraction point to the 'standoff' distance above the starting z height.		
+        retract_height = z + standoff		
+
+        # unsure if this is needed:
+        if self.z != retract_height:
+                        self.rapid(z = retract_height)
+
+        # then continue to x,y if given
+        if (x != None) or (y != None):
+                        self.write_blocknum()				
+                        self.write(self.RAPID() )		   
+
+                        if (x != None):		
+                                        self.write(self.X() + self.fmt.string(x))		
+                                        self.x = x 
+
+                        if (y != None):		
+                                        self.write(self.Y() + self.fmt.string(y))		
+                                        self.y = y
+                        self.write('\n')
+
+        self.write_blocknum()				
+        self.write( self.TAP() )
+        self.write( self.TAP_DEPTH(self.ffmt,pitch) + self.SPACE() )			
+        self.write(self.Z() + self.fmt.string(z - depth))	# This is the 'z' value for the bottom of the tap.
+        self.write_misc()	
+        self.write('\n')
+
+        self.z = retract_height	# this cycle returns to the start position, so remember that as z value
+        
     def bore(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, feed_in=None, feed_out=None, stoppos=None, shift_back=None, shift_right=None, backbore=False, stop=False):
         pass
 
