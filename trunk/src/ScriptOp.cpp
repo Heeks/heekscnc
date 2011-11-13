@@ -173,11 +173,11 @@ This is a simple way to insert datum parameters for translating gcode around lat
 
 		case CoordinateSystemType:			
 			// you can paste in new datum/coordinate system parameters with this
-			python << _T("datumposition(")<< heeksCAD->GetDatumPosX(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumPosY(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumPosZ(*itObject)/ theApp.m_program->m_units<< _T(")\n");
+			python << _T("translate(")<< heeksCAD->GetDatumPosX(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumPosY(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumPosZ(*itObject)/ theApp.m_program->m_units<< _T(")\n");
 
-			python << _T("datumX_dir(")<< heeksCAD->GetDatumDirx_X(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDirx_Y(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDirx_Z(*itObject)/ theApp.m_program->m_units<< _T(")\n");
+			//python << _T("datumX_dir(")<< heeksCAD->GetDatumDirx_X(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDirx_Y(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDirx_Z(*itObject)/ theApp.m_program->m_units<< _T(")\n");
 			
-			python << _T("datumY_dir(")<< heeksCAD->GetDatumDiry_X(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDiry_Y(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDiry_Z(*itObject)/ theApp.m_program->m_units<< _T(")\n");
+			//python << _T("datumY_dir(")<< heeksCAD->GetDatumDiry_X(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDiry_Y(*itObject)/ theApp.m_program->m_units << _T(",") << heeksCAD->GetDatumDiry_Z(*itObject)/ theApp.m_program->m_units<< _T(")\n");
 
 			break;
 

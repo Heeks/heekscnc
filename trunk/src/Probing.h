@@ -140,6 +140,7 @@ public:
 	{
 		eRapid = 0,
 		eProbe,
+		eFeed,
 		eEndOfData
 	} eMovement_t;
 
@@ -161,6 +162,9 @@ public:
 	{
 		switch (movement)
 		{
+		case eFeed:		ss << _("Feed");
+			break;
+
 		case eRapid:	ss << _("Rapid");
 			break;
 
@@ -178,6 +182,9 @@ public:
 	{
 		switch (movement)
 		{
+		case eFeed:		ss << _("Feed");
+			break;
+
 		case eRapid:	ss << _("Rapid");
 			break;
 

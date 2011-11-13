@@ -16,8 +16,10 @@
 class CDepthOp;
 
 class CDepthOpParams{
-public:
+private:
 	double m_clearance_height;
+
+public:
 	double m_start_depth;
 	double m_step_down;
 	double m_final_depth;
@@ -38,6 +40,9 @@ public:
 	void GetProperties(CDepthOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
+
+	double ClearanceHeight() const;
+	void ClearanceHeight( const double value ) { m_clearance_height = value; }
 };
 
 class CDepthOp : public CSpeedOp

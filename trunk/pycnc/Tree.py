@@ -4,13 +4,13 @@ import platform
 class Tree:
     def __init__(self):
         #create self.window and add it to the CAD system
-        if HeeksCNC.widgets == HeeksCNC.WIDGETS_WX:
+        if HeeksCNC.heekscnc.widgets == HeeksCNC.WIDGETS_WX:
             import wx
             from wxCAMWindow import CAMWindow
-            self.window = CAMWindow(HeeksCNC.cad.frame)
-            HeeksCNC.cad.add_window(self.window)
+            self.window = CAMWindow(HeeksCNC.heekscnc.cad.frame)
+            HeeksCNC.heekscnc.cad.add_window(self.window)
             
-        elif HeeksCNC.widgets == HeeksCNC.WIDGETS_QT:
+        elif HeeksCNC.heekscnc.widgets == HeeksCNC.WIDGETS_QT:
             from PyQt4 import QtGui
             self.window = QtGui.QWidget()
             self.window.setWindowTitle('CAM2')
@@ -18,7 +18,7 @@ class Tree:
             tree_item = QtGui.QTreeWidgetItem(tree)
             tree_item.setText(0, "Program")
             tree.addTopLevelItem(tree_item)
-            HeeksCNC.cad.add_window(self.window)
+            HeeksCNC.heekscnc.cad.add_window(self.window)
             self.window.show()
                 
     def Add(self, object):

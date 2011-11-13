@@ -54,6 +54,7 @@ wxString CProgram::alternative_machines_file = _T("");
 CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed_references(NULL)
 #ifndef STABLE_OPS_ONLY
 , m_fixtures(NULL)
+, m_active_machine_state(NULL)
 #endif
 , m_script_edited(false)
 {
@@ -73,6 +74,8 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed
 	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
 	config.Read(_("ProgramMotionBlendingTolerance"), &m_motion_blending_tolerance, 0.0001);
 	config.Read(_("ProgramNaiveCamTolerance"), &m_naive_cam_tolerance, 0.0001);
+
+	config.Read(_("ClearanceSource"), (int *) &m_clearance_source, int(CProgram::eClearanceDefinedByOperation) );
 }
 
 const wxBitmap &CProgram::GetIcon()
@@ -110,6 +113,8 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
 	m_path_control_mode = rhs.m_path_control_mode;
 	m_motion_blending_tolerance = rhs.m_motion_blending_tolerance;
 	m_naive_cam_tolerance = rhs.m_naive_cam_tolerance;
+
+	m_clearance_source = rhs.m_clearance_source;
 
     ReloadPointers();
     AddMissingChildren();
@@ -164,6 +169,8 @@ void CProgram::CopyFrom(const HeeksObj* object)
 		m_path_control_mode = rhs->m_path_control_mode;
 		m_motion_blending_tolerance = rhs->m_motion_blending_tolerance;
 		m_naive_cam_tolerance = rhs->m_naive_cam_tolerance;
+
+		m_clearance_source = rhs->m_clearance_source;
 	}
 }
 
@@ -193,6 +200,8 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 		m_path_control_mode = rhs.m_path_control_mode;
 		m_motion_blending_tolerance = rhs.m_motion_blending_tolerance;
 		m_naive_cam_tolerance = rhs.m_naive_cam_tolerance;
+
+		m_clearance_source = rhs.m_clearance_source;
 	}
 
 	return(*this);
@@ -205,7 +214,8 @@ CMachine::CMachine()
 
 	CNCConfig config(CMachine::ConfigScope());
 	config.Read(_T("safety_height_defined"), &m_safety_height_defined, false );
-	config.Read(_T("safety_height"), &m_safety_height, 0.0 );
+	config.Read(_T("safety_height"), &m_safety_height, 0.0 );		// in G53 machine units - indicates where to move to for tool changes
+	config.Read(_("ClearanceHeight"), (double *) &(m_clearance_height), 50.0 ); // in local coordinate system (G54 etc.) to show how tall clamps and vices are for movement between machine operations.
 }
 
 CMachine::CMachine( const CMachine & rhs )
@@ -224,6 +234,7 @@ CMachine & CMachine::operator= ( const CMachine & rhs )
 		m_max_spindle_speed = rhs.m_max_spindle_speed;
 		m_safety_height_defined = rhs.m_safety_height_defined;
 		m_safety_height = rhs.m_safety_height;
+		m_clearance_height = rhs.m_clearance_height;
 	} // End if - then
 
 	return(*this);
@@ -277,6 +288,14 @@ static void on_set_output_file_name_follows_data_file_name(int zero_based_choice
 	config.Write(_T("OutputFileNameFollowsDataFileName"), pProgram->m_output_file_name_follows_data_file_name );
 }
 
+static void on_set_clearance_source(int zero_based_choice, HeeksObj *object)
+{
+	CProgram *pProgram = (CProgram *) object;
+	pProgram->m_clearance_source = CProgram::eClearanceSource_t(zero_based_choice);
+
+	CNCConfig config(CProgram::ConfigScope());
+	config.Write(_T("ClearanceSource"), (int) pProgram->m_clearance_source );
+}
 
 static void on_set_path_control_mode(int zero_based_choice, HeeksObj *object)
 {
@@ -330,6 +349,16 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		choices.push_back(_T("True"));
 
 		list->push_back(new PropertyChoice(_("output file name follows data file name"), choices, choice, this, on_set_output_file_name_follows_data_file_name));
+	}
+
+	{
+		std::list< wxString > choices;
+		choices.push_back ( wxString ( _("By Machine") ) );
+		choices.push_back ( wxString ( _("By Fixture") ) );
+		choices.push_back ( wxString ( _("By Operation") ) );
+		int choice = int(m_clearance_source);
+
+		list->push_back ( new PropertyChoice ( _("Clearance Height Defined"),  choices, choice, this, on_set_clearance_source ) );
 	}
 
 	if (m_output_file_name_follows_data_file_name == false)
@@ -394,10 +423,26 @@ static void on_set_safety_height(const double value, HeeksObj *object)
     heeksCAD->Changed();
 }
 
+static void on_set_clearance_height( const double value, HeeksObj *object)
+{
+	CMachine *pMachine = &(((CProgram *)object)->m_machine);
+	pMachine->m_clearance_height = value;
+
+	CNCConfig config(CMachine::ConfigScope());
+	config.Write(_T("ClearanceHeight"), pMachine->m_clearance_height);
+
+	heeksCAD->RefreshProperties();
+}
+
 void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("Maximum Spindle Speed (RPM)"), m_max_spindle_speed, parent, on_set_max_spindle_speed));
 	list->push_back(new PropertyCheck(_("Safety Height Defined"), m_safety_height_defined, parent, on_set_safety_height_defined));
+
+	if (theApp.m_program->m_clearance_source == CProgram::eClearanceDefinedByMachine)
+	{
+		list->push_back(new PropertyLength(_("Clearance Height (for inter-operation movement)"), m_clearance_height, parent, on_set_clearance_height));
+	}
 
     if (m_safety_height_defined)
     {
@@ -553,6 +598,7 @@ void CMachine::WriteBaseXML(TiXmlElement *element)
 	element->SetDoubleAttribute( "max_spindle_speed", m_max_spindle_speed);
 	element->SetAttribute( "safety_height_defined", m_safety_height_defined);
 	element->SetDoubleAttribute( "safety_height", m_safety_height);
+	element->SetDoubleAttribute( "clearance_height", m_clearance_height);
 } // End WriteBaseXML() method
 
 void CMachine::ReadBaseXML(TiXmlElement* element)
@@ -566,6 +612,7 @@ void CMachine::ReadBaseXML(TiXmlElement* element)
 	if (element->Attribute("safety_height_defined")) element->Attribute("safety_height_defined", &flag);
 	m_safety_height_defined = (flag != 0);
 	if (element->Attribute("safety_height")) element->Attribute("safety_height", &m_safety_height);
+	if (element->Attribute("clearance_height")) element->Attribute("clearance_height", &m_clearance_height);
 
 } // End ReadBaseXML() method
 
@@ -1070,24 +1117,15 @@ wxString CProgram::GetOutputFileName() const
 	{
 		if (heeksCAD->GetFileFullPath())
 		{
-#ifdef UNICODE
-			std::wostringstream l_ossPath;
-			std::wstring l_ssPath;
-			std::wstring::size_type i;
-#else
-			std::ostringstream l_ossPath;
-			std::string l_ssPath;
-			std::string::size_type i;
-#endif
-
-			l_ssPath.assign(heeksCAD->GetFileFullPath());
-			if ( (i=l_ssPath.find_last_of('.')) != l_ssPath.npos)
+			wxString path(heeksCAD->GetFileFullPath());
+			int offset = -1;
+			if ((offset = path.Find('.', true)) != wxNOT_FOUND)
 			{
-				l_ssPath.erase(i);	// chop off the end.
+				path.Remove(offset); // chop off the end.
 			} // End if - then
 
-			l_ossPath << l_ssPath.c_str() << _T(".tap");
-			return(l_ossPath.str().c_str());
+			path << _T(".tap");
+			return(path);
 		} // End if - then
 		else
 		{
@@ -1197,6 +1235,7 @@ bool CMachine::operator==( const CMachine & rhs ) const
 	if (m_max_spindle_speed != rhs.m_max_spindle_speed) return(false);
 	if (m_safety_height_defined != rhs.m_safety_height_defined) return(false);
 	if (m_safety_height != rhs.m_safety_height) return(false);
+	if (m_clearance_height != rhs.m_clearance_height) return(false);
 
 	return(true);
 }

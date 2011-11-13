@@ -327,15 +327,28 @@ void CToolParams::write_values_to_config()
 void CTool::SetDiameter( const double diameter )
 {
 	m_params.m_diameter = diameter;
-	if (m_params.m_type == CToolParams::eChamfer || m_params.m_type == CToolParams::eEngravingTool)
+	switch (m_params.m_type)
 	{
-		// Recalculate the cutting edge length based on this new diameter
-		// and the cutting angle.
+	    case CToolParams::eChamfer:
+	    case CToolParams::eEngravingTool:
+	    {
+            // Recalculate the cutting edge length based on this new diameter
+            // and the cutting angle.
 
-		double opposite = m_params.m_diameter - m_params.m_flat_radius;
-		double angle = m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
+            double opposite = (m_params.m_diameter / 2.0) - m_params.m_flat_radius;
+            double angle = m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
 
-		m_params.m_cutting_edge_height = opposite / tan(angle);
+            m_params.m_cutting_edge_height = opposite / tan(angle);
+	    }
+	    break;
+
+	    case CToolParams::eEndmill:
+	    case CToolParams::eSlotCutter:
+            m_params.m_flat_radius = diameter / 2.0;
+            break;
+
+	    default:
+	    break;
 	}
 
 	ResetTitle();
@@ -1784,8 +1797,8 @@ TopoDS_Shape CTool::GetShape() const
 		case CToolParams::eEngravingTool:
 		{
 			// First a cylinder to represent the shaft.
-			double tool_tip_length_a = (diameter / 2) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
-			double tool_tip_length_b = (m_params.m_flat_radius)  * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
+			double tool_tip_length_a = (diameter / 2) / tan( degrees_to_radians(m_params.m_cutting_edge_angle));
+			double tool_tip_length_b = (m_params.m_flat_radius)  / tan( degrees_to_radians(m_params.m_cutting_edge_angle));
 			double tool_tip_length = tool_tip_length_a - tool_tip_length_b;
 
 			double shaft_length = tool_length_offset - tool_tip_length;
@@ -2261,10 +2274,14 @@ void CTool::ImportProbeCalibrationData( const wxString & probed_points_xml_file_
 				for(TiXmlElement* pPoint = heeksCAD->FirstXMLChildElement( pElem ) ; pPoint; pPoint = pPoint->NextSiblingElement())
 				{
 					std::string name(pPoint->Value());
-
-					if (name == "X") { double value; pPoint->Attribute("X", &value); point.SetX( value / PROGRAM->m_units ); }
-					if (name == "Y") { double value; pPoint->Attribute("Y", &value); point.SetY( value / PROGRAM->m_units ); }
-					if (name == "Z") { double value; pPoint->Attribute("Z", &value); point.SetZ( value / PROGRAM->m_units ); }
+					wxString value( Ctt(pPoint->GetText()) );
+					double number = 0.0;
+					if (value.ToDouble(&number))
+					{
+					    if (name == "X") { point.SetX( number / PROGRAM->m_units ); }
+                        if (name == "Y") { point.SetY( number / PROGRAM->m_units ); }
+                        if (name == "Z") { point.SetZ( number / PROGRAM->m_units ); }
+					}
 				} // End for
 
 				points.push_back(point);

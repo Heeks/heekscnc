@@ -60,6 +60,7 @@ CProfileParams::CProfileParams()
 	m_sort_sketches = 1;
 	m_offset_extra = 0.0;
 	m_do_finishing_pass = false;
+	m_only_finishing_pass = false;
 	m_finishing_h_feed_rate = 0.0;
 	m_finishing_cut_mode = eConventional;
 	m_finishing_step_down = 1.0;
@@ -113,6 +114,7 @@ static void on_set_sort_sketches(const int value, HeeksObj* object)
 }
 static void on_set_offset_extra(const double value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_offset_extra = value;((CProfile*)object)->WriteDefaultValues();}
 static void on_set_do_finishing_pass(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_do_finishing_pass = value; heeksCAD->RefreshProperties();((CProfile*)object)->WriteDefaultValues();}
+static void on_set_only_finishing_pass(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_only_finishing_pass = value; heeksCAD->RefreshProperties();((CProfile*)object)->WriteDefaultValues();}
 static void on_set_finishing_h_feed_rate(double value, HeeksObj* object)
 {
 	((CProfile*)object)->m_profile_params.m_finishing_h_feed_rate = value;
@@ -235,6 +237,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 	list->push_back(new PropertyCheck(_("do finishing pass"), m_do_finishing_pass, parent, on_set_do_finishing_pass));
 	if(m_do_finishing_pass)
 	{
+		list->push_back(new PropertyCheck(_("only finishing pass"), m_only_finishing_pass, parent, on_set_only_finishing_pass));
 		list->push_back(new PropertyLength(_("finishing feed rate"), m_finishing_h_feed_rate, parent, on_set_finishing_h_feed_rate));
 
 		{
@@ -299,6 +302,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 
 	element->SetDoubleAttribute( "offset_extra", m_offset_extra);
 	element->SetAttribute( "do_finishing_pass", m_do_finishing_pass ? 1:0);
+	element->SetAttribute( "only_finishing_pass", m_only_finishing_pass ? 1:0);
 	element->SetDoubleAttribute( "finishing_feed_rate", m_finishing_h_feed_rate);
 	element->SetAttribute( "finish_cut_mode", m_finishing_cut_mode);
 	element->SetDoubleAttribute( "finishing_step_down", m_finishing_step_down);
@@ -332,6 +336,7 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 	if(pElem->Attribute("sort_sketches"))m_sort_sketches = atoi(pElem->Attribute("sort_sketches"));
 	pElem->Attribute("offset_extra", &m_offset_extra);
 	if(pElem->Attribute("do_finishing_pass", &int_for_bool))m_do_finishing_pass = (int_for_bool != 0);
+	if(pElem->Attribute("only_finishing_pass", &int_for_bool))m_only_finishing_pass = (int_for_bool != 0);
 	pElem->Attribute("finishing_feed_rate", &m_finishing_h_feed_rate);
 	if(pElem->Attribute("finish_cut_mode", &int_for_enum))m_finishing_cut_mode = (eCutMode)int_for_enum;
 	pElem->Attribute("finishing_step_down", &m_finishing_step_down);
@@ -778,6 +783,7 @@ void CProfile::WriteDefaultValues()
 	config.Write(_T("RollRadius"), m_profile_params.m_auto_roll_radius);
 	config.Write(_T("OffsetExtra"), m_profile_params.m_offset_extra);
 	config.Write(_T("DoFinishPass"), m_profile_params.m_do_finishing_pass);
+	config.Write(_T("OnlyFinishPass"), m_profile_params.m_only_finishing_pass);
 	config.Write(_T("FinishFeedRate"), m_profile_params.m_finishing_h_feed_rate);
 	config.Write(_T("FinishCutMode"), m_profile_params.m_finishing_cut_mode);
 	config.Write(_T("FinishStepDown"), m_profile_params.m_finishing_step_down);
@@ -804,6 +810,7 @@ void CProfile::ReadDefaultValues()
 	config.Read(_T("RollRadius"), &m_profile_params.m_auto_roll_radius, 2.0);
 	config.Read(_T("OffsetExtra"), &m_profile_params.m_offset_extra, 0.0);
 	config.Read(_T("DoFinishPass"), &m_profile_params.m_do_finishing_pass, false);
+	config.Read(_T("OnlyFinishPass"), &m_profile_params.m_only_finishing_pass, false);
 	config.Read(_T("FinishFeedRate"), &m_profile_params.m_finishing_h_feed_rate, 100.0);
 	config.Read(_T("FinishCutMode"), &int_mode, CProfileParams::eConventional);
 	m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)int_mode;
@@ -824,7 +831,10 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 	Python python;
 
 	// roughing pass
-	python << AppendTextToProgram(pMachineState, false);
+	if(!this->m_profile_params.m_do_finishing_pass || !this->m_profile_params.m_only_finishing_pass)
+	{
+		python << AppendTextToProgram(pMachineState, false);
+	}
 
 	// finishing pass
 	if(this->m_profile_params.m_do_finishing_pass)
@@ -846,6 +856,18 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 		return(python);
 	} // End if - then
 
+	if(!finishing_pass || m_profile_params.m_only_finishing_pass)
+	{
+		python << CDepthOp::AppendTextToProgram(pMachineState);
+
+		if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
+		{
+			python << _T("roll_radius = float(");
+			python << m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
+			python << _T(")\n");
+		}
+	}
+
 	if(finishing_pass)
 	{
 		python << _T("feedrate_hv(") << m_profile_params.m_finishing_h_feed_rate / theApp.m_program->m_units << _T(", ");
@@ -856,15 +878,6 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 	}
 	else
 	{
-		python << CDepthOp::AppendTextToProgram(pMachineState);
-
-		if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
-		{
-			python << _T("roll_radius = float(");
-			python << m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
-			python << _T(")\n");
-		}
-
 		python << _T("offset_extra = ") << m_profile_params.m_offset_extra / theApp.m_program->m_units << _T("\n");
 	}
 
@@ -989,9 +1002,6 @@ class PickStart: public Tool{
 	const wxChar* GetTitle(){return _("Pick Start");}
 	void Run(){if(heeksCAD->PickPosition(_("Pick new start point"), object_for_tools->m_profile_params.m_start))object_for_tools->m_profile_params.m_start_given = true; heeksCAD->RefreshProperties();}
 	wxString BitmapPath(){ return _T("pickstart");}
-    
-	
-	
 };
 
 static PickStart pick_start;
@@ -1039,6 +1049,9 @@ public:
 		heeksCAD->Changed();
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
+
+		// go straight into tag position picking
+		CTag::PickPosition(new_object);
 	}
 	bool CallChangedOnRun(){return false;}
 	wxString BitmapPath(){ return _T("addtag");}
@@ -1076,7 +1089,7 @@ void CProfile::CopyFrom(const HeeksObj* object)
 
 bool CProfile::CanAdd(HeeksObj* object)
 {
-	return ((object != NULL) && (object->GetType() == TagsType || object->GetType() == SketchType));
+	return ((object != NULL) && (object->GetType() == TagsType || object->GetType() == SketchType || object->GetType() == FixtureType));
 }
 
 bool CProfile::CanAddTo(HeeksObj* owner)

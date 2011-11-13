@@ -28,6 +28,13 @@ public:
 	int    m_retract_mode;	// boring - 0 - rapid retract, 1 - feed retract
 	int    m_spindle_mode;	// boring - if true, stop spindle at bottom
 
+private:
+	double m_clearance_height; // The tool moves to this height between drill locations and then rapidly moves down to the m_standoff height.
+
+public:
+	double ClearanceHeight() const;
+	void   ClearanceHeight(const double value) { m_clearance_height = value; }
+
 	// The following line is the prototype setup in the Python routines for the drill sequence.
 	// depending on parameter combinations the backend should emit proper bore cycles (EMC2:  G85, G86, G89)
 	//
