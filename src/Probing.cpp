@@ -102,7 +102,14 @@ Python CProbe_Centre::AppendTextToProgram( CMachineState *pMachineState )
             python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
             python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
             python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
-            python << _T("rapid_to_midpoint(") << _T("x1='[#1001 + ") << probe_offset_x << _T("]',") << _T("x2='[#1003 + ") << probe_offset_x << _T("]')\n");
+            if (m_number_of_points == 2)
+            {
+                python << _T("rapid_to_midpoint(") << _T("x1='[#1001 + ") << probe_offset_x << _T("]',") << _T("x2='[#1003 + ") << probe_offset_x << _T("]')\n");
+            }
+            else
+            {
+                python << _T("rapid_to_midpoint(") << _T("x1='[#1001]',") << _T("x2='[#1003]')\n");
+            }
             python << _T("remove_temporary_origin()\n");
 		} // End if - then
 		else
@@ -116,12 +123,23 @@ Python CProbe_Centre::AppendTextToProgram( CMachineState *pMachineState )
             python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
             python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
             python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
-            python << _T("rapid_to_midpoint(") << _T("y1='[#1002 + ") << probe_offset_y << _T("]',") << _T("y2='[#1004 + ") << probe_offset_y << _T("]')\n");
+            if (m_number_of_points == 2)
+            {
+                python << _T("rapid_to_midpoint(") << _T("y1='[#1002 + ") << probe_offset_y << _T("]',") << _T("y2='[#1004 + ") << probe_offset_y << _T("]')\n");
+            }
+            else
+            {
+                python << _T("rapid_to_midpoint(") << _T("y1='[#1002]',") << _T("y2='[#1004]')\n");
+
+            }
+
             python << _T("remove_temporary_origin()\n");
 		} // End if - else
 	} // End if - then
 	else
 	{
+	    // Direction == Inside
+
 		python << _T("comment(") << PythonString(_("This program assumes that the machine operator has jogged")) << _T(")\n");
 		python << _T("comment(") << PythonString(_("the machine to approximatedly the correct location")) << _T(")\n");
 		python << _T("comment(") << PythonString(_("immediately above the hole we are finding the centre of.")) << _T(")\n");
@@ -139,7 +157,15 @@ Python CProbe_Centre::AppendTextToProgram( CMachineState *pMachineState )
             python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
             python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
             python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
-            python << _T("rapid_to_midpoint(") << _T("x1='[#1001 + ") << probe_offset_x << _T("]',") << _T("x2='[#1003 + ") << probe_offset_x << _T("]')\n");
+            if (m_number_of_points == 2)
+            {
+                python << _T("rapid_to_midpoint(") << _T("x1='[#1001 + ") << probe_offset_x << _T("]',") << _T("x2='[#1003 + ") << probe_offset_x << _T("]')\n");
+            }
+            else
+            {
+                python << _T("rapid_to_midpoint(") << _T("x1='[#1001]',") << _T("x2='[#1003]')\n");
+            }
+
             python << _T("remove_temporary_origin()\n");
 		} // End if - then
 		else
@@ -154,11 +180,18 @@ Python CProbe_Centre::AppendTextToProgram( CMachineState *pMachineState )
             python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
             python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
             python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
-            python << _T("rapid_to_midpoint(") << _T("y1='[#1002 + ") << probe_offset_y << _T("]',") << _T("y2='[#1004 + ") << probe_offset_y << _T("]')\n");
+            if (m_number_of_points == 2)
+            {
+                python << _T("rapid_to_midpoint(") << _T("y1='[#1002 + ") << probe_offset_y << _T("]',") << _T("y2='[#1004 + ") << probe_offset_y << _T("]')\n");
+            }
+            else
+            {
+                python << _T("rapid_to_midpoint(") << _T("y1='[#1002]',") << _T("y2='[#1004]')\n");
+            }
+
             python << _T("remove_temporary_origin()\n");
 		} // End if - else
 	} // End if - else
-
 
 
 	if (m_number_of_points == 4)
@@ -195,6 +228,7 @@ Python CProbe_Centre::AppendTextToProgram( CMachineState *pMachineState )
 		python << _T("comment(") << PythonString(_("Move back to the intersection points")) << _T(")\n");
 		python << _T("comment(") << PythonString(_("NOTE: We set the temporary origin because it was in effect when the values in these variables were established")) << _T(")\n");
 		python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
+		python << _T("rapid_to_midpoint(") << _T("x1='[#1001 + ") << probe_offset_x << _T("]',") << _T("x2='[#1003 + ") << probe_offset_x << _T("]')\n");
 		python << _T("rapid_to_midpoint(") << _T("y1='[#1006 + ") << probe_offset_y << _T("]',") << _T("y2='[#1008 + ") << probe_offset_y << _T("]')\n");
 		python << _T("remove_temporary_origin()\n");
 
@@ -229,6 +263,7 @@ Python CProbe_Grid::AppendTextToProgram( CMachineState *pMachineState )
 		switch (l_itPoint->first)
 		{
 		case eRapid:
+		case eFeed:
 			break;
 
 		case eProbe:
@@ -849,10 +884,10 @@ Python CProbe_Edge::AppendTextToProgram( CMachineState *pMachineState )
 
 		python << _T("set_temporary_origin( x=0, y=0, z=0 )\n");
 		python << _T("rapid_to_rotated_coordinate( ")
-				<< _T("x1='[#1001 + ") << probe_offset_x << _T("]', ")
-				<< _T("y1='[#1002 + ") << probe_offset_y << _T("]', ")
-				<< _T("x2='[#1004 + ") << probe_offset_x << _T("]', ")
-				<< _T("y2='[#1005 + ") << probe_offset_y << _T("]', ")
+				<< _T("x1='[#1001]', ")
+				<< _T("y1='[#1002]', ")
+				<< _T("x2='[#1004]', ")
+				<< _T("y2='[#1005]', ")
 				<< _T("ref_x='") << ref1.X() << _T("', ")
 				<< _T("ref_y='") << ref1.Y() << _T("', ")
 				<< _T("x_current=") << m_corner_coordinate.X(true) << _T(", ")
@@ -1379,6 +1414,7 @@ void CProbe_Edge::glCommands(bool select, bool marked, bool no_color)
 			glEnd();
 			break;
 
+		case eFeed:
 		case eProbe:
 			CNCCode::Color(ColorFeedType).glColor();
 			glBegin(GL_LINE_STRIP);
@@ -1414,6 +1450,7 @@ void CProbe_Centre::glCommands(bool select, bool marked, bool no_color)
 			glEnd();
 			break;
 
+		case eFeed:
 		case eProbe:
 			CNCCode::Color(ColorFeedType).glColor();
 			glBegin(GL_LINE_STRIP);
@@ -1450,6 +1487,7 @@ void CProbe_Grid::glCommands(bool select, bool marked, bool no_color)
 			glEnd();
 			break;
 
+		case eFeed:
 		case eProbe:
 			CNCCode::Color(ColorFeedType).glColor();
 			glBegin(GL_LINE_STRIP);
@@ -1754,13 +1792,13 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 		case eBottom:
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance,-1.0 * m_retract,0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance,-1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(2.0 * m_distance,-1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1768,13 +1806,13 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 		case eTop:
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract,0 ) ));
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract,0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1782,13 +1820,13 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 		case eLeft:
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1796,13 +1834,13 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 		case eRight:
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1817,26 +1855,26 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 			// Bottom
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, -1.0 * m_retract, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			// Left
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1845,26 +1883,26 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 			// Bottom
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, -1.0 * m_retract, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, -1.0 * m_retract, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			// Right
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(+1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,2.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(+1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, 2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1873,26 +1911,26 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 			// Top
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract,0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract,0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			// Left
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-1.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -1.0 * m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-2.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -2.0 * m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1901,26 +1939,26 @@ CProbing::PointsList_t CProbe_Edge::GetPoints() const
 			// Top
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, +1.0 * m_retract,0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, +1.0 * m_retract,0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-2.0 * m_distance, +1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-2.0 * m_distance, -1.0 * m_retract, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			// Right
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-1.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -1.0 * m_distance, 0 )) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(+1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, -1.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0,-2.0 * m_distance,0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -2.0 * m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(+1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(+1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_retract, -2.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 			break;
@@ -1947,13 +1985,13 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 		{
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(m_distance, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(m_distance, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0,0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(-1.0 * m_distance, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(-1.0 * m_distance, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 		} // End if - then
@@ -1961,13 +1999,13 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 		{
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, -1.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 		} // End if - else
@@ -1980,13 +2018,13 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 		{
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(+1.0 * m_distance ,0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(-1.0 * m_distance ,0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 		} // End if - then
@@ -1995,13 +2033,13 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 			// eYAxis
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, +1.0 * m_distance , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, -1.0 * m_distance , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 		} // End if - else
@@ -2013,13 +2051,13 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 		{
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, -1.0 * m_distance, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, -1.0 * m_distance, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, 0 , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 		}
@@ -2027,13 +2065,13 @@ CProbing::PointsList_t CProbe_Centre::GetPoints() const
 		{
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, +1.0 * m_distance , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
 			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, 0) ) );
-			points.push_back( std::make_pair( CProbing::eRapid, CNCPoint(0, 0, -1.0 * m_depth) ) );
+			points.push_back( std::make_pair( CProbing::eFeed, CNCPoint(0, 0, -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eProbe, CNCPoint(0, -1.0 * m_distance , -1.0 * m_depth) ) );
 			points.push_back( std::make_pair( CProbing::eEndOfData, CNCPoint(0,0,0) ) );
 		} // End if - else
@@ -2099,7 +2137,17 @@ void CProbe_Edge::GenerateMeaningfullName()
 		m_title << eCorners_t(m_corner) << _(" corner");
 	} // End if - else
 
-	m_title << _T(" at ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+	if (theApp.m_program->m_units == 1)
+	{
+		// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
+		m_title << _T(" at ") << m_distance / theApp.m_program->m_units;
+	} // End if - then
+	else
+	{
+		// We're using inches.  Find a fractional representation if one matches.
+		m_title << _T(" at ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+	}
+
 	if (theApp.m_program->m_units > 1) m_title << _T(" inch intervals");
 	else m_title << _T(" mm intervals");
 
@@ -2111,7 +2159,15 @@ void CProbe_Centre::GenerateMeaningfullName()
 	{
 		m_title = _("Probe protrusion along ");
 		m_title << eAlignment_t(m_alignment);
-		m_title << _T(" min ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+		if (theApp.m_program->m_units == 1.0)
+		{
+			m_title << _T(" min ") << (m_distance / theApp.m_program->m_units);
+		}
+		else
+		{
+			m_title << _T(" min ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+		}
+
 		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 		else m_title << _T(" mm");
 	} // End if - then
@@ -2119,7 +2175,15 @@ void CProbe_Centre::GenerateMeaningfullName()
 	{
 		m_title = _("Probe hole along ");
 		m_title << eAlignment_t(m_alignment);
-		m_title << _T(" max ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+		if (theApp.m_program->m_units == 1.0)
+		{
+			m_title << _T(" max ") << (m_distance / theApp.m_program->m_units);
+		}
+		else
+		{
+			m_title << _T(" max ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+		}
+
 		if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 		else m_title << _T(" mm");
 	} // End if - else
@@ -2129,14 +2193,28 @@ void CProbe_Centre::GenerateMeaningfullName()
 		if (m_direction == eOutside)
 		{
 			m_title = _("Probe protrusion");
-			m_title << _T(" min ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+			if (theApp.m_program->m_units == 1.0)
+			{
+				m_title << _T(" min ") << (m_distance / theApp.m_program->m_units);
+			}
+			else
+			{
+				m_title << _T(" min ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+			}
 			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 			else m_title << _T(" mm");
 		} // End if - then
 		else
 		{
 			m_title = _("Probe hole");
-			m_title << _T(" max ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+			if (theApp.m_program->m_units == 1.0)
+			{
+				m_title << _T(" max ") << (m_distance / theApp.m_program->m_units);
+			}
+			else
+			{
+				m_title << _T(" max ") << CTool::FractionalRepresentation( m_distance / theApp.m_program->m_units, 64 );
+			}
 			if (theApp.m_program->m_units > 1) m_title << _T(" inches");
 			else m_title << _T(" mm");
 		} // End if - else

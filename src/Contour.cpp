@@ -912,7 +912,6 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
 					z -= step_down;
 					points.push_back( p );
 				}
-				// l_bClockwise = ! l_bClockwise;
 			}
 
             if ((points.size() > 0) && (*points.rbegin() != CNCPoint(PE)))
@@ -928,7 +927,6 @@ struct EdgeComparison : public binary_function<const TopoDS_Edge &, const TopoDS
                 {
                     python << (l_bClockwise?_T("arc_cw("):_T("arc_ccw(")) << _T("x=") << itPoint->X(true) << _T(", y=") << itPoint->Y(true) << _T(", z=") << itPoint->Z(true) << _T(", ")
                         << _T("i=") << centre.X(true) << _T(", j=") << centre.Y(true);
-                    // if (offset.Z(true) > tolerance) python << _T(", k=") << offset.Z(true);
                     python << _T(")\n");
                     pMachineState->Location(*itPoint);
                 }
@@ -1017,6 +1015,11 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
 
     for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
     {
+		if (object->GetType() != SketchType)
+		{
+			continue;
+		}
+
         std::list<TopoDS_Shape> wires;
         if (! heeksCAD->ConvertSketchToFaceOrWire( object, wires, false))
         {
@@ -1091,7 +1094,7 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
 
                             python << GeneratePathFromWire(	tool_path_wire,
                                                             pMachineState,
-                                                            m_depth_op_params.m_clearance_height,
+                                                            m_depth_op_params.ClearanceHeight(),
                                                             m_depth_op_params.m_rapid_safety_space,
                                                             m_depth_op_params.m_start_depth,
                                                             m_params.m_entry_move_type );
@@ -1107,13 +1110,13 @@ Python CContour::AppendTextToProgram( CMachineState *pMachineState )
         } // End if - else
     } // End for
 
-    if (pMachineState->Location().Z() < (m_depth_op_params.m_clearance_height / theApp.m_program->m_units))
+    if (pMachineState->Location().Z() < (m_depth_op_params.ClearanceHeight() / theApp.m_program->m_units))
     {
         // Move up above workpiece to relocate to the start of the next operation.
-        python << _T("rapid(z=") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+        python << _T("rapid(z=") << m_depth_op_params.ClearanceHeight() / theApp.m_program->m_units << _T(")\n");
 
         CNCPoint where(pMachineState->Location());
-        where.SetZ(m_depth_op_params.m_clearance_height / theApp.m_program->m_units);
+        where.SetZ(m_depth_op_params.ClearanceHeight() / theApp.m_program->m_units);
         pMachineState->Location(where);
     }
 

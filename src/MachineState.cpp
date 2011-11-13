@@ -120,7 +120,7 @@ Python CMachineState::Fixture( CFixture new_fixture )
 
     if ((m_fixture != new_fixture) || (! m_fixture_has_been_set))
     {
-        // The fixture has been changed.  Move to the highest safety-height between the two fixtures.
+        // The fixture has been changed.  Move to the highest safety-height between the two fixtures .
         if (m_fixture.m_params.m_safety_height_defined)
         {
 			if (new_fixture.m_params.m_safety_height_defined)

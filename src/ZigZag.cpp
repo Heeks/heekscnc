@@ -191,7 +191,7 @@ void CZigZag::ReloadPointers()
 void CZigZag::SetDepthOpParamsFromBox()
 {
 	m_depth_op_params.m_start_depth = m_params.m_box.MaxZ();
-	m_depth_op_params.m_clearance_height = m_params.m_box.MaxZ() + 5.0;
+	m_depth_op_params.ClearanceHeight( m_params.m_box.MaxZ() + 5.0 );
 	m_depth_op_params.m_final_depth = m_params.m_box.MinZ();
 	m_depth_op_params.m_rapid_safety_space = m_params.m_box.MaxZ() + 2.0;
 	m_depth_op_params.m_step_down = m_params.m_box.Depth(); // set it to a finishing pass

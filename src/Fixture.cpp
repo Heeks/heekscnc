@@ -66,6 +66,7 @@ void CFixtureParams::set_initial_values(const bool safety_height_defined, const 
 
 	m_safety_height_defined = safety_height_defined;
 	m_safety_height = safety_height;
+	config.Read(_T("clearance_height"), &m_clearance_height, 100.0);
 
 	config.Read(_T("touch_off_point_defined"), &m_touch_off_point_defined, false);
 	double touch_off_point_x, touch_off_point_y;
@@ -93,6 +94,7 @@ void CFixtureParams::write_values_to_config()
 
 	config.Write(_T("safety_height_defined"), m_safety_height_defined);
 	config.Write(_T("safety_height"), m_safety_height);
+	config.Write(_T("clearance_height"), m_clearance_height);
 
 	config.Write(_T("touch_off_point_defined"), m_touch_off_point_defined);
 	config.Write(_T("touch_off_point_x"), m_touch_off_point.X());
@@ -153,6 +155,12 @@ static void on_set_safety_height(const double value, HeeksObj *object)
     heeksCAD->Changed();
 }
 
+static void on_set_clearance_height(const double value, HeeksObj *object)
+{
+    ((CFixture *)object)->m_params.m_clearance_height = value;
+    heeksCAD->Changed();
+}
+
 void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("YZ plane (around X) rotation"), m_yz_plane, parent, on_set_yz_plane));
@@ -170,8 +178,10 @@ void CFixtureParams::GetProperties(CFixture* parent, std::list<Property *> *list
 
     if (m_safety_height_defined)
     {
-        list->push_back(new PropertyLength(_("Safety Height (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
+        list->push_back(new PropertyLength(_("Safety Height for inter-fixture movements (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
     }
+
+	list->push_back(new PropertyLength(_("Clearance Height for inter-operation movements(in local (G54, G55 etc.) coordinates)"), m_clearance_height, parent, on_set_clearance_height));
 
 	list->push_back(new PropertyCheck(_("Touch Off Point Defined"), m_touch_off_point_defined, parent, on_set_touch_off_point_defined));
 	if (m_touch_off_point_defined)
@@ -204,6 +214,7 @@ void CFixtureParams::WriteXMLAttributes(TiXmlNode *root)
 
 	element->SetAttribute( "safety_height_defined", m_safety_height_defined);
 	element->SetDoubleAttribute( "safety_height", m_safety_height);
+	element->SetDoubleAttribute( "clearance_height", m_clearance_height);
 
 	element->SetAttribute( "touch_off_point_defined", m_touch_off_point_defined);
 	element->SetDoubleAttribute( "touch_off_point_x", m_touch_off_point.X());
@@ -228,6 +239,7 @@ void CFixtureParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("safety_height_defined")) pElem->Attribute("safety_height_defined", &flag);
 	m_safety_height_defined = (flag != 0);
 	if (pElem->Attribute("safety_height")) pElem->Attribute("safety_height", &m_safety_height);
+	if (pElem->Attribute("clearance_height")) pElem->Attribute("clearance_height", &m_clearance_height);
 
 	flag = 0;
 	if (pElem->Attribute("touch_off_point_defined")) pElem->Attribute("touch_off_point_defined", &flag);
@@ -795,6 +807,7 @@ bool CFixtureParams::operator== ( const CFixtureParams & rhs ) const
 	if (CNCPoint(m_pivot_point) != CNCPoint(rhs.m_pivot_point)) return(false);
 	if (m_safety_height_defined != rhs.m_safety_height_defined) return(false);
 	if (m_safety_height != rhs.m_safety_height) return(false);
+	if (m_clearance_height != rhs.m_clearance_height) return(false);
 	if (m_touch_off_point_defined != rhs.m_touch_off_point_defined) return(false);
 	if (CNCPoint(m_touch_off_point) != CNCPoint(rhs.m_touch_off_point)) return(false);
 	if (m_touch_off_description != rhs.m_touch_off_description) return(false);

@@ -165,7 +165,7 @@ void PocketDlg::GetData(CPocket* object)
 	object->m_pocket_params.m_use_zig_zag = m_chkUseZigZag->GetValue();
 	if(object->m_pocket_params.m_use_zig_zag)object->m_pocket_params.m_zig_angle = m_dblZigAngle->GetValue();
 	object->m_depth_op_params.m_abs_mode = (m_cmbAbsMode->GetValue().CmpNoCase(_("incremental")) == 0) ? CDepthOpParams::eIncremental : CDepthOpParams::eAbsolute;
-	object->m_depth_op_params.m_clearance_height = m_lgthClearanceHeight->GetValue();
+	object->m_depth_op_params.ClearanceHeight( m_lgthClearanceHeight->GetValue() );
 	object->m_depth_op_params.m_rapid_safety_space = m_lgthRapidDownToHeight->GetValue();
 	object->m_depth_op_params.m_start_depth = m_lgthStartDepth->GetValue();
 	object->m_depth_op_params.m_final_depth = m_lgthFinalDepth->GetValue();
@@ -215,7 +215,7 @@ void PocketDlg::SetFromData(CPocket* object)
 	m_chkUseZigZag->SetValue(object->m_pocket_params.m_use_zig_zag);
 	if(object->m_pocket_params.m_use_zig_zag)m_dblZigAngle->SetValue(object->m_pocket_params.m_zig_angle);
 	m_cmbAbsMode->SetValue((object->m_depth_op_params.m_abs_mode == CDepthOpParams::eAbsolute) ? _("absolute") : _("incremental"));
-	m_lgthClearanceHeight->SetValue(object->m_depth_op_params.m_clearance_height);
+	m_lgthClearanceHeight->SetValue(object->m_depth_op_params.ClearanceHeight());
 	m_lgthRapidDownToHeight->SetValue(object->m_depth_op_params.m_rapid_safety_space);
 	m_lgthStartDepth->SetValue(object->m_depth_op_params.m_start_depth);
 	m_lgthFinalDepth->SetValue(object->m_depth_op_params.m_final_depth);

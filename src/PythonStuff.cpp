@@ -165,7 +165,7 @@ public:
 				Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
 			#else
 				#ifdef RUNINPLACE
-					wxString path(theApp.GetDllFolder() +_T("/../"));
+					wxString path(theApp.GetDllFolder() +_T("/"));
 				#else
 					#ifdef CMAKE_UNIX
 						wxString path(_T("/usr/lib/heekscnc/"));

@@ -405,7 +405,7 @@ Python CInlay::SelectFixture( CMachineState *pMachineState, const bool female_ha
 /**
     This method finds the maximum offset possible for this wire up to the value specified.
  */
-double CInlay::FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const
+/* static */ double CInlay::FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance )
 {
     // We will do a 'binary chop' algorithm to minimise the number of offsets we need to
     // calculate.
@@ -432,7 +432,7 @@ double CInlay::FindMaxOffset( const double max_offset_required, TopoDS_Wire wire
     // will not work.  Try half way between and repeat until we're splitting hairs.
 
     double offset = ((max_offset - min_offset) / 2.0) + min_offset;
-    while ((offset > tolerance) && ((max_offset - min_offset) > tolerance))
+    while ((fabs(offset) > fabs(tolerance)) && (fabs(max_offset - min_offset) > fabs(tolerance)))
     {
         try {
             BRepOffsetAPI_MakeOffset offset_wire(TopoDS::Wire(wire));
@@ -866,7 +866,7 @@ Python CInlay::FormCorners( Valley_t & paths, CMachineState *pMachineState ) con
 
 			// Rapid into place first.
 			python << _T("comment(") << PythonString(_("sharpen corner")) << _T(")\n");
-			python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+			python << _T("rapid(z=") << this->m_depth_op_params.ClearanceHeight() / theApp.m_program->m_units << _T(")\n");
 			python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(")\n");
 			python << _T("rapid(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << this->m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")\n");
 			python << _T("feed(x=") << bottom_corner.X(true) << _T(", y=") << bottom_corner.Y(true) << _T(", z=") << bottom_corner.Z(true) << _T(")\n");
@@ -878,10 +878,10 @@ Python CInlay::FormCorners( Valley_t & paths, CMachineState *pMachineState ) con
 
 			// Now get back up to clearance height.
 			CNCPoint temp(pMachineState->Location());
-			temp.SetZ(this->m_depth_op_params.m_clearance_height);
+			temp.SetZ(this->m_depth_op_params.ClearanceHeight());
 			pMachineState->Location(temp);
 
-			python << _T("rapid(z=") << this->m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
+			python << _T("rapid(z=") << this->m_depth_op_params.ClearanceHeight() / theApp.m_program->m_units << _T(")\n");
 		} // End if - then
     }
 
@@ -1139,7 +1139,7 @@ Python CInlay::FormValleyWalls( CInlay::Valleys_t valleys, CMachineState *pMachi
 
                         python << CContour::GeneratePathFromWire(wire,
                                                                 pMachineState,
-                                                                m_depth_op_params.m_clearance_height,
+                                                                m_depth_op_params.ClearanceHeight(),
                                                                 m_depth_op_params.m_rapid_safety_space,
                                                                 m_depth_op_params.m_start_depth,
                                                                 CContourParams::ePlunge );
@@ -1683,7 +1683,7 @@ Python CInlay::FormMountainWalls( CInlay::Valleys_t valleys, CMachineState *pMac
 
                 python << CContour::GeneratePathFromWire(tool_path_wire,
                                                         pMachineState,
-                                                        m_depth_op_params.m_clearance_height,
+														m_depth_op_params.ClearanceHeight(),
                                                         m_depth_op_params.m_rapid_safety_space,
                                                         m_depth_op_params.m_start_depth,
                                                         CContourParams::ePlunge );
