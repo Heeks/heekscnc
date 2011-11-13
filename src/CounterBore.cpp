@@ -75,9 +75,8 @@ void CCounterBoreParams::GetProperties(CCounterBore* parent, std::list<Property 
 		choices.push_back(_("True"));			// Must be 'true' (non-zero)
 
 		int choice = int(m_sort_locations);
-		list->push_back(new PropertyChoice(_("sort_locations"), choices, choice, parent, on_set_sort_locations));
+		list->push_back(new PropertyChoice(_("Sort Locations"), choices, choice, parent, on_set_sort_locations));
 	} // End choice scope
-
 }
 
 void CCounterBoreParams::WriteXMLAttributes(TiXmlNode *root)
@@ -126,7 +125,11 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 	CNCPoint centre( point );
 
 	// Rapid to above the starting point (up at clearance height)
-	point.SetZ( m_depth_op_params.m_clearance_height );
+	point.SetZ( m_depth_op_params.ClearanceHeight() );
+	python << _T("rapid( x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
+
+	// Rapid down to the 'rapid_safety_space'
+	point.SetZ( m_depth_op_params.m_rapid_safety_space );
 	python << _T("rapid( x=") << point.X(true) << _T(", y=") << point.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 
 	// Feed (slowly) to the starting point at the centre of the material
@@ -138,7 +141,7 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 
 	while ((cutting_depth - final_depth) > tolerance)
 	{
-		python << _T("comment('Spiral down half a circle until we get to the cutting depth')\n");
+		python << _T("comment('Spiral down until we get to the cutting depth')\n");
 
 		double step_down = m_depth_op_params.m_step_down;
 		if ((cutting_depth - step_down) < final_depth)
@@ -295,7 +298,7 @@ Python CCounterBore::GenerateGCodeForOneLocation( const CNCPoint & location, con
 	python << _T("rapid( x=") << centre.X(true) << _T(", y=") << centre.Y(true) << _T(", z=") << drawing_units(final_depth) << _T(")\n");
 
 	// Rapid to above the starting point (up at clearance height)
-	point.SetZ( m_depth_op_params.m_clearance_height );
+	point.SetZ( m_depth_op_params.ClearanceHeight() );
 	python << _T("rapid( x=") << centre.X(true) << _T(", y=") << centre.Y(true) << _T(", z=") << point.Z(true) << _T(")\n");
 
 	return(python);
@@ -622,22 +625,13 @@ bool CCounterBore::CanAdd(HeeksObj*  object)
 
 /**
     This method returns TRUE if the type of symbol is suitable for reference as a source of location
+
+    NOTE: Since we're using the CDrilling::FindAllLocations() routine, we should just
+    allow all the same child objects as the CDrilling operation allows.
  */
 /* static */ bool CCounterBore::ValidType( const int object_type )
 {
-    switch (object_type)
-    {
-        case PointType:
-        case CircleType:
-        case SketchType:
-        case DrillingType:
-        case LineType:
-		case FixtureType:
-            return(true);
-
-        default:
-            return(false);
-    }
+    return(CDrilling::ValidType(object_type));
 }
 
 void CCounterBore::GetTools(std::list<Tool*>* t_list, const wxPoint* p)

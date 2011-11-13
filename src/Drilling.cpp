@@ -14,6 +14,7 @@
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
+#include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
 #include "Operations.h"
 #include "CTool.h"
@@ -43,6 +44,7 @@ void CDrillingParams::set_initial_values( const double depth, const int tool_num
 	config.Read(_T("m_sort_drilling_locations"), &m_sort_drilling_locations, 1);
 	config.Read(_T("m_retract_mode"), &m_retract_mode, 0);
 	config.Read(_T("m_spindle_mode"), &m_spindle_mode, 0);
+	config.Read(_T("m_clearance_height"), &m_clearance_height, 25.4);		// One inch
 
 	if (depth > 0)
 	{
@@ -84,6 +86,7 @@ void CDrillingParams::write_values_to_config()
 	config.Write(_T("m_sort_drilling_locations"), m_sort_drilling_locations);
 	config.Write(_T("m_retract_mode"), m_retract_mode);
 	config.Write(_T("m_spindle_mode"), m_spindle_mode);
+	config.Write(_T("m_clearance_height"), m_clearance_height);
 
 }
 
@@ -130,10 +133,31 @@ static void on_set_sort_drilling_locations(int value, HeeksObj* object)
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
+static void on_set_clearance_height(double value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.ClearanceHeight( value );
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
 
 void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("standoff"), m_standoff, parent, on_set_standoff));
+
+	switch(theApp.m_program->m_clearance_source)
+	{
+	case CProgram::eClearanceDefinedByFixture:
+		list->push_back(new PropertyString(_("clearance height"), _("Defined in fixture definition"), NULL, NULL));
+		break;
+
+	case CProgram::eClearanceDefinedByMachine:
+		list->push_back(new PropertyString(_("clearance height"), _("Defined in Program properties for whole machine"), NULL, NULL));
+		break;
+
+	case CProgram::eClearanceDefinedByOperation:
+	default:
+		list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
+	} // End switch
+
 	list->push_back(new PropertyDouble(_("dwell"), m_dwell, parent, on_set_dwell));
 	list->push_back(new PropertyLength(_("depth"), m_depth, parent, on_set_depth));
 	list->push_back(new PropertyLength(_("peck_depth"), m_peck_depth, parent, on_set_peck_depth));
@@ -181,17 +205,20 @@ void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetAttribute( "sort_drilling_locations", m_sort_drilling_locations);
 	element->SetAttribute( "retract_mode", m_retract_mode);
 	element->SetAttribute( "spindle_mode", m_spindle_mode);
+	element->SetAttribute( "clearance_height", m_clearance_height);
 }
 
 void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	if (pElem->Attribute("standoff")) pElem->Attribute("standoff", &m_standoff);
+	m_clearance_height = m_standoff;  // Default if the clearance_height parameter is not found.
 	if (pElem->Attribute("dwell")) pElem->Attribute("dwell", &m_dwell);
 	if (pElem->Attribute("depth")) pElem->Attribute("depth", &m_depth);
 	if (pElem->Attribute("peck_depth")) pElem->Attribute("peck_depth", &m_peck_depth);
 	if (pElem->Attribute("sort_drilling_locations")) pElem->Attribute("sort_drilling_locations", &m_sort_drilling_locations);
 	if (pElem->Attribute("retract_mode")) pElem->Attribute("retract_mode", &m_retract_mode);
 	if (pElem->Attribute("spindle_mode")) pElem->Attribute("spindle_mode", &m_spindle_mode);
+	if (pElem->Attribute("clearance_height")) pElem->Attribute("clearance_height", &m_clearance_height);
 }
 
 const wxBitmap &CDrilling::GetIcon()
@@ -231,7 +258,8 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
 			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units << _T(", ")
 			<< _T("retract_mode=") << m_params.m_retract_mode << _T(", ")
-			<< _T("spindle_mode=") << m_params.m_spindle_mode // << _T(", ")
+			<< _T("spindle_mode=") << m_params.m_spindle_mode// << _T(", ")
+			//<< _T("clearance_height=") << m_params.ClearanceHeight()
 			<< _T(")\n");
         pMachineState->Location(point); // Remember where we are.
 	} // End for
@@ -979,6 +1007,7 @@ std::list<wxString> CDrilling::DesignRulesAdjustment(const bool apply_changes)
         case ProfileType:
         case PocketType:
 		case FixtureType:
+		case ILineType:
             return(true);
 
         default:
@@ -1002,6 +1031,7 @@ bool CDrillingParams::operator==( const CDrillingParams & rhs) const
 	if (m_sort_drilling_locations != rhs.m_sort_drilling_locations) return(false);
 	if (m_retract_mode != rhs.m_retract_mode) return(false);
 	if (m_spindle_mode != rhs.m_spindle_mode) return(false);
+	if (m_clearance_height != rhs.m_clearance_height) return(false);
 
 	return(true);
 }
@@ -1012,4 +1042,31 @@ bool CDrilling::operator==( const CDrilling & rhs ) const
 	if (m_params != rhs.m_params) return(false);
 
 	return(CSpeedOp::operator==(rhs));
+}
+
+double CDrillingParams::ClearanceHeight() const
+{
+	switch (theApp.m_program->m_clearance_source)
+	{
+	case CProgram::eClearanceDefinedByMachine:
+		return(theApp.m_program->m_machine.m_clearance_height);
+
+	case CProgram::eClearanceDefinedByFixture:
+		// We need to figure out which is the 'active' fixture and return
+		// the clearance height from that fixture.
+
+#ifndef STABLE_OPS_ONLY
+		if (theApp.m_program->m_active_machine_state != NULL)
+		{
+			return(theApp.m_program->m_active_machine_state->Fixture().m_params.m_clearance_height);
+		}
+		else
+#endif
+			// This should not occur.  In any case, use the clearance value from the individual operation.
+			return(m_clearance_height);
+
+	case CProgram::eClearanceDefinedByOperation:
+	default:
+		return(m_clearance_height);
+	} // End switch
 }

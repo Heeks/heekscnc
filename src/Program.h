@@ -17,6 +17,7 @@ class COperations;
 #ifndef STABLE_OPS_ONLY
 class CFixtures;
 class CFixture;
+class CMachineState;
 #endif
 class CTools;
 
@@ -41,6 +42,7 @@ public:
 	double m_max_spindle_speed;		// in revolutions per minute (RPM)
 	bool m_safety_height_defined;
 	double m_safety_height;
+	double m_clearance_height;		// Default clearance height when CProgram::m_clearance_definition == eClearanceDefinedByMachine
 
 	void GetProperties(CProgram *parent, std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
@@ -76,7 +78,15 @@ public:
 		ePathControlUndefined
 	} ePathControlMode_t;
 
+	typedef enum
+	{
+		eClearanceDefinedByMachine = 0,
+		eClearanceDefinedByFixture,
+		eClearanceDefinedByOperation
+	} eClearanceSource_t;
+
 	ePathControlMode_t m_path_control_mode;
+	eClearanceSource_t m_clearance_source;
 	double m_motion_blending_tolerance;	// Only valid if m_path_control_mode == eBestPossibleSpeed
 	double m_naive_cam_tolerance;		// Only valid if m_path_control_mode == eBestPossibleSpeed
 
@@ -94,6 +104,7 @@ public:
 	CSpeedReferences *SpeedReferences();
 #ifndef STABLE_OPS_ONLY
 	CFixtures *Fixtures();
+	CMachineState *m_active_machine_state;	// Pointer to current machine state (only valid during Python output)
 #endif
 
 	bool m_script_edited;

@@ -386,6 +386,11 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
     {
 		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
 #endif
+		if (object->GetType() != SketchType)
+		{
+			continue;	// Skip private fixture objects.
+		}
+
 		if(object == NULL) {
 			wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
 			continue;

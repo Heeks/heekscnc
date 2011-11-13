@@ -49,6 +49,7 @@ public:
 
 	double m_offset_extra; // in mm
 	bool m_do_finishing_pass;
+	bool m_only_finishing_pass; // don't do roughing pass
 	double m_finishing_h_feed_rate;
 	eCutMode m_finishing_cut_mode;
 	double m_finishing_step_down;

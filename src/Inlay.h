@@ -294,7 +294,7 @@ public:
 
 	static std::vector<TopoDS_Edge> SortEdges( const TopoDS_Wire & wire );
 	static bool DirectionTowarardsNextEdge( const TopoDS_Edge &from, const TopoDS_Edge &to );
-	double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance ) const;
+	static double FindMaxOffset( const double max_offset_required, TopoDS_Wire wire, const double tolerance );
 	Python FormCorners( Valley_t & paths, CMachineState *pMachineState ) const;
 	Corners_t FindSimilarCorners( const CNCPoint coordinate, Corners_t corners, const CTool *pChamferingBit ) const;
 	double CornerAngle( const std::set<CNCVector> _vectors ) const;

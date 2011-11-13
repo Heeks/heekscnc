@@ -23,7 +23,7 @@ class CCounterBore;
 class CCounterBoreParams{
 
 public:
-	double m_diameter;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
+	double m_diameter;
 	int m_sort_locations;		// '1' = sort location points prior to generating GCode (to optimize paths)
 
 	void set_initial_values( const int tool_number );

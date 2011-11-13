@@ -31,7 +31,8 @@ public:
 	gp_Pnt m_pivot_point;	// Fixture's pivot point for rotation.
 
 	bool m_safety_height_defined;
-	double m_safety_height;
+	double m_safety_height;	// defined in G53 (machine) coordinates for inter-fixture movements.
+	double m_clearance_height; // defined in local coordinates (G54 etc.) for inter-operation movements.
 
 	bool m_touch_off_point_defined;	// Is the m_touch_off_point valid?
 	gp_Pnt m_touch_off_point;	// Coordinate in the local coordinate system for safe starting point
