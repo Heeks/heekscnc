@@ -251,7 +251,7 @@ class CreatorIso(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None ):
         self.write_blocknum()
         if self.g0123_modal:
             if self.prev_g0123 != iso.codes.RAPID():

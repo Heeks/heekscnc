@@ -153,7 +153,7 @@ class Creator:
     def matrix(self,a1=None,b1=None,c1=None,a2=None,b2=None,c2=None,a3=None,b3=None,c3=None):
         """Create a matrix for transformations"""
         pass
-    def transl(self,x=None,y=None,z=None):
+    def translate(self,x=None,y=None,z=None):
         """Translate in x,y,z direction"""
         pass
     def rotate(self,xyrot=None,yzrot=None,zxrot=None,angle=None):
@@ -199,7 +199,7 @@ class Creator:
     ############################################################################
     ##  Moves
     
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
         """Rapid move"""
         pass
 
@@ -479,8 +479,8 @@ def clearanceplane(z=None):
 def matrix(a1=None,b1=None,c1=None,a2=None,b2=None,c2=None,a3=None,b3=None,c3=None):
     creator.matrix(a1,b1,c1,a2,b2,c2,a3,b3,c3)
     
-def transl(x=None,y=None,z=None):
-    creator.transl(x,y,z)
+def translate(x=None,y=None,z=None):
+    creator.translate(x,y,z)
     
 def rotate(xyrot=None,yzrot=None,zxrot=None,angle=None):
     creator.rotate(xyrot,yzrot,zxrot,angle)
@@ -520,8 +520,8 @@ def gearrange(gear=0):
 ############################################################################
 ##  Moves
 
-def rapid(x=None, y=None, z=None, a=None, b=None, c=None):
-    creator.rapid(x, y, z, a, b, c)
+def rapid(x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
+    creator.rapid(x, y, z, a, b, c, machine_coordinates)
 
 def feed(x=None, y=None, z=None):
     creator.feed(x, y, z)
