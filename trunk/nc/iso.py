@@ -56,7 +56,9 @@ class Creator(nc.Creator):
         self.machine_coordinates = False
         self.drillExpanded = False
         self.can_do_helical_arcs = True
-        
+        self.shift_x = 0.0
+        self.shift_y = 0.0
+        self.shift_z = 0.0        
     ############################################################################
     ##  Codes
 
@@ -239,9 +241,9 @@ class Creator(nc.Creator):
     def set_temporary_origin(self, x=None, y=None, z=None, a=None, b=None, c=None):
         self.write_blocknum()
         self.write(self.SPACE() + (self.SET_TEMPORARY_COORDINATE_SYSTEM()))
-        if (x != None): self.write( self.SPACE() + 'X ' + (self.fmt.string(x)) )
-        if (y != None): self.write( self.SPACE() + 'Y ' + (self.fmt.string(y)) )
-        if (z != None): self.write( self.SPACE() + 'Z ' + (self.fmt.string(z)) )
+        if (x != None): self.write( self.SPACE() + 'X ' + (self.fmt.string(x + self.shift_x)) )
+        if (y != None): self.write( self.SPACE() + 'Y ' + (self.fmt.string(y + self.shift_y)) )
+        if (z != None): self.write( self.SPACE() + 'Z ' + (self.fmt.string(z + self.shift_z)) )
         if (a != None): self.write( self.SPACE() + 'A ' + (self.fmt.string(a)) )
         if (b != None): self.write( self.SPACE() + 'B ' + (self.fmt.string(b)) )
         if (c != None): self.write( self.SPACE() + 'C ' + (self.fmt.string(c)) )
@@ -251,6 +253,13 @@ class Creator(nc.Creator):
         self.write_blocknum()
         self.write(self.SPACE() + (self.REMOVE_TEMPORARY_COORDINATE_SYSTEM()))
         self.write('\n')
+    ############################################################################
+    ##  new graphics origin- make a new coordinate system and snap it onto the geometry
+    ##  the toolpath generated should be translated 
+    def translate(self,x=None, y=None, z=None):
+        self.shift_x = -x
+        self.shift_y = -y
+        self.shift_z = -z
 
     ############################################################################
     ##  Tools
@@ -335,11 +344,11 @@ class Creator(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None ):
         self.write_blocknum()
 
-        if self.machine_coordinates != False:
-            self.write( self.SPACE() + self.MACHINE_COORDINATES() )
+        if self.machine_coordinates != False or (machine_coordinates != None and machine_coordinates == True):
+            self.write( self.MACHINE_COORDINATES() + self.SPACE() )
 
         if self.g0123_modal:
             if self.prev_g0123 != self.RAPID():
@@ -351,14 +360,14 @@ class Creator(nc.Creator):
         if (x != None):
             dx = x - self.x
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.X() + (self.fmt.string(x)))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(x + self.shift_x)))
             else:
                 self.write(self.SPACE() + self.X() + (self.fmt.string(dx)))
             self.x = x
         if (y != None):
             dy = y - self.y
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(y + self.shift_y)))
             else:
                 self.write(self.SPACE() + self.Y() + (self.fmt.string(dy)))
 
@@ -366,7 +375,7 @@ class Creator(nc.Creator):
         if (z != None):
             dz = z - self.z
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.Z() + (self.fmt.string(z)))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(z + self.shift_z)))
             else:
                 self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
 
@@ -413,14 +422,14 @@ class Creator(nc.Creator):
         if (x != None):
             dx = x - self.x
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.X() + (self.fmt.string(x)))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(x + self.shift_x)))
             else:
                 self.write(self.SPACE() + self.X() + (self.fmt.string(dx)))
             self.x = x
         if (y != None):
             dy = y - self.y
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(y + self.shift_y)))
             else:
                 self.write(self.SPACE() + self.Y() + (self.fmt.string(dy)))
 
@@ -428,7 +437,7 @@ class Creator(nc.Creator):
         if (z != None):
             dz = z - self.z
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.Z() + (self.fmt.string(z)))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(z + self.shift_z)))
             else:
                 self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
 
@@ -441,16 +450,17 @@ class Creator(nc.Creator):
 
     def same_xyz(self, x=None, y=None, z=None):
         if (x != None):
-            if (self.fmt.string(x)) != (self.fmt.string(self.x)):
+            if (self.fmt.string(x + self.shift_x)) != (self.fmt.string(self.x)):
                 return False
         if (y != None):
-            if (self.fmt.string(y)) != (self.fmt.string(self.y)):
+            if (self.fmt.string(y + self.shift_y)) != (self.fmt.string(self.y)):
                 return False
         if (z != None):
-            if (self.fmt.string(z)) != (self.fmt.string(self.z)):
+            if (self.fmt.string(z + self.shift_z)) != (self.fmt.string(self.z)):
                 return False
             
         return True
+
     
     def get_quadrant(self, dx, dy):
         if dx < 0:
@@ -458,6 +468,7 @@ class Creator(nc.Creator):
                 return 2
             else:
                 return 1
+
         else:
             if dy < 0:
                 return 3
@@ -562,7 +573,7 @@ class Creator(nc.Creator):
                     if cw:
                         q = q - 1
                     else:
-                        q = q + 1                        
+                        q = q + 1
                     
             self.in_quadrant_splitting = False
             return
@@ -582,19 +593,19 @@ class Creator(nc.Creator):
         if (x != None):
             dx = x - self.x
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.X() + (self.fmt.string(x)))
+                self.write(self.SPACE() + self.X() + (self.fmt.string(x + self.shift_x)))
             else:
                 self.write(self.SPACE() + self.X() + (self.fmt.string(dx)))
         if (y != None):
             dy = y - self.y
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))
+                self.write(self.SPACE() + self.Y() + (self.fmt.string(y + self.shift_y)))
             else:
                 self.write(self.SPACE() + self.Y() + (self.fmt.string(dy)))
         if (z != None):
             dz = z - self.z
             if (self.absolute_flag ):
-                self.write(self.SPACE() + self.Z() + (self.fmt.string(z)))
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(z + self.shift_z)))
             else:
                 self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
         if (i != None):
@@ -653,7 +664,7 @@ class Creator(nc.Creator):
         self.write_misc()
         self.write('\n')
 
-    def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None):
+    def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
         pass
 
     def rapid_unhome(self):
@@ -795,12 +806,12 @@ class Creator(nc.Creator):
         retract_height = z + standoff        
         if (x != None):        
             dx = x - self.x        
-            self.write(self.SPACE() + self.X() + (self.fmt.string(x)))        
+            self.write(self.SPACE() + self.X() + (self.fmt.string(x + self.shift_x)))        
             self.x = x 
        
         if (y != None):        
             dy = y - self.y        
-            self.write(self.SPACE() + self.Y() + (self.fmt.string(y)))        
+            self.write(self.SPACE() + self.Y() + (self.fmt.string(y + self.shift_y)))        
             self.y = y
                       
         dz = (z + standoff) - self.z # In the end, we will be standoff distance above the z value passed in.
@@ -850,14 +861,14 @@ class Creator(nc.Creator):
                 raise "only rigid tapping currently supported"
 
         self.write_preps()
-        self.write_blocknum()				
+        self.write_blocknum()
         self.write_spindle()
         self.write('\n')
 
         # rapid to starting point; z first, then x,y iff given
 
-        # Set the retraction point to the 'standoff' distance above the starting z height.		
-        retract_height = z + standoff		
+        # Set the retraction point to the 'standoff' distance above the starting z height.
+        retract_height = z + standoff
 
         # unsure if this is needed:
         if self.z != retract_height:
@@ -865,23 +876,23 @@ class Creator(nc.Creator):
 
         # then continue to x,y if given
         if (x != None) or (y != None):
-                        self.write_blocknum()				
-                        self.write(self.RAPID() )		   
+                        self.write_blocknum()
+                        self.write(self.RAPID() )
 
-                        if (x != None):		
-                                        self.write(self.X() + self.fmt.string(x))		
+                        if (x != None):
+                                        self.write(self.X() + self.fmt.string(x + self.shift_x))
                                         self.x = x 
 
-                        if (y != None):		
-                                        self.write(self.Y() + self.fmt.string(y))		
+                        if (y != None):
+                                        self.write(self.Y() + self.fmt.string(y + self.shift_y))
                                         self.y = y
                         self.write('\n')
 
-        self.write_blocknum()				
+        self.write_blocknum()
         self.write( self.TAP() )
-        self.write( self.TAP_DEPTH(self.ffmt,pitch) + self.SPACE() )			
-        self.write(self.Z() + self.fmt.string(z - depth))	# This is the 'z' value for the bottom of the tap.
-        self.write_misc()	
+        self.write( self.TAP_DEPTH(self.ffmt,pitch) + self.SPACE() )
+        self.write(self.Z() + self.fmt.string(z - depth))# This is the 'z' value for the bottom of the tap.
+        self.write_misc()
         self.write('\n')
 
         self.z = retract_height	# this cycle returns to the start position, so remember that as z value
@@ -930,6 +941,7 @@ class Creator(nc.Creator):
     def probe_single_point(self, point_along_edge_x=None, point_along_edge_y=None, depth=None, retracted_point_x=None, retracted_point_y=None, destination_point_x=None, destination_point_y=None, intersection_variable_x=None, intersection_variable_y=None, probe_offset_x_component=None, probe_offset_y_component=None ):
         self.write_blocknum()
         self.write(self.SPACE() + (self.SET_TEMPORARY_COORDINATE_SYSTEM() + (' X 0 Y 0 Z 0') + ('\t(Temporarily make this the origin)\n')))
+
         if (self.fhv) : self.calc_feedrate_hv(1, 0)
         self.write_blocknum()
         self.write_feedrate()
@@ -937,10 +949,10 @@ class Creator(nc.Creator):
 
         self.rapid(point_along_edge_x,point_along_edge_y)
         self.rapid(retracted_point_x,retracted_point_y)
-        self.rapid(z=depth)
+        self.feed(z=depth)
 
         self.write_blocknum()
-        self.write(self.SPACE() + (self.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+        self.write((self.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt.string(destination_point_x)) + ' Y ' + (self.fmt.string(destination_point_y)) ) + ('\t(Probe towards our destination point)\n')))
 
         self.comment('Back off the workpiece and re-probe more slowly')
         self.write_blocknum()
@@ -955,7 +967,7 @@ class Creator(nc.Creator):
         self.write(self.SPACE() + self.FEEDRATE() + self.ffmt.string(self.fh / 2.0) + '\n')
 
         self.write_blocknum()
-        self.write(self.SPACE() + (self.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt % destination_point_x) + ' Y ' + (self.fmt % destination_point_y) ) + ('\t(Probe towards our destination point)\n')))
+        self.write((self.SPACE() + self.PROBE_TOWARDS_WITH_SIGNAL() + (' X ' + (self.fmt.string(destination_point_x)) + ' Y ' + (self.fmt.string(destination_point_y)) ) + ('\t(Probe towards our destination point)\n')))
 
         self.comment('Store the probed location somewhere we can get it again later')
         self.write_blocknum()
@@ -984,12 +996,13 @@ class Creator(nc.Creator):
         self.write(self.FEEDRATE() + ' [' + self.ffmt.string(self.fh) + ' / 5.0 ]')
         self.write('\t(Set the feed rate for probing)\n')
 
-        self.write_blocknum();
-        self.write(self.RAPID())
-        self.write(' X ' + x + ' Y ' + y + '\n')
+        if x != None and y != None:
+           self.write_blocknum();
+       	   self.write(self.RAPID())
+       	   self.write(' X ' + x + ' Y ' + y + '\n')
 
         self.write_blocknum()
-        self.write((self.PROBE_TOWARDS_WITH_SIGNAL() + ' Z ' + (self.fmt % depth) + ('\t(Probe towards our destination point)\n')))
+        self.write((self.PROBE_TOWARDS_WITH_SIGNAL() + ' Z ' + (self.fmt.string(depth)) + ('\t(Probe towards our destination point)\n')))
 
         self.comment('Store the probed location somewhere we can get it again later')
         self.write_blocknum()
@@ -1026,13 +1039,13 @@ class Creator(nc.Creator):
         self.write_blocknum()
         self.write(self.RAPID())
         if ((x1 != None) and (x2 != None)):
-            self.write((' X ' + '[[[' + x1 + '-' + x2 + '] / 2.0] + ' + x2 + ']'))
+            self.write((' X ' + '[[[' + x1 + ' - ' + x2 + '] / 2.0] + ' + x2 + ']'))
 
         if ((y1 != None) and (y2 != None)):
-            self.write((' Y ' + '[[[' + y1 + '-' + y2 + '] / 2.0] + ' + y2 + ']'))
+            self.write((' Y ' + '[[[' + y1 + ' - ' + y2 + '] / 2.0] + ' + y2 + ']'))
 
         if ((z1 != None) and (z2 != None)):
-            self.write((' Z ' + '[[[' + z1 + '-' + z2 + '] / 2.0] + ' + z2 + ']'))
+            self.write((' Z ' + '[[[' + z1 + ' - ' + z2 + '] / 2.0] + ' + z2 + ']'))
 
         self.write('\n')
 
@@ -1053,11 +1066,11 @@ class Creator(nc.Creator):
     def rapid_to_intersection(self, x1, y1, x2, y2, x3, y3, x4, y4, intersection_x, intersection_y, ua_numerator, ua_denominator, ua, ub_numerator, ub):
         self.comment('Find the intersection of the two lines made up by the four probed points')
         self.write_blocknum();
-        self.write(ua_numerator + '=[[[' + x4 + '-' + x3 + '] * [' + y1 + '-' + y3 + ']] - [[' + y4 + '-' + y3 + '] * [' + x1 + '-' + x3 + ']]]\n')
+        self.write(ua_numerator + '=[[[' + x4 + ' - ' + x3 + '] * [' + y1 + ' - ' + y3 + ']] - [[' + y4 + ' - ' + y3 + '] * [' + x1 + ' - ' + x3 + ']]]\n')
         self.write_blocknum();
-        self.write(ua_denominator + '=[[[' + y4 + '-' + y3 + '] * [' + x2 + '-' + x1 + ']] - [[' + x4 + '-' + x3 + '] * [' + y2 + '-' + y1 + ']]]\n')
+        self.write(ua_denominator + '=[[[' + y4 + ' - ' + y3 + '] * [' + x2 + ' - ' + x1 + ']] - [[' + x4 + ' - ' + x3 + '] * [' + y2 + ' - ' + y1 + ']]]\n')
         self.write_blocknum();
-        self.write(ub_numerator + '=[[[' + x2 + '-' + x1 + '] * [' + y1 + '-' + y3 + ']] - [[' + y2 + '-' + y1 + '] * [' + x1 + '-' + x3 + ']]]\n')
+        self.write(ub_numerator + '=[[[' + x2 + ' - ' + x1 + '] * [' + y1 + ' - ' + y3 + ']] - [[' + y2 + ' - ' + y1 + '] * [' + x1 + ' - ' + x3 + ']]]\n')
 
         self.comment('If they are not parallel')
         self.write('O900 IF [' + ua_denominator + ' NE 0]\n')
@@ -1089,34 +1102,34 @@ class Creator(nc.Creator):
     def rapid_to_rotated_coordinate(self, x1, y1, x2, y2, ref_x, ref_y, x_current, y_current, x_final, y_final):
         self.comment('Rapid to rotated coordinate')
         self.write_blocknum();
-        self.write( '#1 = [atan[' + y2 + '-' + y1 + ']/[' + x2 +' - ' + x1 + ']] (nominal_angle)\n')
+        self.write( '#1 = [atan[' + y2 + ' - ' + y1 + ']/[' + x2 +' - ' + x1 + ']] (nominal_angle)\n')
         self.write_blocknum();
         self.write( '#2 = [atan[' + ref_y + ']/[' + ref_x + ']] (reference angle)\n')
         self.write_blocknum();
         self.write( '#3 = [#1 - #2] (angle)\n' )
         self.write_blocknum();
-        self.write( '#4 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * COS[ #3 ]] - [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * SIN[ #3 ]]]\n' )
+        self.write( '#4 = [[[' + (self.fmt.string(0)) + ' - ' + (self.fmt.string(x_current)) + '] * COS[ #3 ]] - [[' + (self.fmt.string(0)) + ' - ' + (self.fmt.string(y_current)) + '] * SIN[ #3 ]]]\n' )
         self.write_blocknum();
-        self.write( '#5 = [[[' + (self.fmt % 0) + ' - ' + (self.fmt % x_current) + '] * SIN[ #3 ]] + [[' + (self.fmt % 0) + ' - ' + (self.fmt % y_current) + '] * COS[ #3 ]]]\n' )
+        self.write( '#5 = [[[' + (self.fmt.string(0)) + ' - ' + (self.fmt.string(x_current)) + '] * SIN[ #3 ]] + [[' + (self.fmt.string(0)) + ' - ' + (self.fmt.string(y_current)) + '] * COS[ #3 ]]]\n' )
 
         self.write_blocknum();
-        self.write( '#6 = [[' + (self.fmt % x_final) + ' * COS[ #3 ]] - [' + (self.fmt % y_final) + ' * SIN[ #3 ]]]\n' )
+        self.write( '#6 = [[' + (self.fmt.string(x_final)) + ' * COS[ #3 ]] - [' + (self.fmt.string(y_final)) + ' * SIN[ #3 ]]]\n' )
         self.write_blocknum();
-        self.write( '#7 = [[' + (self.fmt % y_final) + ' * SIN[ #3 ]] + [' + (self.fmt % y_final) + ' * COS[ #3 ]]]\n' )
+        self.write( '#7 = [[' + (self.fmt.string(y_final)) + ' * SIN[ #3 ]] + [' + (self.fmt.string(y_final)) + ' * COS[ #3 ]]]\n' )
 
         self.write_blocknum();
         self.write( self.RAPID() + ' X [ #4 + #6 ] Y [ #5 + #7 ]\n' )
 
     def BEST_POSSIBLE_SPEED(self, motion_blending_tolerance, naive_cam_tolerance): 
-	    statement = 'G64'
+        statement = 'G64'
 
-	    if (motion_blending_tolerance > 0):
-		    statement += ' P ' + str(motion_blending_tolerance)
+        if (motion_blending_tolerance > 0):
+            statement += ' P ' + str(motion_blending_tolerance)
 
-	    if (naive_cam_tolerance > 0):
-		    statement += ' Q ' + str(naive_cam_tolerance)
+        if (naive_cam_tolerance > 0):
+            statement += ' Q ' + str(naive_cam_tolerance)
 
-	    return(statement)
+        return(statement)
             
     def set_path_control_mode(self, mode, motion_blending_tolerance, naive_cam_tolerance ):
         self.write_blocknum()
