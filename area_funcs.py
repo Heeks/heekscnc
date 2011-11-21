@@ -14,9 +14,9 @@ def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, fin
     for vertex in curve.getVertices():
         if need_rapid and first:
             # rapid across
-            rapid(vertex.p.x, vertex.p.y)            
+            rapid(vertex.p.x, vertex.p.y)
             ##rapid down
-            rapid(z = current_start_depth + rapid_safety_space)           
+            rapid(z = current_start_depth + rapid_safety_space)
             #feed down
             feed(z = final_depth)
             first = False
@@ -27,28 +27,28 @@ def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, fin
                 arc_cw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
             else:
                 feed(vertex.p.x, vertex.p.y)
-        prev_p = vertex.p        
+        prev_p = vertex.p
     return prev_p
-        
+
 def area_distance(a, old_area):
     best_dist = None
-    
+
     for curve in a.getCurves():
         for vertex in curve.getVertices():
             c = old_area.NearestPoint(vertex.p)
             d = c.dist(vertex.p)
             if best_dist == None or d < best_dist:
                 best_dist = d
-    
+
     for curve in old_area.getCurves():
         for vertex in curve.getVertices():
             c = a.NearestPoint(vertex.p)
             d = c.dist(vertex.p)
             if best_dist == None or d < best_dist:
                 best_dist = d
-                
+
     return best_dist
-    
+
 def make_obround(p0, p1, radius):
     dir = p1 - p0
     d = dir.length()
@@ -67,7 +67,7 @@ def make_obround(p0, p1, radius):
     c.append(area.Vertex(1, vt0, p0))
     obround.append(c)
     return obround
-    
+
 def feed_possible(p0, p1):
     if p0 == p1:
         return True
@@ -95,7 +95,7 @@ def cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, c
             rapid(z = clearance_height)
         p = cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, depth)
         first = False
-        
+
     rapid(z = clearance_height)
 
 def cut_curvelist2(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss,start_point):
@@ -119,15 +119,15 @@ def cut_curvelist2(curve_list, rapid_safety_space, current_start_depth, depth, c
                 need_rapid = False
 
         cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, depth)
-        first = False #change to True if you want to rapid back to start side before zigging again with unidirectional set        
+        first = False #change to True if you want to rapid back to start side before zigging again with unidirectional set
     rapid(z = clearance_height)
-    
+
 def recur(arealist, a1, stepover, from_center):
     # this makes arealist by recursively offsetting a1 inwards
-    
+
     if a1.num_curves() == 0:
         return
-    
+
     if from_center:
         arealist.insert(0, a1)
     else:
@@ -135,19 +135,19 @@ def recur(arealist, a1, stepover, from_center):
 
     a_offset = area.Area(a1)
     a_offset.Offset(stepover)
-    
+
     # split curves into new areas
     if area.holes_linked():
         for curve in a_offset.getCurves():
             a2 = area.Area()
             a2.append(curve)
             recur(arealist, a2, stepover, from_center)
-    
+
     else:
         # split curves into new areas
         a_offset.Reorder()
         a2 = None
-       
+
         for curve in a_offset.getCurves():
             if curve.IsClockwise():
                 if a2 != None:
@@ -160,12 +160,12 @@ def recur(arealist, a1, stepover, from_center):
 
         if a2 != None:
             recur(arealist, a2, stepover, from_center)
-        
+
 def get_curve_list(arealist):
     curve_list = list()
     for a in arealist:
         for curve in a.getCurves():
-            curve_list.append(curve)       
+            curve_list.append(curve)
     return curve_list
 
 curve_list_for_zigs = []
@@ -198,13 +198,13 @@ def make_zig_curve(curve, y0, y, zig_unidirectional):
                  # use the furthest right point
                 if vertex.p.x > high_point.x:
                     high_point = vertex.p
-        
+
     zig = area.Curve()
-    
+
     high_point_found = False
     zig_started = False
     zag_found = False
-    
+
     for i in range(0, 2): # process the curve twice because we don't know where it will start
         prev_p = None
         for vertex in curve.getVertices():
@@ -226,9 +226,9 @@ def make_zig_curve(curve, y0, y, zig_unidirectional):
                 elif vertex.p.x == high_point.x and vertex.p.y == high_point.y:
                     high_point_found = True
             prev_p = vertex.p
-        
+
     if zig_started:
-        
+
         if zig_unidirectional == True:
             # remove the last bit of zig
             if math.fabs(zig.LastVertex().p.y - y) < 0.002 * one_over_units:
@@ -242,18 +242,18 @@ def make_zig_curve(curve, y0, y, zig_unidirectional):
                 zig = area.Curve()
                 for v in vertices:
                     zig.append(v)
-        
-        curve_list_for_zigs.append(zig)        
+
+        curve_list_for_zigs.append(zig)
 
 def make_zig(a, y0, y, zig_unidirectional):
     for curve in a.getCurves():
         make_zig_curve(curve, y0, y, zig_unidirectional)
-        
+
 reorder_zig_list_list = []
-        
+
 def add_reorder_zig(curve):
     global reorder_zig_list_list
-    
+
     # look in existing lists
     s = curve.FirstVertex().p
     for curve_list in reorder_zig_list_list:
@@ -262,7 +262,7 @@ def add_reorder_zig(curve):
         if math.fabs(s.x - e.x) < 0.002 * one_over_units and math.fabs(s.y - e.y) < 0.002 * one_over_units:
             curve_list.append(curve)
             return
-        
+
     # else add a new list
     curve_list = []
     curve_list.append(curve)
@@ -274,15 +274,15 @@ def reorder_zigs():
     reorder_zig_list_list = []
     for curve in curve_list_for_zigs:
         add_reorder_zig(curve)
-        
+
     curve_list_for_zigs = []
     for curve_list in reorder_zig_list_list:
         for curve in curve_list:
             curve_list_for_zigs.append(curve)
-            
+
 def rotated_point(p):
     return area.Point(p.x * cos_angle_for_zigs - p.y * sin_angle_for_zigs, p.x * sin_angle_for_zigs + p.y * cos_angle_for_zigs)
-    
+
 def unrotated_point(p):
     return area.Point(p.x * cos_minus_angle_for_zigs - p.y * sin_minus_angle_for_zigs, p.x * sin_minus_angle_for_zigs + p.y * cos_minus_angle_for_zigs)
 
@@ -308,7 +308,7 @@ def rotated_area(a):
 def zigzag(a, stepover, zig_unidirectional):
     if a.num_curves() == 0:
         return
-    
+
     global rightward_for_zigs
     global curve_list_for_zigs
     global sin_angle_for_zigs
@@ -316,14 +316,14 @@ def zigzag(a, stepover, zig_unidirectional):
     global sin_minus_angle_for_zigs
     global cos_minus_angle_for_zigs
     global one_over_units
-    
+
     one_over_units = 1 / area.get_units()
-    
+
     a = rotated_area(a)
-    
+
     b = area.Box()
     a.GetBox(b)
-    
+
     x0 = b.MinX() - 1.0
     x1 = b.MaxX() + 1.0
 
@@ -333,7 +333,7 @@ def zigzag(a, stepover, zig_unidirectional):
     null_point = area.Point(0, 0)
     rightward_for_zigs = True
     curve_list_for_zigs = []
-    
+
     for i in range(0, num_steps):
         y0 = y
         y = y + stepover
@@ -353,27 +353,35 @@ def zigzag(a, stepover, zig_unidirectional):
         make_zig(a2, y0, y, zig_unidirectional)
         if zig_unidirectional == False:
             rightward_for_zigs = (rightward_for_zigs == False)
-        
+
     reorder_zigs()
 
 def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None):
     global tool_radius_for_pocket
     global area_for_feed_possible
+
+    #if len(a.getCurves()) > 1:
+    #    for crv in a.getCurves():
+    #        ar = area.Area()
+    #        ar.append(crv)
+    #        pocket(ar, tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional)
+    #    return
+
     tool_radius_for_pocket = tool_radius
 
     if keep_tool_down_if_poss:
         area_for_feed_possible = area.Area(a)
         area_for_feed_possible.Offset(extra_offset - 0.01)
-    
+
     if rapid_safety_space > clearance_height:
        rapid_safety_space = clearance_height
 
     use_internal_function = (area.holes_linked() == False) # use internal function, if area module is the Clipper library
-    
+
     if use_internal_function:
         curve_list = a.MakePocketToolpath(tool_radius, extra_offset, stepover, from_center, use_zig_zag, zig_angle)
-        
-    else:    
+
+    else:
         global sin_angle_for_zigs
         global cos_angle_for_zigs
         global sin_minus_angle_for_zigs
@@ -383,15 +391,15 @@ def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_d
         cos_angle_for_zigs = math.cos(-radians_angle)
         sin_minus_angle_for_zigs = math.sin(radians_angle)
         cos_minus_angle_for_zigs = math.cos(radians_angle)
-        
+
         arealist = list()
 
         a_offset = area.Area(a)
         current_offset = tool_radius + extra_offset
         a_offset.Offset(current_offset)
-        
+
         do_recursive = True
-        
+
         if use_zig_zag:
             zigzag(a_offset, stepover, zig_unidirectional)
             curve_list = curve_list_for_zigs
@@ -408,29 +416,29 @@ def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_d
                     a_offset = area.Area(a)
                     a_offset.Offset(current_offset)
             curve_list = get_curve_list(arealist)
-            
+
     layer_count = int((start_depth - final_depth) / stepdown)
 
     if layer_count * stepdown + 0.00001 < start_depth - final_depth:
         layer_count += 1
-        
+
     current_start_depth = start_depth
 
     if start_point==None:
 
-        for i in range(1, layer_count+1): 
+        for i in range(1, layer_count+1):
             if i == layer_count:
                 depth = final_depth
             else:
-                depth = start_depth - i * stepdown 
+                depth = start_depth - i * stepdown
             cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
             current_start_depth = depth
 
     else:
-        for i in range(1, layer_count+1): 
+        for i in range(1, layer_count+1):
             if i == layer_count:
                 depth = final_depth
             else:
-                depth = start_depth - i * stepdown 
+                depth = start_depth - i * stepdown
             cut_curvelist2(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss, start_point)
             current_start_depth = depth

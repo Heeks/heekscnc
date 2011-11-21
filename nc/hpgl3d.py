@@ -37,7 +37,7 @@ class Creator(hpgl2d.Creator):
             machine_z = self.closest_int(z * self.units_to_mc_units)
         return machine_x, machine_y, machine_z
         
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
         # do a rapid move.
         # for now, do all rapid moves at V50 ( 50 mm/s )
         mx, my, mz = self.get_machine_xyz(x, y, z)
