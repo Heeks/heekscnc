@@ -357,6 +357,32 @@ const wxBitmap &CPocket::GetIcon()
 	return *icon;
 }
 
+void CPocket::WritePocketPython(Python &python)
+{
+
+	// start - assume we are at a suitable clearance height
+
+	// make a parameter of area_funcs.pocket() eventually
+	// 0..plunge, 1..ramp, 2..helical
+	python << _T("entry_style = ") <<  m_pocket_params.m_entry_move << _T("\n");
+
+	// Pocket the area
+	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
+	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
+	python << _T(", rapid_safety_space, start_depth, final_depth, ");
+	python << m_pocket_params.m_step_over / theApp.m_program->m_units;
+	python << _T(", step_down, clearance, ");
+	python << m_pocket_params.m_starting_place;
+	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
+	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
+	python << _T(", ") << m_pocket_params.m_zig_angle;
+	python << _T(",") << (m_pocket_params.m_zig_unidirectional ? _T("True") : _T("False"));
+	python << _T(")\n");
+
+	// rapid back up to clearance plane
+	python << _T("rapid(z = clearance)\n");
+}
+
 Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
@@ -375,21 +401,37 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 
 	python << CDepthOp::AppendTextToProgram(pMachineState);
 
-	python << _T("a = area.Area()\n");
-	python << _T("entry_moves = []\n");
-
-#ifdef OP_SKETCHES_AS_CHILDREN
-    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
-    {
-#else
+	// do areas and circles first, separately
+	int num_sketches = 0;
 	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
     {
 		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
-#endif
-		if (object->GetType() != SketchType)
+
+		switch(object->GetType())
 		{
-			continue;	// Skip private fixture objects.
+		case CircleType:
+		case AreaType:
+			{
+				heeksCAD->ObjectAreaString(object, python);
+				WritePocketPython(python);
+			}
+			break;
+		case SketchType:
+			num_sketches++;
+			break;
 		}
+	}
+
+	if(num_sketches > 0)
+	{
+	python << _T("a = area.Area()\n");
+	python << _T("entry_moves = []\n");
+
+	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
+    {
+		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
+
+		if(object->GetType() != SketchType)continue;
 
 		if(object == NULL) {
 			wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
@@ -397,35 +439,7 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 		}
 		int type = object->GetType();
 		double c[3] = {0, 0, 0};
-		double radius;
 
-		switch (type) {
-
-		case CircleType:
-			if (m_pocket_params.m_entry_move == CPocketParams::eHelical) {
-				GetCentrePoint(c);
-				radius = heeksCAD->CircleGetRadius(object);
-				python << _T("# entry_moves.append(circle(") << c[0]/theApp.m_program->m_units << _T(", ") << c[1]/theApp.m_program->m_units << _T(", ")<< c[2]/theApp.m_program->m_units << _T(", ") << radius/theApp.m_program->m_units ;
-				python << _T("))\n") ;
-			} else {
-				wxLogMessage(_T("circle found in pocket operation (id=%d) but entry move is not helical, id=%d"), GetID(),object->GetID());
-			}
-			continue;
-
-		case PointType:
-			if (m_pocket_params.m_entry_move == CPocketParams::eHelical) {
-				memset( c, 0, sizeof(c) );
-				heeksCAD->VertexGetPoint( object, c);
-				python << _T("# entry_moves.append(point(") << c[0]/theApp.m_program->m_units << _T(", ") << c[1]/theApp.m_program->m_units << _T("))\n");
-
-			} else {
-				wxLogMessage(_T("point found in pocket operation (id=%d) but entry move is not helical, id=%d"), GetID(), object->GetID());
-			}
-			continue;
-
-		default:
-			break;
-		}
 		if (object->GetNumChildren() == 0){
 			wxMessageBox(wxString::Format(_("Pocket operation - Sketch %d has no children"), object->GetID()));
 			continue;
@@ -477,32 +491,14 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 		{
 			delete re_ordered_sketch;
 		}
+
 	} // End for
 
 	// reorder the area, the outside curves must be made anti-clockwise and the insides clockwise
 	python << _T("a.Reorder()\n");
 
-	// start - assume we are at a suitable clearance height
-
-	// make a parameter of area_funcs.pocket() eventually
-	// 0..plunge, 1..ramp, 2..helical
-	python << _T("entry_style = ") <<  m_pocket_params.m_entry_move << _T("\n");
-
-	// Pocket the area
-	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
-	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
-	python << _T(", rapid_safety_space, start_depth, final_depth, ");
-	python << m_pocket_params.m_step_over / theApp.m_program->m_units;
-	python << _T(", step_down, clearance, ");
-	python << m_pocket_params.m_starting_place;
-	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
-	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
-	python << _T(", ") << m_pocket_params.m_zig_angle;
-	python << _T(",") << (m_pocket_params.m_zig_unidirectional ? _T("True") : _T("False"));
-	python << _T(")\n");
-
-	// rapid back up to clearance plane
-	python << _T("rapid(z = clearance)\n");
+	WritePocketPython(python);
+	}
 
 	return(python);
 

@@ -16,7 +16,7 @@ static bool GetSketches(std::list<int>& sketches )
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if(object->GetType() == SketchType)
+		if(object->GetIDGroupType() == SketchType)
 		{
 			sketches.push_back(object->m_id);
 		}
@@ -30,7 +30,7 @@ static bool GetSketches(std::list<int>& sketches )
 void ReselectSketches::Run()
 {
 	std::list<int> sketches;
-	heeksCAD->PickObjects(_("Select Sketches"), MARKING_FILTER_SKETCH);
+	heeksCAD->PickObjects(_("Select Sketches"), MARKING_FILTER_SKETCH | MARKING_FILTER_CIRCLE | MARKING_FILTER_AREA);
 	if(GetSketches( sketches ))
 	{
 		heeksCAD->CreateUndoPoint();
