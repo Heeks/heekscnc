@@ -89,6 +89,7 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
+	void WritePocketPython(Python &python);
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();

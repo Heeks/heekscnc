@@ -167,7 +167,7 @@ static bool GetSketches(std::list<int>& sketches, std::list<int> &tools )
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if(object->GetType() == SketchType)
+		if(object->GetIDGroupType() == SketchType)
 		{
 			sketches.push_back(object->m_id);
 		} // End if - then
@@ -580,7 +580,7 @@ static void NewAttachOpMenuCallback(wxCommandEvent &event)
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+		if(object->GetIDGroupType() == SolidType)solids.push_back(object->m_id);
 	}
 
 	// if no selected solids,
@@ -589,7 +589,7 @@ static void NewAttachOpMenuCallback(wxCommandEvent &event)
 		// use all the solids in the drawing
 		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
 		{
-			if(object->GetType() == SolidType || object->GetType() == StlSolidType)solids.push_back(object->m_id);
+			if(object->GetIDGroupType() == SolidType)solids.push_back(object->m_id);
 		}
 	}
 
