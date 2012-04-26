@@ -566,8 +566,11 @@ class Creator(nc.Creator):
                         else:
                             x1, y1 = self.quadrant_end(q, i, j, rad)
                             
-                    if ((math.fabs(x1 - self.x) > 0.000001) or (math.fabs(y1 - self.y) > 0.000001)) and ((self.fmt.string(x1) != self.fmt.string(self.x)) or (self.fmt.string(y1) != self.fmt.string(self.y))):
-                        self.arc(cw, x1, y1, z, i, j, k, r)
+                    if (self.fmt.string(x1) != self.fmt.string(self.x)) or (self.fmt.string(y1) != self.fmt.string(self.y)):
+                        if (math.fabs(x1 - self.x) > 0.01) or (math.fabs(y1 - self.y) > 0.01):
+                            self.arc(cw, x1, y1, z, i, j, k, r)
+                        else:
+                            self.feed(x1, y1, z)
                     if q == qe:
                         break
                     if cw:
