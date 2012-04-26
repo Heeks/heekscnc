@@ -3,7 +3,6 @@
 #
 # NC code creator for attaching Z coordinates to a surface
 #
-# Hirutso Enni, 2009-01-13
 
 import nc
 import ocl
