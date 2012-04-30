@@ -135,7 +135,9 @@ static void on_set_finish_step_down(double value, HeeksObj* object)
 
 void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list)
 {
-	{
+	CToolParams::eToolType tool_type = CTool::FindToolType(parent->m_tool_number);
+
+	if(CTool::IsMillingToolType(tool_type)){
 		std::list< wxString > choices;
 
 		SketchOrderType order = SketchOrderTypeUnknown;
@@ -189,7 +191,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		list->push_back(new PropertyChoice(_("tool on side"), choices, choice, parent, on_set_tool_on_side));
 	}
 
-	{
+	if(CTool::IsMillingToolType(tool_type)){
 		std::list< wxString > choices;
 		choices.push_back(_("Conventional"));
 		choices.push_back(_("Climb"));
@@ -234,19 +236,22 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
     list->push_back(new PropertyLength(_("lead out line length"), m_lead_out_line_len, parent, on_set_lead_out_line_len));
 
 	list->push_back(new PropertyLength(_("offset_extra"), m_offset_extra, parent, on_set_offset_extra));
-	list->push_back(new PropertyCheck(_("do finishing pass"), m_do_finishing_pass, parent, on_set_do_finishing_pass));
-	if(m_do_finishing_pass)
+	if(CTool::IsMillingToolType(tool_type))
 	{
-		list->push_back(new PropertyCheck(_("only finishing pass"), m_only_finishing_pass, parent, on_set_only_finishing_pass));
-		list->push_back(new PropertyLength(_("finishing feed rate"), m_finishing_h_feed_rate, parent, on_set_finishing_h_feed_rate));
-
+		list->push_back(new PropertyCheck(_("do finishing pass"), m_do_finishing_pass, parent, on_set_do_finishing_pass));
+		if(m_do_finishing_pass)
 		{
-			std::list< wxString > choices;
-			choices.push_back(_("Conventional"));
-			choices.push_back(_("Climb"));
-			list->push_back(new PropertyChoice(_("finish cut mode"), choices, m_finishing_cut_mode, parent, on_set_finish_cut_mode));
+			list->push_back(new PropertyCheck(_("only finishing pass"), m_only_finishing_pass, parent, on_set_only_finishing_pass));
+			list->push_back(new PropertyLength(_("finishing feed rate"), m_finishing_h_feed_rate, parent, on_set_finishing_h_feed_rate));
+
+			{
+				std::list< wxString > choices;
+				choices.push_back(_("Conventional"));
+				choices.push_back(_("Climb"));
+				list->push_back(new PropertyChoice(_("finish cut mode"), choices, m_finishing_cut_mode, parent, on_set_finish_cut_mode));
+			}
+			list->push_back(new PropertyLength(_("finishing step down"), m_finishing_step_down, parent, on_set_finish_step_down));
 		}
-		list->push_back(new PropertyLength(_("finishing step down"), m_finishing_step_down, parent, on_set_finish_step_down));
 	}
 }
 
