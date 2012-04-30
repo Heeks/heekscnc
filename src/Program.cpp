@@ -832,6 +832,11 @@ Python CProgram::RewritePythonProgram()
 		python << _T("\n");
 	}
 
+	if(CTool::FindFirstByType(CToolParams::eDragKnife) != -1)
+	{
+		python << _T("import nc.drag_knife\n");
+		python << _T("\n");
+	}
 
 	// machine general stuff
 	python << _T("from nc.nc import *\n");

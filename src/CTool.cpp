@@ -57,6 +57,7 @@
 
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeRevolution.hxx>
 #include <BRepPrimAPI_MakeCone.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
@@ -276,6 +277,8 @@ void CToolParams::set_initial_values()
 	// The following are ONLY for tapping tools
 	config.Read(_T("m_direction"), &m_direction, 0);  // default to right-hand tap
 	config.Read(_T("m_pitch"), &m_pitch, 1.0);        // mm/rev, this would be for an M6 tap
+
+	config.Read(_T("drag_distance"), &m_drag_knife_distance, 1.0);
 	}
 
 void CToolParams::write_values_to_config()
@@ -322,6 +325,8 @@ void CToolParams::write_values_to_config()
 	// The following are ONLY for tapping tools
 	config.Write(_T("m_direction"), m_direction);
 	config.Write(_T("m_pitch"), m_pitch);
+
+	config.Write(_T("drag_distance"), m_drag_knife_distance);
 }
 
 void CTool::SetDiameter( const double diameter )
@@ -372,6 +377,13 @@ static void on_set_direction(int value, HeeksObj* object)
 static void on_set_pitch(double value, HeeksObj* object)
 {
 	((CTool*)object)->m_params.m_pitch = value;
+	object->KillGLLists();
+	heeksCAD->Repaint();
+}
+
+static void on_set_drag_knife_distance(double value, HeeksObj* object)
+{
+	((CTool*)object)->m_params.m_drag_knife_distance = value;
 	object->KillGLLists();
 	heeksCAD->Repaint();
 }
@@ -461,6 +473,7 @@ static void on_set_type(int zero_based_choice, HeeksObj* object)
 
 	((CTool*)object)->m_params.m_type = tool_types_for_on_set_type[zero_based_choice].first;
 	((CTool*)object)->ResetParametersToReasonableValues();
+	((CTool*)object)->ResetTitle();
 	heeksCAD->RefreshProperties();
 	object->KillGLLists();
 	heeksCAD->Repaint();
@@ -518,6 +531,7 @@ double CToolParams::ReasonableGradient( const eToolType type ) const
 				return(0.0);
 
 		case CToolParams::eEngravingTool:
+		case CToolParams::eDragKnife:
 				return(0.0);
 
         default:
@@ -542,7 +556,6 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_flat_radius = 0;
 				m_params.m_cutting_edge_angle = 59;
 				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				ResetTitle();
 				break;
 
 		case CToolParams::eCentreDrill:
@@ -550,7 +563,6 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_flat_radius = 0;
 				m_params.m_cutting_edge_angle = 59;
 				m_params.m_cutting_edge_height = m_params.m_diameter * 1.0;
-				ResetTitle();
 				break;
 
 		case CToolParams::eEndmill:
@@ -558,7 +570,6 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_flat_radius = m_params.m_diameter / 2;
 				m_params.m_cutting_edge_angle = 0;
 				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				ResetTitle();
 				break;
 
 		case CToolParams::eSlotCutter:
@@ -566,7 +577,6 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_flat_radius = m_params.m_diameter / 2;
 				m_params.m_cutting_edge_angle = 0;
 				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				ResetTitle();
 				break;
 
 		case CToolParams::eBallEndMill:
@@ -574,24 +584,20 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_flat_radius = 0;
 				m_params.m_cutting_edge_angle = 0;
 				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				ResetTitle();
 				break;
 
 		case CToolParams::eTouchProbe:
 				m_params.m_corner_radius = (m_params.m_diameter / 2);
 				m_params.m_flat_radius = 0;
-				ResetTitle();
 				break;
 
 		case CToolParams::eExtrusion:
 				m_params.m_corner_radius = (m_params.m_diameter / 2);
 				m_params.m_flat_radius = 0;
-				ResetTitle();
 				break;
 
 		case CToolParams::eToolLengthSwitch:
 				m_params.m_corner_radius = (m_params.m_diameter / 2);
-				ResetTitle();
 				break;
 
 		case CToolParams::eChamfer:
@@ -601,12 +607,10 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_cutting_edge_angle = (m_params.m_type == CToolParams::eChamfer) ? 45.0 : 30.0;
 				height = (m_params.m_diameter / 2.0) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
 				m_params.m_cutting_edge_height = height;
-				ResetTitle();
 				break;
 
 		case CToolParams::eTurningTool:
 				// No special constraints for this.
-				ResetTitle();
 				break;
 
 		case CToolParams::eTapTool:
@@ -616,7 +620,9 @@ void CTool::ResetParametersToReasonableValues()
 				m_params.m_direction = 0;
 				m_params.m_pitch = 1.0;
 				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				ResetTitle();
+				break;
+
+		case CToolParams::eDragKnife:
 				break;
 
 		default:
@@ -874,7 +880,7 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 		list->push_back(new PropertyChoice(_("Type"), choices, choice, parent, on_set_type));
 	}
 
-	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion))
+	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion) && (m_type != eDragKnife))
 	{
 		list->push_back(new PropertyLength(_("max_advance_per_revolution"), m_max_advance_per_revolution, parent, on_set_max_advance_per_revolution));
 	} // End if - then
@@ -904,6 +910,9 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 			list->push_back(new PropertyChoice(_("orientation"), choices, choice, parent, on_set_orientation));
 		}
 	} // End if - then
+	else if (m_type == eDragKnife)
+	{
+	}
 	else
 	{
 		// We're using milling/drilling tools
@@ -974,6 +983,11 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 			list->push_back(new PropertyChoice(_("Select TAP from standard sizes"), choices, choice, parent, on_select_tap_from_standard_sizes));
 		}
 	}
+	if (m_type == eDragKnife)
+	{
+		// The following are ONLY for drag knife tools
+		list->push_back(new PropertyLength(_("tip distance"), m_drag_knife_distance, parent, on_set_drag_knife_distance));
+	}
 
 }
 
@@ -1017,6 +1031,7 @@ void CToolParams::WriteXMLAttributes(TiXmlNode *root)
 
 	element->SetDoubleAttribute( "pitch", m_pitch);
 	element->SetAttribute( "direction", m_direction);
+	element->SetAttribute( "drag_distance", m_drag_knife_distance);
 }
 
 void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -1068,6 +1083,7 @@ void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	}
 	if (pElem->Attribute("direction")) pElem->Attribute("direction", &m_direction);
 	if (pElem->Attribute("pitch")) pElem->Attribute("pitch", &m_pitch);
+	if (pElem->Attribute("drag_distance")) pElem->Attribute("pitch", &m_drag_knife_distance);
 }
 
 CTool::~CTool()
@@ -1276,6 +1292,12 @@ const wxBitmap &CTool::GetIcon()
 				if(engraverIcon == NULL)engraverIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/engraver.png")));
 				return *engraverIcon;
 			}
+		case CToolParams::eDragKnife:
+			{
+				static wxBitmap* knifeIcon = NULL;
+				if(knifeIcon == NULL)knifeIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/knife.png")));
+				return *knifeIcon;
+			}
 		default:
 			{
 				static wxBitmap* toolIcon = NULL;
@@ -1381,6 +1403,28 @@ int CTool::FindTool( const int tool_number )
 
 } // End FindTool() method
 
+//static
+CToolParams::eToolType CTool::FindToolType( const int tool_number )
+{
+	CTool* pTool = Find(tool_number);
+	if(pTool)return pTool->m_params.m_type;
+	return CToolParams::eUndefinedToolType;
+}
+
+// static
+bool CTool::IsMillingToolType( CToolParams::eToolType type )
+{
+	switch(type)
+	{
+	case CToolParams::eEndmill:
+	case CToolParams::eSlotCutter:
+	case CToolParams::eBallEndMill:
+	case CToolParams::eEngravingTool:
+		return true;
+	default:
+		return false;
+	}
+}
 
 std::vector< std::pair< int, wxString > > CTool::FindAllTools()
 {
@@ -1534,8 +1578,6 @@ wxString CTool::GenerateMeaningfulName() const
 		} // End switch
 	} // End if - then
 
-
-
 	switch (m_params.m_type)
 	{
 		case CToolParams::eDrill:	l_ossName << (_("Drill Bit"));
@@ -1623,6 +1665,12 @@ wxString CTool::GenerateMeaningfulName() const
                 case CToolParams::eEngravingTool:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
 							l_ossName << m_params.m_cutting_edge_angle << (_T(" degreee "));
                 					l_ossName << (_("Engraving Bit"));
+							break;
+
+
+                case CToolParams::eDragKnife:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
+							l_ossName << m_params.m_drag_knife_distance << (_T(" "));
+                					l_ossName << (_("Drag Knife"));
 							break;
 
 
@@ -1979,6 +2027,12 @@ TopoDS_Shape CTool::GetShape() const
 
 			return(tool_shape);
 		}
+
+		case CToolParams::eDragKnife:
+			{
+				BRepPrimAPI_MakeBox knife(gp_Ax2(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)), this->m_params.m_drag_knife_distance, 0.1, 10.0);
+				return knife;
+			}
 
 		case CToolParams::eEndmill:
 		case CToolParams::eSlotCutter:
@@ -2429,6 +2483,7 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
     case CToolParams::eExtrusion:
     case CToolParams::eTapTool:
     case CToolParams::eEngravingTool:
+    case CToolParams::eDragKnife:
     case CToolParams::eUndefinedToolType:
         return(python); // Avoid the compiler warnings.
 	} // End switch

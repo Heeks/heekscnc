@@ -101,5 +101,6 @@ private:
 	std::set<Instance> m_already_processed;
 #endif
     CNCPoint      m_location;
+	bool m_drag_knife_on;
 
 }; // End CMachineState class definition

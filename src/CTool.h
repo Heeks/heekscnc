@@ -34,6 +34,7 @@ public:
 		eExtrusion,
 		eTapTool,
 		eEngravingTool,
+		eDragKnife,
 		eUndefinedToolType
 	} eToolType;
 
@@ -62,6 +63,7 @@ public:
 		types_list.push_back( ToolTypeDescription_t( eTapTool, wxString(_("Tapping Tool")) ));
 #endif
 		types_list.push_back( ToolTypeDescription_t( eEngravingTool, wxString(_("Engraving Tool")) ));
+		types_list.push_back( ToolTypeDescription_t( eDragKnife, wxString(_("Drag Knife")) ));
 		return(types_list);
 	} // End GetToolTypesList() method
 
@@ -209,7 +211,10 @@ public:
 
 	// properties for tapping tools
 	int m_direction;    // 0.. right hand tapping, 1..left hand tapping
-        double m_pitch;     // in units/rev
+	double m_pitch;     // in units/rev
+
+	// properties for drag knife
+	double m_drag_knife_distance; // distance that the point is behind the rotation point
 
 	void set_initial_values();
 	void write_values_to_config();
@@ -287,6 +292,8 @@ public:
 
 	static CTool *Find( const int tool_number );
 	static int FindTool( const int tool_number );
+	static CToolParams::eToolType FindToolType( const int tool_number );
+	static bool IsMillingToolType( CToolParams::eToolType type );
 	static ToolNumber_t FindFirstByType( const CToolParams::eToolType type );
 	static std::vector< std::pair< int, wxString > > FindAllTools();
 	wxString GenerateMeaningfulName() const;
