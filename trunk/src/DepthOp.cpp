@@ -104,12 +104,14 @@ static void on_set_abs_mode(int value, HeeksObj* object) {
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
+#ifndef STABLE_OPS_ONLY
 	{
 		std::list< wxString > choices;
 		choices.push_back(_("Absolute"));
 		choices.push_back(_("Incremental"));
 		list->push_back(new PropertyChoice(_("ABS/INCR mode"), choices, m_abs_mode, parent, on_set_abs_mode));
 	}
+#endif
 
 	switch(theApp.m_program->m_clearance_source)
 	{
@@ -126,18 +128,13 @@ void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list
 		list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
 	} // End switch
 
-	list->push_back(new PropertyLength(_("rapid safety space"), m_rapid_safety_space, parent, on_set_rapid_safety_space));
-
-	//My initial thought was that extrusion operatons would always start at z=0 and end at z=top of object.  I'm now thinking it might be desireable to preserve this as an option.
-	//It might be good to run an operation that prints the bottom half of the object, pauses to allow insertion of something.  Then another operation could print the top half.
-
-	list->push_back(new PropertyLength(_("start depth"), m_start_depth, parent, on_set_start_depth));
-	list->push_back(new PropertyLength(_("final depth"), m_final_depth, parent, on_set_final_depth));
-
-   //Step down doesn't make much sense for extrusion.  The amount the z axis steps up or down is equal to the layer thickness of the slice which
-   //is determined by the thickness of an extruded filament.  Step up is very important since it is directly related to the resolution of the final
-   //produce.
-   	list->push_back(new PropertyLength(_("step down"), m_step_down, parent, on_set_step_down));
+	if(CTool::IsMillingToolType(CTool::FindToolType(parent->m_tool_number)))
+	{
+		list->push_back(new PropertyLength(_("rapid safety space"), m_rapid_safety_space, parent, on_set_rapid_safety_space));
+		list->push_back(new PropertyLength(_("start depth"), m_start_depth, parent, on_set_start_depth));
+		list->push_back(new PropertyLength(_("final depth"), m_final_depth, parent, on_set_final_depth));
+		list->push_back(new PropertyLength(_("step down"), m_step_down, parent, on_set_step_down));
+	}
 }
 
 void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)

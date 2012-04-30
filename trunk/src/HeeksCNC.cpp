@@ -1143,6 +1143,11 @@ static void NewExtrusionMenuCallback(wxCommandEvent &event)
 }
 #endif
 
+static void NewDragKnifeMenuCallback(wxCommandEvent &event)
+{
+	AddNewTool(CToolParams::eDragKnife);
+}
+
 static void MakeScriptMenuCallback(wxCommandEvent &event)
 {
 	// create the Python program
@@ -1318,6 +1323,7 @@ static CCallbackTool new_extrusion(_("New Extrusion..."), _T("extrusion"), NewEx
 static CCallbackTool new_tool_length_switch(_("New Tool Length Switch..."), _T("probe"), NewToolLengthSwitchMenuCallback);
 static CCallbackTool new_tap_tool(_("New Tap Tool..."), _T("tap"), NewTapToolMenuCallback);
 static CCallbackTool new_engraver_tool(_("New Engraver Tool..."), _T("engraver"), NewEngraverToolMenuCallback);
+static CCallbackTool new_drag_knife(_("New Drag Knife..."), _T("knife"), NewDragKnifeMenuCallback);
 
 void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 {
@@ -1338,6 +1344,7 @@ void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_tool_length_switch);
 	t_list->push_back(&new_tap_tool);
 	t_list->push_back(&new_engraver_tool);
+	t_list->push_back(&new_drag_knife);
 }
 
 static void AddToolBars()
