@@ -131,11 +131,11 @@ public:
 
 class CNCCodeBlock:public HeeksObj
 {
+	bool m_formatted;
 public:
 	std::list<ColouredText> m_text;
 	std::list<ColouredPath> m_line_strips;
 	long m_from_pos, m_to_pos; // position of block in text ctrl
-	bool m_formatted;
 	static double multiplier;
 
 	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1), m_formatted(false) {}
@@ -151,7 +151,7 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AppendText(wxString& str);
-	void FormatText(wxTextCtrl *textCtrl);
+	void FormatText(wxTextCtrl *textCtrl, bool highlighted, bool force_format);
 };
 
 class CNCCode:public HeeksObj
@@ -162,6 +162,7 @@ private:
 	static std::map<std::string,ColorEnum> m_colors_s_i;
 	static std::map<ColorEnum,std::string> m_colors_i_s;
 	static std::vector<HeeksColor> m_colors;
+	CNCCodeBlock* m_highlighted_block;
 
 public:
 	static void ClearColors(void);
@@ -174,7 +175,6 @@ public:
 	std::list<CNCCodeBlock*> m_blocks;
 	int m_gl_list;
 	CBox m_box;
-	CNCCodeBlock* m_highlighted_block;
 	bool m_user_edited; // set, if the user has edited the nc code
 	static PathObject* prev_po;
 	static int s_arc_interpolation_count;	// How many lines to represent an arc for the glCommands() method?
@@ -212,6 +212,7 @@ public:
 	void SetTextCtrl(wxTextCtrl *textCtrl);
 	void FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1);
 	void HighlightBlock(long pos);
+	void SetHighlightedBlock(CNCCodeBlock* block);
 
 	std::list< std::pair<PathObject *, CTool *> > GetPaths() const;
 };

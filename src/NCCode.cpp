@@ -535,9 +535,9 @@ void CNCCodeBlock::AppendText(wxString& str)
 	str.append(_T("\n"));
 }
 
-void CNCCodeBlock::FormatText(wxTextCtrl *textCtrl)
+void CNCCodeBlock::FormatText(wxTextCtrl *textCtrl, bool highlighted, bool force_format)
 {
-	if (m_formatted) return;
+	if (m_formatted && !force_format) return;
 	int i = m_from_pos;
 	for(std::list<ColouredText>::iterator It = m_text.begin(); It != m_text.end(); It++)
 	{
@@ -549,6 +549,8 @@ void CNCCodeBlock::FormatText(wxTextCtrl *textCtrl)
 		wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, _T("Lucida Console"), wxFONTENCODING_SYSTEM);
 		wxTextAttr ta(c);
 		ta.SetFont(font);
+		if(highlighted)ta.SetBackgroundColour(wxColour(218, 242, 142));
+		else ta.SetBackgroundColour(wxColour(255, 255, 255));
 		textCtrl->SetStyle(i, i+len, ta);
 		i += len;
 	}
@@ -968,7 +970,7 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 				HeeksObj* object = sub_marked_object->m_map.begin()->first;
 				if(object && object->GetType() == NCCodeBlockType)
 				{
-					m_highlighted_block = (CNCCodeBlock*)object;
+					SetHighlightedBlock((CNCCodeBlock*)object);
 					int from_pos = m_highlighted_block->m_from_pos;
 					int to_pos = m_highlighted_block->m_to_pos;
 					DestroyGLLists();
@@ -1059,21 +1061,21 @@ void CNCCode::FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1)
 	{
 		CNCCodeBlock* block = *It;
 		if (i0 <= block->m_from_pos && block->m_from_pos <= i1)
-			block->FormatText(textCtrl);
+			block->FormatText(textCtrl, block == m_highlighted_block, false);
 	}
 	textCtrl->Thaw();
 }
 
 void CNCCode::HighlightBlock(long pos)
 {
-	m_highlighted_block = NULL;
+	SetHighlightedBlock(NULL);
 
 	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
 		CNCCodeBlock* block = *It;
 		if(pos < block->m_to_pos)
 		{
-			m_highlighted_block = block;
+			SetHighlightedBlock(block);
 			break;
 		}
 	}
@@ -1179,5 +1181,9 @@ std::list< std::pair<PathObject *, CTool *> > CNCCode::GetPaths() const
 	return(paths);
 } // End GetPaths() method
 
-
-
+void CNCCode::SetHighlightedBlock(CNCCodeBlock* block)
+{
+	if(m_highlighted_block)m_highlighted_block->FormatText(theApp.m_output_canvas->m_textCtrl, false, true);
+	m_highlighted_block = block;
+	if(m_highlighted_block)m_highlighted_block->FormatText(theApp.m_output_canvas->m_textCtrl, true, true);
+}
