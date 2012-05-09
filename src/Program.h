@@ -141,6 +141,8 @@ public:
 	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
 	bool AutoExpand(){return true;}
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof){}
+	bool CanBeDragged(){return false;}
 
 	Python RewritePythonProgram();
 	ProgramUserType GetUserType();
