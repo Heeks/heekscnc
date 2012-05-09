@@ -475,15 +475,11 @@ void CProgram::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_
 {
 	if(marked_object->m_map.size() > 0)
 	{
-		MarkedObject* sub_marked_object = marked_object->m_map.begin()->second;
-		if(sub_marked_object)
-		{
-			HeeksObj* object = sub_marked_object->m_map.begin()->first;
+			HeeksObj* object = marked_object->m_map.begin()->first;
 			if(object && object->GetType() == NCCodeType)
 			{
-				((CNCCode*)object)->SetClickMarkPoint(sub_marked_object, ray_start, ray_direction);
+				((CNCCode*)object)->SetClickMarkPoint(marked_object, ray_start, ray_direction);
 			}
-		}
 	}
 }
 
