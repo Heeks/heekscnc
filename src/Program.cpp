@@ -260,7 +260,7 @@ static void on_set_output_file(const wxChar* value, HeeksObj* object)
 
 static void on_set_units(int value, HeeksObj* object)
 {
-	((CProgram*)object)->ChangeUnits((value == 0) ? 1.0:25.4);
+	((CProgram*)object)->m_units = ((value == 0) ? 1.0:25.4);
 
 	CNCConfig config(CProgram::ConfigScope());
 	config.Write(_T("ProgramUnits"), ((CProgram*)object)->m_units);
@@ -632,7 +632,7 @@ Python CProgram::RewritePythonProgram()
 	}
 
 	bool kurve_funcs_needed = false;
-	bool area_module_needed = false;
+	bool area_module_needed = true;  // area module could be used anywhere
 	bool area_funcs_needed = false;
 	bool ocl_module_needed = false;
 	bool ocl_funcs_needed = false;
@@ -660,14 +660,12 @@ Python CProgram::RewritePythonProgram()
 			switch(object->GetType())
 			{
 			case ProfileType:
-				area_module_needed = true;
 				kurve_funcs_needed = true;
 				break;
 
 			case PocketType:
 			case RaftType:
 			case InlayType:
-				area_module_needed = true;
 				area_funcs_needed = true;
 				break;
 
@@ -686,7 +684,6 @@ Python CProgram::RewritePythonProgram()
 				break;
 
 			case TurnRoughType:
-				area_module_needed = true;
 				turning_module_needed = true;
 			}
 		}
@@ -1209,12 +1206,6 @@ void CProgram::AddMissingChildren()
 	if(m_nc_code == NULL){m_nc_code = new CNCCode; Add( m_nc_code, NULL );}
 }
 
-void CProgram::ChangeUnits( const double units )
-{
-    m_units = units;
-    Tools()->OnChangeUnits(units);
-    Operations()->OnChangeUnits(units);
-}
 bool CProgram::operator==( const CProgram & rhs ) const
 {
 	if (m_raw_material != rhs.m_raw_material) return(false);

@@ -90,25 +90,31 @@ HeeksObj* CTools::ReadFromXMLElement(TiXmlElement* pElem)
 }
 
 class ExportTools: public Tool{
+	bool m_for_default;
+
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Export");}
+	const wxChar* GetTitle(){return m_for_default ? _("Save As Default"):_("Export");}
 	void Run()
 	{
 		wxStandardPaths standard_paths;
 		if (previous_path.Length() == 0) previous_path = _T("default.tooltable");
 
-		// Prompt the user to select a file to import.
-		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to export to"),
-		standard_paths.GetUserConfigDir().c_str(), previous_path.c_str(),
+		if(!m_for_default)
+		{
+			// Prompt the user to select a file to import.
+			wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to export to"),
+				standard_paths.GetUserConfigDir().c_str(), previous_path.c_str(),
 				wxString(_("Known Files")) + _T(" |*.heeks;*.HEEKS;")
-					+ _T("*.tool;*.TOOL;*.Tool;")
-					+ _T("*.tools;*.TOOLS;*.Tools;")
-					+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
-					wxSAVE | wxOVERWRITE_PROMPT );
+				+ _T("*.tool;*.TOOL;*.Tool;")
+				+ _T("*.tools;*.TOOLS;*.Tools;")
+				+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
+				wxSAVE | wxOVERWRITE_PROMPT );
 
-		fd.SetFilterIndex(1);
-		if (fd.ShowModal() == wxID_CANCEL) return;
-		previous_path = fd.GetPath().c_str();
+			fd.SetFilterIndex(1);
+			if (fd.ShowModal() == wxID_CANCEL) return;
+			previous_path = fd.GetPath().c_str();
+		}
+
 		std::list<HeeksObj *> tools;
 		for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild();
 			tool != NULL;
@@ -121,9 +127,397 @@ class ExportTools: public Tool{
 	}
 	wxString BitmapPath(){ return _T("export");}
 	wxString previous_path;
+
+public:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	ExportTools(bool for_default = false)
+	{
+		m_for_default = for_default;
+	}
 };
 
 static ExportTools export_tools;
+static ExportTools save_default_tools(true);
 
 void ImportToolsFile( const wxChar *file_path )
 {
@@ -180,6 +574,7 @@ static ImportTools import_tools;
 
 void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
+	t_list->push_back(&save_default_tools);
 	t_list->push_back(&import_tools);
 	t_list->push_back(&export_tools);
 
@@ -187,24 +582,6 @@ void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 	ObjList::GetTools(t_list, p);
 }
-
-
-void CTools::OnChangeUnits(const double units)
-{
-    std::list<HeeksObj *> tools;
-    for (HeeksObj *tool = theApp.m_program->Tools()->GetFirstChild();
-        tool != NULL;
-        tool = theApp.m_program->Tools()->GetNextChild() )
-    {
-        tools.push_back( tool );
-    } // End for
-
-    for (std::list<HeeksObj *>::iterator l_itObject = tools.begin(); l_itObject != tools.end(); l_itObject++)
-    {
-        ((CTool *) *l_itObject)->ResetTitle();
-    } // End for
-}
-
 
 static void on_set_title_format(int value, HeeksObj* object)
 {

@@ -1,4 +1,6 @@
+import nc
 
+units = 1.0
 
 class Redirector(nc.Creator):
 
@@ -6,6 +8,10 @@ class Redirector(nc.Creator):
         nc.Creator.__init__(self)
 
         self.original = original
+        self.x = original.x * units
+        self.y = original.y * units
+        self.z = original.z * units
+        self.imperial = False
 
     ############################################################################
     ##  Programs
@@ -147,6 +153,9 @@ class Redirector(nc.Creator):
     def cut_path(self):
         pass
     
+    def z2(self, z):
+        return z
+    
     def feed(self, x=None, y=None, z=None):
         px = self.x
         py = self.y
@@ -163,10 +172,6 @@ class Redirector(nc.Creator):
             self.cut_path()
             self.original.feed(self.x/units, self.y/units, self.z2(self.z)/units)
             return
-            
-        # add a line to the path
-        if self.path == None: self.path = ocl.Path()
-        self.path.append(ocl.Line(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z)))
         
     def arc(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None, ccw = True):
         if self.x == None or self.y == None or self.z == None:
@@ -177,10 +182,6 @@ class Redirector(nc.Creator):
         if x != None: self.x = x * units
         if y != None: self.y = y * units
         if z != None: self.z = z * units
-        
-        # add an arc to the path
-        if self.path == None: self.path = ocl.Path()
-        self.path.append(ocl.Arc(ocl.Point(px, py, pz), ocl.Point(self.x, self.y, self.z), ocl.Point(i, j, pz), ccw))
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         self.arc(x, y, z, i, j, k, r, False)
