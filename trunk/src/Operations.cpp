@@ -132,28 +132,6 @@ void COperations::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	ObjList::GetTools(t_list, p);
 }
 
-void COperations::OnChangeUnits(const double units)
-{
-    for(HeeksObj* object = GetFirstChild(); object != NULL; object = GetNextChild())
-    {
-        switch (((COp *)object)->m_operation_type)
-        {
-           case ProbeCentreType:
-                ((CProbe_Centre *)object)->OnChangeUnits(units);
-                break;
-
-           case ProbeEdgeType:
-                ((CProbe_Grid *)object)->OnChangeUnits(units);
-                break;
-
-           case ProbeGridType:
-                ((CProbe_Grid *)object)->OnChangeUnits(units);
-                break;
-        }
-    }
-    heeksCAD->Changed();
-}
-
 //static
 bool COperations::IsAnOperation(int object_type)
 {

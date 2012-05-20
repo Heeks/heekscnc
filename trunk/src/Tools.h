@@ -45,7 +45,6 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
-	void OnChangeUnits(const double units);
 	void GetProperties(std::list<Property *> *list);
 
 

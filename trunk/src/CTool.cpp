@@ -1131,7 +1131,7 @@ Python CTool::AppendTextToProgram()
 
 	if (m_params.m_diameter > 0)
 	{
-		python << _T("radius=") << m_params.m_diameter / 2 /PROGRAM->m_units << _T(", ");
+		python << _T("radius=") << m_params.m_diameter / 2 /heeksCAD->GetViewUnits() << _T(", ");
 	} // End if - then
 	else
 	{
@@ -1140,7 +1140,7 @@ Python CTool::AppendTextToProgram()
 
 	if (m_params.m_tool_length_offset > 0)
 	{
-		python << _T("length=") << m_params.m_tool_length_offset /PROGRAM->m_units << _T(", ");
+		python << _T("length=") << m_params.m_tool_length_offset /heeksCAD->GetViewUnits() << _T(", ");
 	} // End if - then
 	else
 	{
@@ -1504,7 +1504,7 @@ std::vector< std::pair< int, wxString > > CTool::FindAllTools()
  * idea is to produce a m_title value that is representative of the tool.  This will
  * make selection in the program list easier.
  */
-wxString CTool::GenerateMeaningfulName() const
+wxString CTool::GetMeaningfulName(double units) const
 {
 #ifdef UNICODE
 	std::wostringstream l_ossName;
@@ -1516,16 +1516,16 @@ wxString CTool::GenerateMeaningfulName() const
 		(m_params.m_type != CToolParams::eTouchProbe) &&
 		(m_params.m_type != CToolParams::eToolLengthSwitch))
 	{
-		if (PROGRAM->m_units == 1)
+		if (units == 1.0)
 		{
 			// We're using metric.  Leave the diameter as a floating point number.  It just looks more natural.
-			l_ossName << m_params.m_diameter / PROGRAM->m_units << " mm ";
+			l_ossName << m_params.m_diameter / units << " mm ";
 		} // End if - then
 		else
 		{
 			// We're using inches.  Find a fractional representation if one matches.
-			wxString fraction = FractionalRepresentation(m_params.m_diameter / PROGRAM->m_units);
-			wxString guage = GuageNumberRepresentation( m_params.m_diameter / PROGRAM->m_units, PROGRAM->m_units );
+			wxString fraction = FractionalRepresentation(m_params.m_diameter / units);
+			wxString guage = GuageNumberRepresentation( m_params.m_diameter / units, units );
 
 			if (fraction.Len() > 0)
 			{
@@ -1541,13 +1541,13 @@ wxString CTool::GenerateMeaningfulName() const
                     {
                         if (TOOLS->m_title_format == CTools::eIncludeGuageAndSize)
                         {
-                            l_ossName << "(" << m_params.m_diameter / PROGRAM->m_units << " inch) ";
+                            l_ossName << "(" << m_params.m_diameter / units << " inch) ";
                         }
                     }
 			    }
 			    else
 			    {
-			        l_ossName << m_params.m_diameter / PROGRAM->m_units << " inch ";
+			        l_ossName << m_params.m_diameter / units << " inch ";
 			    }
 			}
 		} // End if - else
@@ -1678,7 +1678,7 @@ wxString CTool::GenerateMeaningfulName() const
 	} // End switch
 
 	return( l_ossName.str().c_str() );
-} // End GenerateMeaningfulName() method
+} // End GetMeaningfulName() method
 
 
 /**
@@ -1693,7 +1693,7 @@ wxString CTool::ResetTitle()
 	if (m_params.m_automatically_generate_title)
 	{
 		// It has the default title.  Give it a name that makes sense.
-		m_title = GenerateMeaningfulName();
+		m_title = GetMeaningfulName(heeksCAD->GetViewUnits());
 		heeksCAD->Changed();
 
 #ifdef UNICODE
@@ -2184,7 +2184,7 @@ TopoDS_Face CTool::GetSideProfile() const
 	use this method to make all these adjustments based on the tool's
 	geometry and return a reasonable value.
 
-	If express_in_drawing_units is true then we need to divide by the drawing
+	If express_in_program_units is true then we need to divide by the program
 	units value.  We use metric (mm) internally and convert to inches only
 	if we need to and only as the last step in the process.  By default, return
 	the value in internal (metric) units.
@@ -2193,7 +2193,7 @@ TopoDS_Face CTool::GetSideProfile() const
 	for the corresponding depth (from the bottom-most tip of the tool).  This is
 	only relevant for chamfering (angled) bits.
  */
-double CTool::CuttingRadius( const bool express_in_drawing_units /* = false */, const double depth /* = -1 */ ) const
+double CTool::CuttingRadius( const bool express_in_program_units /* = false */, const double depth /* = -1 */ ) const
 {
 	double radius;
 
@@ -2240,7 +2240,7 @@ double CTool::CuttingRadius( const bool express_in_drawing_units /* = false */, 
 			radius = m_params.m_diameter/2;
 	} // End switch
 
-	if (express_in_drawing_units) return(radius / PROGRAM->m_units);
+	if (express_in_program_units) return(radius / PROGRAM->m_units);
 	else return(radius);
 
 } // End CuttingRadius() method
@@ -2332,9 +2332,9 @@ void CTool::ImportProbeCalibrationData( const wxString & probed_points_xml_file_
 					double number = 0.0;
 					if (value.ToDouble(&number))
 					{
-					    if (name == "X") { point.SetX( number / PROGRAM->m_units ); }
-                        if (name == "Y") { point.SetY( number / PROGRAM->m_units ); }
-                        if (name == "Z") { point.SetZ( number / PROGRAM->m_units ); }
+					    if (name == "X") { point.SetX( number / heeksCAD->GetViewUnits() ); }
+                        if (name == "Y") { point.SetY( number / heeksCAD->GetViewUnits() ); }
+                        if (name == "Z") { point.SetZ( number / heeksCAD->GetViewUnits() ); }
 					}
 				} // End for
 
@@ -2561,4 +2561,7 @@ std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
 
 } // End DesignRulesAdjustment() method
 
-
+void CTool::OnChangeViewUnits(const double units)
+{
+	if (m_params.m_automatically_generate_title)m_title = GetMeaningfulName(heeksCAD->GetViewUnits());
+}
