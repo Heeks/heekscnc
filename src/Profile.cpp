@@ -835,6 +835,12 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 {
 	Python python;
 
+	// only do finish pass for non milling cutters
+	if(!CTool::IsMillingToolType(CTool::FindToolType(m_tool_number)))
+	{
+		this->m_profile_params.m_only_finishing_pass = true;
+	}
+
 	// roughing pass
 	if(!this->m_profile_params.m_do_finishing_pass || !this->m_profile_params.m_only_finishing_pass)
 	{

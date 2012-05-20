@@ -415,7 +415,7 @@ public:
 	void GenerateMeaningfullName();
 
 	CProbing::PointsList_t GetPoints() const;
-	void OnChangeUnits(const double units);
+	void OnChangeViewUnits(const double units);
 
 public:
 	int	m_num_x_points;
@@ -464,7 +464,7 @@ public:
 	void GenerateMeaningfullName();
 
 	CProbing::PointsList_t GetPoints() const;
-	void OnChangeUnits(const double units);
+	void OnChangeViewUnits(const double units);
 
 public:
 	int m_direction;	// Really eProbeDirection_t.  i.e. eInside or eOutside
@@ -531,7 +531,7 @@ public:
 	void GenerateMeaningfullName();
 
 	PointsList_t GetPoints() const;
-	void OnChangeUnits(const double units);
+	void OnChangeViewUnits(const double units);
 
 public:
 	// The probing feed rate will be taken from CSpeedOp::m_speed_op_params.m_horozontal_feed_rate

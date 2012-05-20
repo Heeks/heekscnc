@@ -92,7 +92,7 @@ Python CMachineState::Tool( const int new_tool )
         CTool *pTool = (CTool *) CTool::Find(new_tool);
         if (pTool != NULL)
         {
-            python << _T("comment(") << PythonString(_T("tool change to ") + pTool->m_title) << _T(")\n");
+            python << _T("comment(") << PythonString(_T("tool change to ") + pTool->GetMeaningfulName(PROGRAM->m_units)) << _T(")\n");
             python << _T("tool_change( id=") << new_tool << _T(")\n");
 			if(m_attached_to_surface)
 			{
@@ -100,7 +100,7 @@ Python CMachineState::Tool( const int new_tool )
 			}
 			if(pTool->m_params.m_type == CToolParams::eDragKnife)
 			{
-				python << _T("nc.drag_knife.drag_begin(") << pTool->m_params.m_drag_knife_distance << _T(")\n");
+				python << _T("nc.drag_knife.drag_begin(") << pTool->m_params.m_drag_knife_distance/ PROGRAM->m_units << _T(")\n");
 				m_drag_knife_on = true;
 			}
 			else if(m_drag_knife_on)

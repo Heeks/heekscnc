@@ -28,12 +28,12 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="4"
-     inkscape:cx="518.54568"
-     inkscape:cy="711.13685"
+     inkscape:zoom="2"
+     inkscape:cx="454.04568"
+     inkscape:cy="868.63685"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
+     showgrid="true"
      inkscape:window-width="1495"
      inkscape:window-height="968"
      inkscape:window-x="295"
@@ -45,6 +45,18 @@
   </sodipodi:namedview>
   <defs
      id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5735">
+      <stop
+         style="stop-color:#999999;stop-opacity:1;"
+         offset="0"
+         id="stop5737" />
+      <stop
+         style="stop-color:#999999;stop-opacity:0;"
+         offset="1"
+         id="stop5740" />
+    </linearGradient>
     <linearGradient
        inkscape:collect="always"
        id="linearGradient5715">
@@ -10910,6 +10922,108 @@
        y1="311.26291"
        x2="522.94202"
        y2="311.26291" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5735"
+       id="linearGradient5742"
+       x1="484.5"
+       y1="152.36218"
+       x2="515.5"
+       y2="152.36218"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5735-7"
+       id="linearGradient5742-1"
+       x1="484.5"
+       y1="152.36218"
+       x2="515.5"
+       y2="152.36218"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5735-7">
+      <stop
+         style="stop-color:#999999;stop-opacity:1;"
+         offset="0"
+         id="stop5737-4" />
+      <stop
+         style="stop-color:#999999;stop-opacity:0;"
+         offset="1"
+         id="stop5740-0" />
+    </linearGradient>
+    <linearGradient
+       gradientTransform="translate(50,5.0000026)"
+       y2="152.36218"
+       x2="515.5"
+       y1="152.36218"
+       x1="484.5"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient5759"
+       xlink:href="#linearGradient5735-7"
+       inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5735-8"
+       id="linearGradient5742-4"
+       x1="484.5"
+       y1="152.36218"
+       x2="515.5"
+       y2="152.36218"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5735-8">
+      <stop
+         style="stop-color:#999999;stop-opacity:1;"
+         offset="0"
+         id="stop5737-8" />
+      <stop
+         style="stop-color:#999999;stop-opacity:0;"
+         offset="1"
+         id="stop5740-2" />
+    </linearGradient>
+    <linearGradient
+       gradientTransform="translate(55,10.000005)"
+       y2="152.36218"
+       x2="515.5"
+       y1="152.36218"
+       x1="484.5"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient5759-4"
+       xlink:href="#linearGradient5735-8"
+       inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5735-1"
+       id="linearGradient5742-5"
+       x1="484.5"
+       y1="152.36218"
+       x2="515.5"
+       y2="152.36218"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5735-1">
+      <stop
+         style="stop-color:#999999;stop-opacity:1;"
+         offset="0"
+         id="stop5737-7" />
+      <stop
+         style="stop-color:#999999;stop-opacity:0;"
+         offset="1"
+         id="stop5740-1" />
+    </linearGradient>
+    <linearGradient
+       gradientTransform="translate(60,15.000006)"
+       y2="152.36218"
+       x2="515.5"
+       y1="152.36218"
+       x1="484.5"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient5759-1"
+       xlink:href="#linearGradient5735-1"
+       inkscape:collect="always" />
   </defs>
   <metadata
      id="metadata7">
@@ -12562,6 +12676,44 @@
          width="49"
          id="rect5737"
          style="opacity:0.05309735;fill:none;stroke:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    </g>
+    <rect
+       style="opacity:0.05309735;fill:none;stroke:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect4946"
+       width="35"
+       height="30"
+       x="55"
+       y="92.362183" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 440,137.36218 0,30 30,0 z"
+       id="path4951"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:url(#linearGradient5742);stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+       d="m 485,137.36218 0,30 30,0 0,-30 z"
+       id="path4953"
+       inkscape:connector-curvature="0" />
+    <g
+       id="g5812"
+       inkscape:export-filename="C:\Dev\HeeksCNCSVN\icons\billets.png"
+       inkscape:export-xdpi="35.121952"
+       inkscape:export-ydpi="35.121952">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4953-9"
+         d="m 535,142.36218 0,30 30,0 0,-30 z"
+         style="fill:url(#linearGradient5759);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4953-5"
+         d="m 540,147.36218 0,30 30,0 0,-30 z"
+         style="fill:url(#linearGradient5759-4);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4953-52"
+         d="m 545,152.36218 0,30 30,0 0,-30 z"
+         style="fill:url(#linearGradient5759-1);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
   </g>
 </svg>

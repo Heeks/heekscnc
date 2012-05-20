@@ -152,6 +152,5 @@ public:
 	static CMachine GetMachine(const wxString& file_name);
 	void AddMissingChildren();
 
-	void ChangeUnits( const double units );
 	void ReloadPointers();
 };

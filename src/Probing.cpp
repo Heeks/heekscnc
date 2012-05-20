@@ -2259,17 +2259,17 @@ void CProbing::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
     CSpeedOp::GetTools( t_list, p );
 }
 
-void CProbe_Edge::OnChangeUnits(const double units)
+void CProbe_Edge::OnChangeViewUnits(const double units)
 {
     GenerateMeaningfullName();
 }
 
-void CProbe_Centre::OnChangeUnits(const double units)
+void CProbe_Centre::OnChangeViewUnits(const double units)
 {
     GenerateMeaningfullName();
 }
 
-void CProbe_Grid::OnChangeUnits(const double units)
+void CProbe_Grid::OnChangeViewUnits(const double units)
 {
     GenerateMeaningfullName();
 }

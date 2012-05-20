@@ -244,16 +244,9 @@ public:
 	{
 		m_params.set_initial_values();
 		m_params.m_type = type;
-		if (title != NULL)
-		{
-			m_title = title;
-		} // End if - then
-		else
-		{
-			m_title = GenerateMeaningfulName();
-		} // End if - else
-
 		ResetParametersToReasonableValues();
+		if (title != NULL)m_title = title;
+		else m_title = GetMeaningfulName(heeksCAD->GetViewUnits());
 	} // End constructor
 
     CTool( const CTool & rhs );
@@ -296,7 +289,7 @@ public:
 	static bool IsMillingToolType( CToolParams::eToolType type );
 	static ToolNumber_t FindFirstByType( const CToolParams::eToolType type );
 	static std::vector< std::pair< int, wxString > > FindAllTools();
-	wxString GenerateMeaningfulName() const;
+	wxString GetMeaningfulName(double units) const;
 	wxString ResetTitle();
 	static wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 );
 	static wxString GuageNumberRepresentation( const double size, const double units );
@@ -304,7 +297,7 @@ public:
 	TopoDS_Shape GetShape() const;
 	TopoDS_Face  GetSideProfile() const;
 
-	double CuttingRadius(const bool express_in_drawing_units = false, const double depth = -1) const;
+	double CuttingRadius(const bool express_in_program_units = false, const double depth = -1) const;
 	static CToolParams::eToolType CutterType( const int tool_number );
 	static CToolParams::eMaterial_t CutterMaterial( const int tool_number );
 
@@ -330,6 +323,6 @@ public:
 
     void SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes);
     std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
-
+	void OnChangeViewUnits(const double units);
 }; // End CTool class definition.
 
