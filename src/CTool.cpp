@@ -1419,7 +1419,9 @@ bool CTool::IsMillingToolType( CToolParams::eToolType type )
 	case CToolParams::eEndmill:
 	case CToolParams::eSlotCutter:
 	case CToolParams::eBallEndMill:
-	case CToolParams::eEngravingTool:
+	case CToolParams::eDrill:
+	case CToolParams::eCentreDrill:
+	case CToolParams::eChamfer:
 		return true;
 	default:
 		return false;
@@ -2200,7 +2202,6 @@ double CTool::CuttingRadius( const bool express_in_program_units /* = false */, 
 	switch (m_params.m_type)
 	{
 		case CToolParams::eChamfer:
-		case CToolParams::eEngravingTool:
 			{
 			    if (depth < 0.0)
 			    {
@@ -2223,6 +2224,12 @@ double CTool::CuttingRadius( const bool express_in_program_units /* = false */, 
 			            radius = (m_params.m_diameter / 2.0);
 			        }
 			    }
+			}
+			break;
+
+		case CToolParams::eEngravingTool:
+			{
+	            radius = m_params.m_flat_radius;
 			}
 			break;
 
@@ -2505,7 +2512,7 @@ static bool OnEdit(HeeksObj* object)
 
 void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
 {
-#ifndef STABLE_OPS_ONLY
+#if 0
 	*callback = OnEdit;
 #else
 	*callback = NULL;

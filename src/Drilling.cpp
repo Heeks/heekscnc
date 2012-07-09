@@ -19,11 +19,9 @@
 #include "Operations.h"
 #include "CTool.h"
 #include "Profile.h"
-#include "Fixture.h"
 #include "CNCPoint.h"
 #include "MachineState.h"
 #include "Program.h"
-#include "CounterBore.h"
 
 #include <sstream>
 #include <iomanip>
@@ -243,11 +241,7 @@ Python CDrilling::AppendTextToProgram( CMachineState *pMachineState )
 	std::vector<CNCPoint> locations = CDrilling::FindAllLocations(this, pMachineState->Location(), m_params.m_sort_drilling_locations != 0, NULL);
 	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
 	{
-#ifdef STABLE_OPS_ONLY
 		gp_Pnt point = *l_itLocation;
-#else
-		gp_Pnt point = pMachineState->Fixture().Adjustment( *l_itLocation );
-#endif
 
 		python << _T("drill(")
 			<< _T("x=") << point.X()/theApp.m_program->m_units << _T(", ")
@@ -714,10 +708,6 @@ void CDrilling::ReloadPointers()
 			{
 				std::vector<CNCPoint> starting_points;
 				CMachineState machine;
-#ifndef STABLE_OPS_ONLY
-				CFixture perfectly_aligned_fixture(NULL,CFixture::G54, false, 0.0);
-				machine.Fixture(perfectly_aligned_fixture);
-#endif
 
 				// to do, make this get the starting point again
 				//((CProfile *)lhsPtr)->AppendTextToProgram( starting_points, &machine );
@@ -749,20 +739,6 @@ void CDrilling::ReloadPointers()
                     } // End if - then
                 } // End for
             } // End if - then
-
-#ifndef STABLE_OPS_ONLY
-            if (lhsPtr->GetType() == CounterBoreType)
-            {
-                std::vector<CNCPoint> holes = CDrilling::FindAllLocations((CCounterBore *)lhsPtr, starting_location, false, NULL);
-                for (std::vector<CNCPoint>::const_iterator l_itHole = holes.begin(); l_itHole != holes.end(); l_itHole++)
-                {
-                    if (std::find( locations.begin(), locations.end(), *l_itHole ) == locations.end())
-                    {
-                        locations.push_back( *l_itHole );
-                    } // End if - then
-                } // End for
-            } // End if - then
-#endif
 
 		} // End if - then
 	} // End for
@@ -1054,14 +1030,6 @@ double CDrillingParams::ClearanceHeight() const
 	case CProgram::eClearanceDefinedByFixture:
 		// We need to figure out which is the 'active' fixture and return
 		// the clearance height from that fixture.
-
-#ifndef STABLE_OPS_ONLY
-		if (theApp.m_program->m_active_machine_state != NULL)
-		{
-			return(theApp.m_program->m_active_machine_state->Fixture().m_params.m_clearance_height);
-		}
-		else
-#endif
 			// This should not occur.  In any case, use the clearance value from the individual operation.
 			return(m_clearance_height);
 

@@ -13,7 +13,6 @@
 
 // #define OP_SKETCHES_AS_CHILDREN
 
-class CFixture;	// Forward declaration.
 class CMachineState;
 
 class COp : public ObjList
@@ -49,10 +48,6 @@ public:
 	virtual void WriteDefaultValues();
 	virtual void ReadDefaultValues();
 	virtual Python AppendTextToProgram( CMachineState *pMachineState );
-#ifndef STABLE_OPS_ONLY
-	virtual std::list<CFixture> PrivateFixtures();
-	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(1); }
-#endif
 	virtual bool UsesTool(){return true;} // some operations don't use the tool number
 
 	void ReloadPointers() { ObjList::ReloadPointers(); }

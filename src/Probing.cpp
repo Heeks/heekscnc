@@ -21,7 +21,6 @@
 #include "Operations.h"
 #include "CTool.h"
 #include "Profile.h"
-#include "Fixture.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "interface/HeeksColor.h"
@@ -1625,10 +1624,6 @@ public:
 		python << m_pThis->GeneratePythonPreamble();
 
 		CMachineState machine;
-#ifndef STABLE_OPS_ONLY
-		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
-		machine.Fixture(default_fixture);
-#endif
 
 		python << m_pThis->AppendTextToProgram( &machine );
 
@@ -1683,10 +1678,6 @@ public:
 		python << m_pThis->GeneratePythonPreamble();
 
 		CMachineState machine;
-#ifndef STABLE_OPS_ONLY
-		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
-		machine.Fixture(default_fixture);
-#endif
 
 		python << m_pThis->AppendTextToProgram( &machine );
 
@@ -1742,10 +1733,6 @@ public:
 		python << m_pThis->GeneratePythonPreamble();
 
 		CMachineState machine;
-#ifndef STABLE_OPS_ONLY
-		CFixture default_fixture(NULL, CFixture::G54, false, 0.0 );
-		machine.Fixture(default_fixture);
-#endif
 
 		python << m_pThis->AppendTextToProgram( &machine );
 

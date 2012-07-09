@@ -104,15 +104,6 @@ static void on_set_abs_mode(int value, HeeksObj* object) {
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
-#ifndef STABLE_OPS_ONLY
-	{
-		std::list< wxString > choices;
-		choices.push_back(_("Absolute"));
-		choices.push_back(_("Incremental"));
-		list->push_back(new PropertyChoice(_("ABS/INCR mode"), choices, m_abs_mode, parent, on_set_abs_mode));
-	}
-#endif
-
 	switch(theApp.m_program->m_clearance_source)
 	{
 	case CProgram::eClearanceDefinedByFixture:
@@ -461,23 +452,6 @@ double CDepthOpParams::ClearanceHeight() const
 	{
 	case CProgram::eClearanceDefinedByMachine:
 		return(theApp.m_program->m_machine.m_clearance_height);
-
-#ifndef STABLE_OPS_ONLY
-	case CProgram::eClearanceDefinedByFixture:
-		// We need to figure out which is the 'active' fixture and return
-		// the clearance height from that fixture.
-
-		if (theApp.m_program->m_active_machine_state != NULL)
-		{
-			return(theApp.m_program->m_active_machine_state->Fixture().m_params.m_clearance_height);
-		}
-		else
-		{
-			// This should not occur.  In any case, use the clearance value from the individual operation.
-			return(m_clearance_height);
-		}
-#endif // STABLE_OPS_ONLY
-
 	case CProgram::eClearanceDefinedByOperation:
 	default:
 		return(m_clearance_height);
