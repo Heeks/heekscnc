@@ -482,11 +482,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 				{
 					if(reversed)span_object->GetEndPoint(s);
 					else span_object->GetStartPoint(s);
-#ifdef STABLE_OPS_ONLY
 					CNCPoint start(s);
-#else
-					CNCPoint start(pMachineState->Fixture().Adjustment(s));
-#endif
 
 					python << _T("curve.append(area.Point(");
 					python << start.X(true);
@@ -497,11 +493,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 				}
 				if(reversed)span_object->GetStartPoint(e);
 				else span_object->GetEndPoint(e);
-#ifdef STABLE_OPS_ONLY
 				CNCPoint end(e);
-#else
-				CNCPoint end(pMachineState->Fixture().Adjustment( e ));
-#endif
 
 				if(type == LineType)
 				{
@@ -514,11 +506,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
-#ifdef STABLE_OPS_ONLY
 					CNCPoint centre(c);
-#else
-					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
-#endif
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
@@ -563,18 +551,11 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 						points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 					}
 
-#ifndef STABLE_OPS_ONLY
-					pMachineState->Fixture().Adjustment(c);
-#endif
 					CNCPoint centre(c);
 
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
-#ifdef STABLE_OPS_ONLY
 						CNCPoint pnt( l_itPoint->second );
-#else
-						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
-#endif
 
 						python << (_T("curve.append(area.Vertex("));
 						python << l_itPoint->first << _T(", area.Point(");
@@ -618,10 +599,6 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 					m_profile_params.m_start[1] / theApp.m_program->m_units,
 					0.0 );
 
-#ifndef STABLE_OPS_ONLY
-			starting = pMachineState->Fixture().Adjustment( starting );
-#endif
-
 			startx = starting.X();
 			starty = starting.Y();
 
@@ -645,10 +622,6 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 			gp_Pnt finish(m_profile_params.m_end[0] / theApp.m_program->m_units,
 					m_profile_params.m_end[1] / theApp.m_program->m_units,
 					0.0 );
-
-#ifndef STABLE_OPS_ONLY
-			finish = pMachineState->Fixture().Adjustment( finish );
-#endif
 
 			finishx = finish.X();
 			finishy = finish.Y();

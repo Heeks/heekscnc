@@ -297,7 +297,7 @@
 				ObjectFile=".\vc_msw\"
 				ProgramDataBaseFileName="vc_msw\HeeksCNC.pdb"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 				CompileAs="0"
 			/>
 			<Tool
@@ -315,7 +315,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\vc8\lib&quot;"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="0"
 				EnableCOMDATFolding="0"
@@ -351,14 +351,6 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\Adaptive.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Adaptive.h"
-			>
-		</File>
-		<File
 			RelativePath=".\AttachOp.cpp"
 			>
 		</File>
@@ -367,23 +359,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\BOM.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\BOM.h"
-			>
-		</File>
-		<File
 			RelativePath="$(HEEKSCADPATH)\interface\Box.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Chamfer.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Chamfer.h"
 			>
 		</File>
 		<File
@@ -392,22 +368,6 @@
 		</File>
 		<File
 			RelativePath=".\CNCPoint.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Contour.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Contour.h"
-			>
-		</File>
-		<File
-			RelativePath=".\CounterBore.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\CounterBore.h"
 			>
 		</File>
 		<File
@@ -463,22 +423,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Fixture.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Fixture.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Fixtures.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Fixtures.h"
-			>
-		</File>
-		<File
 			RelativePath="$(HEEKSCADPATH)\src\Geom.cpp"
 			>
 		</File>
@@ -528,18 +472,6 @@
 		</File>
 		<File
 			RelativePath="$(HEEKSCADPATH)\interface\HeeksObj.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Inlay.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Inlay.h"
-			>
-		</File>
-		<File
-			RelativePath="$(HEEKSCADPATH)\HeeksCAD\interface\InputMode.h"
 			>
 		</File>
 		<File
@@ -791,14 +723,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Raft.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Raft.h"
-			>
-		</File>
-		<File
 			RelativePath=".\RawMaterial.cpp"
 			>
 		</File>
@@ -820,6 +744,14 @@
 		</File>
 		<File
 			RelativePath=".\ScriptOp.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Simulate.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Simulate.h"
 			>
 		</File>
 		<File
@@ -984,30 +916,6 @@
 		</File>
 		<File
 			RelativePath=".\TrsfNCCode.h"
-			>
-		</File>
-		<File
-			RelativePath=".\TurnRough.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TurnRough.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Waterline.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Waterline.h"
-			>
-		</File>
-		<File
-			RelativePath=".\ZigZag.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\ZigZag.h"
 			>
 		</File>
 	</Files>

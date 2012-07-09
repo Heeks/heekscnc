@@ -7,9 +7,6 @@
 #pragma once
 
 class CProgram;
-#ifndef STABLE_OPS_ONLY
-class CFixture;
-#endif
 class CTools;
 class COperations;
 class CMachineState;
@@ -17,9 +14,6 @@ class CMachineState;
 class CHeeksCNCInterface{
 public:
 	virtual CProgram* GetProgram();
-#ifndef STABLE_OPS_ONLY
-	virtual CFixture* FixtureFind(int coordinate_system_number );
-#endif
 	virtual CTools* GetTools();
 	virtual std::vector< std::pair< int, wxString > > FindAllTools();
 	virtual int FindFirstToolByType( unsigned int type );

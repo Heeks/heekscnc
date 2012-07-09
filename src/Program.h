@@ -14,11 +14,6 @@
 class CNCCode;
 class CProgram;
 class COperations;
-#ifndef STABLE_OPS_ONLY
-class CFixtures;
-class CFixture;
-class CMachineState;
-#endif
 class CTools;
 
 
@@ -63,9 +58,6 @@ private:
 	COperations* m_operations;				// Access via Operations() method
 	CTools* m_tools;						// Access via Tools() method
 	CSpeedReferences *m_speed_references;	// Access via SpeedReferences() method
-#ifndef STABLE_OPS_ONLY
-	CFixtures *m_fixtures;					// Access via Fixtures() method
-#endif
 
 public:
 	static wxString ConfigScope(void) {return _T("Program");}
@@ -102,10 +94,6 @@ public:
 	COperations* Operations();
 	CTools* Tools();
 	CSpeedReferences *SpeedReferences();
-#ifndef STABLE_OPS_ONLY
-	CFixtures *Fixtures();
-	CMachineState *m_active_machine_state;	// Pointer to current machine state (only valid during Python output)
-#endif
 
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches

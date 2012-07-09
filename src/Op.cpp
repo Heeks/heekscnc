@@ -21,7 +21,6 @@
 #include "MachineState.h"
 #include "Program.h"
 #ifdef HEEKSCNC
-#include "Fixtures.h"
 #define FIND_FIRST_TOOL CTool::FindFirstByType
 #define FIND_ALL_TOOLS CTool::FindAllTools
 #define MACHINE_STATE_TOOL(t) pMachineState->Tool(t)
@@ -272,21 +271,6 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 
 	if(UsesTool())python << MACHINE_STATE_TOOL(m_tool_number);  // Select the correct  tool.
 
-#ifdef HEEKSCNC
-#ifndef STABLE_OPS_ONLY
-	// Check to see if this operation has its own fixture settings.  If so, change to that fixture now.
-	for (HeeksObj *ob = GetFirstChild(); ob != NULL; ob = GetNextChild())
-	{
-		if (ob->GetType() == FixtureType)
-		{
-			CFixture *pFixture = (CFixture *) ob;
-			python << pMachineState->Fixture(*pFixture);		// Change fixtures.
-			break;
-		}
-	}
-#endif
-#endif
-
 	return(python);
 }
 
@@ -295,79 +279,10 @@ void COp::OnEditString(const wxChar* str){
 	heeksCAD->Changed();
 }
 
-#ifdef HEEKSCNC
-#ifndef STABLE_OPS_ONLY
-class AddFixture: public Tool{
-	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Add Fixture");}
-	void Run()
-	{
-		CProgram* program = theApp.m_program;
-        if (program->Fixtures()->GetNextFixture() > 0)
-        {
-            CFixture::eCoordinateSystemNumber_t coordinate_system_number = CFixture::eCoordinateSystemNumber_t(program->Fixtures()->GetNextFixture());
-
-            CFixture *new_object = new CFixture( NULL, coordinate_system_number, program->m_machine.m_safety_height_defined, program->m_machine.m_safety_height );
-            m_pThis->Add(new_object, NULL);
-            heeksCAD->ClearMarkedList();
-            heeksCAD->Mark(new_object);
-        } // End if - then
-        else
-        {
-            wxMessageBox(_T("There are no more coordinate systems available"));
-        } // End if - else
-	}
-	wxString BitmapPath(){ return _T("fixture");}
-	wxString previous_path;
-	COp *m_pThis;
-
-public:
-	void Set( COp *pOperation ) { m_pThis = pOperation; }
-};
-
-static AddFixture add_fixture;
-#endif
-#endif
-
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     ObjList::GetTools( t_list, p );
-
-#ifdef HEEKSCNC
-#ifndef STABLE_OPS_ONLY
-	// See if this operation already has a child fixture.  If so, don't add a second one.
-	unsigned int num_private_fixtures = 0;
-	for (HeeksObj *child = GetFirstChild(); (child != NULL); child = GetNextChild())
-	{
-		if (child->GetType() == FixtureType) num_private_fixtures++;
-	} // End for
-
-	if (num_private_fixtures < MaxNumberOfPrivateFixtures())
-	{
-		add_fixture.Set(this);
-		t_list->push_back(&add_fixture);
-	} // End if - then
-#endif
-#endif
 }
-
-#ifndef STABLE_OPS_ONLY
-
-/* virtual */ std::list<CFixture> COp::PrivateFixtures()
-{
-    std::list<CFixture> fixtures;
-
-    for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
-    {
-        if (child->GetType() == FixtureType)
-        {
-            fixtures.push_back( *((CFixture *) child) );
-        }
-    } // End for
-
-    return(fixtures);
-} // End PrivateFixtures() method
-#endif
 
 bool COp::operator==(const COp & rhs) const
 {

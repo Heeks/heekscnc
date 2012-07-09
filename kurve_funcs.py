@@ -225,7 +225,7 @@ def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_safety_space = None, clearance = None, start_depth = None, step_down = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0, lead_in_line_len=0.0,lead_out_line_len= 0.0):
+def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_safety_space = None, clearance = None, start_depth = None, stepdown = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0, lead_in_line_len=0.0,lead_out_line_len= 0.0):
     global tags
 
     offset_curve = area.Curve(curve)
@@ -272,8 +272,10 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         raise "sketch has no spans!"
 
     # do multiple depths
-    total_to_cut = start_depth - final_depth;
-    num_step_downs = int(float(total_to_cut) / math.fabs(step_down) + 0.999999)
+    layer_count = int((start_depth - final_depth) / stepdown)
+    if layer_count * stepdown + 0.00001 < start_depth - final_depth:
+        layer_count += 1
+    current_start_depth = start_depth
 
     # tags
     if len(tags) > 0:
@@ -281,9 +283,11 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         copy_of_offset_curve = area.Curve(offset_curve)
     
     prev_depth = start_depth
-    for step in range(0, num_step_downs):
-        depth_of_cut = ( start_depth - final_depth ) * ( step + 1 ) / num_step_downs
-        depth = start_depth - depth_of_cut
+    for i in range(1, layer_count+1):
+        if i == layer_count:
+            depth = final_depth
+        else:
+            depth = start_depth - i * stepdown
         mat_depth = prev_depth
         
         if len(tags) > 0:

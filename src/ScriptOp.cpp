@@ -18,7 +18,6 @@
 #include "MachineState.h"
 
 #ifdef HEEKSCNC
-#include "Fixtures.h"
 #define FIND_FIRST_TOOL CTool::FindFirstByType
 #define FIND_ALL_TOOLS CTool::FindAllTools
 #define MACHINE_STATE_TOOL(t) pMachineState->Tool(t)

@@ -238,11 +238,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 			if(type == LineType || type == ArcType)
 			{
 				span_object->GetStartPoint(s);
-#ifdef STABLE_OPS_ONLY
 				CNCPoint start(s);
-#else
-				CNCPoint start(pMachineState->Fixture().Adjustment(s));
-#endif
 
 				if(started && (fabs(s[0] - prev_e[0]) > 0.0001 || fabs(s[1] - prev_e[1]) > 0.0001))
 				{
@@ -257,11 +253,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 					started = true;
 				}
 				span_object->GetEndPoint(e);
-#ifdef STABLE_OPS_ONLY
 				CNCPoint end(e);
-#else
-				CNCPoint end(pMachineState->Fixture().Adjustment(e));
-#endif
 
 				if(type == LineType)
 				{
@@ -270,11 +262,7 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 				else if(type == ArcType)
 				{
 					span_object->GetCentrePoint(c);
-#ifdef STABLE_OPS_ONLY
 					CNCPoint centre(c);
-#else
-					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
-#endif
 
 					double pos[3];
 					heeksCAD->GetArcAxis(span_object, pos);
@@ -307,20 +295,12 @@ static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
 					points.push_back( std::make_pair(-1, gp_Pnt( c[0] - radius, c[1], c[2] )) ); // west
 					points.push_back( std::make_pair(-1, gp_Pnt( c[0], c[1] + radius, c[2] )) ); // north
 
-#ifdef STABLE_OPS_ONLY
 					CNCPoint centre(c);
-#else
-					CNCPoint centre(pMachineState->Fixture().Adjustment(c));
-#endif
 
 					gcode << _T("c = area.Curve()\n");
 					for (std::list< std::pair<int, gp_Pnt > >::iterator l_itPoint = points.begin(); l_itPoint != points.end(); l_itPoint++)
 					{
-#ifdef STABLE_OPS_ONLY
 						CNCPoint pnt( l_itPoint->second );
-#else
-						CNCPoint pnt = pMachineState->Fixture().Adjustment( l_itPoint->second );
-#endif
 
 						gcode << _T("c.append(area.Vertex(") << l_itPoint->first << _T(", area.Point(");
 						gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
