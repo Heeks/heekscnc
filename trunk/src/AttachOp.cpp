@@ -121,28 +121,6 @@ Python CAttachOp::AppendTextToProgram(CMachineState *pMachineState)
 			{
 				solids.push_back(object);
 			}
-#ifndef STABLE_OPS_ONLY
-			else
-			{
-				// Need to rotate a COPY of the solid by the fixture settings.
-				HeeksObj* copy = object->MakeACopy();
-				if (copy != NULL)
-				{
-					double m[16];	// A different form of the transformation matrix.
-					CFixture::extract( pMachineState->Fixture().GetMatrix(CFixture::YZ), m );
-					copy->ModifyByMatrix(m);
-
-					CFixture::extract( pMachineState->Fixture().GetMatrix(CFixture::XZ), m );
-					copy->ModifyByMatrix(m);
-
-					CFixture::extract( pMachineState->Fixture().GetMatrix(CFixture::XY), m );
-					copy->ModifyByMatrix(m);
-
-					solids.push_back(copy);
-					copies_to_delete.push_back(copy);
-				}
-			}
-#endif
 		} // End if - then
 	} // End for
 

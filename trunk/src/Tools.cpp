@@ -99,7 +99,11 @@ class ExportTools: public Tool{
 		wxStandardPaths standard_paths;
 		if (previous_path.Length() == 0) previous_path = _T("default.tooltable");
 
-		if(!m_for_default)
+		if(m_for_default)
+		{
+			previous_path = standard_paths.GetUserConfigDir() + _T("/") + previous_path;
+		}
+		else
 		{
 			// Prompt the user to select a file to import.
 			wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to export to"),
@@ -129,387 +133,6 @@ class ExportTools: public Tool{
 	wxString previous_path;
 
 public:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	ExportTools(bool for_default = false)
 	{
 		m_for_default = for_default;
@@ -544,37 +167,53 @@ void ImportToolsFile( const wxChar *file_path )
 }
 
 class ImportTools: public Tool{
+	bool m_for_default;
+
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Import");}
+	const wxChar* GetTitle(){return m_for_default ? _("Restore Default Tools"):_("Import");}
 	void Run()
 	{
 		wxStandardPaths standard_paths;
 		if (previous_path.Length() == 0) previous_path = _T("default.tooltable");
 
-
-		// Prompt the user to select a file to import.
-		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"),
+		if(m_for_default)
+		{
+			previous_path = standard_paths.GetUserConfigDir() + _T("/") + previous_path;
+		}
+		else
+		{
+			// Prompt the user to select a file to import.
+			wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"),
 				standard_paths.GetUserConfigDir().c_str(), previous_path.c_str(),
 				wxString(_("Known Files")) + _T(" |*.heeks;*.HEEKS;")
-					+ _T("*.tool;*.TOOL;*.Tool;")
-					+ _T("*.tools;*.TOOLS;*.Tools;")
-					+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
-					wxOPEN | wxFILE_MUST_EXIST );
-		fd.SetFilterIndex(1);
-		if (fd.ShowModal() == wxID_CANCEL) return;
-		previous_path = fd.GetPath().c_str();
+				+ _T("*.tool;*.TOOL;*.Tool;")
+				+ _T("*.tools;*.TOOLS;*.Tools;")
+				+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
+				wxOPEN | wxFILE_MUST_EXIST );
+			fd.SetFilterIndex(1);
+			if (fd.ShowModal() == wxID_CANCEL) return;
+			previous_path = fd.GetPath().c_str();
+		}
 
         ImportToolsFile( previous_path.c_str() );
 	}
 	wxString BitmapPath(){ return _T("import");}
 	wxString previous_path;
+
+public:
+	ImportTools(bool for_default = false)
+	{
+		m_for_default = for_default;
+	}
 };
 
 static ImportTools import_tools;
+static ImportTools import_default_tools(true);
 
 void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	t_list->push_back(&save_default_tools);
+	t_list->push_back(&import_default_tools);
 	t_list->push_back(&import_tools);
 	t_list->push_back(&export_tools);
 

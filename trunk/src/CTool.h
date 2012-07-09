@@ -51,17 +51,8 @@ public:
 		types_list.push_back( ToolTypeDescription_t( eSlotCutter, wxString(_("Slot Cutter")) ));
 		types_list.push_back( ToolTypeDescription_t( eBallEndMill, wxString(_("Ball End Mill")) ));
 		types_list.push_back( ToolTypeDescription_t( eChamfer, wxString(_("Chamfer")) ));
-#ifndef STABLE_OPS_ONLY
-		types_list.push_back( ToolTypeDescription_t( eTurningTool, wxString(_("Turning Tool")) ));
-#endif
 		types_list.push_back( ToolTypeDescription_t( eTouchProbe, wxString(_("Touch Probe")) ));
 		types_list.push_back( ToolTypeDescription_t( eToolLengthSwitch, wxString(_("Tool Length Switch")) ));
-#ifndef STABLE_OPS_ONLY
-		types_list.push_back( ToolTypeDescription_t( eExtrusion, wxString(_("Extrusion")) ));
-#endif
-#ifndef STABLE_OPS_ONLY
-		types_list.push_back( ToolTypeDescription_t( eTapTool, wxString(_("Tapping Tool")) ));
-#endif
 		types_list.push_back( ToolTypeDescription_t( eEngravingTool, wxString(_("Engraving Tool")) ));
 		types_list.push_back( ToolTypeDescription_t( eDragKnife, wxString(_("Drag Knife")) ));
 		return(types_list);

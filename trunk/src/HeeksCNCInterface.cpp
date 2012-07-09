@@ -3,7 +3,6 @@
 #include "stdafx.h"
 #include "HeeksCNCInterface.h"
 #include "Program.h"
-#include "Fixtures.h"
 #include "Operations.h"
 #include "CTool.h"
 #include "MachineState.h"
@@ -13,13 +12,6 @@ CProgram* CHeeksCNCInterface::GetProgram()
 {
 	return theApp.m_program;
 }
-
-#ifndef STABLE_OPS_ONLY
-CFixture* CHeeksCNCInterface::FixtureFind(int coordinate_system_number )
-{
-	return theApp.m_program->Fixtures()->Find((CFixture::eCoordinateSystemNumber_t)coordinate_system_number);
-}
-#endif
 
 CTools* CHeeksCNCInterface::GetTools()
 {
