@@ -785,12 +785,6 @@ void CHeeksCNCApp::RunPythonScript()
 		wxFile f(m_program->GetOutputFileName().c_str(), wxFile::write);
 		if(f.IsOpened())f.Write(_T("\n"));
 	}
-	{
-		// clear the backplot file
-		wxString backplot_path = m_program->GetOutputFileName() + _T(".nc.xml");
-		wxFile f(backplot_path.c_str(), wxFile::write);
-		if(f.IsOpened())f.Write(_T("\n"));
-	}
 
 	// Check to see if someone has modified the contents of the
 	// program canvas manually.  If so, replace the m_python_program

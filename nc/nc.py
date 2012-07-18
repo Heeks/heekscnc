@@ -374,6 +374,16 @@ class Creator:
         """Set the chamber temp in celsius"""
         pass
 
+    def begin_ncblock(self):
+        # if the moves have come from backplotting nc code, then the nc code text can be given with these three functions
+        pass
+
+    def end_ncblock(self):
+        pass
+
+    def add_text(self, s, col, cdata):
+        pass
+
 ################################################################################
 
 creator = Creator()

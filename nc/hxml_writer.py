@@ -2,14 +2,11 @@ import tempfile
 
 class HxmlWriter:
     def __init__(self):
-        pass
-    
-    def on_parse_start(self, name):
         self.file_out = open(tempfile.gettempdir()+'/backplot.xml', 'w')
         self.file_out.write('<?xml version="1.0" ?>\n')
         self.file_out.write('<nccode>\n')
 
-    def on_parse_end(self):
+    def __del__(self):
         self.file_out.write('</nccode>\n')
         self.file_out.close()
 
@@ -38,12 +35,12 @@ class HxmlWriter:
         self.file_out.write('\t\t<mode')
         if (units != None) : self.file_out.write(' units="'+str(units)+'"')
         self.file_out.write(' />\n')
-
-    def set_tool(self, number):
-        self.file_out.write('\t\t<tool')
-        if (number != None) : 
-            self.file_out.write(' number="'+str(number)+'"')
-            self.file_out.write(' />\n')
+        
+    def metric(self):
+        self.set_mode(units = 1.0)
+        
+    def imperial(self):
+        self.set_mode(units = 25.4)
 
     def begin_path(self, col):
         if (col != None) : self.file_out.write('\t\t<path col="'+col+'">\n')
@@ -51,6 +48,38 @@ class HxmlWriter:
 
     def end_path(self):
         self.file_out.write('\t\t</path>\n')
+        
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
+        self.begin_path("rapid")
+        self.add_line(x, y, z, a, b, c)
+        self.end_path()
+        
+    def feed(self, x=None, y=None, z=None):
+        self.begin_path("feed")
+        self.add_line(x, y, z)
+        self.end_path()
+
+    def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+        self.begin_path("feed")
+        self.add_arc(x, y, z, i, j, k, r, -1)
+        self.end_path()
+
+    def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+        self.begin_path("feed")
+        self.add_arc(x, y, z, i, j, k, r, 1)
+        self.end_path()
+        
+    def tool_change(self, id):
+        self.file_out.write('\t\t<tool')
+        if (id != None) : 
+            self.file_out.write(' number="'+str(id)+'"')
+            self.file_out.write(' />\n')
+            
+    def spindle(self, s, clockwise):
+        pass
+    
+    def feedrate(self, f):
+        pass
 
     def add_line(self, x, y, z, a = None, b = None, c = None):
         self.file_out.write('\t\t\t<line')
@@ -64,6 +93,9 @@ class HxmlWriter:
         if (b != None) : self.file_out.write(' b="%.6f"' % b)
         if (c != None) : self.file_out.write(' c="%.6f"' % c)
         self.file_out.write(' />\n')
+        if x != None: self.oldx = x
+        if y != None: self.oldy = y
+        if z != None: self.oldz = z
         
     def add_arc(self, x, y, z, i, j, k, r = None, d = None):
         self.file_out.write('\t\t\t<arc')
@@ -73,9 +105,12 @@ class HxmlWriter:
             self.file_out.write(' y="%.6f"' % y)
         if (z != None) :
             self.file_out.write(' z="%.6f"' % z)
-        if (i != None) : self.file_out.write(' i="%.6f"' % i)
-        if (j != None) : self.file_out.write(' j="%.6f"' % j)
-        if (k != None) : self.file_out.write(' k="%.6f"' % k)
+        if (i != None) : self.file_out.write(' i="%.6f"' % (i - self.oldx))
+        if (j != None) : self.file_out.write(' j="%.6f"' % (j - self.oldy))
+        if (k != None) : self.file_out.write(' k="%.6f"' % (k - self.oldz))
         if (r != None) : self.file_out.write(' r="%.6f"' % r)
         if (d != None) : self.file_out.write(' d="%i"' % d)
         self.file_out.write(' />\n')
+        if x != None: self.oldx = x
+        if y != None: self.oldy = y
+        if z != None: self.oldz = z

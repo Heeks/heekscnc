@@ -1041,7 +1041,7 @@ wxString CProgram::GetOutputFileName() const
 
 wxString CProgram::GetBackplotFilePath() const
 {
-	// The creation of a ".nc.xml" file, in the users own folder, is not good.
+	// The xml file is created in the temporary folder
 	wxStandardPaths standard_paths;
 	wxFileName file_str( standard_paths.GetTempDir().c_str(), _T("backplot.xml"));
 	return file_str.GetFullPath();

@@ -4,8 +4,8 @@ import sys
 # based on the iso reader
 
 class Parser(iso.Parser):
-    def __init__(self):
-        iso.Parser.__init__(self)
+    def __init__(self, writer):
+        iso.Parser.__init__(self, writer)
 
     def ParseWord(self, word):
         iso.Parser.ParseWord(self, word)
