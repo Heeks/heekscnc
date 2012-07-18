@@ -1,5 +1,5 @@
-﻿emc2 EMC2 Controller 0
-emc2b EMC2-simplified 0
+﻿emc2 LinuxCNC with tool offsets 0
+emc2b LinuxCNC 0
 emc2b_crc EMC2 with Cutter Comp   0
 mach3 Mach3 Machine Controller 0
 iso Standard ISO output 0

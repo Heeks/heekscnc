@@ -4,8 +4,8 @@ import math
 
 class Parser(num_reader.NumReader):
 
-    def __init__(self):
-        num_reader.NumReader.__init__(self)
+    def __init__(self, writer):
+        num_reader.NumReader.__init__(self, writer)
         self.x = 0
         self.y = 0
         self.z = 10000

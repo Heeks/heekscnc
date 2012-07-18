@@ -12,8 +12,8 @@ import sys
 ################################################################################
 class Parser(nc.Parser):
 
-    def __init__(self):
-        nc.Parser.__init__(self)
+    def __init__(self, writer):
+        nc.Parser.__init__(self, writer)
 
         self.pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
         self.arc_centre_absolute = False
@@ -42,8 +42,7 @@ class Parser(nc.Parser):
             self.move = True
         elif (word[0] == 'F' or word[0] == 'f'):
             self.col = "axis"
-            self.f = eval(word[1:])
-            self.move = True
+            self.writer.feedrate(word[1:])
         elif (word[0] == 'H' or word[0] == 'h'):
             self.col = "axis"
             self.h = eval(word[1:])
@@ -72,10 +71,10 @@ class Parser(nc.Parser):
             self.no_move = True
         elif (word == 'G20' or word == 'G70'):
             self.col = "prep"
-            self.writer.set_mode(units=25.4)
+            self.writer.imperial()
         elif (word == 'G21' or word == 'G71'):
             self.col = "prep"
-            self.writer.set_mode(units=1.0)
+            self.writer.metric()
         elif (word == 'G43' or word == 'g43'):
             self.height_offset = True
             self.move = True
@@ -132,11 +131,10 @@ class Parser(nc.Parser):
             self.move = True
         elif (word[0] == 'S' or word[0] == 's'):
             self.col = "axis"
-            self.s = eval(word[1:])
-            self.move = True
+            self.writer.spindle(word[1:], (float(word[1:]) >= 0.0))
         elif (word[0] == 'T') :
             self.col = "tool"
-            self.writer.set_tool( eval(word[1:]) )
+            self.writer.tool_change( eval(word[1:]) )
         elif (word[0] == 'X' or word[0] == 'x'):
             self.col = "axis"
             self.x = eval(word[1:])

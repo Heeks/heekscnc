@@ -24,6 +24,8 @@ class Creator(iso_modal.Creator):
         else:
             return ' '
         
+    def PROGRAM_END(self): return( 'T0' + self.SPACE() + 'M06' + self.SPACE() + 'M02')
+        
 ############################################################################
 ## Begin Program 
 
@@ -43,6 +45,11 @@ class Creator(iso_modal.Creator):
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         #self.write('G43 \n')
         pass
+
+    def tool_change(self, id):
+        self.write_blocknum()
+        self.write(self.SPACE() + (self.TOOL() % id) + self.SPACE() + 'G43\n')
+        self.t = id
 
     def comment(self, text):
         self.write_blocknum()
