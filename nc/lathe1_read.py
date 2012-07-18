@@ -12,8 +12,8 @@ import sys
 ################################################################################
 class Parser(nc.Parser):
 
-    def __init__(self):
-        nc.Parser.__init__(self)
+    def __init__(self, writer):
+        nc.Parser.__init__(self, writer)
 
         self.pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
 

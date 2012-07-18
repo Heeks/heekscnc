@@ -7,7 +7,6 @@ if len(sys.argv)>2:
     
     machine_module = __import__('nc.' + machine + '_read', fromlist = ['dummy'])
         
-    parser = machine_module.Parser()
-    
-    parser.writer = HxmlWriter()
+    parser = machine_module.Parser(HxmlWriter())
+
     parser.Parse(nc_file)

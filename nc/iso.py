@@ -310,7 +310,7 @@ class Creator(nc.Creator):
     ##  Rates + Modes
 
     def feedrate(self, f):
-        self.f = self.SPACE() + self.FEEDRATE() + self.ffmt.string(f)
+        self.f.set(f)
         self.fhv = False
 
     def feedrate_hv(self, fh, fv):
@@ -498,6 +498,7 @@ class Creator(nc.Creator):
         return angle_e - angle_s
 
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
+        if self.same_xyz(x, y, z): return
         if self.can_do_helical_arcs == False and self.in_quadrant_splitting == False and (z != None) and (math.fabs(z - self.z) > 0.000001) and (self.fmt.string(z) != self.fmt.string(self.z)):
             # split the helical arc into little line feed moves
             if x == None: x = self.x
