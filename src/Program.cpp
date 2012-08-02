@@ -45,7 +45,7 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed
 {
 	CNCConfig config(ConfigScope());
 	wxString machine_file_name;
-	config.Read(_T("ProgramMachine"), &machine_file_name, _T("iso"));
+	config.Read(_T("ProgramMachine"), &machine_file_name, _T("emc2b"));
 	m_machine = CProgram::GetMachine(machine_file_name);
 
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
