@@ -341,7 +341,7 @@ void CTool::SetDiameter( const double diameter )
             // and the cutting angle.
 
             double opposite = (m_params.m_diameter / 2.0) - m_params.m_flat_radius;
-            double angle = m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
+            double angle = m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
 
             m_params.m_cutting_edge_height = opposite / tan(angle);
 	    }
@@ -498,7 +498,7 @@ static void on_set_gradient(double value, HeeksObj* object)
 
 static double degrees_to_radians( const double degrees )
 {
-	return( (degrees / 360) * 2 * PI );
+	return( (degrees / 360) * 2 * M_PI );
 } // End degrees_to_radians() routine
 
 
@@ -655,7 +655,7 @@ static void on_set_flat_radius(double value, HeeksObj* object)
 		// and the cutting angle.
 
 		double opposite = ((CTool*)object)->m_params.m_diameter - ((CTool*)object)->m_params.m_flat_radius;
-		double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
+		double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
 
 		((CTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
 	}
@@ -679,7 +679,7 @@ static void on_set_cutting_edge_angle(double value, HeeksObj* object)
 		// and the cutting angle.
 
 		double opposite = ((CTool*)object)->m_params.m_diameter - ((CTool*)object)->m_params.m_flat_radius;
-		double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * PI;
+		double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
 
 		((CTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
 	}
@@ -1861,7 +1861,7 @@ TopoDS_Shape CTool::GetShape() const
 			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2) * ((m_params.m_type == CToolParams::eEngravingTool) ? 1.0 : 0.5), shaft_length );
 
 			// And a cone for the tip.
-			// double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (2 * PI);
+			// double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (2 * M_PI);
 			gp_Ax2 tip_position_and_orientation( shaft_start_location, gp_Dir(0,0,-1) );
 
 			BRepPrimAPI_MakeCone tool_tip( tip_position_and_orientation,
@@ -2082,7 +2082,7 @@ Python CTool::OCLDefinition(CAttachOp* attach_op) const
 
 		case CToolParams::eChamfer:
 		case CToolParams::eEngravingTool:
-			python << _T("ocl.CylConeCutter(float(") << m_params.m_flat_radius * 2 + attach_op->m_material_allowance << _T("), float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), float(") << m_params.m_cutting_edge_angle * PI/360 << _T("))\n");
+			python << _T("ocl.CylConeCutter(float(") << m_params.m_flat_radius * 2 + attach_op->m_material_allowance << _T("), float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), float(") << m_params.m_cutting_edge_angle * M_PI/360 << _T("))\n");
 			break;
 
 		default:
@@ -2217,7 +2217,7 @@ double CTool::CuttingRadius( const bool express_in_program_units /* = false */, 
 			    }
 			    else
 			    {
-			        radius = m_params.m_flat_radius + (depth * tan((m_params.m_cutting_edge_angle / 360.0 * 2 * PI)));
+			        radius = m_params.m_flat_radius + (depth * tan((m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI)));
 			        if (radius > (m_params.m_diameter / 2.0))
 			        {
 			            // The angle and depth would have us cutting larger than our largest diameter.
