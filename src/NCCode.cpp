@@ -156,7 +156,7 @@ bool PathArc::IsIncluded(gp_Pnt pnt,const PathObject* prev_po)
 		return true;
 
 	double the_angle = atan2(pnt.Y(),pnt.X());
-	double the_angle2 = the_angle + 2*PI;
+	double the_angle2 = the_angle + 2*M_PI;
 	return (the_angle >= start_angle && the_angle <= end_angle) || (the_angle2 >= start_angle && the_angle2 <= end_angle);
 }
 
@@ -275,7 +275,7 @@ std::list<gp_Pnt> PathArc::Interpolate( const PathObject *prev_po, const unsigne
 	if (start_angle == end_angle)
 	{
 		// It's a full circle.
-		angle_step = (2 * PI) / number_of_points;
+		angle_step = (2 * M_PI) / number_of_points;
 		if (m_dir == -1)
 		{
 			angle_step = -angle_step; // fix preview of full cw arcs

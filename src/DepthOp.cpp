@@ -54,7 +54,7 @@ void CDepthOp::ReloadPointers()
 
 static double degrees_to_radians( const double degrees )
 {
-	return( (degrees / 360.0) * (2 * PI) );
+	return( (degrees / 360.0) * (2 * M_PI) );
 } // End degrees_to_radians() routine
 
 /**

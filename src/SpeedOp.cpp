@@ -137,7 +137,7 @@ void CSpeedOpParams::ResetSpeeds(const int tool_number)
 			{
                 if (pTool->m_params.m_diameter > 0)
                 {
-                    m_spindle_speed = (surface_speed * 1000.0) / (PI * pTool->m_params.m_diameter);
+                    m_spindle_speed = (surface_speed * 1000.0) / (M_PI * pTool->m_params.m_diameter);
                     m_spindle_speed = floor(m_spindle_speed);	// Round down to integer
                 } // End if - then
 			} // End if - then
