@@ -2033,7 +2033,7 @@ TopoDS_Shape CTool::GetShape() const
 		case CToolParams::eDragKnife:
 			{
 				BRepPrimAPI_MakeBox knife(gp_Ax2(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)), this->m_params.m_drag_knife_distance, 0.1, 10.0);
-				return knife;
+				return knife.Shape();
 			}
 
 		case CToolParams::eEndmill:
