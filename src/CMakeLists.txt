@@ -93,6 +93,7 @@ set( heekscnc_HDRS
     RawMaterial.h
     Reselect.h
     ScriptOp.h
+    Simulate.h
     SpeedOp.h
     SpeedReference.h
     SpeedReferences.h
@@ -157,6 +158,7 @@ set( heekscnc_SRCS
     RawMaterial.cpp
     Reselect.cpp
     ScriptOp.cpp
+    Simulate.cpp
     SpeedOp.cpp
     SpeedReference.cpp
     SpeedReferences.cpp
