@@ -1,78 +1,194 @@
-project( HeeksCNC )
+
+project( libheekscnc )
+
 cmake_minimum_required( VERSION 2.6 )
-if( ${CMAKE_VERSION} STREQUAL "2.8.2" )
-  # bug http://vtk.org/Bug/view.php?id=11020
-  message( WARNING "CMake/CPack version 2.8.2 will not create working .deb packages!")
-endif( ${CMAKE_VERSION} STREQUAL "2.8.2" )
+if( NOT DEFINED BUILD_STARTED_IN_RIGHT_DIR )
+  message( FATAL_ERROR "Don't start a build in the src directory. Do a 'cd ..', then run cmake ." )
+endif( NOT DEFINED BUILD_STARTED_IN_RIGHT_DIR )
 
-set( CMAKE_BUILD_TYPE Debug )
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-set( BUILD_STARTED_IN_RIGHT_DIR "true" )  #used in src/CMakeLists.txt to print a message
-
-add_definitions ( -Wall -DOP_SKETCHES_AS_CHILDREN  )
-
+set ( CMAKE_BUILD_TYPE Debug )
+add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL
+                  -DOPEN_SOURCE_GEOMETRY -DWXUSINGDLL )
 find_package( wxWidgets REQUIRED COMPONENTS base core gl )
-find_package( PythonInterp REQUIRED )
 
 #find OCE or OpenCASCADE
-set( CASCADE_LIBS TKernel )
-if( UNIX )
-  set( OCE_DIR "/usr/local/share/cmake/" )
-else()
-  set( OCE_DIR "c:/OCE-0.3.0/share/cmake" )
-endif()
-find_package ( OCE )
+set( CASCADE_LIBS "TKernel;TKBRep;TKTopAlgo;TKMath;TKV3d;TKGeomBase;TKGeomAlgo;TKShHealing;TKBO;TKBool;TKOffset;TKLCAF;TKMath;TKService" )
+#inherits variables from parent dir - don't need to 'find_package ( OCE )' again
 if( ${OCE_FOUND} )
-  add_definitions ( -DHAVE_CONFIG_H )
   set( OpenCASCADE_LIBRARIES ${CASCADE_LIBS} )
   set( OpenCASCADE_INCLUDE_DIR ${OCE_INCLUDE_DIRS} )
 else() #look for OpenCASCADE
-  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" )
+  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
   find_package ( OpenCASCADE REQUIRED COMPONENTS ${CASCADE_LIBS} )
 endif()
 
+set( HEEKSCADPATH ../../ )
+# find_path( HeeksCadDir interface/HeeksObj.h ${HEEKSCADPATH} ~/HeeksCAD ../.. c:/heekscad )
+
 include(${wxWidgets_USE_FILE})
+
 include_directories (
-	${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-	${wxWidgets_INCLUDE_DIRS}
-	${OpenCASCADE_INCLUDE_DIR}
-	)
+    ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+    ${wxWidgets_INCLUDE_DIRS} ${OpenCASCADE_INCLUDE_DIR}
+    ${HEEKSCADPATH} ../kurve/geometry ../kurve/messages .
+    )
+set ( LIBRARY_OUTPUT_PATH ../bin )
 
-file( GLOB hcnc_py "${CMAKE_CURRENT_SOURCE_DIR}/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/pycnc/*.py")
-list( REMOVE_ITEM hcnc_py
-                  "${CMAKE_CURRENT_SOURCE_DIR}/post.py"
-                  "${CMAKE_CURRENT_SOURCE_DIR}/POST_TEST.py"
-                  "${CMAKE_CURRENT_SOURCE_DIR}/STLTools.py"   )
-install( FILES ${hcnc_py} DESTINATION lib/heekscnc )
+if( UNIX )
+  #set( platform_SRCS some_necessary_linux_file.cpp )
+  add_definitions( -DCMAKE_UNIX ) #defining this changes resource and script locations
+else( UNIX )
+  #windows
+  set( platform_SRCS dllmain.cpp stdafx.cpp )
+endif( UNIX )
 
+set( heekscnc_HDRS
+    AttachOp.h
+    ${HEEKSCADPATH}/interface/Box.h
+    CNCPoint.h
+    CTool.h
+    CToolDlg.h
+    CuttingRate.h
+    DepthOp.h
+    Drilling.h
+    Excellon.h
+    ${HEEKSCADPATH}/interface/HDialogs.h
+    ${HEEKSCADPATH}/interface/HeeksCADInterface.h
+    HeeksCNC.h
+    HeeksCNCInterface.h
+    HeeksCNCTypes.h
+    ${HEEKSCADPATH}/interface/HeeksColor.h
+    ${HEEKSCADPATH}/interface/HeeksObj.h
+    Interface.h
+    ${HEEKSCADPATH}/interface/LeftAndRight.h
+    MachineState.h
+    ${HEEKSCADPATH}/interface/MarkedObject.h
+    NCCode.h
+    ${HEEKSCADPATH}/interface/NiceTextCtrl.h
+    ${HEEKSCADPATH}/interface/ObjList.h
+    Op.h
+    Operations.h
+    OutputCanvas.h
+    ${HEEKSCADPATH}/interface/PictureFrame.h
+    Pocket.h
+    PocketDlg.h
+    Positioning.h
+    Probing.h
+    Profile.h
+    Program.h
+    ProgramCanvas.h
+    ${HEEKSCADPATH}/interface/Property.h
+    ${HEEKSCADPATH}/interface/PropertyCheck.h
+    ${HEEKSCADPATH}/interface/PropertyChoice.h
+    ${HEEKSCADPATH}/interface/PropertyColor.h
+    ${HEEKSCADPATH}/interface/PropertyDouble.h
+    ${HEEKSCADPATH}/interface/PropertyFile.h
+    ${HEEKSCADPATH}/interface/PropertyInt.h
+    ${HEEKSCADPATH}/interface/PropertyLength.h
+    ${HEEKSCADPATH}/interface/PropertyList.h
+    ${HEEKSCADPATH}/interface/PropertyString.h
+    ${HEEKSCADPATH}/interface/PropertyVertex.h
+    PythonString.h
+    PythonStuff.h
+    RawMaterial.h
+    Reselect.h
+    ScriptOp.h
+    SpeedOp.h
+    SpeedReference.h
+    SpeedReferences.h
+    stdafx.h
+    ${HEEKSCADPATH}/interface/strconv.h
+    Tag.h
+    Tags.h
+    Tapping.h
+    ${HEEKSCADPATH}/interface/Tool.h
+    ${HEEKSCADPATH}/interface/ToolImage.h
+    Tools.h
+    ${HEEKSCADPATH}/interface/TransientObject.h
+    TrsfNCCode.h
+   )
 
-IF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
-  set(PKG_ARCH i386)
-ELSE( CMAKE_SIZEOF_VOID_P EQUAL 4 )
-  set(PKG_ARCH amd64)
-ENDIF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+set( heekscnc_SRCS
+    AttachOp.cpp
+    CNCPoint.cpp
+    CTool.cpp
+    CToolDlg.cpp
+    CuttingRate.cpp
+    DepthOp.cpp
+    Drilling.cpp
+    Excellon.cpp
+    ${HEEKSCADPATH}/src/Geom.cpp
+    ${HEEKSCADPATH}/interface/HDialogs.cpp
+    HeeksCNC.cpp
+    HeeksCNCInterface.cpp
+    ${HEEKSCADPATH}/interface/HeeksColor.cpp
+    ${HEEKSCADPATH}/interface/HeeksObj.cpp
+    Interface.cpp
+    ${HEEKSCADPATH}/interface/LeftAndRight.cpp
+    MachineState.cpp
+    ${HEEKSCADPATH}/interface/MarkedObject.cpp
+    NCCode.cpp
+    ${HEEKSCADPATH}/interface/NiceTextCtrl.cpp
+    ${HEEKSCADPATH}/interface/ObjectCanvas.cpp
+    ${HEEKSCADPATH}/interface/ObjList.cpp
+    Op.cpp
+    Operations.cpp
+    OutputCanvas.cpp
+    ${HEEKSCADPATH}/interface/PictureFrame.cpp
+    Pocket.cpp
+    PocketDlg.cpp
+    Positioning.cpp
+    Probing.cpp
+    Profile.cpp
+    Program.cpp
+    ProgramCanvas.cpp
+    ${HEEKSCADPATH}/interface/PropertyCheck.cpp
+    ${HEEKSCADPATH}/interface/PropertyChoice.cpp
+    ${HEEKSCADPATH}/interface/PropertyColor.cpp
+    ${HEEKSCADPATH}/interface/PropertyDouble.cpp
+    ${HEEKSCADPATH}/interface/PropertyFile.cpp
+    ${HEEKSCADPATH}/interface/PropertyInt.cpp
+    ${HEEKSCADPATH}/interface/PropertyLength.cpp
+    ${HEEKSCADPATH}/interface/PropertyList.cpp
+    ${HEEKSCADPATH}/interface/PropertyString.cpp
+    ${HEEKSCADPATH}/interface/PropertyVertex.cpp
+    PythonString.cpp
+    PythonStuff.cpp
+    RawMaterial.cpp
+    Reselect.cpp
+    ScriptOp.cpp
+    SpeedOp.cpp
+    SpeedReference.cpp
+    SpeedReferences.cpp
+    stdafx.cpp
+    ${HEEKSCADPATH}/interface/strconv.cpp
+    Tag.cpp
+    Tags.cpp
+    Tapping.cpp
+    ${HEEKSCADPATH}/interface/ToolImage.cpp
+    Tools.cpp
+    ${HEEKSCADPATH}/interface/TransientObject.cpp
+   )
 
-#-------------------- package generation -------------------------
-set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "HeeksCAD Developers <heekscad-devel@googlegroups.com>")
-set(CPACK_PACKAGE_NAME "heekscnc")
-set(CPACK_PACKAGE_VERSION_MAJOR 0)
-set(CPACK_PACKAGE_VERSION_MINOR 18)
-set(CPACK_PACKAGE_VERSION_PATCH 0)
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_beta-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}_${PKG_ARCH}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "HeeksCNC, CNC machining add-in for HeeksCAD
- HeeksCNC is a CNC machining (CAM) add-in for HeeksCAD. It produces
- g-code for CNC machines, such as those run by linuxcnc.org's EMC2")
-set(CPACK_DEBIAN_PACKAGE_SECTION "science")
-set(CPACK_DEBIAN_PACKAGE_VERSION "")
+add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
+target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} )
+set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
+set_target_properties( heekscnc PROPERTIES LINK_FLAGS -Wl,-Bsymbolic-functions )
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "python-wxgtk2.8, libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python1.40.0 | libboost-python1.42.0, python" )
-set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "heekscad (>= 0.15.1), libopencascade-ocaf-6.3.0")
+#---------------- the lines below tell cmake what files get installed where.---------------------
+#------------------- this is used for 'make install' and 'make package' -------------------------
+install( TARGETS heekscnc DESTINATION lib )
 
+install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )
 
-#--------------- these are down here so that the package version vars above are visible -------------
-add_subdirectory( src )
-set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CPACK_PACKAGE_FILE_NAME}.deb" )
+file( GLOB icons "${CMAKE_CURRENT_SOURCE_DIR}/../icons/*.png" )
+install( FILES ${icons} DESTINATION share/heekscnc/icons )
 
-#------------- include(CPack) should be the last line in this file
-include(CPack)
+file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt")
+install(FILES ${nc} DESTINATION lib/heekscnc/nc )
+
+file( GLOB hcnc_defaults
+               "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
+               )
+install( FILES ${hcnc_defaults} DESTINATION lib/heekscnc/ )
+
