@@ -1047,7 +1047,7 @@ void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
 	for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
 	{
 		CNCCodeBlock* block = *It;
-		block->FormatText(textCtrl);
+		block->FormatText(textCtrl, block == m_highlighted_block, false);
 	}
 #endif
 
