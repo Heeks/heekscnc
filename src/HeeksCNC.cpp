@@ -824,10 +824,12 @@ static void CancelMenuCallback(wxCommandEvent &event)
 	HeeksPyCancel();
 }
 
+#ifdef WIN32
 static void SimulateCallback(wxCommandEvent &event)
 {
 	RunVoxelcutSimulation();
 }
+#endif
 
 static void OpenNcFileMenuCallback(wxCommandEvent& event)
 {
@@ -987,7 +989,9 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Send to Machine"), ToolImage(_T("tomachine")), _("Send to Machine"), SendToMachineMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
+#ifdef WIN32
 		heeksCAD->AddFlyoutButton(_("Simulate"), ToolImage(_T("simulate")), _("Simulate"), SimulateCallback);
+#endif
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		theApp.m_machiningBar->Realize();
@@ -1127,7 +1131,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), ToolImage(_T("python")), MakeScriptMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Run Python Script"), ToolImage(_T("runpython")), RunScriptMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), ToolImage(_T("postprocess")), PostProcessMenuCallback);
+#ifdef WIN32
 	heeksCAD->AddMenuItem(menuMachining, _("Simulate"), ToolImage(_T("simulate")), SimulateCallback);
+#endif
 	heeksCAD->AddMenuItem(menuMachining, _("Open NC File"), ToolImage(_T("opennc")), OpenNcFileMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Save NC File"), ToolImage(_T("savenc")), SaveNcFileMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), ToolImage(_T("tomachine")), SendToMachineMenuCallback);
