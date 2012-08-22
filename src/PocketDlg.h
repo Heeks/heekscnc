@@ -17,6 +17,8 @@ class PocketDlg : public HDialog
 	static wxBitmap* m_material_allowance_bitmap;
 	static wxBitmap* m_starting_center_bitmap;
 	static wxBitmap* m_starting_boundary_bitmap;
+	static wxBitmap* m_climb_milling_bitmap;
+	static wxBitmap* m_conventional_milling_bitmap;
 	static wxBitmap* m_tool_down_bitmap;
 	static wxBitmap* m_not_tool_down_bitmap;
 	static wxBitmap* m_use_zig_zag_bitmap;
@@ -34,6 +36,7 @@ class PocketDlg : public HDialog
 	CLengthCtrl *m_lgthStepOver;
 	CLengthCtrl *m_lgthMaterialAllowance;
 	wxComboBox *m_cmbStartingPlace;
+	wxComboBox *m_cmbCutMode;
 	wxComboBox *m_cmbEntryMove;
 	wxComboBox *m_cmbTool;
 	wxCheckBox *m_chkKeepToolDown;
@@ -63,6 +66,7 @@ public:
 
 	void OnChildFocus(wxChildFocusEvent& event);
 	void OnComboStartingPlace( wxCommandEvent& event );
+	void OnComboCutMode( wxCommandEvent& event );
 	void OnCheckKeepToolDown(wxCommandEvent& event);
 	void OnCheckUseZigZag(wxCommandEvent& event);
 	void OnComboTool(wxCommandEvent& event);
