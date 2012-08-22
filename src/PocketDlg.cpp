@@ -14,6 +14,7 @@ enum
 	ID_STEP_OVER,
 	ID_MATERIAL_ALLOWANCE,
 	ID_STARTING_PLACE,
+	ID_CUT_MODE,
 	ID_KEEP_TOOL_DOWN,
 	ID_USE_ZIG_ZAG,
 	ID_ZIG_ANGLE,
@@ -37,6 +38,7 @@ enum
 BEGIN_EVENT_TABLE(PocketDlg, HDialog)
     EVT_CHILD_FOCUS(PocketDlg::OnChildFocus)
     EVT_COMBOBOX(ID_STARTING_PLACE,PocketDlg::OnComboStartingPlace)
+    EVT_COMBOBOX(ID_CUT_MODE,PocketDlg::OnComboCutMode)
     EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, PocketDlg::OnCheckKeepToolDown)
     EVT_CHECKBOX(ID_USE_ZIG_ZAG, PocketDlg::OnCheckUseZigZag)
     EVT_CHECKBOX(ID_ZIG_UNIDIRECTIONAL, PocketDlg::OnCheckZigUnidirectional)
@@ -48,6 +50,8 @@ wxBitmap* PocketDlg::m_step_over_bitmap = NULL;
 wxBitmap* PocketDlg::m_material_allowance_bitmap = NULL;
 wxBitmap* PocketDlg::m_starting_center_bitmap = NULL;
 wxBitmap* PocketDlg::m_starting_boundary_bitmap = NULL;
+wxBitmap* PocketDlg::m_climb_milling_bitmap = NULL;
+wxBitmap* PocketDlg::m_conventional_milling_bitmap = NULL;
 wxBitmap* PocketDlg::m_tool_down_bitmap = NULL;
 wxBitmap* PocketDlg::m_not_tool_down_bitmap = NULL;
 wxBitmap* PocketDlg::m_use_zig_zag_bitmap = NULL;
@@ -103,6 +107,9 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
 	wxString starting_place_choices[] = {_("boundary"), _("center")};
 	AddLabelAndControl(sizerLeft, _("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices));
 
+	wxString cut_mode_choices[] = {_("conventional"), _("climb")};
+	AddLabelAndControl(sizerLeft, _("cut mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices));
+
 	wxString entry_move_choices[] = {_("Plunge"), _("Ramp"), _("Helical")};
 	AddLabelAndControl(sizerLeft, _("entry move"), m_cmbEntryMove = new wxComboBox(this, ID_DESCENT_STRATGEY, _T(""), wxDefaultPosition, wxDefaultSize, 3, entry_move_choices));
 
@@ -152,6 +159,7 @@ void PocketDlg::GetData(CPocket* object)
 	object->m_pocket_params.m_step_over = m_lgthStepOver->GetValue();
 	object->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	object->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
+	object->m_pocket_params.m_cut_mode = m_cmbCutMode->GetValue() ? CPocketParams::eClimb : CPocketParams::eConventional;
 	if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Plunge")) == 0) {
 		object->m_pocket_params.m_entry_move = CPocketParams::ePlunge;
 	}
@@ -195,6 +203,7 @@ void PocketDlg::SetFromData(CPocket* object)
 	m_lgthStepOver->SetValue(object->m_pocket_params.m_step_over);
 	m_lgthMaterialAllowance->SetValue(object->m_pocket_params.m_material_allowance);
 	m_cmbStartingPlace->SetValue((object->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));
+	m_cmbCutMode->SetValue((object->m_pocket_params.m_cut_mode == CPocketParams::eClimb) ? _("climb") : _("conventional"));
 	switch (object->m_pocket_params.m_entry_move) {
 	case CPocketParams::ePlunge:
 		m_cmbEntryMove->SetValue(_("Plunge"));
@@ -245,6 +254,11 @@ void PocketDlg::SetPicture()
 		if(m_cmbStartingPlace->GetValue() == _("boundary"))SetPicture(&m_starting_boundary_bitmap, _T("starting boundary"));
 		else SetPicture(&m_starting_center_bitmap, _T("starting center"));
 	}
+	else if(w == m_cmbCutMode)
+	{
+		if(m_cmbCutMode->GetValue() == _("climb"))SetPicture(&m_climb_milling_bitmap, _T("climb milling"));
+		else SetPicture(&m_conventional_milling_bitmap, _T("conventional milling"));
+	}
 	else if(w == m_chkKeepToolDown)
 	{
 		if(m_chkKeepToolDown->IsChecked())SetPicture(&m_tool_down_bitmap, _T("tool down"));
@@ -279,6 +293,12 @@ void PocketDlg::OnChildFocus(wxChildFocusEvent& event)
 }
 
 void PocketDlg::OnComboStartingPlace( wxCommandEvent& event )
+{
+	if(m_ignore_event_functions)return;
+	SetPicture();
+}
+
+void PocketDlg::OnComboCutMode( wxCommandEvent& event )
 {
 	if(m_ignore_event_functions)return;
 	SetPicture();

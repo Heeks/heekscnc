@@ -316,7 +316,7 @@ void CProfileParams::WriteXMLAttributes(TiXmlNode *root)
 void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	int int_for_bool;
-	int int_for_enum;;
+	int int_for_enum;
 
 	if(pElem->Attribute("side", &int_for_enum))m_tool_on_side = (eSide)int_for_enum;
 	if(pElem->Attribute("cut_mode", &int_for_enum))m_cut_mode = (eCutMode)int_for_enum;
