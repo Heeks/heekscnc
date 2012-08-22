@@ -159,7 +159,7 @@ void PocketDlg::GetData(CPocket* object)
 	object->m_pocket_params.m_step_over = m_lgthStepOver->GetValue();
 	object->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	object->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
-	object->m_pocket_params.m_cut_mode = m_cmbCutMode->GetValue() ? CPocketParams::eClimb : CPocketParams::eConventional;
+	object->m_pocket_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CPocketParams::eClimb : CPocketParams::eConventional;
 	if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Plunge")) == 0) {
 		object->m_pocket_params.m_entry_move = CPocketParams::ePlunge;
 	}
