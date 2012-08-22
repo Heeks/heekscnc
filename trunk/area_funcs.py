@@ -161,10 +161,12 @@ def recur(arealist, a1, stepover, from_center):
         if a2 != None:
             recur(arealist, a2, stepover, from_center)
 
-def get_curve_list(arealist):
+def get_curve_list(arealist, reverse_curves = False):
     curve_list = list()
     for a in arealist:
         for curve in a.getCurves():
+            if reverse_curves == True:
+                curve.Reverse()
             curve_list.append(curve)
     return curve_list
 
@@ -356,7 +358,7 @@ def zigzag(a, stepover, zig_unidirectional):
 
     reorder_zigs()
 
-def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None):
+def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
     global tool_radius_for_pocket
     global area_for_feed_possible
 
@@ -415,7 +417,7 @@ def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_d
                     current_offset = current_offset + stepover
                     a_offset = area.Area(a)
                     a_offset.Offset(current_offset)
-            curve_list = get_curve_list(arealist)
+            curve_list = get_curve_list(arealist, cut_mode == 'climb')
 
     layer_count = int((start_depth - final_depth) / stepdown)
 

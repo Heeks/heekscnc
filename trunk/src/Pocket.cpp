@@ -39,6 +39,7 @@ CPocketParams::CPocketParams()
 	m_zig_angle = 0.0;
 	m_zig_unidirectional = false;
 	m_entry_move = ePlunge;
+	m_cut_mode = eConventional;
 }
 
 void CPocketParams::set_initial_values(const CTool::ToolNumber_t tool_number)
@@ -101,10 +102,26 @@ static void on_set_zig_uni(bool value, HeeksObj* object)
 	((CPocket*)object)->WriteDefaultValues();
 }
 
+static void on_set_cut_mode(int value, HeeksObj* object)
+{
+	((CPocket*)object)->m_pocket_params.m_cut_mode = (CPocketParams::eCutMode)value;
+	((CPocket*)object)->WriteDefaultValues();
+}
+
 void CPocketParams::GetProperties(CPocket* parent, std::list<Property *> *list)
 {
+	CToolParams::eToolType tool_type = CTool::FindToolType(parent->m_tool_number);
+
 	list->push_back(new PropertyLength(_("step over"), m_step_over, parent, on_set_step_over));
 	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, parent, on_set_material_allowance));
+
+	if(CTool::IsMillingToolType(tool_type)){
+		std::list< wxString > choices;
+		choices.push_back(_("Conventional"));
+		choices.push_back(_("Climb"));
+		list->push_back(new PropertyChoice(_("cut mode"), choices, m_cut_mode, parent, on_set_cut_mode));
+	}
+
 	{
 		std::list< wxString > choices;
 		choices.push_back(_("Boundary"));
@@ -133,6 +150,7 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 	element = heeksCAD->NewXMLElement( "params" );
 	heeksCAD->LinkXMLEndChild( root,  element );
 	element->SetDoubleAttribute( "step", m_step_over);
+	element->SetAttribute( "cut_mode", m_cut_mode);
 	element->SetDoubleAttribute( "mat", m_material_allowance);
 	element->SetAttribute( "from_center", m_starting_place);
 	element->SetAttribute( "keep_tool_down", m_keep_tool_down_if_poss ? 1:0);
@@ -145,6 +163,8 @@ void CPocketParams::WriteXMLAttributes(TiXmlNode *root)
 void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	pElem->Attribute("step", &m_step_over);
+	int int_for_enum;
+	if(pElem->Attribute("cut_mode", &int_for_enum))m_cut_mode = (eCutMode)int_for_enum;
 	pElem->Attribute("mat", &m_material_allowance);
 	pElem->Attribute("from_center", &m_starting_place);
 	int int_for_bool = false;
@@ -339,7 +359,6 @@ const wxBitmap &CPocket::GetIcon()
 
 void CPocket::WritePocketPython(Python &python)
 {
-
 	// start - assume we are at a suitable clearance height
 
 	// make a parameter of area_funcs.pocket() eventually
@@ -357,6 +376,8 @@ void CPocket::WritePocketPython(Python &python)
 	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
 	python << _T(", ") << m_pocket_params.m_zig_angle;
 	python << _T(",") << (m_pocket_params.m_zig_unidirectional ? _T("True") : _T("False"));
+	python << _T(", None"); // start point
+	python << _T(",") << ((m_pocket_params.m_cut_mode == CPocketParams::eClimb) ? _T("'climb'") : _T("'conventional'"));
 	python << _T(")\n");
 
 	// rapid back up to clearance plane
@@ -491,6 +512,7 @@ void CPocket::WriteDefaultValues()
 
 	CNCConfig config(CPocketParams::ConfigScope());
 	config.Write(_T("StepOver"), m_pocket_params.m_step_over);
+	config.Write(_T("CutMode"), m_pocket_params.m_cut_mode);
 	config.Write(_T("MaterialAllowance"), m_pocket_params.m_material_allowance);
 	config.Write(_T("FromCenter"), m_pocket_params.m_starting_place);
 	config.Write(_T("KeepToolDown"), m_pocket_params.m_keep_tool_down_if_poss);
@@ -506,6 +528,9 @@ void CPocket::ReadDefaultValues()
 
 	CNCConfig config(CPocketParams::ConfigScope());
 	config.Read(_T("StepOver"), &m_pocket_params.m_step_over, 1.0);
+	int int_mode = m_pocket_params.m_cut_mode;
+	config.Read(_T("CutMode"), &int_mode, CPocketParams::eConventional);
+	m_pocket_params.m_cut_mode = (CPocketParams::eCutMode)int_mode;
 	config.Read(_T("MaterialAllowance"), &m_pocket_params.m_material_allowance, 0.2);
 	config.Read(_T("FromCenter"), &m_pocket_params.m_starting_place, 1);
 	config.Read(_T("KeepToolDown"), &m_pocket_params.m_keep_tool_down_if_poss, true);
@@ -595,7 +620,7 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 
 	std::list<TiXmlElement *> elements_to_remove;
 
-	// read profile parameters
+	// read parameters
 	TiXmlElement* params = heeksCAD->FirstNamedXMLChildElement(element, "params");
 	if(params)
 	{
