@@ -55,6 +55,8 @@ class Creator(nc.Creator):
         self.in_quadrant_splitting = False
         self.machine_coordinates = False
         self.drillExpanded = False
+        self.dwell_allowed_in_G83 = False
+        self.in_canned_cycle = False
         self.can_do_helical_arcs = True
         self.shift_x = 0.0
         self.shift_y = 0.0
@@ -65,8 +67,7 @@ class Creator(nc.Creator):
     def SPACE(self): return('')
     def FORMAT_FEEDRATE(self): return('%.2f') 
     def FORMAT_ANG(self): return('%.1f')
-    def FORMAT_TIME(self): return('%.2f')
-    def FORMAT_DWELL(self): return('P%f')
+    def FORMAT_TIME(self): return self.fmt
 
     def BLOCK(self): return('N%i')
     def COMMENT(self,comment): return( ('(%s)' % comment ) )
@@ -113,15 +114,15 @@ class Creator(nc.Creator):
     def FEED(self): return('G01')
     def ARC_CW(self): return('G02')
     def ARC_CCW(self): return('G03')
-    def DWELL(self): return('G04')
+    def DWELL(self, dwell): return('G04' + self.SPACE() + self.TIME() + (self.FORMAT_TIME().string(dwell)))
     def DRILL(self): return('G81')
-    def DRILL_WITH_DWELL(self, format, dwell): return('G82' + self.SPACE() + (format.string(dwell)))
+    def DRILL_WITH_DWELL(self, dwell): return('G82' + self.SPACE() + self.TIME() + (self.FORMAT_TIME().string(dwell)))
     def PECK_DRILL(self): return('G83')
-    def PECK_DEPTH(self, format, depth): return(self.SPACE() + 'Q' + (format.string(depth)))
-    def RETRACT(self, format, height): return(self.SPACE() + 'R' + (format.string(height)))
+    def PECK_DEPTH(self, depth): return(self.SPACE() + 'Q' + (self.fmt.string(depth)))
+    def RETRACT(self, height): return(self.SPACE() + 'R' + (self.fmt.string(height)))
     def END_CANNED_CYCLE(self): return('G80')
     def TAP(self): return('G84')
-    def TAP_DEPTH(self, format, depth): return(self.SPACE() + 'K' + (format.string(depth)))
+    def TAP_DEPTH(self, depth): return(self.SPACE() + 'K' + (self.fmt.string(depth)))
 
     def X(self): return('X')
     def Y(self): return('Y')
@@ -664,7 +665,7 @@ class Creator(nc.Creator):
     def dwell(self, t):
         self.write_blocknum()
         self.write_preps()
-        self.write(self.FORMAT_DWELL() % t)
+        self.write(self.SPACE() + self.DWELL(t))
         self.write_misc()
         self.write('\n')
 
@@ -739,7 +740,13 @@ class Creator(nc.Creator):
         if (z == None): 
             return    # We need a Z value as well.  This input parameter represents the top of the hole   
             
-        if self.drillExpanded:
+        drillExpanded = self.drillExpanded
+        if (peck_depth != 0) and (dwell != 0):
+            # pecking and dwell together
+            if self.dwell_allowed_in_G83 != True:     
+                drillExpanded = True
+          
+        if drillExpanded:
             # for machines which don't understand G81, G82 etc.
             if peck_depth == None:
                 peck_depth = depth
@@ -770,18 +777,22 @@ class Creator(nc.Creator):
             
             return
 
+        self.in_canned_cycle = True
         self.write_preps()
         self.write_blocknum()                
         
         if (peck_depth != 0):        
             # We're pecking.  Let's find a tree. 
             if self.drill_modal:       
-                if  self.PECK_DRILL() + self.PECK_DEPTH(self.fmt, peck_depth) != self.prev_drill:
-                    self.write(self.SPACE() + self.PECK_DRILL() + self.SPACE() + self.PECK_DEPTH(self.fmt, peck_depth))  
-                    self.prev_drill = self.PECK_DRILL() + self.PECK_DEPTH(self.fmt, peck_depth)
+                if  self.PECK_DRILL() + self.PECK_DEPTH(peck_depth) != self.prev_drill:
+                    self.write(self.SPACE() + self.PECK_DRILL() + self.SPACE() + self.PECK_DEPTH(peck_depth))  
+                    self.prev_drill = self.PECK_DRILL() + self.PECK_DEPTH(peck_depth)
             else:       
-                self.write(self.PECK_DRILL() + self.PECK_DEPTH(self.fmt, peck_depth)) 
-                           
+                self.write(self.PECK_DRILL() + self.PECK_DEPTH(peck_depth)) 
+            
+            if (self.dwell != 0) and self.dwell_allowed_in_G83:
+                self.write(self.SPACE() + self.DRILL_WITH_DWELL(dwell))
+                          
         else:        
             # We're either just drilling or drilling with dwell.        
             if (dwell == 0):        
@@ -797,14 +808,11 @@ class Creator(nc.Creator):
                 # We're drilling with dwell.
 
                 if self.drill_modal:       
-                    if  self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell) != self.prev_drill:
-                        self.write(self.SPACE() + self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell))  
-                        self.prev_drill = self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell)
+                    if  self.DRILL_WITH_DWELL(dwell) != self.prev_drill:
+                        self.write(self.SPACE() + self.DRILL_WITH_DWELL(dwell))  
+                        self.prev_drill = self.DRILL_WITH_DWELL(dwell)
                 else:
-                    self.write(self.SPACE() + self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell))
-
-        
-                #self.write(self.DRILL_WITH_DWELL(self.FORMAT_DWELL(),dwell))                
+                    self.write(self.SPACE() + self.DRILL_WITH_DWELL(dwell))
     
     # Set the retraction point to the 'standoff' distance above the starting z height.        
         retract_height = z + standoff        
@@ -829,11 +837,11 @@ class Creator(nc.Creator):
             self.z = (z + standoff)            # We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
-            if self.prev_retract  != self.RETRACT(self.fmt, retract_height) :
-                self.write(self.SPACE() + self.RETRACT(self.fmt, retract_height))               
-                self.prev_retract = self.RETRACT(self.fmt, retract_height)
+            if self.prev_retract  != self.RETRACT(retract_height) :
+                self.write(self.SPACE() + self.RETRACT(retract_height))               
+                self.prev_retract = self.RETRACT(retract_height)
         else:              
-            self.write(self.SPACE() + self.RETRACT(self.fmt, retract_height))
+            self.write(self.SPACE() + self.RETRACT(retract_height))
            
         if (self.fhv) : 
             self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
@@ -864,6 +872,7 @@ class Creator(nc.Creator):
         if (tap_mode != 0):
                 raise "only rigid tapping currently supported"
 
+        self.in_canned_cycle = True
         self.write_preps()
         self.write_blocknum()
         self.write_spindle()
@@ -905,7 +914,7 @@ class Creator(nc.Creator):
         pass
 
     def end_canned_cycle(self):
-        if self.drillExpanded:
+        if self.in_canned_cycle == False:
             return
         self.write_blocknum()
         self.write(self.SPACE() + self.END_CANNED_CYCLE() + '\n')
@@ -913,7 +922,9 @@ class Creator(nc.Creator):
         self.prev_g0123 = ''
         self.prev_z = ''   
         self.prev_f = '' 
-        self.prev_retract = ''    
+        self.prev_retract = ''
+        self.in_canned_cycle = False
+          
     ############################################################################
     ##  Misc
 
