@@ -313,7 +313,6 @@ public:
     } tap_sizes_t;
 
     void SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes);
-    std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	void OnChangeViewUnits(const double units);
 }; // End CTool class definition.
 

@@ -20,15 +20,9 @@
 #include "CNCConfig.h"
 #include "MachineState.h"
 #include "Program.h"
-#ifdef HEEKSCNC
 #define FIND_FIRST_TOOL CTool::FindFirstByType
 #define FIND_ALL_TOOLS CTool::FindAllTools
-#define MACHINE_STATE_TOOL(t) pMachineState->Tool(t)
-#else
-#define FIND_FIRST_TOOL heeksCNC->FindFirstToolByType
-#define FIND_ALL_TOOLS heeksCNC->FindAllTools
-#define MACHINE_STATE_TOOL(t) heeksCNC->MachineStateTool(pMachineState, t)
-#endif
+#define MACHINE_STATE_TOOL(t) theApp.machine_state.Tool(t)
 
 #include <iterator>
 #include <vector>
@@ -91,7 +85,9 @@ void COp::ReadBaseXML(TiXmlElement* element)
 }
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
-static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;heeksCAD->Changed();}
+// to do, make undoable properties
+static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;}
+// to do, make undoable properties
 
 static void on_set_tool_number(int zero_based_choice, HeeksObj* object)
 {
@@ -217,7 +213,6 @@ void COp::ReadDefaultValues()
 		case ProfileType:
 		case PocketType:
 		case RaftType:
-		case CounterBoreType:
 			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
 			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
 			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
@@ -260,7 +255,7 @@ void COp::ReadDefaultValues()
 /**
     Change tools (if necessary) and assign any private fixtures.
  */
-Python COp::AppendTextToProgram(CMachineState *pMachineState )
+Python COp::AppendTextToProgram()
 {
     Python python;
 
@@ -276,7 +271,7 @@ Python COp::AppendTextToProgram(CMachineState *pMachineState )
 
 void COp::OnEditString(const wxChar* str){
 	m_title.assign(str);
-	heeksCAD->Changed();
+	// to do, make undoable properties
 }
 
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)

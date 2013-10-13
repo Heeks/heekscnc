@@ -29,16 +29,12 @@
 #include "Profile.h"
 #include "Pocket.h"
 #include "Drilling.h"
-#include "Tapping.h"
-#include "Positioning.h"
 #include "CTool.h"
-#include "SpeedReference.h"
-#include "CuttingRate.h"
 #include "Operations.h"
 #include "Tools.h"
 #include "interface/strconv.h"
+#include "interface/Tool.h"
 #include "CNCPoint.h"
-#include "Probing.h"
 #include "Excellon.h"
 #include "Tags.h"
 #include "Tag.h"
@@ -53,7 +49,6 @@ CHeeksCADInterface* heeksCAD = NULL;
 CHeeksCNCApp theApp;
 
 extern void ImportToolsFile( const wxChar *file_path );
-extern void ImportSpeedReferencesFile( const wxChar *file_path );
 
 extern CTool::tap_sizes_t metric_tap_sizes[];
 extern CTool::tap_sizes_t unified_thread_standard_tap_sizes[];
@@ -205,10 +200,10 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 			} // End if - then
 		} // End for
 
-		heeksCAD->CreateUndoPoint();
+		heeksCAD->StartHistory();
 		CProfile *new_object = new CProfile(sketches, milling_tool_number);
 		new_object->AddMissingChildren();
-		theApp.m_program->Operations()->Add(new_object,NULL);
+		heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
 
@@ -221,12 +216,12 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 			if (ob != NULL)
 			{
 				CDrilling *new_object = new CDrilling( profiles, ((CTool *)ob)->m_tool_number, -1 );
-				theApp.m_program->Operations()->Add(new_object, NULL);
+				heeksCAD->AddUndoably(new_object, theApp.m_program);
 				heeksCAD->ClearMarkedList();
 				heeksCAD->Mark(new_object);
 			} // End if - then
 		} // End for
-		heeksCAD->Changed();
+		heeksCAD->EndHistory();
 	}
 }
 
@@ -239,13 +234,22 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 		CPocket *new_object = new CPocket(sketches, (tools.size()>0)?(*tools.begin()):-1 );
 		if(new_object->Edit())
 		{
-			heeksCAD->CreateUndoPoint();
-			theApp.m_program->Operations()->Add(new_object, NULL);
-			heeksCAD->Changed();
+			heeksCAD->StartHistory();
+			heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
+			heeksCAD->EndHistory();
 		}
 		else
 			delete new_object;
 	}
+}
+
+static void AddNewObjectUndoablyAndMarkIt(HeeksObj* new_object, HeeksObj* parent)
+{
+	heeksCAD->StartHistory();
+	heeksCAD->AddUndoably(new_object, parent);
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(new_object);
+	heeksCAD->EndHistory();
 }
 
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
@@ -277,7 +281,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	CDrilling::Symbols_t ToolsThatMatchCircles;
 	CDrilling drill( symbols, -1, -1 );
 
-	intersections = CDrilling::FindAllLocations(&drill);
+	intersections = drill.FindAllLocations();
 
 	if ((Tools.size() == 0) && (ToolsThatMatchCircles.size() > 0))
 	{
@@ -301,75 +305,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	heeksCAD->CreateUndoPoint();
-	CDrilling *new_object = new CDrilling( symbols, tool_number, depth );
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
-}
-
-
-static void NewTappingOpMenuCallback(wxCommandEvent &event)
-{
-	std::vector<CNCPoint> intersections;
-	CTapping::Symbols_t symbols;
-	CTapping::Symbols_t Tools;
-	int tool_number = 0;
-
-	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
-	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
-	{
-		HeeksObj* object = *It;
-		if (object->GetType() == ToolType)
-		{
-			Tools.push_back( CTapping::Symbol_t( object->GetType(), object->m_id ) );
-			tool_number = ((CTool *)object)->m_tool_number;
-		} // End if - then
-		else
-		{
-		    if (CTapping::ValidType( object->GetType() ))
-		    {
-                symbols.push_back( CTapping::Symbol_t( object->GetType(), object->m_id ) );
-		    }
-		} // End if - else
-	} // End for
-
-	double depth = -1;
-	CTapping::Symbols_t ToolsThatMatchCircles;
-	CTapping tap( symbols, -1, -1 );
-
-	intersections = CDrilling::FindAllLocations(&tap);
-
-	if ((Tools.size() == 0) && (ToolsThatMatchCircles.size() > 0))
-	{
-		// The operator didn't point to a tool object and one of the circles that they
-		// did point to happenned to match the diameter of an existing tool.  Use that
-		// one as our default.  The operator can always overwrite it later on.
-
-		std::copy( ToolsThatMatchCircles.begin(), ToolsThatMatchCircles.end(),
-				std::inserter( Tools, Tools.begin() ));
-	} // End if - then
-
-	if (intersections.size() == 0)
-	{
-		wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
-		return;
-	}
-
-	if(Tools.size() > 1)
-	{
-		wxMessageBox(_("You may only select a single tool for each tapping operation.!"));
-		return;
-	}
-
-	heeksCAD->CreateUndoPoint();
-	//CDrilling *new_object = new CDrilling( symbols, tool_number, depth );
-	CTapping *new_object = new CTapping( symbols, tool_number, depth );
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
+	AddNewObjectUndoablyAndMarkIt(new CDrilling( symbols, tool_number, depth ), theApp.m_program->Operations());
 }
 
 static void NewAttachOpMenuCallback(wxCommandEvent &event)
@@ -400,219 +336,26 @@ static void NewAttachOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	heeksCAD->CreateUndoPoint();
-	CAttachOp *new_object = new CAttachOp(solids, 0.01, 0.0);
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
+	AddNewObjectUndoablyAndMarkIt(new CAttachOp(solids, 0.01, 0.0), theApp.m_program->Operations());
 }
 
 static void NewUnattachOpMenuCallback(wxCommandEvent &event)
 {
-	heeksCAD->CreateUndoPoint();
 	CUnattachOp *new_object = new CUnattachOp();
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
-}
-
-static void NewPositioningOpMenuCallback(wxCommandEvent &event)
-{
-	std::vector<CNCPoint> intersections;
-	CDrilling::Symbols_t symbols;
-
-	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
-	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
-	{
-		HeeksObj* object = *It;
-		if (object != NULL)
-		{
-		    if (CPositioning::ValidType( object->GetType() ))
-		    {
-                symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
-		    }
-		} // End if - then
-	} // End for
-
-    if (symbols.size() == 0)
-    {
-        wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
-        return;
-    }
-
-	heeksCAD->CreateUndoPoint();
-	CPositioning *new_object = new CPositioning( symbols );
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
-}
-
-static void NewProbe_Centre_MenuCallback(wxCommandEvent &event)
-{
-	CTool::ToolNumber_t tool_number = 0;
-
-	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
-	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
-	{
-		HeeksObj* object = *It;
-		if ((object != NULL) && (object->GetType() == ToolType))
-		{
-			tool_number = ((CTool *)object)->m_tool_number;
-		} // End if - then
-	} // End for
-
-	if (tool_number == 0)
-	{
-		tool_number = CTool::FindFirstByType( CToolParams::eTouchProbe );
-	} // End if - then
-
-	heeksCAD->CreateUndoPoint();
-	CProbe_Centre *new_object = new CProbe_Centre( tool_number );
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
-}
-
-static void NewProbe_Grid_MenuCallback(wxCommandEvent &event)
-{
-	CTool::ToolNumber_t tool_number = 0;
-
-	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
-	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
-	{
-		HeeksObj* object = *It;
-		if ((object != NULL) && (object->GetType() == ToolType))
-		{
-			tool_number = ((CTool *)object)->m_tool_number;
-		} // End if - then
-	} // End for
-
-	if (tool_number == 0)
-	{
-		tool_number = CTool::FindFirstByType( CToolParams::eTouchProbe );
-	} // End if - then
-
-	heeksCAD->CreateUndoPoint();
-	CProbe_Grid *new_object = new CProbe_Grid( tool_number );
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
-}
-
-
-static void NewProbe_Edge_MenuCallback(wxCommandEvent &event)
-{
-	CTool::ToolNumber_t tool_number = 0;
-
-	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
-	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
-	{
-		HeeksObj* object = *It;
-		if ((object != NULL) && (object->GetType() == ToolType))
-		{
-			tool_number = ((CTool *)object)->m_tool_number;
-		} // End if - then
-	} // End for
-
-	if (tool_number == 0)
-	{
-		tool_number = CTool::FindFirstByType( CToolParams::eTouchProbe );
-	} // End if - then
-
-	heeksCAD->CreateUndoPoint();
-	CProbe_Edge *new_object = new CProbe_Edge( tool_number );
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
-}
-
-static void DesignRulesAdjustment(const bool apply_changes)
-{
-	std::list<wxString> changes;
-
-	HeeksObj* operations = theApp.m_program->Operations();
-
-	for(HeeksObj* obj = operations->GetFirstChild(); obj; obj = operations->GetNextChild())
-	{
-		if (COperations::IsAnOperation( obj->GetType() ))
-		{
-			if (obj != NULL)
-			{
-				std::list<wxString> change = ((COp *)obj)->DesignRulesAdjustment(apply_changes);
-				std::copy( change.begin(), change.end(), std::inserter( changes, changes.end() ));
-			} // End if - then
-		} // End if - then
-	} // End for
-
-	std::wostringstream l_ossChanges;
-	for (std::list<wxString>::const_iterator l_itChange = changes.begin(); l_itChange != changes.end(); l_itChange++)
-	{
-		l_ossChanges << l_itChange->c_str();
-	} // End for
-
-	if (l_ossChanges.str().size() > 0)
-	{
-		wxMessageBox( l_ossChanges.str().c_str() );
-	} // End if - then
-
-} // End DesignRulesAdjustmentMenuCallback() routine
-
-
-static void DesignRulesAdjustmentMenuCallback(wxCommandEvent &event)
-{
-	DesignRulesAdjustment(true);
-} // End DesignRulesAdjustmentMenuCallback() routine
-
-static void DesignRulesCheckMenuCallback(wxCommandEvent &event)
-{
-	DesignRulesAdjustment(false);
-} // End DesignRulesCheckMenuCallback() routine
-
-static void NewSpeedReferenceMenuCallback(wxCommandEvent &event)
-{
-	heeksCAD->CreateUndoPoint();
-	CSpeedReference *new_object = new CSpeedReference(_T("Fill in material name"), int(CToolParams::eCarbide), 0.0, 0.0);
-	theApp.m_program->SpeedReferences()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
-}
-
-static void NewCuttingRateMenuCallback(wxCommandEvent &event)
-{
-	heeksCAD->CreateUndoPoint();
-	CCuttingRate *new_object = new CCuttingRate(0.0, 0.0);
-	theApp.m_program->SpeedReferences()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
+	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
 }
 
 static void NewScriptOpMenuCallback(wxCommandEvent &event)
 {
-	heeksCAD->CreateUndoPoint();
 	CScriptOp *new_object = new CScriptOp();
-	theApp.m_program->Operations()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
+	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
 }
 
 static void AddNewTool(CToolParams::eToolType type)
 {
 	// Add a new tool.
-	heeksCAD->CreateUndoPoint();
 	CTool *new_object = new CTool(NULL, type, heeksCAD->GetNextID(ToolType));
-	theApp.m_program->Tools()->Add(new_object, NULL);
-	heeksCAD->ClearMarkedList();
-	heeksCAD->Mark(new_object);
-	heeksCAD->Changed();
+	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
 }
 
 static void NewDrillMenuCallback(wxCommandEvent &event)
@@ -639,16 +382,12 @@ static void NewMetricTappingToolMenuCallback(wxCommandEvent &event)
         if ((choices.size() > 0) && (choice == choices[i]))
         {
             // Add a new tool.
-            heeksCAD->CreateUndoPoint();
             CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
             new_object->m_params.m_diameter = metric_tap_sizes[i].diameter;
             new_object->m_params.m_pitch = metric_tap_sizes[i].pitch;
             new_object->m_params.m_direction = 0;    // Right hand thread.
             new_object->ResetTitle();
-            theApp.m_program->Tools()->Add(new_object, NULL);
-            heeksCAD->ClearMarkedList();
-            heeksCAD->Mark(new_object);
-            heeksCAD->Changed();
+			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
             return;
         }
     }
@@ -673,16 +412,12 @@ static void NewUnifiedThreadingStandardTappingToolMenuCallback(wxCommandEvent &e
         if ((choices.size() > 0) && (choice == choices[i]))
         {
             // Add a new tool.
-            heeksCAD->CreateUndoPoint();
             CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
             new_object->m_params.m_diameter = unified_thread_standard_tap_sizes[i].diameter;
             new_object->m_params.m_pitch = unified_thread_standard_tap_sizes[i].pitch;
             new_object->m_params.m_direction = 0;    // Right hand thread.
             new_object->ResetTitle();
-            theApp.m_program->Tools()->Add(new_object, NULL);
-            heeksCAD->ClearMarkedList();
-            heeksCAD->Mark(new_object);
-            heeksCAD->Changed();
+			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
             return;
         }
     }
@@ -707,16 +442,12 @@ static void NewBritishStandardWhitworthTappingToolMenuCallback(wxCommandEvent &e
         if ((choices.size() > 0) && (choice == choices[i]))
         {
             // Add a new tool.
-            heeksCAD->CreateUndoPoint();
             CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
             new_object->m_params.m_diameter = british_standard_whitworth_tap_sizes[i].diameter;
             new_object->m_params.m_pitch = british_standard_whitworth_tap_sizes[i].pitch;
             new_object->m_params.m_direction = 0;    // Right hand thread.
             new_object->ResetTitle();
-            theApp.m_program->Tools()->Add(new_object, NULL);
-            heeksCAD->ClearMarkedList();
-            heeksCAD->Mark(new_object);
-            heeksCAD->Changed();
+			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
             return;
         }
     }
@@ -954,7 +685,6 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("Profile"), ToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Pocket"), ToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Tap"), ToolImage(_T("optap")), _("New Tapping Operation..."), NewTappingOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
@@ -963,23 +693,10 @@ static void AddToolBars()
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Other operations"));
-		heeksCAD->AddFlyoutButton(_("Positioning"), ToolImage(_T("locating")), _("New Positioning Operation..."), NewPositioningOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Centre Operation..."), NewProbe_Centre_MenuCallback);
-		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Edge Operation..."), NewProbe_Edge_MenuCallback);
-		heeksCAD->AddFlyoutButton(_("Probing"), ToolImage(_T("probe")), _("New Probe Grid Operation..."), NewProbe_Grid_MenuCallback);
 		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Tool"), ToolImage(_T("drill")), _("New Tool Definition..."), NewDrillMenuCallback);
-		heeksCAD->StartToolBarFlyout(_("Design Rules"));
-		heeksCAD->AddFlyoutButton(_("Design Rules Check"), ToolImage(_("design_rules_check")), _("Design Rules Check..."), DesignRulesCheckMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Design Rules Adjustment"), ToolImage(_("design_rules_adjustment")), _("Design Rules Adjustment..."), DesignRulesAdjustmentMenuCallback);
-		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
-
-		heeksCAD->StartToolBarFlyout(_("Speeds"));
-		heeksCAD->AddFlyoutButton(_("Speed Reference"), ToolImage(_T("speed_reference")), _("Add Speed Reference..."), NewSpeedReferenceMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Cutting Rate"), ToolImage(_T("cutting_rate")), _("Add Cutting Rate Reference..."), NewCuttingRateMenuCallback);
-		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Post Processing"));
 		heeksCAD->AddFlyoutButton(_("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
@@ -1085,7 +802,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Profile Operation..."), ToolImage(_T("opprofile")), NewProfileOpMenuCallback);
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Pocket Operation..."), ToolImage(_T("pocket")), NewPocketOpMenuCallback);
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Drilling Operation..."), ToolImage(_T("drilling")), NewDrillingOpMenuCallback);
-	heeksCAD->AddMenuItem(menuMillingOperations, _("Tapping Operation..."), ToolImage(_T("optap")), NewTappingOpMenuCallback);
 
 	wxMenu *menu3dMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), ToolImage(_T("attach")), NewAttachOpMenuCallback);
@@ -1094,14 +810,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	// Additive Operations menu
 	wxMenu *menuOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menuOperations, _("Script Operation..."), ToolImage(_T("scriptop")), NewScriptOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Check..."), ToolImage(_T("design_rules_check")), DesignRulesCheckMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Design Rules Adjustment..."), ToolImage(_T("design_rules_adjustment")), DesignRulesAdjustmentMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Speed Reference..."), ToolImage(_T("speed_reference")), NewSpeedReferenceMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Cutting Rate Reference..."), ToolImage(_T("cutting_rate")), NewCuttingRateMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Positioning Operation..."), ToolImage(_T("locating")), NewPositioningOpMenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Probe Centre Operation..."), ToolImage(_T("probe")), NewProbe_Centre_MenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Probe Edge Operation..."), ToolImage(_T("probe")), NewProbe_Edge_MenuCallback);
-	heeksCAD->AddMenuItem(menuOperations, _("Probe Grid Operation..."), ToolImage(_T("probe")), NewProbe_Grid_MenuCallback);
 
     // Tapping tools menu
 	wxMenu *menuTappingTools = new wxMenu;
@@ -1181,18 +889,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Profile", CProfile::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Pocket", CPocket::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Drilling", CDrilling::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("Locating", CPositioning::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("Positioning", CPositioning::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("ProbeCentre", CProbe_Centre::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("ProbeEdge", CProbe_Edge::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("ProbeGrid", CProbe_Grid::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tool", CTool::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("CuttingTool", CTool::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("Tapping", CTapping::ReadFromXMLElement);
-
-	heeksCAD->RegisterReadXMLfunction("SpeedReferences", CSpeedReferences::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("SpeedReference", CSpeedReference::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("CuttingRate", CCuttingRate::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tags", CTags::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tag", CTag::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ScriptOp", CScriptOp::ReadFromXMLElement);
@@ -1228,18 +926,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
         if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportToolsFile ))
         {
             printf("Failed to register handler for Tool Table files\n");
-        }
-	}
-	{
-        std::list<wxString> file_extensions;
-        file_extensions.push_back(_T("speed"));
-        file_extensions.push_back(_T("speeds"));
-        file_extensions.push_back(_T("feed"));
-        file_extensions.push_back(_T("feeds"));
-        file_extensions.push_back(_T("feedsnspeeds"));
-        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportSpeedReferencesFile ))
-        {
-            printf("Failed to register handler for Speed References files\n");
         }
 	}
 
@@ -1320,7 +1006,6 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 		heeksCAD->GetMainObject()->Add(m_program, NULL);
 		theApp.m_program_canvas->Clear();
 		theApp.m_output_canvas->Clear();
-		heeksCAD->Changed();
 
 		std::list<wxString> directories;
 		wxString directory_separator;
@@ -1373,25 +1058,10 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 				wxString lowercase_file_name( *l_itFile );
 				lowercase_file_name.MakeLower();
 
-				if ((speed_references_found == false) && (lowercase_file_name.Find(_T("speed")) != -1))
-				{
-					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
-					heeksCAD->Changed();
-					speed_references_found = true;
-				} // End if - then
-				else if ((speed_references_found == false) && (lowercase_file_name.Find(_T("feed")) != -1))
-				{
-					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->SpeedReferences() );
-					heeksCAD->Changed();
-					speed_references_found = true;
-				} // End if - then
-				else if ((tool_table_found == false) && (lowercase_file_name.Find(_T("tool")) != -1))
+				if ((tool_table_found == false) && (lowercase_file_name.Find(_T("tool")) != -1))
 				{
 					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
 					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Tools() );
-					heeksCAD->Changed();
 					tool_table_found = true;
 				}
 			} // End for
@@ -1505,35 +1175,16 @@ wxString HeeksCNCType( const int type )
 	case OperationsType:       return(_("Operations"));
 	case ProfileType:       return(_("Profile"));
 	case PocketType:       return(_("Pocket"));
-	case ZigZagType:       return(_("ZigZag"));
-	case AdaptiveType:       return(_("Adaptive"));
 	case DrillingType:       return(_("Drilling"));
 	case ToolType:       return(_("Tool"));
 	case ToolsType:       return(_("Tools"));
-	case CounterBoreType:       return(_("CounterBore"));
-	case TurnRoughType:       return(_("TurnRough"));
 	case FixtureType:       return(_("Fixture"));
 	case FixturesType:       return(_("Fixtures"));
-	case SpeedReferenceType:       return(_("SpeedReference"));
-	case SpeedReferencesType:       return(_("SpeedReferences"));
-	case CuttingRateType:       return(_("CuttingRate"));
-	case PositioningType:       return(_("Positioning"));
-	case BOMType:       return(_("BOM"));
-	case TrsfNCCodeType:      return(_("TrsfNCCode"));
-	case ProbeCentreType:       return(_("ProbeCentre"));
-	case ProbeEdgeType:       return(_("ProbeEdge"));
-	case ContourType:       return(_("Contour"));
-	case ChamferType:       return(_("Chamfer"));
-	case InlayType:       return(_("Inlay"));
-	case ProbeGridType:       return(_("ProbeGrid"));
 	case TagsType:       return(_("Tags"));
 	case TagType:       return(_("Tag"));
 	case ScriptOpType:       return(_("ScriptOp"));
 	case AttachOpType:       return(_("AttachOp"));
 	case UnattachOpType:       return(_("UnattachOp"));
-	case WaterlineType:       return(_("Waterline"));
-	case RaftType:       return(_("Raft"));
-	case TappingType:       return(_("Tapping"));
 
 	default:
         return(_T("")); // Indicates that this function could not make the conversion.

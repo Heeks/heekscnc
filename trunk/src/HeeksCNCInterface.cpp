@@ -92,8 +92,3 @@ void CHeeksCNCInterface::PostProcess()
 	// run it
 	theApp.RunPythonScript();
 }
-
-wxString CHeeksCNCInterface::MachineStateTool(CMachineState *pMachineState, const int new_tool)
-{
-	return pMachineState->Tool(new_tool);
-}

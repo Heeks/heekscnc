@@ -5,9 +5,9 @@
 #include "stdafx.h"
 #include "Operations.h"
 #include "Op.h"
+#include "interface/Tool.h"
 #include "tinyxml/tinyxml.h"
 #include "Excellon.h"
-#include "Probing.h"
 
 #include <wx/progdlg.h>
 
@@ -65,7 +65,6 @@ void COperations::glCommands(bool select, bool marked, bool no_color)
 	ObjList::glCommands(select, marked, no_color);
 }
 
-
 void COperations::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
@@ -94,7 +93,7 @@ class SetAllActive: public Tool{
 			if(COperations::IsAnOperation(object->GetType()))
 			{
 				((COp*)object)->m_active = true;
-				heeksCAD->Changed();
+				// to do, make undoable properties
 			}
 		}
 	}
@@ -113,7 +112,7 @@ class SetAllInactive: public Tool{
 			if(COperations::IsAnOperation(object->GetType()))
 			{
 				((COp*)object)->m_active = false;
-				heeksCAD->Changed();
+				// to do, make undoable properties
 			}
 		}
 	}
@@ -144,7 +143,6 @@ bool COperations::IsAnOperation(int object_type)
 		case WaterlineType:
 		case AdaptiveType:
 		case DrillingType:
-		case CounterBoreType:
 		case TurnRoughType:
 		case PositioningType:
 		case ProbeCentreType:

@@ -28,6 +28,7 @@
 #include <BRepAlgoAPI_Cut.hxx>
 #include <Standard_Failure.hxx>
 #include <StdFail_NotDone.hxx>
+#include "tinyxml/tinyxml.h"
 
 #include <wx/progdlg.h>
 
