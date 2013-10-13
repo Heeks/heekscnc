@@ -11,10 +11,6 @@
 #include "interface/ObjList.h"
 #include "PythonStuff.h"
 
-// #define OP_SKETCHES_AS_CHILDREN
-
-class CMachineState;
-
 class COp : public ObjList
 {
 public:
@@ -47,17 +43,10 @@ public:
 
 	virtual void WriteDefaultValues();
 	virtual void ReadDefaultValues();
-	virtual Python AppendTextToProgram( CMachineState *pMachineState );
+	virtual Python AppendTextToProgram();
 	virtual bool UsesTool(){return true;} // some operations don't use the tool number
 
 	void ReloadPointers() { ObjList::ReloadPointers(); }
-
-	// The DesignRulesAdjustment() method is the opportunity for all Operations objects to
-	// adjust their parameters to values that 'make sense'.  eg: If a drilling cycle has a
-	// profile operation as a reference then it should not have a depth value that is deeper
-	// than the profile operation.
-	// The list of strings provides a description of what was changed.
-	virtual std::list<wxString> DesignRulesAdjustment(const bool apply_changes) { std::list<wxString> empty; return(empty); }
 
 	bool operator==(const COp & rhs) const;
 	bool operator!=(const COp & rhs) const { return(! (*this == rhs)); }

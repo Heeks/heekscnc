@@ -151,11 +151,7 @@ void PocketDlg::GetData(CPocket* object)
 	if(m_ignore_event_functions)return;
 	m_ignore_event_functions = true;
 	object->m_sketches.clear();
-#ifdef OP_SKETCHES_AS_CHILDREN
-	m_idsSketches->GetAddChildren(object, SketchType);
-#else
 	m_idsSketches->GetIDList(object->m_sketches);
-#endif
 	object->m_pocket_params.m_step_over = m_lgthStepOver->GetValue();
 	object->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	object->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
@@ -195,11 +191,7 @@ void PocketDlg::GetData(CPocket* object)
 void PocketDlg::SetFromData(CPocket* object)
 {
 	m_ignore_event_functions = true;
-#ifdef OP_SKETCHES_AS_CHILDREN
-	m_idsSketches->SetFromChildren(object, SketchType);
-#else
 	m_idsSketches->SetFromIDList(object->m_sketches);
-#endif
 	m_lgthStepOver->SetValue(object->m_pocket_params.m_step_over);
 	m_lgthMaterialAllowance->SetValue(object->m_pocket_params.m_material_allowance);
 	m_cmbStartingPlace->SetValue((object->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));

@@ -123,18 +123,17 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	bool CanAdd(HeeksObj* object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
-	void ReloadPointers();
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.
-	Python AppendTextToProgram( CMachineState *pMachineState );
+	Python AppendTextToProgram();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddSymbol( const SymbolType_t type, const SymbolId_t id ) { m_symbols.push_back( Symbol_t( type, id ) ); }
-	static std::vector<CNCPoint> FindAllLocations( ObjList *parent, const CNCPoint starting_location = CNCPoint(0.0, 0.0, 0.0),  const bool sort_locations = false, std::list<int> *pToolNumbersReferenced = NULL );
+	std::vector<CNCPoint> FindAllLocations();
+	static void SortLocations(std::vector<CNCPoint> &locations, const CNCPoint starting_location = CNCPoint(0.0, 0.0, 0.0));
 
-	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	static bool ValidType( const int object_type );
 
 	bool operator==( const CDrilling & rhs ) const;

@@ -76,13 +76,12 @@ public:
 	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	Python AppendTextToProgram(CMachineState *pMachineState);
+	Python AppendTextToProgram();
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void glCommands(bool select, bool marked, bool no_color);
 
 	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
 	void SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches);
-	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 
 	std::list<double> GetDepths() const;
 

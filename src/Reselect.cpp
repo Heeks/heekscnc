@@ -33,12 +33,10 @@ void ReselectSketches::Run()
 	heeksCAD->PickObjects(_("Select Sketches"), MARKING_FILTER_SKETCH | MARKING_FILTER_CIRCLE | MARKING_FILTER_AREA);
 	if(GetSketches( sketches ))
 	{
-		heeksCAD->CreateUndoPoint();
 		m_sketches->clear();
 		*m_sketches = sketches;
-		((ObjList*)m_object)->Clear();
 		m_object->ReloadPointers();
-		heeksCAD->Changed();
+		// to do, make undoable with properties
 	}
 	else
 	{
@@ -75,12 +73,11 @@ void ReselectSolids::Run()
 	heeksCAD->PickObjects(_("Select Solids"), MARKING_FILTER_SOLID | MARKING_FILTER_STL_SOLID);
 	if(GetSolids( solids ))
 	{
-		heeksCAD->CreateUndoPoint();
 		m_solids->clear();
 		*m_solids = solids;
 		((ObjList*)m_object)->Clear();
 		m_object->ReloadPointers();
-		heeksCAD->Changed();
+		// to do, make undoable, with properties
 	}
 	else
 	{
@@ -110,37 +107,16 @@ wxString GetIntListString(const std::list<int> &list)
 	return str;
 }
 
-#ifdef OP_SKETCHES_AS_CHILDREN
-void AddSolidsProperties(std::list<Property *> *list, HeeksObj* object)
-{
-	std::list<int> solids;
-	for(HeeksObj* child = object->GetFirstChild(); child; child = object->GetNextChild())
-	{
-		if(child->GetIDGroupType() == SolidType)solids.push_back(child->GetID());
-	}
-#else
 void AddSolidsProperties(std::list<Property *> *list, const std::list<int> &solids)
 {
-#endif
 	if(solids.size() == 0)list->push_back(new PropertyString(_("solids"), _("None"), NULL));
 	else if(solids.size() == 1)list->push_back(new PropertyInt(_("solid id"), solids.front(), NULL));
 	else list->push_back(new PropertyString(_("solids"), GetIntListString(solids), NULL));
 }
 
-#ifdef OP_SKETCHES_AS_CHILDREN
-void AddSketchesProperties(std::list<Property *> *list, HeeksObj* object)
-{
-	std::list<int> sketches;
-	for(HeeksObj* child = object->GetFirstChild(); child; child = object->GetNextChild())
-	{
-		if(child->GetIDGroupType() == SketchType)sketches.push_back(child->GetID());
-	}
-#else
 void AddSketchesProperties(std::list<Property *> *list, const std::list<int> &sketches)
 {
-#endif
 	if(sketches.size() == 0)list->push_back(new PropertyString(_("sketches"), _("None"), NULL));
 	else if(sketches.size() == 1)list->push_back(new PropertyInt(_("sketch id"), sketches.front(), NULL));
 	else list->push_back(new PropertyString(_("sketches"), GetIntListString(sketches), NULL));
 }
-

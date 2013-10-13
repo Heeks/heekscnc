@@ -75,20 +75,16 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
-#ifdef OP_SKETCHES_AS_CHILDREN
-	void ReloadPointers();
-#endif
 	void GetOnEdit(bool(**callback)(HeeksObj*));
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 
 	// COp's virtual functions
-	Python AppendTextToProgram(CMachineState *pMachineState);
+	Python AppendTextToProgram();
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
-	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
 	void WritePocketPython(Python &python);
 
 	static void GetOptions(std::list<Property *> *list);

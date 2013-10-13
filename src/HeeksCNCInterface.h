@@ -9,7 +9,6 @@
 class CProgram;
 class CTools;
 class COperations;
-class CMachineState;
 
 class CHeeksCNCInterface{
 public:
@@ -26,5 +25,4 @@ public:
 	virtual void HideMachiningMenu();
 	virtual void SetProcessRedirect(bool redirect);
 	virtual void PostProcess();
-	virtual wxString MachineStateTool(CMachineState *pMachineState, const int new_tool);
 };

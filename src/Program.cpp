@@ -40,7 +40,7 @@ using namespace std;
 
 wxString CProgram::alternative_machines_file = _T("");
 
-CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_speed_references(NULL)
+CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL)
 , m_script_edited(false)
 {
 	CNCConfig config(ConfigScope());
@@ -81,10 +81,7 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
     m_nc_code = NULL;
     m_operations = NULL;
     m_tools = NULL;
-    m_speed_references = NULL;
     m_script_edited = false;
-
-    m_raw_material = rhs.m_raw_material;
     m_machine = rhs.m_machine;
     m_output_file = rhs.m_output_file;
     m_output_file_name_follows_data_file_name = rhs.m_output_file_name_follows_data_file_name;
@@ -104,7 +101,6 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
     if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
     if ((m_operations != NULL) && (rhs.m_operations != NULL)) *m_operations = *(rhs.m_operations);
     if ((m_tools != NULL) && (rhs.m_tools != NULL)) *m_tools = *(rhs.m_tools);
-    if ((m_speed_references != NULL) && (rhs.m_speed_references != NULL)) *m_speed_references = *(rhs.m_speed_references);
 }
 
 CProgram::~CProgram()
@@ -132,9 +128,7 @@ void CProgram::CopyFrom(const HeeksObj* object)
 		if ((m_nc_code != NULL) && (rhs->m_nc_code != NULL)) m_nc_code->CopyFrom( rhs->m_nc_code );
 		if ((m_operations != NULL) && (rhs->m_operations != NULL)) m_operations->CopyFrom( rhs->m_operations );
 		if ((m_tools != NULL) && (rhs->m_tools != NULL)) m_tools->CopyFrom( rhs->m_tools );
-		if ((m_speed_references != NULL) && (rhs->m_speed_references != NULL)) m_speed_references->CopyFrom(rhs->m_speed_references);
 
-		m_raw_material = rhs->m_raw_material;
 		m_machine = rhs->m_machine;
 		m_output_file = rhs->m_output_file;
 		m_output_file_name_follows_data_file_name = rhs->m_output_file_name_follows_data_file_name;
@@ -160,9 +154,7 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 		if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
 		if ((m_operations != NULL) && (rhs.m_operations != NULL)) *m_operations = *(rhs.m_operations);
 		if ((m_tools != NULL) && (rhs.m_tools != NULL)) *m_tools = *(rhs.m_tools);
-		if ((m_speed_references != NULL) && (rhs.m_speed_references != NULL)) *m_speed_references = *(rhs.m_speed_references);
 
-		m_raw_material = rhs.m_raw_material;
 		m_machine = rhs.m_machine;
 		m_output_file = rhs.m_output_file;
 		m_output_file_name_follows_data_file_name = rhs.m_output_file_name_follows_data_file_name;
@@ -349,7 +341,6 @@ void CProgram::GetProperties(std::list<Property *> *list)
 	}
 
 	m_machine.GetProperties(this, list);
-	m_raw_material.GetProperties(this, list);
 
 	{
 		std::list< wxString > choices;
@@ -383,7 +374,7 @@ static void on_set_safety_height_defined(const bool value, HeeksObj *object)
 	CNCConfig config(CMachine::ConfigScope());
 	config.Write(_T("safety_height_defined"), ((CProgram *)object)->m_machine.m_safety_height_defined );
 
-    heeksCAD->Changed();
+    // to do, make undoable properties
 }
 
 static void on_set_safety_height(const double value, HeeksObj *object)
@@ -393,7 +384,7 @@ static void on_set_safety_height(const double value, HeeksObj *object)
 	CNCConfig config(CMachine::ConfigScope());
 	config.Write(_T("safety_height"), ((CProgram *)object)->m_machine.m_safety_height );
 
-    heeksCAD->Changed();
+    // to do, make undoable properties
 }
 
 static void on_set_clearance_height( const double value, HeeksObj *object)
@@ -469,7 +460,6 @@ void CProgram::WriteXML(TiXmlNode *root)
 	element->SetDoubleAttribute( "ProgramMotionBlendingTolerance", m_motion_blending_tolerance);
 	element->SetDoubleAttribute( "ProgramNaiveCamTolerance", m_naive_cam_tolerance);
 
-	m_raw_material.WriteBaseXML(element);
 	m_machine.WriteBaseXML(element);
 	WriteBaseXML(element);
 }
@@ -489,11 +479,6 @@ bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 	case ToolsType:
 			m_tools = (CTools*)object;
 		break;
-
-	case SpeedReferencesType:
-		m_speed_references = (CSpeedReferences*)object;
-		break;
-
 	}
 
 	return ObjList::Add(object, prev_object);
@@ -513,7 +498,6 @@ void CProgram::Remove(HeeksObj* object)
 	if(object == m_nc_code)m_nc_code = NULL;
 	else if(object == m_operations)m_operations = NULL;
 	else if(object == m_tools)m_tools = NULL;
-	else if(object == m_speed_references)m_speed_references = NULL;
 
 	ObjList::Remove(object);
 }
@@ -542,7 +526,6 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 	}
 
 	new_object->ReadBaseXML(pElem);
-	new_object->m_raw_material.ReadBaseXML(pElem);
 	new_object->m_machine.ReadBaseXML(pElem);
 
 	new_object->AddMissingChildren();
@@ -824,8 +807,6 @@ Python CProgram::RewritePythonProgram()
 		python << _T("set_path_control_mode(") << (int) m_path_control_mode << _T(",") << m_motion_blending_tolerance << _T(",") << m_naive_cam_tolerance << _T(")\n");
 	}
 
-	python << m_raw_material.AppendTextToProgram();
-
 	// write the tools setup code.
 	if (m_tools != NULL)
 	{
@@ -843,7 +824,8 @@ Python CProgram::RewritePythonProgram()
 
 	// copied operations ( with same id ) were not being done, so I've removed fixtures completely for the Windows installation
 	// Write all the operations
-    CMachineState machine;
+	theApp.machine_state = CMachineState();
+
 	for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 	{
 		HeeksObj *object = (HeeksObj *) *l_itOperation;
@@ -853,7 +835,7 @@ Python CProgram::RewritePythonProgram()
 		{
 			if(((COp*)object)->m_active)
 			{
-				python << ((COp*)object)->AppendTextToProgram( &machine );
+				python << ((COp*)object)->AppendTextToProgram();
 			}
 		}
 	} // End for - operation
@@ -1065,19 +1047,12 @@ CTools* CProgram::Tools()
     return m_tools;
 }
 
-CSpeedReferences *CProgram::SpeedReferences()
-{
-    if (m_speed_references == NULL) ReloadPointers();
-    return m_speed_references;
-}
-
 void CProgram::ReloadPointers()
 {
     for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
 	{
 	    if (child->GetType() == ToolsType) m_tools = (CTools *) child;
 	    if (child->GetType() == OperationsType) m_operations = (COperations *) child;
-	    if (child->GetType() == SpeedReferencesType) m_speed_references = (CSpeedReferences *) child;
 	    if (child->GetType() == NCCodeType) m_nc_code = (CNCCode *) child;
 	} // End for
 }
@@ -1090,13 +1065,11 @@ void CProgram::AddMissingChildren()
 	// make sure tools, operations, fixtures, etc. exist
 	if(m_tools == NULL){m_tools = new CTools; Add( m_tools, NULL );}
 	if(m_operations == NULL){m_operations = new COperations; Add( m_operations, NULL );}
-	if(m_speed_references == NULL){m_speed_references = new CSpeedReferences; Add( m_speed_references, NULL );}
 	if(m_nc_code == NULL){m_nc_code = new CNCCode; Add( m_nc_code, NULL );}
 }
 
 bool CProgram::operator==( const CProgram & rhs ) const
 {
-	if (m_raw_material != rhs.m_raw_material) return(false);
 	if (m_machine != rhs.m_machine) return(false);
 	if (m_output_file != rhs.m_output_file) return(false);
 	if (m_output_file_name_follows_data_file_name != rhs.m_output_file_name_follows_data_file_name) return(false);

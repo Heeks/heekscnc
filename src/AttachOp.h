@@ -35,14 +35,11 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CAttachOp *)other)); }
-#ifdef OP_SKETCHES_AS_CHILDREN
-	void ReloadPointers();
-#endif
 
 	const wxString ConfigScope(void)const{return _T("AttachOp");}
 
 	// COp's virtual functions
-	Python AppendTextToProgram(CMachineState *pMachineState);
+	Python AppendTextToProgram();
 	bool UsesTool(){return false;}
 	void WriteDefaultValues();
 	void ReadDefaultValues();
@@ -65,7 +62,7 @@ public:
 	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CUnattachOp *)other)); }
 
 	// COp's virtual functions
-	Python AppendTextToProgram(CMachineState *pMachineState);
+	Python AppendTextToProgram();
 	bool UsesTool(){return false;}
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);

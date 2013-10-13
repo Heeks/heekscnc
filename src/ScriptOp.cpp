@@ -15,16 +15,13 @@
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "PythonStuff.h"
-#include "MachineState.h"
 
 #ifdef HEEKSCNC
 #define FIND_FIRST_TOOL CTool::FindFirstByType
 #define FIND_ALL_TOOLS CTool::FindAllTools
-#define MACHINE_STATE_TOOL(t) pMachineState->Tool(t)
 #else
 #define FIND_FIRST_TOOL heeksCNC->FindFirstToolByType
 #define FIND_ALL_TOOLS heeksCNC->FindAllTools
-#define MACHINE_STATE_TOOL(t) heeksCNC->MachineStateTool(pMachineState, t)
 #endif
 
 #include <sstream>
@@ -288,13 +285,13 @@ This is a simple way to insert datum parameters for translating gcode around lat
 }
 
 
-Python CScriptOp::AppendTextToProgram(CMachineState *pMachineState)
+Python CScriptOp::AppendTextToProgram()
 {
 	Python python;
 
 	if (m_emit_depthop_params)
 	{
-		python << CDepthOp::AppendTextToProgram(pMachineState);
+		python << CDepthOp::AppendTextToProgram();
 	} else 	{
 		if(m_comment.Len() > 0)
 		{

@@ -40,7 +40,7 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 
 	// COp's virtual functions
-	Python AppendTextToProgram(CMachineState *pMachineState);
+	Python AppendTextToProgram();
 	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(0); }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
