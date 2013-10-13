@@ -22,7 +22,6 @@
 #include "CNCPoint.h"
 #include "Reselect.h"
 #include "PythonStuff.h"
-#include "MachineState.h"
 #include "Tags.h"
 #include "Tag.h"
 
@@ -144,11 +143,7 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 
 		if(parent->GetNumSketches() == 1)
 		{
-#ifdef OP_SKETCHES_AS_CHILDREN
-			HeeksObj* sketch = parent->GetFirstChild();
-#else
 			HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, parent->m_sketches.front());
-#endif
 			if((sketch) && (sketch->GetType() == SketchType))
 			{
 				order = heeksCAD->GetSketchOrder(sketch);
@@ -368,18 +363,6 @@ CProfile::CProfile(const std::list<int> &sketches, const int tool_number )
 			m_tags(NULL), m_sketches(sketches)
 {
     ReadDefaultValues();
-#ifdef OP_SKETCHES_AS_CHILDREN
-    for (std::list<int>::iterator id = m_sketches.begin(); id != m_sketches.end(); id++)
-    {
-        HeeksObj *object = heeksCAD->GetIDObject( SketchType, *id );
-        if (object != NULL)
-        {
-            Add( object, NULL );
-        }
-    }
-
-    m_sketches.clear();
-#endif
 } // End constructor
 
 CProfile & CProfile::operator= ( const CProfile & rhs )
@@ -425,7 +408,7 @@ void CProfile::Remove(HeeksObj* object)
 	CDepthOp::Remove(object);
 }
 
-Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, bool reversed )
+Python CProfile::WriteSketchDefn(HeeksObj* sketch, bool reversed )
 {
 	// write the python code for the sketch
 	Python python;
@@ -640,7 +623,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState,
 	return(python);
 }
 
-Python CProfile::AppendTextForOneSketch(HeeksObj* object, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode)
+Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMode cut_mode)
 {
     Python python;
 
@@ -660,7 +643,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CMachineState *pMachin
 		}
 
 		// write the kurve definition
-		python << WriteSketchDefn(object, pMachineState, initially_ccw != reversed);
+		python << WriteSketchDefn(object, initially_ccw != reversed);
 
 		// start - assume we are at a suitable clearance height
 
@@ -799,12 +782,9 @@ void CProfile::ReadDefaultValues()
 	config.Read(_T("ExtendAtEnd"), &m_profile_params.m_extend_at_end, 0.0);
 	config.Read(_T("LeadInLineLen"), &m_profile_params.m_lead_in_line_len, 0.0);
 	config.Read(_T("LeadOutLineLen"), &m_profile_params.m_lead_out_line_len, 0.0);
-
-	ConfirmAutoRollRadius(true);
-
 }
 
-Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
+Python CProfile::AppendTextToProgram()
 {
 	Python python;
 
@@ -817,19 +797,19 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState)
 	// roughing pass
 	if(!this->m_profile_params.m_do_finishing_pass || !this->m_profile_params.m_only_finishing_pass)
 	{
-		python << AppendTextToProgram(pMachineState, false);
+		python << AppendTextToProgram(false);
 	}
 
 	// finishing pass
 	if(this->m_profile_params.m_do_finishing_pass)
 	{
-		python << AppendTextToProgram(pMachineState, true);
+		python << AppendTextToProgram(true);
 	}
 
 	return python;
 }
 
-Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishing_pass)
+Python CProfile::AppendTextToProgram(bool finishing_pass)
 {
 	Python python;
 
@@ -842,7 +822,7 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 
 	if(!finishing_pass || m_profile_params.m_only_finishing_pass)
 	{
-		python << CDepthOp::AppendTextToProgram(pMachineState);
+		python << CDepthOp::AppendTextToProgram();
 
 		if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
 		{
@@ -867,18 +847,10 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 
 	CProfileParams::eCutMode cut_mode = finishing_pass ? m_profile_params.m_finishing_cut_mode : m_profile_params.m_cut_mode;
 
-#ifdef OP_SKETCHES_AS_CHILDREN
-	for(std::list<HeeksObj*>::iterator It = m_objects.begin(); It != m_objects.end(); It++)
-	{
-		// write a kurve definition
-		HeeksObj* object = *It;
-		if((object == NULL) || (object->GetType() != SketchType) || (object->GetNumChildren() == 0))continue;
-#else
 	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
     {
 		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
 		if((object == NULL) || (object->GetNumChildren() == 0))continue;
-#endif
 
 		HeeksObj* re_ordered_sketch = NULL;
 		SketchOrderType sketch_order = heeksCAD->GetSketchOrder(object);
@@ -896,13 +868,13 @@ Python CProfile::AppendTextToProgram(CMachineState *pMachineState, bool finishin
 			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 			{
 				HeeksObj* one_curve_sketch = *It;
-				python << AppendTextForOneSketch(one_curve_sketch, pMachineState, cut_mode).c_str();
+				python << AppendTextForOneSketch(one_curve_sketch, cut_mode).c_str();
 				delete one_curve_sketch;
 			}
 		}
 		else
 		{
-			python << AppendTextForOneSketch(object, pMachineState, cut_mode).c_str();
+			python << AppendTextForOneSketch(object, cut_mode).c_str();
 		}
 
 		if(re_ordered_sketch)
@@ -958,11 +930,8 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 
 void CProfile::GetProperties(std::list<Property *> *list)
 {
-#ifdef OP_SKETCHES_AS_CHILDREN
-	AddSketchesProperties(list, this);
-#else
 	AddSketchesProperties(list, m_sketches);
-#endif
+
 	m_profile_params.GetProperties(this, list);
 
 	CDepthOp::GetProperties(list);
@@ -1027,12 +996,12 @@ public:
 
 	void Run()
 	{
-		heeksCAD->CreateUndoPoint();
 		CTag* new_object = new CTag();
-		object_for_tools->Tags()->Add(new_object, NULL);
-		heeksCAD->Changed();
+		heeksCAD->StartHistory();
+		heeksCAD->AddUndoably(new_object, object_for_tools->Tags());
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
+		heeksCAD->EndHistory();
 
 		// go straight into tag position picking
 		CTag::PickPosition(new_object);
@@ -1087,7 +1056,6 @@ void CProfile::WriteXML(TiXmlNode *root)
 	heeksCAD->LinkXMLEndChild( root,  element );
 	m_profile_params.WriteXMLAttributes(element);
 
-#ifndef OP_SKETCHES_AS_CHILDREN
 	// write sketch ids
 	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
 	{
@@ -1096,7 +1064,6 @@ void CProfile::WriteXML(TiXmlNode *root)
 		heeksCAD->LinkXMLEndChild( element, sketch_element );
 		sketch_element->SetAttribute( "id", sketch);
 	}
-#endif
 
 	CDepthOp::WriteBaseXML(element);
 }
@@ -1156,183 +1123,13 @@ void CProfile::AddMissingChildren()
 unsigned int CProfile::GetNumSketches()
 {
 	unsigned int num_sketches = 0;
-#ifdef OP_SKETCHES_AS_CHILDREN
-    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
-    {
-#else
 	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
     {
 		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
-#endif
 		if(object && object->GetType() == SketchType)num_sketches++;
 	}
 	return num_sketches;
 }
-
-/**
-	The old version of the CDrilling object stored references to graphics as type/id pairs
-	that get read into the m_symbols list.  The new version stores these graphics references
-	as child elements (based on ObjList).  If we read in an old-format file then the m_symbols
-	list will have data in it for which we don't have children.  This routine converts
-	these type/id pairs into the HeeksObj pointers as children.
- */
-#ifdef OP_SKETCHES_AS_CHILDREN
-void CProfile::ReloadPointers()
-{
-	for (Sketches_t::iterator symbol = m_sketches.begin(); symbol != m_sketches.end(); symbol++)
-	{
-		HeeksObj *object = heeksCAD->GetIDObject( SketchType, *symbol );
-		if (object != NULL)
-		{
-			Add( object, NULL );
-		}
-	}
-
-	m_sketches.clear();	// We don't want to convert them twice.
-
-	CDepthOp::ReloadPointers();
-}
-#endif
-
-/**
-	If it's an 'inside' profile then we need to make sure the auto_roll_radius is not so large
-	that it's going to gouge the part outside the sketch's area.  This routine only
-	reduces the auto_roll_radius.  Its value is not changed unless a gouge scenario is detected.
- */
-std::list<wxString> CProfile::ConfirmAutoRollRadius(const bool apply_changes)
-{
-#ifdef UNICODE
-			std::wostringstream l_ossChange;
-#else
-			std::ostringstream l_ossChange;
-#endif
-
-	std::list<wxString> changes;
-
-	if (m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside)
-	{
-		// Look at the dimensions of the sketches as well as the diameter of the bit to decide if
-		// our existing m_auto_roll_radius is too big for this profile.  If so, reduce it now.
-		CTool *pTool = NULL;
-		if ((m_tool_number > 0) && ((pTool = CTool::Find(m_tool_number)) != NULL))
-		{
-			for (std::list<int>::iterator l_itSketchId = m_sketches.begin(); l_itSketchId != m_sketches.end(); l_itSketchId++)
-			{
-				HeeksObj *sketch = heeksCAD->GetIDObject( SketchType, *l_itSketchId );
-				if (sketch != NULL)
-				{
-					CBox bounding_box;
-					sketch->GetBox( bounding_box );
-
-					double min_distance_across = (bounding_box.Height() < bounding_box.Width())?bounding_box.Height():bounding_box.Width();
-					double max_roll_radius = (min_distance_across - (pTool->CuttingRadius() * 2.0)) / 2.0;
-
-					if (max_roll_radius < m_profile_params.m_auto_roll_radius)
-					{
-						l_ossChange << "Need to adjust auto_roll_radius for profile id=" << m_id << " from "
-								<< m_profile_params.m_auto_roll_radius << " to " << max_roll_radius << "\n";
-						changes.push_back(l_ossChange.str().c_str());
-
-						if (apply_changes)
-						{
-							m_profile_params.m_auto_roll_radius = max_roll_radius;
-						} // End if - then
-					}
-				} // End if - then
-			} // End for
-		} // End if - then
-	} // End if - then
-
-	return(changes);
-
-} // End ConfirmAutoRollRadius() method
-
-/**
-	This method adjusts any parameters that don't make sense.  It should report a list
-	of changes in the list of strings.
- */
-std::list<wxString> CProfile::DesignRulesAdjustment(const bool apply_changes)
-{
-	std::list<wxString> changes;
-
-	std::list<int> invalid_sketches;
-	for(std::list<int>::iterator l_itSketch = m_sketches.begin(); l_itSketch != m_sketches.end(); l_itSketch++)
-	{
-		HeeksObj *obj = heeksCAD->GetIDObject( SketchType, *l_itSketch );
-		if (obj == NULL)
-		{
-#ifdef UNICODE
-			std::wostringstream l_ossChange;
-#else
-			std::ostringstream l_ossChange;
-#endif
-
-			l_ossChange << _("Invalid reference to sketch") << " id='" << *l_itSketch << "' " << _("in profile operations") << " id='" << m_id << "'\n";
-			changes.push_back(l_ossChange.str().c_str());
-
-			if (apply_changes)
-			{
-				invalid_sketches.push_back( *l_itSketch );
-			} // End if - then
-		} // End if - then
-	} // End for
-
-	if (apply_changes)
-	{
-		for(std::list<int>::iterator l_itSketch = invalid_sketches.begin(); l_itSketch != invalid_sketches.end(); l_itSketch++)
-		{
-			std::list<int>::iterator l_itToRemove = std::find( m_sketches.begin(), m_sketches.end(), *l_itSketch );
-			if (l_itToRemove != m_sketches.end())
-			{
-				m_sketches.erase(l_itToRemove);
-			} // End while
-		} // End for
-	} // End if - then
-
-	if (GetNumSketches() == 0)
-	{
-#ifdef UNICODE
-			std::wostringstream l_ossChange;
-#else
-			std::ostringstream l_ossChange;
-#endif
-
-			l_ossChange << _("No valid sketches upon which to act for profile operations") << " id='" << m_id << "'\n";
-			changes.push_back(l_ossChange.str().c_str());
-	} // End if - then
-
-
-	if (m_tool_number > 0)
-	{
-		// Make sure the hole depth isn't greater than the tool's cutting depth.
-		CTool *pCutter = (CTool *) CTool::Find( m_tool_number );
-		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
-		{
-			// The tool we've chosen can't cut as deep as we've setup to go.
-
-			std::wostringstream l_ossChange;
-
-			l_ossChange << _("Adjusting depth of profile") << " id='" << m_id << "' " << _("from") << " '"
-				<< m_depth_op_params.m_final_depth << " " << _("to") << " "
-				<< pCutter->m_params.m_cutting_edge_height << " " << _("due to cutting edge length of selected tool") << "\n";
-			changes.push_back(l_ossChange.str().c_str());
-
-			if (apply_changes)
-			{
-				m_depth_op_params.m_final_depth = pCutter->m_params.m_cutting_edge_height;
-			} // End if - then
-		} // End if - then
-	} // End if - then
-
-	std::list<wxString> roll_radius_changes = ConfirmAutoRollRadius(apply_changes);
-	std::copy( roll_radius_changes.begin(), roll_radius_changes.end(), std::inserter( changes, changes.end() ) );
-
-	std::list<wxString> depth_op_changes = CDepthOp::DesignRulesAdjustment( apply_changes );
-	std::copy( depth_op_changes.begin(), depth_op_changes.end(), std::inserter( changes, changes.end() ) );
-
-	return(changes);
-
-} // End DesignRulesAdjustment() method
 
 static void on_set_spline_deviation(double value, HeeksObj* object){
 	CProfile::max_deviation_for_spline_to_arc = value;
@@ -1382,14 +1179,13 @@ bool CProfileParams::operator==( const CProfileParams & rhs ) const
 bool CProfile::operator==( const CProfile & rhs ) const
 {
 	if (m_profile_params != rhs.m_profile_params) return(false);
-#ifndef OP_SKETCHES_AS_CHILDREN
+
 	if(m_sketches.size() != rhs.m_sketches.size())return false;
 	std::list<int>::const_iterator It1 = m_sketches.begin(), It2 = rhs.m_sketches.begin();
 	for(;It1 != m_sketches.end(); It1++, It2++)
 	{
 		if(*It1 != *It2)return false;
 	}
-#endif
 
 	return(CDepthOp::operator==(rhs));
 }

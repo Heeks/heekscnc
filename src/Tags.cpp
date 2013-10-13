@@ -44,11 +44,9 @@ public:
 
 	void Run()
 	{
-      if (object_for_tools) { // jcoffland: object_for_tools can be NULL
-		heeksCAD->CreateUndoPoint();
+      if (object_for_tools) {
 		CTag* new_object = new CTag();
-		object_for_tools->Add(new_object, NULL);
-		heeksCAD->Changed();
+		heeksCAD->AddUndoably(new_object, object_for_tools);
 		heeksCAD->ClearMarkedList();
 		heeksCAD->Mark(new_object);
       }

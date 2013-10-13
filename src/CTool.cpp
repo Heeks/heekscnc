@@ -12,6 +12,7 @@
 #include "ProgramCanvas.h"
 #include "interface/HeeksObj.h"
 #include "interface/HeeksColor.h"
+#include "interface/Tool.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
@@ -20,7 +21,6 @@
 #include "tinyxml/tinyxml.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
-#include "MachineState.h"
 #include "Program.h"
 #include "AttachOp.h"
 
@@ -1349,7 +1349,7 @@ void CTool::OnEditString(const wxChar* str)
 {
     m_title.assign(str);
 	m_params.m_automatically_generate_title = false;	// It's been manually edited.  Leave it alone now.
-	heeksCAD->Changed();
+	// to do, make undoable properties
 }
 
 CTool *CTool::Find( const int tool_number )
@@ -1696,7 +1696,7 @@ wxString CTool::ResetTitle()
 	{
 		// It has the default title.  Give it a name that makes sense.
 		m_title = GetMeaningfulName(heeksCAD->GetViewUnits());
-		heeksCAD->Changed();
+		// to do, make undoable properties
 
 #ifdef UNICODE
 		std::wostringstream l_ossChange;
@@ -2518,55 +2518,6 @@ void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
 	*callback = NULL;
 #endif
 }
-
-
-/**
-	This method adjusts any parameters that don't make sense.  It should report a list
-	of changes in the list of strings.
- */
-std::list<wxString> CTool::DesignRulesAdjustment(const bool apply_changes)
-{
-	std::list<wxString> changes;
-
-    if (m_params.m_type == CToolParams::eTapTool)
-    {
-        bool found = false;
-        for (::size_t i=0; (metric_tap_sizes[i].diameter > 0.0); i++)
-        {
-            if ((m_params.m_diameter == metric_tap_sizes[i].diameter) &&
-                (m_params.m_pitch == metric_tap_sizes[i].pitch))
-            {
-                found = true;
-            }
-        }
-
-        for (::size_t i=0; (unified_thread_standard_tap_sizes[i].diameter > 0.0); i++)
-        {
-            if ((m_params.m_diameter == unified_thread_standard_tap_sizes[i].diameter) &&
-                (m_params.m_pitch == unified_thread_standard_tap_sizes[i].pitch))
-            {
-                found = true;
-            }
-        }
-
-        for (::size_t i=0; (british_standard_whitworth_tap_sizes[i].diameter > 0.0); i++)
-        {
-            if ((m_params.m_diameter == british_standard_whitworth_tap_sizes[i].diameter) &&
-                (m_params.m_pitch == british_standard_whitworth_tap_sizes[i].pitch))
-            {
-                found = true;
-            }
-        }
-
-        if (! found)
-        {
-            changes.push_back(_("The TAP tool's diameter and pitch don't match any of the standard sizes\n"));
-        }
-    }
-
-	return(changes);
-
-} // End DesignRulesAdjustment() method
 
 void CTool::OnChangeViewUnits(const double units)
 {

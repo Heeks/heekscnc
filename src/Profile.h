@@ -104,27 +104,22 @@ public:
 	void Remove(HeeksObj* object);
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-#ifdef OP_SKETCHES_AS_CHILDREN
-	void ReloadPointers();
-#endif
 
 	// Data access methods.
 	CTags* Tags(){return m_tags;}
 
-	Python WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState, bool reversed );
-	Python AppendTextForOneSketch(HeeksObj* object, CMachineState *pMachineState, CProfileParams::eCutMode cut_mode);
+	Python WriteSketchDefn(HeeksObj* sketch, bool reversed );
+	Python AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMode cut_mode);
 
 	// COp's virtual functions
-	Python AppendTextToProgram(CMachineState *pMachineState);
+	Python AppendTextToProgram();
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AddMissingChildren();
 	unsigned int GetNumSketches();
-	Python AppendTextToProgram(CMachineState *pMachineState, bool finishing_pass);
-	std::list<wxString> DesignRulesAdjustment(const bool apply_changes);
-	std::list<wxString> ConfirmAutoRollRadius(const bool apply_changes);
+	Python AppendTextToProgram(bool finishing_pass);
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();

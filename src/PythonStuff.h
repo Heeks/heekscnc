@@ -3,6 +3,7 @@
 
 class CBox;
 class CProgram;
+class Property;
 
 #include "PythonString.h"
 #include <wx/process.h>

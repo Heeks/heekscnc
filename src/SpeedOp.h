@@ -27,16 +27,12 @@ public:
 	void GetProperties(CSpeedOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
-	void ResetSpeeds(const int tool_number);
-	void ResetFeeds(const int tool_number);
 };
 
 class CSpeedOp : public COp
 {
 public:
 	CSpeedOpParams m_speed_op_params;
-
-	static bool m_auto_set_speeds_feeds;
 
 	CSpeedOp(const wxString& title, const int tool_number = -1, const int operation_type = UnknownType )
             :COp(title, tool_number, operation_type)
@@ -55,7 +51,7 @@ public:
 	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	Python AppendTextToProgram(CMachineState *pMachineState);
+	Python AppendTextToProgram();
 
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();

@@ -21,7 +21,6 @@
 #include "CTool.h"
 #include "CNCPoint.h"
 #include "Reselect.h"
-#include "MachineState.h"
 #include "PocketDlg.h"
 
 #include <sstream>
@@ -180,44 +179,8 @@ void CPocketParams::ReadFromXMLElement(TiXmlElement* pElem)
 	m_entry_move = (eEntryStyle) int_for_entry_move;
 }
 
-//static wxString WriteCircleDefn(HeeksObj* sketch, CMachineState *pMachineState) {
-//#ifdef UNICODE
-//	std::wostringstream gcode;
-//#else
-//	std::ostringstream gcode;
-//#endif
-//	gcode.imbue(std::locale("C"));
-//	gcode << std::setprecision(10);
-//	std::list<std::pair<int, gp_Pnt> > points;
-//	span_object->GetCentrePoint(c);
-//
-//	// Setup the four arcs that will make up the circle using UNadjusted
-//	// coordinates first so that the offsets align with the X and Y axes.
-//	double small_amount = 0.001;
-//	double radius = heeksCAD->CircleGetRadius(span_object);
-//
-//	points.push_back(std::make_pair(LINEAR, gp_Pnt(c[0], c[1] + radius, c[2]))); // north
-//	points.push_back(std::make_pair(CW, gp_Pnt(c[0] + radius, c[1], c[2]))); // east
-//	points.push_back(std::make_pair(CW, gp_Pnt(c[0], c[1] - radius, c[2]))); // south
-//	points.push_back(std::make_pair(CW, gp_Pnt(c[0] - radius, c[1], c[2]))); // west
-//	points.push_back(std::make_pair(CW, gp_Pnt(c[0], c[1] + radius, c[2]))); // north
-//
-//	CNCPoint centre(pMachineState->Fixture().Adjustment(c));
-//
-//	gcode << _T("c = area.Curve()\n");
-//	for (std::list<std::pair<int, gp_Pnt> >::iterator l_itPoint =
-//			points.begin(); l_itPoint != points.end(); l_itPoint++) {
-//		CNCPoint pnt = pMachineState->Fixture().Adjustment(l_itPoint->second);
-//
-//		gcode << _T("c.append(area.Vertex(") << l_itPoint->first
-//				<< _T(", area.Point(");
-//		gcode << pnt.X(true) << (_T(", ")) << pnt.Y(true);
-//		gcode << _T("), area.Point(") << centre.X(true) << _T(", ")
-//				<< centre.Y(true) << _T(")))\n");
-//	} // End for
-//	gcode << _T("a.append(c)\n");
-//}
-static wxString WriteSketchDefn(HeeksObj* sketch, CMachineState *pMachineState)
+
+static wxString WriteSketchDefn(HeeksObj* sketch)
 {
 #ifdef UNICODE
 	std::wostringstream gcode;
@@ -384,13 +347,9 @@ void CPocket::WritePocketPython(Python &python)
 	python << _T("rapid(z = clearance)\n");
 }
 
-Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
+Python CPocket::AppendTextToProgram()
 {
 	Python python;
-
-#ifdef OP_SKETCHES_AS_CHILDREN
-	ReloadPointers();   // Make sure all the m_sketches values have been converted into children.
-#endif
 
 	CTool *pTool = CTool::Find( m_tool_number );
 	if (pTool == NULL)
@@ -400,7 +359,7 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 	} // End if - then
 
 
-	python << CDepthOp::AppendTextToProgram(pMachineState);
+	python << CDepthOp::AppendTextToProgram();
 
 	// do areas and circles first, separately
 	int num_sketches = 0;
@@ -485,7 +444,7 @@ Python CPocket::AppendTextToProgram(CMachineState *pMachineState)
 
 		if(object)
 		{
-			python << WriteSketchDefn(object, pMachineState);
+			python << WriteSketchDefn(object);
 		}
 
 		if(re_ordered_sketch)
@@ -549,11 +508,8 @@ void CPocket::glCommands(bool select, bool marked, bool no_color)
 
 void CPocket::GetProperties(std::list<Property *> *list)
 {
-#ifdef OP_SKETCHES_AS_CHILDREN
-	AddSketchesProperties(list, this);
-#else
 	AddSketchesProperties(list, m_sketches);
-#endif
+
 	m_pocket_params.GetProperties(this, list);
 	CDepthOp::GetProperties(list);
 }
@@ -662,19 +618,6 @@ CPocket::CPocket(const std::list<int> &sketches, const int tool_number )
 {
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
-
-#ifdef OP_SKETCHES_AS_CHILDREN
-	for (Sketches_t::iterator sketch = m_sketches.begin(); sketch != m_sketches.end(); sketch++)
-	{
-		HeeksObj *object = heeksCAD->GetIDObject( SketchType, *sketch );
-		if (object != NULL)
-		{
-			Add( object, NULL );
-		}
-	}
-
-	m_sketches.clear();
-#endif
 }
 
 CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
@@ -682,13 +625,6 @@ CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
 {
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
-
-#ifdef OP_SKETCHES_AS_CHILDREN
-	for (std::list<HeeksObj *>::const_iterator sketch = sketches.begin(); sketch != sketches.end(); sketch++)
-	{
-		Add( *sketch, NULL );
-	}
-#endif
 }
 
 
@@ -700,110 +636,6 @@ CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
 	list will have data in it for which we don't have children.  This routine converts
 	these type/id pairs into the HeeksObj pointers as children.
  */
-#ifdef OP_SKETCHES_AS_CHILDREN
-void CPocket::ReloadPointers()
-{
-	for (Sketches_t::iterator symbol = m_sketches.begin(); symbol != m_sketches.end(); symbol++)
-	{
-		HeeksObj *object = heeksCAD->GetIDObject( SketchType, *symbol );
-		if (object != NULL)
-		{
-			Add( object, NULL );
-		}
-	}
-
-	m_sketches.clear();	// We don't want to convert them twice.
-
-	CDepthOp::ReloadPointers();
-}
-#endif
-
-
-
-/**
-	This method adjusts any parameters that don't make sense.  It should report a list
-	of changes in the list of strings.
- */
-std::list<wxString> CPocket::DesignRulesAdjustment(const bool apply_changes)
-{
-	std::list<wxString> changes;
-
-	int num_sketches = 0;
-#ifdef OP_SKETCHES_AS_CHILDREN
-    for (HeeksObj *object = GetFirstChild(); object != NULL; object = GetNextChild())
-    {
-		if (object->GetType() == SketchType)
-		{
-		    num_sketches++;
-		}
-#else
-	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-    {
-		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
-#endif
-	} // End if - then
-
-	if (num_sketches == 0)
-	{
-#ifdef UNICODE
-			std::wostringstream l_ossChange;
-#else
-			std::ostringstream l_ossChange;
-#endif
-
-			l_ossChange << _("No valid sketches upon which to act for pocket operations") << " id='" << m_id << "'\n";
-			changes.push_back(l_ossChange.str().c_str());
-	} // End if - then
-
-
-	if (m_tool_number > 0)
-	{
-		// Make sure the hole depth isn't greater than the tool's depth.
-		CTool *pCutter = (CTool *) CTool::Find( m_tool_number );
-
-		if ((pCutter != NULL) && (pCutter->m_params.m_cutting_edge_height < m_depth_op_params.m_final_depth))
-		{
-			// The tool we've chosen can't cut as deep as we've setup to go.
-
-#ifdef UNICODE
-			std::wostringstream l_ossChange;
-#else
-			std::ostringstream l_ossChange;
-#endif
-
-			l_ossChange << _("Adjusting depth of pocket") << " id='" << m_id << "' " << _("from") << " '"
-				<< m_depth_op_params.m_final_depth << "' " << _("to") << " "
-				<< pCutter->m_params.m_cutting_edge_height << " " << _("due to cutting edge length of selected tool") << "\n";
-			changes.push_back(l_ossChange.str().c_str());
-
-			if (apply_changes)
-			{
-				m_depth_op_params.m_final_depth = pCutter->m_params.m_cutting_edge_height;
-			} // End if - then
-		} // End if - then
-
-		// Also make sure the 'step-over' distance isn't larger than the tool's diameter.
-		if ((pCutter != NULL) && ((pCutter->CuttingRadius(false) * 2.0) < m_pocket_params.m_step_over))
-		{
-			wxString change;
-			change << _("The step-over distance for pocket (id=");
-			change << m_id;
-			change << _(") is larger than the tool's diameter");
-			changes.push_back(change);
-
-			if (apply_changes)
-			{
-				m_pocket_params.m_step_over = (pCutter->CuttingRadius(false) * 2.0);
-			} // End if - then
-		} // End if - then
-	} // End if - then
-
-	std::list<wxString> depth_op_changes = CDepthOp::DesignRulesAdjustment( apply_changes );
-	std::copy( depth_op_changes.begin(), depth_op_changes.end(), std::inserter( changes, changes.end() ) );
-
-	return(changes);
-
-} // End DesignRulesAdjustment() method
 
 static void on_set_spline_deviation(double value, HeeksObj* object){
 	CPocket::max_deviation_for_spline_to_arc = value;

@@ -82,14 +82,13 @@ public:
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Pick position");}
 	void Run(){
-		heeksCAD->CreateUndoPoint();
 		double pos[3];
 		if(heeksCAD->PickPosition(_("Pick position"), pos))
 		{
 			object_for_tools->m_pos[0] = pos[0];
 			object_for_tools->m_pos[1] = pos[1];
 		}
-		heeksCAD->Changed();
+		// to do make undoable
 	}
 	wxString BitmapPath(){ return _T("tagpos");}
 };

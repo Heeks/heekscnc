@@ -7,6 +7,8 @@
 #pragma once
 
 #include "interface/HeeksCADInterface.h"
+#include "CNCPoint.h"
+#include "MachineState.h"
 #include <list>
 #include <wx/string.h>
 
@@ -17,6 +19,7 @@ class CProgram;
 class CProgramCanvas;
 class COutputCanvas;
 class Tool;
+class CAttachOp;
 
 class CHeeksCNCApp{
 public:
@@ -34,6 +37,8 @@ public:
 	std::set<int> m_external_op_types;
 	bool m_use_Clipper_not_Boolean;
 	bool m_use_DOS_not_Unix;
+
+	CMachineState machine_state;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();

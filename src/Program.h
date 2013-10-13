@@ -8,8 +8,7 @@
 
 #include "interface/ObjList.h"
 #include "HeeksCNCTypes.h"
-#include "RawMaterial.h"
-#include "SpeedReferences.h"
+#include "PythonString.h"
 
 class CNCCode;
 class CProgram;
@@ -57,7 +56,6 @@ private:
 	CNCCode* m_nc_code;						// Access via NCCode() method
 	COperations* m_operations;				// Access via Operations() method
 	CTools* m_tools;						// Access via Tools() method
-	CSpeedReferences *m_speed_references;	// Access via SpeedReferences() method
 
 public:
 	static wxString ConfigScope(void) {return _T("Program");}
@@ -84,7 +82,6 @@ public:
 
 public:
 	static wxString alternative_machines_file;
-	CRawMaterial m_raw_material;	// for material hardness - to determine feeds and speeds.
 	CMachine m_machine;
 	wxString m_output_file;		// NOTE: Only relevant if the filename does NOT follow the data file's name.
 	bool m_output_file_name_follows_data_file_name;	// Just change the extension to determine the NC file name
@@ -93,7 +90,6 @@ public:
 	CNCCode* NCCode();
 	COperations* Operations();
 	CTools* Tools();
-	CSpeedReferences *SpeedReferences();
 
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches
