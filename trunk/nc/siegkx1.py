@@ -15,7 +15,6 @@ class Creator(iso_modal.Creator):
 
     def __init__(self):
         iso_modal.Creator.__init__(self)
-        self.dwell_allowed_in_G83 = True
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
         pass
