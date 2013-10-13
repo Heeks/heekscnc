@@ -754,11 +754,13 @@ class Creator(nc.Creator):
             self.rapid(x, y)
             
             first = True
+            last_cut = False
             
             while True:
                 next_z = current_z - peck_depth
-                if next_z < z - depth:
+                if next_z < (z - depth + 0.001):
                     next_z = z - depth
+                    last_cut = True
                 if next_z >= current_z:
                     break;
                 if first:
@@ -766,14 +768,11 @@ class Creator(nc.Creator):
                 else:
                     self.rapid(z = current_z)
                 self.feed(z = next_z)
+                if dwell != 0 and last_cut:
+                    self.dwell(dwell)        
                 self.rapid(z = z + standoff)
                 current_z = next_z
-                if dwell:
-                    self.dwell(dwell)        
                 first = False
-                
-            # we should pass clearance height into here, but my machine is on and I'm in a hurry... 22nd June 2011 danheeks
-            self.rapid(z = z + 5.0)
             
             return
 
@@ -791,7 +790,7 @@ class Creator(nc.Creator):
                 self.write(self.PECK_DRILL() + self.PECK_DEPTH(peck_depth)) 
             
             if (self.dwell != 0) and self.dwell_allowed_in_G83:
-                self.write(self.SPACE() + self.DRILL_WITH_DWELL(dwell))
+                self.write(self.SPACE() + self.TIME() + (self.FORMAT_TIME().string(dwell)))
                           
         else:        
             # We're either just drilling or drilling with dwell.        
