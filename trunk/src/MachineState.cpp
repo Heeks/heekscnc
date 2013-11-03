@@ -28,12 +28,12 @@ CMachineState::CMachineState()
 
 CMachineState::~CMachineState() { }
 
-CMachineState::CMachineState(CMachineState & rhs)
+CMachineState::CMachineState(const CMachineState & rhs)
 {
     *this = rhs;  // Call the assignment operator
 }
 
-CMachineState & CMachineState::operator= ( CMachineState & rhs )
+CMachineState & CMachineState::operator= ( const CMachineState & rhs )
 {
     if (this != &rhs)
     {
