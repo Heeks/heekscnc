@@ -325,7 +325,7 @@ class Creator(iso.Creator):
     #    retract_mode : 0 - rapid retract, 1 - feed retract
     #   spindle_mode ;     if true, stop spindle at bottom, otherwise keep runnung
 
-	def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None):
+	def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None, clearance_height = None):
 
 		if standoff == None:		
 			# This is a bad thing.  All the drilling cycles need a retraction (and starting) height.
