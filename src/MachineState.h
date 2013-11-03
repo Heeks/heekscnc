@@ -46,8 +46,8 @@ public:
 	CMachineState();
     ~CMachineState();
 
-    CMachineState(CMachineState & rhs);
-    CMachineState & operator= ( CMachineState & rhs );
+    CMachineState(const CMachineState & rhs);
+    CMachineState & operator= ( const CMachineState & rhs );
 
     int Tool() const { return(m_tool_number); }
     Python Tool( const int new_tool );

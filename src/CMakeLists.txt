@@ -48,7 +48,7 @@ set( heekscnc_HDRS
     CNCPoint.h
     CTool.h
     CToolDlg.h
-    CuttingRate.h
+    #CuttingRate.h
     DepthOp.h
     Drilling.h
     Excellon.h
@@ -72,8 +72,8 @@ set( heekscnc_HDRS
     ${HEEKSCADPATH}/interface/PictureFrame.h
     Pocket.h
     PocketDlg.h
-    Positioning.h
-    Probing.h
+    #Positioning.h
+    #Probing.h
     Profile.h
     Program.h
     ProgramCanvas.h
@@ -90,23 +90,23 @@ set( heekscnc_HDRS
     ${HEEKSCADPATH}/interface/PropertyVertex.h
     PythonString.h
     PythonStuff.h
-    RawMaterial.h
+    #RawMaterial.h
     Reselect.h
     ScriptOp.h
     Simulate.h
     SpeedOp.h
-    SpeedReference.h
-    SpeedReferences.h
+    #SpeedReference.h
+    #SpeedReferences.h
     stdafx.h
     ${HEEKSCADPATH}/interface/strconv.h
     Tag.h
     Tags.h
-    Tapping.h
+    #Tapping.h
     ${HEEKSCADPATH}/interface/Tool.h
     ${HEEKSCADPATH}/interface/ToolImage.h
     Tools.h
-    ${HEEKSCADPATH}/interface/TransientObject.h
-    TrsfNCCode.h
+    #${HEEKSCADPATH}/interface/TransientObject.h
+    #TrsfNCCode.h
    )
 
 set( heekscnc_SRCS
@@ -114,7 +114,7 @@ set( heekscnc_SRCS
     CNCPoint.cpp
     CTool.cpp
     CToolDlg.cpp
-    CuttingRate.cpp
+    #CuttingRate.cpp
     DepthOp.cpp
     Drilling.cpp
     Excellon.cpp
@@ -138,8 +138,8 @@ set( heekscnc_SRCS
     ${HEEKSCADPATH}/interface/PictureFrame.cpp
     Pocket.cpp
     PocketDlg.cpp
-    Positioning.cpp
-    Probing.cpp
+    #Positioning.cpp
+    #Probing.cpp
     Profile.cpp
     Program.cpp
     ProgramCanvas.cpp
@@ -155,21 +155,21 @@ set( heekscnc_SRCS
     ${HEEKSCADPATH}/interface/PropertyVertex.cpp
     PythonString.cpp
     PythonStuff.cpp
-    RawMaterial.cpp
+    #RawMaterial.cpp
     Reselect.cpp
     ScriptOp.cpp
     Simulate.cpp
     SpeedOp.cpp
-    SpeedReference.cpp
-    SpeedReferences.cpp
+    #SpeedReference.cpp
+    #SpeedReferences.cpp
     stdafx.cpp
     ${HEEKSCADPATH}/interface/strconv.cpp
     Tag.cpp
     Tags.cpp
-    Tapping.cpp
+    #Tapping.cpp
     ${HEEKSCADPATH}/interface/ToolImage.cpp
     Tools.cpp
-    ${HEEKSCADPATH}/interface/TransientObject.cpp
+    #${HEEKSCADPATH}/interface/TransientObject.cpp
    )
 
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
