@@ -253,7 +253,7 @@ class Creator:
         """Profile routine"""
         pass
 
-    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None):
+    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None, clearance_height = None):
         """Drilling routines"""
         pass
 
@@ -581,8 +581,8 @@ def pocket():
 def profile():
     creator.profile()
 
-def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None):
-    creator.drill(x, y, z, depth, standoff, dwell, peck_depth, retract_mode, spindle_mode)
+def drill(x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None, clearance_height = None):
+    creator.drill(x, y, z, depth, standoff, dwell, peck_depth, retract_mode, spindle_mode, clearance_height)
 
 
 def tap(x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None, tap_mode=None, direction=None):
