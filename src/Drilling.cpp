@@ -254,8 +254,8 @@ Python CDrilling::AppendTextToProgram()
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
 			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units << _T(", ")
 			<< _T("retract_mode=") << m_params.m_retract_mode << _T(", ")
-			<< _T("spindle_mode=") << m_params.m_spindle_mode// << _T(", ")
-			//<< _T("clearance_height=") << m_params.ClearanceHeight()
+			<< _T("spindle_mode=") << m_params.m_spindle_mode << _T(", ")
+			<< _T("clearance_height=") << m_params.ClearanceHeight()
 			<< _T(")\n");
         theApp.machine_state.Location(point); // Remember where we are.
 	} // End for

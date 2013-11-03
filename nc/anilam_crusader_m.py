@@ -104,7 +104,7 @@ class Creator(iso.Creator):
     def write_blocknum(self): 
         pass
         
-    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None,retract_mode=None, spindle_mode=None):
+    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None,retract_mode=None, spindle_mode=None, clearance_height = None):
         self.write('(Canned drill cycle ops are not yet supported here on this Anilam Crusader M postprocessor)')
 
 nc.creator = Creator()
