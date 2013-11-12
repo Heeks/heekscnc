@@ -89,7 +89,7 @@ static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)
 static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;}
 // to do, make undoable properties
 
-static void on_set_tool_number(int zero_based_choice, HeeksObj* object)
+static void on_set_tool_number(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 

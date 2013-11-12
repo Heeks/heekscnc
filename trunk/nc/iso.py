@@ -770,7 +770,8 @@ class Creator(nc.Creator):
                 self.feed(z = next_z)
                 if dwell != 0 and last_cut:
                     self.dwell(dwell)        
-                self.rapid(z = z + standoff)
+                if last_cut:self.rapid(z = clearance_height)
+                else: self.rapid(z = z + standoff)
                 current_z = next_z
                 first = False
             

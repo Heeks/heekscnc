@@ -89,13 +89,13 @@ void CDrillingParams::write_values_to_config()
 }
 
 
-static void on_set_spindle_mode(int value, HeeksObj* object)
+static void on_set_spindle_mode(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CDrilling*)object)->m_params.m_spindle_mode = value;
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
-static void on_set_retract_mode(int value, HeeksObj* object)
+static void on_set_retract_mode(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CDrilling*)object)->m_params.m_retract_mode = value;
 	((CDrilling*)object)->m_params.write_values_to_config();
@@ -125,7 +125,7 @@ static void on_set_peck_depth(double value, HeeksObj* object)
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
-static void on_set_sort_drilling_locations(int value, HeeksObj* object)
+static void on_set_sort_drilling_locations(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CDrilling*)object)->m_params.m_sort_drilling_locations = value;
 	((CDrilling*)object)->m_params.write_values_to_config();
