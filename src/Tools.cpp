@@ -224,7 +224,7 @@ void CTools::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	ObjList::GetTools(t_list, p);
 }
 
-static void on_set_title_format(int value, HeeksObj* object)
+static void on_set_title_format(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CTools *)object)->m_title_format = CTools::TitleFormat_t(value);
 

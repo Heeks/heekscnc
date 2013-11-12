@@ -366,7 +366,7 @@ static void on_set_diameter(double value, HeeksObj* object)
 	((CTool*)object)->SetDiameter( value );
 } // End on_set_diameter() routine
 
-static void on_set_direction(int value, HeeksObj* object)
+static void on_set_direction(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CTool*)object)->m_params.m_direction = value;
 	((CTool*)object)->ResetTitle();
@@ -409,7 +409,7 @@ static void on_set_tool_length_offset(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
-static void on_set_orientation(int zero_based_choice, HeeksObj* object)
+static void on_set_orientation(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured
 
@@ -425,7 +425,7 @@ static void on_set_orientation(int zero_based_choice, HeeksObj* object)
 	} // End if - else
 }
 
-static void on_set_material(int zero_based_choice, HeeksObj* object)
+static void on_set_material(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
@@ -467,7 +467,7 @@ static void on_set_back_angle(double value, HeeksObj* object)
 
 static CToolParams::ToolTypesList_t tool_types_for_on_set_type;
 
-static void on_set_type(int zero_based_choice, HeeksObj* object)
+static void on_set_type(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
@@ -479,7 +479,7 @@ static void on_set_type(int zero_based_choice, HeeksObj* object)
 	heeksCAD->Repaint();
 } // End on_set_type() routine
 
-static void on_set_automatically_generate_title(int zero_based_choice, HeeksObj* object)
+static void on_set_automatically_generate_title(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
@@ -722,7 +722,7 @@ static void on_set_probe_offset_y(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
-static void on_set_extrusion_material(int zero_based_choice, HeeksObj* object)
+static void on_set_extrusion_material(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
@@ -784,7 +784,7 @@ static void on_set_filament_diameter(double value, HeeksObj* object)
 }
 
 
-static void on_select_tap_from_standard_sizes(int chosen_units, HeeksObj* object)
+static void on_select_tap_from_standard_sizes(int chosen_units, HeeksObj* object, bool from_undo_redo)
 {
     switch (chosen_units)
     {
@@ -2099,7 +2099,27 @@ Python CTool::OCLDefinition(CAttachOp* attach_op) const
 
 	return python;
 
-} // End GetShape() method
+} 
+
+Python CTool::VoxelcutDefinition()const
+{
+	Python python;
+
+	python << _T("Tool([[Span(Point(");
+
+	switch (m_params.m_type)
+	{
+		case CToolParams::eBallEndMill:
+		case CToolParams::eChamfer:
+		case CToolParams::eEngravingTool:
+		default:
+			// to do, more than just a cylinder
+			python << _T("float(") << this->m_params.m_diameter/2 << _T("), 0), Vertex(Point(float(") << this->m_params.m_diameter/2 << _T("), 20)), False), GRAY]])");
+			break;
+	} // End switch
+
+	return python;
+}
 
 TopoDS_Face CTool::GetSideProfile() const
 {
@@ -2460,7 +2480,7 @@ bool CTool::operator==( const CTool & rhs ) const
 	return(true);
 }
 
-Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )
+Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )const
 {
 	Python python;
 	Python _indent;

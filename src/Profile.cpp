@@ -65,7 +65,7 @@ CProfileParams::CProfileParams()
 	m_finishing_step_down = 1.0;
 }
 
-static void on_set_tool_on_side(int value, HeeksObj* object){
+static void on_set_tool_on_side(int value, HeeksObj* object, bool from_undo_redo){
 	switch(value)
 	{
 	case 0:
@@ -81,7 +81,7 @@ static void on_set_tool_on_side(int value, HeeksObj* object){
 	((CProfile*)object)->WriteDefaultValues();
 }
 
-static void on_set_cut_mode(int value, HeeksObj* object)
+static void on_set_cut_mode(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CProfile*)object)->m_profile_params.m_cut_mode = (CProfileParams::eCutMode)value;
 	((CProfile*)object)->WriteDefaultValues();
@@ -106,7 +106,7 @@ static void on_set_lead_out_line_len(double value, HeeksObj* object){((CProfile*
 
 
 static void on_set_end_beyond_full_profile(bool value, HeeksObj* object){((CProfile*)object)->m_profile_params.m_end_beyond_full_profile = value;}
-static void on_set_sort_sketches(const int value, HeeksObj* object)
+static void on_set_sort_sketches(const int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CProfile*)object)->m_profile_params.m_sort_sketches = value;
 	((CProfile*)object)->WriteDefaultValues();
@@ -120,7 +120,7 @@ static void on_set_finishing_h_feed_rate(double value, HeeksObj* object)
 	((CProfile*)object)->WriteDefaultValues();
 }
 
-static void on_set_finish_cut_mode(int value, HeeksObj* object)
+static void on_set_finish_cut_mode(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CProfile*)object)->m_profile_params.m_finishing_cut_mode = (CProfileParams::eCutMode)value;
 	((CProfile*)object)->WriteDefaultValues();

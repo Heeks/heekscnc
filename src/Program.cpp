@@ -206,7 +206,7 @@ CMachine & CMachine::operator= ( const CMachine & rhs )
 } // End assignment operator.
 
 
-static void on_set_machine(int value, HeeksObj* object)
+static void on_set_machine(int value, HeeksObj* object, bool from_undo_redo)
 {
 	std::vector<CMachine> machines;
 	CProgram::GetMachines(machines);
@@ -223,7 +223,7 @@ static void on_set_output_file(const wxChar* value, HeeksObj* object)
 	config.Write(_T("ProgramOutputFile"), ((CProgram*)object)->m_output_file);
 }
 
-static void on_set_units(int value, HeeksObj* object)
+static void on_set_units(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CProgram*)object)->m_units = ((value == 0) ? 1.0:25.4);
 
@@ -243,7 +243,7 @@ static void on_set_units(int value, HeeksObj* object)
     heeksCAD->RefreshProperties();
 }
 
-static void on_set_output_file_name_follows_data_file_name(int zero_based_choice, HeeksObj *object)
+static void on_set_output_file_name_follows_data_file_name(int zero_based_choice, HeeksObj *object, bool from_undo_redo)
 {
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_output_file_name_follows_data_file_name = (zero_based_choice != 0);
@@ -253,7 +253,7 @@ static void on_set_output_file_name_follows_data_file_name(int zero_based_choice
 	config.Write(_T("OutputFileNameFollowsDataFileName"), pProgram->m_output_file_name_follows_data_file_name );
 }
 
-static void on_set_clearance_source(int zero_based_choice, HeeksObj *object)
+static void on_set_clearance_source(int zero_based_choice, HeeksObj *object, bool from_undo_redo)
 {
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_clearance_source = CProgram::eClearanceSource_t(zero_based_choice);
@@ -262,7 +262,7 @@ static void on_set_clearance_source(int zero_based_choice, HeeksObj *object)
 	config.Write(_T("ClearanceSource"), (int) pProgram->m_clearance_source );
 }
 
-static void on_set_path_control_mode(int zero_based_choice, HeeksObj *object)
+static void on_set_path_control_mode(int zero_based_choice, HeeksObj *object, bool from_undo_redo)
 {
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_path_control_mode = CProgram::ePathControlMode_t(zero_based_choice);

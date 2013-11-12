@@ -875,7 +875,7 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 
 
 
-static void on_set_allow_dummy_tool_definitions(int choice, HeeksObj *unused)
+static void on_set_allow_dummy_tool_definitions(int choice, HeeksObj *unused, bool from_undo_redo)
 {
 	(void) unused;	// Avoid the compiler warning.
 	Excellon::s_allow_dummy_tool_definitions = (choice != 0);

@@ -63,8 +63,7 @@ static void	WriteTools(std::wofstream &ofs)
 		if(object->GetType() == ToolType)
 		{
 			CTool* tool = (CTool*)object;
-			double diameter = tool->CuttingRadius() * 2;
-			ofs<<"toolpath.tools["<<tool->m_tool_number<<"] = [["<<diameter<<", "<<tool->m_params.m_cutting_edge_height<<", GRAY], [40, 40, RED]]\n";
+			ofs<<"toolpath.tools["<<tool->m_tool_number<<"] = "<<tool->VoxelcutDefinition().c_str()<<"\n";
 		}
 	}
 }

@@ -53,7 +53,7 @@ void CPocketParams::set_initial_values(const CTool::ToolNumber_t tool_number)
     }
 }
 
-static void on_set_entry_move(int value, HeeksObj* object)
+static void on_set_entry_move(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CPocket*)object)->m_pocket_params.m_entry_move = (CPocketParams::eEntryStyle) value;
 	((CPocket*)object)->WriteDefaultValues();
@@ -71,7 +71,7 @@ static void on_set_material_allowance(double value, HeeksObj* object)
 	((CPocket*)object)->WriteDefaultValues();
 }
 
-static void on_set_starting_place(int value, HeeksObj* object)
+static void on_set_starting_place(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CPocket*)object)->m_pocket_params.m_starting_place = value;
 	((CPocket*)object)->WriteDefaultValues();
@@ -101,7 +101,7 @@ static void on_set_zig_uni(bool value, HeeksObj* object)
 	((CPocket*)object)->WriteDefaultValues();
 }
 
-static void on_set_cut_mode(int value, HeeksObj* object)
+static void on_set_cut_mode(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CPocket*)object)->m_pocket_params.m_cut_mode = (CPocketParams::eCutMode)value;
 	((CPocket*)object)->WriteDefaultValues();
