@@ -10,7 +10,6 @@
 #include "CTool.h"
 #include "CNCPoint.h"
 #include "Program.h"
-#include "AttachOp.h"
 
 #ifdef HEEKSCNC
 #define PROGRAM theApp.m_program
@@ -78,7 +77,7 @@ Python CMachineState::Tool( const int new_tool )
             python << _T("tool_change( id=") << new_tool << _T(")\n");
 			if(m_attached_to_surface)
 			{
-				python << _T("nc.nc.creator.cutter = ") << pTool->OCLDefinition(m_attached_to_surface) << _T("\n");
+				python << _T("nc.nc.creator.set_ocl_cutter(") << pTool->OCLDefinition(m_attached_to_surface) << _T(")\n");
 			}
 			if(pTool->m_params.m_type == CToolParams::eDragKnife)
 			{

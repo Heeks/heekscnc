@@ -351,14 +351,6 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\AttachOp.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\AttachOp.h"
-			>
-		</File>
-		<File
 			RelativePath="$(HEEKSCADPATH)\interface\Box.h"
 			>
 		</File>
@@ -467,6 +459,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\HeeksCADSVN\interface\InputMode.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Interface.cpp"
 			>
 		</File>
@@ -548,6 +544,22 @@
 		</File>
 		<File
 			RelativePath=".\OutputCanvas.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Pattern.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Pattern.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Patterns.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Patterns.h"
 			>
 		</File>
 		<File
@@ -808,6 +820,22 @@
 		</File>
 		<File
 			RelativePath="$(HEEKSCADPATH)\interface\strconv.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Surface.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Surface.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Surfaces.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Surfaces.h"
 			>
 		</File>
 		<File

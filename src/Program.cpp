@@ -25,9 +25,13 @@
 #include "SpeedOp.h"
 #include "Operations.h"
 #include "Tools.h"
+#include "Patterns.h"
+#include "Surfaces.h"
 #include "interface/strconv.h"
 #include "MachineState.h"
-#include "AttachOp.h"
+#include "Pattern.h"
+#include "Surface.h"
+#include "src/Geom.h"
 
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
@@ -40,7 +44,7 @@ using namespace std;
 
 wxString CProgram::alternative_machines_file = _T("");
 
-CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL)
+CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_patterns(NULL), m_surfaces(NULL)
 , m_script_edited(false)
 {
 	CNCConfig config(ConfigScope());
@@ -81,6 +85,8 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
     m_nc_code = NULL;
     m_operations = NULL;
     m_tools = NULL;
+	m_patterns = NULL;
+	m_surfaces = NULL;
     m_script_edited = false;
     m_machine = rhs.m_machine;
     m_output_file = rhs.m_output_file;
@@ -128,6 +134,8 @@ void CProgram::CopyFrom(const HeeksObj* object)
 		if ((m_nc_code != NULL) && (rhs->m_nc_code != NULL)) m_nc_code->CopyFrom( rhs->m_nc_code );
 		if ((m_operations != NULL) && (rhs->m_operations != NULL)) m_operations->CopyFrom( rhs->m_operations );
 		if ((m_tools != NULL) && (rhs->m_tools != NULL)) m_tools->CopyFrom( rhs->m_tools );
+		if ((m_patterns != NULL) && (rhs->m_patterns != NULL)) m_patterns->CopyFrom( rhs->m_patterns );
+		if ((m_surfaces != NULL) && (rhs->m_surfaces != NULL)) m_surfaces->CopyFrom( rhs->m_surfaces );
 
 		m_machine = rhs->m_machine;
 		m_output_file = rhs->m_output_file;
@@ -154,6 +162,8 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 		if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
 		if ((m_operations != NULL) && (rhs.m_operations != NULL)) *m_operations = *(rhs.m_operations);
 		if ((m_tools != NULL) && (rhs.m_tools != NULL)) *m_tools = *(rhs.m_tools);
+		if ((m_patterns != NULL) && (rhs.m_patterns != NULL)) *m_patterns = *(rhs.m_patterns);
+		if ((m_surfaces != NULL) && (rhs.m_surfaces != NULL)) *m_surfaces = *(rhs.m_surfaces);
 
 		m_machine = rhs.m_machine;
 		m_output_file = rhs.m_output_file;
@@ -423,7 +433,8 @@ bool CProgram::CanAdd(HeeksObj* object)
 	return object->GetType() == NCCodeType ||
 		object->GetType() == OperationsType ||
 		object->GetType() == ToolsType ||
-		object->GetType() == SpeedReferencesType
+		object->GetType() == PatternsType ||
+		object->GetType() == SurfacesType
 		;
 }
 
@@ -477,7 +488,15 @@ bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 		break;
 
 	case ToolsType:
-			m_tools = (CTools*)object;
+		m_tools = (CTools*)object;
+		break;
+
+	case PatternsType:
+		m_patterns = (CPatterns*)object;
+		break;
+
+	case SurfacesType:
+		m_surfaces = (CSurfaces*)object;
 		break;
 	}
 
@@ -498,6 +517,8 @@ void CProgram::Remove(HeeksObj* object)
 	if(object == m_nc_code)m_nc_code = NULL;
 	else if(object == m_operations)m_operations = NULL;
 	else if(object == m_tools)m_tools = NULL;
+	else if(object == m_patterns)m_patterns = NULL;
+	else if(object == m_surfaces)m_surfaces = NULL;
 
 	ObjList::Remove(object);
 }
@@ -557,12 +578,71 @@ void CMachine::ReadBaseXML(TiXmlElement* element)
 
 } // End ReadBaseXML() method
 
+void ApplyPatternToText(Python &python, int p)
+{
+	CPattern* pattern = (CPattern*)heeksCAD->GetIDObject(PatternType, p);
+	if(pattern)
+	{
+		// write a transform redirector
+		python << _T("nc.transform.transform_begin([");
+		std::list<gp_Trsf> matrices;
+		pattern->GetMatrices(matrices);
+		for(std::list<gp_Trsf>::iterator It = matrices.begin(); It != matrices.end(); It++)
+		{
+			if(It != matrices.begin())python << _T(", ");
+			gp_Trsf &mat = *It;
+			python << _T("area.Matrix([");
+			double m[16];
+			extract(mat, m);
+			for(int i = 0; i<16; i++)
+			{
+				if(i>0)python<<_T(", ");
+				python<<m[i];
+			}
+			python << _T("])");
+		}
+		python<<_T("])\n");
+	}
+}
+
+void ApplySurfaceToText(Python &python, CSurface* surface, std::set<CSurface*> &surfaces_written)
+{
+	if(surfaces_written.find(surface) == surfaces_written.end())
+	{
+		surfaces_written.insert(surface);
+		// get the solids list
+		std::list<HeeksObj*> solids;
+		for (std::list<int>::iterator It = surface->m_solids.begin(); It != surface->m_solids.end(); It++)
+		{
+			HeeksObj* object = heeksCAD->GetIDObject(SolidType, *It);
+			if (object != NULL)solids.push_back(object);
+		} // End for
+
+		wxStandardPaths standard_paths;
+		wxFileName filepath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("surface%d.stl"), CSurface::number_for_stl_file).c_str() );
+		CSurface::number_for_stl_file++;
+
+		//write stl file
+		heeksCAD->SaveSTLFile(solids, filepath.GetFullPath(), 0.01);
+
+		python << _T("stl") << (int)(surface->m_id) << _T(" = ocl_funcs.STLSurfFromFile(") << PythonString(filepath.GetFullPath()) << _T(")\n");
+	}
+
+	python << _T("nc.attach.units = ") << theApp.m_program->m_units << _T("\n");
+	python << _T("nc.attach.attach_begin()\n");
+	python << _T("nc.nc.creator.stl = stl") << (int)(surface->m_id) << _T("\n");
+	python << _T("nc.nc.creator.minz = ") << surface->m_min_z << _T("\n");
+	python << _T("nc.nc.creator.material_allowance = ") << surface->m_material_allowance << _T("\n");
+
+	theApp.machine_state.m_attached_to_surface = surface;
+}
+
 Python CProgram::RewritePythonProgram()
 {
 	Python python;
 
 	theApp.m_program_canvas->m_textCtrl->Clear();
-	CAttachOp::number_for_stl_file = 1;
+	CSurface::number_for_stl_file = 1;
 
 	// call any OnRewritePython functions from other plugins
 	for(std::list< void(*)() >::iterator It = theApp.m_OnRewritePython_list.begin(); It != theApp.m_OnRewritePython_list.end(); It++)
@@ -577,8 +657,7 @@ Python CProgram::RewritePythonProgram()
 	bool ocl_module_needed = false;
 	bool ocl_funcs_needed = false;
 	bool nc_attach_needed = false;
-	bool actp_funcs_needed = false;
-	bool turning_module_needed = false;
+	bool transform_module_needed = false;
 
 	typedef std::vector< COp * > OperationsMap_t;
 	OperationsMap_t operations;
@@ -596,6 +675,8 @@ Python CProgram::RewritePythonProgram()
 
 		if(((COp*)object)->m_active)
 		{
+			if(((COp*)object)->m_pattern != 0)transform_module_needed = true;
+			if(((COp*)object)->m_surface != 0){nc_attach_needed = true; ocl_module_needed = true; ocl_funcs_needed = true;}
 
 			switch(object->GetType())
 			{
@@ -604,27 +685,14 @@ Python CProgram::RewritePythonProgram()
 				break;
 
 			case PocketType:
-			case RaftType:
-			case InlayType:
 				area_funcs_needed = true;
 				break;
 
-			case AttachOpType:
-			case UnattachOpType:
 			case ScriptOpType:
 				ocl_module_needed = true;
 				nc_attach_needed = true;
-			case ZigZagType:
-			case WaterlineType:
 				ocl_funcs_needed = true;
 				break;
-
-			case AdaptiveType:
-				actp_funcs_needed = true;
-				break;
-
-			case TurnRoughType:
-				turning_module_needed = true;
 			}
 		}
 	}
@@ -751,23 +819,15 @@ Python CProgram::RewritePythonProgram()
 		python << _T("import ocl_funcs\n");
 	}
 
-	// actp
-	if(actp_funcs_needed)
-	{
-		python << _T("import actp_funcs\n");
-		python << _T("import actp\n");
-		python << _T("\n");
-	}
-
-	if(turning_module_needed)
-	{
-		python << _T("import turning\n");
-		python << _T("\n");
-	}
-
 	if(CTool::FindFirstByType(CToolParams::eDragKnife) != -1)
 	{
 		python << _T("import nc.drag_knife\n");
+		python << _T("\n");
+	}
+
+	if(transform_module_needed)
+	{
+		python << _T("import nc.transform\n");
 		python << _T("\n");
 	}
 
@@ -826,6 +886,8 @@ Python CProgram::RewritePythonProgram()
 	// Write all the operations
 	theApp.machine_state = CMachineState();
 
+	std::set<CSurface*> surfaces_written;
+
 	for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 	{
 		HeeksObj *object = (HeeksObj *) *l_itOperation;
@@ -833,9 +895,20 @@ Python CProgram::RewritePythonProgram()
 
 		if(COperations::IsAnOperation(object->GetType()))
 		{
-			if(((COp*)object)->m_active)
+			COp* op = (COp*)object;
+			if(op->m_active)
 			{
-				python << ((COp*)object)->AppendTextToProgram();
+				CSurface* surface = (CSurface*)heeksCAD->GetIDObject(SurfaceType, op->m_surface);
+				if(surface && !surface->m_same_for_each_pattern_position)ApplySurfaceToText(python, surface, surfaces_written);
+				ApplyPatternToText(python, op->m_pattern);
+				if(surface && surface->m_same_for_each_pattern_position)ApplySurfaceToText(python, surface, surfaces_written);
+
+				python << op->AppendTextToProgram();
+
+				// end surface attach
+				if(surface && surface->m_same_for_each_pattern_position)python << _T("nc.attach.attach_end()\n");
+				if(op->m_pattern != 0)python << _T("nc.transform.transform_end()\n");
+				if(surface && !surface->m_same_for_each_pattern_position)python << _T("nc.attach.attach_end()\n");
 			}
 		}
 	} // End for - operation
@@ -1047,11 +1120,25 @@ CTools* CProgram::Tools()
     return m_tools;
 }
 
+CPatterns* CProgram::Patterns()
+{
+    if (m_patterns == NULL) ReloadPointers();
+    return m_patterns;
+}
+
+CSurfaces* CProgram::Surfaces()
+{
+    if (m_surfaces == NULL) ReloadPointers();
+    return m_surfaces;
+}
+
 void CProgram::ReloadPointers()
 {
     for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
 	{
 	    if (child->GetType() == ToolsType) m_tools = (CTools *) child;
+	    if (child->GetType() == PatternsType) m_patterns = (CPatterns *) child;
+	    if (child->GetType() == SurfacesType) m_surfaces = (CSurfaces *) child;
 	    if (child->GetType() == OperationsType) m_operations = (COperations *) child;
 	    if (child->GetType() == NCCodeType) m_nc_code = (CNCCode *) child;
 	} // End for
@@ -1064,6 +1151,8 @@ void CProgram::AddMissingChildren()
 
 	// make sure tools, operations, fixtures, etc. exist
 	if(m_tools == NULL){m_tools = new CTools; Add( m_tools, NULL );}
+	if(m_patterns == NULL){m_patterns = new CPatterns; Add( m_patterns, NULL );}
+	if(m_surfaces == NULL){m_surfaces = new CSurfaces; Add( m_surfaces, NULL );}
 	if(m_operations == NULL){m_operations = new COperations; Add( m_operations, NULL );}
 	if(m_nc_code == NULL){m_nc_code = new CNCCode; Add( m_nc_code, NULL );}
 }
@@ -1079,7 +1168,6 @@ bool CProgram::operator==( const CProgram & rhs ) const
 	return(ObjList::operator==(rhs));
 }
 
-
 bool CMachine::operator==( const CMachine & rhs ) const
 {
 	if (configuration_file_name != rhs.configuration_file_name) return(false);
@@ -1092,6 +1180,3 @@ bool CMachine::operator==( const CMachine & rhs ) const
 
 	return(true);
 }
-
-
-

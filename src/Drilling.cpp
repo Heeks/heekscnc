@@ -632,7 +632,6 @@ void CDrilling::SortLocations(std::vector<CNCPoint> &locations, const CNCPoint s
         case DrillingType:
         case ProfileType:
         case PocketType:
-		case FixtureType:
 		case ILineType:
             return(true);
 

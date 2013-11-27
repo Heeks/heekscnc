@@ -14,7 +14,7 @@
 
 class Python;
 class CNCPoint;
-class CAttachOp;
+class CSurface;
 
 /**
     The CMachineState class stores information about the machine for use
@@ -41,7 +41,7 @@ private:
 		processed.
 	 */
 public:
-	CAttachOp* m_attached_to_surface;
+	CSurface* m_attached_to_surface;
 
 	CMachineState();
     ~CMachineState();
