@@ -16,6 +16,8 @@
 #include "interface/PropertyVertex.h"
 #include "interface/PropertyCheck.h"
 #include "interface/PropertyInt.h"
+#include "interface/InputMode.h"
+#include "interface/LeftAndRight.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 #include "CTool.h"
@@ -988,23 +990,96 @@ static PickRollOff pick_roll_off;
 
 static ReselectSketches reselect_sketches;
 
+
+
+class TagAddingMode: public CInputMode, CLeftAndRight{
+private:
+	wxPoint clicked_point;
+
+public:
+	// virtual functions for InputMode
+	const wxChar* GetTitle(){return _("Add tags by clicking");}
+	void OnMouse( wxMouseEvent& event );
+	void OnKeyDown(wxKeyEvent& event);
+	void GetTools(std::list<Tool*> *f_list, const wxPoint *p);
+};
+
+
+void TagAddingMode::OnMouse( wxMouseEvent& event )
+{
+	bool event_used = false;
+
+	if(LeftAndRightPressed(event, event_used))
+	{
+		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
+	}
+
+	if(!event_used){
+		if(event.MiddleIsDown() || event.GetWheelRotation() != 0)
+		{
+			heeksCAD->GetSelectMode()->OnMouse(event);
+		}
+		else{
+			if(event.LeftDown()){
+				double pos[3];
+				heeksCAD->Digitize(event.GetPosition(), pos);
+			}
+			else if(event.LeftUp()){
+				double pos[3];
+				if(heeksCAD->GetLastDigitizePosition(pos))
+				{
+					CTag* new_object = new CTag();
+					new_object->m_pos[0] = pos[0];
+					new_object->m_pos[1] = pos[1];
+					heeksCAD->StartHistory();
+					heeksCAD->AddUndoably(new_object, object_for_tools->Tags());
+					heeksCAD->EndHistory();
+				}
+			}
+			else if(event.RightUp()){
+				// do context menu same as select mode
+				heeksCAD->GetSelectMode()->OnMouse(event);
+			}
+		}
+	}
+}
+
+void TagAddingMode::OnKeyDown(wxKeyEvent& event)
+{
+	switch(event.GetKeyCode()){
+	case WXK_F1:
+	case WXK_RETURN:
+	case WXK_ESCAPE:
+		// end drawing mode
+		heeksCAD->SetInputMode(heeksCAD->GetSelectMode());
+	}
+}
+
+class EndDrawing:public Tool{
+public:
+	void Run(){heeksCAD->SetInputMode(heeksCAD->GetSelectMode());}
+	const wxChar* GetTitle(){return _("Stop adding tags");}
+	wxString BitmapPath(){return _T("enddraw");}
+};
+
+static EndDrawing end_drawing;
+
+void TagAddingMode::GetTools(std::list<Tool*> *f_list, const wxPoint *p){
+	f_list->push_back(&end_drawing);
+}
+
+
+TagAddingMode tag_adding_mode;
+
 class AddTagTool: public Tool
 {
 public:
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Add Tag");}
+	const wxChar* GetTitle(){return _("Add Tags");}
 
 	void Run()
 	{
-		CTag* new_object = new CTag();
-		heeksCAD->StartHistory();
-		heeksCAD->AddUndoably(new_object, object_for_tools->Tags());
-		heeksCAD->ClearMarkedList();
-		heeksCAD->Mark(new_object);
-		heeksCAD->EndHistory();
-
-		// go straight into tag position picking
-		CTag::PickPosition(new_object);
+		heeksCAD->SetInputMode(&tag_adding_mode);
 	}
 	bool CallChangedOnRun(){return false;}
 	wxString BitmapPath(){ return _T("addtag");}
@@ -1042,7 +1117,7 @@ void CProfile::CopyFrom(const HeeksObj* object)
 
 bool CProfile::CanAdd(HeeksObj* object)
 {
-	return ((object != NULL) && (object->GetType() == TagsType || object->GetType() == SketchType || object->GetType() == FixtureType));
+	return ((object != NULL) && (object->GetType() == TagsType || object->GetType() == SketchType));
 }
 
 bool CProfile::CanAddTo(HeeksObj* owner)

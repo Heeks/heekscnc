@@ -39,8 +39,11 @@
 #include "Tags.h"
 #include "Tag.h"
 #include "ScriptOp.h"
-#include "AttachOp.h"
 #include "Simulate.h"
+#include "Pattern.h"
+#include "Patterns.h"
+#include "Surface.h"
+#include "Surfaces.h"
 
 #include <sstream>
 
@@ -308,7 +311,19 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 	AddNewObjectUndoablyAndMarkIt(new CDrilling( symbols, tool_number, depth ), theApp.m_program->Operations());
 }
 
-static void NewAttachOpMenuCallback(wxCommandEvent &event)
+static void NewScriptOpMenuCallback(wxCommandEvent &event)
+{
+	CScriptOp *new_object = new CScriptOp();
+	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
+}
+
+static void NewPatternMenuCallback(wxCommandEvent &event)
+{
+	CPattern *new_object = new CPattern();
+	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Patterns());
+}
+
+static void NewSurfaceMenuCallback(wxCommandEvent &event)
 {
 	// check for at least one solid selected
 	std::list<int> solids;
@@ -336,19 +351,8 @@ static void NewAttachOpMenuCallback(wxCommandEvent &event)
 		return;
 	}
 
-	AddNewObjectUndoablyAndMarkIt(new CAttachOp(solids, 0.01, 0.0), theApp.m_program->Operations());
-}
-
-static void NewUnattachOpMenuCallback(wxCommandEvent &event)
-{
-	CUnattachOp *new_object = new CUnattachOp();
-	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
-}
-
-static void NewScriptOpMenuCallback(wxCommandEvent &event)
-{
-	CScriptOp *new_object = new CScriptOp();
-	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
+	CSurface *new_object = new CSurface(solids, 0.01, 0.0);
+	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Surfaces());
 }
 
 static void AddNewTool(CToolParams::eToolType type)
@@ -687,11 +691,6 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-		heeksCAD->StartToolBarFlyout(_("3D Milling operations"));
-		heeksCAD->AddFlyoutButton(_("Attach"), ToolImage(_T("attach")), _("New Attach Operation..."), NewAttachOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Unattach"), ToolImage(_T("unattach")), _("New Unattach Operation..."), NewUnattachOpMenuCallback);
-		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
-
 		heeksCAD->StartToolBarFlyout(_("Other operations"));
 		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
@@ -803,13 +802,11 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Pocket Operation..."), ToolImage(_T("pocket")), NewPocketOpMenuCallback);
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Drilling Operation..."), ToolImage(_T("drilling")), NewDrillingOpMenuCallback);
 
-	wxMenu *menu3dMillingOperations = new wxMenu;
-	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Attach Operation..."), ToolImage(_T("attach")), NewAttachOpMenuCallback);
-	heeksCAD->AddMenuItem(menu3dMillingOperations, _("Unattach Operation..."), ToolImage(_T("unattach")), NewUnattachOpMenuCallback);
-
 	// Additive Operations menu
 	wxMenu *menuOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menuOperations, _("Script Operation..."), ToolImage(_T("scriptop")), NewScriptOpMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Pattern..."), ToolImage(_T("pattern")), NewPatternMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Surface..."), ToolImage(_T("surface")), NewSurfaceMenuCallback);
 
     // Tapping tools menu
 	wxMenu *menuTappingTools = new wxMenu;
@@ -833,7 +830,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Milling Operation"), ToolImage(_T("ops")), NULL, NULL, menuMillingOperations);
-	heeksCAD->AddMenuItem(menuMachining, _("Add New 3D Operation"), ToolImage(_T("ops")), NULL, NULL, menu3dMillingOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add Other Operation"), ToolImage(_T("ops")), NULL, NULL, menuOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Tool"), ToolImage(_T("tools")), NULL, NULL, menuTools);
 	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), ToolImage(_T("python")), MakeScriptMenuCallback);
@@ -894,8 +890,10 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Tags", CTags::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Tag", CTag::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("ScriptOp", CScriptOp::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("AttachOp", CAttachOp::ReadFromXMLElement);
-	heeksCAD->RegisterReadXMLfunction("UnattachOp", CUnattachOp::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Pattern", CPattern::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Patterns", CPatterns::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Surface", CSurface::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Surfaces", CSurfaces::ReadFromXMLElement);
 
 #ifdef WIN32
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=695;prop=100000;bestw=145;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=384;floaty=355;floatw=172;floath=71|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=0;pos=851;prop=100000;bestw=116;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=444;floaty=368;floatw=143;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=566;prop=100000;bestw=118;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=480;floaty=399;floatw=145;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MachiningBar;caption=Machining tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=265;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Program;caption=Program;state=2099198;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Output;caption=Output;state=2099196;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=205|dock_size(1,10,0)=33|dock_size(3,0,0)=219|")));
@@ -1178,13 +1176,9 @@ wxString HeeksCNCType( const int type )
 	case DrillingType:       return(_("Drilling"));
 	case ToolType:       return(_("Tool"));
 	case ToolsType:       return(_("Tools"));
-	case FixtureType:       return(_("Fixture"));
-	case FixturesType:       return(_("Fixtures"));
 	case TagsType:       return(_("Tags"));
 	case TagType:       return(_("Tag"));
 	case ScriptOpType:       return(_("ScriptOp"));
-	case AttachOpType:       return(_("AttachOp"));
-	case UnattachOpType:       return(_("UnattachOp"));
 
 	default:
         return(_T("")); // Indicates that this function could not make the conversion.

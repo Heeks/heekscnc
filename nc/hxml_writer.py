@@ -5,6 +5,7 @@ class HxmlWriter:
         self.file_out = open(tempfile.gettempdir()+'/backplot.xml', 'w')
         self.file_out.write('<?xml version="1.0" ?>\n')
         self.file_out.write('<nccode>\n')
+        self.t = None
 
     def __del__(self):
         self.file_out.write('</nccode>\n')
@@ -74,6 +75,10 @@ class HxmlWriter:
         if (id != None) : 
             self.file_out.write(' number="'+str(id)+'"')
             self.file_out.write(' />\n')
+        self.t = id
+            
+    def current_tool(self):
+        return self.t
             
     def spindle(self, s, clockwise):
         pass

@@ -14,7 +14,8 @@ class CNCCode;
 class CProgram;
 class COperations;
 class CTools;
-
+class CPatterns;
+class CSurfaces;
 
 enum ProgramUserType{
 	ProgramUserTypeUnkown,
@@ -56,6 +57,8 @@ private:
 	CNCCode* m_nc_code;						// Access via NCCode() method
 	COperations* m_operations;				// Access via Operations() method
 	CTools* m_tools;						// Access via Tools() method
+	CPatterns* m_patterns;
+	CSurfaces* m_surfaces;
 
 public:
 	static wxString ConfigScope(void) {return _T("Program");}
@@ -90,6 +93,8 @@ public:
 	CNCCode* NCCode();
 	COperations* Operations();
 	CTools* Tools();
+	CPatterns* Patterns();
+	CSurfaces* Surfaces();
 
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches

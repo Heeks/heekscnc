@@ -40,6 +40,8 @@ void COp::WriteBaseXML(TiXmlElement *element)
 	element->SetAttribute( "active", m_active);
 	element->SetAttribute( "title", m_title.utf8_str());
 	element->SetAttribute( "tool_number", m_tool_number);
+	element->SetAttribute( "pattern", m_pattern);
+	element->SetAttribute( "surface", m_surface);
 
 	ObjList::WriteBaseXML(element);
 }
@@ -81,14 +83,16 @@ void COp::ReadBaseXML(TiXmlElement* element)
         } // End if - else
 	} // End if - else
 
+	element->Attribute( "pattern", &m_pattern);
+	element->Attribute( "surface", &m_surface);
+
 	ObjList::ReadBaseXML(element);
 }
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
-// to do, make undoable properties
 static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;}
-// to do, make undoable properties
-
+static void on_set_pattern(int value, HeeksObj* object){((COp*)object)->m_pattern = value;}
+static void on_set_surface(int value, HeeksObj* object){((COp*)object)->m_surface = value;}
 static void on_set_tool_number(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
@@ -127,6 +131,9 @@ void COp::GetProperties(std::list<Property *> *list)
 
 		list->push_back(new PropertyChoice(_("tool"), choices, choice, this, on_set_tool_number));
 	}
+
+	list->push_back(new PropertyInt(_("pattern"), m_pattern, this, on_set_pattern));
+	list->push_back(new PropertyInt(_("surface"), m_surface, this, on_set_surface));
 
 	ObjList::GetProperties(list);
 }
@@ -182,12 +189,12 @@ void COp::WriteDefaultValues()
 
 void COp::ReadDefaultValues()
 {
+	CNCConfig config(GetTypeString());
 	if (m_tool_number <= 0)
 	{
 		// The tool number hasn't been assigned from above.  Set some reasonable
 		// defaults.
 
-		CNCConfig config(GetTypeString());
 
 		// assume that default.tooltable contains tools with IDs:
 		// 1 drill
@@ -205,40 +212,11 @@ void COp::ReadDefaultValues()
 			default_tool = FIND_FIRST_TOOL( CToolParams::eDrill );
 			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eCentreDrill );
 			break;
-		case AdaptiveType:
-			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
-			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
-			break;
 		case ProfileType:
 		case PocketType:
-		case RaftType:
 			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
 			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
 			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
-			break;
-		case ZigZagType:
-		case WaterlineType:
-			default_tool = FIND_FIRST_TOOL( CToolParams::eEndmill );
-			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eBallEndMill );
-			if (default_tool <= 0) default_tool = FIND_FIRST_TOOL( CToolParams::eSlotCutter );
-			break;
-		case TurnRoughType:
-			default_tool = FIND_FIRST_TOOL( CToolParams::eTurningTool );
-			break;
-        case PositioningType:
-		case ProbeCentreType:
-		case ProbeEdgeType:
-		case ProbeGridType:
-			default_tool = FIND_FIRST_TOOL( CToolParams::eTouchProbe );
-			break;
-        case ChamferType:
-        case InlayType:
-			default_tool = FIND_FIRST_TOOL( CToolParams::eChamfer );
-			break;
-
-        case TappingType:
-			default_tool = FIND_FIRST_TOOL( CToolParams::eTapTool );
 			break;
 
 		default:
@@ -250,6 +228,9 @@ void COp::ReadDefaultValues()
 		}
 		config.Read(_T("Tool"), &m_tool_number, default_tool);
 	} // End if - then
+
+	config.Read(_T("Pattern"), &m_pattern, 0);
+	config.Read(_T("Surface"), &m_surface, 0);
 }
 
 /**

@@ -1,0 +1,164 @@
+// Surface.cpp
+
+#include <stdafx.h>
+
+#include "Surface.h"
+#include "CNCConfig.h"
+#include "tinyxml/tinyxml.h"
+#include "interface/PropertyLength.h"
+#include "interface/PropertyCheck.h"
+#include "Reselect.h"
+
+int CSurface::number_for_stl_file = 1;
+
+CSurface::CSurface()
+{
+	ReadDefaultValues();
+}
+
+HeeksObj *CSurface::MakeACopy(void)const
+{
+	return new CSurface(*this);
+}
+
+void CSurface::WriteXML(TiXmlNode *root)
+{
+	TiXmlElement * element = heeksCAD->NewXMLElement( "Surface" );
+	heeksCAD->LinkXMLEndChild( root,  element );
+
+	element->SetDoubleAttribute( "tolerance", m_tolerance);
+	element->SetDoubleAttribute( "minz", m_min_z);
+	element->SetDoubleAttribute( "material_allowance", m_material_allowance);
+	element->SetAttribute( "same_for_posns", m_same_for_each_pattern_position ? 1:0);
+
+	element->SetAttribute("title", m_title.utf8_str());
+
+	// write solid ids
+	for (std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
+    {
+		int solid = *It;
+
+		TiXmlElement * solid_element = heeksCAD->NewXMLElement( "solid" );
+		heeksCAD->LinkXMLEndChild( element, solid_element );
+		solid_element->SetAttribute("id", solid);
+	}
+
+	HeeksObj::WriteBaseXML(element);
+}
+
+// static member function
+HeeksObj* CSurface::ReadFromXMLElement(TiXmlElement* element)
+{
+	CSurface* new_object = new CSurface;
+
+	element->Attribute("tolerance", &new_object->m_tolerance);
+	element->Attribute("minz", &new_object->m_min_z);
+	element->Attribute("material_allowance", &new_object->m_material_allowance);
+	int int_for_bool = 1;
+	if(element->Attribute( "same_for_posns", &int_for_bool))new_object->m_same_for_each_pattern_position = (int_for_bool != 0);
+
+	if(const char* pstr = element->Attribute("title"))new_object->m_title = Ctt(pstr);
+
+	// read solid ids
+	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
+	{
+		std::string name(pElem->Value());
+		if(name == "solid"){
+			for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
+			{
+				std::string name(a->Name());
+				if(name == "id"){
+					int id = a->IntValue();
+					new_object->m_solids.push_back(id);
+				}
+			}
+		}
+	}
+
+	new_object->ReadBaseXML(element);
+
+	return new_object;
+}
+
+void CSurface::WriteDefaultValues()
+{
+	CNCConfig config(ConfigScope());
+	config.Write(wxString(GetTypeString()) + _T("Tolerance"), m_tolerance);
+	config.Write(wxString(GetTypeString()) + _T("MinZ"), m_min_z);
+	config.Write(wxString(GetTypeString()) + _T("MatAllowance"), m_material_allowance);
+	config.Write(wxString(GetTypeString()) + _T("SameForPositions"), m_same_for_each_pattern_position);
+}
+
+void CSurface::ReadDefaultValues()
+{
+	CNCConfig config(ConfigScope());
+	config.Read(wxString(GetTypeString()) + _T("Tolerance"), &m_tolerance, 0.01);
+	config.Read(wxString(GetTypeString()) + _T("MinZ"), &m_min_z, 0.0);
+	config.Read(wxString(GetTypeString()) + _T("MatAllowance"), &m_material_allowance, 0.0);
+	config.Read(wxString(GetTypeString()) + _T("SameForPositions"), &m_same_for_each_pattern_position, true);
+}
+
+static void on_set_tolerance(double value, HeeksObj* object){((CSurface*)object)->m_tolerance = value; ((CSurface*)object)->WriteDefaultValues();}
+static void on_set_min_z(double value, HeeksObj* object){((CSurface*)object)->m_min_z = value; ((CSurface*)object)->WriteDefaultValues();}
+static void on_set_material_allowance(double value, HeeksObj* object){((CSurface*)object)->m_material_allowance = value; ((CSurface*)object)->WriteDefaultValues();}
+static void on_set_same_for_position(bool value, HeeksObj* object){((CSurface*)object)->m_same_for_each_pattern_position = value; ((CSurface*)object)->WriteDefaultValues();}
+
+void CSurface::GetProperties(std::list<Property *> *list)
+{
+	AddSolidsProperties(list, m_solids);
+
+	list->push_back(new PropertyLength(_("tolerance"), m_tolerance, this, on_set_tolerance));
+	list->push_back(new PropertyLength(_("minimum z"), m_min_z, this, on_set_min_z));
+	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, this, on_set_material_allowance));
+	list->push_back(new PropertyCheck(_("same for each pattern position"), m_same_for_each_pattern_position, this, on_set_same_for_position));
+}
+
+static ReselectSolids reselect_solids;
+
+void CSurface::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+	reselect_solids.m_solids = &m_solids;
+	reselect_solids.m_object = this;
+	t_list->push_back(&reselect_solids);
+
+	HeeksObj::GetTools( t_list, p );
+}
+
+void CSurface::CopyFrom(const HeeksObj* object)
+{
+	if (object->GetType() == GetType())
+	{
+		operator=(*((CSurface*)object));
+	}
+}
+
+bool CSurface::CanAddTo(HeeksObj* owner)
+{
+	return ((owner != NULL) && (owner->GetType() == SurfacesType));
+}
+
+const wxBitmap &CSurface::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/surface.png")));
+	return *icon;
+}
+
+static wxString temp_surface_string;
+
+const wxChar* CSurface::GetShortString(void)const
+{
+	if(m_title_made_from_id)
+	{
+		wxChar pattern_str[512];
+		wsprintf(pattern_str, _T("Surface %d"), m_id);
+		temp_surface_string.assign(pattern_str);
+		return temp_surface_string;
+	}
+	return m_title.c_str();}
+
+void CSurface::OnEditString(const wxChar* str)
+{
+    m_title.assign(str);
+	m_title_made_from_id = false;
+}

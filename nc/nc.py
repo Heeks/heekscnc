@@ -125,6 +125,9 @@ class Creator:
     def offset_length(self, id, length=None):
         """Set tool length offsetting"""
         pass
+    
+    def current_tool(self):
+        return None
 
     ############################################################################
     ##  Datums
@@ -465,6 +468,9 @@ def offset_radius(id, radius=None):
 
 def offset_length(id, length=None):
     creator.offset_length(id, length)
+
+def current_tool(self):
+    return creator.current_tool()
 
 ############################################################################
 ##  Datums
