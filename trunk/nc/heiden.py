@@ -298,6 +298,9 @@ class Creator(nc.Creator):
 
     def offset_length(self, id, length=None):
         pass
+    
+    def current_tool(self):
+        return self.t
 
     ############################################################################
     ##  Datums

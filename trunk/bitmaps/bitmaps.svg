@@ -28,12 +28,12 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="454.04568"
-     inkscape:cy="868.63685"
+     inkscape:zoom="35.311145"
+     inkscape:cx="401.14537"
+     inkscape:cy="670.86404"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="true"
+     showgrid="false"
      inkscape:window-width="1495"
      inkscape:window-height="968"
      inkscape:window-x="295"
@@ -11024,6 +11024,32 @@
        id="linearGradient5759-1"
        xlink:href="#linearGradient5735-1"
        inkscape:collect="always" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3690-7"
+       id="radialGradient4034-1"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,0.9206096,0,1.7471117)"
+       cx="166.42264"
+       cy="22.006586"
+       fx="166.42264"
+       fy="22.006586"
+       r="15.904826" />
+    <linearGradient
+       id="linearGradient3690-7">
+      <stop
+         style="stop-color:#ff8bcc;stop-opacity:1;"
+         offset="0"
+         id="stop3692-4" />
+      <stop
+         id="stop3698-0"
+         offset="1"
+         style="stop-color:#08100e;stop-opacity:0.49803922;" />
+      <stop
+         style="stop-color:#5cece8;stop-opacity:1"
+         offset="1"
+         id="stop3694-9" />
+    </linearGradient>
   </defs>
   <metadata
      id="metadata7">
@@ -12714,6 +12740,136 @@
          id="path4953-52"
          d="m 545,152.36218 0,30 30,0 0,-30 z"
          style="fill:url(#linearGradient5759-1);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+    <g
+       id="g5126"
+       transform="matrix(1,0,0,0.74308965,0,91.039314)"
+       inkscape:export-filename="C:\Dev\HeeksCNCSVN\icons\duplicate.png"
+       inkscape:export-xdpi="51.296738"
+       inkscape:export-ydpi="51.296738">
+      <g
+         inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\profile.png"
+         id="g4007-8"
+         transform="matrix(0.0739951,0,0,0.08681861,381.62526,349.94204)"
+         inkscape:label="#g3159"
+         inkscape:export-xdpi="46.919231"
+         inkscape:export-ydpi="46.919231">
+        <path
+           inkscape:connector-curvature="0"
+           id="path4010-8"
+           d="m 110,152.36218 0,-89.999997 90,0 0,89.999997 0,0"
+           style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        <path
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="ccccccccc"
+           id="path4012-2"
+           d="m 80,182.36218 c 10,0 20,-10 20,-30 l 0,-89.999997 c -0.06863,-7.585783 4.77583,-9.030218 10,-10 l 90,0 c 3.92877,1.54701 8.74757,0.42397 10,10 l 0,89.999997 c -1.01654,20.18639 9.4675,29.96434 20,30 l 0,0"
+           style="fill:none;stroke:#00ff00;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      </g>
+      <g
+         transform="matrix(0.36266223,0,0,0.3783683,345.97404,300.49685)"
+         id="g4014-4"
+         inkscape:label="#g3189"
+         inkscape:export-xdpi="278.70969"
+         inkscape:export-ydpi="278.70969">
+        <path
+           inkscape:connector-curvature="0"
+           id="path4016-5"
+           d="m 160,172.36218 0,-30 30,0 0,30 -30,0 z"
+           style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4018-5"
+           d="m 165,167.36218 20,0 0,-20 -20,0 0,20 z"
+           style="fill:none;stroke:#00ff00;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4020-1"
+           d="m 165,167.36218 5,-5 10,0 0,-10 -10,0 0,10 0,0"
+           style="fill:none;stroke:#00ff00;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      </g>
+      <g
+         inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\profile.png"
+         id="g4007-8-6"
+         transform="matrix(0.0739951,0,0,0.08681861,381.86054,362.94798)"
+         inkscape:label="#g3159"
+         inkscape:export-xdpi="46.919231"
+         inkscape:export-ydpi="46.919231">
+        <path
+           inkscape:connector-curvature="0"
+           id="path4010-8-1"
+           d="m 110,152.36218 0,-89.999997 90,0 0,89.999997 0,0"
+           style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        <path
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="ccccccccc"
+           id="path4012-2-4"
+           d="m 80,182.36218 c 10,0 20,-10 20,-30 l 0,-89.999997 c -0.06863,-7.585783 4.77583,-9.030218 10,-10 l 90,0 c 3.92877,1.54701 8.74757,0.42397 10,10 l 0,89.999997 c -1.01654,20.18639 9.4675,29.96434 20,30 l 0,0"
+           style="fill:none;stroke:#00ff00;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      </g>
+      <g
+         transform="matrix(0.36266223,0,0,0.3783683,346.20932,313.50279)"
+         id="g4014-4-2"
+         inkscape:label="#g3189"
+         inkscape:export-xdpi="278.70969"
+         inkscape:export-ydpi="278.70969">
+        <path
+           inkscape:connector-curvature="0"
+           id="path4016-5-3"
+           d="m 160,172.36218 0,-30 30,0 0,30 -30,0 z"
+           style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4018-5-2"
+           d="m 165,167.36218 20,0 0,-20 -20,0 0,20 z"
+           style="fill:none;stroke:#00ff00;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4020-1-2"
+           d="m 165,167.36218 5,-5 10,0 0,-10 -10,0 0,10 0,0"
+           style="fill:none;stroke:#00ff00;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      </g>
+      <g
+         inkscape:export-filename="C:\Users\Dan\HeeksCAD\HeeksCNC\icons\profile.png"
+         id="g4007-8-1"
+         transform="matrix(0.0739951,0,0,0.08681861,381.46103,375.94798)"
+         inkscape:label="#g3159"
+         inkscape:export-xdpi="46.919231"
+         inkscape:export-ydpi="46.919231">
+        <path
+           inkscape:connector-curvature="0"
+           id="path4010-8-6"
+           d="m 110,152.36218 0,-89.999997 90,0 0,89.999997 0,0"
+           style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        <path
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="ccccccccc"
+           id="path4012-2-8"
+           d="m 80,182.36218 c 10,0 20,-10 20,-30 l 0,-89.999997 c -0.06863,-7.585783 4.77583,-9.030218 10,-10 l 90,0 c 3.92877,1.54701 8.74757,0.42397 10,10 l 0,89.999997 c -1.01654,20.18639 9.4675,29.96434 20,30 l 0,0"
+           style="fill:none;stroke:#00ff00;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      </g>
+      <g
+         transform="matrix(0.36266223,0,0,0.3783683,345.80981,326.50279)"
+         id="g4014-4-5"
+         inkscape:label="#g3189"
+         inkscape:export-xdpi="278.70969"
+         inkscape:export-ydpi="278.70969">
+        <path
+           inkscape:connector-curvature="0"
+           id="path4016-5-7"
+           d="m 160,172.36218 0,-30 30,0 0,30 -30,0 z"
+           style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4018-5-6"
+           d="m 165,167.36218 20,0 0,-20 -20,0 0,20 z"
+           style="fill:none;stroke:#00ff00;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4020-1-1"
+           d="m 165,167.36218 5,-5 10,0 0,-10 -10,0 0,10 0,0"
+           style="fill:none;stroke:#00ff00;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      </g>
     </g>
   </g>
 </svg>

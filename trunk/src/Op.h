@@ -19,10 +19,12 @@ public:
 	wxString m_title;
 	int m_tool_number;	// joins the m_tool_number in one of the CTool objects in the tools list.
 	int m_operation_type; // Type of operation (because GetType() overloading does not allow this class to call the parent's method)
+	int m_pattern;
+	int m_surface; // use OpenCamLib to drop the cutter on to this surface
 
 	COp(const wxString& title, const int tool_number = 0, const int operation_type = UnknownType )
             :m_active(true), m_title(title), m_tool_number(tool_number),
-            m_operation_type(operation_type)
+            m_operation_type(operation_type), m_pattern(1), m_surface(0)
     {
         ReadDefaultValues();
     }

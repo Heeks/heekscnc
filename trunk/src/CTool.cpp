@@ -22,7 +22,7 @@
 #include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "Program.h"
-#include "AttachOp.h"
+#include "Surface.h"
 
 #include <sstream>
 #include <string>
@@ -2070,29 +2070,29 @@ TopoDS_Shape CTool::GetShape() const
    } // End catch
 } // End GetShape() method
 
-Python CTool::OCLDefinition(CAttachOp* attach_op) const
+Python CTool::OCLDefinition(CSurface* surface) const
 {
 	Python python;
 
 	switch (m_params.m_type)
 	{
 		case CToolParams::eBallEndMill:
-			python << _T("ocl.BallCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), 1000)\n");
+			python << _T("ocl.BallCutter(float(") << m_params.m_diameter + surface->m_material_allowance * 2 << _T("), 1000)\n");
 			break;
 
 		case CToolParams::eChamfer:
 		case CToolParams::eEngravingTool:
-			python << _T("ocl.CylConeCutter(float(") << m_params.m_flat_radius * 2 + attach_op->m_material_allowance << _T("), float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), float(") << m_params.m_cutting_edge_angle * M_PI/360 << _T("))\n");
+			python << _T("ocl.CylConeCutter(float(") << m_params.m_flat_radius * 2 + surface->m_material_allowance << _T("), float(") << m_params.m_diameter + surface->m_material_allowance * 2 << _T("), float(") << m_params.m_cutting_edge_angle * M_PI/360 << _T("))\n");
 			break;
 
 		default:
 			if(this->m_params.m_corner_radius > 0.000000001)
 			{
-				python << _T("ocl.BullCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), float(") << m_params.m_corner_radius << _T("), 1000)\n");
+				python << _T("ocl.BullCutter(float(") << m_params.m_diameter + surface->m_material_allowance * 2 << _T("), float(") << m_params.m_corner_radius << _T("), 1000)\n");
 			}
 			else
 			{
-				python << _T("ocl.CylCutter(float(") << m_params.m_diameter + attach_op->m_material_allowance * 2 << _T("), 1000)\n");
+				python << _T("ocl.CylCutter(float(") << m_params.m_diameter + surface->m_material_allowance * 2 << _T("), 1000)\n");
 			}
 			break;
 	} // End switch
