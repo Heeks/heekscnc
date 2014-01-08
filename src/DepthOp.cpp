@@ -21,10 +21,11 @@
 
 CDepthOpParams::CDepthOpParams()
 {
-	m_abs_mode = eAbsolute;
 	m_clearance_height = 0.0;
 	m_start_depth = 0.0;
 	m_step_down = 0.0;
+	m_z_finish_depth = 0.0;
+	m_z_thru_depth = 0.0;
 	m_final_depth = 0.0;
 	m_rapid_safety_space = 0.0;
 
@@ -75,6 +76,24 @@ static void on_set_step_down(double value, HeeksObj* object)
 	((CDepthOp*)object)->WriteDefaultValues();
 }
 
+static void on_set_z_finish_depth(double value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_z_finish_depth = value;
+	((CDepthOp*)object)->WriteDefaultValues();
+}
+
+static void on_set_z_thru_depth(double value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_z_thru_depth = value;
+	((CDepthOp*)object)->WriteDefaultValues();
+}
+
+static void on_set_user_depths(const wxChar* value, HeeksObj* object)
+{
+	((CDepthOp*)object)->m_depth_op_params.m_user_depths.assign(value);
+	((CDepthOp*)object)->WriteDefaultValues();
+}
+
 static void on_set_start_depth(double value, HeeksObj* object)
 {
 	((CDepthOp*)object)->m_depth_op_params.m_start_depth = value;
@@ -92,14 +111,6 @@ static void on_set_rapid_safety_space(double value, HeeksObj* object)
 	((CDepthOp*)object)->m_depth_op_params.m_rapid_safety_space = value;
 	((CDepthOp*)object)->WriteDefaultValues();
 }
-
-static void on_set_abs_mode(int value, HeeksObj* object) {
-
-	((CDepthOp*)object)->m_depth_op_params.m_abs_mode = (CDepthOpParams::eAbsMode)value;
-	((CDepthOp*)object)->WriteDefaultValues();
-
-}
-
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
@@ -123,7 +134,10 @@ void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list
 		list->push_back(new PropertyLength(_("rapid safety space"), m_rapid_safety_space, parent, on_set_rapid_safety_space));
 		list->push_back(new PropertyLength(_("start depth"), m_start_depth, parent, on_set_start_depth));
 		list->push_back(new PropertyLength(_("final depth"), m_final_depth, parent, on_set_final_depth));
-		list->push_back(new PropertyLength(_("step down"), m_step_down, parent, on_set_step_down));
+		list->push_back(new PropertyLength(_("max step down"), m_step_down, parent, on_set_step_down));
+		list->push_back(new PropertyLength(_("z finish depth"), m_z_finish_depth, parent, on_set_z_finish_depth));
+		list->push_back(new PropertyLength(_("z thru depth"), m_z_thru_depth, parent, on_set_z_thru_depth));
+		list->push_back(new PropertyString(_("user depths"), m_user_depths, parent, on_set_user_depths));
 	}
 }
 
@@ -133,24 +147,28 @@ void CDepthOpParams::WriteXMLAttributes(TiXmlNode* pElem)
 	heeksCAD->LinkXMLEndChild( pElem,  element );
 	element->SetDoubleAttribute( "clear", m_clearance_height);
 	element->SetDoubleAttribute( "down", m_step_down);
+	if(m_z_finish_depth > 0.0000001)element->SetDoubleAttribute( "zfinish", m_z_finish_depth);
+	if(m_z_thru_depth > 0.0000001)element->SetDoubleAttribute( "zthru", m_z_thru_depth);
+	element->SetAttribute("userdepths", m_user_depths.utf8_str());
 	element->SetDoubleAttribute( "startdepth", m_start_depth);
 	element->SetDoubleAttribute( "depth", m_final_depth);
 	element->SetDoubleAttribute( "r", m_rapid_safety_space);
-	element->SetAttribute( "abs_mode", m_abs_mode);
 }
 
 void CDepthOpParams::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	TiXmlElement* depthop = heeksCAD->FirstNamedXMLChildElement(pElem, "depthop");
-	if(depthop)
-	{	int int_for_enum;
-		depthop->Attribute("clear", &m_clearance_height);
-		depthop->Attribute("down", &m_step_down);
-		depthop->Attribute("startdepth", &m_start_depth);
-		depthop->Attribute("depth", &m_final_depth);
-		depthop->Attribute("r", &m_rapid_safety_space);
-		if(pElem->Attribute("abs_mode", &int_for_enum))m_abs_mode = (eAbsMode)int_for_enum;
-		heeksCAD->RemoveXMLChild(pElem, depthop);	// We don't want to interpret this again when
+	TiXmlElement* element = heeksCAD->FirstNamedXMLChildElement(pElem, "depthop");
+	if(element)
+	{
+		element->Attribute("clear", &m_clearance_height);
+		element->Attribute("down", &m_step_down);
+		element->Attribute("zfinish", &m_z_finish_depth);
+		element->Attribute("zthru", &m_z_thru_depth);
+		m_user_depths.assign(Ctt(element->Attribute("userdepths")));
+		element->Attribute("startdepth", &m_start_depth);
+		element->Attribute("depth", &m_final_depth);
+		element->Attribute("r", &m_rapid_safety_space);
+		heeksCAD->RemoveXMLChild(pElem, element);	// We don't want to interpret this again when
 										// the ObjList::ReadBaseXML() method gets to it.
 	}
 }
@@ -186,9 +204,11 @@ void CDepthOp::WriteDefaultValues()
 	config.Write(_T("ClearanceHeight"), m_depth_op_params.ClearanceHeight());
 	config.Write(_T("StartDepth"), m_depth_op_params.m_start_depth);
 	config.Write(_T("StepDown"), m_depth_op_params.m_step_down);
+	config.Write(_T("ZFinish"), m_depth_op_params.m_z_finish_depth);
+	config.Write(_T("ZThru"), m_depth_op_params.m_z_thru_depth);
+	config.Write(_T("UserDepths"), m_depth_op_params.m_user_depths);
 	config.Write(_T("FinalDepth"), m_depth_op_params.m_final_depth);
 	config.Write(_T("RapidDown"), m_depth_op_params.m_rapid_safety_space);
-	config.Write(_T("ABSMode"), m_depth_op_params.m_abs_mode);
 }
 
 void CDepthOp::ReadDefaultValues()
@@ -203,11 +223,11 @@ void CDepthOp::ReadDefaultValues()
 
 	config.Read(_T("StartDepth"), &m_depth_op_params.m_start_depth, 0.0);
 	config.Read(_T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
+	config.Read(_T("ZFinish"), &m_depth_op_params.m_z_finish_depth, 0.0);
+	config.Read(_T("ZThru"), &m_depth_op_params.m_z_thru_depth, 0.0);
+	config.Read(_T("UserDepths"), &m_depth_op_params.m_user_depths, _T(""));
 	config.Read(_T("FinalDepth"), &m_depth_op_params.m_final_depth, -1.0);
 	config.Read(_T("RapidDown"), &m_depth_op_params.m_rapid_safety_space, 2.0);
-	int int_mode = m_depth_op_params.m_abs_mode;
-	config.Read(_T("ABSMode"), &int_mode, CDepthOpParams::eAbsolute);
-	m_depth_op_params.m_abs_mode = (CDepthOpParams::eAbsMode)int_mode;
 }
 
 void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
@@ -294,6 +314,10 @@ Python CDepthOp::AppendTextToProgram()
 	python << _T("rapid_safety_space = float(") << m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")\n");
     python << _T("start_depth = float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")\n");
     python << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
+    python << _T("z_finish_depth = float(") << m_depth_op_params.m_z_finish_depth / theApp.m_program->m_units << _T(")\n");
+    python << _T("z_thru_depth = float(") << m_depth_op_params.m_z_thru_depth / theApp.m_program->m_units << _T(")\n");
+	if(m_depth_op_params.m_user_depths.Len() == 0) python << _T("user_depths = None\n");
+    else python << _T("user_depths = [") << m_depth_op_params.m_user_depths << _T("]\n");
     python << _T("final_depth = float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")\n");
 
 	CTool *pTool = CTool::Find( m_tool_number );
@@ -304,15 +328,6 @@ Python CDepthOp::AppendTextToProgram()
 
 	} // End if - then
 
-	if(m_depth_op_params.m_abs_mode == CDepthOpParams::eAbsolute){
-		python << _T("#absolute() mode\n");
-	}
-	else
-	{
-		python << _T("rapid(z=clearance)\n");
-		python << _T("incremental()\n");
-	}// End if else - then
-
 	return(python);
 }
 
@@ -321,38 +336,13 @@ void CDepthOp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
     CSpeedOp::GetTools( t_list, p );
 }
 
-std::list<double> CDepthOp::GetDepths() const
-{
-    std::list<double> depths;
-
-    if (m_depth_op_params.m_start_depth <= m_depth_op_params.m_final_depth)
-    {
-        // Invalid depth values defined.
-        return(depths); // Empty list.
-    }
-
-    for (double depth=m_depth_op_params.m_start_depth - m_depth_op_params.m_step_down;
-                depth > m_depth_op_params.m_final_depth;
-                depth -= m_depth_op_params.m_step_down)
-    {
-        depths.push_back(depth);
-    }
-
-    if ((depths.size() == 0) || (*(depths.rbegin()) > m_depth_op_params.m_final_depth))
-    {
-        depths.push_back( m_depth_op_params.m_final_depth );
-    }
-
-    return(depths);
-}
-
-
-
 bool CDepthOpParams::operator== ( const CDepthOpParams & rhs ) const
 {
 	if (m_clearance_height != rhs.m_clearance_height) return(false);
 	if (m_start_depth != rhs.m_start_depth) return(false);
 	if (m_step_down != rhs.m_step_down) return(false);
+	if (m_z_finish_depth != rhs.m_z_finish_depth) return(false);
+	if (m_z_thru_depth != rhs.m_z_thru_depth) return(false);
 	if (m_final_depth != rhs.m_final_depth) return(false);
 	if (m_rapid_safety_space != rhs.m_rapid_safety_space) return(false);
 
