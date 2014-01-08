@@ -221,17 +221,33 @@ def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end
     crc_end_point.x = crc_end.x 
     crc_end_point.y = crc_end.y 
 
-
+def get_depths(start_depth, final_depth, stepdown, z_finish_depth, z_thru_depth, user_depths):
+    if user_depths != None:
+        depths = user_depths
+    else:
+        depth = final_depth - z_thru_depth
+        depths = [depth]
+        depth += z_finish_depth
+        if depth + 0.0000001 < start_depth:
+            if z_finish_depth > 0.0000001: depths.insert(0, depth)
+            depth += z_thru_depth
+            layer_count = int((start_depth - depth) / stepdown - 0.0000001) + 1
+            if layer_count > 0:
+                layer_depth = (start_depth - depth)/layer_count
+                for i in range(1, layer_count):
+                    depth += layer_depth
+                    depths.insert(0, depth)
+                
+    return depths
     
 # profile command,
 # direction should be 'left' or 'right' or 'on'
-def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_safety_space = None, clearance = None, start_depth = None, stepdown = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0, lead_in_line_len=0.0,lead_out_line_len= 0.0):
+def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, rapid_safety_space = None, clearance = None, start_depth = None, stepdown = None, z_finish_depth = None, z_thru_depth = None, user_depths = None, final_depth = None, extend_at_start = 0.0, extend_at_end = 0.0, lead_in_line_len=0.0,lead_out_line_len= 0.0):
     global tags
 
     offset_curve = area.Curve(curve)
     if direction == "on":
         use_CRC() == False 
-        
         
     if direction != "on":
         if direction != "left" and direction != "right":
@@ -272,9 +288,8 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         raise "sketch has no spans!"
 
     # do multiple depths
-    layer_count = int((start_depth - final_depth) / stepdown)
-    if layer_count * stepdown + 0.00001 < start_depth - final_depth:
-        layer_count += 1
+    depths = get_depths(start_depth, final_depth, stepdown, z_finish_depth, z_thru_depth, user_depths)
+
     current_start_depth = start_depth
 
     # tags
@@ -283,11 +298,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         copy_of_offset_curve = area.Curve(offset_curve)
     
     prev_depth = start_depth
-    for i in range(1, layer_count+1):
-        if i == layer_count:
-            depth = final_depth
-        else:
-            depth = start_depth - i * stepdown
+    for depth in depths:
         mat_depth = prev_depth
         
         if len(tags) > 0:

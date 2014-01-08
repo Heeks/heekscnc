@@ -53,10 +53,6 @@ CHeeksCNCApp theApp;
 
 extern void ImportToolsFile( const wxChar *file_path );
 
-extern CTool::tap_sizes_t metric_tap_sizes[];
-extern CTool::tap_sizes_t unified_thread_standard_tap_sizes[];
-extern CTool::tap_sizes_t british_standard_whitworth_tap_sizes[];
-
 wxString HeeksCNCType(const int type);
 
 CHeeksCNCApp::CHeeksCNCApp(){
@@ -359,112 +355,15 @@ static void AddNewTool(CToolParams::eToolType type)
 {
 	// Add a new tool.
 	CTool *new_object = new CTool(NULL, type, heeksCAD->GetNextID(ToolType));
-	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
+	if(new_object->Edit())
+		AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
+	else
+		delete new_object;
 }
 
 static void NewDrillMenuCallback(wxCommandEvent &event)
 {
 	AddNewTool(CToolParams::eDrill);
-}
-
-static void NewMetricTappingToolMenuCallback(wxCommandEvent &event)
-{
-    wxString message(_("Select tap size"));
-    wxString caption(_("Standard Tap Sizes"));
-
-    wxArrayString choices;
-
-    for (::size_t i=0; (metric_tap_sizes[i].diameter > 0.0); i++)
-    {
-        choices.Add(metric_tap_sizes[i].description);
-    }
-
-    wxString choice = ::wxGetSingleChoice( message, caption, choices );
-
-    for (::size_t i=0; (metric_tap_sizes[i].diameter > 0.0); i++)
-    {
-        if ((choices.size() > 0) && (choice == choices[i]))
-        {
-            // Add a new tool.
-            CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
-            new_object->m_params.m_diameter = metric_tap_sizes[i].diameter;
-            new_object->m_params.m_pitch = metric_tap_sizes[i].pitch;
-            new_object->m_params.m_direction = 0;    // Right hand thread.
-            new_object->ResetTitle();
-			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
-            return;
-        }
-    }
-}
-
-static void NewUnifiedThreadingStandardTappingToolMenuCallback(wxCommandEvent &event)
-{
-	wxString message(_("Select tap size"));
-    wxString caption(_("Standard Tap Sizes"));
-
-    wxArrayString choices;
-
-    for (::size_t i=0; (unified_thread_standard_tap_sizes[i].diameter > 0.0); i++)
-    {
-        choices.Add(unified_thread_standard_tap_sizes[i].description);
-    }
-
-    wxString choice = ::wxGetSingleChoice( message, caption, choices );
-
-    for (::size_t i=0; (unified_thread_standard_tap_sizes[i].diameter > 0.0); i++)
-    {
-        if ((choices.size() > 0) && (choice == choices[i]))
-        {
-            // Add a new tool.
-            CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
-            new_object->m_params.m_diameter = unified_thread_standard_tap_sizes[i].diameter;
-            new_object->m_params.m_pitch = unified_thread_standard_tap_sizes[i].pitch;
-            new_object->m_params.m_direction = 0;    // Right hand thread.
-            new_object->ResetTitle();
-			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
-            return;
-        }
-    }
-}
-
-static void NewBritishStandardWhitworthTappingToolMenuCallback(wxCommandEvent &event)
-{
-	wxString message(_("Select tap size"));
-    wxString caption(_("Standard Tap Sizes"));
-
-    wxArrayString choices;
-
-    for (::size_t i=0; (british_standard_whitworth_tap_sizes[i].diameter > 0.0); i++)
-    {
-        choices.Add(british_standard_whitworth_tap_sizes[i].description);
-    }
-
-    wxString choice = ::wxGetSingleChoice( message, caption, choices );
-
-    for (::size_t i=0; (british_standard_whitworth_tap_sizes[i].diameter > 0.0); i++)
-    {
-        if ((choices.size() > 0) && (choice == choices[i]))
-        {
-            // Add a new tool.
-            CTool *new_object = new CTool(NULL, CToolParams::eTapTool, heeksCAD->GetNextID(ToolType));
-            new_object->m_params.m_diameter = british_standard_whitworth_tap_sizes[i].diameter;
-            new_object->m_params.m_pitch = british_standard_whitworth_tap_sizes[i].pitch;
-            new_object->m_params.m_direction = 0;    // Right hand thread.
-            new_object->ResetTitle();
-			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
-            return;
-        }
-    }
-}
-
-static void NewTapToolMenuCallback(wxCommandEvent &event)
-{
-	AddNewTool(CToolParams::eTapTool);
-}
-
-static void NewEngraverToolMenuCallback(wxCommandEvent &event)
-{
-	AddNewTool(CToolParams::eEngravingTool);
 }
 
 static void NewCentreDrillMenuCallback(wxCommandEvent &event)
@@ -490,21 +389,6 @@ static void NewBallEndMillMenuCallback(wxCommandEvent &event)
 static void NewChamferMenuCallback(wxCommandEvent &event)
 {
 	AddNewTool(CToolParams::eChamfer);
-}
-
-static void NewTouchProbeMenuCallback(wxCommandEvent &event)
-{
-	AddNewTool(CToolParams::eTouchProbe);
-}
-
-static void NewToolLengthSwitchMenuCallback(wxCommandEvent &event)
-{
-	AddNewTool(CToolParams::eToolLengthSwitch);
-}
-
-static void NewDragKnifeMenuCallback(wxCommandEvent &event)
-{
-	AddNewTool(CToolParams::eDragKnife);
 }
 
 static void MakeScriptMenuCallback(wxCommandEvent &event)
@@ -654,11 +538,6 @@ static CCallbackTool new_endmill_tool(_("New End Mill..."), _T("endmill"), NewEn
 static CCallbackTool new_slotdrill_tool(_("New Slot Drill..."), _T("slotdrill"), NewSlotCutterMenuCallback);
 static CCallbackTool new_ball_end_mill_tool(_("New Ball End Mill..."), _T("ballmill"), NewBallEndMillMenuCallback);
 static CCallbackTool new_chamfer_mill_tool(_("New Chamfer Mill..."), _T("chamfmill"), NewChamferMenuCallback);
-static CCallbackTool new_touch_probe(_("New Touch Probe..."), _T("probe"), NewTouchProbeMenuCallback);
-static CCallbackTool new_tool_length_switch(_("New Tool Length Switch..."), _T("probe"), NewToolLengthSwitchMenuCallback);
-static CCallbackTool new_tap_tool(_("New Tap Tool..."), _T("tap"), NewTapToolMenuCallback);
-static CCallbackTool new_engraver_tool(_("New Engraver Tool..."), _T("engraver"), NewEngraverToolMenuCallback);
-static CCallbackTool new_drag_knife(_("New Drag Knife..."), _T("knife"), NewDragKnifeMenuCallback);
 
 void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 {
@@ -668,11 +547,6 @@ void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_slotdrill_tool);
 	t_list->push_back(&new_ball_end_mill_tool);
 	t_list->push_back(&new_chamfer_mill_tool);
-	t_list->push_back(&new_touch_probe);
-	t_list->push_back(&new_tool_length_switch);
-	t_list->push_back(&new_tap_tool);
-	t_list->push_back(&new_engraver_tool);
-	t_list->push_back(&new_drag_knife);
 }
 
 static void AddToolBars()
@@ -808,13 +682,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("Pattern..."), ToolImage(_T("pattern")), NewPatternMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Surface..."), ToolImage(_T("surface")), NewSurfaceMenuCallback);
 
-    // Tapping tools menu
-	wxMenu *menuTappingTools = new wxMenu;
-	heeksCAD->AddMenuItem(menuTappingTools, _("Any sized tap..."), ToolImage(_T("tap")), NewTapToolMenuCallback);
-	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Metric standard sizes"), ToolImage(_T("tap")), NewMetricTappingToolMenuCallback);
-	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from Unified Threading Standard (UNC, UNF or UNEF)"), ToolImage(_T("tap")), NewUnifiedThreadingStandardTappingToolMenuCallback);
-	heeksCAD->AddMenuItem(menuTappingTools, _("Pick from British Standard Whitworth standard sizes"), ToolImage(_T("tap")), NewBritishStandardWhitworthTappingToolMenuCallback);
-
 	// Tools menu
 	wxMenu *menuTools = new wxMenu;
 	heeksCAD->AddMenuItem(menuTools, _("Drill..."), ToolImage(_T("drill")), NewDrillMenuCallback);
@@ -823,9 +690,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuTools, _("Slot Drill..."), ToolImage(_T("slotdrill")), NewSlotCutterMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("Ball End Mill..."), ToolImage(_T("ballmill")), NewBallEndMillMenuCallback);
 	heeksCAD->AddMenuItem(menuTools, _("Chamfer Mill..."), ToolImage(_T("chamfmill")), NewChamferMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Touch Probe..."), ToolImage(_T("probe")), NewTouchProbeMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Tool Length Switch..."), ToolImage(_T("probe")), NewToolLengthSwitchMenuCallback);
-	heeksCAD->AddMenuItem(menuTools, _("Tap Tool..."), ToolImage(_T("tap")), NULL, NULL, menuTappingTools);
 
 	// Machining menu
 	wxMenu *menuMachining = new wxMenu;

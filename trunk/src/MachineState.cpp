@@ -22,7 +22,6 @@ CMachineState::CMachineState()
         m_location = CNCPoint(0.0, 0.0, 0.0);
         m_tool_number = 0;  // No tool assigned.
 		m_attached_to_surface = NULL;
-		m_drag_knife_on = false;
 }
 
 CMachineState::~CMachineState() { }
@@ -39,7 +38,6 @@ CMachineState & CMachineState::operator= ( const CMachineState & rhs )
         m_location = rhs.Location();
         m_tool_number = rhs.Tool();
 		m_attached_to_surface = rhs.m_attached_to_surface;
-		m_drag_knife_on = rhs.m_drag_knife_on;
     }
 
     return(*this);
@@ -78,16 +76,6 @@ Python CMachineState::Tool( const int new_tool )
 			if(m_attached_to_surface)
 			{
 				python << _T("nc.nc.creator.set_ocl_cutter(") << pTool->OCLDefinition(m_attached_to_surface) << _T(")\n");
-			}
-			if(pTool->m_params.m_type == CToolParams::eDragKnife)
-			{
-				python << _T("nc.drag_knife.drag_begin(") << pTool->m_params.m_drag_knife_distance/ PROGRAM->m_units << _T(")\n");
-				m_drag_knife_on = true;
-			}
-			else if(m_drag_knife_on)
-			{
-				python << _T("nc.drag_knife.drag_end()\n");
-				m_drag_knife_on = false;
 			}
         } // End if - then
     }

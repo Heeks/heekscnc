@@ -819,12 +819,6 @@ Python CProgram::RewritePythonProgram()
 		python << _T("import ocl_funcs\n");
 	}
 
-	if(CTool::FindFirstByType(CToolParams::eDragKnife) != -1)
-	{
-		python << _T("import nc.drag_knife\n");
-		python << _T("\n");
-	}
-
 	if(transform_module_needed)
 	{
 		python << _T("import nc.transform\n");

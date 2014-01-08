@@ -358,7 +358,7 @@ def zigzag(a, stepover, zig_unidirectional):
 
     reorder_zigs()
 
-def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
+def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, z_finish_depth, z_thru_depth, user_depths, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
     global tool_radius_for_pocket
     global area_for_feed_possible
 
@@ -418,29 +418,17 @@ def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_d
                     a_offset = area.Area(a)
                     a_offset.Offset(current_offset)
             curve_list = get_curve_list(arealist, cut_mode == 'climb')
-
-    layer_count = int((start_depth - final_depth) / stepdown)
-
-    if layer_count * stepdown + 0.00001 < start_depth - final_depth:
-        layer_count += 1
-
+            
+    depths = kurve_funcs.get_depths(start_depth, final_depth, stepdown, z_finish_depth, z_thru_depth, user_depths)
+    
     current_start_depth = start_depth
 
     if start_point==None:
-
-        for i in range(1, layer_count+1):
-            if i == layer_count:
-                depth = final_depth
-            else:
-                depth = start_depth - i * stepdown
+        for depth in depths:
             cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
             current_start_depth = depth
 
     else:
-        for i in range(1, layer_count+1):
-            if i == layer_count:
-                depth = final_depth
-            else:
-                depth = start_depth - i * stepdown
+        for depth in depths:
             cut_curvelist2(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss, start_point)
             current_start_depth = depth

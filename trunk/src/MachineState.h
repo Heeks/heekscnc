@@ -61,6 +61,5 @@ public:
 private:
     int         m_tool_number;
     CNCPoint      m_location;
-	bool m_drag_knife_on;
 
 }; // End CMachineState class definition

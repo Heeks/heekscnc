@@ -12,26 +12,6 @@ class CObjectIdsCtrl;
 
 class PocketDlg : public HDialog
 {
-	static wxBitmap* m_general_bitmap;
-	static wxBitmap* m_step_over_bitmap;
-	static wxBitmap* m_material_allowance_bitmap;
-	static wxBitmap* m_starting_center_bitmap;
-	static wxBitmap* m_starting_boundary_bitmap;
-	static wxBitmap* m_climb_milling_bitmap;
-	static wxBitmap* m_conventional_milling_bitmap;
-	static wxBitmap* m_tool_down_bitmap;
-	static wxBitmap* m_not_tool_down_bitmap;
-	static wxBitmap* m_use_zig_zag_bitmap;
-	static wxBitmap* m_zig_angle_bitmap;
-	static wxBitmap* m_zig_unidirectional_bitmap;
-	static wxBitmap* m_not_use_zig_zag_bitmap;
-	static wxBitmap* m_clearance_height_bitmap;
-	static wxBitmap* m_rapid_down_to_bitmap;
-	static wxBitmap* m_start_depth_bitmap;
-	static wxBitmap* m_final_depth_bitmap;
-	static wxBitmap* m_step_down_bitmap;
-	static wxBitmap* m_entry_move_bitmap;
-
 	CObjectIdsCtrl *m_idsSketches;
 	CLengthCtrl *m_lgthStepOver;
 	CLengthCtrl *m_lgthMaterialAllowance;
@@ -43,7 +23,6 @@ class PocketDlg : public HDialog
 	wxCheckBox *m_chkUseZigZag;
 	CDoubleCtrl *m_dblZigAngle;
 	wxCheckBox *m_chkZigUnidirectional;
-	wxComboBox *m_cmbAbsMode;
 	CLengthCtrl *m_lgthClearanceHeight;
 	CLengthCtrl *m_lgthRapidDownToHeight;
 	CLengthCtrl *m_lgthStartDepth;
@@ -56,13 +35,17 @@ class PocketDlg : public HDialog
 	wxCheckBox *m_chkActive;
 	wxTextCtrl *m_txtTitle;
 	PictureWindow *m_picture;
+	CLengthCtrl *m_lgthZFinishDepth;
+	CLengthCtrl *m_lgthZThruDepth;
+
+	void EnableZigZagControls();
 
 public:
     PocketDlg(wxWindow *parent, CPocket* object);
 	void GetData(CPocket* object);
 	void SetFromData(CPocket* object);
 	void SetPicture();
-	void SetPicture(wxBitmap** bitmap, const wxString& name);
+	void SetPicture(const wxString& name);
 
 	void OnChildFocus(wxChildFocusEvent& event);
 	void OnComboStartingPlace( wxCommandEvent& event );
