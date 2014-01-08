@@ -333,7 +333,7 @@ void CPocket::WritePocketPython(Python &python)
 	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
 	python << _T(", rapid_safety_space, start_depth, final_depth, ");
 	python << m_pocket_params.m_step_over / theApp.m_program->m_units;
-	python << _T(", step_down, clearance, ");
+	python << _T(", step_down, z_finish_depth, z_thru_depth, user_depths, clearance, ");
 	python << m_pocket_params.m_starting_place;
 	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
 	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));

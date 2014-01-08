@@ -22,14 +22,11 @@ private:
 public:
 	double m_start_depth;
 	double m_step_down;
+	double m_z_finish_depth;
+	double m_z_thru_depth;
 	double m_final_depth;
+	wxString m_user_depths;
 	double m_rapid_safety_space;
-	//check to see if in Absolute or Incremental mode for moves
-	typedef enum {
-		eAbsolute,
-		eIncremental
-	}eAbsMode;
-	eAbsMode m_abs_mode;
 
 	CDepthOpParams();
 	bool operator== ( const CDepthOpParams & rhs ) const;
@@ -82,8 +79,6 @@ public:
 
 	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
 	void SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches);
-
-	std::list<double> GetDepths() const;
 
 	bool operator== ( const CDepthOp & rhs ) const;
 	bool operator!= ( const CDepthOp & rhs ) const { return(! (*this == rhs)); }

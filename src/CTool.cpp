@@ -91,242 +91,33 @@ extern CHeeksCADInterface* heeksCAD;
 #define TOOLS heeksCNC->GetTools()
 #endif
 
-
-
-
-
-CTool::tap_sizes_t metric_tap_sizes[] = {
-      {_T("M1x0.25 mm course"), 1.0, 0.25},
-      {_T("M1.2 x 0.25 mm course"), 1.2, 0.25},
-      {_T("M1.4 x 0.3 mm course"), 1.3, 0.3},
-      {_T("M1.6 x 0.35mm course"), 1.6, 0.35},
-      {_T("M1.8 x 0.35mm course"), 1.8, 0.35},
-      {_T("M2 x 0.4 mm course"), 2.0, 0.4},
-      {_T("M2.5 x 0.45 mm course"), 2.5, 0.45},
-      {_T("M3 x 0.5 mm course"), 3.0, 0.5},
-      {_T("M3.5 x 0.6 mm course"), 3.5, 0.6},
-      {_T("M4 x 0.7 mm course"), 4.0, 0.7},
-      {_T("M5 x 0.8 mm course"), 5.0, 0.8},
-      {_T("M6 x 1 mm course"), 6.0, 1.0},
-      {_T("M7 x 1 mm course"), 7.0, 1.0},
-      {_T("M8 x 1.25mm course"), 8.0, 1.25},
-      {_T("M8 x 1 mm fine"), 8.0, 1.0},
-      {_T("M10 x 1.5 mm course"), 10.0, 1.5},
-      {_T("M10 x 1 mm fine"), 10.0, 1.0},
-      {_T("M10 x 1.25mm fine"), 10.0, 1.25},
-      {_T("M12 x 1.75mm course"), 12.0, 1.75},
-      {_T("M12 x 1.5 mm fine"), 12.0, 1.5},
-      {_T("M12 x 1.25mm fine"), 12.0, 1.25},
-      {_T("M14 x 1.5 mm fine"), 14.0, 1.5},
-      {_T("M14 x 2 mm course"), 14.0, 2.0},
-      {_T("M16 x 2 mm course"), 16.0, 2.0},
-      {_T("M16 x 1.5 mm fine"), 16.0, 1.5},
-      {_T("M18 x 2.5 mm course"), 18.0, 2.5},
-      {_T("M18 x 2 mm fine"), 18.0, 2.0},
-      {_T("M18 x 1.5 mm fine"), 18.0, 1.5},
-      {_T("M20 x 2.5 mm course"), 20.0, 2.5},
-      {_T("M20 x 2 mm fine"), 20.0, 2.0},
-      {_T("M20 x 1.5 mm fine"), 20.0, 1.5},
-      {_T("M30 x 3.5 mm course"), 30.0, 3.5},
-      {_T("M30 x 2 mm fine"), 30.0, 2.0},
-      {_T("M33 x 3.5 mm course"), 33.0, 3.5},
-      {_T("M33 x 2 mm fine"), 33.0, 2.0},
-      {_T("M36 x 4 mm course"), 36.0, 4.0},
-      {_T("M36 x 3 mm fine"), 36.0, 3.0},
-      {_T("M39 x 4 mm course"), 39.0, 4.0},
-      {_T("M39 x 3 mm fine"), 39.0, 3.0},
-      {_T("M42 x 4.5 mm course"), 42.0, 4.5},
-      {_T("M42 x 3 mm fine"), 42.0, 3.0},
-      {_T("M45 x 4.5 mm course"), 45.0, 4.5},
-      {_T("M45 x 3 mm fine"), 45.0, 3.0},
-      {_T("M48 x 5 mm course"), 48.0, 5.0},
-      {_T("M48 x 3 mm fine"), 48.0, 3.0},
-      {_T("M52 x 5 mm course"), 52.0, 5.0},
-      {_T("M52 x 4 mm fine"), 52.0, 4.0},
-      {_T("M56 x 5.5 mm course"), 56.0, 5.5},
-      {_T("M56 x 4 mm fine"), 56.0, 4.0},
-      {_T("M60 x 5.5 mm course"), 60.0, 5.5},
-      {_T("M60 x 4 mm fine"), 60.0, 4.0},
-      {_T("M64 x 6 mm course"), 64.0, 6.0},
-      {_T("M64 x 4 mm fine"), 64.0, 4.0},
-      {_T("End of table marker"), -1.0, -1.0}   // WARNING DO NOT REMOVE THIS ENTRY.  IT MUST BE THE LAST ENTRY IN THE TABLE
-    };
-
-CTool::tap_sizes_t unified_thread_standard_tap_sizes[] = {
-      {_T("#0 = 0.060 x 80 UNF"), 0.06 * 25.4, 25.4 / 80},
-      {_T("#1 = 0.073 x 64 UNC"), 0.073 * 25.4, 25.4 / 64},
-      {_T("#1 = 0.073 x 72 UNF"), 0.073 * 25.4, 25.4 / 72},
-      {_T("#2 = 0.086 x 56 UNC"), 0.086 * 25.4, 25.4 / 56},
-      {_T("#2 = 0.086 x 64 UNF"), 0.086 * 25.4, 25.4 / 64},
-      {_T("#3 = 0.099 x 48 UNC"), 0.099 * 25.4, 25.4 / 48},
-      {_T("#3 = 0.099 x 56 UNF"), 0.099 * 25.4, 25.4 / 56},
-      {_T("#4 = 0.112 x 40 UNC"), 0.112 * 25.4, 25.4 / 40},
-      {_T("#4 = 0.112 x 48 UNF"), 0.112 * 25.4, 25.4 / 48},
-      {_T("#5 = 0.125 x 40 UNC"), 0.125 * 25.4, 25.4 / 40},
-      {_T("#5 = 0.125 x 44 UNF"), 0.125 * 25.4, 25.4 / 44},
-      {_T("#6 = 0.138 x 32 UNC"), 0.138 * 25.4, 25.4 / 32},
-      {_T("#6 = 0.138 x 40 UNF"), 0.138 * 25.4, 25.4 / 40},
-      {_T("#8 = 0.164 x 32 UNC"), 0.164 * 25.4, 25.4 / 32},
-      {_T("#8 = 0.164 x 36 UNF"), 0.164 * 25.4, 25.4 / 36},
-      {_T("#10= 0.190 x 24 UNC"), 0.190 * 25.4, 25.4 / 24},
-      {_T("#10= 0.190 x 32 UNF"), 0.190 * 25.4, 25.4 / 32},
-      {_T("#12= 0.216 x 24 UNC"), 0.216 * 25.4, 25.4 / 24},
-      {_T("#12= 0.216 x 28 UNC"), 0.216 * 25.4, 25.4 / 28},
-      {_T("#12= 0.216 x 32 UNEF"), 0.216 * 25.4, 25.4 / 32},
-      {_T("1/4  x 20 UNC"), 0.25 * 25.4, 25.4 / 20},
-      {_T("1/4  x 28 UNF"), 0.25 * 25.4, 25.4 / 28},
-      {_T("1/4  x 32 UNEF"), 0.25 * 25.4, 25.4 / 32},
-      {_T("5/16 x 18 UNC"), (5.0/16.0) * 25.4, 25.4 / 18},
-      {_T("5/16 x 24 UNF"), (5.0/16.0) * 25.4, 25.4 / 24},
-      {_T("5/16 x 32 UNEF"), (5.0/16.0) * 25.4, 25.4 / 32},
-      {_T("3/8 x 16 UNC"), (3.0/8.0) * 25.4, 25.4 / 16},
-      {_T("3/8 x 24 UNF"), (3.0/8.0) * 25.4, 25.4 / 24},
-      {_T("3/8 x 32 UNEF"), (3.0/8.0) * 25.4, 25.4 / 32},
-      {_T("7/16 x 14 UNC"), (7.0/16.0) * 25.4, 25.4 / 14},
-      {_T("7/16 x 20 UNF"), (7.0/16.0) * 25.4, 25.4 / 20},
-      {_T("7/16 x 28 UNEF"), (7.0/16.0) * 25.4, 25.4 / 28},
-      {_T("1/2 x 13 UNC"), (1.0/2.0) * 25.4, 25.4 / 13},
-      {_T("1/2 x 20 UNF"), (1.0/2.0) * 25.4, 25.4 / 20},
-      {_T("1/2 x 28 UNEF"), (1.0/2.0) * 25.4, 25.4 / 28},
-      {_T("9/16 x 12 UNC"), (9.0/16.0) * 25.4, 25.4 / 12},
-      {_T("9/16 x 18 UNF"), (9.0/16.0) * 25.4, 25.4 / 18},
-      {_T("9/16 x 24 UNEF"), (9.0/16.0) * 25.4, 25.4 / 24},
-      {_T("5/8 x 11 UNC"), (5.0/8.0) * 25.4, 25.4 / 11},
-      {_T("5/8 x 18 UNF"), (5.0/8.0) * 25.4, 25.4 / 18},
-      {_T("5/8 x 24 UNEF"), (5.0/8.0) * 25.4, 25.4 / 24},
-      {_T("3/4 x 10 UNC"), (3.0/4.0) * 25.4, 25.4 / 10},
-      {_T("3/4 x 16 UNF"), (3.0/4.0) * 25.4, 25.4 / 16},
-      {_T("3/4 x 20 UNEF"), (3.0/4.0) * 25.4, 25.4 / 20},
-      {_T("7/8 x 9 UNC"), (7.0/8.0) * 25.4, 25.4 / 9},
-      {_T("7/8 x 14 UNF"), (7.0/8.0) * 25.4, 25.4 / 14},
-      {_T("7/8 x 20 UNEF"), (7.0/8.0) * 25.4, 25.4 / 20},
-      {_T("1 x 8 UNC"), 1.0 * 25.4, 25.4 / 8},
-      {_T("1 x 14 UNF"), 1.0 * 25.4, 25.4 / 14},
-      {_T("1 x 20 UNEF"), 1.0 * 25.4, 25.4 / 20},
-      {_T("End of table marker"), -1.0, -1.0}   // WARNING DO NOT REMOVE THIS ENTRY.  IT MUST BE THE LAST ENTRY IN THE TABLE
-    };
-
-CTool::tap_sizes_t british_standard_whitworth_tap_sizes[] = {
-      {_T("1/16 x 60 BSW"), (1.0/16.0) * 25.4, 25.4 / 60},
-      {_T("3/32 x 48 BSW"), (3.0/32.0) * 25.4, 25.4 / 48},
-      {_T("1/8  x 48 BSW"), (1.0/8.0) * 25.4, 25.4 / 40},
-      {_T("5/32 x 32 BSW"), (5.0/32.0) * 25.4, 25.4 / 32},
-      {_T("3/16 x 24 BSW"), (3.0/16.0) * 25.4, 25.4 / 24},
-      {_T("7/32 x 24 BSW"), (7.0/32.0) * 25.4, 25.4 / 24},
-      {_T("1/4 x 20 BSW"), (1.0/4.0) * 25.4, 25.4 / 20},
-      {_T("5/16 x 18 BSW"), (5.0/16.0) * 25.4, 25.4 / 18},
-      {_T("3/8 x 16 BSW"), (3.0/8.0) * 25.4, 25.4 / 16},
-      {_T("7/16 x 14 BSW"), (7.0/16.0) * 25.4, 25.4 / 14},
-      {_T("1/2 x 12 BSW"), (1.0/2.0) * 25.4, 25.4 / 12},
-      {_T("9/16 x 12 BSW"), (9.0/16.0) * 25.4, 25.4 / 12},
-      {_T("5/8 x 11 BSW"), (5.0/8.0) * 25.4, 25.4 / 11},
-      {_T("11/16 x 11 BSW"), (11.0/16.0) * 25.4, 25.4 / 11},
-      {_T("3/4 x 10 BSW"), (3.0/4.0) * 25.4, 25.4 / 10},
-      {_T("13/16 x 10 BSW"), (13.0/16.0) * 25.4, 25.4 / 10},
-      {_T("7/8 x 9 BSW"), (7.0/8.0) * 25.4, 25.4 / 9},
-      {_T("15/16 x 9 BSW"), (15.0/16.0) * 25.4, 25.4 / 9},
-      {_T("1 x 8 BSW"), 1.0 * 25.4, 25.4 / 8},
-      {_T("1 1/8 x 7 BSW"), (1.0 + (1.0/8.0)) * 25.4, 25.4 / 7},
-      {_T("1 1/4 x 7 BSW"), (1.0 + (1.0/4.0)) * 25.4, 25.4 / 7},
-      {_T("1 1/2 x 6 BSW"), (1.0 + (1.0/2.0)) * 25.4, 25.4 / 6},
-      {_T("1 3/4 x 5 BSW"), (1.0 + (3.0/4.0)) * 25.4, 25.4 / 5},
-      {_T("2 x 4.5 BSW"), 2.0 * 25.4, 25.4 / 4.5},
-      {_T("End of table marker"), -1.0, -1.0}   // WARNING DO NOT REMOVE THIS ENTRY.  IT MUST BE THE LAST ENTRY IN THE TABLE
-    };
-
-
-
-
 void CToolParams::set_initial_values()
 {
 	CNCConfig config(ConfigScope());
 	config.Read(_T("m_material"), &m_material, int(eCarbide));
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
-	config.Read(_T("m_max_advance_per_revolution"), &m_max_advance_per_revolution, 0.12 );	// mm
 	config.Read(_T("m_automatically_generate_title"), &m_automatically_generate_title, 1 );
-
 	config.Read(_T("m_type"), (int *) &m_type, eDrill);
 	config.Read(_T("m_flat_radius"), &m_flat_radius, 0);
 	config.Read(_T("m_corner_radius"), &m_corner_radius, 0);
 	config.Read(_T("m_cutting_edge_angle"), &m_cutting_edge_angle, 59);
 	config.Read(_T("m_cutting_edge_height"), &m_cutting_edge_height, 4 * m_diameter);
-
-	// The following are all turning tool parameters
-	config.Read(_T("m_orientation"), &m_orientation, 6);
-	config.Read(_T("m_x_offset"), &m_x_offset, 0);
-	config.Read(_T("m_front_angle"), &m_front_angle, 95);
-	config.Read(_T("m_tool_angle"), &m_tool_angle, 60);
-	config.Read(_T("m_back_angle"), &m_back_angle, 25);
-
-	// The following are ONLY for touch probe tools
-	config.Read(_T("probe_offset_x"), &m_probe_offset_x, 0.0);
-	config.Read(_T("probe_offset_y"), &m_probe_offset_y, 0.0);
-
-	// The following are ONLY for extrusions
-	config.Read(_T("m_extrusion_material"), &m_extrusion_material, int(eABS));  //type of plastic or other material to extrude
-	config.Read(_T("m_feedrate"), &m_feedrate, 50);  //the base feed rate.
-	config.Read(_T("m_layer_height"), &m_layer_height, .35);  //Distance the extruder moves in Z axis for each layer.
-	config.Read(_T("m_width_over_thickness"), &m_width_over_thickness, 1.8);  //Ratio expressing the height over width of the extruded filament 1.0 indicates a circular cross section.  Higher numbers indicate an elliptical extrusion.
-	config.Read(_T("m_temperature"), &m_temperature, 220); //temp in celsius
-	config.Read(_T("m_flowrate"), &m_flowrate, 255); //speed of the extruder motor.
-	config.Read(_T("m_filament_diameter"), &m_filament_diameter, 3); //The diameter of the raw filament.  Typically ~3mm
-
-	config.Read(_T("gradient"), &m_gradient, 0.0);  // Straight plunge by default.
-
-	// The following are ONLY for tapping tools
-	config.Read(_T("m_direction"), &m_direction, 0);  // default to right-hand tap
-	config.Read(_T("m_pitch"), &m_pitch, 1.0);        // mm/rev, this would be for an M6 tap
-
-	config.Read(_T("drag_distance"), &m_drag_knife_distance, 1.0);
-	}
+}
 
 void CToolParams::write_values_to_config()
 {
 	CNCConfig config(ConfigScope());
 
-	// We ALWAYS write the parameters into the configuration file in mm (for consistency).
-	// If we're now in inches then convert the values.
-	// We're in mm already.
 	config.Write(_T("m_material"), m_material);
 	config.Write(_T("m_diameter"), m_diameter);
-	config.Write(_T("m_x_offset"), m_x_offset);
 	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
-	config.Write(_T("m_orientation"), m_orientation);
-	config.Write(_T("m_max_advance_per_revolution"), m_max_advance_per_revolution );
 	config.Write(_T("m_automatically_generate_title"), m_automatically_generate_title );
-
 	config.Write(_T("m_type"), m_type);
 	config.Write(_T("m_flat_radius"), m_flat_radius);
 	config.Write(_T("m_corner_radius"), m_corner_radius);
 	config.Write(_T("m_cutting_edge_angle"), m_cutting_edge_angle);
 	config.Write(_T("m_cutting_edge_height"), m_cutting_edge_height);
-
-	config.Write(_T("m_front_angle"), m_front_angle);
-	config.Write(_T("m_tool_angle"), m_tool_angle);
-	config.Write(_T("m_back_angle"), m_back_angle);
-
-	// The following are ONLY for touch probe tools
-	config.Write(_T("probe_offset_x"), m_probe_offset_x);
-	config.Write(_T("probe_offset_y"), m_probe_offset_y);
-
-	// The following are ONLY for extrusions
-	config.Write(_T("m_extrusion_material"), m_extrusion_material);
-	config.Write(_T("m_feedrate"), m_feedrate);
-	config.Write(_T("m_layer_height"), m_layer_height);
-	config.Write(_T("m_width_over_thickness"), m_width_over_thickness);
-	config.Write(_T("m_temperature"), m_temperature);
-	config.Write(_T("m_flowrate"), m_flowrate);
-	config.Write(_T("m_filament_diameter"), m_filament_diameter);
-
-
-	config.Write(_T("gradient"), m_gradient);
-
-	// The following are ONLY for tapping tools
-	config.Write(_T("m_direction"), m_direction);
-	config.Write(_T("m_pitch"), m_pitch);
-
-	config.Write(_T("drag_distance"), m_drag_knife_distance);
 }
 
 void CTool::SetDiameter( const double diameter )
@@ -335,20 +126,18 @@ void CTool::SetDiameter( const double diameter )
 	switch (m_params.m_type)
 	{
 	    case CToolParams::eChamfer:
-	    case CToolParams::eEngravingTool:
 	    {
             // Recalculate the cutting edge length based on this new diameter
             // and the cutting angle.
-
             double opposite = (m_params.m_diameter / 2.0) - m_params.m_flat_radius;
             double angle = m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
-
             m_params.m_cutting_edge_height = opposite / tan(angle);
 	    }
 	    break;
 
 	    case CToolParams::eEndmill:
 	    case CToolParams::eSlotCutter:
+		case CToolParams::eEngravingTool:
             m_params.m_flat_radius = diameter / 2.0;
             break;
 
@@ -366,42 +155,6 @@ static void on_set_diameter(double value, HeeksObj* object)
 	((CTool*)object)->SetDiameter( value );
 } // End on_set_diameter() routine
 
-static void on_set_direction(int value, HeeksObj* object, bool from_undo_redo)
-{
-	((CTool*)object)->m_params.m_direction = value;
-	((CTool*)object)->ResetTitle();
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_pitch(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_pitch = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_drag_knife_distance(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_drag_knife_distance = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_max_advance_per_revolution(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_max_advance_per_revolution = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_x_offset(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_x_offset = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
 static void on_set_tool_length_offset(double value, HeeksObj* object)
 {
 	((CTool*)object)->m_params.m_tool_length_offset = value;
@@ -409,70 +162,23 @@ static void on_set_tool_length_offset(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
-static void on_set_orientation(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
-{
-	if (zero_based_choice < 0) return;	// An error has occured
-
-	if ((zero_based_choice >= 0) && (zero_based_choice <= 9))
-	{
-		((CTool*)object)->m_params.m_orientation = zero_based_choice;
-		object->KillGLLists();
-		heeksCAD->Repaint();
-	} // End if - then
-	else
-	{
-		wxMessageBox(_T("Orientation values must be between 0 and 9 inclusive.  Aborting value change"));
-	} // End if - else
-}
-
 static void on_set_material(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
-	if (zero_based_choice < 0) return;	// An error has occured.
-
-	if ((zero_based_choice >= CToolParams::eHighSpeedSteel) && (zero_based_choice <= CToolParams::eCarbide))
-	{
-		((CTool*)object)->m_params.m_material = zero_based_choice;
-		((CTool*)object)->ResetTitle();
-		heeksCAD->RefreshProperties();
-		object->KillGLLists();
-		heeksCAD->Repaint();
-	} // End if - then
-	else
-	{
-		wxMessageBox(_T("Tool material must be between 0 and 1. Aborting value change"));
-	} // End if - else
-}
-
-static void on_set_front_angle(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_front_angle = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_tool_angle(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_tool_angle = value;
+	((CTool*)object)->m_params.m_material = zero_based_choice;
 	((CTool*)object)->ResetTitle();
 	object->KillGLLists();
 	heeksCAD->Repaint();
 }
 
-static void on_set_back_angle(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_back_angle = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static CToolParams::ToolTypesList_t tool_types_for_on_set_type;
+typedef std::pair< CToolParams::eToolType, wxString > ToolTypeDescription_t;
+typedef std::vector<ToolTypeDescription_t > ToolTypesList_t;
+static ToolTypesList_t tool_types_for_on_set_type;
 
 static void on_set_type(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
 	((CTool*)object)->m_params.m_type = tool_types_for_on_set_type[zero_based_choice].first;
-	((CTool*)object)->ResetParametersToReasonableValues();
 	((CTool*)object)->ResetTitle();
 	heeksCAD->RefreshProperties();
 	object->KillGLLists();
@@ -488,149 +194,10 @@ static void on_set_automatically_generate_title(int zero_based_choice, HeeksObj*
 
 } // End on_set_type() routine
 
-static void on_set_gradient(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_gradient = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-
 static double degrees_to_radians( const double degrees )
 {
 	return( (degrees / 360) * 2 * M_PI );
 } // End degrees_to_radians() routine
-
-
-double CToolParams::ReasonableGradient( const eToolType type ) const
-{
-    switch(type)
-	{
-	    case CToolParams::eCentreDrill:
-		case CToolParams::eDrill:
-		case CToolParams::eTapTool:
-				return(0.0);
-
-        case CToolParams::eSlotCutter:
-		case CToolParams::eEndmill:
-		case CToolParams::eBallEndMill:
-				return(-1.0 / 10.0);  // 1 down for 10 across
-
-
-		case CToolParams::eTouchProbe:
-		case CToolParams::eToolLengthSwitch:
-				return(0.0);
-
-		case CToolParams::eExtrusion:
-				return(0.0);
-
-		case CToolParams::eChamfer:
-				return(0.0);
-
-		case CToolParams::eTurningTool:
-				return(0.0);
-
-		case CToolParams::eEngravingTool:
-		case CToolParams::eDragKnife:
-				return(0.0);
-
-        default:
-            return(0.0);
-	} // End switch
-}
-
-void CTool::ResetParametersToReasonableValues()
-{
-	if (m_params.m_type != CToolParams::eTurningTool)
-	{
-		m_params.m_tool_length_offset = (5 * m_params.m_diameter);
-	} // End if - then
-
-    m_params.m_gradient = m_params.ReasonableGradient(m_params.m_type);
-
-	double height;
-	switch(m_params.m_type)
-	{
-		case CToolParams::eDrill:
-				m_params.m_corner_radius = 0;
-				m_params.m_flat_radius = 0;
-				m_params.m_cutting_edge_angle = 59;
-				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				break;
-
-		case CToolParams::eCentreDrill:
-				m_params.m_corner_radius = 0;
-				m_params.m_flat_radius = 0;
-				m_params.m_cutting_edge_angle = 59;
-				m_params.m_cutting_edge_height = m_params.m_diameter * 1.0;
-				break;
-
-		case CToolParams::eEndmill:
-				m_params.m_corner_radius = 0;
-				m_params.m_flat_radius = m_params.m_diameter / 2;
-				m_params.m_cutting_edge_angle = 0;
-				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				break;
-
-		case CToolParams::eSlotCutter:
-				m_params.m_corner_radius = 0;
-				m_params.m_flat_radius = m_params.m_diameter / 2;
-				m_params.m_cutting_edge_angle = 0;
-				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				break;
-
-		case CToolParams::eBallEndMill:
-				m_params.m_corner_radius = (m_params.m_diameter / 2);
-				m_params.m_flat_radius = 0;
-				m_params.m_cutting_edge_angle = 0;
-				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				break;
-
-		case CToolParams::eTouchProbe:
-				m_params.m_corner_radius = (m_params.m_diameter / 2);
-				m_params.m_flat_radius = 0;
-				break;
-
-		case CToolParams::eExtrusion:
-				m_params.m_corner_radius = (m_params.m_diameter / 2);
-				m_params.m_flat_radius = 0;
-				break;
-
-		case CToolParams::eToolLengthSwitch:
-				m_params.m_corner_radius = (m_params.m_diameter / 2);
-				break;
-
-		case CToolParams::eChamfer:
-		case CToolParams::eEngravingTool:
-				m_params.m_corner_radius = 0;
-				m_params.m_flat_radius = 0;
-				m_params.m_cutting_edge_angle = (m_params.m_type == CToolParams::eChamfer) ? 45.0 : 30.0;
-				height = (m_params.m_diameter / 2.0) * tan( degrees_to_radians(90.0 - m_params.m_cutting_edge_angle));
-				m_params.m_cutting_edge_height = height;
-				break;
-
-		case CToolParams::eTurningTool:
-				// No special constraints for this.
-				break;
-
-		case CToolParams::eTapTool:
-		                m_params.m_tool_length_offset = (5 * m_params.m_diameter);
-				m_params.m_automatically_generate_title = 1;
-				m_params.m_diameter = 6.0;
-				m_params.m_direction = 0;
-				m_params.m_pitch = 1.0;
-				m_params.m_cutting_edge_height = m_params.m_diameter * 3.0;
-				break;
-
-		case CToolParams::eDragKnife:
-				break;
-
-		default:
-				wxMessageBox(_T("That is not a valid tool type. Aborting value change."));
-				return;
-	} // End switch
-
-} // End ResetParametersToReasonableValues() method
 
 static void on_set_corner_radius(double value, HeeksObj* object)
 {
@@ -649,15 +216,20 @@ static void on_set_flat_radius(double value, HeeksObj* object)
 
 	((CTool*)object)->m_params.m_flat_radius = value;
 
-	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer || ((CTool*)object)->m_params.m_type == CToolParams::eEngravingTool)
+	switch(((CTool*)object)->m_params.m_type)
 	{
-		// Recalculate the cutting edge length based on this new diameter
-		// and the cutting angle.
+		case CToolParams::eChamfer:
+		case CToolParams::eEngravingTool:
+		{
+			// Recalculate the cutting edge length based on this new diameter
+			// and the cutting angle.
 
-		double opposite = ((CTool*)object)->m_params.m_diameter - ((CTool*)object)->m_params.m_flat_radius;
-		double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
+			double opposite = ((CTool*)object)->m_params.m_diameter - ((CTool*)object)->m_params.m_flat_radius;
+			double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
 
-		((CTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
+			((CTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
+		}
+		break;
 	}
 
 	object->KillGLLists();
@@ -673,15 +245,21 @@ static void on_set_cutting_edge_angle(double value, HeeksObj* object)
 	}
 
 	((CTool*)object)->m_params.m_cutting_edge_angle = value;
-	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer || ((CTool*)object)->m_params.m_type == CToolParams::eEngravingTool)
+
+	switch(((CTool*)object)->m_params.m_type)
 	{
-		// Recalculate the cutting edge length based on this new diameter
-		// and the cutting angle.
+		case CToolParams::eChamfer:
+		case CToolParams::eEngravingTool:
+		{
+			// Recalculate the cutting edge length based on this new diameter
+			// and the cutting angle.
 
-		double opposite = ((CTool*)object)->m_params.m_diameter - ((CTool*)object)->m_params.m_flat_radius;
-		double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
+			double opposite = ((CTool*)object)->m_params.m_diameter - ((CTool*)object)->m_params.m_flat_radius;
+			double angle = ((CTool*)object)->m_params.m_cutting_edge_angle / 360.0 * 2 * M_PI;
 
-		((CTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
+			((CTool*)object)->m_params.m_cutting_edge_height = opposite / tan(angle);
+		}
+		break;
 	}
 
 	((CTool*)object)->ResetTitle();
@@ -697,7 +275,7 @@ static void on_set_cutting_edge_height(double value, HeeksObj* object)
 		return;
 	}
 
-	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer || ((CTool*)object)->m_params.m_type == CToolParams::eEngravingTool)
+	if (((CTool*)object)->m_params.m_type == CToolParams::eChamfer)
 	{
 		wxMessageBox(_T("Cutting edge height is generated from diameter, flat radius and cutting edge angle for chamfering bits."));
 		return;
@@ -708,135 +286,18 @@ static void on_set_cutting_edge_height(double value, HeeksObj* object)
 	heeksCAD->Repaint();
 }
 
-static void on_set_probe_offset_x(double value, HeeksObj* object)
+static ToolTypesList_t GetToolTypesList()
 {
-	((CTool*)object)->m_params.m_probe_offset_x = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
+	ToolTypesList_t types_list;
 
-static void on_set_probe_offset_y(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_probe_offset_y = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_extrusion_material(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
-{
-	if (zero_based_choice < 0) return;	// An error has occured.
-
-	if ((zero_based_choice >= CToolParams::eABS) && (zero_based_choice <= CToolParams::eHDPE))
-	{
-		((CTool*)object)->m_params.m_extrusion_material = zero_based_choice;
-		((CTool*)object)->ResetTitle();
-		heeksCAD->RefreshProperties();
-		object->KillGLLists();
-		heeksCAD->Repaint();
-	} // End if - then
-	else
-	{
-		wxMessageBox(_T("Extrusion material must be between 0 and 2. Aborting value change"));
-	} // End if - else
-
-}
-
-static void on_set_feedrate(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_feedrate = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_layer_height(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_layer_height = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_width_over_thickness(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_width_over_thickness = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_temperature(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_temperature = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_flowrate(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_flowrate = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-static void on_set_filament_diameter(double value, HeeksObj* object)
-{
-	((CTool*)object)->m_params.m_filament_diameter = value;
-	object->KillGLLists();
-	heeksCAD->Repaint();
-}
-
-
-static void on_select_tap_from_standard_sizes(int chosen_units, HeeksObj* object, bool from_undo_redo)
-{
-    switch (chosen_units)
-    {
-        case 0:
-        return; // They didn't select metric or imperial.  Ignore this.
-
-        case 1:
-        ((CTool *)object)->SelectTapFromStandardSizes(metric_tap_sizes);
-        break;
-
-        case 2:
-        ((CTool *)object)->SelectTapFromStandardSizes(unified_thread_standard_tap_sizes);
-        break;
-
-        case 3:
-        ((CTool *)object)->SelectTapFromStandardSizes(british_standard_whitworth_tap_sizes);
-        break;
-    }
-}
-
-void CTool::SelectTapFromStandardSizes(const tap_sizes_t *tap_sizes)
-{
-    wxString message(_("Select tap size"));
-    wxString caption(_("Standard Tap Sizes"));
-
-    wxArrayString choices;
-
-    for (::size_t i=0; tap_sizes[i].diameter > 0.0; i++)
-    {
-        choices.Add(tap_sizes[i].description);
-    }
-
-    wxString choice = ::wxGetSingleChoice( message, caption, choices );
-
-    for (::size_t i=0; tap_sizes[i].diameter > 0.0; i++)
-    {
-        if ((choices.size() > 0) && (choice == choices[i]))
-        {
-            m_params.m_diameter = tap_sizes[i].diameter;
-            m_params.m_pitch = tap_sizes[i].pitch;
-            m_params.m_direction = 0;    // Right hand thread.
-
-            ResetTitle();
-            heeksCAD->RefreshProperties();
-            KillGLLists();
-            heeksCAD->Repaint();
-            return;
-        }
-    }
-}
-
-
+	types_list.push_back( ToolTypeDescription_t( CToolParams::eDrill, wxString(_("Drill Bit")) ));
+	types_list.push_back( ToolTypeDescription_t( CToolParams::eCentreDrill, wxString(_("Centre Drill Bit")) ));
+	types_list.push_back( ToolTypeDescription_t( CToolParams::eEndmill, wxString(_("End Mill")) ));
+	types_list.push_back( ToolTypeDescription_t( CToolParams::eSlotCutter, wxString(_("Slot Cutter")) ));
+	types_list.push_back( ToolTypeDescription_t( CToolParams::eBallEndMill, wxString(_("Ball End Mill")) ));
+	types_list.push_back( ToolTypeDescription_t( CToolParams::eChamfer, wxString(_("Chamfer")) ));
+	return(types_list);
+} // End GetToolTypesList() method
 
 void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 {
@@ -849,29 +310,20 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 		list->push_back(new PropertyChoice(_("Automatic Title"), choices, choice, parent, on_set_automatically_generate_title));
 	}
 
-	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion))
 	{
-		CToolParams::MaterialsList_t materials = CToolParams::GetMaterialsList();
-
-		int choice = -1;
 		std::list< wxString > choices;
-		for (CToolParams::MaterialsList_t::size_type i=0; i<materials.size(); i++)
-		{
-			choices.push_back(materials[i].second);
-			if (m_material == materials[i].first) choice = int(i);
+		choices.push_back(_("High Speed Steel"));
+		choices.push_back(_("Carbide"));
+		list->push_back(new PropertyChoice(_("Material"), choices, m_material, parent, on_set_material));
 
-		} // End for
-		list->push_back(new PropertyChoice(_("Material"), choices, choice, parent, on_set_material));
 	}
 
-
-
 	{
-		tool_types_for_on_set_type = CToolParams::GetToolTypesList();
+		tool_types_for_on_set_type = GetToolTypesList();
 
 		int choice = -1;
 		std::list< wxString > choices;
-		for (CToolParams::ToolTypesList_t::size_type i=0; i<tool_types_for_on_set_type.size(); i++)
+		for (ToolTypesList_t::size_type i=0; i<tool_types_for_on_set_type.size(); i++)
 		{
 			choices.push_back(tool_types_for_on_set_type[i].second);
 			if (m_type == tool_types_for_on_set_type[i].first) choice = int(i);
@@ -880,115 +332,75 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 		list->push_back(new PropertyChoice(_("Type"), choices, choice, parent, on_set_type));
 	}
 
-	if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion) && (m_type != eDragKnife))
-	{
-		list->push_back(new PropertyLength(_("max_advance_per_revolution"), m_max_advance_per_revolution, parent, on_set_max_advance_per_revolution));
-	} // End if - then
-
-	if (m_type == eTurningTool)
-	{
-		// We're using lathe (turning) tools
-
-		list->push_back(new PropertyLength(_("x_offset"), m_x_offset, parent, on_set_x_offset));
-		list->push_back(new PropertyDouble(_("front_angle"), m_front_angle, parent, on_set_front_angle));
-		list->push_back(new PropertyDouble(_("tool_angle"), m_tool_angle, parent, on_set_tool_angle));
-		list->push_back(new PropertyDouble(_("back_angle"), m_back_angle, parent, on_set_back_angle));
-
-		{
-			std::list< wxString > choices;
-			choices.push_back(_("(0) Unused"));
-			choices.push_back(_("(1) Turning/Back Facing"));
-			choices.push_back(_("(2) Turning/Facing"));
-			choices.push_back(_("(3) Boring/Facing"));
-			choices.push_back(_("(4) Boring/Back Facing"));
-			choices.push_back(_("(5) Back Facing"));
-			choices.push_back(_("(6) Turning"));
-			choices.push_back(_("(7) Facing"));
-			choices.push_back(_("(8) Boring"));
-			choices.push_back(_("(9) Centre"));
-			int choice = int(m_orientation);
-			list->push_back(new PropertyChoice(_("orientation"), choices, choice, parent, on_set_orientation));
-		}
-	} // End if - then
-	else if (m_type == eDragKnife)
-	{
-	}
-	else
 	{
 		// We're using milling/drilling tools
 		list->push_back(new PropertyLength(_("diameter"), m_diameter, parent, on_set_diameter));
-
-		if ((m_type != eExtrusion))
-		{
 		list->push_back(new PropertyLength(_("tool_length_offset"), m_tool_length_offset, parent, on_set_tool_length_offset));
-		}
-
-		if ((m_type != eTouchProbe) && (m_type != eToolLengthSwitch) && (m_type != eExtrusion))
-		{
-			list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
-			list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
-			list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
-			list->push_back(new PropertyLength(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
-			list->push_back(new PropertyDouble(_("gradient"), m_gradient, parent, on_set_gradient));
-		} // End if - then
-	} // End if - else
-
-	if (m_type == eTouchProbe)
-	{
-		// The following are ONLY for touch probe tools
-		list->push_back(new PropertyLength(_("Probe offset X"), m_probe_offset_x, parent, on_set_probe_offset_x));
-		list->push_back(new PropertyLength(_("Probe offset Y"), m_probe_offset_y, parent, on_set_probe_offset_y));
+		list->push_back(new PropertyLength(_("flat_radius"), m_flat_radius, parent, on_set_flat_radius));
+		list->push_back(new PropertyLength(_("corner_radius"), m_corner_radius, parent, on_set_corner_radius));
+		list->push_back(new PropertyDouble(_("cutting_edge_angle"), m_cutting_edge_angle, parent, on_set_cutting_edge_angle));
+		list->push_back(new PropertyLength(_("cutting_edge_height"), m_cutting_edge_height, parent, on_set_cutting_edge_height));
 	}
+}
 
-	if (m_type == eExtrusion)
-	// The following are ONLY for extrusion
+#define XML_STRING_DRILL "drill"
+#define XML_STRING_CENTRE_DRILL "centre_drill"
+#define XML_STRING_END_MILL "end_mill"
+#define XML_STRING_SLOT_CUTTER "slot_cutter"
+#define XML_STRING_BALL_END_MILL "ball_end_mill"
+#define XML_STRING_CHAMFER "chamfer"
+
+CToolParams::eToolType GetToolTypeFromString(const char* str)
+{
+	if(!stricmp(str, XML_STRING_DRILL))return CToolParams::eDrill;
+	if(!stricmp(str, XML_STRING_CENTRE_DRILL))return CToolParams::eCentreDrill;
+	if(!stricmp(str, XML_STRING_END_MILL))return CToolParams::eEndmill;
+	if(!stricmp(str, XML_STRING_SLOT_CUTTER))return CToolParams::eSlotCutter;
+	if(!stricmp(str, XML_STRING_BALL_END_MILL))return CToolParams::eBallEndMill;
+	if(!stricmp(str, XML_STRING_CHAMFER))return CToolParams::eChamfer;
+	return CToolParams::eUndefinedToolType;
+}
+
+CToolParams::eToolType GetToolTypeFromOldInt(int t)
+{
+	switch(t)
 	{
-		CToolParams::ExtrusionMaterialsList_t materials = CToolParams::GetExtrusionMaterialsList();
-
-		int choice = -1;
-		std::list< wxString > choices;
-		for (CToolParams::ExtrusionMaterialsList_t::size_type i=0; i<materials.size(); i++)
-		{
-			choices.push_back(materials[i].second);
-			if (m_extrusion_material == materials[i].first) choice = int(i);
-
-		} // End for
-		list->push_back(new PropertyChoice(_("extrusion_material"), choices, choice, parent, on_set_extrusion_material));
-		list->push_back(new PropertyLength(_("width_over_thickness"), m_width_over_thickness, parent, on_set_width_over_thickness));
-		list->push_back(new PropertyLength(_("feedrate"), m_feedrate, parent, on_set_feedrate));
-		list->push_back(new PropertyLength(_("layer_height"), m_layer_height, parent, on_set_layer_height));
-		list->push_back(new PropertyLength(_("temperature"), m_temperature, parent, on_set_temperature));
-		list->push_back(new PropertyLength(_("flowrate"), m_flowrate, parent, on_set_flowrate));
-		list->push_back(new PropertyLength(_("filament_diameter"), m_filament_diameter, parent, on_set_filament_diameter));
+	case 0:
+		return CToolParams::eDrill;
+	case 1:
+		return CToolParams::eCentreDrill;
+	case 2:
+		return CToolParams::eEndmill;
+	case 3:
+		return CToolParams::eSlotCutter;
+	case 4:
+		return CToolParams::eBallEndMill;
+	case 5:
+		return CToolParams::eChamfer;
+	default:
+		return CToolParams::eUndefinedToolType;
 	}
-	if (m_type == eTapTool)
+}
+
+const char* GetToolTypeXMLString(CToolParams::eToolType t)
+{
+	switch(t)
 	{
-		// The following are ONLY for tapping tools
-		{
-			std::list< wxString > choices;
-			choices.push_back(_("right hand"));
-			choices.push_back(_("left hand"));
-			int choice = int(m_direction);
-			list->push_back(new PropertyChoice(_("Tap direction"), choices, choice, parent, on_set_direction));
-		}
-		list->push_back(new PropertyLength(_("pitch"), m_pitch, parent, on_set_pitch));
-
-        {
-			std::list< wxString > choices;
-			choices.push_back(_("Select size"));
-			choices.push_back(_("Metric"));
-			choices.push_back(_("Unified Thread Standard (UNC/UNF/UNEF)"));
-			choices.push_back(_("British Standard Whitworth"));
-			int choice = 0;
-			list->push_back(new PropertyChoice(_("Select TAP from standard sizes"), choices, choice, parent, on_select_tap_from_standard_sizes));
-		}
+	case CToolParams::eDrill:
+		return XML_STRING_DRILL;
+	case CToolParams::eCentreDrill:
+		return XML_STRING_CENTRE_DRILL;
+	case CToolParams::eEndmill:
+		return XML_STRING_END_MILL;
+	case CToolParams::eSlotCutter:
+		return XML_STRING_SLOT_CUTTER;
+	case CToolParams::eBallEndMill:
+		return XML_STRING_BALL_END_MILL;
+	case CToolParams::eChamfer:
+		return XML_STRING_CHAMFER;
+	default:
+		return "";
 	}
-	if (m_type == eDragKnife)
-	{
-		// The following are ONLY for drag knife tools
-		list->push_back(new PropertyLength(_("tip distance"), m_drag_knife_distance, parent, on_set_drag_knife_distance));
-	}
-
 }
 
 void CToolParams::WriteXMLAttributes(TiXmlNode *root)
@@ -998,92 +410,27 @@ void CToolParams::WriteXMLAttributes(TiXmlNode *root)
 	heeksCAD->LinkXMLEndChild( root,  element );
 
 	element->SetDoubleAttribute( "diameter", m_diameter);
-	element->SetDoubleAttribute( "x_offset", m_x_offset);
 	element->SetDoubleAttribute( "tool_length_offset", m_tool_length_offset);
-	element->SetDoubleAttribute( "max_advance_per_revolution", m_max_advance_per_revolution);
-
 	element->SetAttribute( "automatically_generate_title", m_automatically_generate_title );
 	element->SetAttribute( "material", m_material );
-	element->SetAttribute( "orientation", m_orientation );
-	element->SetAttribute( "type", int(m_type) );
-
+	element->SetAttribute( "type", GetToolTypeXMLString(m_type) );
 	element->SetDoubleAttribute( "corner_radius", m_corner_radius);
 	element->SetDoubleAttribute( "flat_radius", m_flat_radius);
 	element->SetDoubleAttribute( "cutting_edge_angle", m_cutting_edge_angle);
 	element->SetDoubleAttribute( "cutting_edge_height", m_cutting_edge_height);
-
-	element->SetDoubleAttribute( "front_angle", m_front_angle);
-	element->SetDoubleAttribute( "tool_angle", m_tool_angle);
-	element->SetDoubleAttribute( "back_angle", m_back_angle);
-
-	element->SetDoubleAttribute( "probe_offset_x", m_probe_offset_x);
-	element->SetDoubleAttribute( "probe_offset_y", m_probe_offset_y);
-
-	element->SetDoubleAttribute( "width_over_thickness", m_width_over_thickness);
-	element->SetDoubleAttribute( "feedrate", m_feedrate);
-	element->SetAttribute( "extrusion_material", m_extrusion_material);
-	element->SetAttribute( "automatically_generate_title", m_automatically_generate_title );
-	element->SetDoubleAttribute( "layer_height", m_layer_height );
-	element->SetDoubleAttribute( "temperature", m_temperature );
-	element->SetDoubleAttribute( "filament_diameter", m_filament_diameter );
-	element->SetDoubleAttribute( "flowrate", m_flowrate );
-	element->SetDoubleAttribute( "gradient", m_gradient);
-
-	element->SetDoubleAttribute( "pitch", m_pitch);
-	element->SetAttribute( "direction", m_direction);
-	element->SetAttribute( "drag_distance", m_drag_knife_distance);
 }
 
 void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
 	if (pElem->Attribute("diameter")) pElem->Attribute("diameter", &m_diameter);
-	if (pElem->Attribute("max_advance_per_revolution")) pElem->Attribute("max_advance_per_revolution", &m_max_advance_per_revolution);
-	if (pElem->Attribute("automatically_generate_title")) pElem->Attribute("automatically_generate_title", &m_automatically_generate_title);
-	if (pElem->Attribute("x_offset")) pElem->Attribute("x_offset", &m_x_offset);
 	if (pElem->Attribute("tool_length_offset")) pElem->Attribute("tool_length_offset", &m_tool_length_offset);
+	if (pElem->Attribute("automatically_generate_title")) pElem->Attribute("automatically_generate_title", &m_automatically_generate_title);
 	if (pElem->Attribute("material")) pElem->Attribute("material", &m_material);
-	if (pElem->Attribute("orientation")) pElem->Attribute("orientation", &m_orientation);
 	if (pElem->Attribute("type")) { int value; pElem->Attribute("type", &value); m_type = CToolParams::eToolType(value); }
 	if (pElem->Attribute("corner_radius")) pElem->Attribute("corner_radius", &m_corner_radius);
 	if (pElem->Attribute("flat_radius")) pElem->Attribute("flat_radius", &m_flat_radius);
 	if (pElem->Attribute("cutting_edge_angle")) pElem->Attribute("cutting_edge_angle", &m_cutting_edge_angle);
-	if (pElem->Attribute("cutting_edge_height"))
-	{
-		 pElem->Attribute("cutting_edge_height", &m_cutting_edge_height);
-	} // End if - then
-	else
-	{
-		m_cutting_edge_height = m_diameter * 4.0;
-	} // End if - else
-
-	if (pElem->Attribute("front_angle")) pElem->Attribute("front_angle", &m_front_angle);
-	if (pElem->Attribute("tool_angle")) pElem->Attribute("tool_angle", &m_tool_angle);
-	if (pElem->Attribute("back_angle")) pElem->Attribute("back_angle", &m_back_angle);
-
-	if (pElem->Attribute( "probe_offset_x" )) pElem->Attribute("probe_offset_x", &m_probe_offset_x);
-	if (pElem->Attribute( "probe_offset_y" )) pElem->Attribute("probe_offset_y", &m_probe_offset_y);
-
-	if (pElem->Attribute("extrusion_material")) pElem->Attribute("extrusion_material", &m_extrusion_material);
-	if (pElem->Attribute("max_advance_per_revolution")) pElem->Attribute("max_advance_per_revolution", &m_max_advance_per_revolution);
-	if (pElem->Attribute("layer_height")) pElem->Attribute("layer_height", &m_layer_height);
-	if (pElem->Attribute("automatically_generate_title")) pElem->Attribute("automatically_generate_title", &m_automatically_generate_title);
-	if (pElem->Attribute("width_over_thickness")) pElem->Attribute("width_over_thickness", &m_width_over_thickness);
-	if (pElem->Attribute("temperature")) pElem->Attribute("temperature", &m_temperature);
-	if (pElem->Attribute("filament_diameter")) pElem->Attribute("filament_diameter", &m_filament_diameter);
-	if (pElem->Attribute("flowrate")) pElem->Attribute("flowrate", &m_flowrate);
-	if (pElem->Attribute("feedrate")) pElem->Attribute("feedrate", &m_feedrate);
-
-	if (pElem->Attribute( "gradient" ))
-	{
-	     pElem->Attribute("gradient", &m_gradient);
-	}
-	else
-	{
-	    m_gradient = ReasonableGradient(m_type);
-	}
-	if (pElem->Attribute("direction")) pElem->Attribute("direction", &m_direction);
-	if (pElem->Attribute("pitch")) pElem->Attribute("pitch", &m_pitch);
-	if (pElem->Attribute("drag_distance")) pElem->Attribute("pitch", &m_drag_knife_distance);
+	if (pElem->Attribute("cutting_edge_height")) pElem->Attribute("cutting_edge_height", &m_cutting_edge_height);
 }
 
 CTool::~CTool()
@@ -1131,7 +478,7 @@ Python CTool::AppendTextToProgram()
 
 	if (m_params.m_diameter > 0)
 	{
-		python << _T("radius=") << m_params.m_diameter / 2 /heeksCAD->GetViewUnits() << _T(", ");
+		python << _T("radius=") << m_params.m_diameter / 2 / theApp.m_program->m_units << _T(", ");
 	} // End if - then
 	else
 	{
@@ -1140,14 +487,12 @@ Python CTool::AppendTextToProgram()
 
 	if (m_params.m_tool_length_offset > 0)
 	{
-		python << _T("length=") << m_params.m_tool_length_offset /heeksCAD->GetViewUnits() << _T(", ");
+		python << _T("length=") << m_params.m_tool_length_offset / theApp.m_program->m_units << _T(", ");
 	} // End if - then
 	else
 	{
 		python << _T("length=None, ");
 	} // End if - else
-
-	python << _T("gradient=") << m_params.m_gradient;
 
 	python << _T(")\n");
 
@@ -1255,49 +600,6 @@ const wxBitmap &CTool::GetIcon()
 				if(chamferIcon == NULL)chamferIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/chamfmill.png")));
 				return *chamferIcon;
 			}
-		case CToolParams::eTurningTool:
-			{
-				static wxBitmap* turningToolIcon = NULL;
-				if(turningToolIcon == NULL)turningToolIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/turntool.png")));
-				return *turningToolIcon;
-			}
-		case CToolParams::eTouchProbe:
-			{
-				static wxBitmap* touchProbeIcon = NULL;
-				if(touchProbeIcon == NULL)touchProbeIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/probe.png")));
-				return *touchProbeIcon;
-			}
-		case CToolParams::eToolLengthSwitch:
-			{
-				static wxBitmap* toolLengthSwitchIcon = NULL;
-				if(toolLengthSwitchIcon == NULL)toolLengthSwitchIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/probe.png")));
-				return *toolLengthSwitchIcon;
-			}
-
-		case CToolParams::eExtrusion:
-			{
-				static wxBitmap* extrusionIcon = NULL;
-				if(extrusionIcon == NULL)extrusionIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/extrusion.png")));
-				return *extrusionIcon;
-			}
-		case CToolParams::eTapTool:
-			{
-				static wxBitmap* tapToolIcon = NULL;
-				if(tapToolIcon == NULL)tapToolIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/tap.png")));
-				return *tapToolIcon;
-			}
-		case CToolParams::eEngravingTool:
-			{
-				static wxBitmap* engraverIcon = NULL;
-				if(engraverIcon == NULL)engraverIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/engraver.png")));
-				return *engraverIcon;
-			}
-		case CToolParams::eDragKnife:
-			{
-				static wxBitmap* knifeIcon = NULL;
-				if(knifeIcon == NULL)knifeIcon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/knife.png")));
-				return *knifeIcon;
-			}
 		default:
 			{
 				static wxBitmap* toolIcon = NULL;
@@ -1312,9 +614,7 @@ void CTool::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = heeksCAD->NewXMLElement( "Tool" );
 	heeksCAD->LinkXMLEndChild( root,  element );
 	element->SetAttribute( "title", m_title.utf8_str());
-
 	element->SetAttribute( "tool_number", m_tool_number );
-
 	m_params.WriteXMLAttributes(element);
 	WriteBaseXML(element);
 }
@@ -1514,9 +814,6 @@ wxString CTool::GetMeaningfulName(double units) const
     std::ostringstream l_ossName;
 #endif
 
-	if (	(m_params.m_type != CToolParams::eTurningTool) &&
-		(m_params.m_type != CToolParams::eTouchProbe) &&
-		(m_params.m_type != CToolParams::eToolLengthSwitch))
 	{
 		if (units == 1.0)
 		{
@@ -1527,7 +824,6 @@ wxString CTool::GetMeaningfulName(double units) const
 		{
 			// We're using inches.  Find a fractional representation if one matches.
 			wxString fraction = FractionalRepresentation(m_params.m_diameter / units);
-			wxString guage = GuageNumberRepresentation( m_params.m_diameter / units, units );
 
 			if (fraction.Len() > 0)
 			{
@@ -1535,148 +831,34 @@ wxString CTool::GetMeaningfulName(double units) const
 			}
 			else
 			{
-			    if (guage.Len() > 0)
-			    {
-                    l_ossName << guage.c_str() << " ";
-
-                    if (TOOLS)
-                    {
-                        if (TOOLS->m_title_format == CTools::eIncludeGuageAndSize)
-                        {
-                            l_ossName << "(" << m_params.m_diameter / units << " inch) ";
-                        }
-                    }
-			    }
-			    else
-			    {
-			        l_ossName << m_params.m_diameter / units << " inch ";
-			    }
+		        l_ossName << m_params.m_diameter / units << " inch ";
 			}
 		} // End if - else
-	} // End if - then
-
-	if ((m_params.m_type != CToolParams::eTouchProbe) && (m_params.m_type != CToolParams::eToolLengthSwitch) && (m_params.m_type != CToolParams::eExtrusion))
-	{
-		switch (m_params.m_material)
-		{
-			case CToolParams::eHighSpeedSteel: l_ossName << "HSS ";
-								  break;
-
-			case CToolParams::eCarbide:	l_ossName << (_("Carbide "));
-								break;
-		} // End switch
-	} // End if - then
-
-	if ((m_params.m_type == CToolParams::eExtrusion))
-	{
-		switch (m_params.m_extrusion_material)
-		{
-			case CToolParams::eABS: l_ossName << "ABS ";
-								break;
-			case CToolParams::ePLA:	l_ossName << (_("PLA "));
-								break;
-			case CToolParams::eHDPE:	l_ossName << (_("HDPE "));
-								break;
-		} // End switch
 	} // End if - then
 
 	switch (m_params.m_type)
 	{
 		case CToolParams::eDrill:	l_ossName << (_("Drill Bit"));
-							break;
+			break;
 
 		case CToolParams::eCentreDrill:	l_ossName << (_("Centre Drill Bit"));
-							break;
+			break;
 
-                case CToolParams::eEndmill:	l_ossName << (_("End Mill"));
-							break;
+        case CToolParams::eEndmill:	l_ossName << (_("End Mill"));
+			break;
 
-                case CToolParams::eSlotCutter:	l_ossName << (_("Slot Cutter"));
-							break;
+        case CToolParams::eSlotCutter:	l_ossName << (_("Slot Cutter"));
+			break;
 
-                case CToolParams::eBallEndMill:	l_ossName << (_("Ball End Mill"));
-							break;
+        case CToolParams::eBallEndMill:	l_ossName << (_("Ball End Mill"));
+			break;
 
-                case CToolParams::eChamfer:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
-							l_ossName << m_params.m_cutting_edge_angle << (_T(" degreee "));
-                					l_ossName << (_("Chamfering Bit"));
-							break;
-
-                case CToolParams::eTurningTool:	l_ossName << (_("Turning Tool"));
-							break;
-
-                case CToolParams::eTouchProbe:	l_ossName << (_("Touch Probe"));
-							break;
-
-                case CToolParams::eExtrusion:	l_ossName << (_("Extrusion"));
-							break;
-
-                case CToolParams::eToolLengthSwitch:	l_ossName << (_("Tool Length Switch"));
-							break;
-
-                case CToolParams::eTapTool:
-                {
-                    // See if we can find a name for it in the standard TAP sizes tables.
-                    bool found = false;
-
-                    for (::size_t i=0; ((metric_tap_sizes[i].diameter > 0.0) && (! found)); i++)
-                    {
-                        if ((m_params.m_diameter == metric_tap_sizes[i].diameter) &&
-                            (m_params.m_pitch == metric_tap_sizes[i].pitch))
-                            {
-                                l_ossName.str(_T(""));  // Replace what came before.
-                                wxString description = metric_tap_sizes[i].description;
-                                description.Replace(_T("  "),_T(" "),true);
-                                l_ossName << description.utf8_str();
-                                found = true;
-                            }
-                    }
-
-                    for (::size_t i=0; ((unified_thread_standard_tap_sizes[i].diameter > 0.0) && (! found)); i++)
-                    {
-                        if ((m_params.m_diameter == unified_thread_standard_tap_sizes[i].diameter) &&
-                            (m_params.m_pitch == unified_thread_standard_tap_sizes[i].pitch))
-                            {
-                                l_ossName.str(_T(""));  // Replace what came before.
-                                wxString description = unified_thread_standard_tap_sizes[i].description;
-                                description.Replace(_T("  "),_T(" "),true);
-                                l_ossName << description.utf8_str();
-                                found = true;
-                            }
-                    }
-
-                    for (::size_t i=0; ((british_standard_whitworth_tap_sizes[i].diameter > 0.0) && (! found)); i++)
-                    {
-                        if ((m_params.m_diameter == british_standard_whitworth_tap_sizes[i].diameter) &&
-                            (m_params.m_pitch == british_standard_whitworth_tap_sizes[i].pitch))
-                            {
-                                l_ossName.str(_T(""));  // Replace what came before.
-                                wxString description = british_standard_whitworth_tap_sizes[i].description;
-                                description.Replace(_T("  "),_T(" "),true);
-                                l_ossName << description.utf8_str();
-                                found = true;
-                            }
-                    }
-
-                    l_ossName << (_(" Tap Tool"));
-                    if (m_params.m_direction == 1) {
-                        l_ossName << (_(", left hand"));
-                    }
-                }
-		  break;
-                case CToolParams::eEngravingTool:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
-							l_ossName << m_params.m_cutting_edge_angle << (_T(" degreee "));
-                					l_ossName << (_("Engraving Bit"));
-							break;
-
-
-                case CToolParams::eDragKnife:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
-							l_ossName << m_params.m_drag_knife_distance << (_T(" "));
-                					l_ossName << (_("Drag Knife"));
-							break;
-
-
-		default:				break;
+        case CToolParams::eChamfer:	l_ossName.str(_T(""));	// Remove all that we've already prepared.
+			l_ossName << m_params.m_cutting_edge_angle << (_T(" degreee "));
+					l_ossName << (_("Chamfering Bit"));
+			break;
+		default:
+			break;
 	} // End switch
 
 	return( l_ossName.str().c_str() );
@@ -1829,7 +1011,7 @@ TopoDS_Shape CTool::GetShape() const
 
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
-			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, diameter / 2, shaft_length );
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2) * ((m_params.m_type == CToolParams::eEngravingTool) ? 1.0 : 0.5), shaft_length );
 
 			// And a cone for the tip.
 			gp_Ax2 tip_position_and_orientation( shaft_start_location, gp_Dir(0,0,-1) );
@@ -1858,7 +1040,7 @@ TopoDS_Shape CTool::GetShape() const
 
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
-			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2) * ((m_params.m_type == CToolParams::eEngravingTool) ? 1.0 : 0.5), shaft_length );
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, diameter / 2, shaft_length );
 
 			// And a cone for the tip.
 			// double cutting_edge_angle_in_radians = ((m_params.m_cutting_edge_angle / 2) / 360) * (2 * M_PI);
@@ -1892,154 +1074,6 @@ TopoDS_Shape CTool::GetShape() const
 			return tool_shape;
 		}
 
-		case CToolParams::eTouchProbe:
-		case CToolParams::eToolLengthSwitch:	// TODO: Draw a tool length switch
-		{
-			// First a cylinder to represent the shaft.
-			double shaft_length = tool_length_offset - diameter;
-
-			gp_Pnt shaft_start_location( tool_tip_location );
-			shaft_start_location.SetZ( tool_tip_location.Z() - shaft_length );
-
-			gp_Ax2 tip_position_and_orientation( tool_tip_location, gp_Dir(0,0,+1) );
-			BRepPrimAPI_MakeCone shaft( tip_position_and_orientation,
-							diameter/16.0,
-							diameter/2,
-							shaft_length);
-
-			BRepPrimAPI_MakeSphere ball( tool_tip_location, diameter / 2.0 );
-
-			// TopoDS_Compound tool_shape;
-			TopoDS_Shape tool_shape;
-			tool_shape = BRepAlgoAPI_Fuse(shaft.Shape() , ball.Shape() );
-			return tool_shape;
-		}
-
-		case CToolParams::eTurningTool:
-		{
-			// First draw the cutting tip.
-			double triangle_radius = 8.0;	// mm
-			double cutting_tip_thickness = 3.0;	// mm
-
-			gp_Trsf rotation;
-
-			gp_Pnt p1(0.0, triangle_radius, 0.0);
-			rotation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(0) );
-			p1.Transform(rotation);
-
-			rotation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(+1 * ((360 - m_params.m_tool_angle)/2)) );
-			gp_Pnt p2(p1);
-			p2.Transform(rotation);
-
-			rotation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(-1 * ((360 - m_params.m_tool_angle)/2)) );
-			gp_Pnt p3(p1);
-			p3.Transform(rotation);
-
-			Handle(Geom_TrimmedCurve) line1 = GC_MakeSegment(p1,p2);
-			Handle(Geom_TrimmedCurve) line2 = GC_MakeSegment(p2,p3);
-			Handle(Geom_TrimmedCurve) line3 = GC_MakeSegment(p3,p1);
-
-			TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge( line1 );
-			TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge( line2 );
-			TopoDS_Edge edge3 = BRepBuilderAPI_MakeEdge( line3 );
-
-			TopoDS_Wire wire = BRepBuilderAPI_MakeWire( edge1, edge2, edge3 );
-			TopoDS_Face face = BRepBuilderAPI_MakeFace( wire );
-			gp_Vec vec( 0,0, cutting_tip_thickness );
-			TopoDS_Shape cutting_tip = BRepPrimAPI_MakePrism( face, vec );
-
-			// Now make the supporting shaft
-			gp_Pnt p4(p3); p4.SetZ( p3.Z() + cutting_tip_thickness );
-			gp_Pnt p5(p2); p5.SetZ( p2.Z() + cutting_tip_thickness );
-
-			Handle(Geom_TrimmedCurve) shaft_line1 = GC_MakeSegment(p2,p3);
-			Handle(Geom_TrimmedCurve) shaft_line2 = GC_MakeSegment(p3,p4);
-			Handle(Geom_TrimmedCurve) shaft_line3 = GC_MakeSegment(p4,p5);
-			Handle(Geom_TrimmedCurve) shaft_line4 = GC_MakeSegment(p5,p2);
-
-			TopoDS_Edge shaft_edge1 = BRepBuilderAPI_MakeEdge( shaft_line1 );
-			TopoDS_Edge shaft_edge2 = BRepBuilderAPI_MakeEdge( shaft_line2 );
-			TopoDS_Edge shaft_edge3 = BRepBuilderAPI_MakeEdge( shaft_line3 );
-			TopoDS_Edge shaft_edge4 = BRepBuilderAPI_MakeEdge( shaft_line4 );
-
-			TopoDS_Wire shaft_wire = BRepBuilderAPI_MakeWire( shaft_edge1, shaft_edge2, shaft_edge3, shaft_edge4 );
-			TopoDS_Face shaft_face = BRepBuilderAPI_MakeFace( shaft_wire );
-			gp_Vec shaft_vec( 0, (-1 * tool_length_offset), 0 );
-			TopoDS_Shape shaft = BRepPrimAPI_MakePrism( shaft_face, shaft_vec );
-
-			// Aggregate the shaft and cutting tip
-			TopoDS_Shape tool_shape = BRepAlgoAPI_Fuse(shaft , cutting_tip );
-
-			// Now orient the tool as per its settings.
-			gp_Trsf tool_holder_orientation;
-			gp_Trsf orient_for_lathe_use;
-
-			switch (m_params.m_orientation)
-			{
-				case 1: // South East
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(45 - 90) );
-					break;
-
-				case 2: // South West
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(123 - 90) );
-					break;
-
-				case 3: // North West
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(225 - 90) );
-					break;
-
-				case 4: // North East
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(-45 - 90) );
-					break;
-
-				case 5: // East
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(0 - 90) );
-					break;
-
-				case 6: // South
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(+90 - 90) );
-					break;
-
-				case 7: // West
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(180 - 90) );
-					break;
-
-				case 8: // North
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1)), degrees_to_radians(-90 - 90) );
-					break;
-
-				case 9: // Boring (straight along Y axis)
-				default:
-					tool_holder_orientation.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(1,0,0)), degrees_to_radians(90.0) );
-					break;
-
-			} // End switch
-
-			// Rotate from drawing orientation (for easy mathematics in this code) to tool holder orientation.
-			tool_shape = BRepBuilderAPI_Transform( tool_shape, tool_holder_orientation, false );
-
-			// Rotate to use axes typically used for lathe work.
-			// i.e. z axis along the bed (from head stock to tail stock as z increases)
-			// and x across the bed.
-			orient_for_lathe_use.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,1,0) ), degrees_to_radians(-90.0) );
-			tool_shape = BRepBuilderAPI_Transform( tool_shape, orient_for_lathe_use, false );
-
-			orient_for_lathe_use.SetRotation( gp_Ax1( gp_Pnt(0,0,0), gp_Dir(0,0,1) ), degrees_to_radians(90.0) );
-			tool_shape = BRepBuilderAPI_Transform( tool_shape, orient_for_lathe_use, false );
-
-			return(tool_shape);
-		}
-
-		case CToolParams::eDragKnife:
-			{
-				BRepPrimAPI_MakeBox knife(gp_Ax2(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)), this->m_params.m_drag_knife_distance, 0.1, 10.0);
-				return knife.Shape();
-			}
-
-		case CToolParams::eEndmill:
-		case CToolParams::eSlotCutter:
-		case CToolParams::eExtrusion:
-	        case CToolParams::eTapTool:             // reasonable?
 		default:
 		{
 			// First a cylinder to represent the shaft.
@@ -2253,16 +1287,6 @@ double CTool::CuttingRadius( const bool express_in_program_units /* = false */, 
 			}
 			break;
 
-		case CToolParams::eDrill:
-		case CToolParams::eCentreDrill:
-		case CToolParams::eEndmill:
-		case CToolParams::eSlotCutter:
-		case CToolParams::eBallEndMill:
-		case CToolParams::eTurningTool:
-		case CToolParams::eTouchProbe:
-		case CToolParams::eExtrusion:
-		case CToolParams::eToolLengthSwitch:
-		case CToolParams::eTapTool:
 		default:
 			radius = m_params.m_diameter/2;
 	} // End switch
@@ -2283,7 +1307,6 @@ CToolParams::eToolType CTool::CutterType( const int tool_number )
 	return(pTool->m_params.m_type);
 } // End of CutterType() method
 
-
 CToolParams::eMaterial_t CTool::CutterMaterial( const int tool_number )
 {
 	if (tool_number <= 0) return(CToolParams::eUndefinedMaterialType);
@@ -2294,178 +1317,21 @@ CToolParams::eMaterial_t CTool::CutterMaterial( const int tool_number )
 	return(CToolParams::eMaterial_t(pTool->m_params.m_material));
 } // End of CutterType() method
 
-
-class Tool_ImportProbeData: public Tool
-{
-
-CTool *m_pThis;
-
-public:
-	Tool_ImportProbeData() { m_pThis = NULL; }
-
-	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Import probe calibration data");}
-
-	void Run()
-	{
-		// Prompt the user to select a file to import.
-		wxFileDialog fd(heeksCAD->GetMainFrame(), _T("Select a file to import"), _T("."), _T(""),
-				wxString(_("Known Files")) + _T(" |*.xml;*.XML;")
-					+ _T("*.Xml;"),
-					wxOPEN | wxFILE_MUST_EXIST );
-		fd.SetFilterIndex(1);
-		if (fd.ShowModal() == wxID_CANCEL) return;
-		m_pThis->ImportProbeCalibrationData( fd.GetPath().c_str() );
-	}
-	wxString BitmapPath(){ return _T("import");}
-	wxString previous_path;
-	void Set( CTool *pThis ) { m_pThis = pThis; }
-};
-
-static Tool_ImportProbeData import_probe_calibration_data;
-
 void CTool::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	if (m_params.m_type == CToolParams::eTouchProbe)
-	{
-		import_probe_calibration_data.Set( this );
-
-		t_list->push_back( &import_probe_calibration_data );
-	}
 }
-
-
-void CTool::ImportProbeCalibrationData( const wxString & probed_points_xml_file_name )
-{
-	TiXmlDocument* xml = heeksCAD->NewXMLDocument();
-	if (! xml->LoadFile( probed_points_xml_file_name.utf8_str()) )
-	{
-		printf("Failed to load XML file '%s'\n", Ttc(probed_points_xml_file_name.c_str()) );
-	} // End if - then
-	else
-	{
-		TiXmlElement *root = xml->RootElement();
-		if (root != NULL)
-		{
-			std::vector<CNCPoint> points;
-
-			for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( root ); pElem; pElem = pElem->NextSiblingElement())
-			{
-				CNCPoint point(0,0,0);
-				for(TiXmlElement* pPoint = heeksCAD->FirstXMLChildElement( pElem ) ; pPoint; pPoint = pPoint->NextSiblingElement())
-				{
-					std::string name(pPoint->Value());
-					wxString value( Ctt(pPoint->GetText()) );
-					double number = 0.0;
-					if (value.ToDouble(&number))
-					{
-					    if (name == "X") { point.SetX( number / heeksCAD->GetViewUnits() ); }
-                        if (name == "Y") { point.SetY( number / heeksCAD->GetViewUnits() ); }
-                        if (name == "Z") { point.SetZ( number / heeksCAD->GetViewUnits() ); }
-					}
-				} // End for
-
-				points.push_back(point);
-			} // End for
-
-			if (points.size() >= 1)
-			{
-				m_params.m_probe_offset_x = points[0].X(false);
-				m_params.m_probe_offset_y = points[0].Y(false);
-			} // End if - then
-		} // End if - then
-	} // End if - else
-} // End ImportProbeCalibrationData() method
-
-
-/* static */ wxString CTool::GuageNumberRepresentation( const double size, const double units )
-{
-
-    typedef struct Guages {
-        const wxChar *guage;
-        double imperial;
-        double metric;
-    } Guages_t;
-
-    Guages_t guages[] = {{_T("80"),0.0135,0.343},{_T("79"),0.0145,0.368},{_T("78"),0.016,0.406},{_T("77"),0.018,0.457},{_T("76"),0.020,0.508},
-                         {_T("75"),0.021,0.533},{_T("74"),0.0225,0.572},{_T("73"),0.024,0.610},{_T("72"),0.025,0.635},{_T("71"),0.026,0.660},
-                         {_T("70"),0.028,0.711},{_T("69"),0.0292,0.742},{_T("68"),0.031,0.787},{_T("67"),0.032,0.813},{_T("66"),0.033,0.838},
-                         {_T("65"),0.035,0.889},{_T("64"),0.036,0.914},{_T("63"),0.037,0.940},{_T("62"),0.038,0.965},{_T("61"),0.039,0.991},
-                         {_T("60"),0.040,1.016},{_T("59"),0.041,1.041},{_T("58"),0.042,1.067},{_T("57"),0.043,1.092},{_T("56"),0.0465,1.181},
-                         {_T("55"),0.052,1.321},{_T("54"),0.055,1.397},{_T("53"),0.0595,1.511},{_T("52"),0.0635,1.613},{_T("51"),0.067,1.702},
-                         {_T("50"),0.070,1.778},{_T("49"),0.073,1.854},{_T("48"),0.076,1.930},{_T("47"),0.0785,1.994},{_T("46"),0.081,2.057},
-                         {_T("45"),0.082,2.083},{_T("44"),0.086,2.184},{_T("43"),0.089,2.261},{_T("42"),0.0935,2.375},{_T("41"),0.096,2.438},
-                         {_T("40"),0.098,2.489},{_T("39"),0.0995,2.527},{_T("38"),0.1015,2.578},{_T("37"),0.104,2.642},{_T("36"),0.1065,2.705},
-                         {_T("35"),0.110,2.794},{_T("34"),0.111,2.819},{_T("33"),0.113,2.870},{_T("32"),0.116,2.946},{_T("31"),0.120,3.048},
-                         {_T("30"),0.1285,3.264},{_T("29"),0.136,3.454},{_T("28"),0.1405,3.569},{_T("27"),0.144,3.658},{_T("26"),0.147,3.734},
-                         {_T("25"),0.1495,3.797},{_T("24"),0.152,3.861},{_T("23"),0.154,3.912},{_T("22"),0.157,3.988},{_T("21"),0.159,4.039},
-                         {_T("20"),0.161,4.089},{_T("19"),0.166,4.216},{_T("18"),0.1695,4.305},{_T("17"),0.173,4.394},{_T("16"),0.177,4.496},
-                         {_T("15"),0.180,4.572},{_T("14"),0.182,4.623},{_T("13"),0.185,4.699},{_T("12"),0.189,4.801},{_T("11"),0.191,4.851},
-                         {_T("10"),0.1935,4.915},{_T("9"),0.196,4.978},{_T("8"),0.199,5.055},{_T("7"),0.201,5.105},{_T("6"),0.204,5.182},
-                         {_T("5"),0.2055,5.220},{_T("4"),0.209,5.309},{_T("3"),0.213,5.410},{_T("2"),0.221,5.613},{_T("1"),0.228,5.791},
-                         {_T("A"),0.234,5.944},{_T("B"),0.238,6.045},{_T("C"),0.242,6.147},{_T("D"),0.246,6.248},{_T("E"),0.250,6.350},
-                         {_T("F"),0.257,6.528},{_T("G"),0.261,6.629},{_T("H"),0.266,6.756},{_T("I"),0.272,6.909},{_T("J"),0.277,7.036},
-                         {_T("K"),0.281,7.137},{_T("L"),0.290,7.366},{_T("M"),0.295,7.493},{_T("N"),0.302,7.671},{_T("O"),0.316,8.026},
-                         {_T("P"),0.323,8.204},{_T("Q"),0.332,8.433},{_T("R"),0.339,8.611},{_T("S"),0.348,8.839},{_T("T"),0.358,9.093},
-                         {_T("U"),0.368,9.347},{_T("V"),0.377,9.576},{_T("W"),0.386,9.804},{_T("X"),0.397,10.08},{_T("Y"),0.404,10.26},
-                         {_T("Z"),0.413,10.49}};
-
-    double tolerance = heeksCAD->GetTolerance();
-    for (::size_t offset=0; offset < (sizeof(guages)/sizeof(guages[0])); offset++)
-    {
-        if (units > 25.0)
-        {
-            if (fabs(size - guages[offset].imperial) < tolerance)
-            {
-                wxString result;
-                result << _T("#") << guages[offset].guage;
-                return(result);
-            }
-        }
-        else
-        {
-            if (fabs(size - guages[offset].metric) < tolerance)
-            {
-                wxString result;
-                result << _T("#") << guages[offset].guage;
-                return(result);
-            }
-        }
-    } // End for
-
-    return(_T(""));
-} // End GuageNumberRepresentation() method
-
 
 bool CToolParams::operator==( const CToolParams & rhs ) const
 {
 	if (m_material != rhs.m_material) return(false);
 	if (m_diameter != rhs.m_diameter) return(false);
 	if (m_tool_length_offset != rhs.m_tool_length_offset) return(false);
-	if (m_x_offset != rhs.m_x_offset) return(false);
-	if (m_front_angle != rhs.m_front_angle) return(false);
-	if (m_tool_angle != rhs.m_tool_angle) return(false);
-	if (m_back_angle != rhs.m_back_angle) return(false);
-	if (m_orientation != rhs.m_orientation) return(false);
 	if (m_corner_radius != rhs.m_corner_radius) return(false);
 	if (m_flat_radius != rhs.m_flat_radius) return(false);
 	if (m_cutting_edge_angle != rhs.m_cutting_edge_angle) return(false);
 	if (m_cutting_edge_height != rhs.m_cutting_edge_height) return(false);
 	if (m_type != rhs.m_type) return(false);
-	if (m_max_advance_per_revolution != rhs.m_max_advance_per_revolution) return(false);
 	if (m_automatically_generate_title != rhs.m_automatically_generate_title) return(false);
-	if (m_probe_offset_x != rhs.m_probe_offset_x) return(false);
-	if (m_probe_offset_y != rhs.m_probe_offset_y) return(false);
-	if (m_extrusion_material != rhs.m_material) return(false);
-	if (m_automatically_generate_title != rhs.m_automatically_generate_title) return(false);
-	if (m_layer_height != rhs.m_layer_height) return(false);
-	if (m_width_over_thickness != rhs.m_width_over_thickness) return(false);
-	if (m_feedrate != rhs.m_feedrate) return(false);
-	if (m_temperature != rhs.m_temperature) return(false);
-	if (m_flowrate != rhs.m_flowrate) return(false);
-	if (m_filament_diameter != rhs.m_filament_diameter) return(false);
-	if (m_direction != rhs.m_direction) return(false);
-	if (m_pitch != rhs.m_pitch) return(false);
 	return(true);
 }
 
@@ -2474,9 +1340,7 @@ bool CTool::operator==( const CTool & rhs ) const
 	if (m_params != rhs.m_params) return(false);
 	if (m_title != rhs.m_title) return(false);
 	if (m_tool_number != rhs.m_tool_number) return(false);
-	// m_pToolSolid;
 
-	// return(HeeksObj::operator==(rhs));
 	return(true);
 }
 
@@ -2501,17 +1365,7 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )const
 		python << _indent << _T("ocl.CylCutter(") << CuttingRadius(false) << _T(", 1000)");
 		return(python);
 
-    case CToolParams::eDrill:
-    case CToolParams::eCentreDrill:
-    case CToolParams::eChamfer:
-    case CToolParams::eTurningTool:
-    case CToolParams::eTouchProbe:
-    case CToolParams::eToolLengthSwitch:
-    case CToolParams::eExtrusion:
-    case CToolParams::eTapTool:
-    case CToolParams::eEngravingTool:
-    case CToolParams::eDragKnife:
-    case CToolParams::eUndefinedToolType:
+	default:
         return(python); // Avoid the compiler warnings.
 	} // End switch
 
@@ -2532,7 +1386,7 @@ static bool OnEdit(HeeksObj* object)
 
 void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
 {
-#if 0
+#if 1
 	*callback = OnEdit;
 #else
 	*callback = NULL;
