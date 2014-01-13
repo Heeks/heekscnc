@@ -104,6 +104,7 @@ public:
 	void Remove(HeeksObj* object);
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 
 	// Data access methods.
 	CTags* Tags(){return m_tags;}
