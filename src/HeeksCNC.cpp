@@ -161,67 +161,21 @@ static bool GetSketches(std::list<int>& sketches, std::list<int> &tools )
 
 static void NewProfileOpMenuCallback(wxCommandEvent &event)
 {
-	std::list<int> drill_bits;
 	std::list<int> tools;
 	std::list<int> sketches;
-	int milling_tool_number = -1;
-	if(GetSketches(sketches, tools))
+	GetSketches(sketches, tools);
+
+	CProfile *new_object = new CProfile(sketches, (tools.size()>0)?(*tools.begin()):-1);
+	new_object->AddMissingChildren();
+
+	if(new_object->Edit())
 	{
-		// Look through the tools that have been selected.  If any of them
-		// are drill or centre bits then create Drilling cycle objects as well.
-		// If we find a milling bit then pass that through to the CProfile object.
-		std::list<int>::const_iterator l_itTool;
-		for (l_itTool = tools.begin(); l_itTool != tools.end(); l_itTool++)
-		{
-			HeeksObj *ob = heeksCAD->GetIDObject( ToolType, *l_itTool );
-			if (ob != NULL)
-			{
-				switch (((CTool *)ob)->m_params.m_type)
-				{
-					case CToolParams::eDrill:
-					case CToolParams::eCentreDrill:
-						// Keep a list for later.  We need to create the Profile object
-						// before we create Drilling objects that refer to it.
-						drill_bits.push_back( *l_itTool );
-						break;
-
-					case CToolParams::eChamfer:
-					case CToolParams::eEndmill:
-					case CToolParams::eSlotCutter:
-					case CToolParams::eBallEndMill:
-						// We only want one.  Just keep overwriting this variable.
-						milling_tool_number = ((CTool *)ob)->m_tool_number;
-						break;
-
-					default:
-						break;
-				} // End switch
-			} // End if - then
-		} // End for
-
 		heeksCAD->StartHistory();
-		CProfile *new_object = new CProfile(sketches, milling_tool_number);
-		new_object->AddMissingChildren();
 		heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
-		heeksCAD->ClearMarkedList();
-		heeksCAD->Mark(new_object);
-
-		CDrilling::Symbols_t profiles;
-		profiles.push_back( CDrilling::Symbol_t( new_object->GetType(), new_object->m_id ) );
-
-		for (l_itTool = drill_bits.begin(); l_itTool != drill_bits.end(); l_itTool++)
-		{
-			HeeksObj *ob = heeksCAD->GetIDObject( ToolType, *l_itTool );
-			if (ob != NULL)
-			{
-				CDrilling *new_object = new CDrilling( profiles, ((CTool *)ob)->m_tool_number, -1 );
-				heeksCAD->AddUndoably(new_object, theApp.m_program);
-				heeksCAD->ClearMarkedList();
-				heeksCAD->Mark(new_object);
-			} // End if - then
-		} // End for
 		heeksCAD->EndHistory();
 	}
+	else
+		delete new_object;
 }
 
 static void NewPocketOpMenuCallback(wxCommandEvent &event)
