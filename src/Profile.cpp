@@ -26,6 +26,7 @@
 #include "PythonStuff.h"
 #include "Tags.h"
 #include "Tag.h"
+#include "ProfileDlg.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Ax1.hxx>
@@ -1263,4 +1264,21 @@ bool CProfile::operator==( const CProfile & rhs ) const
 	}
 
 	return(CDepthOp::operator==(rhs));
+}
+
+static bool OnEdit(HeeksObj* object)
+{
+	ProfileDlg dlg(heeksCAD->GetMainFrame(), (CProfile*)object);
+	if(dlg.ShowModal() == wxID_OK)
+	{
+		dlg.GetData((CProfile*)object);
+		((CProfile*)object)->WriteDefaultValues();
+		return true;
+	}
+	return false;
+}
+
+void CProfile::GetOnEdit(bool(**callback)(HeeksObj*))
+{
+	*callback = OnEdit;
 }

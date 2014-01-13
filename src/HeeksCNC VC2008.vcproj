@@ -297,7 +297,7 @@
 				ObjectFile=".\vc_msw\"
 				ProgramDataBaseFileName="vc_msw\HeeksCNC.pdb"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -315,7 +315,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\vc8\lib&quot;"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="0"
 				EnableCOMDATFolding="0"
@@ -592,6 +592,14 @@
 		</File>
 		<File
 			RelativePath=".\Profile.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ProfileDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ProfileDlg.h"
 			>
 		</File>
 		<File
