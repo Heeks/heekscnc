@@ -36,45 +36,17 @@ http://code.google.com/p/heekscnc/wiki/ProfileOperation
 
 http://code.google.com/p/heekscnc/wiki/PocketOperation
 
-== http://heekscnc.googlecode.com/svn/trunk/icons/zigzag.png Zig Zag ==
-
-http://code.google.com/p/heekscnc/wiki/ZigZagOperation
-
-== http://heekscnc.googlecode.com/svn/trunk/icons/adapt.png Adaptive Roughing ==
-
-http://code.google.com/p/heekscnc/wiki/AdaptiveRoughing
-
 == http://heekscnc.googlecode.com/svn/trunk/icons/drilling.png Drilling ==
 
 http://code.google.com/p/heekscnc/wiki/Drilling
-
-== http://heekscnc.googlecode.com/svn/trunk/icons/turnrough.png Rough Turning ==
-
-http://code.google.com/p/heekscnc/wiki/RoughTurningOp
 
 == Tool Table ==
 
 http://code.google.com/p/heekscnc/wiki/ToolTable
 
-== Counterbore ==
-
-http://code.google.com/p/heekscnc/wiki/CounterBore
-
-== Locating ==
-
-http://code.google.com/p/heekscnc/wiki/LocatingOperation
-
-== Fixtures (Vice alignment) ==
-
-http://code.google.com/p/heekscnc/wiki/Fixtures
-
 == Printed Circuit Board machining utilities ==
 
 http://code.google.com/p/heekscnc/wiki/PrintedCircuitBoard
-
-== Probing Operations for location and alignment ==
-
-http://code.google.com/p/heekscnc/wiki/Probing
 
 = Some Example Files =
 
