@@ -2,21 +2,15 @@
 
 = Introduction =
 
-The Cutting Tool object defines a single tool in what will eventually become a tool table.  For each Cutting Tool object, a G10 L1 command is added to the GCode to add the cutting tool to the tool table 'on the fly'.
-
-The various NC operations (Adaptive, Profile, Drilling etc.) objects also refer to these Cutting Tool objects and add a 'select tool' command immediately prior to that operation's GCode generation.
+The Cutting Tool object defines a single tool in what will eventually become a tool table.
 
 A default tool table may be setup so that it is automatically loaded on a 'File'->'New' command.
 
 
 = Details =
-The Cutting Tool object has been added to define a single tool.  It's GCode produces a 'G10 L1' command to add a tool to the logical tool table from within the GCode program.  (from the EMC2 documentation).
+The Cutting Tool object has been added to define a single tool.
 
-The tool_number value may be assigned to any of the NC operation objects within their Properties page.  If no tool table and/or tool change commands are wanted, a tool_number value of zero (0) should be assigned.
-
-An operation's tool_number may not be updated to any value except zero unless a corresponding Cutting Tool object already exists for the tool number.  If an invalid tool number is entered, a warning dialog will appear and the change will not be made.
-
-When the GCode is generated, preference is given to drilling cycles that use a centre drill.  Next drill cycles that use a normal drill bit.  Next all NC operations that use any of the milling bits and finally all other NC operations that use a chamfering bit.
+The tool may be chosen to any of the NC operation objects within their Properties page.
 
 = Properties =
 
@@ -38,11 +32,7 @@ The type property can be one of;
 
  - "Chamfering Bit"
 
- - "Turning Tool"
-
- - "Touch Probe"
-
- - "Tool Length Switch"
+ - "Engraving Bit"
 
 == Title ==
 
@@ -72,71 +62,15 @@ This represents the curve from the bottom of the cutting tool around to the edge
 
 This is the angle between the tools centre line and that of the cutting surface.  For a normal endmill this would be zero.  i.e. the cutting surface is parallel with the tool's centre line.  For a chamfering bit, however, this might be something like 45 degrees representing the slanting cutting surface the tool makes.
 
-=== Turning Tool Parameters ===
-
-==== X Offset ====
-
-This is meant for lathe cutting tools.
-
-==== Orientation ====
-
-This provides an indication as to what angle the cutter makes with the workpiece.  Again, this is meant for lathe cutting tools.
-
-The options are;
-
- - "(0) Unused"
-
- - "(1) Turning/Back Facing"
-
- - "(2) Turning/Facing"
-
- - "(3) Boring/Facing"
-
- - "(4) Boring/Back Facing"
-
- - "(5) Back Facing"
-
- - "(6) Turning"
-
- - "(7) Facing"
-
- - "(8) Boring"
-
- - "(9) Centre"
-
-http://heekscnc.googlecode.com/svn/wiki/turning/orientation.png
-
-==== Front Angle ====
-
-The angle at the front of the tool. In degrees.
-
-==== Back Angle ====
-
-The angle behind the tool. In degrees.
-
-==== Tool Angle ====
-
-The angle of the tip of the tool. In degrees.  i.e. the angle from the tool's centre-line to the cutting edge.
-
-http://heekscnc.googlecode.com/svn/wiki/turning/angles.png
-
 ==== Material ====
 
-This is the material that makes up the cutting edge of the cutter.  It may be set to either 'High Speed Steel' or 'Carbide'.  This value is used, along with the chosen workpiece material (the block you're machining) to determine a recommended spindle speed.  i.e. surface feet per minute between the cutting edge and the raw material being machined.
-
-==== Maximum advance distance per revolution ====
-
-This is the maximum distance a tool should advance during a single revolution.  This value is often defined by the manufacturer in terms of an advance on a per-tooth basis.  This value, however, must be expressed on a per-revolution basis.  i.e. we don't want to maintain the number of cutting teeth so a per-revolution value is easier to use.  This value is used in the feedrate estimation.
+This is the material that makes up the cutting edge of the cutter.  It may be set to either 'High Speed Steel' or 'Carbide'.
 
 ==== Automatic Title ====
 
 When the various parameters of the cutting tool are adjusted, the system attempts to find a more appropriate title for the cutting tool so that it is easily selected from the Tools list.  There are occasions, however, where the user may wish to manually assign a tool name.  This flag is set to 'true' by default so that the object's title is automatically changed to reflect the tool's parameters.  If the user manually edits the object title then this flag will implicitly be changed to 'false'.  i.e. from this point on, the manually assigned title will be used.  If, on the other hand, the user wishes to reinstate the automatic naming function, this parameter may be changed.
 
-==== Probe Offset X & Y ====
 
-For touch probe tools ONLY, these values define the coordinate found following a calibration exercise.  i.e. if the final position following a centre probing operation was (x=1.5, y=-3.0) then the probe offsets would be probe_offset_x = +1.5, probe_offset_y = -3.0.  These offsets will be subtracted from subsequent probing operations as necessary.
-
-== Default Tool Table ==
 
 A default tool table may be configured by saving a HeeksCNC data file that already contains a set of tool definitions into a file called 'default.tooltable'.  The process involves adding cutting tools to a HeeksCNC model before using the 'Export' command beneath a right mouse click on the Tools icon.  This allows the tool definitions to be saved to a file.  If the file is called 'default.tooltable' and is located in one of the two possible directories then these tools will be automatically added to all new data files.
 
