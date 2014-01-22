@@ -6,32 +6,6 @@ The Drilling Cycle supports the inclusion of Drilling (G81), Drilling
 with dwell (G82),  peck drilling (G83), Boring-No Dwell-Feed Out (G85),  Boring-Spindle Stop-Rapid Out (G86) and Boring-Dwell-Feed Out (G89) operations depending on the parameters
 added to the Drilling Cycle object.
 
-It also refers to the new Cutting Tool object to find tool diameter
-for its graphical representation.
-
-Drilling cycles will be located at an aggregation of;
-
- - all selected points
-
- - the intersections of all other selected objects.
-
- - the centre of any selected circles where those circles don't intersect any other selected object.
-
- - the location of any other drilling operations (recursively).  The reason for having a drilling operation be based on another drilling operation's locations is to allow for a round of centre drilling prior to the proper drilling operation.
-
- - the starting points of any selected profile operations.  The idea here being to allow a hole to be drilled at all of the profile's starting points before they are machined out using the milling bit.
-
-= Workflow =
- - Add a Cutting Tool object and set its parameters (length/width)
-
- - Place one/more points at the locations where the holes should begin (i.e. this would be at the surface of the material).  Alternatively, select other object types.  The intersections of these selected objects will be used as the starting point for drilling cycles.  Finally, selecting circles that don't have any other intersections is also allowed.  In this case the circle's centre is used as the drilling location.
-
- - Select the Cutting Tool object and all the other objects.  Holes will be located both at the selected point object locations as well as the intersection points of all other selected objects.
-
- - with these selected, add a Drilling Cycle object.
-
- - set the Drilling Cycle parameters
-
 = Parameters =
 
 == Standoff ==
@@ -54,8 +28,5 @@ Drilling cycles will be located at an aggregation of;
 == Spindle mode ==
   Default 0 - keep spindle running while retracting. set to 1 to stop spindle at bottom, wait for dwell seconds and before rapid retract (G86).  Incompatible with peck depth > 0.
 
-
-== Sort Drill Locations ==
-    If this is 'true', the list of locations at which holes should be drilled is sorted.  The sorting algorithm finds the nearest point to (0,0,0) and then, from there, the closest point to the previous one.
 
 The Retract mode and Spindle mode options are currently only supported in the emc2 machine.
