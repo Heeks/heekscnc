@@ -5,7 +5,8 @@
 #include "Program.h"
 #include "Operations.h"
 #include "CTool.h"
-#include "MachineState.h"
+#include "Tools.h"
+#include "interface/HDialogs.h"
 #include <wx/aui/aui.h>
 
 CProgram* CHeeksCNCInterface::GetProgram()
@@ -21,7 +22,9 @@ CTools* CHeeksCNCInterface::GetTools()
 
 std::vector< std::pair< int, wxString > > CHeeksCNCInterface::FindAllTools()
 {
-	return CTool::FindAllTools();
+	std::vector< std::pair< int, wxString > > tools;
+	HTypeObjectDropDown::GetObjectArrayString(ToolType, theApp.m_program->Tools(), tools);
+	return tools;
 }
 
 int CHeeksCNCInterface::FindFirstToolByType( unsigned int type )

@@ -8,34 +8,32 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "interface/HDialogs.h"
+#include "interface/HeeksObjDlg.h"
 
-class CToolDlg : public HDialog
+class CToolDlg : public HeeksObjDlg
 {
 	wxTextCtrl *m_dlbToolNumber;
 	wxComboBox *m_cmbMaterial;
 	wxComboBox *m_cmbToolType;
-	CDoubleCtrl *m_dblDiameter;
-	CDoubleCtrl *m_dblToolLengthOffset;
-	CDoubleCtrl *m_dblFlatRadius;
-	CDoubleCtrl *m_dblCornerRadius;
+	CLengthCtrl *m_dblDiameter;
+	CLengthCtrl *m_dblToolLengthOffset;
+	CLengthCtrl *m_dblFlatRadius;
+	CLengthCtrl *m_dblCornerRadius;
 	CDoubleCtrl *m_dblCuttingEdgeAngle;
-	CDoubleCtrl *m_dblCuttingEdgeHeight;
-	PictureWindow *m_picture;
+	CLengthCtrl *m_dblCuttingEdgeHeight;
 	wxComboBox *m_cmbTitleType;
 	wxTextCtrl *m_txtTitle;
 
-	CTool* m_ptool;
-
 public:
-    CToolDlg(wxWindow *parent, CTool* object);
-	void GetData(CTool* object);
-	void SetFromData(CTool* object);
-	void SetPicture();
-	void SetPicture(const wxString& name);
-	void EnableAndSetCornerFlatAndAngle(CToolParams::eToolType type);
+    CToolDlg(wxWindow *parent, CTool* object, const wxString& title = wxString(_T("Tool Definition")), bool top_level = true);
 
-	void OnChildFocus(wxChildFocusEvent& event);
+	// HeeksObjDlg virtual functions
+	void GetDataRaw(HeeksObj* object);
+	void SetFromDataRaw(HeeksObj* object);
+	void SetPictureByWindow(wxWindow* w);
+	void SetPicture(const wxString& name);
+
+	void EnableAndSetCornerFlatAndAngle(CToolParams::eToolType type);
 	void OnComboTitleType( wxCommandEvent& event );
 	void OnComboToolType(wxCommandEvent& event);
 	void OnComboMaterial(wxCommandEvent& event);

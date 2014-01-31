@@ -28,10 +28,10 @@
 #include "Patterns.h"
 #include "Surfaces.h"
 #include "interface/strconv.h"
-#include "MachineState.h"
 #include "Pattern.h"
 #include "Surface.h"
 #include "src/Geom.h"
+#include "ProgramDlg.h"
 
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
@@ -47,24 +47,7 @@ wxString CProgram::alternative_machines_file = _T("");
 CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_patterns(NULL), m_surfaces(NULL)
 , m_script_edited(false)
 {
-	CNCConfig config(ConfigScope());
-	wxString machine_file_name;
-	config.Read(_T("ProgramMachine"), &machine_file_name, _T("emc2b"));
-	m_machine = CProgram::GetMachine(machine_file_name);
-
-	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
-
-    wxStandardPaths standard_paths;
-    wxFileName default_path( standard_paths.GetTempDir().c_str(), _T("test.tap"));
-
-	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
-
-	config.Read(_T("ProgramUnits"), &m_units, 1.0);
-	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
-	config.Read(_("ProgramMotionBlendingTolerance"), &m_motion_blending_tolerance, 0.0001);
-	config.Read(_("ProgramNaiveCamTolerance"), &m_naive_cam_tolerance, 0.0001);
-
-	config.Read(_("ClearanceSource"), (int *) &m_clearance_source, int(CProgram::eClearanceDefinedByOperation) );
+	ReadDefaultValues();
 }
 
 const wxBitmap &CProgram::GetIcon()
@@ -98,8 +81,6 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
 	m_path_control_mode = rhs.m_path_control_mode;
 	m_motion_blending_tolerance = rhs.m_motion_blending_tolerance;
 	m_naive_cam_tolerance = rhs.m_naive_cam_tolerance;
-
-	m_clearance_source = rhs.m_clearance_source;
 
     ReloadPointers();
     AddMissingChildren();
@@ -147,8 +128,6 @@ void CProgram::CopyFrom(const HeeksObj* object)
 		m_path_control_mode = rhs->m_path_control_mode;
 		m_motion_blending_tolerance = rhs->m_motion_blending_tolerance;
 		m_naive_cam_tolerance = rhs->m_naive_cam_tolerance;
-
-		m_clearance_source = rhs->m_clearance_source;
 	}
 }
 
@@ -175,8 +154,6 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 		m_path_control_mode = rhs.m_path_control_mode;
 		m_motion_blending_tolerance = rhs.m_motion_blending_tolerance;
 		m_naive_cam_tolerance = rhs.m_naive_cam_tolerance;
-
-		m_clearance_source = rhs.m_clearance_source;
 	}
 
 	return(*this);
@@ -187,7 +164,7 @@ CMachine::CMachine()
 {
 	m_max_spindle_speed = 0.0;
 
-	CNCConfig config(CMachine::ConfigScope());
+	CNCConfig config;
 	config.Read(_T("safety_height_defined"), &m_safety_height_defined, false );
 	config.Read(_T("safety_height"), &m_safety_height, 0.0 );		// in G53 machine units - indicates where to move to for tool changes
 	config.Read(_("ClearanceHeight"), (double *) &(m_clearance_height), 50.0 ); // in local coordinate system (G54 etc.) to show how tall clamps and vices are for movement between machine operations.
@@ -221,24 +198,21 @@ static void on_set_machine(int value, HeeksObj* object, bool from_undo_redo)
 	std::vector<CMachine> machines;
 	CProgram::GetMachines(machines);
 	((CProgram*)object)->m_machine = machines[value];
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("ProgramMachine"), ((CProgram*)object)->m_machine.file_name);
+	((CProgram*)object)->WriteDefaultValues();
 	heeksCAD->RefreshProperties();
 }
 
 static void on_set_output_file(const wxChar* value, HeeksObj* object)
 {
 	((CProgram*)object)->m_output_file = value;
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("ProgramOutputFile"), ((CProgram*)object)->m_output_file);
+	((CProgram*)object)->WriteDefaultValues();
 }
 
 static void on_set_units(int value, HeeksObj* object, bool from_undo_redo)
 {
 	((CProgram*)object)->m_units = ((value == 0) ? 1.0:25.4);
 
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("ProgramUnits"), ((CProgram*)object)->m_units);
+	object->WriteDefaultValues();
 
     if (heeksCAD->GetViewUnits() != ((CProgram*)object)->m_units)
     {
@@ -257,46 +231,30 @@ static void on_set_output_file_name_follows_data_file_name(int zero_based_choice
 {
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_output_file_name_follows_data_file_name = (zero_based_choice != 0);
+	object->WriteDefaultValues();
 	heeksCAD->RefreshProperties();
-
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("OutputFileNameFollowsDataFileName"), pProgram->m_output_file_name_follows_data_file_name );
-}
-
-static void on_set_clearance_source(int zero_based_choice, HeeksObj *object, bool from_undo_redo)
-{
-	CProgram *pProgram = (CProgram *) object;
-	pProgram->m_clearance_source = CProgram::eClearanceSource_t(zero_based_choice);
-
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("ClearanceSource"), (int) pProgram->m_clearance_source );
 }
 
 static void on_set_path_control_mode(int zero_based_choice, HeeksObj *object, bool from_undo_redo)
 {
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_path_control_mode = CProgram::ePathControlMode_t(zero_based_choice);
-
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("ProgramPathControlMode"), (int) pProgram->m_path_control_mode );
+	object->WriteDefaultValues();
 }
 
 static void on_set_motion_blending_tolerance(double value, HeeksObj *object)
 {
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_motion_blending_tolerance = value;
+	object->WriteDefaultValues();
 
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("ProgramMotionBlendingTolerance"), pProgram->m_motion_blending_tolerance );
 }
 
 static void on_set_naive_cam_tolerance(double value, HeeksObj *object)
 {
 	CProgram *pProgram = (CProgram *) object;
 	pProgram->m_naive_cam_tolerance = value;
-
-	CNCConfig config(CProgram::ConfigScope());
-	config.Write(_T("ProgramNaiveCamTolerance"), pProgram->m_naive_cam_tolerance );
+	object->WriteDefaultValues();
 }
 
 
@@ -324,16 +282,6 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		choices.push_back(_T("True"));
 
 		list->push_back(new PropertyChoice(_("output file name follows data file name"), choices, choice, this, on_set_output_file_name_follows_data_file_name));
-	}
-
-	{
-		std::list< wxString > choices;
-		choices.push_back ( wxString ( _("By Machine") ) );
-		choices.push_back ( wxString ( _("By Fixture") ) );
-		choices.push_back ( wxString ( _("By Operation") ) );
-		int choice = int(m_clearance_source);
-
-		list->push_back ( new PropertyChoice ( _("Clearance Height Defined"),  choices, choice, this, on_set_clearance_source ) );
 	}
 
 	if (m_output_file_name_follows_data_file_name == false)
@@ -381,7 +329,7 @@ static void on_set_safety_height_defined(const bool value, HeeksObj *object)
 {
     ((CProgram *)object)->m_machine.m_safety_height_defined = value;
 
-	CNCConfig config(CMachine::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("safety_height_defined"), ((CProgram *)object)->m_machine.m_safety_height_defined );
 
     // to do, make undoable properties
@@ -391,7 +339,7 @@ static void on_set_safety_height(const double value, HeeksObj *object)
 {
     ((CProgram *)object)->m_machine.m_safety_height = value;
 
-	CNCConfig config(CMachine::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("safety_height"), ((CProgram *)object)->m_machine.m_safety_height );
 
     // to do, make undoable properties
@@ -402,7 +350,7 @@ static void on_set_clearance_height( const double value, HeeksObj *object)
 	CMachine *pMachine = &(((CProgram *)object)->m_machine);
 	pMachine->m_clearance_height = value;
 
-	CNCConfig config(CMachine::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("ClearanceHeight"), pMachine->m_clearance_height);
 
 	heeksCAD->RefreshProperties();
@@ -412,11 +360,6 @@ void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyDouble(_("Maximum Spindle Speed (RPM)"), m_max_spindle_speed, parent, on_set_max_spindle_speed));
 	list->push_back(new PropertyCheck(_("Safety Height Defined"), m_safety_height_defined, parent, on_set_safety_height_defined));
-
-	if (theApp.m_program->m_clearance_source == CProgram::eClearanceDefinedByMachine)
-	{
-		list->push_back(new PropertyLength(_("Clearance Height (for inter-operation movement)"), m_clearance_height, parent, on_set_clearance_height));
-	}
 
     if (m_safety_height_defined)
     {
@@ -634,7 +577,7 @@ void ApplySurfaceToText(Python &python, CSurface* surface, std::set<CSurface*> &
 	python << _T("nc.nc.creator.minz = ") << surface->m_min_z << _T("\n");
 	python << _T("nc.nc.creator.material_allowance = ") << surface->m_material_allowance << _T("\n");
 
-	theApp.machine_state.m_attached_to_surface = surface;
+	theApp.m_attached_to_surface = surface;
 }
 
 Python CProgram::RewritePythonProgram()
@@ -642,7 +585,9 @@ Python CProgram::RewritePythonProgram()
 	Python python;
 
 	theApp.m_program_canvas->m_textCtrl->Clear();
+	theApp.m_attached_to_surface = NULL;
 	CSurface::number_for_stl_file = 1;
+	theApp.m_tool_number = 0;
 
 	// call any OnRewritePython functions from other plugins
 	for(std::list< void(*)() >::iterator It = theApp.m_OnRewritePython_list.begin(); It != theApp.m_OnRewritePython_list.end(); It++)
@@ -876,9 +821,7 @@ Python CProgram::RewritePythonProgram()
 		} // End for
 	} // End if - then
 
-	// copied operations ( with same id ) were not being done, so I've removed fixtures completely for the Windows installation
 	// Write all the operations
-	theApp.machine_state = CMachineState();
 
 	std::set<CSurface*> surfaces_written;
 
@@ -1049,7 +992,7 @@ CMachine CProgram::GetMachine(const wxString& file_name)
 	machine.file_name = _T("not found");
 	machine.description = _T("not found");
 
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Read(_T("safety_height_defined"), &machine.m_safety_height_defined, false);
 	config.Read(_T("safety_height"), &machine.m_safety_height, 0.0);
 
@@ -1173,4 +1116,51 @@ bool CMachine::operator==( const CMachine & rhs ) const
 	if (m_clearance_height != rhs.m_clearance_height) return(false);
 
 	return(true);
+}
+
+void CProgram::WriteDefaultValues()
+{
+	CNCConfig config;
+
+	config.Write(_T("ProgramMachine"), m_machine.file_name);
+	config.Write(_T("OutputFileNameFollowsDataFileName"), m_output_file_name_follows_data_file_name );
+	config.Write(_T("ProgramOutputFile"), m_output_file);
+	config.Write(_T("ProgramUnits"), m_units);
+	config.Write(_T("ProgramPathControlMode"), (int) m_path_control_mode );
+	config.Write(_T("ProgramMotionBlendingTolerance"), m_motion_blending_tolerance );
+	config.Write(_T("ProgramNaiveCamTolerance"), m_naive_cam_tolerance );
+}
+
+void CProgram::ReadDefaultValues()
+{
+	CNCConfig config;
+
+	wxString machine_file_name;
+	config.Read(_T("ProgramMachine"), &machine_file_name, _T("emc2b"));
+	m_machine = CProgram::GetMachine(machine_file_name);
+	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
+    wxStandardPaths standard_paths;
+    wxFileName default_path( standard_paths.GetTempDir().c_str(), _T("test.tap"));
+	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
+	config.Read(_T("ProgramUnits"), &m_units, 1.0);
+	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
+	config.Read(_("ProgramMotionBlendingTolerance"), &m_motion_blending_tolerance, 0.0001);
+	config.Read(_("ProgramNaiveCamTolerance"), &m_naive_cam_tolerance, 0.0001);
+}
+
+static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+{
+	ProgramDlg dlg(heeksCAD->GetMainFrame(), (CProgram*)object);
+	if(dlg.ShowModal() == wxID_OK)
+	{
+		dlg.GetData((CProgram*)object);
+		((CProgram*)object)->WriteDefaultValues();
+		return true;
+	}
+	return false;
+}
+
+void CProgram::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+{
+	*callback = OnEdit;
 }

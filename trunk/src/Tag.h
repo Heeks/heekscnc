@@ -34,12 +34,10 @@ public:
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == TagsType;}
 	void WriteXML(TiXmlNode *root);
 	bool UsesID() { return(false); }
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 
-	static wxString ConfigScope() { return(_T("Tag")); }
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+
 	static void PickPosition(CTag* tag);
 };

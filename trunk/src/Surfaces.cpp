@@ -25,7 +25,7 @@ HeeksObj *CSurfaces::MakeACopy(void) const
 
 CSurfaces::CSurfaces()
 {
-    CNCConfig config(CSurfaces::ConfigScope());
+    CNCConfig config;
 }
 
 
@@ -64,4 +64,11 @@ HeeksObj* CSurfaces::ReadFromXMLElement(TiXmlElement* pElem)
 	CSurfaces* new_object = new CSurfaces;
 	new_object->ReadBaseXML(pElem);
 	return new_object;
+}
+
+void CSurfaces::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+	CHeeksCNCApp::GetNewSurfaceTools(t_list);
+
+	ObjList::GetTools(t_list, p);
 }

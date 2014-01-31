@@ -206,7 +206,6 @@ public:
 	static void ReadColorsFromConfig();
 	static void WriteColorsToConfig();
 	static void GetOptions(std::list<Property *> *list);
-	static wxString ConfigScope() { return(_T("NC Code")); }
 
 	void DestroyGLLists(void); // not void KillGLLists(void), because I don't want the display list recreated on the Redraw button
 	void SetTextCtrl(wxTextCtrl *textCtrl);

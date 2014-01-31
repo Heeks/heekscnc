@@ -30,6 +30,7 @@ extern "C" {
 #include "interface/strconv.h"
 #include "interface/HeeksObj.h"
 #include "interface/ObjectCanvas.h"
+#include "tinyxml/tinyxml.h"
 
 #include "gp_Pnt.hxx"
 #include <gp_Dir.hxx>

@@ -379,13 +379,13 @@ void CSendToMachine::GetOptions(std::list<Property *> *list)
 // static
 void CSendToMachine::ReadFromConfig()
 {
-        CNCConfig config(CSendToMachine::ConfigScope());
+        CNCConfig config;
         config.Read(_T("SendToMachineCommand"), &m_command , _T("axis-remote"));
 }
 // static
 void CSendToMachine::WriteToConfig()
 {
-        CNCConfig config(CSendToMachine::ConfigScope());
+        CNCConfig config;
         config.Write(_T("SendToMachineCommand"), m_command);
 }
 

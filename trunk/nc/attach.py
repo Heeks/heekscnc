@@ -52,29 +52,18 @@ class Creator(recreator.Redirector):
         
     def cut_path(self):
         if self.path == None: return
-        print 'attach cut_path()'
         self.setPdcfIfNotSet()
-        
-        print 'pdc set'
         
         if (self.z>self.minz):
             self.pdcf.setZ(self.z)  # Adjust Z if we have gotten a higher limit (Fix pocketing loosing steps when using attach?)
         else:
             self.pdcf.setZ(self.minz) # Else use minz
             
-        print 'odcf z set '
-            
        # get the points on the surface
         self.pdcf.setPath(self.path)
         
-        print 'path set'
-        
         self.pdcf.run()
-        
-        print 'run done'
         plist = self.pdcf.getCLPoints()
-        
-        print 'plist size = ', len(plist)
         
         #refine the points
         f = ocl.LineCLFilter()
@@ -92,11 +81,11 @@ class Creator(recreator.Redirector):
             
         self.path = ocl.Path()
 
-    def feed(self, x=None, y=None, z=None):
+    def feed(self, x=None, y=None, z=None, a=None, b=None, c=None):
         px = self.x
         py = self.y
         pz = self.z
-        recreator.Redirector.feed(self, x, y, z)
+        recreator.Redirector.feed(self, x, y, z, a, b, c)
         if self.x == None or self.y == None or self.z == None:
             return
         if px == self.x and py == self.y:

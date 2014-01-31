@@ -34,8 +34,8 @@ class CSpeedOp : public COp
 public:
 	CSpeedOpParams m_speed_op_params;
 
-	CSpeedOp(const wxString& title, const int tool_number = -1, const int operation_type = UnknownType )
-            :COp(title, tool_number, operation_type)
+	CSpeedOp(const int tool_number = -1, const int operation_type = UnknownType )
+            :COp(tool_number, operation_type)
     {
         ReadDefaultValues();
     }
@@ -47,10 +47,10 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
-
-	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
+
+	// COp's virtual functions
 	Python AppendTextToProgram();
 
 	static void GetOptions(std::list<Property *> *list);
@@ -59,8 +59,6 @@ public:
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void glCommands(bool select, bool marked, bool no_color);
 	void ReloadPointers() { COp::ReloadPointers(); }
-
-	static wxString ConfigScope() { return(_T("SpeedOp")); }
 
 	bool operator==( const CSpeedOp & rhs ) const;
 	bool operator!=( const CSpeedOp & rhs ) const { return(! (*this == rhs)); }

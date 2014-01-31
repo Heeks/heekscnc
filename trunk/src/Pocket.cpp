@@ -469,7 +469,7 @@ void CPocket::WriteDefaultValues()
 {
 	CDepthOp::WriteDefaultValues();
 
-	CNCConfig config(CPocketParams::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("StepOver"), m_pocket_params.m_step_over);
 	config.Write(_T("CutMode"), m_pocket_params.m_cut_mode);
 	config.Write(_T("MaterialAllowance"), m_pocket_params.m_material_allowance);
@@ -485,7 +485,7 @@ void CPocket::ReadDefaultValues()
 {
 	CDepthOp::ReadDefaultValues();
 
-	CNCConfig config(CPocketParams::ConfigScope());
+	CNCConfig config;
 	config.Read(_T("StepOver"), &m_pocket_params.m_step_over, 1.0);
 	int int_mode = m_pocket_params.m_cut_mode;
 	config.Read(_T("CutMode"), &int_mode, CPocketParams::eConventional);
@@ -614,14 +614,14 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 }
 
 CPocket::CPocket(const std::list<int> &sketches, const int tool_number )
-	: CDepthOp(GetTypeString(), &sketches, tool_number ), m_sketches(sketches)
+	: CDepthOp(&sketches, tool_number ), m_sketches(sketches)
 {
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
 }
 
 CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
-	: CDepthOp(GetTypeString(), sketches, tool_number )
+	: CDepthOp(sketches, tool_number )
 {
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
@@ -651,14 +651,14 @@ void CPocket::GetOptions(std::list<Property *> *list)
 // static
 void CPocket::ReadFromConfig()
 {
-	CNCConfig config(CPocketParams::ConfigScope());
+	CNCConfig config;
 	config.Read(_T("PocketSplineDeviation"), &max_deviation_for_spline_to_arc, 0.1);
 }
 
 // static
 void CPocket::WriteToConfig()
 {
-	CNCConfig config(CPocketParams::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("PocketSplineDeviation"), max_deviation_for_spline_to_arc);
 }
 
@@ -694,7 +694,7 @@ bool CPocket::operator==(const CPocket & rhs) const
 	return(CDepthOp::operator==(rhs));
 }
 
-static bool OnEdit(HeeksObj* object)
+static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
 {
 	PocketDlg dlg(heeksCAD->GetMainFrame(), (CPocket*)object);
 	if(dlg.ShowModal() == wxID_OK)
@@ -706,7 +706,7 @@ static bool OnEdit(HeeksObj* object)
 	return false;
 }
 
-void CPocket::GetOnEdit(bool(**callback)(HeeksObj*))
+void CPocket::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
 {
 	*callback = OnEdit;
 }

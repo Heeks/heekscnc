@@ -4,17 +4,21 @@
 
 #include "Pattern.h"
 #include "src/Geom.h"
-#include "interface/PropertyVertex.h"
 #include "interface/PropertyInt.h"
+#include "interface/PropertyDouble.h"
 #include "CNCConfig.h"
 #include "tinyxml/tinyxml.h"
+#include "PatternDlg.h"
 
 CPattern::CPattern()
 {
 	//ReadDefaultValues();
-	m_title_made_from_id = true;
-	m_number_of_copies = 1;
-	m_sub_pattern = 0;
+	m_copies1 = 2;
+	m_x_shift1 = 50;
+	m_y_shift1 = 0;
+	m_copies2 = 1;
+	m_x_shift2 = 0;
+	m_y_shift2 = 50;
 }
 
 HeeksObj *CPattern::MakeACopy(void)const
@@ -27,29 +31,14 @@ void CPattern::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = heeksCAD->NewXMLElement( "Pattern" );
 	heeksCAD->LinkXMLEndChild( root,  element );
 
-	double m[16];
-	extract(m_trsf, m);
+	element->SetAttribute( "copies1", m_copies1);
+	element->SetDoubleAttribute( "x_shift1", m_x_shift1);
+	element->SetDoubleAttribute( "y_shift1", m_y_shift1);
+	element->SetAttribute( "copies2", m_copies2);
+	element->SetDoubleAttribute( "x_shift2", m_x_shift2);
+	element->SetDoubleAttribute( "y_shift2", m_y_shift2);
 
-	element->SetDoubleAttribute( "m0", m[0]);
-	element->SetDoubleAttribute( "m1", m[1]);
-	element->SetDoubleAttribute( "m2", m[2]);
-	element->SetDoubleAttribute( "m3", m[3]);
-	element->SetDoubleAttribute( "m4", m[4]);
-	element->SetDoubleAttribute( "m5", m[5]);
-	element->SetDoubleAttribute( "m6", m[6]);
-	element->SetDoubleAttribute( "m7", m[7]);
-	element->SetDoubleAttribute( "m8", m[8]);
-	element->SetDoubleAttribute( "m9", m[9]);
-	element->SetDoubleAttribute( "ma", m[10]);
-	element->SetDoubleAttribute( "mb", m[11]);
-	element->SetDoubleAttribute( "mc", m[12]);
-	element->SetDoubleAttribute( "md", m[13]);
-	element->SetDoubleAttribute( "me", m[14]);
-	element->SetDoubleAttribute( "mf", m[15]);
-	element->SetAttribute("num_copies", m_number_of_copies);
-	element->SetAttribute("sub_pattern", m_sub_pattern);
-
-	HeeksObj::WriteBaseXML(element);
+	IdNamedObj::WriteBaseXML(element);
 }
 
 // static member function
@@ -57,61 +46,58 @@ HeeksObj* CPattern::ReadFromXMLElement(TiXmlElement* element)
 {
 	CPattern* new_object = new CPattern;
 
-	double m[16];
-	element->Attribute("m0", &m[0]);
-	element->Attribute("m1", &m[1]);
-	element->Attribute("m2", &m[2]);
-	element->Attribute("m3", &m[3]);
-	element->Attribute("m4", &m[4]);
-	element->Attribute("m5", &m[5]);
-	element->Attribute("m6", &m[6]);
-	element->Attribute("m7", &m[7]);
-	element->Attribute("m8", &m[8]);
-	element->Attribute("m9", &m[9]);
-	element->Attribute("ma", &m[10]);
-	element->Attribute("mb", &m[11]);
-	element->Attribute("mc", &m[12]);
-	element->Attribute("md", &m[13]);
-	element->Attribute("me", &m[14]);
-	element->Attribute("mf", &m[15]);
-
-	new_object->m_trsf = make_matrix(m);
-
-	if(const char* pstr = element->Attribute("title"))new_object->m_title = Ctt(pstr);
-	element->Attribute("num_copies", &new_object->m_number_of_copies);
-	element->Attribute("sub_pattern", &new_object->m_sub_pattern);
+	element->Attribute( "copies1", &new_object->m_copies1);
+	element->Attribute( "x_shift1", &new_object->m_x_shift1);
+	element->Attribute( "y_shift1", &new_object->m_y_shift1);
+	element->Attribute( "copies2", &new_object->m_copies2);
+	element->Attribute( "x_shift2", &new_object->m_x_shift2);
+	element->Attribute( "y_shift2", &new_object->m_y_shift2);
 
 	new_object->ReadBaseXML(element);
 
 	return new_object;
 }
 
-static void on_set_pos(const double *pos, HeeksObj* object)
+static void on_set_copies1(int value, HeeksObj* object)
 {
-	((CPattern*)object)->m_trsf.SetTranslation(gp_Vec(pos[0], pos[1], pos[2]));
+	((CPattern*)object)->m_copies1 = value;
 }
 
-static void on_set_num_copies(int value, HeeksObj* object)
+static void on_set_x_shift1(double value, HeeksObj* object)
 {
-	((CPattern*)object)->m_number_of_copies = value;
+	((CPattern*)object)->m_x_shift1 = value;
 }
 
-static void on_set_sub_pattern(int value, HeeksObj* object)
+static void on_set_y_shift1(double value, HeeksObj* object)
 {
-	((CPattern*)object)->m_sub_pattern = value;
+	((CPattern*)object)->m_y_shift1 = value;
+}
+
+static void on_set_copies2(int value, HeeksObj* object)
+{
+	((CPattern*)object)->m_copies2 = value;
+}
+
+static void on_set_x_shift2(double value, HeeksObj* object)
+{
+	((CPattern*)object)->m_x_shift2 = value;
+}
+
+static void on_set_y_shift2(double value, HeeksObj* object)
+{
+	((CPattern*)object)->m_y_shift2 = value;
 }
 
 void CPattern::GetProperties(std::list<Property *> *list)
 {
-	const gp_XYZ& t = m_trsf.TranslationPart();
-	double o[3];
-	extract(t, o);
-	list->push_back(new PropertyVertex(_("position"), o, this, on_set_pos));
+	list->push_back(new PropertyInt(_("number of copies 1"), m_copies1, this, on_set_copies1));
+	list->push_back(new PropertyDouble(_("x shift 1"), m_x_shift1, this, on_set_x_shift1));
+	list->push_back(new PropertyDouble(_("y shift 1"), m_y_shift1, this, on_set_y_shift1));
+	list->push_back(new PropertyInt(_("number of copies 2"), m_copies2, this, on_set_copies2));
+	list->push_back(new PropertyDouble(_("x shift 2"), m_x_shift2, this, on_set_x_shift2));
+	list->push_back(new PropertyDouble(_("y shift 2"), m_y_shift2, this, on_set_y_shift2));
 
-	list->push_back(new PropertyInt(_("number of copies"), m_number_of_copies, this, on_set_num_copies));
-	list->push_back(new PropertyInt(_("sub pattern"), m_sub_pattern, this, on_set_sub_pattern));
-
-	return HeeksObj::GetProperties(list);
+	IdNamedObj::GetProperties(list);
 }
 
 void CPattern::CopyFrom(const HeeksObj* object)
@@ -134,46 +120,41 @@ const wxBitmap &CPattern::GetIcon()
 	return *icon;
 }
 
-static wxString temp_pattern_string;
-
-const wxChar* CPattern::GetShortString(void)const
-{
-	if(m_title_made_from_id)
-	{
-		wxChar pattern_str[512];
-		wsprintf(pattern_str, _T("Pattern %d"), m_id);
-		temp_pattern_string.assign(pattern_str);
-		return temp_pattern_string;
-	}
-	return m_title.c_str();}
-
-void CPattern::OnEditString(const wxChar* str)
-{
-    m_title.assign(str);
-	m_title_made_from_id = false;
-}
-
 void CPattern::GetMatrices(std::list<gp_Trsf> &matrices)
 {
-	gp_Trsf m;
+	gp_Trsf m2;
+	gp_Trsf shift_m2;
+	shift_m2.SetTranslationPart(gp_Vec(m_x_shift2, m_y_shift2, 0.0));
+	gp_Trsf shift_m1;
+	shift_m1.SetTranslationPart(gp_Vec(m_x_shift1, m_y_shift1, 0.0));
 
-	CPattern* sub_pattern = (CPattern*)heeksCAD->GetIDObject(PatternType, m_sub_pattern);
-
-	for(int i =0; i<m_number_of_copies+1; i++)
+	for(int j =0; j<m_copies2; j++)
 	{
-		if(sub_pattern && sub_pattern != this)
+		gp_Trsf m = m2;
+
+		for(int i =0; i<m_copies1; i++)
 		{
-			std::list<gp_Trsf> matrices2;
-			sub_pattern->GetMatrices(matrices2);
-			for(std::list<gp_Trsf>::iterator It = matrices2.begin(); It != matrices2.end(); It++)
-			{
-				gp_Trsf m2 = *It;
-				m2 = m2 * m;
-				matrices.push_back(m2);
-			}
-		}
-		else
 			matrices.push_back(m);
-		m = m * m_trsf;
+			m = m * shift_m1;
+		}
+
+		m2 = m2 * shift_m2;
 	}
+}
+
+static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+{
+	PatternDlg dlg(heeksCAD->GetMainFrame(), (CPattern*)object);
+	if(dlg.ShowModal() == wxID_OK)
+	{
+		dlg.GetData((CPattern*)object);
+		((CPattern*)object)->WriteDefaultValues();
+		return true;
+	}
+	return false;
+}
+
+void CPattern::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+{
+	*callback = OnEdit;
 }

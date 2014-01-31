@@ -66,7 +66,7 @@ static double degrees_to_radians( const double degrees )
  */
 static void on_set_clearance_height(double value, HeeksObj* object)
 {
-	((CDepthOp*)object)->m_depth_op_params.ClearanceHeight( value );
+	((CDepthOp*)object)->m_depth_op_params.m_clearance_height = value;
 	((CDepthOp*)object)->WriteDefaultValues();
 }
 
@@ -114,20 +114,7 @@ static void on_set_rapid_safety_space(double value, HeeksObj* object)
 
 void CDepthOpParams::GetProperties(CDepthOp* parent, std::list<Property *> *list)
 {
-	switch(theApp.m_program->m_clearance_source)
-	{
-	case CProgram::eClearanceDefinedByFixture:
-		list->push_back(new PropertyString(_("clearance height"), _("Defined in fixture definition"), NULL, NULL));
-		break;
-
-	case CProgram::eClearanceDefinedByMachine:
-		list->push_back(new PropertyString(_("clearance height"), _("Defined in Program properties for whole machine"), NULL, NULL));
-		break;
-
-	case CProgram::eClearanceDefinedByOperation:
-	default:
-		list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
-	} // End switch
+	list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
 
 	if(CTool::IsMillingToolType(CTool::FindToolType(parent->m_tool_number)))
 	{
@@ -200,8 +187,8 @@ void CDepthOp::WriteDefaultValues()
 {
 	CSpeedOp::WriteDefaultValues();
 
-	CNCConfig config(GetTypeString());
-	config.Write(_T("ClearanceHeight"), m_depth_op_params.ClearanceHeight());
+	CNCConfig config;
+	config.Write(_T("ClearanceHeight"), m_depth_op_params.m_clearance_height);
 	config.Write(_T("StartDepth"), m_depth_op_params.m_start_depth);
 	config.Write(_T("StepDown"), m_depth_op_params.m_step_down);
 	config.Write(_T("ZFinish"), m_depth_op_params.m_z_finish_depth);
@@ -215,12 +202,9 @@ void CDepthOp::ReadDefaultValues()
 {
 	CSpeedOp::ReadDefaultValues();
 
-	CNCConfig config(GetTypeString());
+	CNCConfig config;
 
-	double clearance_height;
-	config.Read(_T("ClearanceHeight"), &clearance_height, 5.0);
-	m_depth_op_params.ClearanceHeight(clearance_height);
-
+	config.Read(_T("ClearanceHeight"), &m_depth_op_params.m_clearance_height, 5.0);
 	config.Read(_T("StartDepth"), &m_depth_op_params.m_start_depth, 0.0);
 	config.Read(_T("StepDown"), &m_depth_op_params.m_step_down, 1.0);
 	config.Read(_T("ZFinish"), &m_depth_op_params.m_z_finish_depth, 0.0);
@@ -310,7 +294,7 @@ Python CDepthOp::AppendTextToProgram()
 
     python << CSpeedOp::AppendTextToProgram();
 
-	python << _T("clearance = float(") << m_depth_op_params.ClearanceHeight() / theApp.m_program->m_units << _T(")\n");
+	python << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
 	python << _T("rapid_safety_space = float(") << m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")\n");
     python << _T("start_depth = float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")\n");
     python << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
@@ -353,16 +337,4 @@ bool CDepthOp::operator== ( const CDepthOp & rhs ) const
 {
 	if (m_depth_op_params != rhs.m_depth_op_params) return(false);
 	return(CSpeedOp::operator==(rhs));
-}
-
-double CDepthOpParams::ClearanceHeight() const
-{
-	switch (theApp.m_program->m_clearance_source)
-	{
-	case CProgram::eClearanceDefinedByMachine:
-		return(theApp.m_program->m_machine.m_clearance_height);
-	case CProgram::eClearanceDefinedByOperation:
-	default:
-		return(m_clearance_height);
-	} // End switch
 }

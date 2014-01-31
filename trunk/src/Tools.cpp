@@ -26,7 +26,7 @@ HeeksObj *CTools::MakeACopy(void) const
 
 CTools::CTools()
 {
-    CNCConfig config(CTools::ConfigScope());
+    CNCConfig config;
 	config.Read(_T("title_format"), (int *) (&m_title_format), int(eGuageReplacesSize) );
 }
 
@@ -228,7 +228,7 @@ static void on_set_title_format(int value, HeeksObj* object, bool from_undo_redo
 {
 	((CTools *)object)->m_title_format = CTools::TitleFormat_t(value);
 
-	CNCConfig config(CTools::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("title_format"), ((CTools *)object)->m_title_format);
 }
 

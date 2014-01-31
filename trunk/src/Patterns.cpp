@@ -25,7 +25,7 @@ HeeksObj *CPatterns::MakeACopy(void) const
 
 CPatterns::CPatterns()
 {
-    CNCConfig config(CPatterns::ConfigScope());
+    CNCConfig config;
 }
 
 
@@ -64,4 +64,11 @@ HeeksObj* CPatterns::ReadFromXMLElement(TiXmlElement* pElem)
 	CPatterns* new_object = new CPatterns;
 	new_object->ReadBaseXML(pElem);
 	return new_object;
+}
+
+void CPatterns::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
+{
+	CHeeksCNCApp::GetNewPatternTools(t_list);
+
+	ObjList::GetTools(t_list, p);
 }

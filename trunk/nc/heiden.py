@@ -64,7 +64,6 @@ class Creator(nc.Creator):
         self.arc_centre_absolute = False
         self.arc_centre_positive = False
         self.in_quadrant_splitting = False
-        self.machine_coordinates = False
         self.drillExpanded = False
         self.can_do_helical_arcs = True
         self.shift_x = 0.0
@@ -358,11 +357,8 @@ class Creator(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None ):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
         self.write_blocknum()
-
-        if self.machine_coordinates != False or (machine_coordinates != None and machine_coordinates == True):
-            self.write( self.MACHINE_COORDINATES() + self.SPACE() )
 
         if self.g0123_modal:
             if self.prev_g0123 != self.RAPID():
@@ -422,7 +418,7 @@ class Creator(nc.Creator):
         self.write_misc()
         self.write('\n')
 
-    def feed(self, x=None, y=None, z=None):
+    def feed(self, x=None, y=None, z=None, a=None, b=None, c=None):
         if self.same_xyz(x, y, z): return
         self.write_blocknum()
         if self.g0123_modal:
@@ -678,7 +674,7 @@ class Creator(nc.Creator):
         self.write_misc()
         self.write('\n')
 
-    def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
+    def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None):
         pass
 
     def rapid_unhome(self):

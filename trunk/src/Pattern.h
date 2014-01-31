@@ -7,37 +7,34 @@
 
 #pragma once
 
-#include "interface/HeeksObj.h"
+#include "interface/IdNamedObj.h"
 #include "HeeksCNCTypes.h"
 
-class CPattern: public HeeksObj {
+class CPattern: public IdNamedObj {
 public:
-	wxString m_title;
-	bool m_title_made_from_id;
-	gp_Trsf m_trsf;
-	int m_number_of_copies;
-	int m_sub_pattern;
+	int m_copies1;
+	double m_x_shift1;
+	double m_y_shift1;
+	int m_copies2;
+	double m_x_shift2;
+	double m_y_shift2;
 
 	//	Constructors.
 	CPattern();
-	CPattern(const wxString &title, const gp_Trsf &trsf, int number_of_copies):m_title(title), m_title_made_from_id(true), m_trsf(trsf), m_number_of_copies(number_of_copies){}
+	CPattern(int copies1, double x_shift1, double y_shift1, int copies2, double x_shift2, double y_shift2):m_copies1(copies1), m_x_shift1(x_shift1), m_y_shift1(y_shift1), m_copies2(copies2), m_x_shift2(x_shift2), m_y_shift2(y_shift2){}
 
 	// HeeksObj's virtual functions
     int GetType()const{return PatternType;}
 	const wxChar* GetTypeString(void) const{ return _T("Pattern"); }
     HeeksObj *MakeACopy(void)const;
-
     void WriteXML(TiXmlNode *root);
-    static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	const wxBitmap &GetIcon();
-    const wxChar* GetShortString(void)const;
-    bool CanEditString(void)const{return true;}
-    void OnEditString(const wxChar* str);
+	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+
+    static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void GetMatrices(std::list<gp_Trsf> &matrices);
 }; // End CPattern class definition.
-

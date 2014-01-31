@@ -286,7 +286,7 @@
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)&quot;;&quot;$(WXWIN)\lib\vc_dll\mswu&quot;;&quot;$(WXWIN)\include\msvc&quot;;&quot;$(HEEKSCADPATH)&quot;;../kurve/geometry;../kurve/messages;&quot;$(LIBAREA_PATH)&quot;"
+				AdditionalIncludeDirectories="./;&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)&quot;;&quot;$(WXWIN)\lib\vc_dll\mswu&quot;;&quot;$(WXWIN)\include\msvc&quot;;&quot;$(HEEKSCADPATH)&quot;;../kurve/geometry;../kurve/messages;&quot;$(LIBAREA_PATH)&quot;"
 				PreprocessorDefinitions="WIN32;__WXMSW__;_WINDOWS;NOPCH;WNT;_CRT_SECURE_NO_WARNINGS;WXUSINGDLL;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;_SECURE_ATL =0;HEEKSCNC;OPEN_SOURCE_GEOMETRY;HEEKSPLUGIN;STABLE_OPS_ONLY"
 				StringPooling="false"
 				RuntimeLibrary="2"
@@ -387,6 +387,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\DepthOpDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\DepthOpDlg.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dllmain.cpp"
 			>
 		</File>
@@ -396,6 +404,14 @@
 		</File>
 		<File
 			RelativePath=".\Drilling.h"
+			>
+		</File>
+		<File
+			RelativePath=".\DrillingDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\DrillingDlg.h"
 			>
 		</File>
 		<File
@@ -459,6 +475,30 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\HeeksCADSVN\interface\HeeksObjDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\interface\HeeksObjDlg.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObj.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObj.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObjList.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObjList.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\HeeksCADSVN\interface\InputMode.h"
 			>
 		</File>
@@ -476,14 +516,6 @@
 		</File>
 		<File
 			RelativePath="$(HEEKSCADPATH)\interface\LeftAndRight.h"
-			>
-		</File>
-		<File
-			RelativePath=".\MachineState.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\MachineState.h"
 			>
 		</File>
 		<File
@@ -555,6 +587,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PatternDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\PatternDlg.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Patterns.cpp"
 			>
 		</File>
@@ -616,6 +656,14 @@
 		</File>
 		<File
 			RelativePath=".\ProgramCanvas.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ProgramDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ProgramDlg.h"
 			>
 		</File>
 		<File
@@ -751,6 +799,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\SpeedOpDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\SpeedOpDlg.h"
+			>
+		</File>
+		<File
 			RelativePath=".\stdafx.cpp"
 			>
 			<FileConfiguration
@@ -836,6 +892,14 @@
 		</File>
 		<File
 			RelativePath=".\Surface.h"
+			>
+		</File>
+		<File
+			RelativePath=".\SurfaceDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\SurfaceDlg.h"
 			>
 		</File>
 		<File

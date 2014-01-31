@@ -20,8 +20,9 @@
 #include "CTool.h"
 #include "Profile.h"
 #include "CNCPoint.h"
-#include "MachineState.h"
 #include "Program.h"
+#include "src/Geom.h"
+#include "DrillingDlg.h"
 
 #include <sstream>
 #include <iomanip>
@@ -33,13 +34,12 @@ extern CHeeksCADInterface* heeksCAD;
 
 void CDrillingParams::set_initial_values( const double depth, const int tool_number )
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 
 	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
 	config.Read(_T("m_dwell"), &m_dwell, 1);
 	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
 	config.Read(_T("m_peck_depth"), &m_peck_depth, (25.4 / 10));	// One tenth of an inch
-	config.Read(_T("m_sort_drilling_locations"), &m_sort_drilling_locations, 1);
 	config.Read(_T("m_retract_mode"), &m_retract_mode, 0);
 	config.Read(_T("m_spindle_mode"), &m_spindle_mode, 0);
 	config.Read(_T("m_clearance_height"), &m_clearance_height, 25.4);		// One inch
@@ -74,14 +74,13 @@ void CDrillingParams::write_values_to_config()
 {
 	// We always want to store the parameters in mm and convert them back later on.
 
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 
 	// These values are in mm.
 	config.Write(_T("m_standoff"), m_standoff);
 	config.Write(_T("m_dwell"), m_dwell);
 	config.Write(_T("m_depth"), m_depth);
 	config.Write(_T("m_peck_depth"), m_peck_depth);
-	config.Write(_T("m_sort_drilling_locations"), m_sort_drilling_locations);
 	config.Write(_T("m_retract_mode"), m_retract_mode);
 	config.Write(_T("m_spindle_mode"), m_spindle_mode);
 	config.Write(_T("m_clearance_height"), m_clearance_height);
@@ -125,37 +124,16 @@ static void on_set_peck_depth(double value, HeeksObj* object)
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
-static void on_set_sort_drilling_locations(int value, HeeksObj* object, bool from_undo_redo)
-{
-	((CDrilling*)object)->m_params.m_sort_drilling_locations = value;
-	((CDrilling*)object)->m_params.write_values_to_config();
-}
-
 static void on_set_clearance_height(double value, HeeksObj* object)
 {
-	((CDrilling*)object)->m_params.ClearanceHeight( value );
+	((CDrilling*)object)->m_params.m_clearance_height = value;
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
 void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *list)
 {
 	list->push_back(new PropertyLength(_("standoff"), m_standoff, parent, on_set_standoff));
-
-	switch(theApp.m_program->m_clearance_source)
-	{
-	case CProgram::eClearanceDefinedByFixture:
-		list->push_back(new PropertyString(_("clearance height"), _("Defined in fixture definition"), NULL, NULL));
-		break;
-
-	case CProgram::eClearanceDefinedByMachine:
-		list->push_back(new PropertyString(_("clearance height"), _("Defined in Program properties for whole machine"), NULL, NULL));
-		break;
-
-	case CProgram::eClearanceDefinedByOperation:
-	default:
-		list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
-	} // End switch
-
+	list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
 	list->push_back(new PropertyDouble(_("dwell"), m_dwell, parent, on_set_dwell));
 	list->push_back(new PropertyLength(_("depth"), m_depth, parent, on_set_depth));
 	list->push_back(new PropertyLength(_("peck_depth"), m_peck_depth, parent, on_set_peck_depth));
@@ -177,16 +155,6 @@ void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *li
 		int choice = int(m_spindle_mode);
 		list->push_back(new PropertyChoice(_("spindle_mode"), choices, choice, parent, on_set_spindle_mode));
 	} // End choice scope
-	{ // Begin choice scope
-		std::list< wxString > choices;
-
-		choices.push_back(_("Respect existing order"));	// Must be 'false' (0)
-		choices.push_back(_("True"));			// Must be 'true' (non-zero)
-
-		int choice = int(m_sort_drilling_locations);
-		list->push_back(new PropertyChoice(_("sort_drilling_locations"), choices, choice, parent, on_set_sort_drilling_locations));
-	} // End choice scope
-
 }
 
 void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
@@ -200,7 +168,6 @@ void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute( "depth", m_depth);
 	element->SetDoubleAttribute( "peck_depth", m_peck_depth);
 
-	element->SetAttribute( "sort_drilling_locations", m_sort_drilling_locations);
 	element->SetAttribute( "retract_mode", m_retract_mode);
 	element->SetAttribute( "spindle_mode", m_spindle_mode);
 	element->SetAttribute( "clearance_height", m_clearance_height);
@@ -213,7 +180,6 @@ void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("dwell")) pElem->Attribute("dwell", &m_dwell);
 	if (pElem->Attribute("depth")) pElem->Attribute("depth", &m_depth);
 	if (pElem->Attribute("peck_depth")) pElem->Attribute("peck_depth", &m_peck_depth);
-	if (pElem->Attribute("sort_drilling_locations")) pElem->Attribute("sort_drilling_locations", &m_sort_drilling_locations);
 	if (pElem->Attribute("retract_mode")) pElem->Attribute("retract_mode", &m_retract_mode);
 	if (pElem->Attribute("spindle_mode")) pElem->Attribute("spindle_mode", &m_spindle_mode);
 	if (pElem->Attribute("clearance_height")) pElem->Attribute("clearance_height", &m_clearance_height);
@@ -238,26 +204,26 @@ Python CDrilling::AppendTextToProgram()
 
 	python << CSpeedOp::AppendTextToProgram();   // Set any private fixtures and change tools (if necessary)
 
-	std::vector<CNCPoint> locations = FindAllLocations();
-	if(m_params.m_sort_drilling_locations != 0)CDrilling::SortLocations(locations, theApp.machine_state.Location());
-
-	for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+	for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
-		gp_Pnt point = *l_itLocation;
+		HeeksObj* object = heeksCAD->GetIDObject(PointType, *It);
+		if(object == NULL)continue;
+		double p[3];
+		if(object->GetEndPoint(p) == false)continue;
 
 		python << _T("drill(")
-			<< _T("x=") << point.X()/theApp.m_program->m_units << _T(", ")
-			<< _T("y=") << point.Y()/theApp.m_program->m_units << _T(", ")
-			<< _T("z=") << point.Z()/theApp.m_program->m_units << _T(", ")
+			<< _T("x=") << p[0]/theApp.m_program->m_units << _T(", ")
+			<< _T("y=") << p[1]/theApp.m_program->m_units << _T(", ")
+			<< _T("z=") << p[2]/theApp.m_program->m_units << _T(", ")
 			<< _T("depth=") << m_params.m_depth/theApp.m_program->m_units << _T(", ")
 			<< _T("standoff=") << m_params.m_standoff/theApp.m_program->m_units << _T(", ")
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
 			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units << _T(", ")
 			<< _T("retract_mode=") << m_params.m_retract_mode << _T(", ")
 			<< _T("spindle_mode=") << m_params.m_spindle_mode << _T(", ")
-			<< _T("clearance_height=") << m_params.ClearanceHeight()
+			<< _T("clearance_height=") << m_params.m_clearance_height
 			<< _T(")\n");
-        theApp.machine_state.Location(point); // Remember where we are.
+        theApp.m_location = make_point(p); // Remember where we are.
 	} // End for
 
 	python << _T("end_canned_cycle()\n");
@@ -392,19 +358,22 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			} // End if - then
 		} // End if - then
 
-		std::vector<CNCPoint> locations = FindAllLocations();
-
-		for (std::vector<CNCPoint>::const_iterator l_itLocation = locations.begin(); l_itLocation != locations.end(); l_itLocation++)
+		for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
 		{
+			HeeksObj* object = heeksCAD->GetIDObject(PointType, *It);
+			double p[3];
+			if(!object->GetEndPoint(p))continue;
+			gp_Pnt point = make_point(p);
+
 			GLdouble start[3], end[3];
 
-			start[0] = l_itLocation->X();
-			start[1] = l_itLocation->Y();
-			start[2] = l_itLocation->Z();
+			start[0] = point.X();
+			start[1] = point.Y();
+			start[2] = point.Z();
 
-			end[0] = l_itLocation->X();
-			end[1] = l_itLocation->Y();
-			end[2] = l_itLocation->Z();
+			end[0] = point.X();
+			end[1] = point.Y();
+			end[2] = point.Z();
 
 			end[2] -= m_params.m_depth;
 
@@ -413,7 +382,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 			glVertex3dv( end );
 			glEnd();
 
-			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	*l_itLocation,
+			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	point,
 												l_dHoleDiameter / 2,
 												m_params.m_depth);
 
@@ -451,10 +420,10 @@ void CDrilling::CopyFrom(const HeeksObj* object)
 	}
 }
 
-CDrilling::CDrilling(	const Symbols_t &symbols,
+CDrilling::CDrilling(	const std::list<int> &points,
         const int tool_number,
         const double depth )
-    : CSpeedOp(GetTypeString(), tool_number, DrillingType), m_symbols(symbols)
+    : CSpeedOp(tool_number, DrillingType), m_points(points)
 {
     m_params.set_initial_values(depth, tool_number);
 }
@@ -462,7 +431,7 @@ CDrilling::CDrilling(	const Symbols_t &symbols,
 
 CDrilling::CDrilling( const CDrilling & rhs ) : CSpeedOp( rhs )
 {
-	std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ));
+	m_points = rhs.m_points;
     m_params = rhs.m_params;
 }
 
@@ -471,9 +440,8 @@ CDrilling & CDrilling::operator= ( const CDrilling & rhs )
 	if (this != &rhs)
 	{
 		CSpeedOp::operator=(rhs);
-		m_symbols.clear();
-		std::copy( rhs.m_symbols.begin(), rhs.m_symbols.end(), std::inserter( m_symbols, m_symbols.begin() ));
-
+		m_points.clear();
+		m_points = rhs.m_points;
 		m_params = rhs.m_params;
 	}
 
@@ -502,16 +470,15 @@ void CDrilling::WriteXML(TiXmlNode *root)
 	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
 
-	TiXmlElement * symbols;
-	symbols = heeksCAD->NewXMLElement( "symbols" );
-	heeksCAD->LinkXMLEndChild( element, symbols );
+	//TiXmlElement * symbols;
+	//symbols = heeksCAD->NewXMLElement( "symbols" );
+	//heeksCAD->LinkXMLEndChild( element, symbols );
 
-	for (Symbols_t::const_iterator l_itSymbol = m_symbols.begin(); l_itSymbol != m_symbols.end(); l_itSymbol++)
+	for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
-		TiXmlElement * symbol = heeksCAD->NewXMLElement( "symbol" );
-		symbols->LinkEndChild( symbol );  
-		symbol->SetAttribute("type", l_itSymbol->first );
-		symbol->SetAttribute("id", l_itSymbol->second );
+		TiXmlElement * point = heeksCAD->NewXMLElement( "Point" );
+		heeksCAD->LinkXMLEndChild( element, point );
+		point->SetAttribute("id", *It );
 	} // End for
 
 	WriteBaseXML(element);
@@ -524,7 +491,7 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 
 	std::list<TiXmlElement *> elements_to_remove;
 
-	// read point and circle ids
+	// read point ids
 	for(TiXmlElement* pElem = heeksCAD->FirstXMLChildElement( element ) ; pElem; pElem = pElem->NextSiblingElement())
 	{
 		std::string name(pElem->Value());
@@ -538,17 +505,17 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 				int type, id;
 				if (child->Attribute("type", &type) && child->Attribute("id", &id))
 				{
-					new_object->AddSymbol( type, id );
+					if(type == PointType)
+					new_object->AddPoint(id);
 				}
 			} // End for
 			elements_to_remove.push_back(pElem);
 		} // End if
 		else if(name == "Point"){
-			// older version where children were allowed
 			int id;
 			if(pElem->Attribute("id", &id))
 			{
-				new_object->AddSymbol( PointType, id);
+				new_object->AddPoint(id);
 			}
 		}
 	}
@@ -563,89 +530,10 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
-std::vector<CNCPoint> CDrilling::FindAllLocations()
-{
-	std::vector<CNCPoint> locations;
-
-	for (Symbols_t::iterator itLhs = m_symbols.begin(); itLhs != m_symbols.end(); itLhs++)
-	{
-	    Symbol_t &symbol = *itLhs;
-
-		if (symbol.first == PointType)
-		{
-			HeeksObj* object = heeksCAD->GetIDObject(symbol.first, symbol.second);
-			double pos[3];
-			object->GetStartPoint(pos);
-
-			// Copy the results in ONLY if each point doesn't already exist.
-			if (std::find( locations.begin(), locations.end(), CNCPoint( pos ) ) == locations.end())
-			{
-				locations.push_back( CNCPoint( pos ) );
-			} // End if - then
-
-			continue;	// No need to intersect a point with anything.
-		} // End if - then
-	}
-
-	return(locations);
-}
-
-//static
-void CDrilling::SortLocations(std::vector<CNCPoint> &locations, const CNCPoint starting_location)
-{
-	for (std::vector<CNCPoint>::iterator l_itPoint = locations.begin(); l_itPoint != locations.end(); l_itPoint++)
-	{
-		if (l_itPoint == locations.begin())
-		{
-			// It's the first point.
-			CNCPoint reference_location(0.0, 0.0, 0.0);
-            reference_location = starting_location;
-
-			sort_points_by_distance compare( reference_location );
-			std::sort( locations.begin(), locations.end(), compare );
-		} // End if - then
-		else
-		{
-			// We've already begun.  Just sort based on the previous point's location.
-			std::vector<CNCPoint>::iterator l_itNextPoint = l_itPoint;
-			l_itNextPoint++;
-
-			if (l_itNextPoint != locations.end())
-			{
-				sort_points_by_distance compare( *l_itPoint );
-				std::sort( l_itNextPoint, locations.end(), compare );
-			} // End if - then
-		} // End if - else
-	} // End for
-} // End if - then
-
-/**
-    This method returns TRUE if the type of symbol is suitable for reference as a source of location
- */
-/* static */ bool CDrilling::ValidType( const int object_type )
-{
-    switch (object_type)
-    {
-        case PointType:
-        case CircleType:
-        case SketchType:
-        case DrillingType:
-        case ProfileType:
-        case PocketType:
-		case ILineType:
-            return(true);
-
-        default:
-            return(false);
-    }
-}
-
-
 void CDrilling::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
     CSpeedOp::GetTools( t_list, p );
 }
-
 
 bool CDrillingParams::operator==( const CDrillingParams & rhs) const
 {
@@ -653,7 +541,6 @@ bool CDrillingParams::operator==( const CDrillingParams & rhs) const
 	if (m_dwell != rhs.m_dwell) return(false);
 	if (m_depth != rhs.m_depth) return(false);
 	if (m_peck_depth != rhs.m_peck_depth) return(false);
-	if (m_sort_drilling_locations != rhs.m_sort_drilling_locations) return(false);
 	if (m_retract_mode != rhs.m_retract_mode) return(false);
 	if (m_spindle_mode != rhs.m_spindle_mode) return(false);
 	if (m_clearance_height != rhs.m_clearance_height) return(false);
@@ -669,21 +556,73 @@ bool CDrilling::operator==( const CDrilling & rhs ) const
 	return(CSpeedOp::operator==(rhs));
 }
 
-double CDrillingParams::ClearanceHeight() const
+static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
 {
-	switch (theApp.m_program->m_clearance_source)
+	int type = 3; // 3 for drilling, 2, for speedop, 1 for op, 0 for other
+
+	if(others)
 	{
-	case CProgram::eClearanceDefinedByMachine:
-		return(theApp.m_program->m_machine.m_clearance_height);
+		for(std::list<HeeksObj*>::iterator It = others->begin(); It != others->end(); It++)
+		{
+			HeeksObj* obj = *It;
+			switch(obj->GetType())
+			{
+			case DrillingType:
+				break;
+			case ProfileType:
+			case PocketType:
+				if(type > 2)type = 2;
+				break;
+			case ScriptOpType:
+				if(type>1)type = 1;
+				break;
+			default:
+				type = 0;
+				break;
+			}
+		}
+	}
 
-	case CProgram::eClearanceDefinedByFixture:
-		// We need to figure out which is the 'active' fixture and return
-		// the clearance height from that fixture.
-			// This should not occur.  In any case, use the clearance value from the individual operation.
-			return(m_clearance_height);
+	int res = 0;
 
-	case CProgram::eClearanceDefinedByOperation:
+	HeeksObjDlg* dlg = NULL;
+
+	switch(type)
+	{
+	case 3:
+		dlg = new DrillingDlg(heeksCAD->GetMainFrame(), (CDrilling*)object);
+		break;
+	case 2:
+		dlg = new SpeedOpDlg(heeksCAD->GetMainFrame(), (CDrilling*)object, false);
+		break;
+	case 1:
+		//dlg = new OpDlg(heeksCAD->GetMainFrame(), (CDrilling*)object);
+		break;
 	default:
-		return(m_clearance_height);
-	} // End switch
+		break;
+	}
+
+	if(dlg)
+	{
+		if(dlg->ShowModal() == wxID_OK)
+		{
+			dlg->GetData(object);
+			object->WriteDefaultValues();
+			if(others)
+			{
+				for(std::list<HeeksObj*>::iterator It = others->begin(); It != others->end(); It++)
+				{
+					HeeksObj* obj = *It;
+					dlg->GetData(obj);
+				}
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+void CDrilling::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+{
+	*callback = OnEdit;
 }
