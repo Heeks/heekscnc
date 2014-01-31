@@ -144,7 +144,7 @@ bool Excellon::Read( const char *p_szFileName, const bool force_mirror /* = fals
 		if (obj->GetType() != PointType) continue;
 		double pos[3];
 		obj->GetStartPoint( pos );
-		m_existing_points.insert( std::make_pair( CNCPoint( pos ), CDrilling::Symbol_t( PointType, obj->m_id ) ) );
+		m_existing_points.insert( std::make_pair( CNCPoint( pos ), obj->m_id ) );
 	} // End for
 
 	std::ifstream input( p_szFileName, std::ios::in );
@@ -841,19 +841,18 @@ bool Excellon::ReadDataBlock( const std::string & data_block )
 				cnc_point.ToDoubleArray( location );
 				HeeksObj *point = heeksCAD->NewPoint( location );
 				heeksCAD->Add( point, NULL );
-				CDrilling::Symbol_t symbol( point->GetType(), point->m_id );
-				m_existing_points.insert( std::make_pair( cnc_point, symbol ));
+				m_existing_points.insert( std::make_pair( cnc_point, point->m_id ));
 			} // End if - then
 
 			// There is already a point here.  Use it.
 			if (m_holes.find( m_active_tool_number ) == m_holes.end())
 			{
 				// We haven't used this drill bit before.  Add it now.
-				CDrilling::Symbols_t symbols;
-				CDrilling::Symbol_t symbol( m_existing_points[ cnc_point ] );
-				symbols.push_back( symbol );
+				std::list<int> points;
+				int p = m_existing_points[ cnc_point ];
+				points.push_back( p );
 
-				m_holes.insert( std::make_pair( m_active_tool_number, symbols ) );
+				m_holes.insert( std::make_pair( m_active_tool_number, points ) );
 			}
 			else
 			{

@@ -93,7 +93,7 @@ extern CHeeksCADInterface* heeksCAD;
 
 void CToolParams::set_initial_values()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Read(_T("m_material"), &m_material, int(eCarbide));
 	config.Read(_T("m_diameter"), &m_diameter, 12.7);
 	config.Read(_T("m_tool_length_offset"), &m_tool_length_offset, (10 * m_diameter));
@@ -107,7 +107,7 @@ void CToolParams::set_initial_values()
 
 void CToolParams::write_values_to_config()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 
 	config.Write(_T("m_material"), m_material);
 	config.Write(_T("m_diameter"), m_diameter);
@@ -728,34 +728,6 @@ bool CTool::IsMillingToolType( CToolParams::eToolType type )
 	}
 }
 
-std::vector< std::pair< int, wxString > > CTool::FindAllTools()
-{
-	std::vector< std::pair< int, wxString > > tools;
-
-	// Always add a value of zero to allow for an absense of tool use.
-	tools.push_back( std::make_pair(0, _T("No Tool") ) );
-
-	if (TOOLS)
-	{
-		HeeksObj* tool_list = TOOLS;
-
-		for(HeeksObj* ob = tool_list->GetFirstChild(); ob; ob = tool_list->GetNextChild())
-		{
-			if (ob->GetType() != ToolType) continue;
-
-			CTool *pTool = (CTool *)ob;
-			if (ob != NULL)
-			{
-				tools.push_back( std::make_pair( pTool->m_tool_number, pTool->GetShortString() ) );
-			} // End if - then
-		} // End for
-	} // End if - then
-
-	return(tools);
-
-} // End FindAllTools() method
-
-
 
 /**
 	Find a fraction that represents this floating point number.  We use this
@@ -1372,7 +1344,7 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )const
 	return(python);
 }
 
-static bool OnEdit(HeeksObj* object)
+static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
 {
 	CToolDlg dlg(heeksCAD->GetMainFrame(), (CTool*)object);
 	if(dlg.ShowModal() == wxID_OK)
@@ -1384,7 +1356,7 @@ static bool OnEdit(HeeksObj* object)
 	return false;
 }
 
-void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
+void CTool::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
 {
 #if 1
 	*callback = OnEdit;

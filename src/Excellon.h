@@ -73,10 +73,10 @@ class Excellon
 		typedef std::map< unsigned int, CTool::ToolNumber_t > ToolTableMap_t;
 		ToolTableMap_t	m_tool_table_map;
 
-		typedef std::map< CTool::ToolNumber_t, CDrilling::Symbols_t > Holes_t;
+		typedef std::map< CTool::ToolNumber_t, std::list<int> > Holes_t;
 		Holes_t m_holes;
 
-		typedef std::map< CNCPoint, CDrilling::Symbol_t > Points_t;
+		typedef std::map< CNCPoint, int > Points_t;
 		Points_t	m_existing_points;
 
 public:

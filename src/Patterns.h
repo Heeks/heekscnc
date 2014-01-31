@@ -30,10 +30,8 @@ public:
 	bool CanBeRemoved(){return false;}
 	void WriteXML(TiXmlNode *root);
 	bool UsesID() { return(false); }
+	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-
-	static wxString ConfigScope() { return(_("Patterns")); }
-
 };
 

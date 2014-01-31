@@ -1,200 +1,107 @@
 // PocketDlg.cpp
-// Copyright (c) 2010, Dan Heeks
+// Copyright (c) 2014, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
 #include "stdafx.h"
 #include "PocketDlg.h"
-#include "interface/PictureFrame.h"
 #include "interface/NiceTextCtrl.h"
 #include "Pocket.h"
 
 enum
 {
-	ID_STARTING_PLACE = 100,
+	ID_SKETCH = 100,
+	ID_STARTING_PLACE,
 	ID_CUT_MODE,
 	ID_KEEP_TOOL_DOWN,
 	ID_USE_ZIG_ZAG,
 	ID_ZIG_UNIDIRECTIONAL,
-	ID_TOOL,
 };
 
-BEGIN_EVENT_TABLE(PocketDlg, HDialog)
-    EVT_CHILD_FOCUS(PocketDlg::OnChildFocus)
-    EVT_COMBOBOX(ID_STARTING_PLACE,PocketDlg::OnComboStartingPlace)
-    EVT_COMBOBOX(ID_CUT_MODE,PocketDlg::OnComboCutMode)
-    EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, PocketDlg::OnCheckKeepToolDown)
+BEGIN_EVENT_TABLE(PocketDlg, DepthOpDlg)
+    EVT_COMBOBOX(ID_SKETCH,HeeksObjDlg::OnComboOrCheck)
+    EVT_COMBOBOX(ID_STARTING_PLACE,HeeksObjDlg::OnComboOrCheck)
+    EVT_COMBOBOX(ID_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
+    EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, HeeksObjDlg::OnComboOrCheck)
     EVT_CHECKBOX(ID_USE_ZIG_ZAG, PocketDlg::OnCheckUseZigZag)
-    EVT_CHECKBOX(ID_ZIG_UNIDIRECTIONAL, PocketDlg::OnCheckZigUnidirectional)
-    EVT_COMBOBOX(ID_TOOL,PocketDlg::OnComboTool)
+    EVT_CHECKBOX(ID_ZIG_UNIDIRECTIONAL, HeeksObjDlg::OnComboOrCheck)
 END_EVENT_TABLE()
 
-static std::vector< std::pair< int, wxString > > tools_for_combo;
-
-PocketDlg::PocketDlg(wxWindow *parent, CPocket* object)
-             : HDialog(parent, wxID_ANY, wxString(_T("Pocket Operation")))
+PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, bool top_level)
+             : DepthOpDlg(parent, object, title, false)
 {
-	m_ignore_event_functions = true;
-    wxBoxSizer *sizerMain = new wxBoxSizer(wxHORIZONTAL);
-
-	// add left sizer
-    wxBoxSizer *sizerLeft = new wxBoxSizer(wxVERTICAL);
-    sizerMain->Add( sizerLeft, 0, wxALL, control_border );
-
-	// add right sizer
-    wxBoxSizer *sizerRight = new wxBoxSizer(wxVERTICAL);
-    sizerMain->Add( sizerRight, 0, wxALL, control_border );
-
-	// add picture to right side
-	m_picture = new PictureWindow(this, wxSize(300, 200));
-	wxBoxSizer *pictureSizer = new wxBoxSizer(wxVERTICAL);
-	pictureSizer->Add(m_picture, 1, wxGROW);
-    sizerRight->Add( pictureSizer, 0, wxALL, control_border );
-
-	// add some of the controls to the right side
-	AddLabelAndControl(sizerRight, _("horizontal feedrate"), m_lgthHFeed = new CLengthCtrl(this));
-	AddLabelAndControl(sizerRight, _("vertical feedrate"), m_lgthVFeed = new CLengthCtrl(this));
-	AddLabelAndControl(sizerRight, _("spindle speed"), m_dblSpindleSpeed = new CDoubleCtrl(this));
-
-	AddLabelAndControl(sizerRight, _("comment"), m_txtComment = new wxTextCtrl(this, wxID_ANY));
-	sizerRight->Add( m_chkActive = new wxCheckBox( this, wxID_ANY, _("active") ), 0, wxALL, control_border );
-	AddLabelAndControl(sizerRight, _("title"), m_txtTitle = new wxTextCtrl(this, wxID_ANY));
-
-	// add OK and Cancel to right side
-    wxBoxSizer *sizerOKCancel = MakeOkAndCancel(wxHORIZONTAL);
-	sizerRight->Add( sizerOKCancel, 0, wxALL | wxALIGN_RIGHT | wxALIGN_BOTTOM, control_border );
+	std::list<HControl> save_leftControls = leftControls;
+	leftControls.clear();
 
 	// add all the controls to the left side
-	AddLabelAndControl(sizerLeft, _("sketches"), m_idsSketches = new CObjectIdsCtrl(this));
-	AddLabelAndControl(sizerLeft, _("step over"), m_lgthStepOver = new CLengthCtrl(this));
-	AddLabelAndControl(sizerLeft, _("material allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this));
+	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject())));
+	leftControls.push_back(MakeLabelAndControl(_("step over"), m_lgthStepOver = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("material allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
 
 	wxString starting_place_choices[] = {_("boundary"), _("center")};
-	AddLabelAndControl(sizerLeft, _("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices));
+	leftControls.push_back(MakeLabelAndControl(_("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices)));
 
 	wxString cut_mode_choices[] = {_("conventional"), _("climb")};
-	AddLabelAndControl(sizerLeft, _("cut mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices));
+	leftControls.push_back(MakeLabelAndControl(_("cut mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices)));
 
-//	wxString entry_move_choices[] = {_("Plunge"), _("Ramp"), _("Helical")};
-//	AddLabelAndControl(sizerLeft, _("entry move"), m_cmbEntryMove = new wxComboBox(this, ID_DESCENT_STRATGEY, _T(""), wxDefaultPosition, wxDefaultSize, 3, entry_move_choices));
+	leftControls.push_back( HControl( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), wxALL ));
+	leftControls.push_back( HControl( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), wxALL ));
+	leftControls.push_back(MakeLabelAndControl(_("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this)));
+	leftControls.push_back( HControl( m_chkZigUnidirectional = new wxCheckBox( this, ID_ZIG_UNIDIRECTIONAL, _("zig unidirectional") ), wxALL ));
 
-	tools_for_combo = CTool::FindAllTools();
+	for(std::list<HControl>::iterator It = save_leftControls.begin(); It != save_leftControls.end(); It++)
+	{
+		leftControls.push_back(*It);
+	}
 
-	wxArrayString tools;
-	for(unsigned int i = 0; i<tools_for_combo.size(); i++)tools.Add(tools_for_combo[i].second);
-	AddLabelAndControl(sizerLeft, _("Tool"), m_cmbTool = new wxComboBox(this, ID_TOOL, _T(""), wxDefaultPosition, wxDefaultSize, tools));
-
-	sizerLeft->Add( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), 0, wxALL, control_border );
-	sizerLeft->Add( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), 0, wxALL, control_border );
-	AddLabelAndControl(sizerLeft, _("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this));
-	sizerLeft->Add( m_chkZigUnidirectional = new wxCheckBox( this, ID_ZIG_UNIDIRECTIONAL, _("zig unidirectional") ), 0, wxALL, control_border );
-
-	AddLabelAndControl(sizerLeft, _("clearance height"), m_lgthClearanceHeight = new CLengthCtrl(this));
-	AddLabelAndControl(sizerLeft, _("rapid safety space"), m_lgthRapidDownToHeight = new CLengthCtrl(this));
-	AddLabelAndControl(sizerLeft, _("start depth"), m_lgthStartDepth = new CLengthCtrl(this));
-	AddLabelAndControl(sizerLeft, _("final depth"), m_lgthFinalDepth = new CLengthCtrl(this));
-	AddLabelAndControl(sizerLeft, _("step down"), m_lgthStepDown = new CLengthCtrl(this));
-	AddLabelAndControl(sizerLeft, _("z finish depth"), m_lgthZFinishDepth = new CLengthCtrl(this));
-	AddLabelAndControl(sizerLeft, _("z through depth"), m_lgthZThruDepth = new CLengthCtrl(this));
-
-	SetFromData(object);
-
-    SetSizer( sizerMain );
-    sizerMain->SetSizeHints(this);
-	sizerMain->Fit(this);
-
-    m_idsSketches->SetFocus();
-
-	m_ignore_event_functions = false;
-
-	SetPicture();
+	if(top_level)
+	{
+		HeeksObjDlg::AddControlsAndCreate();
+		m_cmbSketch->SetFocus();
+	}
 }
 
-void PocketDlg::GetData(CPocket* object)
+void PocketDlg::GetDataRaw(HeeksObj* object)
 {
-	if(m_ignore_event_functions)return;
-	m_ignore_event_functions = true;
-	object->m_sketches.clear();
-	m_idsSketches->GetIDList(object->m_sketches);
-	object->m_pocket_params.m_step_over = m_lgthStepOver->GetValue();
-	object->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
-	object->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
-	object->m_pocket_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CPocketParams::eClimb : CPocketParams::eConventional;
-//	if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Plunge")) == 0) {
-//		object->m_pocket_params.m_entry_move = CPocketParams::ePlunge;
-//	}
-//	else if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Ramp")) == 0) {
-//		object->m_pocket_params.m_entry_move = CPocketParams::eRamp;
-//	}
-//	else if ( m_cmbEntryMove->GetValue().CmpNoCase(_("Helical")) == 0) {
-//		object->m_pocket_params.m_entry_move = CPocketParams::eHelical;
-//	}
-	object->m_pocket_params.m_keep_tool_down_if_poss = m_chkKeepToolDown->GetValue();
-	object->m_pocket_params.m_use_zig_zag = m_chkUseZigZag->GetValue();
-	if(object->m_pocket_params.m_use_zig_zag)object->m_pocket_params.m_zig_angle = m_dblZigAngle->GetValue();
-	object->m_depth_op_params.ClearanceHeight( m_lgthClearanceHeight->GetValue() );
-	object->m_depth_op_params.m_rapid_safety_space = m_lgthRapidDownToHeight->GetValue();
-	object->m_depth_op_params.m_start_depth = m_lgthStartDepth->GetValue();
-	object->m_depth_op_params.m_final_depth = m_lgthFinalDepth->GetValue();
-	object->m_depth_op_params.m_step_down = m_lgthStepDown->GetValue();
-	object->m_depth_op_params.m_z_finish_depth = m_lgthZFinishDepth->GetValue();
-	object->m_depth_op_params.m_z_thru_depth = m_lgthZThruDepth->GetValue();
-	object->m_speed_op_params.m_horizontal_feed_rate = m_lgthHFeed->GetValue();
-	object->m_speed_op_params.m_vertical_feed_rate = m_lgthVFeed->GetValue();
-	object->m_speed_op_params.m_spindle_speed = m_dblSpindleSpeed->GetValue();
-	object->m_comment = m_txtComment->GetValue();
-	object->m_active = m_chkActive->GetValue();
-	
-	// get the tool number
-	object->m_tool_number = 0;
-	if(m_cmbTool->GetSelection() >= 0)object->m_tool_number = tools_for_combo[m_cmbTool->GetSelection()].first;
+	((CPocket*)object)->m_sketches.clear();
+	int sketch = m_cmbSketch->GetSelectedId();
+	if(sketch != 0)((CPocket*)object)->m_sketches.push_back(sketch);
+	((CPocket*)object)->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
+	((CPocket*)object)->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
+	((CPocket*)object)->m_pocket_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CPocketParams::eClimb : CPocketParams::eConventional;
+	((CPocket*)object)->m_pocket_params.m_keep_tool_down_if_poss = m_chkKeepToolDown->GetValue();
+	((CPocket*)object)->m_pocket_params.m_use_zig_zag = m_chkUseZigZag->GetValue();
+	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag)((CPocket*)object)->m_pocket_params.m_zig_angle = m_dblZigAngle->GetValue();
 
-	object->m_title = m_txtTitle->GetValue();
-	m_ignore_event_functions = false;
+	DepthOpDlg::GetDataRaw(object);
 }
 
-void PocketDlg::SetFromData(CPocket* object)
+void PocketDlg::SetFromDataRaw(HeeksObj* object)
 {
-	m_ignore_event_functions = true;
-	m_idsSketches->SetFromIDList(object->m_sketches);
-	m_lgthStepOver->SetValue(object->m_pocket_params.m_step_over);
-	m_lgthMaterialAllowance->SetValue(object->m_pocket_params.m_material_allowance);
-	m_cmbStartingPlace->SetValue((object->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));
-	m_cmbCutMode->SetValue((object->m_pocket_params.m_cut_mode == CPocketParams::eClimb) ? _("climb") : _("conventional"));
+	if(((CPocket*)object)->m_sketches.size() > 0)
+		m_cmbSketch->SelectById(((CPocket*)object)->m_sketches.front());
+	else
+		m_cmbSketch->SelectById(0);
+	m_lgthStepOver->SetValue(((CPocket*)object)->m_pocket_params.m_step_over);
+	m_lgthMaterialAllowance->SetValue(((CPocket*)object)->m_pocket_params.m_material_allowance);
+	m_cmbStartingPlace->SetValue((((CPocket*)object)->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));
+	m_cmbCutMode->SetValue((((CPocket*)object)->m_pocket_params.m_cut_mode == CPocketParams::eClimb) ? _("climb") : _("conventional"));
 
-	// set the tool combo to the correct tool
-	for(unsigned int i = 0; i < tools_for_combo.size(); i++)if(tools_for_combo[i].first == object->m_tool_number){m_cmbTool->SetSelection(i); break;}
-
-	m_chkKeepToolDown->SetValue(object->m_pocket_params.m_keep_tool_down_if_poss);
-	m_chkUseZigZag->SetValue(object->m_pocket_params.m_use_zig_zag);
-	if(object->m_pocket_params.m_use_zig_zag)m_dblZigAngle->SetValue(object->m_pocket_params.m_zig_angle);
-	m_lgthClearanceHeight->SetValue(object->m_depth_op_params.ClearanceHeight());
-	m_lgthRapidDownToHeight->SetValue(object->m_depth_op_params.m_rapid_safety_space);
-	m_lgthStartDepth->SetValue(object->m_depth_op_params.m_start_depth);
-	m_lgthFinalDepth->SetValue(object->m_depth_op_params.m_final_depth);
-	m_lgthStepDown->SetValue(object->m_depth_op_params.m_step_down);
-	m_lgthZFinishDepth->SetValue(object->m_depth_op_params.m_z_finish_depth);
-	m_lgthZThruDepth->SetValue(object->m_depth_op_params.m_z_thru_depth);
-	m_lgthHFeed->SetValue(object->m_speed_op_params.m_horizontal_feed_rate);
-	m_lgthVFeed->SetValue(object->m_speed_op_params.m_vertical_feed_rate);
-	m_dblSpindleSpeed->SetValue(object->m_speed_op_params.m_spindle_speed);
-	m_txtComment->SetValue(object->m_comment);
-	m_chkActive->SetValue(object->m_active);
-	m_txtTitle->SetValue(object->m_title);
+	m_chkKeepToolDown->SetValue(((CPocket*)object)->m_pocket_params.m_keep_tool_down_if_poss);
+	m_chkUseZigZag->SetValue(((CPocket*)object)->m_pocket_params.m_use_zig_zag);
+	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag)m_dblZigAngle->SetValue(((CPocket*)object)->m_pocket_params.m_zig_angle);
 
 	EnableZigZagControls();
 
-	m_ignore_event_functions = false;
+	DepthOpDlg::SetFromDataRaw(object);
 }
 
 void PocketDlg::SetPicture(const wxString& name)
 {
-	m_picture->SetPicture(theApp.GetResFolder() + _T("/bitmaps/pocket/") + name + _T(".png"), wxBITMAP_TYPE_PNG);
+	HeeksObjDlg::SetPicture(name, _T("pocket"));
 }
 
-void PocketDlg::SetPicture()
+void PocketDlg::SetPictureByWindow(wxWindow* w)
 {
-	wxWindow* w = FindFocus();
-
 	if(w == m_lgthStepOver)SetPicture(_T("step over"));
 	else if(w == m_lgthMaterialAllowance)SetPicture(_T("material allowance"));
 	else if(w == m_cmbStartingPlace)
@@ -222,58 +129,14 @@ void PocketDlg::SetPicture()
 		else SetPicture(_T("general"));
 	}
 	else if(w == m_dblZigAngle)SetPicture(_T("zig angle"));
-	else if(w == m_lgthClearanceHeight)SetPicture(_T("clearance height"));
-	else if(w == m_lgthRapidDownToHeight)SetPicture(_T("rapid down height"));
-	else if(w == m_lgthStartDepth)SetPicture(_T("start depth"));
-	else if(w == m_lgthFinalDepth)SetPicture(_T("final depth"));
-	else if(w == m_lgthStepDown)SetPicture(_T("step down"));
-	else if(w == m_lgthZFinishDepth)SetPicture(_T("z finish depth"));
-	else if(w == m_lgthZThruDepth)SetPicture(_T("z thru depth"));
-	else SetPicture(_T("general"));
-}
-
-void PocketDlg::OnChildFocus(wxChildFocusEvent& event)
-{
-	if(m_ignore_event_functions)return;
-	if(event.GetWindow())
-	{
-		SetPicture();
-	}
-}
-
-void PocketDlg::OnComboStartingPlace( wxCommandEvent& event )
-{
-	if(m_ignore_event_functions)return;
-	SetPicture();
-}
-
-void PocketDlg::OnComboCutMode( wxCommandEvent& event )
-{
-	if(m_ignore_event_functions)return;
-	SetPicture();
-}
-
-void PocketDlg::OnComboTool( wxCommandEvent& event )
-{
-}
-
-void PocketDlg::OnCheckKeepToolDown(wxCommandEvent& event)
-{
-	if(m_ignore_event_functions)return;
-	SetPicture();
+	else DepthOpDlg::SetPictureByWindow(w);
 }
 
 void PocketDlg::OnCheckUseZigZag(wxCommandEvent& event)
 {
 	if(m_ignore_event_functions)return;
 	EnableZigZagControls();
-	SetPicture();
-}
-
-void PocketDlg::OnCheckZigUnidirectional(wxCommandEvent& event)
-{
-	if(m_ignore_event_functions)return;
-	SetPicture();
+	HeeksObjDlg::SetPicture();
 }
 
 void PocketDlg::EnableZigZagControls()

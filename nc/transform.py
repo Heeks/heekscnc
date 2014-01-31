@@ -232,7 +232,7 @@ class Creator:
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z
@@ -245,7 +245,7 @@ class Creator:
         else:
             self.commands.append(RapidXYZ(self.x, self.y, self.z))
         
-    def feed(self, x=None, y=None, z=None):
+    def feed(self, x=None, y=None, z=None, a = None, b = None, c = None):
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z

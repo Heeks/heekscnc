@@ -46,9 +46,5 @@ public:
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 
 	void GetProperties(std::list<Property *> *list);
-
-
-	static wxString ConfigScope() { return(_("Tools")); }
-
 };
 

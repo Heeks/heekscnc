@@ -41,7 +41,6 @@ public:
 	void GetProperties(CPocket* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
-	static wxString ConfigScope() { return(_T("Pocket")); }
 
 	bool operator== ( const CPocketParams & rhs ) const;
 	bool operator!= ( const CPocketParams & rhs ) const { return(! (*this == rhs)); }
@@ -55,7 +54,7 @@ public:
 
 	static double max_deviation_for_spline_to_arc;
 
-	CPocket():CDepthOp(GetTypeString(), 0, PocketType){}
+	CPocket():CDepthOp(0, PocketType){}
 	CPocket(const std::list<int> &sketches, const int tool_number );
 	CPocket(const std::list<HeeksObj *> &sketches, const int tool_number );
 	CPocket( const CPocket & rhs );
@@ -75,13 +74,13 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
-	void GetOnEdit(bool(**callback)(HeeksObj*));
+	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
+	void WriteDefaultValues();
+	void ReadDefaultValues();
 
 	// COp's virtual functions
 	Python AppendTextToProgram();
-	void WriteDefaultValues();
-	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

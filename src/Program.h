@@ -43,8 +43,6 @@ public:
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
 
-	static wxString ConfigScope() { return(_T("Machine")); }
-
 	bool operator==( const CMachine & rhs ) const;
 	bool operator!=( const CMachine & rhs ) const { return(! (*this == rhs)); }
 
@@ -61,8 +59,6 @@ private:
 	CSurfaces* m_surfaces;
 
 public:
-	static wxString ConfigScope(void) {return _T("Program");}
-
 	typedef enum
 	{
 		eExactPathMode = 0,
@@ -79,7 +75,6 @@ public:
 	} eClearanceSource_t;
 
 	ePathControlMode_t m_path_control_mode;
-	eClearanceSource_t m_clearance_source;
 	double m_motion_blending_tolerance;	// Only valid if m_path_control_mode == eBestPossibleSpeed
 	double m_naive_cam_tolerance;		// Only valid if m_path_control_mode == eBestPossibleSpeed
 
@@ -132,6 +127,9 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof){}
 	bool CanBeDragged(){return false;}
+	void WriteDefaultValues();
+	void ReadDefaultValues();
+	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
 
 	Python RewritePythonProgram();
 	ProgramUserType GetUserType();

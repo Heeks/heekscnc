@@ -60,8 +60,6 @@ public:
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
 
-	static wxString ConfigScope() { return(_T("Profile")); }
-
 	bool operator==(const CProfileParams & rhs ) const;
 	bool operator!=(const CProfileParams & rhs ) const { return(! (*this == rhs)); }
 };
@@ -77,7 +75,7 @@ public:
 
 	static double max_deviation_for_spline_to_arc;
 
-	CProfile():CDepthOp(GetTypeString(), 0, ProfileType), m_tags(NULL) {}
+	CProfile():CDepthOp(0, ProfileType), m_tags(NULL) {}
 	CProfile(const std::list<int> &sketches, const int tool_number );
 
 	CProfile( const CProfile & rhs );
@@ -104,7 +102,9 @@ public:
 	void Remove(HeeksObj* object);
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-	void GetOnEdit(bool(**callback)(HeeksObj*));
+	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void WriteDefaultValues();
+	void ReadDefaultValues();
 
 	// Data access methods.
 	CTags* Tags(){return m_tags;}
@@ -114,8 +114,6 @@ public:
 
 	// COp's virtual functions
 	Python AppendTextToProgram();
-	void WriteDefaultValues();
-	void ReadDefaultValues();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AddMissingChildren();

@@ -16,10 +16,8 @@
 class CDepthOp;
 
 class CDepthOpParams{
-private:
-	double m_clearance_height;
-
 public:
+	double m_clearance_height;
 	double m_start_depth;
 	double m_step_down;
 	double m_z_finish_depth;
@@ -37,9 +35,6 @@ public:
 	void GetProperties(CDepthOp* parent, std::list<Property *> *list);
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadFromXMLElement(TiXmlElement* pElem);
-
-	double ClearanceHeight() const;
-	void ClearanceHeight( const double value ) { m_clearance_height = value; }
 };
 
 class CDepthOp : public CSpeedOp
@@ -47,15 +42,15 @@ class CDepthOp : public CSpeedOp
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(const wxString& title, const std::list<int> *sketches = NULL, const int tool_number = -1, const int operation_type = UnknownType )
-		: CSpeedOp(title, tool_number, operation_type)
+	CDepthOp(const std::list<int> *sketches = NULL, const int tool_number = -1, const int operation_type = UnknownType )
+		: CSpeedOp(tool_number, operation_type)
 	{
 		ReadDefaultValues();
 		SetDepthsFromSketchesAndTool(sketches);
 	}
 
-	CDepthOp(const wxString& title, const std::list<HeeksObj *> sketches, const int tool_number = -1, const int operation_type = UnknownType )
-		: CSpeedOp(title, tool_number, operation_type)
+	CDepthOp(const std::list<HeeksObj *> sketches, const int tool_number = -1, const int operation_type = UnknownType )
+		: CSpeedOp(tool_number, operation_type)
 	{
 		ReadDefaultValues();
 		SetDepthsFromSketchesAndTool(sketches);
@@ -69,10 +64,10 @@ public:
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
 	void ReloadPointers();
-
-	// COp's virtual functions
 	void WriteDefaultValues();
 	void ReadDefaultValues();
+
+	// COp's virtual functions
 	Python AppendTextToProgram();
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void glCommands(bool select, bool marked, bool no_color);

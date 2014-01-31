@@ -130,7 +130,7 @@ HeeksObj* CTag::ReadFromXMLElement(TiXmlElement* pElem)
 
 void CTag::WriteDefaultValues()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Write(_T("Width"), m_width);
 	config.Write(_T("Angle"), m_angle);
 	config.Write(_T("Height"), m_height);
@@ -138,7 +138,7 @@ void CTag::WriteDefaultValues()
 
 void CTag::ReadDefaultValues()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Read(_T("Width"), &m_width);
 	config.Read(_T("Angle"), &m_angle);
 	config.Read(_T("Height"), &m_height);

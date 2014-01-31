@@ -8,32 +8,16 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "interface/HDialogs.h"
+#include "DepthOpDlg.h"
 
-class ProfileDlg : public HDialog
+class ProfileDlg : public DepthOpDlg
 {
-	CProfile* m_object;
-
-	CObjectIdsCtrl *m_idsSketches;
+	HTypeObjectDropDown *m_cmbSketch;
 	wxComboBox *m_cmbToolOnSide;
 	wxComboBox *m_cmbCutMode;
 	CLengthCtrl *m_lgthRollRadius;
 	CLengthCtrl *m_lgthOffsetExtra;
 	wxCheckBox *m_chkDoFinishingPass;
-	CLengthCtrl *m_lgthClearanceHeight;
-	CLengthCtrl *m_lgthRapidDownToHeight;
-	CLengthCtrl *m_lgthStartDepth;
-	CLengthCtrl *m_lgthFinalDepth;
-	CLengthCtrl *m_lgthStepDown;
-	CLengthCtrl *m_lgthZFinishDepth;
-	CLengthCtrl *m_lgthZThruDepth;
-	CLengthCtrl *m_lgthHFeed;
-	CLengthCtrl *m_lgthVFeed;
-	CDoubleCtrl *m_dblSpindleSpeed;
-	wxTextCtrl *m_txtComment;
-	wxCheckBox *m_chkActive;
-	wxTextCtrl *m_txtTitle;
-	wxComboBox *m_cmbTool;
 	wxCheckBox *m_chkOnlyFinishingPass;
 	CLengthCtrl *m_lgthFinishingFeedrate;
 	wxComboBox *m_cmbFinishingCutMode;
@@ -41,23 +25,21 @@ class ProfileDlg : public HDialog
 	wxStaticText* m_staticFinishingFeedrate;
 	wxStaticText* m_staticFinishingCutMode;
 	wxStaticText* m_staticFinishStepDown;
-	PictureWindow *m_picture;
 
 	SketchOrderType m_order;
 
-	void EnableZigZagControls();
-
-public:
-    ProfileDlg(wxWindow *parent, CProfile* object);
-	void GetData(CProfile* object);
-	void SetFromData(CProfile* object);
-	void SetPicture();
-	void SetPicture(const wxString& name, bool pocket_picture = false);
-	void SetSketchOrderAndCombo();
 	void EnableControls();
 
-	void OnChildFocus(wxChildFocusEvent& event);
-	void OnComboOrCheck( wxCommandEvent& event );
+public:
+    ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title = wxString(_T("Profile Operation")), bool top_level = true);
+
+	// HeeksObjDlg virtual functions
+	void GetDataRaw(HeeksObj* object);
+	void SetFromDataRaw(HeeksObj* object);
+	void SetPictureByWindow(wxWindow* w);
+	void SetPicture(const wxString& name);
+
+	void SetSketchOrderAndCombo();
 	void OnCheckFinishingPass( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()

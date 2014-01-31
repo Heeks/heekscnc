@@ -8,6 +8,7 @@
 #include "interface/PropertyLength.h"
 #include "interface/PropertyCheck.h"
 #include "Reselect.h"
+#include "SurfaceDlg.h"
 
 int CSurface::number_for_stl_file = 1;
 
@@ -31,8 +32,6 @@ void CSurface::WriteXML(TiXmlNode *root)
 	element->SetDoubleAttribute( "material_allowance", m_material_allowance);
 	element->SetAttribute( "same_for_posns", m_same_for_each_pattern_position ? 1:0);
 
-	element->SetAttribute("title", m_title.utf8_str());
-
 	// write solid ids
 	for (std::list<int>::iterator It = m_solids.begin(); It != m_solids.end(); It++)
     {
@@ -43,7 +42,7 @@ void CSurface::WriteXML(TiXmlNode *root)
 		solid_element->SetAttribute("id", solid);
 	}
 
-	HeeksObj::WriteBaseXML(element);
+	IdNamedObj::WriteBaseXML(element);
 }
 
 // static member function
@@ -82,7 +81,7 @@ HeeksObj* CSurface::ReadFromXMLElement(TiXmlElement* element)
 
 void CSurface::WriteDefaultValues()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Write(wxString(GetTypeString()) + _T("Tolerance"), m_tolerance);
 	config.Write(wxString(GetTypeString()) + _T("MinZ"), m_min_z);
 	config.Write(wxString(GetTypeString()) + _T("MatAllowance"), m_material_allowance);
@@ -91,7 +90,7 @@ void CSurface::WriteDefaultValues()
 
 void CSurface::ReadDefaultValues()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Read(wxString(GetTypeString()) + _T("Tolerance"), &m_tolerance, 0.01);
 	config.Read(wxString(GetTypeString()) + _T("MinZ"), &m_min_z, 0.0);
 	config.Read(wxString(GetTypeString()) + _T("MatAllowance"), &m_material_allowance, 0.0);
@@ -111,6 +110,8 @@ void CSurface::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyLength(_("minimum z"), m_min_z, this, on_set_min_z));
 	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, this, on_set_material_allowance));
 	list->push_back(new PropertyCheck(_("same for each pattern position"), m_same_for_each_pattern_position, this, on_set_same_for_position));
+
+	IdNamedObj::GetProperties(list);
 }
 
 static ReselectSolids reselect_solids;
@@ -121,7 +122,7 @@ void CSurface::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	reselect_solids.m_object = this;
 	t_list->push_back(&reselect_solids);
 
-	HeeksObj::GetTools( t_list, p );
+	IdNamedObj::GetTools( t_list, p );
 }
 
 void CSurface::CopyFrom(const HeeksObj* object)
@@ -144,21 +145,19 @@ const wxBitmap &CSurface::GetIcon()
 	return *icon;
 }
 
-static wxString temp_surface_string;
-
-const wxChar* CSurface::GetShortString(void)const
+static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
 {
-	if(m_title_made_from_id)
+	SurfaceDlg dlg(heeksCAD->GetMainFrame(), (CSurface*)object);
+	if(dlg.ShowModal() == wxID_OK)
 	{
-		wxChar pattern_str[512];
-		wsprintf(pattern_str, _T("Surface %d"), m_id);
-		temp_surface_string.assign(pattern_str);
-		return temp_surface_string;
+		dlg.GetData((CSurface*)object);
+		((CSurface*)object)->WriteDefaultValues();
+		return true;
 	}
-	return m_title.c_str();}
+	return false;
+}
 
-void CSurface::OnEditString(const wxChar* str)
+void CSurface::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
 {
-    m_title.assign(str);
-	m_title_made_from_id = false;
+	*callback = OnEdit;
 }
