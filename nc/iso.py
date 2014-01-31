@@ -53,7 +53,6 @@ class Creator(nc.Creator):
         self.arc_centre_absolute = False
         self.arc_centre_positive = False
         self.in_quadrant_splitting = False
-        self.machine_coordinates = False
         self.drillExpanded = False
         self.dwell_allowed_in_G83 = False
         self.in_canned_cycle = False
@@ -349,11 +348,8 @@ class Creator(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None ):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
         self.write_blocknum()
-
-        if self.machine_coordinates != False or (machine_coordinates != None and machine_coordinates == True):
-            self.write( self.MACHINE_COORDINATES() + self.SPACE() )
 
         if self.g0123_modal:
             if self.prev_g0123 != self.RAPID():
@@ -413,8 +409,8 @@ class Creator(nc.Creator):
         self.write_misc()
         self.write('\n')
 
-    def feed(self, x=None, y=None, z=None):
-        if self.same_xyz(x, y, z): return
+    def feed(self, x=None, y=None, z=None, a=None, b=None, c=None):
+        if self.same_xyz(x, y, z, a, b, c): return
         self.write_blocknum()
         if self.g0123_modal:
             if self.prev_g0123 != self.FEED():
@@ -447,13 +443,38 @@ class Creator(nc.Creator):
                 self.write(self.SPACE() + self.Z() + (self.fmt.string(dz)))
 
             self.z = z
+
+        if (a != None):
+            da = a - self.a
+            if (self.absolute_flag ):
+                self.write(self.SPACE() + self.A() + (self.fmt.string(a)))
+            else:
+                self.write(self.SPACE() + self.A() + (self.fmt.string(da)))
+            self.a = a
+
+        if (b != None):
+            db = b - self.b
+            if (self.absolute_flag ):
+                self.write(self.SPACE() + self.B() + (self.fmt.string(b)))
+            else:
+                self.write(self.SPACE() + self.B() + (self.fmt.string(db)))
+            self.b = b
+
+        if (c != None):
+            dc = c - self.c
+            if (self.absolute_flag ):
+                self.write(self.SPACE() + self.C() + (self.fmt.string(c)))
+            else:
+                self.write(self.SPACE() + self.C() + (self.fmt.string(dc)))
+            self.c = c
+
         if (self.fhv) : self.calc_feedrate_hv(math.sqrt(dx*dx+dy*dy), math.fabs(dz))
         self.write_feedrate()
         self.write_spindle()
         self.write_misc()
         self.write('\n')
 
-    def same_xyz(self, x=None, y=None, z=None):
+    def same_xyz(self, x=None, y=None, z=None, a=None, b=None, c=None):
         if (x != None):
             if (self.fmt.string(x + self.shift_x)) != (self.fmt.string(self.x)):
                 return False
@@ -463,7 +484,15 @@ class Creator(nc.Creator):
         if (z != None):
             if (self.fmt.string(z + self.shift_z)) != (self.fmt.string(self.z)):
                 return False
-            
+        if (a != None):
+            if (self.fmt.string(a)) != (self.fmt.string(self.a)):
+                return False
+        if (b != None):
+            if (self.fmt.string(b)) != (self.fmt.string(self.b)):
+                return False
+        if (c != None):
+            if (self.fmt.string(c)) != (self.fmt.string(self.c)):
+                return False
         return True
 
     
@@ -587,7 +616,6 @@ class Creator(nc.Creator):
             self.in_quadrant_splitting = False
             return
             
-        #if self.same_xyz(x, y, z): return
         self.write_blocknum()
         arc_g_code = ''
         if cw: arc_g_code = self.ARC_CW()
@@ -673,7 +701,7 @@ class Creator(nc.Creator):
         self.write_misc()
         self.write('\n')
 
-    def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
+    def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None):
         pass
 
     def rapid_unhome(self):

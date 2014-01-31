@@ -606,7 +606,7 @@ const char* CNCCode::GetColor(ColorEnum i, const char* def)
 // static
 void CNCCode::ReadColorsFromConfig()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	long col;
 	ClearColors();
 	config.Read(_T("ColorDefaultType"),		&col, HeeksColor(0, 0, 0).COLORREF_color()); AddColor("default", HeeksColor((long)col));
@@ -625,7 +625,7 @@ void CNCCode::ReadColorsFromConfig()
 // static
 void CNCCode::WriteColorsToConfig()
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 
 	config.Write(_T("ColorDefaultType"),	CNCCode::m_colors[ColorDefaultType	].COLORREF_color());
 	config.Write(_T("ColorBlockType"),		CNCCode::m_colors[ColorBlockType	].COLORREF_color());
@@ -676,7 +676,7 @@ void CNCCode::GetOptions(std::list<Property *> *list)
 
 CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL), m_user_edited(false)
 {
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Read(_T("CNCCode_ArcInterpolationCount"), &CNCCode::s_arc_interpolation_count, 20);
 }
 
@@ -753,7 +753,7 @@ void CNCCode::GetBox(CBox &box)
 void on_set_arc_interpolation_count(int value, HeeksObj*object)
 {
 	CNCCode::s_arc_interpolation_count = value;
-	CNCConfig config(CNCCode::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("CNCCode_ArcInterpolationCount"), CNCCode::s_arc_interpolation_count);
 }
 

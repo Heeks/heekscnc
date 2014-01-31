@@ -207,58 +207,29 @@ static void AddNewObjectUndoablyAndMarkIt(HeeksObj* new_object, HeeksObj* parent
 
 static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 {
-	std::vector<CNCPoint> intersections;
-	CDrilling::Symbols_t symbols;
-	CDrilling::Symbols_t Tools;
-	int tool_number = 0;
+	std::list<int> points;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		if (object->GetType() == ToolType)
+		if (object->GetType() == PointType)
 		{
-			Tools.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
-			tool_number = ((CTool *)object)->m_tool_number;
-		} // End if - then
-		else
-		{
-		    if (CDrilling::ValidType( object->GetType() ))
-		    {
-                symbols.push_back( CDrilling::Symbol_t( object->GetType(), object->m_id ) );
-		    }
+            points.push_back( object->m_id );
 		} // End if - else
 	} // End for
 
-	double depth = -1;
-	CDrilling::Symbols_t ToolsThatMatchCircles;
-	CDrilling drill( symbols, -1, -1 );
-
-	intersections = drill.FindAllLocations();
-
-	if ((Tools.size() == 0) && (ToolsThatMatchCircles.size() > 0))
 	{
-		// The operator didn't point to a tool object and one of the circles that they
-		// did point to happenned to match the diameter of an existing tool.  Use that
-		// one as our default.  The operator can always overwrite it later on.
-
-		std::copy( ToolsThatMatchCircles.begin(), ToolsThatMatchCircles.end(),
-				std::inserter( Tools, Tools.begin() ));
-	} // End if - then
-
-	if (intersections.size() == 0)
-	{
-		wxMessageBox(_("You must select some points, circles or other intersecting elements first!"));
-		return;
+		CDrilling *new_object = new CDrilling( points, 0, -1 );
+		if(new_object->Edit())
+		{
+			heeksCAD->StartHistory();
+			heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
+			heeksCAD->EndHistory();
+		}
+		else
+			delete new_object;
 	}
-
-	if(Tools.size() > 1)
-	{
-		wxMessageBox(_("You may only select a single tool for each drilling operation.!"));
-		return;
-	}
-
-	AddNewObjectUndoablyAndMarkIt(new CDrilling( symbols, tool_number, depth ), theApp.m_program->Operations());
 }
 
 static void NewScriptOpMenuCallback(wxCommandEvent &event)
@@ -269,8 +240,17 @@ static void NewScriptOpMenuCallback(wxCommandEvent &event)
 
 static void NewPatternMenuCallback(wxCommandEvent &event)
 {
-	CPattern *new_object = new CPattern();
-	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Patterns());
+	{
+		CPattern *new_object = new CPattern();
+		if(new_object->Edit())
+		{
+			heeksCAD->StartHistory();
+			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Patterns());
+			heeksCAD->EndHistory();
+		}
+		else
+			delete new_object;
+	}
 }
 
 static void NewSurfaceMenuCallback(wxCommandEvent &event)
@@ -295,14 +275,18 @@ static void NewSurfaceMenuCallback(wxCommandEvent &event)
 		}
 	}
 
-	if(solids.size() == 0)
 	{
-		wxMessageBox(_("There are no solids!"));
-		return;
+		CSurface *new_object = new CSurface();
+		new_object->m_solids = solids;
+		if(new_object->Edit())
+		{
+			heeksCAD->StartHistory();
+			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Surfaces());
+			heeksCAD->EndHistory();
+		}
+		else
+			delete new_object;
 	}
-
-	CSurface *new_object = new CSurface(solids, 0.01, 0.0);
-	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Surfaces());
 }
 
 static void AddNewTool(CToolParams::eToolType type)
@@ -503,6 +487,21 @@ void CHeeksCNCApp::GetNewToolTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_chamfer_mill_tool);
 }
 
+static CCallbackTool new_pattern_tool(_("New Pattern..."), _T("pattern"), NewPatternMenuCallback);
+
+void CHeeksCNCApp::GetNewPatternTools(std::list<Tool*>* t_list)
+{
+	t_list->push_back(&new_pattern_tool);
+}
+
+static CCallbackTool new_surface_tool(_("New Surface..."), _T("surface"), NewSurfaceMenuCallback);
+
+void CHeeksCNCApp::GetNewSurfaceTools(std::list<Tool*>* t_list)
+{
+	t_list->push_back(&new_surface_tool);
+}
+
+
 static void AddToolBars()
 {
 	if(!theApp.m_machining_hidden)
@@ -600,7 +599,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	wxInitialize();
 #endif
 
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 
 	// About box, stuff
 	heeksCAD->AddToAboutBox(wxString(_T("\n\n")) + _("HeeksCNC is the free machining add-on to HeeksCAD")
@@ -610,8 +609,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 		+ _T("\n\n") + _("geometry code, donated by Geoff Hawkesford, Camtek GmbH http://www.peps.de/")
 		+ _T("\n") + _("pocketing code from http://code.google.com/p/libarea/ , derived from the kbool library written by Klaas Holwerda http://boolean.klaasholwerda.nl/bool.html")
 		+ _T("\n") + _("Zig zag code from opencamlib http://code.google.com/p/opencamlib/")
-		+ _T("\n") + _("Adaptive Roughing code from http://code.google.com/p/libactp/, using code written in 2004")
-		+ _T("\n") + _("For a more modern version of adaptive roughing, see Julian Todd and Martin Dunschen of http://www.freesteel.co.uk/")
 		+ _T("\n\n") + _("This HeeksCNC software installation is restricted by the GPL license http://www.gnu.org/licenses/gpl-3.0.txt")
 		+ _T("\n") + _("  which means it is free and open source, and must stay that way")
 		);
@@ -916,7 +913,7 @@ void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
 void CHeeksCNCApp::OnFrameDelete()
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
-	CNCConfig config(ConfigScope());
+	CNCConfig config;
 	config.Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
 	config.Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
 	config.Write(_T("MachiningBarVisible"), aui_manager->GetPane(m_machiningBar).IsShown());
@@ -928,6 +925,30 @@ void CHeeksCNCApp::OnFrameDelete()
 	CSendToMachine::WriteToConfig();
 	config.Write(_T("UseClipperNotBoolean"), m_use_Clipper_not_Boolean);
     config.Write(_T("UseDOSNotUnix"), m_use_DOS_not_Unix);
+}
+
+Python CHeeksCNCApp::SetTool( const int new_tool )
+{
+    Python python;
+
+    if (m_tool_number != new_tool)
+    {
+        m_tool_number = new_tool;
+
+        // Select the right tool.
+        CTool *pTool = (CTool *) CTool::Find(new_tool);
+        if (pTool != NULL)
+        {
+            python << _T("comment(") << PythonString(_T("tool change to ") + pTool->GetMeaningfulName(m_program->m_units)) << _T(")\n");
+            python << _T("tool_change( id=") << new_tool << _T(")\n");
+			if(m_attached_to_surface)
+			{
+				python << _T("nc.nc.creator.set_ocl_cutter(") << pTool->OCLDefinition(m_attached_to_surface) << _T(")\n");
+			}
+        } // End if - then
+    }
+
+    return(python);
 }
 
 wxString CHeeksCNCApp::GetDllFolder()
@@ -953,9 +974,6 @@ wxString CHeeksCNCApp::GetResFolder()
 #endif
 #endif
 }
-
-
-
 
 
 class MyApp : public wxApp

@@ -18,11 +18,12 @@
 #include "CTool.h"
 #include "PythonStuff.h"
 #include "CNCConfig.h"
-#include "MachineState.h"
 #include "Program.h"
+#include "interface/HDialogs.h"
+#include "Tools.h"
+
 #define FIND_FIRST_TOOL CTool::FindFirstByType
 #define FIND_ALL_TOOLS CTool::FindAllTools
-#define MACHINE_STATE_TOOL(t) theApp.machine_state.Tool(t)
 
 #include <iterator>
 #include <vector>
@@ -38,7 +39,6 @@ void COp::WriteBaseXML(TiXmlElement *element)
 {
 	if(m_comment.Len() > 0)element->SetAttribute( "comment", m_comment.utf8_str());
 	element->SetAttribute( "active", m_active);
-	element->SetAttribute( "title", m_title.utf8_str());
 	element->SetAttribute( "tool_number", m_tool_number);
 	element->SetAttribute( "pattern", m_pattern);
 	element->SetAttribute( "surface", m_surface);
@@ -61,9 +61,6 @@ void COp::ReadBaseXML(TiXmlElement* element)
 	{
         m_active = true;
 	}
-
-	const char* title = element->Attribute("title");
-	if(title)m_title = wxString(Ctt(title));
 
 	if (element->Attribute("tool_number") != NULL)
 	{
@@ -93,15 +90,16 @@ static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)
 static void on_set_active(bool value, HeeksObj* object){((COp*)object)->m_active = value;}
 static void on_set_pattern(int value, HeeksObj* object){((COp*)object)->m_pattern = value;}
 static void on_set_surface(int value, HeeksObj* object){((COp*)object)->m_surface = value;}
+
+static std::vector< std::pair< int, wxString > > tools_for_GetProperties;
+
 static void on_set_tool_number(int zero_based_choice, HeeksObj* object, bool from_undo_redo)
 {
 	if (zero_based_choice < 0) return;	// An error has occured.
 
-	std::vector< std::pair< int, wxString > > tools = FIND_ALL_TOOLS();
-
-	if ((zero_based_choice >= int(0)) && (zero_based_choice <= int(tools.size()-1)))
+	if ((zero_based_choice >= int(0)) && (zero_based_choice <= int(tools_for_GetProperties.size()-1)))
 	{
-                ((COp *)object)->m_tool_number = tools[zero_based_choice].first;	// Convert the choice offset to the tool number for that choice
+                ((COp *)object)->m_tool_number = tools_for_GetProperties[zero_based_choice].first;	// Convert the choice offset to the tool number for that choice
 	} // End if - then
 
 	((COp*)object)->WriteDefaultValues();
@@ -115,15 +113,15 @@ void COp::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyCheck(_("active"), m_active, this, on_set_active));
 
 	if(UsesTool()){
-		std::vector< std::pair< int, wxString > > tools = FIND_ALL_TOOLS();
 
+		HTypeObjectDropDown::GetObjectArrayString(ToolType, theApp.m_program->Tools(), tools_for_GetProperties);
 		int choice = 0;
                 std::list< wxString > choices;
-		for (std::vector< std::pair< int, wxString > >::size_type i=0; i<tools.size(); i++)
+		for (std::vector< std::pair< int, wxString > >::size_type i=0; i<tools_for_GetProperties.size(); i++)
 		{
-                	choices.push_back(tools[i].second);
+                	choices.push_back(tools_for_GetProperties[i].second);
 
-			if (m_tool_number == tools[i].first)
+			if (m_tool_number == tools_for_GetProperties[i].first)
 			{
                 		choice = int(i);
 			} // End if - then
@@ -160,7 +158,6 @@ COp & COp::operator= ( const COp & rhs )
 
 		m_comment = rhs.m_comment;
 		m_active = rhs.m_active;
-		m_title = rhs.m_title;
 		m_tool_number = rhs.m_tool_number;
 		m_operation_type = rhs.m_operation_type;
 	}
@@ -183,13 +180,15 @@ void COp::glCommands(bool select, bool marked, bool no_color)
 
 void COp::WriteDefaultValues()
 {
-	CNCConfig config(GetTypeString());
+	CNCConfig config;
 	config.Write(_T("Tool"), m_tool_number);
+	config.Write(_T("Pattern"), m_pattern);
+	config.Write(_T("Surface"), m_surface);
 }
 
 void COp::ReadDefaultValues()
 {
-	CNCConfig config(GetTypeString());
+	CNCConfig config;
 	if (m_tool_number <= 0)
 	{
 		// The tool number hasn't been assigned from above.  Set some reasonable
@@ -233,6 +232,7 @@ void COp::ReadDefaultValues()
 	config.Read(_T("Surface"), &m_surface, 0);
 }
 
+
 /**
     Change tools (if necessary) and assign any private fixtures.
  */
@@ -245,14 +245,12 @@ Python COp::AppendTextToProgram()
 		python << _T("comment(") << PythonString(m_comment) << _T(")\n");
 	}
 
-	if(UsesTool())python << MACHINE_STATE_TOOL(m_tool_number);  // Select the correct  tool.
+	if(UsesTool())
+	{
+		python << theApp.SetTool(m_tool_number); // Select the correct  tool.
+	}
 
 	return(python);
-}
-
-void COp::OnEditString(const wxChar* str){
-	m_title.assign(str);
-	// to do, make undoable properties
 }
 
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
@@ -264,7 +262,6 @@ bool COp::operator==(const COp & rhs) const
 {
 	if (m_comment != rhs.m_comment) return(false);
 	if (m_active != rhs.m_active) return(false);
-	if (m_title != rhs.m_title) return(false);
 	if (m_tool_number != rhs.m_tool_number) return(false);
 	if (m_operation_type != rhs.m_operation_type) return(false);
 

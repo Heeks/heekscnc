@@ -17,7 +17,7 @@ public:
 	wxString m_str;
 	int m_emit_depthop_params;
 
-	CScriptOp():CDepthOp(GetTypeString(), 0, ScriptOpType) {}
+	CScriptOp():CDepthOp(0, ScriptOpType) {}
 
 	CScriptOp( const CScriptOp & rhs );
 	CScriptOp & operator= ( const CScriptOp & rhs );

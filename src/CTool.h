@@ -15,6 +15,7 @@
 #include <algorithm>
 
 class CTool;
+class CSurface;
 
 class CToolParams{
 
@@ -58,7 +59,6 @@ public:
 	void WriteXMLAttributes(TiXmlNode* pElem);
 	void ReadParametersFromXMLElement(TiXmlElement* pElem);
 
-	const wxString ConfigScope(void)const{return _T("ToolParam_");}
 	double ReasonableGradient( const eToolType type ) const;
 
 	bool operator== ( const CToolParams & rhs ) const;
@@ -123,7 +123,6 @@ public:
 	static CToolParams::eToolType FindToolType( const int tool_number );
 	static bool IsMillingToolType( CToolParams::eToolType type );
 	static ToolNumber_t FindFirstByType( const CToolParams::eToolType type );
-	static std::vector< std::pair< int, wxString > > FindAllTools();
 	wxString GetMeaningfulName(double units) const;
 	wxString ResetTitle();
 	static wxString FractionalRepresentation( const double original_value, const int max_denominator = 64 );
@@ -136,7 +135,7 @@ public:
 	Python OpenCamLibDefinition(const unsigned int indent = 0)const;
 	Python VoxelcutDefinition()const;
 
-	void GetOnEdit(bool(**callback)(HeeksObj*));
+	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
 	void OnChangeViewUnits(const double units);
 
 private:

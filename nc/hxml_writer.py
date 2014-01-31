@@ -50,14 +50,14 @@ class HxmlWriter:
     def end_path(self):
         self.file_out.write('\t\t</path>\n')
         
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, machine_coordinates=None):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None):
         self.begin_path("rapid")
         self.add_line(x, y, z, a, b, c)
         self.end_path()
         
-    def feed(self, x=None, y=None, z=None):
+    def feed(self, x=None, y=None, z=None, a=None, b=None, c=None):
         self.begin_path("feed")
-        self.add_line(x, y, z)
+        self.add_line(x, y, z, a, b, c)
         self.end_path()
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):

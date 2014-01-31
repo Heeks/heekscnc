@@ -7,13 +7,11 @@
 
 #pragma once
 
-#include "interface/HeeksObj.h"
+#include "interface/IdNamedObj.h"
 #include "HeeksCNCTypes.h"
 
-class CSurface: public HeeksObj {
+class CSurface: public IdNamedObj {
 public:
-	wxString m_title;
-	bool m_title_made_from_id;
 	std::list<int> m_solids;
 	double m_tolerance;
 	double m_min_z;
@@ -23,7 +21,7 @@ public:
 
 	//	Constructors.
 	CSurface();
-	CSurface(const std::list<int> &solids, double tol, double min_z):m_title_made_from_id(true), m_solids(solids), m_tolerance(tol), m_min_z(min_z), m_same_for_each_pattern_position(true){}
+	CSurface(const std::list<int> &solids, double tol, double min_z, double mat_allowance):m_solids(solids), m_tolerance(tol), m_min_z(min_z), m_material_allowance(mat_allowance), m_same_for_each_pattern_position(true){}
 
 	// HeeksObj's virtual functions
     int GetType()const{return SurfaceType;}
@@ -38,14 +36,8 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	const wxBitmap &GetIcon();
-    const wxChar* GetShortString(void)const;
-    bool CanEditString(void)const{return true;}
-    void OnEditString(const wxChar* str);
-
-	const wxString ConfigScope(void)const{return _T("Surface");}
-
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-
+	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
 }; // End CSurface class definition.
 

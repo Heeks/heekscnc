@@ -47,7 +47,6 @@ public:
 	void SendGCode(const wxChar *gcode);
 	void Cancel();
 
-    static wxString ConfigScope(void)  {return _T("SendToMachine");}
 	static void GetOptions(std::list<Property *> *list);
 	static void ReadFromConfig();
 	static void WriteToConfig();

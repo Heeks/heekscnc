@@ -362,7 +362,7 @@ CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
 }
 
 CProfile::CProfile(const std::list<int> &sketches, const int tool_number )
-		: 	CDepthOp(GetTypeString(), &sketches, tool_number, ProfileType),
+		: 	CDepthOp(&sketches, tool_number, ProfileType),
 			m_tags(NULL), m_sketches(sketches)
 {
     ReadDefaultValues();
@@ -741,7 +741,7 @@ void CProfile::WriteDefaultValues()
 {
 	CDepthOp::WriteDefaultValues();
 
-	CNCConfig config(CProfileParams::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("ToolOnSide"), m_profile_params.m_tool_on_side);
 	config.Write(_T("CutMode"), m_profile_params.m_cut_mode);
 	config.Write(_T("RollRadius"), m_profile_params.m_auto_roll_radius);
@@ -764,7 +764,7 @@ void CProfile::ReadDefaultValues()
 {
 	CDepthOp::ReadDefaultValues();
 
-	CNCConfig config(CProfileParams::ConfigScope());
+	CNCConfig config;
 	int int_side = m_profile_params.m_tool_on_side;
 	config.Read(_T("ToolOnSide"), &int_side, CProfileParams::eLeftOrOutside);
 	m_profile_params.m_tool_on_side = (CProfileParams::eSide)int_side;
@@ -1221,14 +1221,14 @@ void CProfile::GetOptions(std::list<Property *> *list)
 // static
 void CProfile::ReadFromConfig()
 {
-	CNCConfig config(CProfileParams::ConfigScope());
+	CNCConfig config;
 	config.Read(_T("ProfileSplineDeviation"), &max_deviation_for_spline_to_arc, 0.01);
 }
 
 // static
 void CProfile::WriteToConfig()
 {
-	CNCConfig config(CProfileParams::ConfigScope());
+	CNCConfig config;
 	config.Write(_T("ProfileSplineDeviation"), max_deviation_for_spline_to_arc);
 }
 bool CProfileParams::operator==( const CProfileParams & rhs ) const
@@ -1266,7 +1266,7 @@ bool CProfile::operator==( const CProfile & rhs ) const
 	return(CDepthOp::operator==(rhs));
 }
 
-static bool OnEdit(HeeksObj* object)
+static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
 {
 	ProfileDlg dlg(heeksCAD->GetMainFrame(), (CProfile*)object);
 	if(dlg.ShowModal() == wxID_OK)
@@ -1278,7 +1278,7 @@ static bool OnEdit(HeeksObj* object)
 	return false;
 }
 
-void CProfile::GetOnEdit(bool(**callback)(HeeksObj*))
+void CProfile::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
 {
 	*callback = OnEdit;
 }

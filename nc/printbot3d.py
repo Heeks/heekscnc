@@ -45,7 +45,7 @@ class CreatorPrintbot(iso_modal.CreatorIsoModal):
         # do a G1 even for rapid moves
         iso_modal.CreatorIsoModal.feed(self, x, y, z)
 
-    def feed(self, x=None, y=None, z=None):
+    def feed(self, x=None, y=None, z=None, a = None, b = None, c = None):
         iso_modal.CreatorIsoModal.feed(self, x, y, z)
             
 ################################################################################

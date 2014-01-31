@@ -8,7 +8,7 @@
 
 #include "interface/HeeksCADInterface.h"
 #include "CNCPoint.h"
-#include "MachineState.h"
+#include "PythonString.h"
 #include <list>
 #include <wx/string.h>
 
@@ -19,7 +19,7 @@ class CProgram;
 class CProgramCanvas;
 class COutputCanvas;
 class Tool;
-class CAttachOp;
+class CSurface;
 
 class CHeeksCNCApp{
 public:
@@ -38,7 +38,10 @@ public:
 	bool m_use_Clipper_not_Boolean;
 	bool m_use_DOS_not_Unix;
 
-	CMachineState machine_state;
+	CSurface* m_attached_to_surface;
+    int         m_tool_number;
+    Python SetTool( const int new_tool );
+    CNCPoint      m_location;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();
@@ -60,9 +63,9 @@ public:
 
 	std::list<wxString> GetFileNames( const char *p_szRoot ) const;
 	static void GetNewToolTools(std::list<Tool*>* t_list);
+	static void GetNewPatternTools(std::list<Tool*>* t_list);
+	static void GetNewSurfaceTools(std::list<Tool*>* t_list);
 	static void GetNewOperationTools(std::list<Tool*>* t_list);
-
-	wxString ConfigScope() const { return(_("Program")); }
 };
 
 extern CHeeksCNCApp theApp;
