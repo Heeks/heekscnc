@@ -179,9 +179,9 @@ bool Excellon::Read( const char *p_szFileName, const bool force_mirror /* = fals
 			CDrilling *new_object = new CDrilling( m_holes[ *l_itToolNumber ], *l_itToolNumber, depth );
 			new_object->m_speed_op_params.m_spindle_speed = m_spindle_speed;
 			new_object->m_speed_op_params.m_vertical_feed_rate = m_feed_rate;
-			new_object->m_params.m_peck_depth = 0.0;	// Don't peck for a Printed Circuit Board.
+			new_object->m_depth_op_params.m_step_down = 0.0;	// Don't peck for a Printed Circuit Board.
 			new_object->m_params.m_dwell = 0.0;		// Don't wait around to clear stringers either.
-			new_object->m_params.m_standoff = 2.0;		// Printed Circuit Boards a quite flat
+			new_object->m_depth_op_params.m_rapid_safety_space = 2.0;		// Printed Circuit Boards a quite flat
 
 			theApp.m_program->Operations()->Add(new_object,NULL);
 		} // End for

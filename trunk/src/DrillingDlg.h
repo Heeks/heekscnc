@@ -8,26 +8,28 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "SpeedOpDlg.h"
+#include "DepthOpDlg.h"
 
-class DrillingDlg : public SpeedOpDlg
+class DrillingDlg : public DepthOpDlg
 {
 	CObjectIdsCtrl *m_idsPoints;
-	CLengthCtrl *m_lgthStandOff;
 	CDoubleCtrl *m_dblDwell;
 	wxCheckBox *m_chkFeedRetract;
 	wxCheckBox *m_chkStopSpindleAtBottom;
-	CLengthCtrl *m_lgthClearanceHeight;
+	wxButton *m_btnPointsPick;
 
 public:
     DrillingDlg(wxWindow *parent, CDrilling* object, const wxString& title = wxString(_T("Drilling Operation")), bool top_level = true);
 
-	// SpeedOpDlg's virtual functions
+	static bool Do(CDrilling* object);
+
+	// HeeksObjDlg's virtual functions
 	void GetDataRaw(HeeksObj* object);
 	void SetFromDataRaw(HeeksObj* object);
 	void SetPictureByWindow(wxWindow* w);
 
 	void SetPicture(const wxString& name);
+	void OnPointsPick( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };

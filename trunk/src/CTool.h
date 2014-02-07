@@ -135,7 +135,7 @@ public:
 	Python OpenCamLibDefinition(const unsigned int indent = 0)const;
 	Python VoxelcutDefinition()const;
 
-	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 	void OnChangeViewUnits(const double units);
 
 private:

@@ -47,7 +47,7 @@ void CPyProcess::HandleInput(void) {
 			s += wxString::From8BitData(buffer, m_in->LastRead());
 		}
 		if (s.Length() > 0) {
-			wxLogMessage(_T("> %s"), s.c_str());
+			theApp.m_print_canvas->m_textCtrl->AppendText(s);
 		}
 	}
 	if (m_err) {
@@ -72,9 +72,8 @@ void CPyProcess::Execute(const wxChar* cmd)
 	m_pid = wxExecute(cmd, wxEXEC_ASYNC|wxEXEC_MAKE_GROUP_LEADER, this);
 	if (!m_pid) {
 	  wxLogMessage(_T("could not execute '%s'"),cmd);
-	} else {
-	  wxLogMessage(_T("starting '%s' (%d)"),cmd,m_pid);
 	}
+
 	if (redirect) {
 		m_timer.Start(100);   //msec
 	}
@@ -122,11 +121,7 @@ void CPyProcess::OnTerminate(int pid, int status)
 		  m_timer.Stop();
 		  HandleInput();   // anything left?
 	  }
-	  if (status) {
-		  wxLogMessage(_T("process %d exit(%d)"),pid, status);
-	  } else {
-		  wxLogDebug(_T("process %d exit(0)"),pid);
-	  }
+
 	  m_pid = 0;
 	  ThenDo();
 	}
@@ -227,8 +222,19 @@ public:
 
 	void Do(void)
 	{
-		wxBusyCursor wait; // show an hour glass until the end of this function
 		wxStandardPaths standard_paths;
+		wxFileName errors_path( standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
+		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
+
+		// clear the error and output files
+		{
+			ofstream ofs(Ttc(errors_path.GetFullPath().c_str()));
+		}
+		{
+			ofstream ofs(Ttc(output_path.GetFullPath().c_str()));
+		}
+		wxBusyCursor wait; // show an hour glass until the end of this function
+
 		wxFileName path( standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 #ifdef WIN32
@@ -241,6 +247,46 @@ public:
 	}
 	void ThenDo(void)
 	{
+		wxStandardPaths standard_paths;
+		wxFileName errors_path( standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
+		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
+
+		ifstream ifs(Ttc(errors_path.GetFullPath().c_str()));
+		if(!ifs)
+		{
+	#ifdef UNICODE
+			std::wostringstream l_ossMessage;
+	#else
+			std::ostringstream l_ossMessage;
+	#endif
+
+			l_ossMessage << "Could not open '" << errors_path.GetFullPath().c_str() << "' for reading";
+			wxMessageBox( l_ossMessage.str().c_str() );
+			return;
+		}
+
+		char str[1024] = "";
+
+		bool there_were_errors = false;
+		while(!(ifs.eof()))
+		{
+			ifs.getline(str, 1024);
+			if(strlen(str)>0)
+			{
+				there_were_errors = true;
+				theApp.m_output_canvas->m_textCtrl->AppendText(Ctt(str));
+				theApp.m_output_canvas->m_textCtrl->AppendText(_T("\n"));
+			}
+		}
+
+		if(there_were_errors)
+		{
+			wxFont font(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, _T("Lucida Console"), wxFONTENCODING_SYSTEM);
+			theApp.m_output_canvas->m_textCtrl->SetFont(font);
+			wxMessageBox(_("There were errors!, see Output window"));
+			return;
+		}
+
 		if (m_include_backplot_processing)
 		{
 			(new CPyBackPlot(m_program, (HeeksObj*)m_program, m_filename))->Do();
@@ -266,6 +312,7 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath, const
 {
 	try{
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
+		theApp.m_print_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
 		wxStandardPaths standard_paths;
@@ -288,7 +335,9 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath, const
 #endif
 
 			// call the python file
-			(new CPyPostProcess(program, filepath, include_backplot_processing))->Do();
+			CPyPostProcess::redirect = true;
+			CPyPostProcess* p = new CPyPostProcess(program, filepath, include_backplot_processing);
+			p->Do();
 
 			return true;
 		}
@@ -373,7 +422,9 @@ static void on_set_to_machine_command(const wxChar *value, HeeksObj* object)
 // static
 void CSendToMachine::GetOptions(std::list<Property *> *list)
 {
+#ifndef WIN32
 	list->push_back(new PropertyString(_("send-to-machine command"), m_command, NULL, on_set_to_machine_command));
+#endif
 }
 
 // static

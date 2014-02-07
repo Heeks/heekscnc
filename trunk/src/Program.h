@@ -33,6 +33,7 @@ public:
 
 	wxString configuration_file_name;
 	wxString file_name;
+	wxString suffix;
 	wxString description;
 	double m_max_spindle_speed;		// in revolutions per minute (RPM)
 	bool m_safety_height_defined;
@@ -129,7 +130,7 @@ public:
 	bool CanBeDragged(){return false;}
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 
 	Python RewritePythonProgram();
 	ProgramUserType GetUserType();
