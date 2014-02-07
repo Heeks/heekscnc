@@ -331,9 +331,8 @@ void CPocket::WritePocketPython(Python &python)
 	// Pocket the area
 	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
 	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
-	python << _T(", rapid_safety_space, start_depth, final_depth, ");
-	python << m_pocket_params.m_step_over / theApp.m_program->m_units;
-	python << _T(", step_down, z_finish_depth, z_thru_depth, user_depths, clearance, ");
+	python << _T(", ") << m_pocket_params.m_step_over / theApp.m_program->m_units;
+	python << _T(", depth_params, ");
 	python << m_pocket_params.m_starting_place;
 	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
 	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
@@ -344,7 +343,7 @@ void CPocket::WritePocketPython(Python &python)
 	python << _T(")\n");
 
 	// rapid back up to clearance plane
-	python << _T("rapid(z = clearance)\n");
+	python << _T("rapid(z = depth_params.clearance_height)\n");
 }
 
 Python CPocket::AppendTextToProgram()
@@ -614,14 +613,14 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 }
 
 CPocket::CPocket(const std::list<int> &sketches, const int tool_number )
-	: CDepthOp(&sketches, tool_number ), m_sketches(sketches)
+	: CDepthOp(tool_number ), m_sketches(sketches)
 {
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
 }
 
 CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
-	: CDepthOp(sketches, tool_number )
+	: CDepthOp( tool_number )
 {
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
@@ -694,19 +693,12 @@ bool CPocket::operator==(const CPocket & rhs) const
 	return(CDepthOp::operator==(rhs));
 }
 
-static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+static bool OnEdit(HeeksObj* object)
 {
-	PocketDlg dlg(heeksCAD->GetMainFrame(), (CPocket*)object);
-	if(dlg.ShowModal() == wxID_OK)
-	{
-		dlg.GetData((CPocket*)object);
-		((CPocket*)object)->WriteDefaultValues();
-		return true;
-	}
-	return false;
+	return PocketDlg::Do((CPocket*)object);
 }
 
-void CPocket::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+void CPocket::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
 }

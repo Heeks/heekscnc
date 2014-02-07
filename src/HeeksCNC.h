@@ -18,6 +18,7 @@ class Property;
 class CProgram;
 class CProgramCanvas;
 class COutputCanvas;
+class CPrintCanvas;
 class Tool;
 class CSurface;
 
@@ -27,6 +28,7 @@ public:
 	CProgram* m_program;
 	CProgramCanvas* m_program_canvas;
 	COutputCanvas* m_output_canvas;
+	CPrintCanvas* m_print_canvas;
 	bool m_run_program_on_new_line;
 	wxToolBarBase* m_machiningBar;
 	wxMenu *m_menuMachining;

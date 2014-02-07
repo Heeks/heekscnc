@@ -182,6 +182,7 @@ CMachine & CMachine::operator= ( const CMachine & rhs )
 	{
 		configuration_file_name = rhs.configuration_file_name;
 		file_name = rhs.file_name;
+		suffix = rhs.suffix;
 		description = rhs.description;
 		m_max_spindle_speed = rhs.m_max_spindle_speed;
 		m_safety_height_defined = rhs.m_safety_height_defined;
@@ -603,6 +604,7 @@ Python CProgram::RewritePythonProgram()
 	bool ocl_funcs_needed = false;
 	bool nc_attach_needed = false;
 	bool transform_module_needed = false;
+	bool depths_needed = false;
 
 	typedef std::vector< COp * > OperationsMap_t;
 	OperationsMap_t operations;
@@ -627,16 +629,23 @@ Python CProgram::RewritePythonProgram()
 			{
 			case ProfileType:
 				kurve_funcs_needed = true;
+				depths_needed = true;
 				break;
 
 			case PocketType:
 				area_funcs_needed = true;
+				depths_needed = true;
+				break;
+
+			case DrillingType:
+				depths_needed = true;
 				break;
 
 			case ScriptOpType:
 				ocl_module_needed = true;
 				nc_attach_needed = true;
 				ocl_funcs_needed = true;
+				depths_needed = true;
 				break;
 			}
 		}
@@ -710,6 +719,11 @@ Python CProgram::RewritePythonProgram()
 	//hackhack, make it work on unix with FHS
 	python << _T("import sys\n");
 
+	// redirect errors and print statements to files
+	wxStandardPaths standard_paths;
+	wxFileName errors_path( standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
+	wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
+
 #ifdef CMAKE_UNIX
 	#ifdef RUNINPLACE
 	        python << _T("sys.path.insert(0,'") << theApp.GetResFolder() << _T("/')\n");
@@ -767,6 +781,12 @@ Python CProgram::RewritePythonProgram()
 	if(transform_module_needed)
 	{
 		python << _T("import nc.transform\n");
+		python << _T("\n");
+	}
+
+	if(depths_needed)
+	{
+		python << _T("from depth_params import depth_params as depth_params\n");
 		python << _T("\n");
 	}
 
@@ -906,71 +926,48 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 	wxString machines_file = CProgram::alternative_machines_file;
 #ifdef CMAKE_UNIX
 	#ifdef RUNINPLACE
-		if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
+		if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.xml");
 	#else
-		if(machines_file.Len() == 0)machines_file = _T("/usr/lib/heekscnc/nc/machines.txt");
+		if(machines_file.Len() == 0)machines_file = _T("/usr/lib/heekscnc/nc/machines.xml");
 	#endif
 #else
-	if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.txt");
-#endif
-    ifstream ifs(Ttc(machines_file.c_str()));
-	if(!ifs)
-	{
-#ifdef UNICODE
-		std::wostringstream l_ossMessage;
-#else
-		std::ostringstream l_ossMessage;
+	if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.xml");
 #endif
 
-		l_ossMessage << "Could not open '" << machines_file.c_str() << "' for reading";
-		wxMessageBox( l_ossMessage.str().c_str() );
+	TiXmlDocument doc(Ttc(machines_file.c_str()));
+	if (!doc.LoadFile())
+	{
+		if(doc.Error())
+		{
+			wxMessageBox(Ctt(doc.ErrorDesc()));
+		}
 		return;
 	}
 
-	char str[1024] = "";
+	char oldlocale[1000];
+	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
 
-	while(!(ifs.eof()))
+	TiXmlHandle hDoc(&doc);
+	TiXmlElement* element;
+	TiXmlNode* root = &doc;
+
+	for(element = root->FirstChildElement(); element;	element = element->NextSiblingElement())
 	{
-		CMachine m;
-
-		ifs.getline(str, 1024);
-
-		m.configuration_file_name = machines_file;
-
-		std::vector<wxString> tokens = Tokens( Ctt(str), _T(" \t\n\r") );
-
-		// The first token is the machine name (post processor name)
-		if (tokens.size() > 0) {
-			m.file_name = tokens[0];
-			tokens.erase(tokens.begin());
-		} // End if - then
-
-		// If there are other tokens, check the last one to see if it could be a maximum
-		// spindle speed.
-		if (tokens.size() > 0)
+		//if(!stricmp(element->GetText(), "machine"))
 		{
-			// We may have a material rate value.
-			if (AllNumeric( *tokens.rbegin() ))
-			{
-				tokens.rbegin()->ToDouble(&(m.m_max_spindle_speed));
-				tokens.resize(tokens.size() - 1);	// Remove last token.
-			} // End if - then
-		} // End if - then
+		//TiXmlElement* element = TiXmlHandle(pElem).FirstChildElement("machine").Element();
 
-		// Everything else must be a description.
-		m.description.clear();
-		for (std::vector<wxString>::const_iterator l_itToken = tokens.begin(); l_itToken != tokens.end(); l_itToken++)
-		{
-			if (l_itToken != tokens.begin()) m.description << _T(" ");
-			m.description << *l_itToken;
-		} // End for
-
-		if(m.file_name.Length() > 0)
-		{
+		//if(element)
+		//{
+			CMachine m;
+			if(const char* pyfile_str = element->Attribute("pyfile"))m.file_name = wxString(Ctt(pyfile_str));
+			if(const char* suffix_str = element->Attribute("suffix"))m.suffix = wxString(Ctt(suffix_str));
+			if(const char* descrp_str = element->Attribute("description"))m.description = wxString(Ctt(descrp_str));
 			machines.push_back(m);
 		}
 	}
 
+	setlocale(LC_NUMERIC, oldlocale);
 }
 
 // static
@@ -1016,7 +1013,7 @@ wxString CProgram::GetOutputFileName() const
 				path.Remove(offset); // chop off the end.
 			} // End if - then
 
-			path << _T(".tap");
+			path << m_machine.suffix.c_str();
 			return(path);
 		} // End if - then
 		else
@@ -1109,6 +1106,7 @@ bool CMachine::operator==( const CMachine & rhs ) const
 {
 	if (configuration_file_name != rhs.configuration_file_name) return(false);
 	if (file_name != rhs.file_name) return(false);
+	if (suffix != rhs.suffix) return(false);
 	if (description != rhs.description) return(false);
 	if (m_max_spindle_speed != rhs.m_max_spindle_speed) return(false);
 	if (m_safety_height_defined != rhs.m_safety_height_defined) return(false);
@@ -1140,7 +1138,7 @@ void CProgram::ReadDefaultValues()
 	m_machine = CProgram::GetMachine(machine_file_name);
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
     wxStandardPaths standard_paths;
-    wxFileName default_path( standard_paths.GetTempDir().c_str(), _T("test.tap"));
+    wxFileName default_path( standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);
 	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
@@ -1148,19 +1146,18 @@ void CProgram::ReadDefaultValues()
 	config.Read(_("ProgramNaiveCamTolerance"), &m_naive_cam_tolerance, 0.0001);
 }
 
-static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+static bool OnEdit(HeeksObj* object)
 {
 	ProgramDlg dlg(heeksCAD->GetMainFrame(), (CProgram*)object);
 	if(dlg.ShowModal() == wxID_OK)
 	{
 		dlg.GetData((CProgram*)object);
-		((CProgram*)object)->WriteDefaultValues();
 		return true;
 	}
 	return false;
 }
 
-void CProgram::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+void CProgram::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
 }

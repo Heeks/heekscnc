@@ -12,6 +12,7 @@
 enum
 {
 	ID_SKETCH = 100,
+	ID_SKETCH_PICK,
 	ID_TOOL_ON_SIDE,
 	ID_CUT_MODE,
 	ID_DO_FINISHING_PASS,
@@ -21,6 +22,7 @@ enum
 
 BEGIN_EVENT_TABLE(ProfileDlg, DepthOpDlg)
     EVT_COMBOBOX(ID_SKETCH,HeeksObjDlg::OnComboOrCheck)
+    EVT_BUTTON(ID_SKETCH_PICK,ProfileDlg::OnSketchPick)
     EVT_COMBOBOX(ID_TOOL_ON_SIDE,HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
     EVT_CHECKBOX(ID_DO_FINISHING_PASS, ProfileDlg::OnCheckFinishingPass)
@@ -29,13 +31,13 @@ BEGIN_EVENT_TABLE(ProfileDlg, DepthOpDlg)
 END_EVENT_TABLE()
 
 ProfileDlg::ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title, bool top_level)
-: DepthOpDlg(parent, object, title, false)
+: DepthOpDlg(parent, object, false, title, false)
 {
 	std::list<HControl> save_leftControls = leftControls;
 	leftControls.clear();
 
 	// add all the controls to the left side
-	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject())));
+	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject()), m_btnSketchPick = new wxButton(this, ID_SKETCH_PICK, _("Pick"))));
 	wxString tool_on_side_choices[] = {_("left"), _("right"), _("on")};
 	leftControls.push_back(MakeLabelAndControl( _("tool on side"), m_cmbToolOnSide = new wxComboBox(this, ID_TOOL_ON_SIDE, _T(""), wxDefaultPosition, wxDefaultSize, 3, tool_on_side_choices)));
 
@@ -67,6 +69,22 @@ void ProfileDlg::GetDataRaw(HeeksObj* object)
 {
 	((CProfile*)object)->m_sketches.clear();
 	int sketch = m_cmbSketch->GetSelectedId();
+
+	switch (m_cmbToolOnSide->GetSelection())
+	{
+	case 1:
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eRightOrInside;
+		break;
+
+	case 2:
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eOn;
+		break;
+
+	case 0:
+		((CProfile*)object)->m_profile_params.m_tool_on_side = CProfileParams::eLeftOrOutside;
+		break;
+	} // End switch
+
 	if(sketch != 0)((CProfile*)object)->m_sketches.push_back(sketch);
 	((CProfile*)object)->m_profile_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CProfileParams::eClimb : CProfileParams::eConventional;
 
@@ -167,8 +185,8 @@ void ProfileDlg::SetPictureByWindow(wxWindow* w)
 	}
 	else if(w == m_cmbCutMode)
 	{
-		if(m_cmbCutMode->GetValue() == _("climb"))SetPicture(_T("climb milling"));
-		else SetPicture(_T("conventional milling"));
+		if(m_cmbCutMode->GetValue() == _("climb"))HeeksObjDlg::SetPicture(_T("climb milling"),_T("pocket"));
+		else HeeksObjDlg::SetPicture(_T("conventional milling"),_T("pocket"));
 	}
 	else if(w == m_lgthRollRadius)SetPicture(_T("roll radius"));
 	else if(w == m_lgthOffsetExtra)SetPicture(_T("offset extra"));
@@ -183,10 +201,10 @@ void ProfileDlg::SetPictureByWindow(wxWindow* w)
 	}
 	else if(w == m_cmbFinishingCutMode)
 	{
-		if(m_cmbFinishingCutMode->GetValue() == _("climb"))SetPicture(_T("climb milling"));
-		else SetPicture(_T("conventional milling"));
+		if(m_cmbFinishingCutMode->GetValue() == _("climb"))HeeksObjDlg::SetPicture(_T("climb milling"),_T("pocket"));
+		else HeeksObjDlg::SetPicture(_T("conventional milling"),_T("pocket"));
 	}
-	else if(w == m_lgthFinishStepDown)SetPicture(_T("step down"));
+	else if(w == m_lgthFinishStepDown)HeeksObjDlg::SetPicture(_T("step down"),_T("depthop"));
 	else DepthOpDlg::SetPictureByWindow(w);
 
 }
@@ -233,5 +251,44 @@ void ProfileDlg::SetSketchOrderAndCombo()
 		m_cmbToolOnSide->SetString (0, _("outside or left"));
 		m_cmbToolOnSide->SetString (1, _("inside or right"));
 		break;
+	}
+}
+
+void ProfileDlg::OnSketchPick( wxCommandEvent& event )
+{
+	EndModal(ID_SKETCH_PICK);
+}
+
+bool ProfileDlg::Do(CProfile* object)
+{
+	ProfileDlg dlg(heeksCAD->GetMainFrame(), object);
+
+	while(1)
+	{
+		int result = dlg.ShowModal();
+
+		if(result == wxID_OK)
+		{
+			dlg.GetData(object);
+			return true;
+		}
+		else if(result == ID_SKETCH_PICK)
+		{
+			heeksCAD->ClearMarkedList();
+			heeksCAD->PickObjects(_("Pick a sketch"), MARKING_FILTER_SKETCH, true);
+
+			dlg.m_cmbSketch->Recreate();
+			dlg.Fit();
+
+			const std::list<HeeksObj*> &list = heeksCAD->GetMarkedList();
+			if(list.size() > 0)
+			{
+				dlg.m_cmbSketch->SelectById(list.front()->GetID());
+			}
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

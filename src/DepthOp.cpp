@@ -214,95 +214,23 @@ void CDepthOp::ReadDefaultValues()
 	config.Read(_T("RapidDown"), &m_depth_op_params.m_rapid_safety_space, 2.0);
 }
 
-void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<int> *sketches)
-{
-	std::list<HeeksObj *> objects;
-
-	if (sketches != NULL)
-	{
-		for (std::list<int>::const_iterator l_itSketch = sketches->begin(); l_itSketch != sketches->end(); l_itSketch++)
-		{
-			HeeksObj *pSketch = heeksCAD->GetIDObject( SketchType, *l_itSketch );
-			if (pSketch != NULL)
-			{
-				objects.push_back(pSketch);
-			}
-		}
-	}
-
-	SetDepthsFromSketchesAndTool( objects );
-}
-
-void CDepthOp::SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches)
-{
-	for (std::list<HeeksObj *>::const_iterator l_itSketch = sketches.begin(); l_itSketch != sketches.end(); l_itSketch++)
-	{
-		double default_depth = 1.0;	// mm
-		HeeksObj *pSketch = *l_itSketch;
-		if (pSketch != NULL)
-		{
-			CBox bounding_box;
-			pSketch->GetBox( bounding_box );
-
-			if (l_itSketch == sketches.begin())
-			{
-				// This is the first cab off the rank.
-
-				m_depth_op_params.m_start_depth = bounding_box.MaxZ();
-				m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - default_depth;
-			} // End if - then
-			else
-			{
-				// We've seen some before.  If this one is higher up then use
-				// that instead.
-
-				if (m_depth_op_params.m_start_depth < bounding_box.MaxZ())
-				{
-					m_depth_op_params.m_start_depth = bounding_box.MaxZ();
-				} // End if - then
-
-				if (m_depth_op_params.m_final_depth > bounding_box.MinZ())
-				{
-					m_depth_op_params.m_final_depth = bounding_box.MinZ() - default_depth;
-				} // End if - then
-			} // End if - else
-		} // End if - then
-	} // End for
-
-	// If we've chosen a chamfering bit, calculate the depth required to give a 1 mm wide
-	// chamfer.  It's as good as any width to start with.  If it's not a chamfering bit
-	// then we can't even guess as to what the operator wants.
-
-	const double default_chamfer_width = 1.0;	// mm
-	if (m_tool_number > 0)
-	{
-		CTool *pTool = CTool::Find( m_tool_number );
-		if (pTool != NULL)
-		{
-			if ((pTool->m_params.m_type == CToolParams::eChamfer) &&
-			    (pTool->m_params.m_cutting_edge_angle > 0))
-			{
-				m_depth_op_params.m_final_depth = m_depth_op_params.m_start_depth - (default_chamfer_width * tan( degrees_to_radians( 90.0 - pTool->m_params.m_cutting_edge_angle ) ));
-			} // End if - then
-		} // End if - then
-	} // End if - then
-}
-
 Python CDepthOp::AppendTextToProgram()
 {
 	Python python;
 
     python << CSpeedOp::AppendTextToProgram();
 
-	python << _T("clearance = float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")\n");
-	python << _T("rapid_safety_space = float(") << m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")\n");
-    python << _T("start_depth = float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")\n");
-    python << _T("step_down = float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")\n");
-    python << _T("z_finish_depth = float(") << m_depth_op_params.m_z_finish_depth / theApp.m_program->m_units << _T(")\n");
-    python << _T("z_thru_depth = float(") << m_depth_op_params.m_z_thru_depth / theApp.m_program->m_units << _T(")\n");
-	if(m_depth_op_params.m_user_depths.Len() == 0) python << _T("user_depths = None\n");
-    else python << _T("user_depths = [") << m_depth_op_params.m_user_depths << _T("]\n");
-    python << _T("final_depth = float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")\n");
+	python << _T("depth_params = depth_params(");
+	python << _T("float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")");
+	python << _T(", float(") << m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")");
+    python << _T(", float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")");
+    python << _T(", float(") << m_depth_op_params.m_step_down / theApp.m_program->m_units << _T(")");
+    python << _T(", float(") << m_depth_op_params.m_z_finish_depth / theApp.m_program->m_units << _T(")");
+    python << _T(", float(") << m_depth_op_params.m_z_thru_depth / theApp.m_program->m_units << _T(")");
+    python << _T(", float(") << m_depth_op_params.m_final_depth / theApp.m_program->m_units << _T(")");
+	if(m_depth_op_params.m_user_depths.Len() == 0) python << _T(", None");
+    else python << _T(", [") << m_depth_op_params.m_user_depths << _T("]");
+	python << _T(")\n");
 
 	CTool *pTool = CTool::Find( m_tool_number );
 	if (pTool != NULL)

@@ -10,6 +10,7 @@
 enum
 {
 	ID_SKETCH = 100,
+	ID_SKETCH_PICK,
 	ID_STARTING_PLACE,
 	ID_CUT_MODE,
 	ID_KEEP_TOOL_DOWN,
@@ -19,6 +20,7 @@ enum
 
 BEGIN_EVENT_TABLE(PocketDlg, DepthOpDlg)
     EVT_COMBOBOX(ID_SKETCH,HeeksObjDlg::OnComboOrCheck)
+    EVT_BUTTON(ID_SKETCH_PICK,PocketDlg::OnSketchPick)
     EVT_COMBOBOX(ID_STARTING_PLACE,HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
     EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, HeeksObjDlg::OnComboOrCheck)
@@ -27,13 +29,13 @@ BEGIN_EVENT_TABLE(PocketDlg, DepthOpDlg)
 END_EVENT_TABLE()
 
 PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, bool top_level)
-             : DepthOpDlg(parent, object, title, false)
+             : DepthOpDlg(parent, object, false, title, false)
 {
 	std::list<HControl> save_leftControls = leftControls;
 	leftControls.clear();
 
 	// add all the controls to the left side
-	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject())));
+	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject()), m_btnSketchPick = new wxButton(this, ID_SKETCH_PICK, _("Pick"))));
 	leftControls.push_back(MakeLabelAndControl(_("step over"), m_lgthStepOver = new CLengthCtrl(this)));
 	leftControls.push_back(MakeLabelAndControl(_("material allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
 
@@ -65,6 +67,7 @@ void PocketDlg::GetDataRaw(HeeksObj* object)
 	((CPocket*)object)->m_sketches.clear();
 	int sketch = m_cmbSketch->GetSelectedId();
 	if(sketch != 0)((CPocket*)object)->m_sketches.push_back(sketch);
+
 	((CPocket*)object)->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	((CPocket*)object)->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
 	((CPocket*)object)->m_pocket_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CPocketParams::eClimb : CPocketParams::eConventional;
@@ -145,4 +148,43 @@ void PocketDlg::EnableZigZagControls()
 
 	m_dblZigAngle->Enable(enable);
 	m_chkZigUnidirectional->Enable(enable);
+}
+
+void PocketDlg::OnSketchPick( wxCommandEvent& event )
+{
+	EndModal(ID_SKETCH_PICK);
+}
+
+bool PocketDlg::Do(CPocket* object)
+{
+	PocketDlg dlg(heeksCAD->GetMainFrame(), object);
+
+	while(1)
+	{
+		int result = dlg.ShowModal();
+
+		if(result == wxID_OK)
+		{
+			dlg.GetData(object);
+			return true;
+		}
+		else if(result == ID_SKETCH_PICK)
+		{
+			heeksCAD->ClearMarkedList();
+			heeksCAD->PickObjects(_("Pick a sketch"), MARKING_FILTER_SKETCH, true);
+
+			dlg.m_cmbSketch->Recreate();
+			dlg.Fit();
+
+			const std::list<HeeksObj*> &list = heeksCAD->GetMarkedList();
+			if(list.size() > 0)
+			{
+				dlg.m_cmbSketch->SelectById(list.front()->GetID());
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
 }

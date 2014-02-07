@@ -362,8 +362,7 @@ CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
 }
 
 CProfile::CProfile(const std::list<int> &sketches, const int tool_number )
-		: 	CDepthOp(&sketches, tool_number, ProfileType),
-			m_tags(NULL), m_sketches(sketches)
+		: 	CDepthOp(tool_number, ProfileType),	m_tags(NULL), m_sketches(sketches)
 {
     ReadDefaultValues();
 } // End constructor
@@ -731,7 +730,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMo
         python << _T("lead_out_line_len= ") << m_profile_params.m_lead_out_line_len / theApp.m_program->m_units<< _T("\n");
 
 		// profile the kurve
-		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, rapid_safety_space, clearance, start_depth, step_down, z_finish_depth, z_thru_depth, user_depths, final_depth,extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )\n"), side_string.c_str());
+		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depth_params, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )\n"), side_string.c_str());
 	}
 	python << _T("absolute()\n");
 	return(python);
@@ -841,7 +840,7 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 		python << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
 		python << _T("flush_nc()\n");
 		python << _T("offset_extra = 0.0\n");
-		python << _T("step_down = ") << m_profile_params.m_finishing_step_down << _T("\n");
+		python << _T("depth_params.step_down = ") << m_profile_params.m_finishing_step_down << _T("\n");
 	}
 	else
 	{
@@ -1266,19 +1265,12 @@ bool CProfile::operator==( const CProfile & rhs ) const
 	return(CDepthOp::operator==(rhs));
 }
 
-static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+static bool OnEdit(HeeksObj* object)
 {
-	ProfileDlg dlg(heeksCAD->GetMainFrame(), (CProfile*)object);
-	if(dlg.ShowModal() == wxID_OK)
-	{
-		dlg.GetData((CProfile*)object);
-		((CProfile*)object)->WriteDefaultValues();
-		return true;
-	}
-	return false;
+	return ProfileDlg::Do((CProfile*)object);
 }
 
-void CProfile::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+void CProfile::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
 }

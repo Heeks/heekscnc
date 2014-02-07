@@ -125,13 +125,29 @@ static void OnOutputCanvas( wxCommandEvent& event )
 	}
 }
 
+static void OnPrintCanvas( wxCommandEvent& event )
+{
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+	wxAuiPaneInfo& pane_info = aui_manager->GetPane(theApp.m_print_canvas);
+	if(pane_info.IsOk()){
+		pane_info.Show(event.IsChecked());
+		aui_manager->Update();
+	}
+}
+
 static void OnUpdateOutputCanvas( wxUpdateUIEvent& event )
 {
 	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
 	event.Check(aui_manager->GetPane(theApp.m_output_canvas).IsShown());
 }
 
-static bool GetSketches(std::list<int>& sketches, std::list<int> &tools )
+static void OnUpdatePrintCanvas( wxUpdateUIEvent& event )
+{
+	wxAuiManager* aui_manager = heeksCAD->GetAuiManager();
+	event.Check(aui_manager->GetPane(theApp.m_print_canvas).IsShown());
+}
+
+static void GetSketches(std::list<int>& sketches, std::list<int> &tools )
 {
 	// check for at least one sketch selected
 
@@ -149,14 +165,6 @@ static bool GetSketches(std::list<int>& sketches, std::list<int> &tools )
 			tools.push_back( object->m_id );
 		} // End if - then
 	}
-
-	if(sketches.size() == 0)
-	{
-		wxMessageBox(_("You must select some sketches, first!"));
-		return false;
-	}
-
-	return true;
 }
 
 static void NewProfileOpMenuCallback(wxCommandEvent &event)
@@ -182,18 +190,17 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 {
 	std::list<int> tools;
 	std::list<int> sketches;
-	if(GetSketches(sketches, tools))
+	GetSketches(sketches, tools);
+
+	CPocket *new_object = new CPocket(sketches, (tools.size()>0)?(*tools.begin()):-1 );
+	if(new_object->Edit())
 	{
-		CPocket *new_object = new CPocket(sketches, (tools.size()>0)?(*tools.begin()):-1 );
-		if(new_object->Edit())
-		{
-			heeksCAD->StartHistory();
-			heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
-			heeksCAD->EndHistory();
-		}
-		else
-			delete new_object;
+		heeksCAD->StartHistory();
+		heeksCAD->AddUndoably(new_object, theApp.m_program->Operations());
+		heeksCAD->EndHistory();
 	}
+	else
+		delete new_object;
 }
 
 static void AddNewObjectUndoablyAndMarkIt(HeeksObj* new_object, HeeksObj* parent)
@@ -530,7 +537,9 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("Run Python Script"), ToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
 		heeksCAD->AddFlyoutButton(_("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
 		heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
+#ifndef WIN32
 		heeksCAD->AddFlyoutButton(_("Send to Machine"), ToolImage(_T("tomachine")), _("Send to Machine"), SendToMachineMenuCallback);
+#endif
 		heeksCAD->AddFlyoutButton(_("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
 #ifdef WIN32
 		heeksCAD->AddFlyoutButton(_("Simulate"), ToolImage(_T("simulate")), _("Simulate"), SimulateCallback);
@@ -590,6 +599,109 @@ static void UnitsChangedHandler( const double units )
     }
 }
 
+class SketchBox{
+public:
+	CBox m_box;
+	gp_Vec m_latest_shift;
+
+	SketchBox(const CBox &box);
+
+	SketchBox(const SketchBox &s)
+	{
+		m_box = s.m_box;
+		m_latest_shift = s.m_latest_shift;
+	}
+
+	void UpdateBoxAndSetShift(const CBox &new_box)
+	{
+		// use Centre
+		double old_centre[3], new_centre[3];
+		m_box.Centre(old_centre);
+		new_box.Centre(new_centre);
+		m_latest_shift = gp_Vec(new_centre[0] - old_centre[0], new_centre[1] - old_centre[1], 0.0);
+		m_box = new_box;
+	}
+};
+SketchBox::SketchBox(const CBox &box)
+	{
+		m_box = box;
+		m_latest_shift = gp_Vec(0, 0, 0);
+	}
+
+class HeeksCADObserver: public Observer
+{
+public:
+	std::map<int, SketchBox> m_box_map;
+
+	void OnChanged(const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed, const std::list<HeeksObj*>* modified)
+	{
+		if(added)
+		{
+			for(std::list<HeeksObj*>::const_iterator It = added->begin(); It != added->end(); It++)
+			{
+				HeeksObj* object = *It;
+				if(object->GetType() == SketchType)
+				{
+					CBox box;
+					object->GetBox(box);
+					m_box_map.insert(std::make_pair(object->GetID(), SketchBox(box)));
+				}
+			}
+		}
+
+		if(modified)
+		{
+			for(std::list<HeeksObj*>::const_iterator It = modified->begin(); It != modified->end(); It++)
+			{
+				HeeksObj* object = *It;
+				if(object->GetType() == SketchType)
+				{
+					CBox new_box;
+					object->GetBox(new_box);
+					std::map<int, SketchBox>::iterator FindIt = m_box_map.find(object->GetID());
+					if(FindIt != m_box_map.end())
+					{
+						SketchBox &sketch_box = FindIt->second;
+						sketch_box.UpdateBoxAndSetShift(new_box);
+					}
+				}
+			}
+
+			// check all the profile operations, so we can move the tags
+			for(HeeksObj* object = theApp.m_program->Operations()->GetFirstChild(); object; object = theApp.m_program->Operations()->GetNextChild())
+			{
+				if(object->GetType() == ProfileType)
+				{
+					if(((CProfile*)object)->m_sketches.size() > 0)
+					{
+						int sketch = ((CProfile*)object)->m_sketches.front();
+						std::map<int, SketchBox>::iterator FindIt = m_box_map.find(object->GetID());
+						if(FindIt != m_box_map.end())
+						{
+							SketchBox &sketch_box = FindIt->second;
+							for(HeeksObj* tag = ((CProfile*)object)->Tags()->GetFirstChild(); tag; tag = ((CProfile*)object)->Tags()->GetNextChild())
+							{
+								((CTag*)tag)->m_pos[0] += sketch_box.m_latest_shift.X();
+								((CTag*)tag)->m_pos[1] += sketch_box.m_latest_shift.Y();
+							}
+						}
+					}
+				}
+			}
+
+			for(std::map<int, SketchBox>::iterator It = m_box_map.begin(); It != m_box_map.end(); It++)
+			{
+				SketchBox &sketch_box = It->second;
+				sketch_box.m_latest_shift = gp_Vec(0, 0, 0);
+			}
+		}
+	}
+
+	void Clear()
+	{
+		m_box_map.clear();
+	}
+}heekscad_observer;
 
 void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 {
@@ -598,6 +710,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #if !defined WXUSINGDLL
 	wxInitialize();
 #endif
+
+	// to do, use os_id
+	wxOperatingSystemId os_id = wxGetOsVersion();
 
 	CNCConfig config;
 
@@ -655,7 +770,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #endif
 	heeksCAD->AddMenuItem(menuMachining, _("Open NC File"), ToolImage(_T("opennc")), OpenNcFileMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Save NC File"), ToolImage(_T("savenc")), SaveNcFileMenuCallback);
+#ifndef WIN32
 	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), ToolImage(_T("tomachine")), SendToMachineMenuCallback);
+#endif
 	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
 
 	// add the program canvas
@@ -666,11 +783,17 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
     m_output_canvas = new COutputCanvas(frame);
 	aui_manager->AddPane(m_output_canvas, wxAuiPaneInfo().Name(_T("Output")).Caption(_T("Output")).Bottom().BestSize(wxSize(600, 200)));
 
+	// add the print canvas
+    m_print_canvas = new CPrintCanvas(frame);
+	aui_manager->AddPane(m_print_canvas, wxAuiPaneInfo().Name(_T("Print")).Caption(_T("Print")).Bottom().BestSize(wxSize(600, 200)));
+
 	bool program_visible;
 	bool output_visible;
+	bool print_visible;
 
 	config.Read(_T("ProgramVisible"), &program_visible);
 	config.Read(_T("OutputVisible"), &output_visible);
+	config.Read(_T("PrintVisible"), &print_visible);
 
 	// read other settings
 	CNCCode::ReadColorsFromConfig();
@@ -682,14 +805,17 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	config.Read(_T("UseDOSNotUnix"), &m_use_DOS_not_Unix, false);
 	aui_manager->GetPane(m_program_canvas).Show(program_visible);
 	aui_manager->GetPane(m_output_canvas).Show(output_visible);
+	aui_manager->GetPane(m_print_canvas).Show(print_visible);
 
 	// add tick boxes for them all on the view menu
 	wxMenu* window_menu = heeksCAD->GetWindowMenu();
 	heeksCAD->AddMenuItem(window_menu, _T("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
 	heeksCAD->AddMenuItem(window_menu, _T("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
+	heeksCAD->AddMenuItem(window_menu, _T("Print"), wxBitmap(), OnPrintCanvas, OnUpdatePrintCanvas, NULL, true);
 	heeksCAD->AddMenuItem(window_menu, _T("Machining"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
+	heeksCAD->RegisterHideableWindow(m_print_canvas);
 	heeksCAD->RegisterHideableWindow(m_machiningBar);
 
 	// add object reading functions
@@ -741,6 +867,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
             printf("Failed to register handler for Tool Table files\n");
         }
 	}
+
+	heeksCAD->RegisterObserver(&heekscad_observer);
 
 	heeksCAD->RegisterUnitsChangeHandler( UnitsChangedHandler );
 	heeksCAD->RegisterHeeksTypesConverter( HeeksCNCType );
@@ -819,6 +947,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 		heeksCAD->GetMainObject()->Add(m_program, NULL);
 		theApp.m_program_canvas->Clear();
 		theApp.m_output_canvas->Clear();
+		theApp.m_print_canvas->Clear();
 
 		std::list<wxString> directories;
 		wxString directory_separator;
@@ -916,6 +1045,7 @@ void CHeeksCNCApp::OnFrameDelete()
 	CNCConfig config;
 	config.Write(_T("ProgramVisible"), aui_manager->GetPane(m_program_canvas).IsShown());
 	config.Write(_T("OutputVisible"), aui_manager->GetPane(m_output_canvas).IsShown());
+	config.Write(_T("PrintVisible"), aui_manager->GetPane(m_print_canvas).IsShown());
 	config.Write(_T("MachiningBarVisible"), aui_manager->GetPane(m_machiningBar).IsShown());
 
 	CNCCode::WriteColorsToConfig();

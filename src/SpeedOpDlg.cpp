@@ -88,5 +88,7 @@ void SpeedOpDlg::SetPicture(const wxString& name)
 
 void SpeedOpDlg::SetPictureByWindow(wxWindow* w)
 {
-	SetPicture(_T("general"));
+	if(w == m_cmbPattern)HeeksObjDlg::SetPicture(_T("general"), _T("pattern"));
+	else if(w == m_cmbSurface)HeeksObjDlg::SetPicture(_T("general"), _T("surface"));
+	else SetPicture(_T("general"));
 }

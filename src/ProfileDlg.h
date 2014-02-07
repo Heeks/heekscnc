@@ -25,6 +25,7 @@ class ProfileDlg : public DepthOpDlg
 	wxStaticText* m_staticFinishingFeedrate;
 	wxStaticText* m_staticFinishingCutMode;
 	wxStaticText* m_staticFinishStepDown;
+	wxButton *m_btnSketchPick;
 
 	SketchOrderType m_order;
 
@@ -32,6 +33,8 @@ class ProfileDlg : public DepthOpDlg
 
 public:
     ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title = wxString(_T("Profile Operation")), bool top_level = true);
+
+	static bool Do(CProfile* object);
 
 	// HeeksObjDlg virtual functions
 	void GetDataRaw(HeeksObj* object);
@@ -41,6 +44,7 @@ public:
 
 	void SetSketchOrderAndCombo();
 	void OnCheckFinishingPass( wxCommandEvent& event );
+	void OnSketchPick( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };

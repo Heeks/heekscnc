@@ -74,7 +74,7 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
-	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void WriteDefaultValues();
 	void ReadDefaultValues();

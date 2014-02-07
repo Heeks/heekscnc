@@ -339,14 +339,11 @@ void CScriptOp::GetProperties(std::list<Property *> *list)
 
 ObjectCanvas* CScriptOp::GetDialog(wxWindow* parent)
 {
-	static TextCanvas* object_canvas = NULL;
-	if(object_canvas == NULL)object_canvas = new TextCanvas(parent, &m_str);
-	else
-	{
-		object_canvas->m_str = &m_str;
-		object_canvas->SetWithObject(this);
-	}
-	return object_canvas;
+	if(TextCanvas::global_text_canvas)delete TextCanvas::global_text_canvas;
+	
+	TextCanvas::global_text_canvas = new TextCanvas(parent, &m_str);
+
+	return TextCanvas::global_text_canvas;
 }
 
 HeeksObj *CScriptOp::MakeACopy(void)const

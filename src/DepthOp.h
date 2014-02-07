@@ -18,13 +18,13 @@ class CDepthOp;
 class CDepthOpParams{
 public:
 	double m_clearance_height;
+	double m_rapid_safety_space;
 	double m_start_depth;
 	double m_step_down;
 	double m_z_finish_depth;
 	double m_z_thru_depth;
 	double m_final_depth;
 	wxString m_user_depths;
-	double m_rapid_safety_space;
 
 	CDepthOpParams();
 	bool operator== ( const CDepthOpParams & rhs ) const;
@@ -42,18 +42,10 @@ class CDepthOp : public CSpeedOp
 public:
 	CDepthOpParams m_depth_op_params;
 
-	CDepthOp(const std::list<int> *sketches = NULL, const int tool_number = -1, const int operation_type = UnknownType )
+	CDepthOp(const int tool_number = -1, const int operation_type = UnknownType )
 		: CSpeedOp(tool_number, operation_type)
 	{
 		ReadDefaultValues();
-		SetDepthsFromSketchesAndTool(sketches);
-	}
-
-	CDepthOp(const std::list<HeeksObj *> sketches, const int tool_number = -1, const int operation_type = UnknownType )
-		: CSpeedOp(tool_number, operation_type)
-	{
-		ReadDefaultValues();
-		SetDepthsFromSketchesAndTool(sketches);
 	}
 
 	CDepthOp & operator= ( const CDepthOp & rhs );
@@ -71,9 +63,6 @@ public:
 	Python AppendTextToProgram();
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void glCommands(bool select, bool marked, bool no_color);
-
-	void SetDepthsFromSketchesAndTool(const std::list<int> *sketches);
-	void SetDepthsFromSketchesAndTool(const std::list<HeeksObj *> sketches);
 
 	bool operator== ( const CDepthOp & rhs ) const;
 	bool operator!= ( const CDepthOp & rhs ) const { return(! (*this == rhs)); }

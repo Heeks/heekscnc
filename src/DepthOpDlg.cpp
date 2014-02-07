@@ -12,8 +12,8 @@
 BEGIN_EVENT_TABLE(DepthOpDlg, SpeedOpDlg)
 END_EVENT_TABLE()
 
-DepthOpDlg::DepthOpDlg(wxWindow *parent, CDepthOp* object, const wxString& title, bool top_level)
-:SpeedOpDlg(parent, object, false, title, false)
+DepthOpDlg::DepthOpDlg(wxWindow *parent, CDepthOp* object, bool drill_pictures, const wxString& title, bool top_level)
+:m_drill_pictures(drill_pictures), SpeedOpDlg(parent, object, false, title, false)
 {
 	leftControls.push_back(MakeLabelAndControl( _("clearance height"), m_lgthClearanceHeight = new CLengthCtrl(this)));
 	leftControls.push_back(MakeLabelAndControl( _("rapid safety space"), m_lgthRapidDownToHeight = new CLengthCtrl(this)));
@@ -58,13 +58,13 @@ void DepthOpDlg::SetFromDataRaw(HeeksObj* object)
 
 void DepthOpDlg::SetPictureByWindow(wxWindow* w)
 {
-	if(w == m_lgthClearanceHeight)DepthOpDlg::SetPicture(_T("clearance height"));
-	else if(w == m_lgthRapidDownToHeight)DepthOpDlg::SetPicture(_T("rapid down height"));
-	else if(w == m_lgthStartDepth)DepthOpDlg::SetPicture(_T("start depth"));
-	else if(w == m_lgthFinalDepth)DepthOpDlg::SetPicture(_T("final depth"));
-	else if(w == m_lgthStepDown)DepthOpDlg::SetPicture(_T("step down"));
-	else if(w == m_lgthZFinishDepth)DepthOpDlg::SetPicture(_T("z finish depth"));
-	else if(w == m_lgthZThruDepth)DepthOpDlg::SetPicture(_T("z thru depth"));
+	if(w == m_lgthClearanceHeight)DepthOpDlg::SetPicture(m_drill_pictures ? _T("drill clearance height") : _T("clearance height"));
+	else if(w == m_lgthRapidDownToHeight)DepthOpDlg::SetPicture(m_drill_pictures ? _T("drill rapid down height") : _T("rapid down height"));
+	else if(w == m_lgthStartDepth)DepthOpDlg::SetPicture(m_drill_pictures ? _T("drill start depth") : _T("start depth"));
+	else if(w == m_lgthFinalDepth)DepthOpDlg::SetPicture(m_drill_pictures ? _T("drill final depth") : _T("final depth"));
+	else if(w == m_lgthStepDown)DepthOpDlg::SetPicture(m_drill_pictures ? _T("drill step down") : _T("step down"));
+	else if(w == m_lgthZFinishDepth)DepthOpDlg::SetPicture(m_drill_pictures ? _T("drill z finish depth") : _T("z finish depth"));
+	else if(w == m_lgthZThruDepth)DepthOpDlg::SetPicture(m_drill_pictures ? _T("drill z thru depth") : _T("z thru depth"));
 	else SpeedOpDlg::SetPictureByWindow(w);
 }
 

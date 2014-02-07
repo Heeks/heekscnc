@@ -36,55 +36,18 @@ void CDrillingParams::set_initial_values( const double depth, const int tool_num
 {
 	CNCConfig config;
 
-	config.Read(_T("m_standoff"), &m_standoff, (25.4 / 4));	// Quarter of an inch
 	config.Read(_T("m_dwell"), &m_dwell, 1);
-	config.Read(_T("m_depth"), &m_depth, 25.4);		// One inch
-	config.Read(_T("m_peck_depth"), &m_peck_depth, (25.4 / 10));	// One tenth of an inch
 	config.Read(_T("m_retract_mode"), &m_retract_mode, 0);
 	config.Read(_T("m_spindle_mode"), &m_spindle_mode, 0);
-	config.Read(_T("m_clearance_height"), &m_clearance_height, 25.4);		// One inch
-
-	if (depth > 0)
-	{
-		// We've found the depth we want used.  Assign it now.
-		m_depth = depth;
-	} // End if - then
-
-	// The following is taken from the 'rule of thumb' document that Stanley Dornfeld put
-	// together for drilling feeds and speeds.  It includes a statement something like;
-	// "We most always peck every one half drill diameter in depth after the first peck of
-	// three diameters".  From this, we will take his advice and set a default peck depth
-	// that is half the drill's diameter.
-	//
-	// NOTE: If the peck depth is zero (or less) then the operator may have manually chosen
-	// to not peck.  In this case, don't add a positive peck depth - which would force
-	// a pecking cycle rather than another drilling cycle.
-	if ((tool_number > 0) && (m_peck_depth > 0.0))
-	{
-		CTool *pTool = CTool::Find( tool_number );
-		if (pTool != NULL)
-		{
-			m_peck_depth = pTool->m_params.m_diameter / 2.0;
-		}
-	}
-
 }
 
 void CDrillingParams::write_values_to_config()
 {
-	// We always want to store the parameters in mm and convert them back later on.
-
 	CNCConfig config;
 
-	// These values are in mm.
-	config.Write(_T("m_standoff"), m_standoff);
 	config.Write(_T("m_dwell"), m_dwell);
-	config.Write(_T("m_depth"), m_depth);
-	config.Write(_T("m_peck_depth"), m_peck_depth);
 	config.Write(_T("m_retract_mode"), m_retract_mode);
 	config.Write(_T("m_spindle_mode"), m_spindle_mode);
-	config.Write(_T("m_clearance_height"), m_clearance_height);
-
 }
 
 
@@ -100,43 +63,15 @@ static void on_set_retract_mode(int value, HeeksObj* object, bool from_undo_redo
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
-static void on_set_standoff(double value, HeeksObj* object)
-{
-	((CDrilling*)object)->m_params.m_standoff = value;
-	((CDrilling*)object)->m_params.write_values_to_config();
-}
-
 static void on_set_dwell(double value, HeeksObj* object)
 {
 	((CDrilling*)object)->m_params.m_dwell = value;
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
-static void on_set_depth(double value, HeeksObj* object)
-{
-	((CDrilling*)object)->m_params.m_depth = value;
-	((CDrilling*)object)->m_params.write_values_to_config();
-}
-
-static void on_set_peck_depth(double value, HeeksObj* object)
-{
-	((CDrilling*)object)->m_params.m_peck_depth = value;
-	((CDrilling*)object)->m_params.write_values_to_config();
-}
-
-static void on_set_clearance_height(double value, HeeksObj* object)
-{
-	((CDrilling*)object)->m_params.m_clearance_height = value;
-	((CDrilling*)object)->m_params.write_values_to_config();
-}
-
 void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyLength(_("standoff"), m_standoff, parent, on_set_standoff));
-	list->push_back(new PropertyLength(_("clearance height"), m_clearance_height, parent, on_set_clearance_height));
 	list->push_back(new PropertyDouble(_("dwell"), m_dwell, parent, on_set_dwell));
-	list->push_back(new PropertyLength(_("depth"), m_depth, parent, on_set_depth));
-	list->push_back(new PropertyLength(_("peck_depth"), m_peck_depth, parent, on_set_peck_depth));
 	{ // Begin choice scope
 		std::list< wxString > choices;
 
@@ -163,26 +98,16 @@ void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 	element = heeksCAD->NewXMLElement( "params" );
 	heeksCAD->LinkXMLEndChild( root,  element );
 
-	element->SetDoubleAttribute( "standoff", m_standoff);
 	element->SetDoubleAttribute( "dwell", m_dwell);
-	element->SetDoubleAttribute( "depth", m_depth);
-	element->SetDoubleAttribute( "peck_depth", m_peck_depth);
-
 	element->SetAttribute( "retract_mode", m_retract_mode);
 	element->SetAttribute( "spindle_mode", m_spindle_mode);
-	element->SetAttribute( "clearance_height", m_clearance_height);
 }
 
 void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 {
-	if (pElem->Attribute("standoff")) pElem->Attribute("standoff", &m_standoff);
-	m_clearance_height = m_standoff;  // Default if the clearance_height parameter is not found.
 	if (pElem->Attribute("dwell")) pElem->Attribute("dwell", &m_dwell);
-	if (pElem->Attribute("depth")) pElem->Attribute("depth", &m_depth);
-	if (pElem->Attribute("peck_depth")) pElem->Attribute("peck_depth", &m_peck_depth);
 	if (pElem->Attribute("retract_mode")) pElem->Attribute("retract_mode", &m_retract_mode);
 	if (pElem->Attribute("spindle_mode")) pElem->Attribute("spindle_mode", &m_spindle_mode);
-	if (pElem->Attribute("clearance_height")) pElem->Attribute("clearance_height", &m_clearance_height);
 }
 
 const wxBitmap &CDrilling::GetIcon()
@@ -202,7 +127,7 @@ Python CDrilling::AppendTextToProgram()
 {
 	Python python;
 
-	python << CSpeedOp::AppendTextToProgram();   // Set any private fixtures and change tools (if necessary)
+	python << CDepthOp::AppendTextToProgram();   // Set any private fixtures and change tools (if necessary)
 
 	for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
@@ -214,14 +139,10 @@ Python CDrilling::AppendTextToProgram()
 		python << _T("drill(")
 			<< _T("x=") << p[0]/theApp.m_program->m_units << _T(", ")
 			<< _T("y=") << p[1]/theApp.m_program->m_units << _T(", ")
-			<< _T("z=") << p[2]/theApp.m_program->m_units << _T(", ")
-			<< _T("depth=") << m_params.m_depth/theApp.m_program->m_units << _T(", ")
-			<< _T("standoff=") << m_params.m_standoff/theApp.m_program->m_units << _T(", ")
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
-			<< _T("peck_depth=") << m_params.m_peck_depth/theApp.m_program->m_units << _T(", ")
+			<< _T("depth_params = depth_params, ")
 			<< _T("retract_mode=") << m_params.m_retract_mode << _T(", ")
-			<< _T("spindle_mode=") << m_params.m_spindle_mode << _T(", ")
-			<< _T("clearance_height=") << m_params.m_clearance_height
+			<< _T("spindle_mode=") << m_params.m_spindle_mode
 			<< _T(")\n");
         theApp.m_location = make_point(p); // Remember where we are.
 	} // End for
@@ -286,7 +207,7 @@ std::list< CNCPoint > CDrilling::DrillBitVertices( const CNCPoint & origin, cons
 	double depthPerItteration;
 	countersinkDepth = -1 * radius * tan(31.0);	// For a typical (118 degree bevel on the drill bit tip)
 
-	unsigned int l_iNumItterations = numPoints * (length / flutePitch);
+	unsigned int l_iNumItterations = numPoints * fabs(length / flutePitch);
 	depthPerItteration = (length - countersinkDepth) / l_iNumItterations;
 
 	// Now generate the spirals.
@@ -343,7 +264,7 @@ std::list< CNCPoint > CDrilling::DrillBitVertices( const CNCPoint & origin, cons
  */
 void CDrilling::glCommands(bool select, bool marked, bool no_color)
 {
-	CSpeedOp::glCommands(select, marked, no_color);
+	CDepthOp::glCommands(select, marked, no_color);
 
 	if(marked && !no_color)
 	{
@@ -369,13 +290,11 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 
 			start[0] = point.X();
 			start[1] = point.Y();
-			start[2] = point.Z();
+			start[2] = m_depth_op_params.m_start_depth;
 
 			end[0] = point.X();
 			end[1] = point.Y();
-			end[2] = point.Z();
-
-			end[2] -= m_params.m_depth;
+			end[2] = m_depth_op_params.m_final_depth;
 
 			glBegin(GL_LINE_STRIP);
 			glVertex3dv( start );
@@ -384,7 +303,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 
 			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	point,
 												l_dHoleDiameter / 2,
-												m_params.m_depth);
+												m_depth_op_params.m_final_depth);
 
 			glBegin(GL_LINE_STRIP);
 			CNCPoint previous = *(pointsAroundCircle.begin());
@@ -404,7 +323,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 void CDrilling::GetProperties(std::list<Property *> *list)
 {
 	m_params.GetProperties(this, list);
-	CSpeedOp::GetProperties(list);
+	CDepthOp::GetProperties(list);
 }
 
 HeeksObj *CDrilling::MakeACopy(void)const
@@ -423,13 +342,13 @@ void CDrilling::CopyFrom(const HeeksObj* object)
 CDrilling::CDrilling(	const std::list<int> &points,
         const int tool_number,
         const double depth )
-    : CSpeedOp(tool_number, DrillingType), m_points(points)
+    : CDepthOp(tool_number, DrillingType), m_points(points)
 {
     m_params.set_initial_values(depth, tool_number);
 }
 
 
-CDrilling::CDrilling( const CDrilling & rhs ) : CSpeedOp( rhs )
+CDrilling::CDrilling( const CDrilling & rhs ) : CDepthOp( rhs )
 {
 	m_points = rhs.m_points;
     m_params = rhs.m_params;
@@ -439,7 +358,7 @@ CDrilling & CDrilling::operator= ( const CDrilling & rhs )
 {
 	if (this != &rhs)
 	{
-		CSpeedOp::operator=(rhs);
+		CDepthOp::operator=(rhs);
 		m_points.clear();
 		m_points = rhs.m_points;
 		m_params = rhs.m_params;
@@ -469,10 +388,6 @@ void CDrilling::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = heeksCAD->NewXMLElement( "Drilling" );
 	heeksCAD->LinkXMLEndChild( root,  element );
 	m_params.WriteXMLAttributes(element);
-
-	//TiXmlElement * symbols;
-	//symbols = heeksCAD->NewXMLElement( "symbols" );
-	//heeksCAD->LinkXMLEndChild( element, symbols );
 
 	for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
@@ -532,18 +447,14 @@ HeeksObj* CDrilling::ReadFromXMLElement(TiXmlElement* element)
 
 void CDrilling::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-    CSpeedOp::GetTools( t_list, p );
+    CDepthOp::GetTools( t_list, p );
 }
 
 bool CDrillingParams::operator==( const CDrillingParams & rhs) const
 {
-	if (m_standoff != rhs.m_standoff) return(false);
 	if (m_dwell != rhs.m_dwell) return(false);
-	if (m_depth != rhs.m_depth) return(false);
-	if (m_peck_depth != rhs.m_peck_depth) return(false);
 	if (m_retract_mode != rhs.m_retract_mode) return(false);
 	if (m_spindle_mode != rhs.m_spindle_mode) return(false);
-	if (m_clearance_height != rhs.m_clearance_height) return(false);
 
 	return(true);
 }
@@ -553,76 +464,15 @@ bool CDrilling::operator==( const CDrilling & rhs ) const
 {
 	if (m_params != rhs.m_params) return(false);
 
-	return(CSpeedOp::operator==(rhs));
+	return(CDepthOp::operator==(rhs));
 }
 
-static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+static bool OnEdit(HeeksObj* object)
 {
-	int type = 3; // 3 for drilling, 2, for speedop, 1 for op, 0 for other
-
-	if(others)
-	{
-		for(std::list<HeeksObj*>::iterator It = others->begin(); It != others->end(); It++)
-		{
-			HeeksObj* obj = *It;
-			switch(obj->GetType())
-			{
-			case DrillingType:
-				break;
-			case ProfileType:
-			case PocketType:
-				if(type > 2)type = 2;
-				break;
-			case ScriptOpType:
-				if(type>1)type = 1;
-				break;
-			default:
-				type = 0;
-				break;
-			}
-		}
-	}
-
-	int res = 0;
-
-	HeeksObjDlg* dlg = NULL;
-
-	switch(type)
-	{
-	case 3:
-		dlg = new DrillingDlg(heeksCAD->GetMainFrame(), (CDrilling*)object);
-		break;
-	case 2:
-		dlg = new SpeedOpDlg(heeksCAD->GetMainFrame(), (CDrilling*)object, false);
-		break;
-	case 1:
-		//dlg = new OpDlg(heeksCAD->GetMainFrame(), (CDrilling*)object);
-		break;
-	default:
-		break;
-	}
-
-	if(dlg)
-	{
-		if(dlg->ShowModal() == wxID_OK)
-		{
-			dlg->GetData(object);
-			object->WriteDefaultValues();
-			if(others)
-			{
-				for(std::list<HeeksObj*>::iterator It = others->begin(); It != others->end(); It++)
-				{
-					HeeksObj* obj = *It;
-					dlg->GetData(obj);
-				}
-			}
-			return true;
-		}
-	}
-	return false;
+	return DrillingDlg::Do((CDrilling*)object);
 }
 
-void CDrilling::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+void CDrilling::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
 }

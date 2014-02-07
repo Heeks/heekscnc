@@ -764,25 +764,22 @@ class Creator(nc.Creator):
     # revert it.  I must set the mode so that I can be sure the values I'm passing in make
     # sense to the end-machine.
     #
-    def drill(self, x=None, y=None, z=None, depth=None, standoff=None, dwell=None, peck_depth=None, retract_mode=None, spindle_mode=None, clearance_height = None):
-        if (standoff == None):        
-        # This is a bad thing.  All the drilling cycles need a retraction (and starting) height.        
+    def drill(self, x=None, y=None, dwell=None, depth_params = None, retract_mode=None, spindle_mode=None):
+        if (depth_params.clearance_height == None):        
             return
-           
-        if (z == None): 
-            return    # We need a Z value as well.  This input parameter represents the top of the hole   
             
         drillExpanded = self.drillExpanded
-        if (peck_depth != 0) and (dwell != 0):
+        if (depth_params.step_down != 0) and (dwell != 0):
             # pecking and dwell together
             if self.dwell_allowed_in_G83 != True:     
                 drillExpanded = True
           
         if drillExpanded:
             # for machines which don't understand G81, G82 etc.
+            peck_depth = depth_params.step_down
             if peck_depth == None:
-                peck_depth = depth
-            current_z = z
+                peck_depth = depth_params.final_depth
+            current_z = depth_params.start_depth
             self.rapid(x, y)
             
             first = True
@@ -790,20 +787,20 @@ class Creator(nc.Creator):
             
             while True:
                 next_z = current_z - peck_depth
-                if next_z < (z - depth + 0.001):
-                    next_z = z - depth
+                if next_z < (depth_params.final_depth + 0.001):
+                    next_z = depth_params.final_depth
                     last_cut = True
                 if next_z >= current_z:
                     break;
                 if first:
-                    self.rapid(z = z + standoff)
+                    self.rapid(z = depth_params.start_depth + depth_params.rapid_safety_space)
                 else:
                     self.rapid(z = current_z)
                 self.feed(z = next_z)
                 if dwell != 0 and last_cut:
                     self.dwell(dwell)        
-                if last_cut:self.rapid(z = clearance_height)
-                else: self.rapid(z = z + standoff)
+                if last_cut:self.rapid(z = depth_params.clearance_height)
+                else: self.rapid(z = depth_params.start_depth + depth_params.rapid_safety_space)
                 current_z = next_z
                 first = False
             
@@ -813,14 +810,14 @@ class Creator(nc.Creator):
         self.write_preps()
         self.write_blocknum()                
         
-        if (peck_depth != 0):        
+        if (depth_params.step_down != 0):        
             # We're pecking.  Let's find a tree. 
             if self.drill_modal:       
-                if  self.PECK_DRILL() + self.PECK_DEPTH(peck_depth) != self.prev_drill:
-                    self.write(self.SPACE() + self.PECK_DRILL() + self.SPACE() + self.PECK_DEPTH(peck_depth))  
-                    self.prev_drill = self.PECK_DRILL() + self.PECK_DEPTH(peck_depth)
+                if  self.PECK_DRILL() + self.PECK_DEPTH(depth_params.step_down) != self.prev_drill:
+                    self.write(self.SPACE() + self.PECK_DRILL() + self.SPACE() + self.PECK_DEPTH(depth_params.step_down))  
+                    self.prev_drill = self.PECK_DRILL() + self.PECK_DEPTH(depth_params.step_down)
             else:       
-                self.write(self.PECK_DRILL() + self.PECK_DEPTH(peck_depth)) 
+                self.write(self.PECK_DRILL() + self.PECK_DEPTH(depth_params.step_down)) 
             
             if (self.dwell != 0) and self.dwell_allowed_in_G83:
                 self.write(self.SPACE() + self.TIME() + (self.FORMAT_TIME().string(dwell)))
@@ -847,7 +844,7 @@ class Creator(nc.Creator):
                     self.write(self.SPACE() + self.DRILL_WITH_DWELL(dwell))
     
     # Set the retraction point to the 'standoff' distance above the starting z height.        
-        retract_height = z + standoff        
+        retract_height = depth_params.start_depth + depth_params.rapid_safety_space        
         if (x != None):        
             dx = x - self.x        
             self.write(self.SPACE() + self.X() + (self.fmt.string(x + self.shift_x)))        
@@ -858,15 +855,15 @@ class Creator(nc.Creator):
             self.write(self.SPACE() + self.Y() + (self.fmt.string(y + self.shift_y)))        
             self.y = y
                       
-        dz = (z + standoff) - self.z # In the end, we will be standoff distance above the z value passed in.
+        dz = (depth_params.start_depth + depth_params.rapid_safety_space) - self.z # In the end, we will be standoff distance above the z value passed in.
 
         if self.drill_modal:
-            if z != self.prev_z:
-                self.write(self.SPACE() + self.Z() + (self.fmt.string(z - depth)))
-                self.prev_z=z
+            if depth_params.start_depth != self.prev_z:
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(depth_params.final_depth)))
+                self.prev_z=depth_params.start_depth
         else:             
-            self.write(self.SPACE() + self.Z() + (self.fmt.string(z - depth)))    # This is the 'z' value for the bottom of the hole.
-            self.z = (z + standoff)            # We want to remember where z is at the end (at the top of the hole)
+            self.write(self.SPACE() + self.Z() + (self.fmt.string(depth_params.final_depth)))    # This is the 'z' value for the bottom of the hole.
+            self.z = (depth_params.start_depth + depth_params.rapid_safety_space)            # We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
             if self.prev_retract  != self.RETRACT(retract_height) :
@@ -882,68 +879,6 @@ class Creator(nc.Creator):
         self.write_spindle()            
         self.write_misc()    
         self.write('\n')
-        
-    # G33.1 tapping with EMC for now
-    # unsynchronized (chuck) taps NIY (tap_mode = 1)
-    
-    def tap(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None, tap_mode=None, direction=None):
-        # mystery parameters: 
-        # zretract=None, dwell_bottom=None,pitch=None, stoppos=None, spin_in=None, spin_out=None):
-        # I dont see how to map these to EMC Gcode
-
-        if (standoff == None):		
-                # This is a bad thing.  All the drilling cycles need a retraction (and starting) height.		
-                return
-        if (z == None): 
-                return	# We need a Z value as well.  This input parameter represents the top of the hole 
-        if (pitch == None): 
-                return	# We need a pitch value.
-        if (direction == None): 
-                return	# We need a direction value.
-
-        if (tap_mode != 0):
-                raise "only rigid tapping currently supported"
-
-        self.in_canned_cycle = True
-        self.write_preps()
-        self.write_blocknum()
-        self.write_spindle()
-        self.write('\n')
-
-        # rapid to starting point; z first, then x,y iff given
-
-        # Set the retraction point to the 'standoff' distance above the starting z height.
-        retract_height = z + standoff
-
-        # unsure if this is needed:
-        if self.z != retract_height:
-                        self.rapid(z = retract_height)
-
-        # then continue to x,y if given
-        if (x != None) or (y != None):
-                        self.write_blocknum()
-                        self.write(self.RAPID() )
-
-                        if (x != None):
-                                        self.write(self.X() + self.fmt.string(x + self.shift_x))
-                                        self.x = x 
-
-                        if (y != None):
-                                        self.write(self.Y() + self.fmt.string(y + self.shift_y))
-                                        self.y = y
-                        self.write('\n')
-
-        self.write_blocknum()
-        self.write( self.TAP() )
-        self.write( self.TAP_DEPTH(self.ffmt,pitch) + self.SPACE() )
-        self.write(self.Z() + self.fmt.string(z - depth))# This is the 'z' value for the bottom of the tap.
-        self.write_misc()
-        self.write('\n')
-
-        self.z = retract_height	# this cycle returns to the start position, so remember that as z value
-        
-    def bore(self, x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, feed_in=None, feed_out=None, stoppos=None, shift_back=None, shift_right=None, backbore=False, stop=False):
-        pass
 
     def end_canned_cycle(self):
         if self.in_canned_cycle == False:

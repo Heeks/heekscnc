@@ -927,6 +927,62 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\HeeksCADSVN\tinyxml\tinystr.cpp"
+			>
+			<FileConfiguration
+				Name="Unicode Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\tinyxml\tinystr.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxml.cpp"
+			>
+			<FileConfiguration
+				Name="Unicode Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxml.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxmlerror.cpp"
+			>
+			<FileConfiguration
+				Name="Unicode Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxmlparser.cpp"
+			>
+			<FileConfiguration
+				Name="Unicode Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
 			RelativePath="$(HEEKSCADPATH)\interface\Tool.h"
 			>
 		</File>

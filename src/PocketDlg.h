@@ -22,11 +22,14 @@ class PocketDlg : public DepthOpDlg
 	wxCheckBox *m_chkUseZigZag;
 	CDoubleCtrl *m_dblZigAngle;
 	wxCheckBox *m_chkZigUnidirectional;
+	wxButton *m_btnSketchPick;
 
 	void EnableZigZagControls();
 
 public:
     PocketDlg(wxWindow *parent, CPocket* object, const wxString& title = wxString(_T("Pocket Operation")), bool top_level = true);
+
+	static bool Do(CPocket* object);
 
 	// HeeksObjDlg virtual functions
 	void GetDataRaw(HeeksObj* object);
@@ -35,6 +38,7 @@ public:
 	void SetPicture(const wxString& name);
 
 	void OnCheckUseZigZag(wxCommandEvent& event);
+	void OnSketchPick( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };
