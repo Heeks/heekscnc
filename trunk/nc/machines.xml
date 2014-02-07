@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Machine pyfile="emc2" suffix=".ngc" description="LinuxCNC with tool offsets"/>
+<Machine pyfile="emc2b" suffix=".ngc" description="LinuxCNC"/>
+<Machine pyfile="emc2b_crc" suffix=".ngc" description="EMC2 with Cutter Comp"/>
+<Machine pyfile="mach3" suffix=".tap" description="Mach3 Machine Controller"/>
+<Machine pyfile="siegkx1" suffix=".tap" description="Sieg KX1 machine"/>
