@@ -39,3 +39,24 @@ public:
 	DECLARE_EVENT_TABLE()
 };
 
+
+class CPrintCanvas: public wxScrolledWindow
+{
+private:
+    void Resize();
+
+public:
+    wxTextCtrl *m_textCtrl;
+
+    CPrintCanvas(wxWindow* parent);
+	virtual ~CPrintCanvas(){}
+
+	void Clear();
+
+    void OnSize(wxSizeEvent& event);
+	void OnLengthExceeded(wxCommandEvent& event);
+ 
+    DECLARE_NO_COPY_CLASS(CPrintCanvas)
+	DECLARE_EVENT_TABLE()
+};
+

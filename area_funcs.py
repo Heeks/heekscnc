@@ -358,7 +358,7 @@ def zigzag(a, stepover, zig_unidirectional):
 
     reorder_zigs()
 
-def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_depth, stepover, stepdown, z_finish_depth, z_thru_depth, user_depths, clearance_height, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
+def pocket(a,tool_radius, extra_offset, stepover, depth_params, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
     global tool_radius_for_pocket
     global area_for_feed_possible
 
@@ -374,9 +374,6 @@ def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_d
     if keep_tool_down_if_poss:
         area_for_feed_possible = area.Area(a)
         area_for_feed_possible.Offset(extra_offset - 0.01)
-
-    if rapid_safety_space > clearance_height:
-       rapid_safety_space = clearance_height
 
     use_internal_function = (area.holes_linked() == False) # use internal function, if area module is the Clipper library
 
@@ -419,16 +416,16 @@ def pocket(a,tool_radius, extra_offset, rapid_safety_space, start_depth, final_d
                     a_offset.Offset(current_offset)
             curve_list = get_curve_list(arealist, cut_mode == 'climb')
             
-    depths = kurve_funcs.get_depths(start_depth, final_depth, stepdown, z_finish_depth, z_thru_depth, user_depths)
+    depths = depth_params.get_depths()
     
-    current_start_depth = start_depth
+    current_start_depth = depth_params.start_depth
 
     if start_point==None:
         for depth in depths:
-            cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss)
+            cut_curvelist1(curve_list, depth_params.rapid_safety_space, current_start_depth, depth, depth_params.clearance_height, keep_tool_down_if_poss)
             current_start_depth = depth
 
     else:
         for depth in depths:
-            cut_curvelist2(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss, start_point)
+            cut_curvelist2(curve_list, depth_params.rapid_safety_space, current_start_depth, depth, depth_params.clearance_height, keep_tool_down_if_poss, start_point)
             current_start_depth = depth

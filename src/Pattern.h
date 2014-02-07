@@ -32,7 +32,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	const wxBitmap &GetIcon();
-	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 
     static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

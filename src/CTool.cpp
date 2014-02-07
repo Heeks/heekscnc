@@ -1344,7 +1344,7 @@ Python CTool::OpenCamLibDefinition(const unsigned int indent /* = 0 */ )const
 	return(python);
 }
 
-static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+static bool OnEdit(HeeksObj* object)
 {
 	CToolDlg dlg(heeksCAD->GetMainFrame(), (CTool*)object);
 	if(dlg.ShowModal() == wxID_OK)
@@ -1356,7 +1356,7 @@ static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
 	return false;
 }
 
-void CTool::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 #if 1
 	*callback = OnEdit;

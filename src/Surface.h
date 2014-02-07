@@ -38,6 +38,6 @@ public:
 	const wxBitmap &GetIcon();
 	void WriteDefaultValues();
 	void ReadDefaultValues();
-	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 }; // End CSurface class definition.
 

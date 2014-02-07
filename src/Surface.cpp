@@ -145,19 +145,18 @@ const wxBitmap &CSurface::GetIcon()
 	return *icon;
 }
 
-static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+static bool OnEdit(HeeksObj* object)
 {
 	SurfaceDlg dlg(heeksCAD->GetMainFrame(), (CSurface*)object);
 	if(dlg.ShowModal() == wxID_OK)
 	{
 		dlg.GetData((CSurface*)object);
-		((CSurface*)object)->WriteDefaultValues();
 		return true;
 	}
 	return false;
 }
 
-void CSurface::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+void CSurface::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
 }

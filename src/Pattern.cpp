@@ -142,19 +142,18 @@ void CPattern::GetMatrices(std::list<gp_Trsf> &matrices)
 	}
 }
 
-static bool OnEdit(HeeksObj* object, std::list<HeeksObj*> *others)
+static bool OnEdit(HeeksObj* object)
 {
 	PatternDlg dlg(heeksCAD->GetMainFrame(), (CPattern*)object);
 	if(dlg.ShowModal() == wxID_OK)
 	{
 		dlg.GetData((CPattern*)object);
-		((CPattern*)object)->WriteDefaultValues();
 		return true;
 	}
 	return false;
 }
 
-void CPattern::GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *))
+void CPattern::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
 }

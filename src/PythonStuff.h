@@ -8,6 +8,9 @@ class Property;
 #include "PythonString.h"
 #include <wx/process.h>
 
+#define ERRORS_TXT_FILE_NAME "heeks errors.txt"
+#define OUTPUT_TXT_FILE_NAME "heeks output.txt"
+
 class CPyProcess : public wxProcess
 {
 protected:

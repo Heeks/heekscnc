@@ -1,6 +1,7 @@
 import ocl
 import math
 from nc.nc import *
+import tempfile
 
 def STLSurfFromFile(filepath):
     s = ocl.STLSurf()

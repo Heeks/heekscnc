@@ -102,7 +102,7 @@ public:
 	void Remove(HeeksObj* object);
 	bool CanAdd(HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
-	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 

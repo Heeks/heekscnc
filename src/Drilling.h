@@ -9,7 +9,7 @@
  * details.
  */
 
-#include "SpeedOp.h"
+#include "DepthOp.h"
 #include "HeeksCNCTypes.h"
 #include <list>
 #include <vector>
@@ -20,13 +20,9 @@ class CDrilling;
 class CDrillingParams{
 
 public:
-	double m_standoff;		// This is the height above the staring Z position that forms the Z retract height (R word)
 	double m_dwell;			// If dwell_bottom is non-zero then we're using the G82 drill cycle rather than G83 peck drill cycle.  This is the 'P' word
-	double m_depth;			// Incremental length down from 'z' value at which the bottom of the hole can be found
-	double m_peck_depth;		// This is the 'Q' word in the G83 cycle.  How deep to peck each time.
 	int    m_retract_mode;	// boring - 0 - rapid retract, 1 - feed retract
 	int    m_spindle_mode;	// boring - if true, stop spindle at bottom
-	double m_clearance_height; // The tool moves to this height between drill locations and then rapidly moves down to the m_standoff height.
 
 	void set_initial_values( const double depth, const int tool_number );
 	void write_values_to_config();
@@ -38,7 +34,7 @@ public:
 	bool operator!= ( const CDrillingParams & rhs ) const { return(! (*this == rhs)); }
 };
 
-class CDrilling: public CSpeedOp {
+class CDrilling: public CDepthOp {
 public:
 	/**
 		The following two methods are just to draw pretty lines on the screen to represent drilling
@@ -52,7 +48,7 @@ public:
 	CDrillingParams m_params;
 
 	//	Constructors.
-	CDrilling():CSpeedOp(0){}
+	CDrilling():CDepthOp(0){}
 	CDrilling(	const std::list<int> &points,
 			const int tool_number,
 			const double depth );
@@ -73,7 +69,7 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	bool CanAdd(HeeksObj* object);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
-	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 
 	// This is the method that gets called when the operator hits the 'Python' button.  It generates a Python
 	// program whose job is to generate RS-274 GCode.

@@ -20,8 +20,10 @@ class DepthOpDlg : public SpeedOpDlg
 	CLengthCtrl *m_lgthFinalDepth;
 	CLengthCtrl *m_lgthRapidDownToHeight;
 
+	bool m_drill_pictures;
+
 public:
-    DepthOpDlg(wxWindow *parent, CDepthOp* object, const wxString& title = wxString(_T("")), bool top_level = true);
+    DepthOpDlg(wxWindow *parent, CDepthOp* object, bool drill_pictures = false, const wxString& title = wxString(_T("Depth Operation")), bool top_level = true);
 
 	// HeeksObjDlg virtual functions
 	void GetDataRaw(HeeksObj* object);
