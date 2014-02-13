@@ -140,7 +140,7 @@ Python CDrilling::AppendTextToProgram()
 			<< _T("x=") << p[0]/theApp.m_program->m_units << _T(", ")
 			<< _T("y=") << p[1]/theApp.m_program->m_units << _T(", ")
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
-			<< _T("depth_params = depth_params, ")
+			<< _T("depthparams = depthparams, ")
 			<< _T("retract_mode=") << m_params.m_retract_mode << _T(", ")
 			<< _T("spindle_mode=") << m_params.m_spindle_mode
 			<< _T(")\n");

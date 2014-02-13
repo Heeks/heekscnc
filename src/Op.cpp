@@ -43,7 +43,7 @@ void COp::WriteBaseXML(TiXmlElement *element)
 	element->SetAttribute( "pattern", m_pattern);
 	element->SetAttribute( "surface", m_surface);
 
-	ObjList::WriteBaseXML(element);
+	IdNamedObjList::WriteBaseXML(element);
 }
 
 void COp::ReadBaseXML(TiXmlElement* element)
@@ -83,7 +83,7 @@ void COp::ReadBaseXML(TiXmlElement* element)
 	element->Attribute( "pattern", &m_pattern);
 	element->Attribute( "surface", &m_surface);
 
-	ObjList::ReadBaseXML(element);
+	IdNamedObjList::ReadBaseXML(element);
 }
 
 static void on_set_comment(const wxChar* value, HeeksObj* object){((COp*)object)->m_comment = value;}
@@ -133,48 +133,34 @@ void COp::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyInt(_("pattern"), m_pattern, this, on_set_pattern));
 	list->push_back(new PropertyInt(_("surface"), m_surface, this, on_set_surface));
 
-	ObjList::GetProperties(list);
+	IdNamedObjList::GetProperties(list);
 }
 
 COp & COp::operator= ( const COp & rhs )
 {
 	if (this != &rhs)
 	{
-		// In the case of machine operations, the child objects are all used
-		// for reference (position etc.) only.  When we duplicate the machine
-		// operation, we don't want to duplicate these reference (child)
-		// objects too.
-		// To this end, we want to copy the m_objects list without duplicating the
-		// objects they point to.  i.e. don't call the ObjList::operator=( rhs ) method.
-
-		m_objects.clear();
-		for (HeeksObj *child = ((ObjList &)rhs).GetFirstChild(); child != NULL; child = ((ObjList &)rhs).GetNextChild())
-		{
-			m_objects.push_back( child );
-		} // End for
-
-		HeeksObj::operator=(rhs);	// We need to call this as we've skipped over the ObjList::operator=() method
-									// which would normally have called it for us.
+		IdNamedObjList::operator=( rhs );
 
 		m_comment = rhs.m_comment;
 		m_active = rhs.m_active;
 		m_tool_number = rhs.m_tool_number;
 		m_operation_type = rhs.m_operation_type;
+		m_pattern = rhs.m_pattern;
+		m_surface = rhs.m_surface;
 	}
 
 	return(*this);
 }
 
-// Don't call the ObjList() constructor here as the duplication is
-// handled in an unusual way by the assignment operator.
-COp::COp( const COp & rhs ) // : ObjList(rhs)
+COp::COp( const COp & rhs ) : IdNamedObjList(rhs)
 {
 	*this = rhs;	// Call the assignment operator.
 }
 
 void COp::glCommands(bool select, bool marked, bool no_color)
 {
-	ObjList::glCommands(select, marked, no_color);
+	IdNamedObjList::glCommands(select, marked, no_color);
 }
 
 
@@ -255,7 +241,7 @@ Python COp::AppendTextToProgram()
 
 void COp::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-    ObjList::GetTools( t_list, p );
+    IdNamedObjList::GetTools( t_list, p );
 }
 
 bool COp::operator==(const COp & rhs) const
@@ -265,6 +251,6 @@ bool COp::operator==(const COp & rhs) const
 	if (m_tool_number != rhs.m_tool_number) return(false);
 	if (m_operation_type != rhs.m_operation_type) return(false);
 
-	return(ObjList::operator==(rhs));
+	return(IdNamedObjList::operator==(rhs));
 }
 

@@ -59,6 +59,7 @@ void SpeedOpDlg::GetDataRaw(HeeksObj* object)
 	((CSpeedOp*)object)->m_comment = m_txtComment->GetValue();
 	((CSpeedOp*)object)->m_active = m_chkActive->GetValue();
 	((CSpeedOp*)object)->m_title = m_txtTitle->GetValue();
+	if(((CSpeedOp*)object)->m_title != wxString(((CSpeedOp*)object)->GetShortString()))((CSpeedOp*)object)->m_title_made_from_id = false;
 	((CSpeedOp*)object)->m_tool_number = m_cmbTool->GetSelectedId();
 	((CSpeedOp*)object)->m_pattern = m_cmbPattern->GetSelectedId();
 	((CSpeedOp*)object)->m_surface = m_cmbSurface->GetSelectedId();
@@ -73,7 +74,7 @@ void SpeedOpDlg::SetFromDataRaw(HeeksObj* object)
 	m_dblSpindleSpeed->SetValue(((CSpeedOp*)object)->m_speed_op_params.m_spindle_speed);
 	m_txtComment->SetValue(((CSpeedOp*)object)->m_comment);
 	m_chkActive->SetValue(((CSpeedOp*)object)->m_active);
-	m_txtTitle->SetValue(((CSpeedOp*)object)->m_title);
+	m_txtTitle->SetValue(((CSpeedOp*)object)->GetShortString());
 	m_cmbTool->SelectById(((CSpeedOp*)object)->m_tool_number);
 	m_cmbPattern->SelectById(((CSpeedOp*)object)->m_pattern);
 	m_cmbSurface->SelectById(((CSpeedOp*)object)->m_surface);

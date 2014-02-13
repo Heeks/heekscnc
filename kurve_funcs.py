@@ -2,6 +2,19 @@ import math
 from nc.nc import *
 import area
 
+def set_good_start_point( curve ):
+    if curve.IsClosed():
+        # find the longest span and use the middle as the new start point
+        longest_length = None
+        mid_point = None
+        for span in curve.GetSpans():
+            length = span.Length()
+            if longest_length == None or length > longest_length:
+                longest_length = length
+                mid_point = span.MidParam(0.5)
+        if mid_point != None:
+            make_smaller(curve, mid_point)
+
 def make_smaller( curve, start = None, finish = None, end_beyond = False ):
     if start != None:
         curve.ChangeStart(curve.NearestPoint(start))
@@ -369,6 +382,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
             # rapid up to the clearance height
             rapid(z = depth_params.clearance_height)        
 
+    #rapid(z = depth_params.clearance_height)        
 
     del offset_curve
                 
