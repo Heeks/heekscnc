@@ -51,7 +51,6 @@ public:
 		heeksCAD->Mark(new_object);
       }
 	}
-	bool CallChangedOnRun(){return false;}
 	wxString BitmapPath(){ return _T("addtag");}
 };
 

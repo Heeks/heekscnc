@@ -58,7 +58,7 @@ void CPyProcess::HandleInput(void) {
 			s += wxString::From8BitData(buffer, m_err->LastRead());
 		}
 		if (s.Length() > 0) {
-			wxLogMessage(_T("! %s"), s.c_str());
+			wxLogMessage(_T("%s"), s.c_str());
 		}
 	}
 }

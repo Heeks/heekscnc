@@ -332,7 +332,7 @@ void CPocket::WritePocketPython(Python &python)
 	python << _T("area_funcs.pocket(a, tool_diameter/2, ");
 	python << m_pocket_params.m_material_allowance / theApp.m_program->m_units;
 	python << _T(", ") << m_pocket_params.m_step_over / theApp.m_program->m_units;
-	python << _T(", depth_params, ");
+	python << _T(", depthparams, ");
 	python << m_pocket_params.m_starting_place;
 	python << (m_pocket_params.m_keep_tool_down_if_poss ? _T(", True") : _T(", False"));
 	python << (m_pocket_params.m_use_zig_zag ? _T(", True") : _T(", False"));
@@ -343,7 +343,7 @@ void CPocket::WritePocketPython(Python &python)
 	python << _T(")\n");
 
 	// rapid back up to clearance plane
-	python << _T("rapid(z = depth_params.clearance_height)\n");
+	python << _T("rapid(z = depthparams.clearance_height)\n");
 }
 
 Python CPocket::AppendTextToProgram()

@@ -647,6 +647,11 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMo
 		// write the kurve definition
 		python << WriteSketchDefn(object, initially_ccw != reversed);
 
+		if((m_profile_params.m_start_given == false) && (m_profile_params.m_end_given == false))
+		{
+			python << _T("kurve_funcs.set_good_start_point(curve)\n");
+		}
+
 		// start - assume we are at a suitable clearance height
 
 		// get offset side string
@@ -730,7 +735,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMo
         python << _T("lead_out_line_len= ") << m_profile_params.m_lead_out_line_len / theApp.m_program->m_units<< _T("\n");
 
 		// profile the kurve
-		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depth_params, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )\n"), side_string.c_str());
+		python << wxString::Format(_T("kurve_funcs.profile(curve, '%s', tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )\n"), side_string.c_str());
 	}
 	python << _T("absolute()\n");
 	return(python);
@@ -1081,7 +1086,6 @@ public:
 	{
 		heeksCAD->SetInputMode(&tag_adding_mode);
 	}
-	bool CallChangedOnRun(){return false;}
 	wxString BitmapPath(){ return _T("addtag");}
 };
 
