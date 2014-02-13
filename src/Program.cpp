@@ -719,11 +719,6 @@ Python CProgram::RewritePythonProgram()
 	//hackhack, make it work on unix with FHS
 	python << _T("import sys\n");
 
-	// redirect errors and print statements to files
-	wxStandardPaths standard_paths;
-	wxFileName errors_path( standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
-	wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
-
 #ifdef CMAKE_UNIX
 	#ifdef RUNINPLACE
 	        python << _T("sys.path.insert(0,'") << theApp.GetResFolder() << _T("/')\n");

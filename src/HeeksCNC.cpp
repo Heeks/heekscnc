@@ -167,7 +167,7 @@ static void GetSketches(std::list<int>& sketches, std::list<int> &tools )
 	}
 }
 
-static void NewProfileOpMenuCallback(wxCommandEvent &event)
+static void NewProfileOp()
 {
 	std::list<int> tools;
 	std::list<int> sketches;
@@ -186,7 +186,12 @@ static void NewProfileOpMenuCallback(wxCommandEvent &event)
 		delete new_object;
 }
 
-static void NewPocketOpMenuCallback(wxCommandEvent &event)
+static void NewProfileOpMenuCallback(wxCommandEvent &event)
+{
+	NewProfileOp();
+}
+
+static void NewPocketOp()
 {
 	std::list<int> tools;
 	std::list<int> sketches;
@@ -203,6 +208,11 @@ static void NewPocketOpMenuCallback(wxCommandEvent &event)
 		delete new_object;
 }
 
+static void NewPocketOpMenuCallback(wxCommandEvent &event)
+{
+	NewPocketOp();
+}
+
 static void AddNewObjectUndoablyAndMarkIt(HeeksObj* new_object, HeeksObj* parent)
 {
 	heeksCAD->StartHistory();
@@ -212,7 +222,7 @@ static void AddNewObjectUndoablyAndMarkIt(HeeksObj* new_object, HeeksObj* parent
 	heeksCAD->EndHistory();
 }
 
-static void NewDrillingOpMenuCallback(wxCommandEvent &event)
+static void NewDrillingOp()
 {
 	std::list<int> points;
 
@@ -237,6 +247,11 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 		else
 			delete new_object;
 	}
+}
+
+static void NewDrillingOpMenuCallback(wxCommandEvent &event)
+{
+	NewDrillingOp();
 }
 
 static void NewScriptOpMenuCallback(wxCommandEvent &event)
@@ -703,6 +718,62 @@ public:
 	}
 }heekscad_observer;
 
+class NewProfileOpTool:public Tool
+{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("New Profile Operatio");}
+	void Run(){
+		NewProfileOp();
+	}
+	wxString BitmapPath(){ return _T("opprofile");}
+};
+
+class NewPocketOpTool:public Tool
+{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("New Pocket Operatio");}
+	void Run(){
+		NewPocketOp();
+	}
+	wxString BitmapPath(){ return _T("pocket");}
+};
+
+class NewDrillingOpTool:public Tool
+{
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("New Drilling Operatio");}
+	void Run(){
+		NewDrillingOp();
+	}
+	wxString BitmapPath(){ return _T("drilling");}
+};
+
+static void GetMarkedListTools(std::list<Tool*>& t_list)
+{
+	std::set<int> types;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		types.insert(object->GetType());
+	}
+
+	for(std::set<int>::iterator It = types.begin(); It != types.end(); It++)
+	{
+		switch(*It)
+		{
+		case SketchType:
+			t_list.push_back(new NewProfileOpTool);
+			t_list.push_back(new NewPocketOpTool);
+			break;
+		case PointType:
+			t_list.push_back(new NewDrillingOpTool);
+			break;
+		}
+	}
+}
+
 void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 {
 	m_dll_path = dll_path;
@@ -872,6 +943,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	heeksCAD->RegisterUnitsChangeHandler( UnitsChangedHandler );
 	heeksCAD->RegisterHeeksTypesConverter( HeeksCNCType );
+
+	heeksCAD->RegisterMarkeListTools(&GetMarkedListTools);
 }
 
 std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const

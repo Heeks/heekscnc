@@ -220,7 +220,7 @@ Python CDepthOp::AppendTextToProgram()
 
     python << CSpeedOp::AppendTextToProgram();
 
-	python << _T("depth_params = depth_params(");
+	python << _T("depthparams = depth_params(");
 	python << _T("float(") << m_depth_op_params.m_clearance_height / theApp.m_program->m_units << _T(")");
 	python << _T(", float(") << m_depth_op_params.m_rapid_safety_space / theApp.m_program->m_units << _T(")");
     python << _T(", float(") << m_depth_op_params.m_start_depth / theApp.m_program->m_units << _T(")");

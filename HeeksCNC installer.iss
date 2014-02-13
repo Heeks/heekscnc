@@ -5,17 +5,17 @@
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{FE583F3D-8863-438B-AD81-790FD54A7113}
-AppName=HeeksCNC
-AppVerName=HeeksCNC 0.28.0
+AppId={{12E3C404-8533-4A91-BB89-DEA488957F84}
+AppName=HeeksCNC030
+AppVerName=HeeksCNC 0.30.0
 AppPublisher=Heeks Software
 AppPublisherURL=http://heeks.net/
 AppSupportURL=http://code.google.com/p/heekscnc/
 AppUpdatesURL=http://code.google.com/p/heekscnc/
-DefaultDirName={pf}\HeeksCNC
-DefaultGroupName=HeeksCNC
+DefaultDirName={pf}\HeeksCNC030
+DefaultGroupName=HeeksCNC030
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.28.0
+OutputBaseFilename=HeeksCNC 0.30.0
 Compression=lzma
 SolidCompression=yes
 
@@ -24,6 +24,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: de; MessagesFile: "compiler:Languages\German.isl"
 Name: fr; MessagesFile: "compiler:Languages\French.isl"
 Name: it; MessagesFile: "compiler:Languages\Italian.isl"
+
+[Dirs]
+Name: "{app}\bitmaps"; Permissions: users-modify
+Name: "{app}\bitmaps\angle"; Permissions: users-modify
+Name: "{app}\icons"; Permissions: users-modify
+Name: "{app}\HeeksCNC"; Permissions: users-modify
+Name: "{app}\HeeksCNC\nc"; Permissions: users-modify
 
 [Files]
 Source: "C:\Dev\HeeksCADSVN\HeeksCAD.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -52,13 +59,20 @@ Source: "C:\Dev\libarea\ClipperRelease\area.pyd"; DestDir: "{app}\HeeksCNC\Clipp
 Source: "C:\Dev\HeeksCNCSVN\subdir.manifest"; DestDir: "{app}\HeeksCNC\Clipper"; DestName: "Microsoft.VC90.CRT.manifest"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNCSVN\ocl_funcs.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\ocl.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCNCSVN\depth_params.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\*.speeds"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\*.tooltable"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\nc\*.py"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion; Permissions: users-modify
-Source: "C:\Dev\HeeksCNCSVN\nc\*.txt"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion; Permissions: users-modify
+Source: "C:\Dev\HeeksCNCSVN\nc\*.xml"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\src\Unicode Release\HeeksCNC.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNCSVN\bitmaps\*.png"; DestDir: "{app}\HeeksCNC\bitmaps"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCNCSVN\bitmaps\ctool\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\ctool"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCNCSVN\bitmaps\depthop\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\depthop"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCNCSVN\bitmaps\drilling\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\drilling"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCNCSVN\bitmaps\pattern\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\pattern"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNCSVN\bitmaps\pocket\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\pocket"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCNCSVN\bitmaps\profile\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\profile"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCNCSVN\bitmaps\surface\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\surface"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNCSVN\icons\*.png"; DestDir: "{app}\HeeksCNC\icons"; Flags: ignoreversion
 Source: "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files (x86)\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\*"; DestDir: "{app}"; Flags: ignoreversion
@@ -76,13 +90,13 @@ Source: "C:\Program Files (x86)\VoxelCut\wx*.dll"; DestDir: "{app}\HeeksCNC"; Fl
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\HeeksCNC"; Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
+Name: "{group}\HeeksCNC030"; Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
 
 [Run]
 Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Description: "{cm:LaunchProgram,HeeksCNC}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
-Root: HKCU; Subkey: "Software\HeeksCAD"; Flags: uninsdeletekeyifempty
-Root: HKCU; Subkey: "Software\HeeksCNC"; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\HeeksCAD030"; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\HeeksCNC030"; Flags: uninsdeletekeyifempty
 
 
