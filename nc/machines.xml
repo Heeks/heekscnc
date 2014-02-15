@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Machine pyfile="emc2" suffix=".ngc" description="LinuxCNC with tool offsets"/>
-<Machine pyfile="emc2b" suffix=".ngc" description="LinuxCNC"/>
-<Machine pyfile="emc2b_crc" suffix=".ngc" description="EMC2 with Cutter Comp"/>
-<Machine pyfile="mach3" suffix=".tap" description="Mach3 Machine Controller"/>
-<Machine pyfile="siegkx1" suffix=".tap" description="Sieg KX1 machine"/>
+<Machine post="emc2" reader="iso_read" suffix=".ngc" description="LinuxCNC with tool offsets" test_param1 = "3.45" test_param2 = "89.4"/>
+<Machine post="emc2b" reader="iso_read" suffix=".ngc" description="LinuxCNC"/>
+<Machine post="emc2b_crc" reader="iso_read" suffix=".ngc" description="EMC2 with Cutter Comp"/>
+<Machine post="mach3" reader="iso_read" suffix=".tap" description="Mach3 Machine Controller"/>
+<Machine post="siegkx1" reader="iso_read" suffix=".tap" description="Sieg KX1 machine"/>

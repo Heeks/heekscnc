@@ -23,6 +23,7 @@ public:
 	double m_dwell;			// If dwell_bottom is non-zero then we're using the G82 drill cycle rather than G83 peck drill cycle.  This is the 'P' word
 	int    m_retract_mode;	// boring - 0 - rapid retract, 1 - feed retract
 	int    m_spindle_mode;	// boring - if true, stop spindle at bottom
+	bool   m_internal_coolant_on;
 
 	void set_initial_values( const double depth, const int tool_number );
 	void write_values_to_config();

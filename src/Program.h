@@ -24,6 +24,16 @@ enum ProgramUserType{
 	ProgramUserTypeNC
 };
 
+class PyParam
+{
+public:
+	std::string m_name;
+	std::string m_value;
+
+	PyParam(const char* name, const char* value):m_name(name), m_value(value){}
+	bool operator==( const PyParam & rhs ) const{ return (m_name == rhs.m_name) && (m_value == rhs.m_value);}
+};
+
 class CMachine
 {
 public:
@@ -31,14 +41,11 @@ public:
 	CMachine( const CMachine & rhs );
 	CMachine & operator= ( const CMachine & rhs );
 
-	wxString configuration_file_name;
-	wxString file_name;
+	wxString post;
+	wxString reader;
 	wxString suffix;
 	wxString description;
-	double m_max_spindle_speed;		// in revolutions per minute (RPM)
-	bool m_safety_height_defined;
-	double m_safety_height;
-	double m_clearance_height;		// Default clearance height when CProgram::m_clearance_definition == eClearanceDefinedByMachine
+	std::list<PyParam> py_params;
 
 	void GetProperties(CProgram *parent, std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
@@ -49,6 +56,16 @@ public:
 
 };
 
+class CXmlScriptOp
+{
+public:
+	wxString m_name;
+	wxString m_bitmap;
+	wxString m_icon;
+	wxString m_script;
+
+	CXmlScriptOp(const wxString &name, const wxString &bitmap, const wxString &icon, const wxString &script):m_name(name), m_bitmap(bitmap), m_icon(icon), m_script(script){}
+};
 
 class CProgram:public ObjList
 {
@@ -137,6 +154,7 @@ public:
 	void UpdateFromUserType();
 
 	static void GetMachines(std::vector<CMachine> &machines);
+	static void GetScriptOps(std::vector< CXmlScriptOp > &script_ops);
 	static CMachine GetMachine(const wxString& file_name);
 	void AddMissingChildren();
 

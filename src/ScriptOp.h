@@ -6,18 +6,16 @@
  */
 
 #include "HeeksCNCTypes.h"
-#include "DepthOp.h"
+#include "Op.h"
 
 
-class CScriptOp: public CDepthOp {
-
-
-
+class CScriptOp: public COp {
 public:
 	wxString m_str;
-	int m_emit_depthop_params;
+	bool m_user_icon;
+	wxString m_user_icon_name;
 
-	CScriptOp():CDepthOp(0, ScriptOpType) {}
+	CScriptOp():COp(0, ScriptOpType), m_user_icon(false) {}
 
 	CScriptOp( const CScriptOp & rhs );
 	CScriptOp & operator= ( const CScriptOp & rhs );
@@ -41,11 +39,6 @@ public:
 
 	// COp's virtual functions
 	Python AppendTextToProgram();
-	virtual unsigned int MaxNumberOfPrivateFixtures() const { return(0); }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-
-	static Python OpenCamLibDefinition(std::list<HeeksObj *> objects, Python object_title);
-	static Python OpenCamLibDefinition(TopoDS_Edge edge, Python prefix, Python suffix);
-	static Python MiscDefs(std::list<HeeksObj *> objects, Python object_title);
 };

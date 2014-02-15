@@ -150,14 +150,14 @@ public:
 	{
 		if(m_busy_cursor == NULL)m_busy_cursor = new wxBusyCursor();
 
-		if (m_program->m_machine.file_name == _T("not found"))
+		if (m_program->m_machine.reader == _T("not found"))
 		{
-			wxMessageBox(_T("Machine name (defined in Program Properties) not found"));
+			wxMessageBox(_T("Machine reader name (defined in Program Properties) not found"));
 		} // End if - then
 		else
 		{
 			#ifdef WIN32
-				Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.file_name + _T(" \"") + m_filename + _T("\""));
+				Execute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\nc_read.bat\" ") + m_program->m_machine.reader + _T(" \"") + m_filename + _T("\""));
 			#else
 				#ifdef RUNINPLACE
 					wxString path(theApp.GetDllFolder() +_T("/"));
@@ -169,7 +169,7 @@ public:
 					#endif
 				#endif
 
-				Execute(wxString(_T("python \"")) + path + wxString(_T("backplot.py\" \"")) + m_program->m_machine.file_name + wxString(_T("\" \"")) + m_filename + wxString(_T("\"")) );
+				Execute(wxString(_T("python \"")) + path + wxString(_T("backplot.py\" \"")) + m_program->m_machine.reader + wxString(_T("\" \"")) + m_filename + wxString(_T("\"")) );
 			#endif
 		} // End if - else
 	}

@@ -358,7 +358,7 @@ def zigzag(a, stepover, zig_unidirectional):
 
     reorder_zigs()
 
-def pocket(a,tool_radius, extra_offset, stepover, depth_params, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
+def pocket(a,tool_radius, extra_offset, stepover, depthparams, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
     global tool_radius_for_pocket
     global area_for_feed_possible
 
@@ -416,16 +416,16 @@ def pocket(a,tool_radius, extra_offset, stepover, depth_params, from_center, kee
                     a_offset.Offset(current_offset)
             curve_list = get_curve_list(arealist, cut_mode == 'climb')
             
-    depths = depth_params.get_depths()
+    depths = depthparams.get_depths()
     
-    current_start_depth = depth_params.start_depth
+    current_start_depth = depthparams.start_depth
 
     if start_point==None:
         for depth in depths:
-            cut_curvelist1(curve_list, depth_params.rapid_safety_space, current_start_depth, depth, depth_params.clearance_height, keep_tool_down_if_poss)
+            cut_curvelist1(curve_list, depthparams.rapid_safety_space, current_start_depth, depth, depthparams.clearance_height, keep_tool_down_if_poss)
             current_start_depth = depth
 
     else:
         for depth in depths:
-            cut_curvelist2(curve_list, depth_params.rapid_safety_space, current_start_depth, depth, depth_params.clearance_height, keep_tool_down_if_poss, start_point)
+            cut_curvelist2(curve_list, depthparams.rapid_safety_space, current_start_depth, depth, depthparams.clearance_height, keep_tool_down_if_poss, start_point)
             current_start_depth = depth

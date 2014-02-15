@@ -9,14 +9,10 @@ now = datetime.datetime.now()
 class Creator(iso_modal.Creator):
     def __init__(self):
         iso_modal.Creator.__init__(self)
-        self.absolute_flag = True
-        self.prev_g91 = ''
-        self.useCrc = False
-        self.start_of_line = True
+        self.output_block_numbers = False
+        self.output_tool_definitions = False
+        self.output_g43_on_tool_change_line = True
 
-    def write_blocknum(self):
-        self.start_of_line = True
-        
     def SPACE(self):
         if self.start_of_line == True:
             self.start_of_line = False
@@ -35,16 +31,6 @@ class Creator(iso_modal.Creator):
             self.write( ('(Created with emc2b post processor ' + str(now.strftime("%Y/%m/%d %H:%M")) + ')' + '\n') )
         else:  
             self.write( ('(Created with emc2b Cutter Radius Compensation post processor ' + str(now.strftime("%Y/%m/%d %H:%M")) + ')' + '\n') )
-
-	
-
-
-############################################################################
-##  Settings
-
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
-        #self.write('G43 \n')
-        pass
 
     def tool_change(self, id):
         self.write_blocknum()

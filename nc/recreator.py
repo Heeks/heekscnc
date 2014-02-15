@@ -234,9 +234,9 @@ class Redirector(nc.Creator):
         self.cut_path()
         self.circular_pocket(x, y, ToolDiameter, HoleDiameter, ClearanceHeight, StartHeight, MaterialTop, FeedRate, SpindleRPM, HoleDepth, DepthOfCut, StepOver)
 
-    def drill(self, x=None, y=None, dwell=None, depth_params = None, retract_mode=None, spindle_mode=None):
+    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
         self.cut_path()
-        self.original.drill(x, y, dwell, depth_params, spindle_mode, clearance_height)
+        self.original.drill(x, y, dwell, depthparams, spindle_mode, internal_coolant_on)
 
     # argument list adapted for compatibility with Tapping module
     # wild guess - I'm unsure about the purpose of this file and wether this works -haberlerm
