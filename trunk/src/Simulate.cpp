@@ -101,6 +101,6 @@ void RunVoxelcutSimulation()
 	// Set the working directory to the area that contains the DLL so that
 	// the system can find the voxelcut.bat file correctly.
 	::wxSetWorkingDirectory(theApp.GetDllFolder());
-	wxExecute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\VoxelCut.bat\""));
+	wxExecute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\VoxelCut.bat\" ") + theApp.m_program->GetOutputFileName());
 }
 #endif

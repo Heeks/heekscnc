@@ -50,7 +50,11 @@ ProgramDlg::ProgramDlg(wxWindow *parent, HeeksObj* object, const wxString& title
 
 void ProgramDlg::GetDataRaw(HeeksObj* object)
 {
-	((CProgram*)object)->m_machine.file_name = m_cmbMachines->GetValue();
+	std::vector<CMachine> machines;
+	CProgram::GetMachines(machines);
+	
+	CMachine &machine = machines[m_cmbMachines->GetSelection()];
+	((CProgram*)object)->m_machine = machine;
 	((CProgram*)object)->m_output_file_name_follows_data_file_name = m_chkOutputNameFollowsDataName->GetValue();
 	((CProgram*)object)->m_output_file = m_txtOutputFile->GetValue();
 	((CProgram*)object)->m_units = ((m_cmbUnits->GetSelection() == 0) ? 1.0:25.4);
@@ -64,7 +68,7 @@ void ProgramDlg::SetFromDataRaw(HeeksObj* object)
 		for(unsigned int i = 0; i < machines.size(); i++)
 		{
 			CMachine& machine = machines[i];
-			if(machine.file_name == ((CProgram*)object)->m_machine.file_name)
+			if(machine.description == ((CProgram*)object)->m_machine.description)
 			{
 				m_cmbMachines->SetSelection(i);
 				break;

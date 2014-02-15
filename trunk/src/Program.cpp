@@ -162,12 +162,6 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 
 CMachine::CMachine()
 {
-	m_max_spindle_speed = 0.0;
-
-	CNCConfig config;
-	config.Read(_T("safety_height_defined"), &m_safety_height_defined, false );
-	config.Read(_T("safety_height"), &m_safety_height, 0.0 );		// in G53 machine units - indicates where to move to for tool changes
-	config.Read(_("ClearanceHeight"), (double *) &(m_clearance_height), 50.0 ); // in local coordinate system (G54 etc.) to show how tall clamps and vices are for movement between machine operations.
 }
 
 CMachine::CMachine( const CMachine & rhs )
@@ -180,14 +174,11 @@ CMachine & CMachine::operator= ( const CMachine & rhs )
 {
 	if (this != &rhs)
 	{
-		configuration_file_name = rhs.configuration_file_name;
-		file_name = rhs.file_name;
+		post = rhs.post;
+		reader = rhs.reader;
 		suffix = rhs.suffix;
 		description = rhs.description;
-		m_max_spindle_speed = rhs.m_max_spindle_speed;
-		m_safety_height_defined = rhs.m_safety_height_defined;
-		m_safety_height = rhs.m_safety_height;
-		m_clearance_height = rhs.m_clearance_height;
+		py_params = rhs.py_params;
 	} // End if - then
 
 	return(*this);
@@ -271,7 +262,7 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		{
 			CMachine& machine = machines[i];
 			choices.push_back(machine.description);
-			if(machine.file_name == m_machine.file_name)choice = i;
+			if(machine.description == m_machine.description)choice = i;
 		}
 		list->push_back ( new PropertyChoice ( _("machine"),  choices, choice, this, on_set_machine ) );
 	}
@@ -320,52 +311,8 @@ void CProgram::GetProperties(std::list<Property *> *list)
 	HeeksObj::GetProperties(list);
 }
 
-static void on_set_max_spindle_speed(double value, HeeksObj* object)
-{
-    ((CProgram *) object)->m_machine.m_max_spindle_speed = value;
-	heeksCAD->RefreshProperties();
-}
-
-static void on_set_safety_height_defined(const bool value, HeeksObj *object)
-{
-    ((CProgram *)object)->m_machine.m_safety_height_defined = value;
-
-	CNCConfig config;
-	config.Write(_T("safety_height_defined"), ((CProgram *)object)->m_machine.m_safety_height_defined );
-
-    // to do, make undoable properties
-}
-
-static void on_set_safety_height(const double value, HeeksObj *object)
-{
-    ((CProgram *)object)->m_machine.m_safety_height = value;
-
-	CNCConfig config;
-	config.Write(_T("safety_height"), ((CProgram *)object)->m_machine.m_safety_height );
-
-    // to do, make undoable properties
-}
-
-static void on_set_clearance_height( const double value, HeeksObj *object)
-{
-	CMachine *pMachine = &(((CProgram *)object)->m_machine);
-	pMachine->m_clearance_height = value;
-
-	CNCConfig config;
-	config.Write(_T("ClearanceHeight"), pMachine->m_clearance_height);
-
-	heeksCAD->RefreshProperties();
-}
-
 void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
 {
-	list->push_back(new PropertyDouble(_("Maximum Spindle Speed (RPM)"), m_max_spindle_speed, parent, on_set_max_spindle_speed));
-	list->push_back(new PropertyCheck(_("Safety Height Defined"), m_safety_height_defined, parent, on_set_safety_height_defined));
-
-    if (m_safety_height_defined)
-    {
-        list->push_back(new PropertyLength(_("Safety Height (in G53 - Machine - coordinates)"), m_safety_height, parent, on_set_safety_height));
-    }
 } // End GetProperties() method
 
 
@@ -404,7 +351,7 @@ void CProgram::WriteXML(TiXmlNode *root)
 	TiXmlElement * element;
 	element = heeksCAD->NewXMLElement( "Program" );
 	heeksCAD->LinkXMLEndChild( root,  element );
-	element->SetAttribute( "machine", m_machine.file_name.utf8_str());
+	element->SetAttribute( "machine", m_machine.description.utf8_str());
 	element->SetAttribute( "output_file", m_output_file.utf8_str());
 	element->SetAttribute( "output_file_name_follows_data_file_name", (int) (m_output_file_name_follows_data_file_name?1:0));
 
@@ -501,25 +448,10 @@ HeeksObj* CProgram::ReadFromXMLElement(TiXmlElement* pElem)
 
 void CMachine::WriteBaseXML(TiXmlElement *element)
 {
-	element->SetDoubleAttribute( "max_spindle_speed", m_max_spindle_speed);
-	element->SetAttribute( "safety_height_defined", m_safety_height_defined);
-	element->SetDoubleAttribute( "safety_height", m_safety_height);
-	element->SetDoubleAttribute( "clearance_height", m_clearance_height);
 } // End WriteBaseXML() method
 
 void CMachine::ReadBaseXML(TiXmlElement* element)
 {
-	if (element->Attribute("max_spindle_speed"))
-	{
-		element->Attribute("max_spindle_speed", &m_max_spindle_speed);
-	} // End if - then
-
-	int flag = 0;
-	if (element->Attribute("safety_height_defined")) element->Attribute("safety_height_defined", &flag);
-	m_safety_height_defined = (flag != 0);
-	if (element->Attribute("safety_height")) element->Attribute("safety_height", &m_safety_height);
-	if (element->Attribute("clearance_height")) element->Attribute("clearance_height", &m_clearance_height);
-
 } // End ReadBaseXML() method
 
 void ApplyPatternToText(Python &python, int p)
@@ -789,15 +721,22 @@ Python CProgram::RewritePythonProgram()
 	python << _T("from nc.nc import *\n");
 
 	// specific machine
-	if (m_machine.file_name == _T("not found"))
+	if (m_machine.post == _T("not found"))
 	{
-		wxMessageBox(_T("Machine name (defined in Program Properties) not found"));
+		wxMessageBox(_T("Machine post processor name (defined in Program Properties) not found"));
 	} // End if - then
 	else
 	{
-		python << _T("import nc.") + m_machine.file_name + _T("\n");
+		python << _T("from nc.") + m_machine.post + _T(" import *\n");
 		python << _T("\n");
 	} // End if - else
+
+	// write the machine's parameters
+	for(std::list<PyParam>::iterator It = m_machine.py_params.begin(); It != m_machine.py_params.end(); It++)
+	{
+		PyParam &p = *It;
+		python << _T("nc.creator.") << Ctt(p.m_name.c_str()) << _T(" = ") << Ctt(p.m_value.c_str()) << _T("\n");
+	}
 
 	// output file
 	python << _T("output(") << PythonString(GetOutputFileName()) << _T(")\n");
@@ -948,31 +887,73 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 
 	for(element = root->FirstChildElement(); element;	element = element->NextSiblingElement())
 	{
-		//if(!stricmp(element->GetText(), "machine"))
+		CMachine m;
+		for(TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
 		{
-		//TiXmlElement* element = TiXmlHandle(pElem).FirstChildElement("machine").Element();
-
-		//if(element)
-		//{
-			CMachine m;
-			if(const char* pyfile_str = element->Attribute("pyfile"))m.file_name = wxString(Ctt(pyfile_str));
-			if(const char* suffix_str = element->Attribute("suffix"))m.suffix = wxString(Ctt(suffix_str));
-			if(const char* descrp_str = element->Attribute("description"))m.description = wxString(Ctt(descrp_str));
-			machines.push_back(m);
+			std::string name(a->Name());
+			if(name == "post")m.post = wxString(Ctt(a->Value()));
+			else if(name == "reader")m.reader = wxString(Ctt(a->Value()));
+			else if(name == "suffix")m.suffix = wxString(Ctt(a->Value()));
+			else if(name == "description")m.description = wxString(Ctt(a->Value()));
+			else m.py_params.push_back(PyParam(a->Name(), a->Value()));
 		}
+		machines.push_back(m);
 	}
 
 	setlocale(LC_NUMERIC, oldlocale);
 }
 
 // static
-CMachine CProgram::GetMachine(const wxString& file_name)
+void CProgram::GetScriptOps(std::vector< CXmlScriptOp > &script_ops)
+{
+	wxString script_op_file = theApp.GetResFolder() + _T("/script_ops.xml");
+
+	TiXmlDocument doc(Ttc(script_op_file.c_str()));
+	if (!doc.LoadFile())
+	{
+		if(doc.Error())
+		{
+			wxMessageBox(Ctt(doc.ErrorDesc()));
+		}
+		return;
+	}
+
+	char oldlocale[1000];
+	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
+
+	TiXmlHandle hDoc(&doc);
+	TiXmlElement* element;
+	TiXmlNode* root = &doc;
+
+	for(element = root->FirstChildElement(); element;	element = element->NextSiblingElement())
+	{
+		wxString label;
+		wxString bitmap;
+		wxString icon;
+		wxString script;
+
+		for(TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
+		{
+			std::string name(a->Name());
+			if(name == "name")label = wxString(Ctt(a->Value()));
+			else if(name == "bitmap")bitmap = wxString(Ctt(a->Value()));
+			else if(name == "icon")icon = wxString(Ctt(a->Value()));
+			else if(name == "script")script = wxString(Ctt(a->Value()));
+		}
+		script_ops.push_back(CXmlScriptOp(label, bitmap, icon, script));
+	}
+
+	setlocale(LC_NUMERIC, oldlocale);
+}
+
+// static
+CMachine CProgram::GetMachine(const wxString& description)
 {
 	std::vector<CMachine> machines;
 	GetMachines(machines);
 	for(unsigned int i = 0; i<machines.size(); i++)
 	{
-		if(machines[i].file_name == file_name)
+		if(machines[i].description == description)
 		{
 			return machines[i];
 		}
@@ -981,12 +962,9 @@ CMachine CProgram::GetMachine(const wxString& file_name)
 	if(machines.size() > 0)return machines[0];
 
 	CMachine machine;
-	machine.file_name = _T("not found");
+	machine.post = _T("not found");
+	machine.reader = _T("not found");
 	machine.description = _T("not found");
-
-	CNCConfig config;
-	config.Read(_T("safety_height_defined"), &machine.m_safety_height_defined, false);
-	config.Read(_T("safety_height"), &machine.m_safety_height, 0.0);
 
 	return machine;
 }
@@ -1099,14 +1077,15 @@ bool CProgram::operator==( const CProgram & rhs ) const
 
 bool CMachine::operator==( const CMachine & rhs ) const
 {
-	if (configuration_file_name != rhs.configuration_file_name) return(false);
-	if (file_name != rhs.file_name) return(false);
+	if (post != rhs.post) return(false);
+	if (reader != rhs.reader) return(false);
 	if (suffix != rhs.suffix) return(false);
 	if (description != rhs.description) return(false);
-	if (m_max_spindle_speed != rhs.m_max_spindle_speed) return(false);
-	if (m_safety_height_defined != rhs.m_safety_height_defined) return(false);
-	if (m_safety_height != rhs.m_safety_height) return(false);
-	if (m_clearance_height != rhs.m_clearance_height) return(false);
+	if (py_params.size() != rhs.py_params.size())return false;
+	std::list<PyParam>::const_iterator It = py_params.begin(), It2 = rhs.py_params.begin();
+	for(;It != py_params.end(); It++, It2++){
+		if(!((*It) == (*It2)))return false;
+	}
 
 	return(true);
 }
@@ -1115,7 +1094,7 @@ void CProgram::WriteDefaultValues()
 {
 	CNCConfig config;
 
-	config.Write(_T("ProgramMachine"), m_machine.file_name);
+	config.Write(_T("ProgramMachine"), m_machine.description);
 	config.Write(_T("OutputFileNameFollowsDataFileName"), m_output_file_name_follows_data_file_name );
 	config.Write(_T("ProgramOutputFile"), m_output_file);
 	config.Write(_T("ProgramUnits"), m_units);
@@ -1128,9 +1107,9 @@ void CProgram::ReadDefaultValues()
 {
 	CNCConfig config;
 
-	wxString machine_file_name;
-	config.Read(_T("ProgramMachine"), &machine_file_name, _T("emc2b"));
-	m_machine = CProgram::GetMachine(machine_file_name);
+	wxString machine_description;
+	config.Read(_T("ProgramMachine"), &machine_description, _T("LinuxCNC"));
+	m_machine = CProgram::GetMachine(machine_description);
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
     wxStandardPaths standard_paths;
     wxFileName default_path( standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);

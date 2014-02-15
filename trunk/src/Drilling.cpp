@@ -15,6 +15,7 @@
 #include "interface/PropertyLength.h"
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyString.h"
+#include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "Operations.h"
 #include "CTool.h"
@@ -36,9 +37,10 @@ void CDrillingParams::set_initial_values( const double depth, const int tool_num
 {
 	CNCConfig config;
 
-	config.Read(_T("m_dwell"), &m_dwell, 1);
+	config.Read(_T("m_dwell"), &m_dwell, 0);
 	config.Read(_T("m_retract_mode"), &m_retract_mode, 0);
 	config.Read(_T("m_spindle_mode"), &m_spindle_mode, 0);
+	config.Read(_T("m_internal_coolant_on"), &m_internal_coolant_on, false);
 }
 
 void CDrillingParams::write_values_to_config()
@@ -48,6 +50,7 @@ void CDrillingParams::write_values_to_config()
 	config.Write(_T("m_dwell"), m_dwell);
 	config.Write(_T("m_retract_mode"), m_retract_mode);
 	config.Write(_T("m_spindle_mode"), m_spindle_mode);
+	config.Write(_T("m_internal_coolant_on"), m_internal_coolant_on);
 }
 
 
@@ -66,6 +69,12 @@ static void on_set_retract_mode(int value, HeeksObj* object, bool from_undo_redo
 static void on_set_dwell(double value, HeeksObj* object)
 {
 	((CDrilling*)object)->m_params.m_dwell = value;
+	((CDrilling*)object)->m_params.write_values_to_config();
+}
+
+static void on_set_internal_coolant(bool value, HeeksObj* object)
+{
+	((CDrilling*)object)->m_params.m_internal_coolant_on = value;
 	((CDrilling*)object)->m_params.write_values_to_config();
 }
 
@@ -90,6 +99,8 @@ void CDrillingParams::GetProperties(CDrilling* parent, std::list<Property *> *li
 		int choice = int(m_spindle_mode);
 		list->push_back(new PropertyChoice(_("spindle_mode"), choices, choice, parent, on_set_spindle_mode));
 	} // End choice scope
+
+	list->push_back(new PropertyCheck(_("internal coolant on"), m_internal_coolant_on, parent, on_set_internal_coolant));
 }
 
 void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
@@ -101,6 +112,7 @@ void CDrillingParams::WriteXMLAttributes(TiXmlNode *root)
 	element->SetDoubleAttribute( "dwell", m_dwell);
 	element->SetAttribute( "retract_mode", m_retract_mode);
 	element->SetAttribute( "spindle_mode", m_spindle_mode);
+	element->SetAttribute( "internal_coolant_on", m_internal_coolant_on ? 1:0);
 }
 
 void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
@@ -108,6 +120,8 @@ void CDrillingParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("dwell")) pElem->Attribute("dwell", &m_dwell);
 	if (pElem->Attribute("retract_mode")) pElem->Attribute("retract_mode", &m_retract_mode);
 	if (pElem->Attribute("spindle_mode")) pElem->Attribute("spindle_mode", &m_spindle_mode);
+	int i = 0;
+	if (pElem->Attribute("internal_coolant_on")){ pElem->Attribute("internal_coolant_on", &i); m_internal_coolant_on = (i != 0); }
 }
 
 const wxBitmap &CDrilling::GetIcon()
@@ -142,7 +156,8 @@ Python CDrilling::AppendTextToProgram()
 			<< _T("dwell=") << m_params.m_dwell << _T(", ")
 			<< _T("depthparams = depthparams, ")
 			<< _T("retract_mode=") << m_params.m_retract_mode << _T(", ")
-			<< _T("spindle_mode=") << m_params.m_spindle_mode
+			<< _T("spindle_mode=") << m_params.m_spindle_mode << _T(", ")
+			<< _T("internal_coolant_on=") << m_params.m_internal_coolant_on
 			<< _T(")\n");
         theApp.m_location = make_point(p); // Remember where we are.
 	} // End for
@@ -455,6 +470,7 @@ bool CDrillingParams::operator==( const CDrillingParams & rhs) const
 	if (m_dwell != rhs.m_dwell) return(false);
 	if (m_retract_mode != rhs.m_retract_mode) return(false);
 	if (m_spindle_mode != rhs.m_spindle_mode) return(false);
+	if (m_internal_coolant_on != rhs.m_internal_coolant_on) return(false);
 
 	return(true);
 }

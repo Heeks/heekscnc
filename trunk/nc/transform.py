@@ -89,7 +89,7 @@ class Arc:
             original.arc_cw(x, y, z, i, j)
             
 class Drill:
-    def __init__(self, x, y, z, depth, standoff, dwell, peck_depth, retract_mode, spindle_mode, clearance_height):
+    def __init__(self, x, y, z, depth, standoff, dwell, peck_depth, retract_mode, spindle_mode, internal_coolant_on):
         self.x = x
         self.y = y
         self.z = z
@@ -99,7 +99,7 @@ class Drill:
         self.peck_depth = peck_depth
         self.retract_mode = retract_mode
         self.spindle_mode = spindle_mode
-        self.clearance_height = clearance_height
+        self.internal_coolant_on = internal_coolant_on
         
     def Do(self, original, matrix):
         x,y,z = matrix.TransformedPoint(self.x, self.y, self.z)
@@ -308,8 +308,8 @@ class Creator:
     def circular_pocket(self, x=None, y=None, ToolDiameter=None, HoleDiameter=None, ClearanceHeight=None, StartHeight=None, MaterialTop=None, FeedRate=None, SpindleRPM=None, HoleDepth=None, DepthOfCut=None, StepOver=None ):
         self.circular_pocket(x, y, ToolDiameter, HoleDiameter, ClearanceHeight, StartHeight, MaterialTop, FeedRate, SpindleRPM, HoleDepth, DepthOfCut, StepOver)
 
-    def drill(self, x=None, y=None, dwell=None, depth_params = None, retract_mode=None, spindle_mode=None):
-        self.commands.append(Drill(x, y, dwell, depth_params, spindle_mode, clearance_height))
+    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
+        self.commands.append(Drill(x, y, dwell, depthparams, spindle_mode, internal_coolant_on))
 
     # argument list adapted for compatibility with Tapping module
     # wild guess - I'm unsure about the purpose of this file and wether this works -haberlerm

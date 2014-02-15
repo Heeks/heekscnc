@@ -60,10 +60,25 @@ class Creator(nc.Creator):
         self.shift_x = 0.0
         self.shift_y = 0.0
         self.shift_z = 0.0        
+        self.z_for_g53 = None # set this to a value to output G53 Zvalue in tool change and at program end
+        self.output_h_and_d_at_tool_change = False
+        self.output_block_numbers = True
+        self.start_of_line = False # set in write_blocknum when output_block_numbers is False
+        self.output_tool_definitions = True
+        self.output_g43_on_tool_change_line = False
+        self.output_internal_coolant_commands = False
+        self.internal_coolant_on = None
     ############################################################################
     ##  Codes
 
-    def SPACE(self): return('')
+    def SPACE_STR(self): return ''
+    def SPACE(self):
+        if self.start_of_line == True:
+            self.start_of_line = False            
+            return ''
+        else:
+            return self.SPACE_STR()
+            
     def FORMAT_FEEDRATE(self): return('%.2f') 
     def FORMAT_ANG(self): return('%.1f')
     def FORMAT_TIME(self): return self.fmt
@@ -117,11 +132,13 @@ class Creator(nc.Creator):
     def DRILL(self): return('G81')
     def DRILL_WITH_DWELL(self, dwell): return('G82' + self.SPACE() + self.TIME() + (self.FORMAT_TIME().string(dwell)))
     def PECK_DRILL(self): return('G83')
-    def PECK_DEPTH(self, depth): return(self.SPACE() + 'Q' + (self.fmt.string(depth)))
-    def RETRACT(self, height): return(self.SPACE() + 'R' + (self.fmt.string(height)))
+    def PECK_DEPTH(self, depth): return('Q' + (self.fmt.string(depth)))
+    def RETRACT(self, height): return('R' + (self.fmt.string(height)))
     def END_CANNED_CYCLE(self): return('G80')
     def TAP(self): return('G84')
-    def TAP_DEPTH(self, depth): return(self.SPACE() + 'K' + (self.fmt.string(depth)))
+    def TAP_DEPTH(self, depth): return('K' + (self.fmt.string(depth)))
+    def INTERNAL_COOLANT_ON(self): return('M18')
+    def INTERNAL_COOLANT_OFF(self): return('M28')
 
     def X(self): return('X')
     def Y(self): return('Y')
@@ -149,22 +166,31 @@ class Creator(nc.Creator):
     ##  Internals
 
     def write_feedrate(self):
+        self.write(self.SPACE())
         self.f.write(self)
 
     def write_preps(self):
+        if self.g_plane.str:
+            self.write(self.SPACE())
         self.g_plane.write(self)
         for g in self.g_list:
             self.write(self.SPACE() + g)
         self.g_list = []
 
     def write_misc(self):
-        if (len(self.m)) : self.write(self.m.pop())
+        if (len(self.m)):
+            self.write(self.SPACE())
+            self.write(self.m.pop())
 
     def write_blocknum(self):
-        self.write(self.BLOCK() % self.n)
-        self.n += 10
-        
+        if self.output_block_numbers:
+            self.write(self.BLOCK() % self.n)
+            self.n += 10
+        else:
+            self.start_of_line = True
+            
     def write_spindle(self):
+        self.write(self.SPACE())
         self.s.write(self)
 
     ############################################################################
@@ -185,6 +211,9 @@ class Creator(nc.Creator):
 
 
     def program_end(self):
+        if self.z_for_g53 != None:
+            self.write_blocknum()
+            self.write(self.SPACE() + self.MACHINE_COORDINATES() + self.SPACE() + 'Z' + str(self.z_for_g53) + '\n')
         self.write_blocknum()
         self.write(self.SPACE() + self.PROGRAM_END() + '\n')
 
@@ -265,22 +294,32 @@ class Creator(nc.Creator):
     ##  Tools
 
     def tool_change(self, id):
+        if (self.t != None) and (self.z_for_g53 != None):
+            self.write_blocknum()
+            self.write('G53 Z' + str(self.z_for_g53) + '\n')
         self.write_blocknum()
-        self.write(self.SPACE() + (self.TOOL() % id) + '\n')
+        self.write(self.SPACE() + (self.TOOL() % id))
+        if self.output_g43_on_tool_change_line:
+            self.write(self.SPACE() + 'G43')
+        self.write('\n')
+        if self.output_h_and_d_at_tool_change == True:
+            self.write_blocknum()
+            self.write(self.SPACE() + 'G43' + self.SPACE() + 'D' + str(id) + self.SPACE() + 'H' + str(id) + '\n')
         self.t = id
 
     def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
-        self.write_blocknum()
-        self.write(self.SPACE() + self.TOOL_DEFINITION())
-        self.write(self.SPACE() + ('P%i' % id) + ' ')
+        if self.output_tool_definitions:
+            self.write_blocknum()
+            self.write(self.SPACE() + self.TOOL_DEFINITION())
+            self.write(self.SPACE() + ('P%i' % id) + ' ')
 
-        if (radius != None):
-            self.write(self.SPACE() + ('R%.3f' % radius))
+            if (radius != None):
+                self.write(self.SPACE() + ('R%.3f' % radius))
 
-        if (length != None):
-            self.write(self.SPACE() + 'Z%.3f' % length)
+            if (length != None):
+                self.write(self.SPACE() + 'Z%.3f' % length)
 
-        self.write('\n')
+            self.write('\n')
 
     def offset_radius(self, id, radius=None):
         pass
@@ -332,18 +371,18 @@ class Creator(nc.Creator):
 
     def spindle(self, s, clockwise):
         if clockwise == True:
-            self.s.set(s, self.SPACE() + self.SPINDLE_CW(), self.SPACE() + self.SPINDLE_CCW())
+            self.s.set(s, self.SPINDLE_CW(), self.SPINDLE_CCW())
         else:
-            self.s.set(s, self.SPACE() + self.SPINDLE_CCW(), self.SPACE() + self.SPINDLE_CW())
+            self.s.set(s, self.SPINDLE_CCW(), self.SPINDLE_CW())
 
     def coolant(self, mode=0):
-        if (mode <= 0) : self.m.append(self.SPACE() + self.COOLANT_OFF())
-        elif (mode == 1) : self.m.append(self.SPACE() + self.COOLANT_MIST())
-        elif (mode == 2) : self.m.append(self.SPACE() + self.COOLANT_FLOOD())
+        if (mode <= 0) : self.m.append(self.COOLANT_OFF())
+        elif (mode == 1) : self.m.append(self.COOLANT_MIST())
+        elif (mode == 2) : self.m.append(self.COOLANT_FLOOD())
 
     def gearrange(self, gear=0):
-        if (gear <= 0) : self.m.append(self.SPACE() + self.GEAR_OFF())
-        elif (gear <= 4) : self.m.append(self.SPACE() + self.GEAR() % (gear + GEAR_BASE()))
+        if (gear <= 0) : self.m.append(self.GEAR_OFF())
+        elif (gear <= 4) : self.m.append(self.GEAR() % (gear + GEAR_BASE()))
 
     ############################################################################
     ##  Moves
@@ -746,6 +785,21 @@ class Creator(nc.Creator):
 
     def profile(self):
         pass
+    
+    def write_internal_coolant_commands(self, internal_coolant_on):
+        if (internal_coolant_on != None) and (self.output_internal_coolant_commands == True):
+            if internal_coolant_on == True:
+                if self.internal_coolant_on != True:
+                    self.write_blocknum()
+                    self.write(self.SPACE())
+                    self.write(self.INTERNAL_COOLANT_ON() + '\n')
+                    self.internal_coolant_on = True
+            else:
+                if self.internal_coolant_on != False:
+                    self.write_blocknum()
+                    self.write(self.SPACE())
+                    self.write(self.INTERNAL_COOLANT_OFF() + '\n')
+                    self.internal_coolant_on = False
 
     # The drill routine supports drilling (G81), drilling with dwell (G82) and peck drilling (G83).
     # The x,y,z values are INITIAL locations (above the hole to be made.  This is in contrast to
@@ -764,22 +818,24 @@ class Creator(nc.Creator):
     # revert it.  I must set the mode so that I can be sure the values I'm passing in make
     # sense to the end-machine.
     #
-    def drill(self, x=None, y=None, dwell=None, depth_params = None, retract_mode=None, spindle_mode=None):
-        if (depth_params.clearance_height == None):        
+    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
+        if (depthparams.clearance_height == None):        
             return
+        
+        self.write_internal_coolant_commands(internal_coolant_on)
             
         drillExpanded = self.drillExpanded
-        if (depth_params.step_down != 0) and (dwell != 0):
+        if (depthparams.step_down != 0) and (dwell != 0):
             # pecking and dwell together
             if self.dwell_allowed_in_G83 != True:     
                 drillExpanded = True
           
         if drillExpanded:
             # for machines which don't understand G81, G82 etc.
-            peck_depth = depth_params.step_down
+            peck_depth = depthparams.step_down
             if peck_depth == None:
-                peck_depth = depth_params.final_depth
-            current_z = depth_params.start_depth
+                peck_depth = depthparams.final_depth
+            current_z = depthparams.start_depth
             self.rapid(x, y)
             
             first = True
@@ -787,20 +843,20 @@ class Creator(nc.Creator):
             
             while True:
                 next_z = current_z - peck_depth
-                if next_z < (depth_params.final_depth + 0.001):
-                    next_z = depth_params.final_depth
+                if next_z < (depthparams.final_depth + 0.001):
+                    next_z = depthparams.final_depth
                     last_cut = True
                 if next_z >= current_z:
                     break;
                 if first:
-                    self.rapid(z = depth_params.start_depth + depth_params.rapid_safety_space)
+                    self.rapid(z = depthparams.start_depth + depthparams.rapid_safety_space)
                 else:
                     self.rapid(z = current_z)
                 self.feed(z = next_z)
                 if dwell != 0 and last_cut:
                     self.dwell(dwell)        
-                if last_cut:self.rapid(z = depth_params.clearance_height)
-                else: self.rapid(z = depth_params.start_depth + depth_params.rapid_safety_space)
+                if last_cut:self.rapid(z = depthparams.clearance_height)
+                else: self.rapid(z = depthparams.start_depth + depthparams.rapid_safety_space)
                 current_z = next_z
                 first = False
             
@@ -808,16 +864,16 @@ class Creator(nc.Creator):
 
         self.in_canned_cycle = True
         self.write_preps()
-        self.write_blocknum()                
+        self.write_blocknum()
         
-        if (depth_params.step_down != 0):        
-            # We're pecking.  Let's find a tree. 
-            if self.drill_modal:       
-                if  self.PECK_DRILL() + self.PECK_DEPTH(depth_params.step_down) != self.prev_drill:
-                    self.write(self.SPACE() + self.PECK_DRILL() + self.SPACE() + self.PECK_DEPTH(depth_params.step_down))  
-                    self.prev_drill = self.PECK_DRILL() + self.PECK_DEPTH(depth_params.step_down)
+        if (depthparams.step_down != 0):        
+            # G83 peck drilling
+            if self.drill_modal:
+                if self.PECK_DRILL() + self.PECK_DEPTH(depthparams.step_down) != self.prev_drill:
+                    self.write(self.SPACE() + self.PECK_DRILL() + self.SPACE() + self.PECK_DEPTH(depthparams.step_down))  
+                    self.prev_drill = self.PECK_DRILL() + self.PECK_DEPTH(depthparams.step_down)
             else:       
-                self.write(self.PECK_DRILL() + self.PECK_DEPTH(depth_params.step_down)) 
+                self.write(self.PECK_DRILL() + self.PECK_DEPTH(depthparams.step_down)) 
             
             if (self.dwell != 0) and self.dwell_allowed_in_G83:
                 self.write(self.SPACE() + self.TIME() + (self.FORMAT_TIME().string(dwell)))
@@ -844,7 +900,7 @@ class Creator(nc.Creator):
                     self.write(self.SPACE() + self.DRILL_WITH_DWELL(dwell))
     
     # Set the retraction point to the 'standoff' distance above the starting z height.        
-        retract_height = depth_params.start_depth + depth_params.rapid_safety_space        
+        retract_height = depthparams.start_depth + depthparams.rapid_safety_space        
         if (x != None):        
             dx = x - self.x        
             self.write(self.SPACE() + self.X() + (self.fmt.string(x + self.shift_x)))        
@@ -855,15 +911,15 @@ class Creator(nc.Creator):
             self.write(self.SPACE() + self.Y() + (self.fmt.string(y + self.shift_y)))        
             self.y = y
                       
-        dz = (depth_params.start_depth + depth_params.rapid_safety_space) - self.z # In the end, we will be standoff distance above the z value passed in.
+        dz = (depthparams.start_depth + depthparams.rapid_safety_space) - self.z # In the end, we will be standoff distance above the z value passed in.
 
         if self.drill_modal:
-            if depth_params.start_depth != self.prev_z:
-                self.write(self.SPACE() + self.Z() + (self.fmt.string(depth_params.final_depth)))
-                self.prev_z=depth_params.start_depth
+            if depthparams.start_depth != self.prev_z:
+                self.write(self.SPACE() + self.Z() + (self.fmt.string(depthparams.final_depth)))
+                self.prev_z=depthparams.start_depth
         else:             
-            self.write(self.SPACE() + self.Z() + (self.fmt.string(depth_params.final_depth)))    # This is the 'z' value for the bottom of the hole.
-            self.z = (depth_params.start_depth + depth_params.rapid_safety_space)            # We want to remember where z is at the end (at the top of the hole)
+            self.write(self.SPACE() + self.Z() + (self.fmt.string(depthparams.final_depth)))    # This is the 'z' value for the bottom of the hole.
+            self.z = (depthparams.start_depth + depthparams.rapid_safety_space)            # We want to remember where z is at the end (at the top of the hole)
 
         if self.drill_modal:
             if self.prev_retract  != self.RETRACT(retract_height) :
@@ -885,6 +941,7 @@ class Creator(nc.Creator):
             return
         self.write_blocknum()
         self.write(self.SPACE() + self.END_CANNED_CYCLE() + '\n')
+        self.write_internal_coolant_commands(0)
         self.prev_drill = ''
         self.prev_g0123 = ''
         self.prev_z = ''   

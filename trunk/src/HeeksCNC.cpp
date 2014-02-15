@@ -523,6 +523,123 @@ void CHeeksCNCApp::GetNewSurfaceTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_surface_tool);
 }
 
+#define MAX_XML_SCRIPT_OPS 10
+
+std::vector< CXmlScriptOp > script_ops;
+int script_op_flyout_index = 0;
+
+static void NewXmlScriptOp(int i)
+{
+	CScriptOp *new_object = new CScriptOp();
+	new_object->m_title_made_from_id = false;
+	new_object->m_title = script_ops[i].m_name;
+	new_object->m_str = script_ops[i].m_script;
+	new_object->m_user_icon = true;
+	new_object->m_user_icon_name = script_ops[i].m_icon;
+
+	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
+}
+
+static void NewXmlScriptOpCallback0(wxCommandEvent &event)
+{
+	NewXmlScriptOp(0);
+}
+
+static void NewXmlScriptOpCallback1(wxCommandEvent &event)
+{
+	NewXmlScriptOp(1);
+}
+
+static void NewXmlScriptOpCallback2(wxCommandEvent &event)
+{
+	NewXmlScriptOp(2);
+}
+
+static void NewXmlScriptOpCallback3(wxCommandEvent &event)
+{
+	NewXmlScriptOp(3);
+}
+
+static void NewXmlScriptOpCallback4(wxCommandEvent &event)
+{
+	NewXmlScriptOp(4);
+}
+
+static void NewXmlScriptOpCallback5(wxCommandEvent &event)
+{
+	NewXmlScriptOp(5);
+}
+
+static void NewXmlScriptOpCallback6(wxCommandEvent &event)
+{
+	NewXmlScriptOp(6);
+}
+
+static void NewXmlScriptOpCallback7(wxCommandEvent &event)
+{
+	NewXmlScriptOp(7);
+}
+
+static void NewXmlScriptOpCallback8(wxCommandEvent &event)
+{
+	NewXmlScriptOp(8);
+}
+
+static void NewXmlScriptOpCallback9(wxCommandEvent &event)
+{
+	NewXmlScriptOp(9);
+}
+
+static void AddXmlScriptOpMenuItems(wxMenu *menu = NULL)
+{
+	CProgram::GetScriptOps(script_ops);
+
+	int i = 0;
+	for(std::vector< CXmlScriptOp >::iterator It = script_ops.begin(); It != script_ops.end(); It++, i++)
+	{
+		CXmlScriptOp &s = *It;
+		if(i >= MAX_XML_SCRIPT_OPS)break;
+		void(*onButtonFunction)(wxCommandEvent&) = NULL;
+		switch(i)
+		{
+		case 0:
+			onButtonFunction = NewXmlScriptOpCallback0;
+			break;
+		case 1:
+			onButtonFunction = NewXmlScriptOpCallback1;
+			break;
+		case 2:
+			onButtonFunction = NewXmlScriptOpCallback2;
+			break;
+		case 3:
+			onButtonFunction = NewXmlScriptOpCallback3;
+			break;
+		case 4:
+			onButtonFunction = NewXmlScriptOpCallback4;
+			break;
+		case 5:
+			onButtonFunction = NewXmlScriptOpCallback5;
+			break;
+		case 6:
+			onButtonFunction = NewXmlScriptOpCallback6;
+			break;
+		case 7:
+			onButtonFunction = NewXmlScriptOpCallback7;
+			break;
+		case 8:
+			onButtonFunction = NewXmlScriptOpCallback8;
+			break;
+		case 9:
+			onButtonFunction = NewXmlScriptOpCallback9;
+			break;
+		}
+
+		if(menu)
+			heeksCAD->AddMenuItem(menu, s.m_name, ToolImage(s.m_bitmap), onButtonFunction);
+		else
+			heeksCAD->AddFlyoutButton(s.m_name, ToolImage(s.m_bitmap), s.m_name, onButtonFunction);
+	}
+}	
 
 static void AddToolBars()
 {
@@ -542,6 +659,10 @@ static void AddToolBars()
 
 		heeksCAD->StartToolBarFlyout(_("Other operations"));
 		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Pattern"), ToolImage(_T("pattern")), _("New Pattern..."), NewPatternMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Surface"), ToolImage(_T("surface")), _("New Surface..."), NewSurfaceMenuCallback);
+		AddXmlScriptOpMenuItems();
+
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Tool"), ToolImage(_T("drill")), _("New Tool Definition..."), NewDrillMenuCallback);
@@ -818,6 +939,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("Script Operation..."), ToolImage(_T("scriptop")), NewScriptOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Pattern..."), ToolImage(_T("pattern")), NewPatternMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Surface..."), ToolImage(_T("surface")), NewSurfaceMenuCallback);
+	AddXmlScriptOpMenuItems(menuOperations);
 
 	// Tools menu
 	wxMenu *menuTools = new wxMenu;
