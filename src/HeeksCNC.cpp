@@ -592,6 +592,7 @@ static void NewXmlScriptOpCallback9(wxCommandEvent &event)
 
 static void AddXmlScriptOpMenuItems(wxMenu *menu = NULL)
 {
+	script_ops.clear();
 	CProgram::GetScriptOps(script_ops);
 
 	int i = 0;
