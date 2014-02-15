@@ -661,7 +661,7 @@ class Creator(nc.Creator):
         else: arc_g_code = self.ARC_CCW()
         if self.g0123_modal:
             if self.prev_g0123 != arc_g_code:
-                self.write(arc_g_code)
+                self.write(self.SPACE() + arc_g_code)
                 self.prev_g0123 = arc_g_code
         else:
             self.write(arc_g_code)
