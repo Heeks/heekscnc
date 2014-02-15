@@ -17,6 +17,7 @@ class DrillingDlg : public DepthOpDlg
 	wxCheckBox *m_chkFeedRetract;
 	wxCheckBox *m_chkStopSpindleAtBottom;
 	wxButton *m_btnPointsPick;
+	wxCheckBox *m_chkInternalCoolantOn;
 
 public:
     DrillingDlg(wxWindow *parent, CDrilling* object, const wxString& title = wxString(_T("Drilling Operation")), bool top_level = true);

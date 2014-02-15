@@ -14,6 +14,7 @@ enum
 	ID_FEED_RETRACT = 100,
 	ID_POINTS_PICK,
 	ID_STOP_SPINDLE,
+	ID_INTERNAL_COOLANT_ON,
 };
 
 BEGIN_EVENT_TABLE(DrillingDlg, DepthOpDlg)
@@ -33,6 +34,7 @@ DrillingDlg::DrillingDlg(wxWindow *parent, CDrilling* object, const wxString& ti
 	leftControls.push_back(MakeLabelAndControl(_("dwell"), m_dblDwell = new CDoubleCtrl(this)));
 	leftControls.push_back( HControl( m_chkFeedRetract = new wxCheckBox( this, ID_FEED_RETRACT, _("feed retract") ), wxALL ));
 	leftControls.push_back( HControl( m_chkStopSpindleAtBottom = new wxCheckBox( this, ID_STOP_SPINDLE, _("stop spindle at bottom") ), wxALL ));
+	leftControls.push_back( HControl( m_chkInternalCoolantOn = new wxCheckBox( this, ID_INTERNAL_COOLANT_ON, _("interal coolant on") ), wxALL ));
 
 	for(std::list<HControl>::iterator It = save_leftControls.begin(); It != save_leftControls.end(); It++)
 	{
@@ -54,6 +56,7 @@ void DrillingDlg::GetDataRaw(HeeksObj* object)
 	((CDrilling*)object)->m_params.m_dwell = m_dblDwell->GetValue();
 	((CDrilling*)object)->m_params.m_retract_mode = m_chkFeedRetract->GetValue();
 	((CDrilling*)object)->m_params.m_spindle_mode = m_chkStopSpindleAtBottom->GetValue();
+	((CDrilling*)object)->m_params.m_internal_coolant_on = m_chkInternalCoolantOn->GetValue();
 
 	DepthOpDlg::GetDataRaw(object);
 }
@@ -64,6 +67,7 @@ void DrillingDlg::SetFromDataRaw(HeeksObj* object)
 	m_dblDwell->SetValue(((CDrilling*)object)->m_params.m_dwell);
 	m_chkFeedRetract->SetValue(((CDrilling*)object)->m_params.m_retract_mode != 0);
 	m_chkStopSpindleAtBottom->SetValue(((CDrilling*)object)->m_params.m_spindle_mode != 0);
+	m_chkInternalCoolantOn->SetValue(((CDrilling*)object)->m_params.m_internal_coolant_on != 0);
 
 	DepthOpDlg::SetFromDataRaw(object);
 }
@@ -80,6 +84,11 @@ void DrillingDlg::SetPictureByWindow(wxWindow* w)
 	{
 		if(m_chkStopSpindleAtBottom->GetValue())SetPicture(_T("stop spindle at bottom"));
 		else SetPicture(_T("dont stop spindle"));
+	}
+	else if(w == m_chkInternalCoolantOn)
+	{
+		if(m_chkInternalCoolantOn->GetValue())SetPicture(_T("internal coolant on"));
+		else SetPicture(_T("internal coolant off"));
 	}
 	else DepthOpDlg::SetPictureByWindow(w);
 
