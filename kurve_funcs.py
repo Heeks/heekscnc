@@ -2,12 +2,16 @@ import math
 from nc.nc import *
 import area
 
-def set_good_start_point( curve ):
+def set_good_start_point( curve, rev ):
     if curve.IsClosed():
         # find the longest span and use the middle as the new start point
         longest_length = None
         mid_point = None
-        for span in curve.GetSpans():
+        spans = curve.GetSpans()
+        if rev:
+            spans = reversed(spans)
+
+        for span in spans:
             length = span.Length()
             if longest_length == None or length > longest_length:
                 longest_length = length
