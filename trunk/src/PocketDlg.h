@@ -8,11 +8,19 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "DepthOpDlg.h"
+#include "SketchOpDlg.h"
 
-class PocketDlg : public DepthOpDlg
+class PocketDlg : public SketchOpDlg
 {
-	HTypeObjectDropDown *m_cmbSketch;
+	enum
+	{
+		ID_STARTING_PLACE = ID_SKETCH_ENUM_MAX,
+		ID_CUT_MODE,
+		ID_KEEP_TOOL_DOWN,
+		ID_USE_ZIG_ZAG,
+		ID_ZIG_UNIDIRECTIONAL,
+	};
+
 	CLengthCtrl *m_lgthStepOver;
 	CLengthCtrl *m_lgthMaterialAllowance;
 	wxComboBox *m_cmbStartingPlace;
@@ -22,7 +30,6 @@ class PocketDlg : public DepthOpDlg
 	wxCheckBox *m_chkUseZigZag;
 	CDoubleCtrl *m_dblZigAngle;
 	wxCheckBox *m_chkZigUnidirectional;
-	wxButton *m_btnSketchPick;
 
 	void EnableZigZagControls();
 
@@ -38,7 +45,6 @@ public:
 	void SetPicture(const wxString& name);
 
 	void OnCheckUseZigZag(wxCommandEvent& event);
-	void OnSketchPick( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };

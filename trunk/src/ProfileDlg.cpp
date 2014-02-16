@@ -9,20 +9,7 @@
 #include "Profile.h"
 #include "CTool.h"
 
-enum
-{
-	ID_SKETCH = 100,
-	ID_SKETCH_PICK,
-	ID_TOOL_ON_SIDE,
-	ID_CUT_MODE,
-	ID_DO_FINISHING_PASS,
-	ID_ONLY_FINISHING_PASS,
-	ID_FINISH_CUT_MODE,
-};
-
-BEGIN_EVENT_TABLE(ProfileDlg, DepthOpDlg)
-    EVT_COMBOBOX(ID_SKETCH,HeeksObjDlg::OnComboOrCheck)
-    EVT_BUTTON(ID_SKETCH_PICK,ProfileDlg::OnSketchPick)
+BEGIN_EVENT_TABLE(ProfileDlg, SketchOpDlg)
     EVT_COMBOBOX(ID_TOOL_ON_SIDE,HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
     EVT_CHECKBOX(ID_DO_FINISHING_PASS, ProfileDlg::OnCheckFinishingPass)
@@ -31,13 +18,12 @@ BEGIN_EVENT_TABLE(ProfileDlg, DepthOpDlg)
 END_EVENT_TABLE()
 
 ProfileDlg::ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title, bool top_level)
-: DepthOpDlg(parent, object, false, title, false)
+: SketchOpDlg(parent, object, title, false)
 {
 	std::list<HControl> save_leftControls = leftControls;
 	leftControls.clear();
 
 	// add all the controls to the left side
-	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject()), m_btnSketchPick = new wxButton(this, ID_SKETCH_PICK, _("Pick"))));
 	wxString tool_on_side_choices[] = {_("left"), _("right"), _("on")};
 	leftControls.push_back(MakeLabelAndControl( _("tool on side"), m_cmbToolOnSide = new wxComboBox(this, ID_TOOL_ON_SIDE, _T(""), wxDefaultPosition, wxDefaultSize, 3, tool_on_side_choices)));
 
@@ -67,9 +53,6 @@ ProfileDlg::ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title
 
 void ProfileDlg::GetDataRaw(HeeksObj* object)
 {
-	((CProfile*)object)->m_sketches.clear();
-	int sketch = m_cmbSketch->GetSelectedId();
-
 	switch (m_cmbToolOnSide->GetSelection())
 	{
 	case 1:
@@ -85,7 +68,6 @@ void ProfileDlg::GetDataRaw(HeeksObj* object)
 		break;
 	} // End switch
 
-	if(sketch != 0)((CProfile*)object)->m_sketches.push_back(sketch);
 	((CProfile*)object)->m_profile_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CProfileParams::eClimb : CProfileParams::eConventional;
 
 	((CProfile*)object)->m_profile_params.m_auto_roll_radius = m_lgthRollRadius->GetValue();
@@ -97,16 +79,11 @@ void ProfileDlg::GetDataRaw(HeeksObj* object)
 	((CProfile*)object)->m_profile_params.m_finishing_cut_mode = (m_cmbFinishingCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CProfileParams::eClimb : CProfileParams::eConventional;
 	((CProfile*)object)->m_profile_params.m_finishing_step_down = m_lgthFinishStepDown->GetValue();
 
-	DepthOpDlg::GetDataRaw(object);
+	SketchOpDlg::GetDataRaw(object);
 }
 
 void ProfileDlg::SetFromDataRaw(HeeksObj* object)
 {
-	if(((CProfile*)object)->m_sketches.size() > 0)
-		m_cmbSketch->SelectById(((CProfile*)object)->m_sketches.front());
-	else
-		m_cmbSketch->SelectById(0);
-
 	{
 		int choice = int(CProfileParams::eOn);
 		switch (((CProfile*)object)->m_profile_params.m_tool_on_side)
@@ -139,7 +116,7 @@ void ProfileDlg::SetFromDataRaw(HeeksObj* object)
 
 	EnableControls();
 
-	DepthOpDlg::SetFromDataRaw(object);
+	SketchOpDlg::SetFromDataRaw(object);
 }
 
 void ProfileDlg::EnableControls()
@@ -205,7 +182,7 @@ void ProfileDlg::SetPictureByWindow(wxWindow* w)
 		else HeeksObjDlg::SetPicture(_T("conventional milling"),_T("pocket"));
 	}
 	else if(w == m_lgthFinishStepDown)HeeksObjDlg::SetPicture(_T("step down"),_T("depthop"));
-	else DepthOpDlg::SetPictureByWindow(w);
+	else SketchOpDlg::SetPictureByWindow(w);
 
 }
 
@@ -225,9 +202,8 @@ void ProfileDlg::SetSketchOrderAndCombo()
 {
 	m_order = SketchOrderTypeUnknown;
 
-	if(((CProfile*)m_object)->GetNumSketches() == 1)
 	{
-		HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, ((CProfile*)m_object)->m_sketches.front());
+		HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, ((CProfile*)m_object)->m_sketch);
 		if((sketch) && (sketch->GetType() == SketchType))
 		{
 			m_order = heeksCAD->GetSketchOrder(sketch);
@@ -254,11 +230,6 @@ void ProfileDlg::SetSketchOrderAndCombo()
 	}
 }
 
-void ProfileDlg::OnSketchPick( wxCommandEvent& event )
-{
-	EndModal(ID_SKETCH_PICK);
-}
-
 bool ProfileDlg::Do(CProfile* object)
 {
 	ProfileDlg dlg(heeksCAD->GetMainFrame(), object);
@@ -274,17 +245,7 @@ bool ProfileDlg::Do(CProfile* object)
 		}
 		else if(result == ID_SKETCH_PICK)
 		{
-			heeksCAD->ClearMarkedList();
-			heeksCAD->PickObjects(_("Pick a sketch"), MARKING_FILTER_SKETCH, true);
-
-			dlg.m_cmbSketch->Recreate();
-			dlg.Fit();
-
-			const std::list<HeeksObj*> &list = heeksCAD->GetMarkedList();
-			if(list.size() > 0)
-			{
-				dlg.m_cmbSketch->SelectById(list.front()->GetID());
-			}
+			dlg.PickSketch();
 		}
 		else
 		{

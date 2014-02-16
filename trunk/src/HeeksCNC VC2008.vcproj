@@ -297,7 +297,7 @@
 				ObjectFile=".\vc_msw\"
 				ProgramDataBaseFileName="vc_msw\HeeksCNC.pdb"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="1"
 				CompileAs="0"
 			/>
 			<Tool
@@ -315,7 +315,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\vc8\lib&quot;"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="0"
 				EnableCOMDATFolding="0"
@@ -788,6 +788,22 @@
 		</File>
 		<File
 			RelativePath=".\Simulate.h"
+			>
+		</File>
+		<File
+			RelativePath=".\SketchOp.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\SketchOp.h"
+			>
+		</File>
+		<File
+			RelativePath=".\SketchOpDlg.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\SketchOpDlg.h"
 			>
 		</File>
 		<File

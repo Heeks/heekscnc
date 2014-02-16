@@ -13,13 +13,6 @@
 #include "Patterns.h"
 #include "Surfaces.h"
 
-enum
-{
-	ID_TOOL = 200,
-	ID_PATTERN,
-	ID_SURFACE,
-};
-
 BEGIN_EVENT_TABLE(SpeedOpDlg, HeeksObjDlg)
     EVT_COMBOBOX(ID_TOOL,HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_PATTERN,HeeksObjDlg::OnComboOrCheck)

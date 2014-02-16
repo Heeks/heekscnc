@@ -16,6 +16,18 @@ public:
 	wxString BitmapPath(){ return _T("selsketch");}
 };
 
+class ReselectSketch: public Tool{
+public:
+	int m_sketch;
+	HeeksObj* m_object;
+	ReselectSketch(): m_sketch(0), m_object(NULL){}
+
+	// Tool's virtual functions
+	const wxChar* GetTitle(){return _("Re-select sketch");}
+	void Run();
+	wxString BitmapPath(){ return _T("selsketch");}
+};
+
 class ReselectSolids: public Tool{
 public:
 	std::list<int> *m_solids;
@@ -29,4 +41,3 @@ public:
 };
 
 void AddSolidsProperties(std::list<Property *> *list, const std::list<int> &sketches);
-void AddSketchesProperties(std::list<Property *> *list, const std::list<int> &sketches);

@@ -30,11 +30,32 @@ static bool GetSketches(std::list<int>& sketches )
 void ReselectSketches::Run()
 {
 	std::list<int> sketches;
-	heeksCAD->PickObjects(_("Select Sketches"), MARKING_FILTER_SKETCH | MARKING_FILTER_CIRCLE | MARKING_FILTER_AREA);
+	heeksCAD->PickObjects(_("Select Sketches"), MARKING_FILTER_SKETCH_GROUP);
 	if(GetSketches( sketches ))
 	{
 		m_sketches->clear();
 		*m_sketches = sketches;
+		m_object->ReloadPointers();
+		// to do, make undoable with properties
+	}
+	else
+	{
+		wxMessageBox(_("Select cancelled. No sketches were selected!"));
+	}
+
+	// get back to the operation's properties
+	heeksCAD->ClearMarkedList();
+	heeksCAD->Mark(m_object);
+}
+
+void ReselectSketch::Run()
+{
+	std::list<int> sketches;
+	heeksCAD->PickObjects(_("Select Sketch"), MARKING_FILTER_SKETCH_GROUP, true);
+	if(GetSketches( sketches ))
+	{
+		if(sketches.size() > 0)m_sketch = sketches.front();
+		else m_sketch = 0;
 		m_object->ReloadPointers();
 		// to do, make undoable with properties
 	}
@@ -112,11 +133,4 @@ void AddSolidsProperties(std::list<Property *> *list, const std::list<int> &soli
 	if(solids.size() == 0)list->push_back(new PropertyString(_("solids"), _("None"), NULL));
 	else if(solids.size() == 1)list->push_back(new PropertyInt(_("solid id"), solids.front(), NULL));
 	else list->push_back(new PropertyString(_("solids"), GetIntListString(solids), NULL));
-}
-
-void AddSketchesProperties(std::list<Property *> *list, const std::list<int> &sketches)
-{
-	if(sketches.size() == 0)list->push_back(new PropertyString(_("sketches"), _("None"), NULL));
-	else if(sketches.size() == 1)list->push_back(new PropertyInt(_("sketch id"), sketches.front(), NULL));
-	else list->push_back(new PropertyString(_("sketches"), GetIntListString(sketches), NULL));
 }
