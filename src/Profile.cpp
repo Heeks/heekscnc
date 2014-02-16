@@ -652,7 +652,7 @@ Python CProfile::AppendTextForSketch(HeeksObj* object, CProfileParams::eCutMode 
 
 		if((m_profile_params.m_start_given == false) && (m_profile_params.m_end_given == false))
 		{
-			python << _T("kurve_funcs.set_good_start_point(curve)\n");
+			python << _T("kurve_funcs.set_good_start_point(curve, ") << (reversed ? _T("True") : _T("False")) << _T(")\n");
 		}
 
 		// start - assume we are at a suitable clearance height
