@@ -11,6 +11,7 @@
 #include "ProgramCanvas.h"
 #include "Program.h"
 #include "interface/HeeksObj.h"
+#include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
 #include "interface/PropertyString.h"
@@ -20,7 +21,6 @@
 #include "tinyxml/tinyxml.h"
 #include "CTool.h"
 #include "CNCPoint.h"
-#include "Reselect.h"
 #include "PocketDlg.h"
 
 #include <sstream>
@@ -354,19 +354,24 @@ Python CPocket::AppendTextToProgram()
 	if (pTool == NULL)
 	{
 		wxMessageBox(_T("Cannot generate GCode for pocket without a tool assigned"));
-		return(python);
+		return python;
 	} // End if - then
 
 
-	python << CDepthOp::AppendTextToProgram();
+	python << CSketchOp::AppendTextToProgram();
+
+	HeeksObj* object = heeksCAD->GetIDObject(SketchType, m_sketch);
+
+	if(object == NULL) {
+		wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
+		return python;
+	}
+
+	int type = object->GetType();
 
 	// do areas and circles first, separately
-	int num_sketches = 0;
-	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
     {
-		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
-
-		switch(object->GetType())
+		switch(type)
 		{
 		case CircleType:
 		case AreaType:
@@ -375,33 +380,19 @@ Python CPocket::AppendTextToProgram()
 				WritePocketPython(python);
 			}
 			break;
-		case SketchType:
-			num_sketches++;
-			break;
 		}
 	}
 
-	if(num_sketches > 0)
+	if(type == SketchType)
 	{
-	python << _T("a = area.Area()\n");
-	python << _T("entry_moves = []\n");
+		python << _T("a = area.Area()\n");
+		python << _T("entry_moves = []\n");
 
-	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-    {
-		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
-
-		if(object->GetType() != SketchType)continue;
-
-		if(object == NULL) {
-			wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
-			continue;
-		}
-		int type = object->GetType();
 		double c[3] = {0, 0, 0};
 
 		if (object->GetNumChildren() == 0){
 			wxMessageBox(wxString::Format(_("Pocket operation - Sketch %d has no children"), object->GetID()));
-			continue;
+			return python;
 		}
 
 		HeeksObj* re_ordered_sketch = NULL;
@@ -426,7 +417,7 @@ Python CPocket::AppendTextToProgram()
 					{
 						wxMessageBox(wxString::Format(_("Pocket operation - Sketch must be a closed shape - sketch %d"), object->m_id));
 						delete re_ordered_sketch;
-						continue;
+						return python;
 					}
 					break;
 
@@ -434,7 +425,7 @@ Python CPocket::AppendTextToProgram()
 					{
 						wxMessageBox(wxString::Format(_("Pocket operation - Badly ordered sketch - sketch %d"), object->m_id));
 						delete re_ordered_sketch;
-						continue;
+						return python;
 					}
 					break;
 				}
@@ -457,16 +448,13 @@ Python CPocket::AppendTextToProgram()
 	python << _T("a.Reorder()\n");
 
 	WritePocketPython(python);
-	}
 
-	return(python);
-
-} // End AppendTextToProgram() method
-
+	return python;
+}
 
 void CPocket::WriteDefaultValues()
 {
-	CDepthOp::WriteDefaultValues();
+	CSketchOp::WriteDefaultValues();
 
 	CNCConfig config;
 	config.Write(_T("StepOver"), m_pocket_params.m_step_over);
@@ -482,7 +470,7 @@ void CPocket::WriteDefaultValues()
 
 void CPocket::ReadDefaultValues()
 {
-	CDepthOp::ReadDefaultValues();
+	CSketchOp::ReadDefaultValues();
 
 	CNCConfig config;
 	config.Read(_T("StepOver"), &m_pocket_params.m_step_over, 1.0);
@@ -502,15 +490,13 @@ void CPocket::ReadDefaultValues()
 
 void CPocket::glCommands(bool select, bool marked, bool no_color)
 {
-	CDepthOp::glCommands( select, marked, no_color );
+	CSketchOp::glCommands( select, marked, no_color );
 }
 
 void CPocket::GetProperties(std::list<Property *> *list)
 {
-	AddSketchesProperties(list, m_sketches);
-
 	m_pocket_params.GetProperties(this, list);
-	CDepthOp::GetProperties(list);
+	CSketchOp::GetProperties(list);
 }
 
 HeeksObj *CPocket::MakeACopy(void)const
@@ -523,10 +509,8 @@ void CPocket::CopyFrom(const HeeksObj* object)
 	operator=(*((CPocket*)object));
 }
 
-CPocket::CPocket( const CPocket & rhs ) : CDepthOp(rhs)
+CPocket::CPocket( const CPocket & rhs ) : CSketchOp(rhs)
 {
-	m_sketches.clear();
-	std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
 	m_pocket_params = rhs.m_pocket_params;
 }
 
@@ -534,12 +518,8 @@ CPocket & CPocket::operator= ( const CPocket & rhs )
 {
 	if (this != &rhs)
 	{
-		CDepthOp::operator=(rhs);
-		m_sketches.clear();
-		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
-
+		CSketchOp::operator=(rhs);
 		m_pocket_params = rhs.m_pocket_params;
-		// static double max_deviation_for_spline_to_arc;
 	}
 
 	return(*this);
@@ -555,15 +535,6 @@ void CPocket::WriteXML(TiXmlNode *root)
 	TiXmlElement * element = heeksCAD->NewXMLElement( "Pocket" );
 	heeksCAD->LinkXMLEndChild( root,  element );
 	m_pocket_params.WriteXMLAttributes(element);
-
-	// write sketch ids
-	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-	{
-		int sketch = *It;
-		TiXmlElement * sketch_element = heeksCAD->NewXMLElement( "sketch" );
-		heeksCAD->LinkXMLEndChild( element, sketch_element );
-		sketch_element->SetAttribute("id", sketch);
-	}
 
 	WriteBaseXML(element);
 }
@@ -583,24 +554,6 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 		elements_to_remove.push_back(params);
 	}
 
-	// read sketch ids
-	for(TiXmlElement* sketch = heeksCAD->FirstNamedXMLChildElement(element, "sketch"); sketch; sketch = sketch->NextSiblingElement())
-	{
-		if ((wxString(Ctt(sketch->Value())) == wxString(_T("sketch"))) &&
-			(sketch->Attribute("id") != NULL) &&
-			(sketch->Attribute("title") == NULL))
-		{
-			int id = 0;
-			sketch->Attribute("id", &id);
-			if(id)
-			{
-				new_object->m_sketches.push_back(id);
-			}
-
-			elements_to_remove.push_back(sketch);
-		} // End if - then
-	}
-
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
 	{
 		heeksCAD->RemoveXMLChild( element, *itElem);
@@ -612,20 +565,12 @@ HeeksObj* CPocket::ReadFromXMLElement(TiXmlElement* element)
 	return new_object;
 }
 
-CPocket::CPocket(const std::list<int> &sketches, const int tool_number )
-	: CDepthOp(tool_number ), m_sketches(sketches)
+CPocket::CPocket(int sketch, const int tool_number )
+	: CSketchOp(sketch, tool_number, PocketType )
 {
 	ReadDefaultValues();
 	m_pocket_params.set_initial_values(tool_number);
 }
-
-CPocket::CPocket(const std::list<HeeksObj *> &sketches, const int tool_number )
-	: CDepthOp( tool_number )
-{
-	ReadDefaultValues();
-	m_pocket_params.set_initial_values(tool_number);
-}
-
 
 
 /**
@@ -661,15 +606,9 @@ void CPocket::WriteToConfig()
 	config.Write(_T("PocketSplineDeviation"), max_deviation_for_spline_to_arc);
 }
 
-static ReselectSketches reselect_sketches;
-
 void CPocket::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
-	reselect_sketches.m_sketches = &m_sketches;
-	reselect_sketches.m_object = this;
-	t_list->push_back(&reselect_sketches);
-
-    CDepthOp::GetTools( t_list, p );
+    CSketchOp::GetTools( t_list, p );
 }
 
 bool CPocketParams::operator==(const CPocketParams & rhs) const
@@ -690,7 +629,7 @@ bool CPocket::operator==(const CPocket & rhs) const
 {
 	if (m_pocket_params != rhs.m_pocket_params) return(false);
 
-	return(CDepthOp::operator==(rhs));
+	return(CSketchOp::operator==(rhs));
 }
 
 static bool OnEdit(HeeksObj* object)
@@ -705,5 +644,5 @@ void CPocket::GetOnEdit(bool(**callback)(HeeksObj*))
 
 bool CPocket::Add(HeeksObj* object, HeeksObj* prev_object)
 {
-	return CDepthOp::Add(object, prev_object);
+	return CSketchOp::Add(object, prev_object);
 }

@@ -22,7 +22,6 @@
 #include "interface/Tool.h"
 #include "CTool.h"
 #include "CNCPoint.h"
-#include "Reselect.h"
 #include "PythonStuff.h"
 #include "Tags.h"
 #include "Tag.h"
@@ -144,9 +143,8 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 
 		SketchOrderType order = SketchOrderTypeUnknown;
 
-		if(parent->GetNumSketches() == 1)
 		{
-			HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, parent->m_sketches.front());
+			HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, parent->m_sketch);
 			if((sketch) && (sketch->GetType() == SketchType))
 			{
 				order = heeksCAD->GetSketchOrder(sketch);
@@ -196,7 +194,6 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 		list->push_back(new PropertyChoice(_("cut mode"), choices, m_cut_mode, parent, on_set_cut_mode));
 	}
 
-	if(parent->GetNumSketches() == 1) // multiple sketches must use auto roll on, and can not have start and end points specified
 	{
 		list->push_back(new PropertyCheck(_("auto roll on"), m_auto_roll_on, parent, on_set_auto_roll_on));
 		if(!m_auto_roll_on)list->push_back(new PropertyVertex(_("roll on point"), m_roll_on_point, parent, on_set_roll_on_point));
@@ -212,19 +209,6 @@ void CProfileParams::GetProperties(CProfile* parent, std::list<Property *> *list
 			list->push_back(new PropertyCheck(_("end beyond full profile"), m_end_beyond_full_profile, parent, on_set_end_beyond_full_profile));
 		}
 	}
-	else
-	{
-		std::list< wxString > choices;
-
-		choices.push_back(_("Respect existing order"));	// Must be 'false' (0)
-		choices.push_back(_("True"));			// Must be 'true' (non-zero)
-
-		int choice = int(m_sort_sketches);
-		list->push_back(new PropertyChoice(_("sort_sketches"), choices, choice, parent, on_set_sort_sketches));
-
-		// roll on radius
-		list->push_back(new PropertyLength(_("roll radius"), m_auto_roll_radius, parent, on_set_roll_radius));
-	} // End if - else
     
     list->push_back(new PropertyLength(_("extend before start"), m_extend_at_start, parent, on_set_extend_at_start));
     list->push_back(new PropertyLength(_("extend past end"), m_extend_at_end, parent, on_set_extend_at_end));
@@ -351,18 +335,17 @@ void CProfileParams::ReadFromXMLElement(TiXmlElement* pElem)
 
 }
 
-CProfile::CProfile( const CProfile & rhs ) : CDepthOp(rhs)
+CProfile::CProfile( const CProfile & rhs ) : CSketchOp(rhs)
 {
 	m_tags = new CTags;
 	Add( m_tags, NULL );
 	if (rhs.m_tags != NULL) *m_tags = *(rhs.m_tags);
-	m_sketches.clear();
-	std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+	m_sketch = rhs.m_sketch;
 	m_profile_params = rhs.m_profile_params;
 }
 
-CProfile::CProfile(const std::list<int> &sketches, const int tool_number )
-		: 	CDepthOp(tool_number, ProfileType),	m_tags(NULL), m_sketches(sketches)
+CProfile::CProfile(int sketch, const int tool_number )
+		: 	CSketchOp(sketch, tool_number, ProfileType), m_tags(NULL)
 {
     ReadDefaultValues();
 } // End constructor
@@ -371,10 +354,9 @@ CProfile & CProfile::operator= ( const CProfile & rhs )
 {
 	if (this != &rhs)
 	{
-		CDepthOp::operator=( rhs );
+		CSketchOp::operator=( rhs );
 		if ((m_tags != NULL) && (rhs.m_tags != NULL)) *m_tags = *(rhs.m_tags);
-		m_sketches.clear();
-		std::copy( rhs.m_sketches.begin(), rhs.m_sketches.end(), std::inserter( m_sketches, m_sketches.begin() ) );
+		m_sketch = rhs.m_sketch;
 
 		m_profile_params = rhs.m_profile_params;
 	}
@@ -399,7 +381,7 @@ bool CProfile::Add(HeeksObj* object, HeeksObj* prev_object)
 		break;
 	}
 
-	return CDepthOp::Add(object, prev_object);
+	return CSketchOp::Add(object, prev_object);
 }
 
 void CProfile::Remove(HeeksObj* object)
@@ -407,7 +389,7 @@ void CProfile::Remove(HeeksObj* object)
 	// set the m_tags pointer to NULL, when Tags is removed from here
 	if(object == m_tags)m_tags = NULL;
 
-	CDepthOp::Remove(object);
+	CSketchOp::Remove(object);
 }
 
 Python CProfile::WriteSketchDefn(HeeksObj* sketch, bool reversed )
@@ -424,10 +406,20 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, bool reversed )
 
 	bool started = false;
 	std::list<HeeksObj*> spans;
-	for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
+	switch(sketch->GetType())
 	{
-		if(reversed)spans.push_front(span_object);
-		else spans.push_back(span_object);
+	case SketchType:
+		for(HeeksObj* span_object = sketch->GetFirstChild(); span_object; span_object = sketch->GetNextChild())
+		{
+			if(reversed)spans.push_front(span_object);
+			else spans.push_back(span_object);
+		}
+		break;
+	case CircleType:
+		spans.push_back(sketch);
+		break;
+	case AreaType:
+		break;
 	}
 
 	std::list<HeeksObj*> new_spans;
@@ -567,7 +559,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, bool reversed )
 
 	python << _T("\n");
 
-	if(GetNumSketches() == 1 && (m_profile_params.m_start_given || m_profile_params.m_end_given))
+	if(m_profile_params.m_start_given || m_profile_params.m_end_given)
 	{
 		double startx, starty, finishx, finishy;
 
@@ -625,7 +617,7 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, bool reversed )
 	return(python);
 }
 
-Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMode cut_mode)
+Python CProfile::AppendTextForSketch(HeeksObj* object, CProfileParams::eCutMode cut_mode)
 {
     Python python;
 
@@ -636,9 +628,20 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMo
 		bool initially_ccw = false;
 		if(m_profile_params.m_tool_on_side != CProfileParams::eOn)
 		{
-			SketchOrderType order = SketchOrderTypeUnknown;
-			if(object)order = heeksCAD->GetSketchOrder(object);
-			if(order == SketchOrderTypeCloseCCW)initially_ccw = true;
+			if(object)
+			{
+				switch(object->GetType())
+				{
+				case CircleType:
+				case AreaType:
+					initially_ccw = true;
+					break;
+				case SketchType:
+					SketchOrderType order = heeksCAD->GetSketchOrder(object);
+					if(order == SketchOrderTypeCloseCCW)initially_ccw = true;
+					break;
+				}
+			}
 			if(m_speed_op_params.m_spindle_speed<0)reversed = !reversed;
 			if(cut_mode == CProfileParams::eConventional)reversed = !reversed;
 			if(m_profile_params.m_tool_on_side == CProfileParams::eRightOrInside)reversed = !reversed;
@@ -677,7 +680,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMo
 		case CProfileParams::eLeftOrOutside:
 		case CProfileParams::eRightOrInside:
 			{
-				if(m_profile_params.m_auto_roll_on || (GetNumSketches() > 1))
+				if(m_profile_params.m_auto_roll_on)
 				{
 					python << wxString(_T("roll_on = 'auto'\n"));
 				}
@@ -702,7 +705,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMo
 		case CProfileParams::eLeftOrOutside:
 		case CProfileParams::eRightOrInside:
 			{
-				if(m_profile_params.m_auto_roll_off || (GetNumSketches() > 1))
+				if(m_profile_params.m_auto_roll_off)
 				{
 					python << wxString(_T("roll_off = 'auto'\n"));
 				}
@@ -743,7 +746,7 @@ Python CProfile::AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMo
 
 void CProfile::WriteDefaultValues()
 {
-	CDepthOp::WriteDefaultValues();
+	CSketchOp::WriteDefaultValues();
 
 	CNCConfig config;
 	config.Write(_T("ToolOnSide"), m_profile_params.m_tool_on_side);
@@ -766,7 +769,7 @@ void CProfile::WriteDefaultValues()
 
 void CProfile::ReadDefaultValues()
 {
-	CDepthOp::ReadDefaultValues();
+	CSketchOp::ReadDefaultValues();
 
 	CNCConfig config;
 	int int_side = m_profile_params.m_tool_on_side;
@@ -829,7 +832,7 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 
 	if(!finishing_pass || m_profile_params.m_only_finishing_pass)
 	{
-		python << CDepthOp::AppendTextToProgram();
+		python << CSketchOp::AppendTextToProgram();
 
 		if(m_profile_params.m_auto_roll_on || m_profile_params.m_auto_roll_off)
 		{
@@ -854,39 +857,44 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 
 	CProfileParams::eCutMode cut_mode = finishing_pass ? m_profile_params.m_finishing_cut_mode : m_profile_params.m_cut_mode;
 
-	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-    {
-		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
-		if((object == NULL) || (object->GetNumChildren() == 0))continue;
-
-		HeeksObj* re_ordered_sketch = NULL;
-		SketchOrderType sketch_order = heeksCAD->GetSketchOrder(object);
-		if(sketch_order == SketchOrderTypeBad)
+	HeeksObj* object = heeksCAD->GetIDObject(SketchType, m_sketch);
+	if(object)
+	{
+		if(object->GetType() == SketchType)
 		{
-			re_ordered_sketch = object->MakeACopy();
-			heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
-			object = re_ordered_sketch;
-		}
-
-		if(sketch_order == SketchOrderTypeMultipleCurves || sketch_order == SketchOrderHasCircles)
-		{
-			std::list<HeeksObj*> new_separate_sketches;
-			heeksCAD->ExtractSeparateSketches(object, new_separate_sketches, false);
-			for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
+			HeeksObj* re_ordered_sketch = NULL;
+			SketchOrderType sketch_order = heeksCAD->GetSketchOrder(object);
+			if(sketch_order == SketchOrderTypeBad)
 			{
-				HeeksObj* one_curve_sketch = *It;
-				python << AppendTextForOneSketch(one_curve_sketch, cut_mode).c_str();
-				delete one_curve_sketch;
+				re_ordered_sketch = object->MakeACopy();
+				heeksCAD->ReOrderSketch(re_ordered_sketch, SketchOrderTypeReOrder);
+				object = re_ordered_sketch;
+			}
+
+			if(sketch_order == SketchOrderTypeMultipleCurves || sketch_order == SketchOrderHasCircles)
+			{
+				std::list<HeeksObj*> new_separate_sketches;
+				heeksCAD->ExtractSeparateSketches(object, new_separate_sketches, false);
+				for(std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
+				{
+					HeeksObj* one_curve_sketch = *It;
+					python << AppendTextForSketch(one_curve_sketch, cut_mode).c_str();
+					delete one_curve_sketch;
+				}
+			}
+			else
+			{
+				python << AppendTextForSketch(object, cut_mode).c_str();
+			}
+
+			if(re_ordered_sketch)
+			{
+				delete re_ordered_sketch;
 			}
 		}
 		else
 		{
-			python << AppendTextForOneSketch(object, cut_mode).c_str();
-		}
-
-		if(re_ordered_sketch)
-		{
-			delete re_ordered_sketch;
+			python << AppendTextForSketch(object, cut_mode).c_str();
 		}
 	}
 
@@ -897,11 +905,10 @@ static unsigned char cross16[32] = {0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x
 
 void CProfile::glCommands(bool select, bool marked, bool no_color)
 {
-	CDepthOp::glCommands(select, marked, no_color);
+	CSketchOp::glCommands(select, marked, no_color);
 
 	if(marked && !no_color)
 	{
-		if(GetNumSketches() == 1)
 		{
 			// draw roll on point
 			if(!m_profile_params.m_auto_roll_on)
@@ -937,11 +944,9 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 
 void CProfile::GetProperties(std::list<Property *> *list)
 {
-	AddSketchesProperties(list, m_sketches);
-
 	m_profile_params.GetProperties(this, list);
 
-	CDepthOp::GetProperties(list);
+	CSketchOp::GetProperties(list);
 }
 
 ObjectCanvas* CProfile::GetDialog(wxWindow* parent)
@@ -992,8 +997,6 @@ class PickRollOff: public Tool{
 };
 
 static PickRollOff pick_roll_off;
-
-static ReselectSketches reselect_sketches;
 
 
 
@@ -1098,12 +1101,9 @@ void CProfile::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	t_list->push_back(&pick_end);
 	t_list->push_back(&pick_roll_on);
 	t_list->push_back(&pick_roll_off);
-	reselect_sketches.m_sketches = &m_sketches;
-	reselect_sketches.m_object = this;
-	t_list->push_back(&reselect_sketches);
 	t_list->push_back(&add_tag_tool);
 
-	CDepthOp::GetTools(t_list, p);
+	CSketchOp::GetTools(t_list, p);
 }
 
 HeeksObj *CProfile::MakeACopy(void)const
@@ -1135,16 +1135,7 @@ void CProfile::WriteXML(TiXmlNode *root)
 	heeksCAD->LinkXMLEndChild( root,  element );
 	m_profile_params.WriteXMLAttributes(element);
 
-	// write sketch ids
-	for(std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-	{
-		int sketch = *It;
-		TiXmlElement * sketch_element = heeksCAD->NewXMLElement( "sketch" );
-		heeksCAD->LinkXMLEndChild( element, sketch_element );
-		sketch_element->SetAttribute( "id", sketch);
-	}
-
-	CDepthOp::WriteBaseXML(element);
+	CSketchOp::WriteBaseXML(element);
 }
 
 // static member function
@@ -1160,24 +1151,6 @@ HeeksObj* CProfile::ReadFromXMLElement(TiXmlElement* element)
 	{
 		new_object->m_profile_params.ReadFromXMLElement(params);
 		elements_to_remove.push_back(params);
-	}
-
-	// read sketch ids
-	for(TiXmlElement* sketch = heeksCAD->FirstNamedXMLChildElement(element, "sketch"); sketch; sketch = sketch->NextSiblingElement())
-	{
-		if ((wxString(Ctt(sketch->Value())) == wxString(_T("sketch"))) &&
-			(sketch->Attribute("id") != NULL) &&
-			(sketch->Attribute("title") == NULL))
-		{
-			int id = 0;
-			sketch->Attribute("id", &id);
-			if(id)
-			{
-				new_object->m_sketches.push_back(id);
-			}
-
-			elements_to_remove.push_back(sketch);
-		} // End if - then
 	}
 
 	for (std::list<TiXmlElement*>::iterator itElem = elements_to_remove.begin(); itElem != elements_to_remove.end(); itElem++)
@@ -1197,17 +1170,6 @@ void CProfile::AddMissingChildren()
 {
 	// make sure "tags" exists
 	if(m_tags == NULL){m_tags = new CTags; Add( m_tags, NULL );}
-}
-
-unsigned int CProfile::GetNumSketches()
-{
-	unsigned int num_sketches = 0;
-	for (std::list<int>::iterator It = m_sketches.begin(); It != m_sketches.end(); It++)
-    {
-		HeeksObj* object = heeksCAD->GetIDObject(SketchType, *It);
-		if(object && object->GetType() == SketchType)num_sketches++;
-	}
-	return num_sketches;
 }
 
 static void on_set_spline_deviation(double value, HeeksObj* object){
@@ -1259,14 +1221,9 @@ bool CProfile::operator==( const CProfile & rhs ) const
 {
 	if (m_profile_params != rhs.m_profile_params) return(false);
 
-	if(m_sketches.size() != rhs.m_sketches.size())return false;
-	std::list<int>::const_iterator It1 = m_sketches.begin(), It2 = rhs.m_sketches.begin();
-	for(;It1 != m_sketches.end(); It1++, It2++)
-	{
-		if(*It1 != *It2)return false;
-	}
+	if(m_sketch != rhs.m_sketch)return false;
 
-	return(CDepthOp::operator==(rhs));
+	return(CSketchOp::operator==(rhs));
 }
 
 static bool OnEdit(HeeksObj* object)

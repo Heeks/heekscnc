@@ -62,8 +62,9 @@ Source: "C:\Dev\HeeksCNCSVN\ocl.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreve
 Source: "C:\Dev\HeeksCNCSVN\depth_params.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\*.speeds"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\*.tooltable"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
+Source: "C:\Dev\HeeksCNCSVN\script_ops.xml"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\nc\*.py"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion; Permissions: users-modify
-Source: "C:\Dev\HeeksCNCSVN\nc\*.xml"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion; Permissions: users-modify
+Source: "C:\Dev\HeeksCNCSVN\nc\machines.xml"; DestDir: "{app}\HeeksCNC\nc"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\HeeksCNCSVN\src\Unicode Release\HeeksCNC.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNCSVN\bitmaps\*.png"; DestDir: "{app}\HeeksCNC\bitmaps"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNCSVN\bitmaps\ctool\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\ctool"; Flags: ignoreversion
