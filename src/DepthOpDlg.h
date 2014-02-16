@@ -12,6 +12,12 @@ class CObjectIdsCtrl;
 
 class DepthOpDlg : public SpeedOpDlg
 {
+protected:
+	enum
+	{
+		ID_DEPTHOP_ENUM_MAX = ID_SPEEDOP_ENUM_MAX,
+	};
+
 	CLengthCtrl *m_lgthClearanceHeight;
 	CLengthCtrl *m_lgthStartDepth;
 	CLengthCtrl *m_lgthStepDown;

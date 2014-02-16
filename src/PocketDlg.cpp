@@ -7,20 +7,7 @@
 #include "interface/NiceTextCtrl.h"
 #include "Pocket.h"
 
-enum
-{
-	ID_SKETCH = 100,
-	ID_SKETCH_PICK,
-	ID_STARTING_PLACE,
-	ID_CUT_MODE,
-	ID_KEEP_TOOL_DOWN,
-	ID_USE_ZIG_ZAG,
-	ID_ZIG_UNIDIRECTIONAL,
-};
-
-BEGIN_EVENT_TABLE(PocketDlg, DepthOpDlg)
-    EVT_COMBOBOX(ID_SKETCH,HeeksObjDlg::OnComboOrCheck)
-    EVT_BUTTON(ID_SKETCH_PICK,PocketDlg::OnSketchPick)
+BEGIN_EVENT_TABLE(PocketDlg, SketchOpDlg)
     EVT_COMBOBOX(ID_STARTING_PLACE,HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
     EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, HeeksObjDlg::OnComboOrCheck)
@@ -29,13 +16,12 @@ BEGIN_EVENT_TABLE(PocketDlg, DepthOpDlg)
 END_EVENT_TABLE()
 
 PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, bool top_level)
-             : DepthOpDlg(parent, object, false, title, false)
+             : SketchOpDlg(parent, object, title, false)
 {
 	std::list<HControl> save_leftControls = leftControls;
 	leftControls.clear();
 
 	// add all the controls to the left side
-	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject()), m_btnSketchPick = new wxButton(this, ID_SKETCH_PICK, _("Pick"))));
 	leftControls.push_back(MakeLabelAndControl(_("step over"), m_lgthStepOver = new CLengthCtrl(this)));
 	leftControls.push_back(MakeLabelAndControl(_("material allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
 
@@ -64,10 +50,6 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, b
 
 void PocketDlg::GetDataRaw(HeeksObj* object)
 {
-	((CPocket*)object)->m_sketches.clear();
-	int sketch = m_cmbSketch->GetSelectedId();
-	if(sketch != 0)((CPocket*)object)->m_sketches.push_back(sketch);
-
 	((CPocket*)object)->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	((CPocket*)object)->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
 	((CPocket*)object)->m_pocket_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CPocketParams::eClimb : CPocketParams::eConventional;
@@ -75,15 +57,11 @@ void PocketDlg::GetDataRaw(HeeksObj* object)
 	((CPocket*)object)->m_pocket_params.m_use_zig_zag = m_chkUseZigZag->GetValue();
 	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag)((CPocket*)object)->m_pocket_params.m_zig_angle = m_dblZigAngle->GetValue();
 
-	DepthOpDlg::GetDataRaw(object);
+	SketchOpDlg::GetDataRaw(object);
 }
 
 void PocketDlg::SetFromDataRaw(HeeksObj* object)
 {
-	if(((CPocket*)object)->m_sketches.size() > 0)
-		m_cmbSketch->SelectById(((CPocket*)object)->m_sketches.front());
-	else
-		m_cmbSketch->SelectById(0);
 	m_lgthStepOver->SetValue(((CPocket*)object)->m_pocket_params.m_step_over);
 	m_lgthMaterialAllowance->SetValue(((CPocket*)object)->m_pocket_params.m_material_allowance);
 	m_cmbStartingPlace->SetValue((((CPocket*)object)->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));
@@ -95,7 +73,7 @@ void PocketDlg::SetFromDataRaw(HeeksObj* object)
 
 	EnableZigZagControls();
 
-	DepthOpDlg::SetFromDataRaw(object);
+	SketchOpDlg::SetFromDataRaw(object);
 }
 
 void PocketDlg::SetPicture(const wxString& name)
@@ -132,7 +110,7 @@ void PocketDlg::SetPictureByWindow(wxWindow* w)
 		else SetPicture(_T("general"));
 	}
 	else if(w == m_dblZigAngle)SetPicture(_T("zig angle"));
-	else DepthOpDlg::SetPictureByWindow(w);
+	else SketchOpDlg::SetPictureByWindow(w);
 }
 
 void PocketDlg::OnCheckUseZigZag(wxCommandEvent& event)
@@ -150,11 +128,6 @@ void PocketDlg::EnableZigZagControls()
 	m_chkZigUnidirectional->Enable(enable);
 }
 
-void PocketDlg::OnSketchPick( wxCommandEvent& event )
-{
-	EndModal(ID_SKETCH_PICK);
-}
-
 bool PocketDlg::Do(CPocket* object)
 {
 	PocketDlg dlg(heeksCAD->GetMainFrame(), object);
@@ -170,17 +143,7 @@ bool PocketDlg::Do(CPocket* object)
 		}
 		else if(result == ID_SKETCH_PICK)
 		{
-			heeksCAD->ClearMarkedList();
-			heeksCAD->PickObjects(_("Pick a sketch"), MARKING_FILTER_SKETCH, true);
-
-			dlg.m_cmbSketch->Recreate();
-			dlg.Fit();
-
-			const std::list<HeeksObj*> &list = heeksCAD->GetMarkedList();
-			if(list.size() > 0)
-			{
-				dlg.m_cmbSketch->SelectById(list.front()->GetID());
-			}
+			dlg.PickSketch();
 		}
 		else
 		{

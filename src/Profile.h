@@ -6,7 +6,7 @@
  */
 
 #include "HeeksCNCTypes.h"
-#include "DepthOp.h"
+#include "SketchOp.h"
 #include "Drilling.h"
 #include "CNCPoint.h"
 
@@ -64,19 +64,17 @@ public:
 	bool operator!=(const CProfileParams & rhs ) const { return(! (*this == rhs)); }
 };
 
-class CProfile: public CDepthOp{
+class CProfile: public CSketchOp{
 private:
 	CTags* m_tags;				// Access via Tags() method
 
 public:
-	typedef std::list<int> Sketches_t;
-	Sketches_t	m_sketches;
 	CProfileParams m_profile_params;
 
 	static double max_deviation_for_spline_to_arc;
 
-	CProfile():CDepthOp(0, ProfileType), m_tags(NULL) {}
-	CProfile(const std::list<int> &sketches, const int tool_number );
+	CProfile():CSketchOp(0, ProfileType), m_tags(NULL) {}
+	CProfile(int sketch, const int tool_number );
 
 	CProfile( const CProfile & rhs );
 	CProfile & operator= ( const CProfile & rhs );
@@ -110,14 +108,13 @@ public:
 	CTags* Tags(){return m_tags;}
 
 	Python WriteSketchDefn(HeeksObj* sketch, bool reversed );
-	Python AppendTextForOneSketch(HeeksObj* object, CProfileParams::eCutMode cut_mode);
+	Python AppendTextForSketch(HeeksObj* object, CProfileParams::eCutMode cut_mode);
 
 	// COp's virtual functions
 	Python AppendTextToProgram();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AddMissingChildren();
-	unsigned int GetNumSketches();
 	Python AppendTextToProgram(bool finishing_pass);
 
 	static void GetOptions(std::list<Property *> *list);

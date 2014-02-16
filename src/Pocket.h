@@ -6,7 +6,7 @@
  */
 
 #include "HeeksCNCTypes.h"
-#include "DepthOp.h"
+#include "SketchOp.h"
 #include "CTool.h"
 
 class CPocket;
@@ -46,17 +46,14 @@ public:
 	bool operator!= ( const CPocketParams & rhs ) const { return(! (*this == rhs)); }
 };
 
-class CPocket: public CDepthOp{
+class CPocket: public CSketchOp{
 public:
-	typedef std::list<int> Sketches_t;
-	Sketches_t m_sketches;
 	CPocketParams m_pocket_params;
 
 	static double max_deviation_for_spline_to_arc;
 
-	CPocket():CDepthOp(0, PocketType){}
-	CPocket(const std::list<int> &sketches, const int tool_number );
-	CPocket(const std::list<HeeksObj *> &sketches, const int tool_number );
+	CPocket():CSketchOp(0, PocketType){}
+	CPocket(int sketch, const int tool_number );
 	CPocket( const CPocket & rhs );
 	CPocket & operator= ( const CPocket & rhs );
 

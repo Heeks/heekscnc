@@ -12,6 +12,15 @@ class CObjectIdsCtrl;
 
 class SpeedOpDlg : public HeeksObjDlg
 {
+protected:
+	enum
+	{
+		ID_TOOL = 100,
+		ID_PATTERN,
+		ID_SURFACE,
+		ID_SPEEDOP_ENUM_MAX,
+	};
+
 	CLengthCtrl *m_lgthHFeed;
 	CLengthCtrl *m_lgthVFeed;
 	CDoubleCtrl *m_dblSpindleSpeed;

@@ -8,11 +8,19 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "DepthOpDlg.h"
+#include "SketchOpDlg.h"
 
-class ProfileDlg : public DepthOpDlg
+class ProfileDlg : public SketchOpDlg
 {
-	HTypeObjectDropDown *m_cmbSketch;
+	enum
+	{
+		ID_TOOL_ON_SIDE = ID_SKETCH_ENUM_MAX,
+		ID_CUT_MODE,
+		ID_DO_FINISHING_PASS,
+		ID_ONLY_FINISHING_PASS,
+		ID_FINISH_CUT_MODE,
+	};
+
 	wxComboBox *m_cmbToolOnSide;
 	wxComboBox *m_cmbCutMode;
 	CLengthCtrl *m_lgthRollRadius;
@@ -25,7 +33,6 @@ class ProfileDlg : public DepthOpDlg
 	wxStaticText* m_staticFinishingFeedrate;
 	wxStaticText* m_staticFinishingCutMode;
 	wxStaticText* m_staticFinishStepDown;
-	wxButton *m_btnSketchPick;
 
 	SketchOrderType m_order;
 
@@ -44,7 +51,6 @@ public:
 
 	void SetSketchOrderAndCombo();
 	void OnCheckFinishingPass( wxCommandEvent& event );
-	void OnSketchPick( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };
