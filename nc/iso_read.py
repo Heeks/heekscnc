@@ -65,6 +65,8 @@ class Parser(nc.Parser):
             self.arc = +1
         elif (word == 'G10' or word == 'g10'):
             self.no_move = True
+        elif (word == 'G53' or word == 'g53'):
+            self.no_move = True
         elif (word == 'L1' or word == 'l1'):
             self.no_move = True
         elif (word == 'G61.1' or word == 'g61.1' or word == 'G61' or word == 'g61' or word == 'G64' or word == 'g64'):
