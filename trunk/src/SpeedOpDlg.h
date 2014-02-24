@@ -8,28 +8,19 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "interface/HeeksObjDlg.h"
+#include "OpDlg.h"
 
-class SpeedOpDlg : public HeeksObjDlg
+class SpeedOpDlg : public OpDlg
 {
 protected:
 	enum
 	{
-		ID_TOOL = 100,
-		ID_PATTERN,
-		ID_SURFACE,
-		ID_SPEEDOP_ENUM_MAX,
+		ID_SPEEDOP_ENUM_MAX = ID_OP_ENUM_MAX,
 	};
 
 	CLengthCtrl *m_lgthHFeed;
 	CLengthCtrl *m_lgthVFeed;
 	CDoubleCtrl *m_dblSpindleSpeed;
-	wxTextCtrl *m_txtComment;
-	wxCheckBox *m_chkActive;
-	wxTextCtrl *m_txtTitle;
-	HTypeObjectDropDown *m_cmbTool;
-	HTypeObjectDropDown *m_cmbPattern;
-	HTypeObjectDropDown *m_cmbSurface;
 
 public:
 	SpeedOpDlg(wxWindow *parent, CSpeedOp* object, bool some_controls_on_left, const wxString& title = wxString(_T("")), bool top_level = true);

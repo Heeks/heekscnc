@@ -31,11 +31,11 @@ public:
 	const wxChar* GetTypeString(void)const{return _T("ScriptOp");}
 	const wxBitmap &GetIcon();
 	void GetProperties( std::list<Property *> *list);
-	ObjectCanvas* GetDialog(wxWindow* parent);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool CanAddTo(HeeksObj* owner);
+	void GetOnEdit(bool(**callback)(HeeksObj*));
 
 	// COp's virtual functions
 	Python AppendTextToProgram();

@@ -6,16 +6,16 @@
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{12E3C404-8533-4A91-BB89-DEA488957F84}
-AppName=HeeksCNC030
-AppVerName=HeeksCNC 0.30.0
+AppName=HeeksCNC031
+AppVerName=HeeksCNC 0.31.0
 AppPublisher=Heeks Software
 AppPublisherURL=http://heeks.net/
 AppSupportURL=http://code.google.com/p/heekscnc/
 AppUpdatesURL=http://code.google.com/p/heekscnc/
-DefaultDirName={pf}\HeeksCNC030
-DefaultGroupName=HeeksCNC030
+DefaultDirName={pf}\HeeksCNC031
+DefaultGroupName=HeeksCNC031
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 0.30.0
+OutputBaseFilename=HeeksCNC 0.31.0
 Compression=lzma
 SolidCompression=yes
 
@@ -33,7 +33,7 @@ Name: "{app}\HeeksCNC"; Permissions: users-modify
 Name: "{app}\HeeksCNC\nc"; Permissions: users-modify
 
 [Files]
-Source: "C:\Dev\HeeksCADSVN\HeeksCAD.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCADSVN\HeeksCAD.exe"; DestDir: "{app}"; DestName: "HeeksCAD031.exe"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCADSVN\bitmaps\*.png"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCADSVN\bitmaps\angle\*.png"; DestDir: "{app}\bitmaps\angle"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCADSVN\bitmaps\font.glf"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
@@ -91,13 +91,13 @@ Source: "C:\Program Files (x86)\VoxelCut\wx*.dll"; DestDir: "{app}\HeeksCNC"; Fl
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\HeeksCNC030"; Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
+Name: "{group}\HeeksCNC031"; Filename: "{app}\HeeksCAD031.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
 
 [Run]
-Filename: "{app}\HeeksCAD.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Description: "{cm:LaunchProgram,HeeksCNC}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\HeeksCAD031.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Description: "{cm:LaunchProgram,HeeksCNC}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
-Root: HKCU; Subkey: "Software\HeeksCAD030"; Flags: uninsdeletekeyifempty
-Root: HKCU; Subkey: "Software\HeeksCNC030"; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\HeeksCAD031"; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\HeeksCNC031"; Flags: uninsdeletekeyifempty
 
 

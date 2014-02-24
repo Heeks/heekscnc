@@ -860,6 +860,13 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 	HeeksObj* object = heeksCAD->GetIDObject(SketchType, m_sketch);
 	if(object)
 	{
+		HeeksObj* sketch_to_be_deleted = NULL;
+		if(object->GetType() == AreaType)
+		{
+			object = heeksCAD->NewSketchFromArea(object);
+			sketch_to_be_deleted = object;
+		}
+
 		if(object->GetType() == SketchType)
 		{
 			HeeksObj* re_ordered_sketch = NULL;
@@ -896,6 +903,8 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 		{
 			python << AppendTextForSketch(object, cut_mode).c_str();
 		}
+
+		delete sketch_to_be_deleted;
 	}
 
 	return python;
@@ -947,17 +956,6 @@ void CProfile::GetProperties(std::list<Property *> *list)
 	m_profile_params.GetProperties(this, list);
 
 	CSketchOp::GetProperties(list);
-}
-
-ObjectCanvas* CProfile::GetDialog(wxWindow* parent)
-{
-#if 0
-	static ObjectCanvas* object_canvas = NULL;
-	if(object_canvas == NULL)object_canvas = new PictureCanvas(parent, wxImage(theApp.GetResFolder() + _T("/bitmaps/dlgprofile.png")));
-	return object_canvas;
-#else
-	return NULL; // the picture was taking up too much space, maybe we should have either properties or dialog, but not both
-#endif
 }
 
 static CProfile* object_for_tools = NULL;

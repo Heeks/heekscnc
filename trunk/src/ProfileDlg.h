@@ -51,6 +51,7 @@ public:
 
 	void SetSketchOrderAndCombo();
 	void OnCheckFinishingPass( wxCommandEvent& event );
+	void OnHelp( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };

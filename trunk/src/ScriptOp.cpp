@@ -14,6 +14,7 @@
 #include "interface/PropertyCheck.h"
 #include "tinyxml/tinyxml.h"
 #include "PythonStuff.h"
+#include "ScriptOpDlg.h"
 
 #include <sstream>
 #include <iomanip>
@@ -21,6 +22,8 @@
 CScriptOp::CScriptOp( const CScriptOp & rhs ) : COp(rhs)
 {
 	m_str = rhs.m_str;
+	m_user_icon = rhs.m_user_icon;
+	m_user_icon_name = rhs.m_user_icon_name;
 }
 
 CScriptOp & CScriptOp::operator= ( const CScriptOp & rhs )
@@ -82,15 +85,6 @@ void CScriptOp::GetProperties(std::list<Property *> *list)
     COp::GetProperties(list);
 }
 
-ObjectCanvas* CScriptOp::GetDialog(wxWindow* parent)
-{
-	if(TextCanvas::global_text_canvas)delete TextCanvas::global_text_canvas;
-	
-	TextCanvas::global_text_canvas = new TextCanvas(parent, &m_str);
-
-	return TextCanvas::global_text_canvas;
-}
-
 HeeksObj *CScriptOp::MakeACopy(void)const
 {
 	return new CScriptOp(*this);
@@ -136,4 +130,20 @@ bool CScriptOp::operator==( const CScriptOp & rhs ) const
 	if (m_str != rhs.m_str) return(false);
 
 	return(COp::operator==(rhs));
+}
+
+static bool OnEdit(HeeksObj* object)
+{
+	ScriptOpDlg dlg(heeksCAD->GetMainFrame(), (CScriptOp*)object);
+	if(dlg.ShowModal() == wxID_OK)
+	{
+		dlg.GetData((CScriptOp*)object);
+		return true;
+	}
+	return false;
+}
+
+void CScriptOp::GetOnEdit(bool(**callback)(HeeksObj*))
+{
+	*callback = OnEdit;
 }

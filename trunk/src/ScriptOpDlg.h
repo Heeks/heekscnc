@@ -1,28 +1,36 @@
-// SurfaceDlg.h
+// ScriptOpDlg.h
 // Copyright (c) 2014, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
+class CScriptOp;
+class PictureWindow;
 class CLengthCtrl;
+class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "interface/HeeksObjDlg.h"
+#include "OpDlg.h"
 
-class SurfaceDlg : public HeeksObjDlg
+class ScriptOpDlg : public OpDlg
 {
-	CObjectIdsCtrl *m_idsSolids;
-	CLengthCtrl *m_lgthTolerance;
-	CLengthCtrl *m_lgthMinZ;
-	CLengthCtrl *m_lgthMaterialAllowance;
-	wxCheckBox *m_chkSameForEachPosition;
+protected:
+	enum
+	{
+		ID_SCRIPT_TXT = ID_OP_ENUM_MAX,
+		ID_SCRIPTOP_ENUM_MAX,
+	};
+
+	wxTextCtrl *m_txtScript;
 
 public:
-    SurfaceDlg(wxWindow *parent, HeeksObj* object, const wxString& title = wxString(_T("Surface")), bool top_level = true);
+	ScriptOpDlg(wxWindow *parent, CScriptOp* object, const wxString& title = wxString(_T("Script Operation")), bool top_level = true);
 
 	// HeeksObjDlg virtual functions
 	void GetDataRaw(HeeksObj* object);
 	void SetFromDataRaw(HeeksObj* object);
 	void SetPictureByWindow(wxWindow* w);
 	void SetPicture(const wxString& name);
+
+	void OnScriptText( wxCommandEvent& event );
 	void OnHelp( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()

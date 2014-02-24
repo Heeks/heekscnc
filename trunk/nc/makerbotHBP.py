@@ -116,7 +116,7 @@ class CreatorMakerbotHBP(iso_modal.CreatorIsoModal):
      #  self.write((maker.codes.TOOL() % id) + '\n')
      #  self.t = id
     
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+    def tool_defn(self, id, name='', params=None):
 	pass
 ############################################################################
 ##  Moves

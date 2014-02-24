@@ -465,36 +465,36 @@ Python CTool::AppendTextToProgram()
 		python << _T("#(") << m_title.c_str() << _T(")\n");
 	} // End if - then
 
-	python << _T("tool_defn( id=") << m_tool_number << _T(", ");
+	python << _T("tool_defn( ") << m_tool_number << _T(", ");
 
 	if (m_title.size() > 0)
 	{
-		python << _T("name=") << PythonString(m_title).c_str() << _T(", ");
+		python << PythonString(m_title).c_str() << _T(", ");
 	} // End if - then
 	else
 	{
-		python << _T("name=None, ");
+		python << _T("None, ");
 	} // End if - else
 
-	if (m_params.m_diameter > 0)
-	{
-		python << _T("radius=") << m_params.m_diameter / 2 / theApp.m_program->m_units << _T(", ");
-	} // End if - then
-	else
-	{
-		python << _T("radius=None, ");
-	} // End if - else
+	// write all the other parameters as a dictionary
+	python << _T("{");
+	python << _T("'corner radius':") << this->m_params.m_corner_radius;
+	python << _T(", ");
+	python << _T("'cutting edge angle':") << this->m_params.m_cutting_edge_angle;
+	python << _T(", ");
+	python << _T("'cutting edge height':") << this->m_params.m_cutting_edge_height;
+	python << _T(", ");
+	python << _T("'diameter':") << this->m_params.m_diameter;
+	python << _T(", ");
+	python << _T("'flat radius':") << this->m_params.m_flat_radius;
+	python << _T(", ");
+	python << _T("'material':") << this->m_params.m_material;
+	python << _T(", ");
+	python << _T("'tool length offset':") << this->m_params.m_tool_length_offset;
+	python << _T(", ");
+	python << _T("'type':") << this->m_params.m_type;
 
-	if (m_params.m_tool_length_offset > 0)
-	{
-		python << _T("length=") << m_params.m_tool_length_offset / theApp.m_program->m_units << _T(", ");
-	} // End if - then
-	else
-	{
-		python << _T("length=None, ");
-	} // End if - else
-
-	python << _T(")\n");
+	python << _T("})\n");
 
 	return(python);
 }

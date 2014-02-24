@@ -24,6 +24,7 @@ public:
 	int    m_retract_mode;	// boring - 0 - rapid retract, 1 - feed retract
 	int    m_spindle_mode;	// boring - if true, stop spindle at bottom
 	bool   m_internal_coolant_on;
+	bool   m_rapid_to_clearance;
 
 	void set_initial_values( const double depth, const int tool_number );
 	void write_values_to_config();

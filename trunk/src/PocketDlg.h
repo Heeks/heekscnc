@@ -45,6 +45,7 @@ public:
 	void SetPicture(const wxString& name);
 
 	void OnCheckUseZigZag(wxCommandEvent& event);
+	void OnHelp( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };

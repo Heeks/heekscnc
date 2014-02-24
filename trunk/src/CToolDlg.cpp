@@ -19,6 +19,7 @@ BEGIN_EVENT_TABLE(CToolDlg, HeeksObjDlg)
     EVT_COMBOBOX(ID_TOOL_TYPE, CToolDlg::OnComboToolType)
     EVT_COMBOBOX(ID_MATERIAL, CToolDlg::OnComboMaterial)
     EVT_TEXT(wxID_ANY,CToolDlg::OnTextCtrlEvent)
+    EVT_BUTTON(wxID_HELP, CToolDlg::OnHelp)
 END_EVENT_TABLE()
 
 CToolDlg::CToolDlg(wxWindow *parent, CTool* object, const wxString& title, bool top_level)
@@ -198,8 +199,8 @@ void CToolDlg::EnableAndSetCornerFlatAndAngle(CToolParams::eToolType type)
 			m_dblCornerRadius->SetLabel(_T(""));
 			m_dblFlatRadius->Enable(false);
 			m_dblFlatRadius->SetLabel(_T(""));
-			m_dblCuttingEdgeAngle->Enable(false);
-			m_dblCuttingEdgeAngle->SetLabel(_T(""));
+			m_dblCuttingEdgeAngle->Enable();
+			m_dblCuttingEdgeAngle->SetValue(((CTool*)m_object)->m_params.m_cutting_edge_angle);
 			break;
 		case CToolParams::eEndmill:
 		case CToolParams::eSlotCutter:
@@ -225,3 +226,7 @@ void CToolDlg::EnableAndSetCornerFlatAndAngle(CToolParams::eToolType type)
 	}
 }
 
+void CToolDlg::OnHelp( wxCommandEvent& event )
+{
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/tool"));
+}

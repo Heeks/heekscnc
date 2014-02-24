@@ -460,7 +460,7 @@ void ApplyPatternToText(Python &python, int p)
 	if(pattern)
 	{
 		// write a transform redirector
-		python << _T("nc.transform.transform_begin([");
+		python << _T("transform.transform_begin([");
 		std::list<gp_Trsf> matrices;
 		pattern->GetMatrices(matrices);
 		for(std::list<gp_Trsf>::iterator It = matrices.begin(); It != matrices.end(); It++)
@@ -504,11 +504,11 @@ void ApplySurfaceToText(Python &python, CSurface* surface, std::set<CSurface*> &
 		python << _T("stl") << (int)(surface->m_id) << _T(" = ocl_funcs.STLSurfFromFile(") << PythonString(filepath.GetFullPath()) << _T(")\n");
 	}
 
-	python << _T("nc.attach.units = ") << theApp.m_program->m_units << _T("\n");
-	python << _T("nc.attach.attach_begin()\n");
-	python << _T("nc.nc.creator.stl = stl") << (int)(surface->m_id) << _T("\n");
-	python << _T("nc.nc.creator.minz = ") << surface->m_min_z << _T("\n");
-	python << _T("nc.nc.creator.material_allowance = ") << surface->m_material_allowance << _T("\n");
+	python << _T("attach.units = ") << theApp.m_program->m_units << _T("\n");
+	python << _T("attach.attach_begin()\n");
+	python << _T("nc.creator.stl = stl") << (int)(surface->m_id) << _T("\n");
+	python << _T("nc.creator.minz = ") << surface->m_min_z << _T("\n");
+	python << _T("nc.creator.material_allowance = ") << surface->m_material_allowance << _T("\n");
 
 	theApp.m_attached_to_surface = surface;
 }
@@ -692,7 +692,7 @@ Python CProgram::RewritePythonProgram()
 	// attach operations
 	if(nc_attach_needed)
 	{
-		python << _T("import nc.attach\n");
+		python << _T("import nc.attach as attach\n");
 	}
 
 	// OpenCamLib stuff
@@ -707,7 +707,7 @@ Python CProgram::RewritePythonProgram()
 
 	if(transform_module_needed)
 	{
-		python << _T("import nc.transform\n");
+		python << _T("import nc.transform as transform\n");
 		python << _T("\n");
 	}
 
@@ -743,6 +743,18 @@ Python CProgram::RewritePythonProgram()
 
 	// begin program
 	python << _T("program_begin(123, ") << PythonString(_T("Test program")) << _T(")\n");
+
+	// add any stock commands
+	for(HeeksObj* object = heeksCAD->GetFirstObject(); object != NULL; object = heeksCAD->GetNextObject())
+	{
+		if(object->GetIDGroupType() == SolidType)
+		{
+			CBox box;
+			object->GetBox(box);
+			python << _T("add_stock('BLOCK',[") << box.Width() << _T(", ") << box.Height() << _T(", ") << box.Depth() << _T(", ") << -box.MinX() << _T(", ") << -box.MinY() << _T(", ") << -box.MinZ() << _T("])\n");
+		}
+	}
+
 	python << _T("absolute()\n");
 	if(m_units > 25.0)
 	{
@@ -797,9 +809,9 @@ Python CProgram::RewritePythonProgram()
 				python << op->AppendTextToProgram();
 
 				// end surface attach
-				if(surface && surface->m_same_for_each_pattern_position)python << _T("nc.attach.attach_end()\n");
-				if(op->m_pattern != 0)python << _T("nc.transform.transform_end()\n");
-				if(surface && !surface->m_same_for_each_pattern_position)python << _T("nc.attach.attach_end()\n");
+				if(surface && surface->m_same_for_each_pattern_position)python << _T("attach.attach_end()\n");
+				if(op->m_pattern != 0)python << _T("transform.transform_end()\n");
+				if(surface && !surface->m_same_for_each_pattern_position)python << _T("attach.attach_end()\n");
 			}
 		}
 	} // End for - operation

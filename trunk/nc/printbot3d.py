@@ -13,7 +13,7 @@ class CreatorPrintbot(iso_modal.CreatorIsoModal):
     def __init__(self):
         iso_modal.CreatorIsoModal.__init__(self)
 
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+    def tool_defn(self, id, name='', params=None):
         pass
 
     def write_blocknum(self):
