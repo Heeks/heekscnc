@@ -8,7 +8,7 @@ class Creator(emc2.Creator):
     def program_begin(self, id, comment):
 	self.write( ('(' + comment + ')' + '\n') )
 
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+    def tool_defn(self, id, name='', params=None):
         pass
 
     def spindle(self, s, clockwise):

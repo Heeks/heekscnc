@@ -8316,17 +8316,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.50980392"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.28210205"
-     inkscape:cx="251.37244"
-     inkscape:cy="2572.1865"
+     inkscape:zoom="2.5724647"
+     inkscape:cx="190.73021"
+     inkscape:cy="2231.886"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="708"
-     inkscape:window-height="425"
-     inkscape:window-x="250"
-     inkscape:window-y="250"
-     inkscape:window-maximized="0">
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
        id="grid2987"
@@ -8353,406 +8353,29 @@
      id="layer1"
      style="display:inline"
      transform="translate(0,1927.5592)">
-    <g
-       id="g6986"
-       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\general.png"
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
+       id="rect6972"
+       width="300"
+       height="200"
+       x="205"
+       y="-1267.6381"
+       ry="0" />
+    <path
+       style="fill:#00fe00;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+       d="m 340,-1187.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
+       id="path5201"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\shape.png"
        inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         ry="0"
-         y="-1907.6381"
-         x="20"
-         height="200"
-         width="300"
-         id="rect2985-1"
-         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5995"
-         d="m 65,-1747.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 140,-1762.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6008"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6010"
-         d="m 215,-1777.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 90,-1827.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6012"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6014"
-         d="m 165,-1842.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 240,-1857.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6016"
-         inkscape:connector-curvature="0" />
-    </g>
-    <g
-       id="g7051"
-       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\xshift1.png"
+       inkscape:export-ydpi="90" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path5207"
+       d="m 380,-1187.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
+       style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\shape2.png"
        inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         ry="0"
-         y="-1467.6381"
-         x="20"
-         height="200"
-         width="300"
-         id="rect6872"
-         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6874"
-         d="m 65,-1307.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 140,-1322.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6876"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6878"
-         d="m 215,-1337.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 90,-1387.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6880"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6882"
-         d="m 165,-1402.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 240,-1417.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6884"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6886"
-         d="m 65,-1307.6381 65.51375,-13.1295"
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-         sodipodi:nodetypes="cc" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5355"
-         d="m 50,-1312.638 0,10 15,-5 z"
-         style="fill:#000000;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5357"
-         d="m 140,-1307.6381 15,-5 0,10 z"
-         style="fill:#000000;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5359"
-         d="m 30,-1307.638 25,0"
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5361"
-         d="m 148,-1307.6381 25,0"
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6888"
-         d="m 124.34353,-1324.8461 1.80651,9.8355 13.84996,-7.6275 z"
-         style="fill:#000000;stroke:none;display:inline" />
-    </g>
-    <g
-       id="g6995"
-       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\xshift2.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         ry="0"
-         y="-1907.6381"
-         x="340"
-         height="200"
-         width="300"
-         id="rect6841"
-         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6843"
-         d="m 385,-1747.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 460,-1762.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6845"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6847"
-         d="m 535,-1777.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 410,-1827.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6849"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6851"
-         d="m 485,-1842.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 560,-1857.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6853"
-         inkscape:connector-curvature="0" />
-      <path
-         sodipodi:nodetypes="cc"
-         inkscape:connector-curvature="0"
-         id="path6855"
-         d="m 385,-1747.6381 22.32782,-70.781"
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-      <path
-         inkscape:transform-center-y="7.8988574"
-         inkscape:transform-center-x="4.14902"
-         inkscape:connector-curvature="0"
-         id="path6857"
-         d="m 401.04608,-1814.6063 9.60988,2.766 L 410,-1827.6381 z"
-         style="fill:#000000;stroke:none;display:inline" />
-      <path
-         style="fill:#000000;stroke:none;display:inline"
-         d="m 370,-1832.6381 0,10 15,-5 z"
-         id="path6908"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:#000000;stroke:none;display:inline"
-         d="m 410,-1827.6381 15,-5 0,10 z"
-         id="path6910"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
-         d="m 350,-1827.6381 25,0"
-         id="path6912"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
-         d="m 418,-1827.6381 25,0"
-         id="path6914"
-         inkscape:connector-curvature="0" />
-    </g>
-    <g
-       id="g7025"
-       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\yshift2.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
-         id="rect6890"
-         width="300"
-         height="200"
-         x="340"
-         y="-1687.6381"
-         ry="0" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 385,-1527.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6892"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6894"
-         d="m 460,-1542.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 535,-1557.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6896"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6898"
-         d="m 410,-1607.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 485,-1622.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6900"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6902"
-         d="m 560,-1637.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-         d="m 385,-1527.6381 22.32782,-70.781"
-         id="path6904"
-         inkscape:connector-curvature="0"
-         sodipodi:nodetypes="cc" />
-      <path
-         style="fill:#000000;stroke:none;display:inline"
-         d="m 401.04608,-1594.6063 9.60988,2.766 L 410,-1607.6381 z"
-         id="path6906"
-         inkscape:connector-curvature="0"
-         inkscape:transform-center-x="4.14902"
-         inkscape:transform-center-y="7.8988574" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5355-1"
-         d="m 390,-1622.6381 -10,0 5,15 z"
-         style="fill:#000000;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5357-7"
-         d="m 385,-1527.6381 5,15 -10,0 z"
-         style="fill:#000000;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5359-4"
-         d="m 385,-1642.6381 0,25"
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path5361-0"
-         d="m 385,-1517.6381 0,25"
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
-    </g>
-    <g
-       id="g7010"
-       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\yshift1.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
-         id="rect6795"
-         width="300"
-         height="200"
-         x="20"
-         y="-1687.6381"
-         ry="0" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 65,-1527.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6797"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6799"
-         d="m 140,-1542.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 215,-1557.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6801"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6803"
-         d="m 90,-1607.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 165,-1622.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6805"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6807"
-         d="m 240,-1637.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         sodipodi:nodetypes="cc"
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-         d="m 65,-1527.6381 65.51375,-13.1295"
-         id="path6809"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:#000000;stroke:none;display:inline"
-         d="m 124.34353,-1544.8461 1.80651,9.8355 13.84996,-7.6275 z"
-         id="path6811"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:#000000;stroke:none;display:inline"
-         d="m 70,-1622.6381 -10,0 5,15 z"
-         id="path6943"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:#000000;stroke:none;display:inline"
-         d="m 65,-1527.6381 5,15 -10,0 z"
-         id="path6945"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
-         d="m 65,-1642.6381 0,25"
-         id="path6947"
-         inkscape:connector-curvature="0" />
-      <path
-         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
-         d="m 65,-1517.6381 0,25"
-         id="path6949"
-         inkscape:connector-curvature="0" />
-    </g>
-    <g
-       id="g7045"
-       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\copies1.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
-         id="rect6958"
-         width="300"
-         height="200"
-         x="340"
-         y="-1467.6381"
-         ry="0" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 385,-1307.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6960"
-         inkscape:connector-curvature="0" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6962"
-         d="m 460,-1322.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 535,-1337.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6964"
-         inkscape:connector-curvature="0" />
-    </g>
-    <g
-       id="g7040"
-       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\pattern\copies2.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         ry="0"
-         y="-1467.6381"
-         x="660"
-         height="200"
-         width="300"
-         id="rect6972"
-         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path6974"
-         d="m 705,-1307.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         style="fill:#008000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 730,-1387.6381 25,0 0,-10 -10,0 0,-20 -15,0 z"
-         id="path6980"
-         inkscape:connector-curvature="0" />
-    </g>
+       inkscape:export-ydpi="90" />
   </g>
 </svg>

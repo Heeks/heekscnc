@@ -62,6 +62,7 @@ CHeeksCNCApp::CHeeksCNCApp(){
 	m_machiningBar = NULL;
 	m_icon_texture_number = 0;
 	m_machining_hidden = false;
+	m_settings_restored = false;
 }
 
 CHeeksCNCApp::~CHeeksCNCApp(){
@@ -285,22 +286,27 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 static void NewScriptOpMenuCallback(wxCommandEvent &event)
 {
 	CScriptOp *new_object = new CScriptOp();
-	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
+	if(new_object->Edit())
+	{
+		heeksCAD->StartHistory();
+		AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
+		heeksCAD->EndHistory();
+	}
+	else
+		delete new_object;
 }
 
 static void NewPatternMenuCallback(wxCommandEvent &event)
 {
+	CPattern *new_object = new CPattern();
+	if(new_object->Edit())
 	{
-		CPattern *new_object = new CPattern();
-		if(new_object->Edit())
-		{
-			heeksCAD->StartHistory();
-			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Patterns());
-			heeksCAD->EndHistory();
-		}
-		else
-			delete new_object;
+		heeksCAD->StartHistory();
+		AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Patterns());
+		heeksCAD->EndHistory();
 	}
+	else
+		delete new_object;
 }
 
 static void NewSurfaceMenuCallback(wxCommandEvent &event)
@@ -500,6 +506,11 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 		}
 		HeeksPyBackplot(theApp.m_program, theApp.m_program, nc_file_str);
 	}
+}
+
+static void HelpMenuCallback(wxCommandEvent& event)
+{
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help"));
 }
 
 // a class to re-use existing "OnButton" functions in a Tool class
@@ -867,7 +878,7 @@ public:
 class NewProfileOpTool:public Tool
 {
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("New Profile Operatio");}
+	const wxChar* GetTitle(){return _("New Profile Operation");}
 	void Run(){
 		NewProfileOp();
 	}
@@ -877,7 +888,7 @@ class NewProfileOpTool:public Tool
 class NewPocketOpTool:public Tool
 {
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("New Pocket Operatio");}
+	const wxChar* GetTitle(){return _("New Pocket Operation");}
 	void Run(){
 		NewPocketOp();
 	}
@@ -896,16 +907,16 @@ class NewDrillingOpTool:public Tool
 
 static void GetMarkedListTools(std::list<Tool*>& t_list)
 {
-	std::set<int> types;
+	std::set<int> group_types;
 
 	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
 	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		types.insert(object->GetType());
+		group_types.insert(object->GetIDGroupType());
 	}
 
-	for(std::set<int>::iterator It = types.begin(); It != types.end(); It++)
+	for(std::set<int>::iterator It = group_types.begin(); It != group_types.end(); It++)
 	{
 		switch(*It)
 		{
@@ -918,6 +929,13 @@ static void GetMarkedListTools(std::list<Tool*>& t_list)
 			break;
 		}
 	}
+}
+
+static void OnRestoreDefaults()
+{
+	CNCConfig config;
+	config.DeleteAll();
+	theApp.m_settings_restored = true;
 }
 
 void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
@@ -992,6 +1010,11 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), ToolImage(_T("tomachine")), SendToMachineMenuCallback);
 #endif
 	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
+
+	// Help menu
+	wxMenu *menuHelp = new wxMenu;
+	heeksCAD->AddMenuItem(menuHelp, _("Online HeeksCNC Manual"), ToolImage(_T("help")), HelpMenuCallback);
+	frame->GetMenuBar()->Append(menuHelp,  _("Help"));
 
 	// add the program canvas
     m_program_canvas = new CProgramCanvas(frame);
@@ -1092,6 +1115,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterHeeksTypesConverter( HeeksCNCType );
 
 	heeksCAD->RegisterMarkeListTools(&GetMarkedListTools);
+	heeksCAD->RegisterOnRestoreDefaults(&OnRestoreDefaults);
 }
 
 std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
@@ -1293,7 +1317,7 @@ Python CHeeksCNCApp::SetTool( const int new_tool )
             python << _T("tool_change( id=") << new_tool << _T(")\n");
 			if(m_attached_to_surface)
 			{
-				python << _T("nc.nc.creator.set_ocl_cutter(") << pTool->OCLDefinition(m_attached_to_surface) << _T(")\n");
+				python << _T("nc.creator.set_ocl_cutter(") << pTool->OCLDefinition(m_attached_to_surface) << _T(")\n");
 			}
         } // End if - then
     }

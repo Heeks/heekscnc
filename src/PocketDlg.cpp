@@ -13,6 +13,7 @@ BEGIN_EVENT_TABLE(PocketDlg, SketchOpDlg)
     EVT_CHECKBOX(ID_KEEP_TOOL_DOWN, HeeksObjDlg::OnComboOrCheck)
     EVT_CHECKBOX(ID_USE_ZIG_ZAG, PocketDlg::OnCheckUseZigZag)
     EVT_CHECKBOX(ID_ZIG_UNIDIRECTIONAL, HeeksObjDlg::OnComboOrCheck)
+    EVT_BUTTON(wxID_HELP, PocketDlg::OnHelp)
 END_EVENT_TABLE()
 
 PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, bool top_level)
@@ -126,6 +127,11 @@ void PocketDlg::EnableZigZagControls()
 
 	m_dblZigAngle->Enable(enable);
 	m_chkZigUnidirectional->Enable(enable);
+}
+
+void PocketDlg::OnHelp( wxCommandEvent& event )
+{
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/pocket"));
 }
 
 bool PocketDlg::Do(CPocket* object)

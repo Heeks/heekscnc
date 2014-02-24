@@ -279,16 +279,16 @@ class Creator(nc.Creator):
         self.write(self.SPACE() + (self.TOOL() % id) + '\n')
         self.t = id
 
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+    def tool_defn(self, id, name='', params=None):
         self.write_blocknum()
         self.write(self.SPACE() + self.TOOL_DEFINITION())
         self.write(self.SPACE() + ('P%i' % id) + ' ')
 
         if (radius != None):
-            self.write(self.SPACE() + ('R%.3f' % radius))
+            self.write(self.SPACE() + ('R%.3f' % (float(params['diameter'])/2)))
 
         if (length != None):
-            self.write(self.SPACE() + 'Z%.3f' % length)
+            self.write(self.SPACE() + 'Z%.3f' % float(params['cutting edge height']))
 
         self.write('\n')
 
@@ -737,7 +737,7 @@ class Creator(nc.Creator):
     # revert it.  I must set the mode so that I can be sure the values I'm passing in make
     # sense to the end-machine.
     #
-    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
+    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None, rapid_to_clearance = None):
         if (standoff == None):        
         # This is a bad thing.  All the drilling cycles need a retraction (and starting) height.        
             return

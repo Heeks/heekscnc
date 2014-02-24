@@ -18,6 +18,7 @@ class DrillingDlg : public DepthOpDlg
 	wxCheckBox *m_chkStopSpindleAtBottom;
 	wxButton *m_btnPointsPick;
 	wxCheckBox *m_chkInternalCoolantOn;
+	wxCheckBox *m_chkRapidToClearance;
 
 public:
     DrillingDlg(wxWindow *parent, CDrilling* object, const wxString& title = wxString(_T("Drilling Operation")), bool top_level = true);
@@ -31,6 +32,7 @@ public:
 
 	void SetPicture(const wxString& name);
 	void OnPointsPick( wxCommandEvent& event );
+	void OnHelp( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };

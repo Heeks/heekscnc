@@ -44,6 +44,7 @@ public:
     int         m_tool_number;
     Python SetTool( const int new_tool );
     CNCPoint      m_location;
+	bool m_settings_restored;
 
 	CHeeksCNCApp();
 	~CHeeksCNCApp();
