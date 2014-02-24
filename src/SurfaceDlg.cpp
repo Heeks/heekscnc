@@ -18,6 +18,7 @@ enum
 
 BEGIN_EVENT_TABLE(SurfaceDlg, HeeksObjDlg)
     EVT_CHECKBOX(ID_SAME_FOR_EACH_POSITION, HeeksObjDlg::OnComboOrCheck)
+    EVT_BUTTON(wxID_HELP, SurfaceDlg::OnHelp)
 END_EVENT_TABLE()
 
 SurfaceDlg::SurfaceDlg(wxWindow *parent, HeeksObj* object, const wxString& title, bool top_level)
@@ -72,4 +73,9 @@ void SurfaceDlg::SetPictureByWindow(wxWindow* w)
 		else SetPicture(_T("different for each position"));
 	}
 	else SetPicture(_T("general"));
+}
+
+void SurfaceDlg::OnHelp( wxCommandEvent& event )
+{
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/surface"));
 }

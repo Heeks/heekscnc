@@ -38,6 +38,7 @@ public:
 	void OnComboToolType(wxCommandEvent& event);
 	void OnComboMaterial(wxCommandEvent& event);
 	void OnTextCtrlEvent(wxCommandEvent& event);
+	void OnHelp( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };

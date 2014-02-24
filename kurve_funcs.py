@@ -386,7 +386,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
             # rapid up to the clearance height
             rapid(z = depthparams.clearance_height)        
 
-    #rapid(z = depthparams.clearance_height)        
+    rapid(z = depthparams.clearance_height)        
 
     del offset_curve
                 

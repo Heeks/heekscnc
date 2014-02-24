@@ -44,6 +44,9 @@ class Creator:
     def program_begin(self, id, name=''):
         """Begin a program"""
         pass
+    
+    def add_stock(self, type_name, params):
+        pass
 
     def program_stop(self, optional=False):
         """Stop the machine"""
@@ -114,7 +117,7 @@ class Creator:
         """Change the tool"""
         pass
 
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+    def tool_defn(self, id, name='', params=None):
         """Define a tool"""
         pass
 
@@ -256,7 +259,7 @@ class Creator:
         """Profile routine"""
         pass
 
-    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
+    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None, rapid_to_clearance=None):
         """Drilling routines"""
         pass
 
@@ -406,6 +409,9 @@ def output(filename):
 def program_begin(id, name=''):
     creator.program_begin(id, name)
 
+def add_stock(type_name, params):
+    creator.add_stock(type_name, params)
+
 def program_stop(optional=False):
     creator.program_stop(optional)
 
@@ -460,8 +466,8 @@ def remove_temporary_origin():
 def tool_change(id):
     creator.tool_change(id)
 
-def tool_defn(id, name='', radius=None, length=None, gradient=None):
-    creator.tool_defn(id, name, radius, length, gradient)
+def tool_defn(id, name='', params=None):
+    creator.tool_defn(id, name, params)
 
 def offset_radius(id, radius=None):
     creator.offset_radius(id, radius)
@@ -587,8 +593,8 @@ def pocket():
 def profile():
     creator.profile()
 
-def drill(x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
-    creator.drill(x, y, dwell, depthparams, retract_mode, spindle_mode, internal_coolant_on)
+def drill(x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None, rapid_to_clearance=None):
+    creator.drill(x, y, dwell, depthparams, retract_mode, spindle_mode, internal_coolant_on, rapid_to_clearance)
 
 
 def tap(x=None, y=None, z=None, zretract=None, depth=None, standoff=None, dwell_bottom=None, pitch=None, stoppos=None, spin_in=None, spin_out=None, tap_mode=None, direction=None):

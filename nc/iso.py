@@ -68,6 +68,9 @@ class Creator(nc.Creator):
         self.output_g43_on_tool_change_line = False
         self.output_internal_coolant_commands = False
         self.internal_coolant_on = None
+        self.output_g98_and_g99 = True
+        self.g98_not_g99 = None # True for G98 ouput, False for G99 output
+        self.output_cutviewer_comments = False
     ############################################################################
     ##  Codes
 
@@ -161,6 +164,9 @@ class Creator(nc.Creator):
 
     def EXACT_PATH_MODE(self): return('G61')
     def EXACT_STOP_MODE(self): return('G61.1')
+
+    def RETRACT_TO_CLEARANCE(self): return('G98')
+    def RETRACT_TO_STANDOFF(self): return('G99')
         
     ############################################################################
     ##  Internals
@@ -199,6 +205,14 @@ class Creator(nc.Creator):
     def program_begin(self, id, name=''):
         self.write((self.PROGRAM() % id) + self.SPACE() + (self.COMMENT(name)))
         self.write('\n')
+
+    def add_stock(self, type_name, params):
+        if self.output_cutviewer_comments:
+            self.write("(STOCK/" + type_name)
+            for param in params:
+                self.write(",")
+                self.write(str(param))
+            self.write(")\n")
 
     def program_stop(self, optional=False):
         self.write_blocknum()
@@ -307,17 +321,20 @@ class Creator(nc.Creator):
             self.write(self.SPACE() + 'G43' + self.SPACE() + 'D' + str(id) + self.SPACE() + 'H' + str(id) + '\n')
         self.t = id
 
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
+    def tool_defn(self, id, name='',params=None):
+        if self.output_cutviewer_comments:
+            import cutviewer
+            cutviewer.tool_defn(self, id, name, params)
         if self.output_tool_definitions:
             self.write_blocknum()
             self.write(self.SPACE() + self.TOOL_DEFINITION())
             self.write(self.SPACE() + ('P%i' % id) + ' ')
 
             if (radius != None):
-                self.write(self.SPACE() + ('R%.3f' % radius))
+                self.write(self.SPACE() + ('R%.3f' % (float(params['diameter'])/2)))
 
             if (length != None):
-                self.write(self.SPACE() + 'Z%.3f' % length)
+                self.write(self.SPACE() + 'Z%.3f' % float(params['cutting edge height']))
 
             self.write('\n')
 
@@ -818,7 +835,7 @@ class Creator(nc.Creator):
     # revert it.  I must set the mode so that I can be sure the values I'm passing in make
     # sense to the end-machine.
     #
-    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
+    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None, rapid_to_clearance=None):
         if (depthparams.clearance_height == None):        
             return
         
@@ -856,7 +873,11 @@ class Creator(nc.Creator):
                 if dwell != 0 and last_cut:
                     self.dwell(dwell)        
                 if last_cut:self.rapid(z = depthparams.clearance_height)
-                else: self.rapid(z = depthparams.start_depth + depthparams.rapid_safety_space)
+                else:
+                    if rapid_to_clearance:
+                        self.rapid(z = depthparams.clearance_height)
+                    else:
+                        self.rapid(z = depthparams.start_depth + depthparams.rapid_safety_space)
                 current_z = next_z
                 first = False
             
@@ -898,6 +919,16 @@ class Creator(nc.Creator):
                         self.prev_drill = self.DRILL_WITH_DWELL(dwell)
                 else:
                     self.write(self.SPACE() + self.DRILL_WITH_DWELL(dwell))
+
+        if self.output_g98_and_g99 == True:
+            if rapid_to_clearance == True:
+                if self.g98_not_g99 != True:
+                    self.write(self.SPACE() + self.RETRACT_TO_CLEARANCE())
+                    self.g98_not_g99 = True
+            else:
+                if self.g98_not_g99 != False:
+                    self.write(self.SPACE() + self.RETRACT_TO_STANDOFF())
+                    self.g98_not_g99 = FALSE                    
     
     # Set the retraction point to the 'standoff' distance above the starting z height.        
         retract_height = depthparams.start_depth + depthparams.rapid_safety_space        

@@ -13,6 +13,7 @@ BEGIN_EVENT_TABLE(ProfileDlg, SketchOpDlg)
     EVT_COMBOBOX(ID_TOOL_ON_SIDE,HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
     EVT_CHECKBOX(ID_DO_FINISHING_PASS, ProfileDlg::OnCheckFinishingPass)
+    EVT_BUTTON(wxID_HELP, ProfileDlg::OnHelp)
     EVT_CHECKBOX(ID_ONLY_FINISHING_PASS, HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_FINISH_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
 END_EVENT_TABLE()
@@ -36,7 +37,7 @@ ProfileDlg::ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title
 	leftControls.push_back( HControl( m_chkDoFinishingPass = new wxCheckBox( this, ID_DO_FINISHING_PASS, _("do finishing pass") ), wxALL ));
 	leftControls.push_back( HControl( m_chkOnlyFinishingPass = new wxCheckBox( this, ID_ONLY_FINISHING_PASS, _("only finishing pass") ), wxALL ));
 	leftControls.push_back(MakeLabelAndControl(_("finishing feed rate"), m_lgthFinishingFeedrate = new CLengthCtrl(this), &m_staticFinishingFeedrate));
-	leftControls.push_back(MakeLabelAndControl(_("cut mode"), m_cmbFinishingCutMode = new wxComboBox(this, ID_FINISH_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices), &m_staticFinishingCutMode));
+	leftControls.push_back(MakeLabelAndControl(_("finishing cut mode"), m_cmbFinishingCutMode = new wxComboBox(this, ID_FINISH_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices), &m_staticFinishingCutMode));
 	leftControls.push_back(MakeLabelAndControl(_("finish step down"), m_lgthFinishStepDown = new CLengthCtrl(this), &m_staticFinishStepDown));
 
 	for(std::list<HControl>::iterator It = save_leftControls.begin(); It != save_leftControls.end(); It++)
@@ -196,6 +197,11 @@ void ProfileDlg::OnCheckFinishingPass(wxCommandEvent& event)
 	if(m_ignore_event_functions)return;
 	EnableControls();
 	HeeksObjDlg::SetPicture();
+}
+
+void ProfileDlg::OnHelp( wxCommandEvent& event )
+{
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/profile"));
 }
 
 void ProfileDlg::SetSketchOrderAndCombo()

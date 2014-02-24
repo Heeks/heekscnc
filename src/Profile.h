@@ -91,7 +91,6 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);
-	ObjectCanvas* GetDialog(wxWindow* parent);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);

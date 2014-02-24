@@ -89,21 +89,19 @@ class Arc:
             original.arc_cw(x, y, z, i, j)
             
 class Drill:
-    def __init__(self, x, y, z, depth, standoff, dwell, peck_depth, retract_mode, spindle_mode, internal_coolant_on):
+    def __init__(self, x, y, dwell, depthparams, retract_mode, spindle_mode, internal_coolant_on, rapid_to_clearance):
         self.x = x
         self.y = y
-        self.z = z
-        self.depth = depth
-        self.standoff = standoff
         self.dwell = dwell
-        self.peck_depth = peck_depth
+        self.depthparams = depthparams
         self.retract_mode = retract_mode
         self.spindle_mode = spindle_mode
         self.internal_coolant_on = internal_coolant_on
+        self.rapid_to_clearance = rapid_to_clearance
         
     def Do(self, original, matrix):
-        x,y,z = matrix.TransformedPoint(self.x, self.y, self.z)
-        original.drill(x, y, z, self.depth, self.standoff, self.dwell, self.peck_depth, self.retract_mode, self.spindle_mode, self.clearance_height)
+        x,y,z = matrix.TransformedPoint(self.x, self.y, 0.0)
+        original.drill(x, y, self.dwell, self.depthparams, self.retract_mode, self.spindle_mode, self.internal_coolant_on, self.rapid_to_clearance)
     
 
 ################################################################################
@@ -187,8 +185,8 @@ class Creator:
             self.commands = []
         self.original.tool_change(id)
 
-    def tool_defn(self, id, name='', radius=None, length=None, gradient=None):
-        self.original.tool_defn(id, name, radius, length, gradient)
+    def tool_defn(self, id, name='', params=None):
+        self.original.tool_defn(id, name, params)
 
     def offset_radius(self, id, radius=None):
         self.original.offset_radius(id, radius)
@@ -308,8 +306,8 @@ class Creator:
     def circular_pocket(self, x=None, y=None, ToolDiameter=None, HoleDiameter=None, ClearanceHeight=None, StartHeight=None, MaterialTop=None, FeedRate=None, SpindleRPM=None, HoleDepth=None, DepthOfCut=None, StepOver=None ):
         self.circular_pocket(x, y, ToolDiameter, HoleDiameter, ClearanceHeight, StartHeight, MaterialTop, FeedRate, SpindleRPM, HoleDepth, DepthOfCut, StepOver)
 
-    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None):
-        self.commands.append(Drill(x, y, dwell, depthparams, spindle_mode, internal_coolant_on))
+    def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None, rapid_to_clearance=None):
+        self.commands.append(Drill(x, y, dwell, depthparams, retract_mode, spindle_mode, internal_coolant_on, rapid_to_clearance))
 
     # argument list adapted for compatibility with Tapping module
     # wild guess - I'm unsure about the purpose of this file and wether this works -haberlerm

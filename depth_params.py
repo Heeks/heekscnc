@@ -1,11 +1,13 @@
+import math
+
 class depth_params:
     def __init__(self, clearance_height, rapid_safety_space, start_depth, step_down, z_finish_depth, z_thru_depth, final_depth, user_depths):
         self.clearance_height = clearance_height
-        self.rapid_safety_space = rapid_safety_space
+        self.rapid_safety_space = math.fabs(rapid_safety_space)
         self.start_depth = start_depth
-        self.step_down = step_down
-        self.z_finish_depth = z_finish_depth
-        self.z_thru_depth = z_thru_depth
+        self.step_down = math.fabs(step_down)
+        self.z_finish_depth = math.fabs(z_finish_depth)
+        self.z_thru_depth = math.fabs(z_thru_depth)
         self.final_depth = final_depth
         self.user_depths = user_depths
         
@@ -25,5 +27,7 @@ class depth_params:
                     for i in range(1, layer_count):
                         depth += layer_depth
                         depths.insert(0, depth)
+                        
+        print 'depths = ', depths
                     
         return depths

@@ -28,12 +28,12 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.7220218"
-     inkscape:cx="401.14537"
-     inkscape:cy="844.52024"
+     inkscape:zoom="1.3748254"
+     inkscape:cx="372.04724"
+     inkscape:cy="573.87893"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="true"
+     showgrid="false"
      inkscape:window-width="1495"
      inkscape:window-height="968"
      inkscape:window-x="295"
@@ -45,6 +45,18 @@
   </sodipodi:namedview>
   <defs
      id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5791">
+      <stop
+         style="stop-color:#0000ff;stop-opacity:1;"
+         offset="0"
+         id="stop5793" />
+      <stop
+         style="stop-color:#0000ff;stop-opacity:0;"
+         offset="1"
+         id="stop5795" />
+    </linearGradient>
     <linearGradient
        inkscape:collect="always"
        id="linearGradient5735">
@@ -11102,6 +11114,44 @@
        id="linearGradient4853"
        xlink:href="#linearGradient1887-0"
        inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5791"
+       id="linearGradient5801"
+       gradientUnits="userSpaceOnUse"
+       x1="309.75"
+       y1="477.36218"
+       x2="360.25056"
+       y2="477.36218" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5791"
+       id="linearGradient5805"
+       gradientUnits="userSpaceOnUse"
+       x1="309.75"
+       y1="477.36218"
+       x2="360.25056"
+       y2="477.36218" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5791"
+       id="linearGradient5815"
+       gradientUnits="userSpaceOnUse"
+       x1="309.75"
+       y1="477.36218"
+       x2="360.25056"
+       y2="477.36218"
+       gradientTransform="matrix(2.1660248,0,0,2.1660248,-360.88469,-526.88253)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5791"
+       id="linearGradient5819"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.70591405,0,0,0.70591405,91.019596,132.88631)"
+       x1="309.75"
+       y1="477.36218"
+       x2="360.25056"
+       y2="477.36218" />
   </defs>
   <metadata
      id="metadata7">
@@ -12943,6 +12993,35 @@
          d="M 461.77347,392.98492 480,377.36218 l -18.22653,-16.1435 0,31.76624 z"
          style="fill:#008000;fill-rule:evenodd;stroke:#000000;stroke-width:1.09359205;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
          inkscape:connector-curvature="0" />
+    </g>
+    <g
+       id="g5821"
+       inkscape:export-filename="C:\Dev\HeeksCNCSVN\bitmaps\help.png"
+       inkscape:export-xdpi="240"
+       inkscape:export-ydpi="240">
+      <path
+         sodipodi:nodetypes="csscc"
+         inkscape:connector-curvature="0"
+         id="path5008"
+         d="m 345.14866,469.86299 c 0,9.74664 -7.90121,17.64785 -17.64785,17.64785 -9.74664,0 -17.64786,-7.90121 -17.64786,-17.64785 0,-9.74664 7.90122,-17.64786 17.64786,-17.64786 9.62011,0 17.71352,8.29044 17.64785,17.64786 z"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.70591408;stroke-linecap:butt;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path5799"
+         d="m 327.05802,454.29026 c -10.44269,-0.26875 -18.49484,12.25668 -13.92217,21.63181 3.55531,9.65441 17.65853,12.73287 24.88066,5.45888 7.30908,-6.10736 6.40605,-19.0429 -1.54804,-24.12701 -2.7021,-1.98389 -6.0506,-3.08173 -9.41045,-2.96368 z"
+         style="fill:url(#linearGradient5819);fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.70591408;stroke-linecap:butt;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text5807"
+         y="482.15918"
+         x="317.65283"
+         style="font-size:34.91170502px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:#0000ff;stroke-width:0.70591408;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.70591408"
+           y="482.15918"
+           x="317.65283"
+           id="tspan5809"
+           sodipodi:role="line">?</tspan></text>
     </g>
   </g>
 </svg>
