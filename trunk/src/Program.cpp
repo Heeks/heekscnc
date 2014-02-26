@@ -757,7 +757,16 @@ Python CProgram::RewritePythonProgram()
 
 
 #ifdef FREE_VERSION
-	python << _T("write('Delete this line manually from each g-code file. Buy full version to remove this automatically. www.heeks.net\\n')\n");
+	python << _T("comment('MADE WITH FREE VERSION OF HEEKSCNC. Please buy full version to remove this text\\n')\n");
+	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
+	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
+	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
+	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
+	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
+	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
+	python << _T("comment('***********                    ***********\\n')\n");
+	python << _T("comment('***********    www.heeks.net   ***********\\n')\n");
+	python << _T("comment('***********                    ***********\\n')\n");
 #endif
 
 	// begin program

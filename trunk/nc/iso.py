@@ -330,10 +330,11 @@ class Creator(nc.Creator):
             self.write(self.SPACE() + self.TOOL_DEFINITION())
             self.write(self.SPACE() + ('P%i' % id) + ' ')
 
-            if (radius != None):
+            if (params['diameter'] != None):
                 self.write(self.SPACE() + ('R%.3f' % (float(params['diameter'])/2)))
 
-            if (length != None):
+            print params
+            if (params['cutting edge height'] != None):
                 self.write(self.SPACE() + 'Z%.3f' % float(params['cutting edge height']))
 
             self.write('\n')
