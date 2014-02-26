@@ -35,6 +35,18 @@ static void	WriteCoords(std::wofstream &ofs)
 {
 	CBox box;
 	GetWorldBox(box);
+
+	if(!box.m_valid)
+	{
+		box = CBox(-100, -100, -50, 100, 100, 50);
+	}
+	else
+	{
+		while(box.Width() < 100){box.m_x[0] -= 5.0; box.m_x[3] += 5.0;}
+		while(box.Height() < 100){box.m_x[1] -= 5.0; box.m_x[4] += 5.0;}
+		box.m_x[2] -= 10.0;
+	}
+
 	ofs<<"toolpath.coords = Coords("<<box.MinX()<<", "<<box.MinY()<<", "<<box.MinZ()<<", "<<box.MaxX()<<", "<<box.MaxY()<<", "<<box.MaxZ()<<")\n";
 }
 
