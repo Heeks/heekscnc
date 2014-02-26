@@ -15,6 +15,7 @@
 #include "CTool.h"
 #include "Tools.h"
 #include <wx/stdpaths.h>
+#include "Stocks.h"
 
 #include <sstream>
 
@@ -39,9 +40,14 @@ static void	WriteCoords(std::wofstream &ofs)
 
 static void	WriteSolids(std::wofstream &ofs)
 {
-	for(HeeksObj* object = heeksCAD->GetFirstObject(); object != NULL; object = heeksCAD->GetNextObject())
+
+	std::set<int> stock_ids;
+	theApp.m_program->Stocks()->GetSolidIds(stock_ids);
+	for(std::set<int>::iterator It = stock_ids.begin(); It != stock_ids.end(); It++)
 	{
-		if(object->GetIDGroupType() == SolidType)
+		int id = *It;
+		HeeksObj* object = heeksCAD->GetIDObject(SolidType, id);
+		if(object)
 		{
 			CBox box;
 			object->GetBox(box);

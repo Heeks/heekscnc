@@ -34,6 +34,8 @@ public:
 	HeeksObj* m_object;
 	ReselectSolids(): m_solids(NULL), m_object(NULL){}
 
+	static bool GetSolids(std::list<int>& solids );
+
 	// Tool's virtual functions
 	const wxChar* GetTitle(){return _("Re-select solids");}
 	void Run();

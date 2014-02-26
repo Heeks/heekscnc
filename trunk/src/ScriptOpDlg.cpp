@@ -31,7 +31,7 @@ ScriptOpDlg::ScriptOpDlg(wxWindow *parent, CScriptOp* object, const wxString& ti
 	if(top_level)
 	{
 		HeeksObjDlg::AddControlsAndCreate();
-		m_cmbPattern->SetFocus();
+		m_txtScript->SetFocus();
 	}
 }
 

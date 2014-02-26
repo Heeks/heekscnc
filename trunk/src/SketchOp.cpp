@@ -24,6 +24,7 @@ CSketchOp & CSketchOp::operator= ( const CSketchOp & rhs )
 {
 	if (this != &rhs)
 	{
+		m_sketch = rhs.m_sketch;
 		CDepthOp::operator=( rhs );
 	}
 
@@ -32,7 +33,7 @@ CSketchOp & CSketchOp::operator= ( const CSketchOp & rhs )
 
 CSketchOp::CSketchOp( const CSketchOp & rhs ) : CDepthOp(rhs)
 {
-	m_depth_op_params = rhs.m_depth_op_params;
+	m_sketch = rhs.m_sketch;
 }
 
 void CSketchOp::ReloadPointers()

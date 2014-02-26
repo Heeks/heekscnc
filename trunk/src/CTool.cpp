@@ -426,7 +426,7 @@ void CToolParams::ReadParametersFromXMLElement(TiXmlElement* pElem)
 	if (pElem->Attribute("tool_length_offset")) pElem->Attribute("tool_length_offset", &m_tool_length_offset);
 	if (pElem->Attribute("automatically_generate_title")) pElem->Attribute("automatically_generate_title", &m_automatically_generate_title);
 	if (pElem->Attribute("material")) pElem->Attribute("material", &m_material);
-	if (pElem->Attribute("type")) { int value; pElem->Attribute("type", &value); m_type = CToolParams::eToolType(value); }
+	if (const char* value = pElem->Attribute("type")) { m_type = GetToolTypeFromString(value); }
 	if (pElem->Attribute("corner_radius")) pElem->Attribute("corner_radius", &m_corner_radius);
 	if (pElem->Attribute("flat_radius")) pElem->Attribute("flat_radius", &m_flat_radius);
 	if (pElem->Attribute("cutting_edge_angle")) pElem->Attribute("cutting_edge_angle", &m_cutting_edge_angle);
@@ -1001,6 +1001,8 @@ TopoDS_Shape CTool::GetShape() const
 		case CToolParams::eEngravingTool:
 		{
 			// First a cylinder to represent the shaft.
+			if(m_params.m_cutting_edge_angle > 0.00001)
+			{
 			double tool_tip_length_a = (diameter / 2) / tan( degrees_to_radians(m_params.m_cutting_edge_angle));
 			double tool_tip_length_b = (m_params.m_flat_radius)  / tan( degrees_to_radians(m_params.m_cutting_edge_angle));
 			double tool_tip_length = tool_tip_length_a - tool_tip_length_b;
@@ -1025,6 +1027,18 @@ TopoDS_Shape CTool::GetShape() const
 
 			TopoDS_Shape tool_shape = BRepAlgoAPI_Fuse(shaft.Shape() , tool_tip.Shape() );
 			return tool_shape;
+			}
+			else
+			{
+			// First a cylinder to represent the shaft.
+			double shaft_length = tool_length_offset;
+			gp_Pnt shaft_start_location( tool_tip_location );
+
+			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
+
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, diameter / 2, shaft_length );
+			return(shaft.Shape());
+			}
 		}
 
 		case CToolParams::eBallEndMill:
@@ -1055,8 +1069,6 @@ TopoDS_Shape CTool::GetShape() const
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
 			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, diameter / 2, shaft_length );
-
-			TopoDS_Compound tool_shape;
 			return(shaft.Shape());
 		}
 	} // End switch
@@ -1368,4 +1380,14 @@ void CTool::GetOnEdit(bool(**callback)(HeeksObj*))
 void CTool::OnChangeViewUnits(const double units)
 {
 	if (m_params.m_automatically_generate_title)m_title = GetMeaningfulName(heeksCAD->GetViewUnits());
+}
+
+void CTool::WriteDefaultValues()
+{
+	m_params.write_values_to_config();
+}
+
+void CTool::ReadDefaultValues()
+{
+	m_params.set_initial_values();
 }
