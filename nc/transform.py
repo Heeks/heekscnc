@@ -123,6 +123,11 @@ class Creator:
 
     ############################################################################
     ##  Programs
+    def write(self, s):
+        self.original.write(s)
+        
+    def write_blocknum(self):
+        self.original.write_blocknum()
 
     def program_begin(self, id, name=''):
         self.original.program_begin(id, name)

@@ -28,9 +28,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.3748254"
-     inkscape:cx="372.04724"
-     inkscape:cy="573.87893"
+     inkscape:zoom="7.7771869"
+     inkscape:cx="321.91109"
+     inkscape:cy="472.46542"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -13022,6 +13022,122 @@
            x="317.65283"
            id="tspan5809"
            sodipodi:role="line">?</tspan></text>
+    </g>
+    <g
+       id="g5862"
+       inkscape:export-filename="C:\Dev\HeeksCNCSVN\icons\stock.png"
+       inkscape:export-xdpi="32.365253"
+       inkscape:export-ydpi="32.365253">
+      <path
+         d="m 189.70118,565.61884 19.56927,11.63783 24.89793,-7.27587 -22.35274,-8.8621 z"
+         style="fill:#afafde;fill-opacity:1;fill-rule:evenodd;stroke:none"
+         id="path5844"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 189.70118,533.65031 0,31.96853 22.11446,-4.50014 0,-28.3542 z"
+         style="fill:#353564;fill-opacity:1;fill-rule:evenodd;stroke:none"
+         id="path5846"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 211.81564,532.7645 22.35274,1.74441 0,35.47189 -22.35274,-8.8621 z"
+         style="fill:#e9e9ff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+         id="path5848"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 189.70118,533.65031 19.56927,2.29076 24.89793,-1.43216 -22.35274,-1.74441 z"
+         style="fill:#4d4d4d;fill-opacity:1;fill-rule:evenodd;stroke:none"
+         id="path5850"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 209.27045,535.94107 0,41.3156 24.89793,-7.27587 0,-35.47189 z"
+         style="fill:#ececec;fill-opacity:1;fill-rule:evenodd;stroke:none"
+         id="path5852"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 189.70118,533.65031 19.56927,2.29076 0,41.3156 -19.56927,-11.63783 z"
+         style="fill:#b3b3b3;fill-opacity:1;fill-rule:evenodd;stroke:none"
+         id="path5854"
+         inkscape:connector-curvature="0" />
+    </g>
+    <g
+       id="g5925"
+       inkscape:export-filename="C:\Dev\HeeksCNCSVN\icons\stocks.png"
+       inkscape:export-xdpi="18.75153"
+       inkscape:export-ydpi="18.75153">
+      <g
+         inkscape:export-ydpi="32.365253"
+         inkscape:export-xdpi="32.365253"
+         inkscape:export-filename="C:\Dev\HeeksCNCSVN\icons\stock.png"
+         id="g5862-1"
+         transform="translate(93.558556,5.6527998)">
+        <path
+           inkscape:connector-curvature="0"
+           id="path5844-7"
+           style="fill:#afafde;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,565.61884 19.56927,11.63783 24.89793,-7.27587 -22.35274,-8.8621 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5846-4"
+           style="fill:#353564;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,533.65031 0,31.96853 22.11446,-4.50014 0,-28.3542 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5848-0"
+           style="fill:#e9e9ff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 211.81564,532.7645 22.35274,1.74441 0,35.47189 -22.35274,-8.8621 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5850-9"
+           style="fill:#4d4d4d;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,533.65031 19.56927,2.29076 24.89793,-1.43216 -22.35274,-1.74441 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5852-4"
+           style="fill:#ececec;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 209.27045,535.94107 0,41.3156 24.89793,-7.27587 0,-35.47189 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5854-8"
+           style="fill:#b3b3b3;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,533.65031 19.56927,2.29076 0,41.3156 -19.56927,-11.63783 z" />
+      </g>
+      <g
+         inkscape:export-ydpi="32.365253"
+         inkscape:export-xdpi="32.365253"
+         inkscape:export-filename="C:\Dev\HeeksCNCSVN\icons\stock.png"
+         id="g5862-8"
+         transform="translate(125.6912,37.954363)">
+        <path
+           inkscape:connector-curvature="0"
+           id="path5844-2"
+           style="fill:#afafde;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,565.61884 19.56927,11.63783 24.89793,-7.27587 -22.35274,-8.8621 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5846-45"
+           style="fill:#353564;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,533.65031 0,31.96853 22.11446,-4.50014 0,-28.3542 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5848-5"
+           style="fill:#e9e9ff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 211.81564,532.7645 22.35274,1.74441 0,35.47189 -22.35274,-8.8621 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5850-1"
+           style="fill:#4d4d4d;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,533.65031 19.56927,2.29076 24.89793,-1.43216 -22.35274,-1.74441 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5852-7"
+           style="fill:#ececec;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 209.27045,535.94107 0,41.3156 24.89793,-7.27587 0,-35.47189 z" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path5854-1"
+           style="fill:#b3b3b3;fill-opacity:1;fill-rule:evenodd;stroke:none"
+           d="m 189.70118,533.65031 19.56927,2.29076 0,41.3156 -19.56927,-11.63783 z" />
+      </g>
     </g>
   </g>
 </svg>

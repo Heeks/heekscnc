@@ -103,7 +103,7 @@ class ExportTools: public Tool{
 
 		if(m_for_default)
 		{
-			previous_path = standard_paths.GetUserConfigDir() + _T("/") + previous_path;
+			previous_path = theApp.GetDllFolder() + _T("/") + previous_path;
 		}
 		else
 		{
@@ -180,7 +180,7 @@ class ImportTools: public Tool{
 
 		if(m_for_default)
 		{
-			previous_path = standard_paths.GetUserConfigDir() + _T("/") + previous_path;
+			previous_path = theApp.GetDllFolder() + _T("/") + previous_path;
 		}
 		else
 		{

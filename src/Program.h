@@ -16,6 +16,7 @@ class COperations;
 class CTools;
 class CPatterns;
 class CSurfaces;
+class CStocks;
 
 enum ProgramUserType{
 	ProgramUserTypeUnkown,
@@ -75,6 +76,7 @@ private:
 	CTools* m_tools;						// Access via Tools() method
 	CPatterns* m_patterns;
 	CSurfaces* m_surfaces;
+	CStocks* m_stocks;
 
 public:
 	typedef enum
@@ -108,6 +110,7 @@ public:
 	CTools* Tools();
 	CPatterns* Patterns();
 	CSurfaces* Surfaces();
+	CStocks* Stocks();
 
 	bool m_script_edited;
 	double m_units; // 1.0 for mm, 25.4 for inches

@@ -5,11 +5,20 @@
 class CLengthCtrl;
 class CObjectIdsCtrl;
 
-#include "interface/HeeksObjDlg.h"
+#include "SolidsDlg.h"
 
-class SurfaceDlg : public HeeksObjDlg
+class SurfaceDlg : public SolidsDlg
 {
-	CObjectIdsCtrl *m_idsSolids;
+protected:
+	enum
+	{
+		ID_TOLERANCE = ID_SOLIDS_ENUM_MAX,
+		ID_MIN_Z,
+		ID_MATERIAL_ALLOWANCE,
+		ID_SAME_FOR_EACH_POSITION,
+		ID_SURFACE_ENUM_MAX,
+	};
+
 	CLengthCtrl *m_lgthTolerance;
 	CLengthCtrl *m_lgthMinZ;
 	CLengthCtrl *m_lgthMaterialAllowance;
@@ -24,6 +33,8 @@ public:
 	void SetPictureByWindow(wxWindow* w);
 	void SetPicture(const wxString& name);
 	void OnHelp( wxCommandEvent& event );
+
+	static bool Do(CSurface* object);
 
     DECLARE_EVENT_TABLE()
 };

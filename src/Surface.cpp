@@ -147,13 +147,7 @@ const wxBitmap &CSurface::GetIcon()
 
 static bool OnEdit(HeeksObj* object)
 {
-	SurfaceDlg dlg(heeksCAD->GetMainFrame(), (CSurface*)object);
-	if(dlg.ShowModal() == wxID_OK)
-	{
-		dlg.GetData((CSurface*)object);
-		return true;
-	}
-	return false;
+	return SurfaceDlg::Do((CSurface*)object);
 }
 
 void CSurface::GetOnEdit(bool(**callback)(HeeksObj*))

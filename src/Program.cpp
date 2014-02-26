@@ -27,9 +27,11 @@
 #include "Tools.h"
 #include "Patterns.h"
 #include "Surfaces.h"
+#include "Stocks.h"
 #include "interface/strconv.h"
 #include "Pattern.h"
 #include "Surface.h"
+#include "Stock.h"
 #include "src/Geom.h"
 #include "ProgramDlg.h"
 
@@ -44,7 +46,7 @@ using namespace std;
 
 wxString CProgram::alternative_machines_file = _T("");
 
-CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_patterns(NULL), m_surfaces(NULL)
+CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_patterns(NULL), m_surfaces(NULL), m_stocks(NULL)
 , m_script_edited(false)
 {
 	ReadDefaultValues();
@@ -70,6 +72,7 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
     m_tools = NULL;
 	m_patterns = NULL;
 	m_surfaces = NULL;
+	m_stocks = NULL;
     m_script_edited = false;
     m_machine = rhs.m_machine;
     m_output_file = rhs.m_output_file;
@@ -88,6 +91,9 @@ CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
     if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
     if ((m_operations != NULL) && (rhs.m_operations != NULL)) *m_operations = *(rhs.m_operations);
     if ((m_tools != NULL) && (rhs.m_tools != NULL)) *m_tools = *(rhs.m_tools);
+    if ((m_patterns != NULL) && (rhs.m_patterns != NULL)) *m_patterns = *(rhs.m_patterns);
+    if ((m_surfaces != NULL) && (rhs.m_surfaces != NULL)) *m_surfaces = *(rhs.m_surfaces);
+    if ((m_stocks != NULL) && (rhs.m_stocks != NULL)) *m_stocks = *(rhs.m_stocks);
 }
 
 CProgram::~CProgram()
@@ -117,6 +123,7 @@ void CProgram::CopyFrom(const HeeksObj* object)
 		if ((m_tools != NULL) && (rhs->m_tools != NULL)) m_tools->CopyFrom( rhs->m_tools );
 		if ((m_patterns != NULL) && (rhs->m_patterns != NULL)) m_patterns->CopyFrom( rhs->m_patterns );
 		if ((m_surfaces != NULL) && (rhs->m_surfaces != NULL)) m_surfaces->CopyFrom( rhs->m_surfaces );
+		if ((m_stocks != NULL) && (rhs->m_stocks != NULL)) m_stocks->CopyFrom( rhs->m_stocks );
 
 		m_machine = rhs->m_machine;
 		m_output_file = rhs->m_output_file;
@@ -143,6 +150,7 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 		if ((m_tools != NULL) && (rhs.m_tools != NULL)) *m_tools = *(rhs.m_tools);
 		if ((m_patterns != NULL) && (rhs.m_patterns != NULL)) *m_patterns = *(rhs.m_patterns);
 		if ((m_surfaces != NULL) && (rhs.m_surfaces != NULL)) *m_surfaces = *(rhs.m_surfaces);
+		if ((m_stocks != NULL) && (rhs.m_stocks != NULL)) *m_stocks = *(rhs.m_stocks);
 
 		m_machine = rhs.m_machine;
 		m_output_file = rhs.m_output_file;
@@ -325,7 +333,8 @@ bool CProgram::CanAdd(HeeksObj* object)
 		object->GetType() == OperationsType ||
 		object->GetType() == ToolsType ||
 		object->GetType() == PatternsType ||
-		object->GetType() == SurfacesType
+		object->GetType() == SurfacesType ||
+		object->GetType() == StocksType
 		;
 }
 
@@ -389,6 +398,10 @@ bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 	case SurfacesType:
 		m_surfaces = (CSurfaces*)object;
 		break;
+
+	case StocksType:
+		m_stocks = (CStocks*)object;
+		break;
 	}
 
 	return ObjList::Add(object, prev_object);
@@ -410,6 +423,7 @@ void CProgram::Remove(HeeksObj* object)
 	else if(object == m_tools)m_tools = NULL;
 	else if(object == m_patterns)m_patterns = NULL;
 	else if(object == m_surfaces)m_surfaces = NULL;
+	else if(object == m_stocks)m_stocks = NULL;
 
 	ObjList::Remove(object);
 }
@@ -745,9 +759,13 @@ Python CProgram::RewritePythonProgram()
 	python << _T("program_begin(123, ") << PythonString(_T("Test program")) << _T(")\n");
 
 	// add any stock commands
-	for(HeeksObj* object = heeksCAD->GetFirstObject(); object != NULL; object = heeksCAD->GetNextObject())
+	std::set<int> stock_ids;
+	m_stocks->GetSolidIds(stock_ids);
+	for(std::set<int>::iterator It = stock_ids.begin(); It != stock_ids.end(); It++)
 	{
-		if(object->GetIDGroupType() == SolidType)
+		int id = *It;
+		HeeksObj* object = heeksCAD->GetIDObject(SolidType, id);
+		if(object)
 		{
 			CBox box;
 			object->GetBox(box);
@@ -1051,6 +1069,12 @@ CSurfaces* CProgram::Surfaces()
     return m_surfaces;
 }
 
+CStocks* CProgram::Stocks()
+{
+    if (m_stocks == NULL) ReloadPointers();
+    return m_stocks;
+}
+
 void CProgram::ReloadPointers()
 {
     for (HeeksObj *child = GetFirstChild(); child != NULL; child = GetNextChild())
@@ -1058,6 +1082,7 @@ void CProgram::ReloadPointers()
 	    if (child->GetType() == ToolsType) m_tools = (CTools *) child;
 	    if (child->GetType() == PatternsType) m_patterns = (CPatterns *) child;
 	    if (child->GetType() == SurfacesType) m_surfaces = (CSurfaces *) child;
+	    if (child->GetType() == StocksType) m_stocks = (CStocks *) child;
 	    if (child->GetType() == OperationsType) m_operations = (COperations *) child;
 	    if (child->GetType() == NCCodeType) m_nc_code = (CNCCode *) child;
 	} // End for
@@ -1072,6 +1097,7 @@ void CProgram::AddMissingChildren()
 	if(m_tools == NULL){m_tools = new CTools; Add( m_tools, NULL );}
 	if(m_patterns == NULL){m_patterns = new CPatterns; Add( m_patterns, NULL );}
 	if(m_surfaces == NULL){m_surfaces = new CSurfaces; Add( m_surfaces, NULL );}
+	if(m_stocks == NULL){m_stocks = new CStocks; Add( m_stocks, NULL );}
 	if(m_operations == NULL){m_operations = new COperations; Add( m_operations, NULL );}
 	if(m_nc_code == NULL){m_nc_code = new CNCCode; Add( m_nc_code, NULL );}
 }
