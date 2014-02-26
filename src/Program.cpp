@@ -755,6 +755,11 @@ Python CProgram::RewritePythonProgram()
 	// output file
 	python << _T("output(") << PythonString(GetOutputFileName()) << _T(")\n");
 
+
+#ifdef FREE_VERSION
+	python << _T("write('Delete this line manually from each g-code file. Buy full version to remove this automatically. www.heeks.net\\n')\n");
+#endif
+
 	// begin program
 	python << _T("program_begin(123, ") << PythonString(_T("Test program")) << _T(")\n");
 

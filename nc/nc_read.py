@@ -88,86 +88,89 @@ class Parser:
             self.height_offset = False
             self.drill = False
             self.no_move = False
+            
+            try:
 
-            words = self.pattern_main.findall(self.line)
-            for word in words:
-                self.col = None
-                self.cdata = False
-                self.ParseWord(word)
-                self.writer.add_text(word, self.col, self.cdata)
+                words = self.pattern_main.findall(self.line)
+                for word in words:
+                    self.col = None
+                    self.cdata = False
+                    self.ParseWord(word)
+                    self.writer.add_text(word, self.col, self.cdata)
 
-            if self.t != None:
-                if (self.m6 == True) or (self.need_m6_for_t_change == False):
-                    self.writer.tool_change( self.t )
+                if self.t != None:
+                    if (self.m6 == True) or (self.need_m6_for_t_change == False):
+                        self.writer.tool_change( self.t )
 
-            if (self.drill):
-                if self.z != None: self.drillz = self.z
-                self.writer.rapid(self.x, self.y, self.r)
-                self.writer.feed(self.x, self.y, self.drillz)
-                self.writer.feed(self.x, self.y, self.r)
+                if (self.drill):
+                    if self.z != None: self.drillz = self.z
+                    self.writer.rapid(self.x, self.y, self.r)
+                    self.writer.feed(self.x, self.y, self.drillz)
+                    self.writer.feed(self.x, self.y, self.r)
 
-            elif(self.height_offset):
-                self.writer.rapid(self.x, self.y, self.z)
+                elif(self.height_offset):
+                    self.writer.rapid(self.x, self.y, self.z)
 
-            else:
-                if (self.move and not self.no_move):
-                    if (self.arc==0):
-                        if self.path_col == "feed":
-                            self.writer.feed(self.x, self.y, self.z)
-                        else:
-                            self.writer.rapid(self.x, self.y, self.z, self.a, self.b, self.c)
-                    else:
-                        i = self.i
-                        j = self.j
-                        k = self.k
-                        if self.arc_centre_absolute == True:
-                            pass
-                        else:
-                            if (self.arc_centre_positive == True) and (self.oldx != None) and (self.oldy != None):
-                                x = self.oldx
-                                if self.x != None: x = self.x
-                                if (self.x > self.oldx) != (self.arc > 0):
-                                    j = -j
-                                y = self.oldy
-                                if self.y != None: y = self.y
-                                if (self.y > self.oldy) != (self.arc < 0):
-                                    i = -i
-
-                                #fix centre point
-                                r = math.sqrt(i*i + j*j)
-                                p0 = area.Point(self.oldx, self.oldy)
-                                p1 = area.Point(x, y)
-                                v = p1 - p0
-                                l = v.length()
-                                h = l/2
-                                d = math.sqrt(r*r - h*h)
-                                n = area.Point(-v.y, v.x)
-                                n.normalize()
-                                if self.arc == -1: d = -d
-                                c = p0 + (v * 0.5) + (n * d)
-                                i = c.x
-                                j = c.y
-                                global count
-                                
-                                if count == 0 and x > 47:
-                                    print 'x = ', x
-                                    print 'p0 = ', p0.x, ', ', p0.y, '   p1 = ', p1.x, ', ', p1.y
-                                    print 'c = ', c.x, ', ', c.y
-                                    print 'v = ', v.x, ', ', v.y
-                                    print 'n = ', n.x, ', ', n.y
-                                    count += 1
-
+                else:
+                    if (self.move and not self.no_move):
+                        if (self.arc==0):
+                            if self.path_col == "feed":
+                                self.writer.feed(self.x, self.y, self.z)
                             else:
-                                i = i + self.oldx
-                                j = j + self.oldy
-                        if self.arc == -1:
-                            self.writer.arc_cw(self.x, self.y, self.z, i, j, k)
+                                self.writer.rapid(self.x, self.y, self.z, self.a, self.b, self.c)
                         else:
-                            self.writer.arc_ccw(self.x, self.y, self.z, i, j, k)
-                    if self.x != None: self.oldx = self.x
-                    if self.y != None: self.oldy = self.y
-                    if self.z != None: self.oldz = self.z
+                            i = self.i
+                            j = self.j
+                            k = self.k
+                            if self.arc_centre_absolute == True:
+                                pass
+                            else:
+                                if (self.arc_centre_positive == True) and (self.oldx != None) and (self.oldy != None):
+                                    x = self.oldx
+                                    if self.x != None: x = self.x
+                                    if (self.x > self.oldx) != (self.arc > 0):
+                                        j = -j
+                                    y = self.oldy
+                                    if self.y != None: y = self.y
+                                    if (self.y > self.oldy) != (self.arc < 0):
+                                        i = -i
 
+                                    #fix centre point
+                                    r = math.sqrt(i*i + j*j)
+                                    p0 = area.Point(self.oldx, self.oldy)
+                                    p1 = area.Point(x, y)
+                                    v = p1 - p0
+                                    l = v.length()
+                                    h = l/2
+                                    d = math.sqrt(r*r - h*h)
+                                    n = area.Point(-v.y, v.x)
+                                    n.normalize()
+                                    if self.arc == -1: d = -d
+                                    c = p0 + (v * 0.5) + (n * d)
+                                    i = c.x
+                                    j = c.y
+                                    global count
+                                    
+                                    if count == 0 and x > 47:
+                                        print 'x = ', x
+                                        print 'p0 = ', p0.x, ', ', p0.y, '   p1 = ', p1.x, ', ', p1.y
+                                        print 'c = ', c.x, ', ', c.y
+                                        print 'v = ', v.x, ', ', v.y
+                                        print 'n = ', n.x, ', ', n.y
+                                        count += 1
+
+                                else:
+                                    i = i + self.oldx
+                                    j = j + self.oldy
+                            if self.arc == -1:
+                                self.writer.arc_cw(self.x, self.y, self.z, i, j, k)
+                            else:
+                                self.writer.arc_ccw(self.x, self.y, self.z, i, j, k)
+                        if self.x != None: self.oldx = self.x
+                        if self.y != None: self.oldy = self.y
+                        if self.z != None: self.oldz = self.z
+            except:
+                pass
             self.writer.end_ncblock()
 
         
