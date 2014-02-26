@@ -27,5 +27,13 @@ It should load up HeeksCNC.dll and add the extra windows and menu items. You wil
 kurve.pyd should have been built and be in the same folder as HeeksCNC.dll
 ( You will need this for the profile operation )
 
-You also need to go to the Google Code projects "opencamlib", "libarea" and "libactp" and build "ocl.pyd" ( for zig-zag operation ), "area.pyd" ( for pocket operation ) and "actp.pyd" ( for adaptive roughing opeartion ), if you want those operations to work.
+You also need to go to the Google Code projects "opencamlib", "libarea" and "libactp" and build "ocl.pyd" ( for zig-zag operation ), "area.pyd" ( for pocket operation ) if you want those operations to work.
 Copy them to the same place as your HeeksCNC.dll
+
+HeeksCNC 1.0 is made with
+
+revision 1431 from HeeksCNC
+
+revision 1550 from HeeksCAD
+
+revision 102 from libarea
