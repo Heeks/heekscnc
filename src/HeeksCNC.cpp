@@ -44,6 +44,8 @@
 #include "Patterns.h"
 #include "Surface.h"
 #include "Surfaces.h"
+#include "Stock.h"
+#include "Stocks.h"
 
 #include <sstream>
 
@@ -345,6 +347,42 @@ static void NewSurfaceMenuCallback(wxCommandEvent &event)
 	}
 }
 
+static void NewStockMenuCallback(wxCommandEvent &event)
+{
+	// check for at least one solid selected
+	std::list<int> solids;
+
+	const std::list<HeeksObj*>& list = heeksCAD->GetMarkedList();
+	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	{
+		HeeksObj* object = *It;
+		if(object->GetIDGroupType() == SolidType)solids.push_back(object->m_id);
+	}
+
+	// if no selected solids,
+	if(solids.size() == 0)
+	{
+		// use all the solids in the drawing
+		for(HeeksObj* object = heeksCAD->GetFirstObject();object; object = heeksCAD->GetNextObject())
+		{
+			if(object->GetIDGroupType() == SolidType)solids.push_back(object->m_id);
+		}
+	}
+
+	{
+		CStock *new_object = new CStock();
+		new_object->m_solids = solids;
+		if(new_object->Edit())
+		{
+			heeksCAD->StartHistory();
+			AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Stocks());
+			heeksCAD->EndHistory();
+		}
+		else
+			delete new_object;
+	}
+}
+
 static void AddNewTool(CToolParams::eToolType type)
 {
 	// Add a new tool.
@@ -562,6 +600,13 @@ void CHeeksCNCApp::GetNewSurfaceTools(std::list<Tool*>* t_list)
 	t_list->push_back(&new_surface_tool);
 }
 
+static CCallbackTool new_stock_tool(_("New Stock..."), _T("stock"), NewStockMenuCallback);
+
+void CHeeksCNCApp::GetNewStockTools(std::list<Tool*>* t_list)
+{
+	t_list->push_back(&new_stock_tool);
+}
+
 #define MAX_XML_SCRIPT_OPS 10
 
 std::vector< CXmlScriptOp > script_ops;
@@ -576,7 +621,14 @@ static void NewXmlScriptOp(int i)
 	new_object->m_user_icon = true;
 	new_object->m_user_icon_name = script_ops[i].m_icon;
 
-	AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
+	if(new_object->Edit())
+	{
+		heeksCAD->StartHistory();
+		AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Operations());
+		heeksCAD->EndHistory();
+	}
+	else
+		delete new_object;
 }
 
 static void NewXmlScriptOpCallback0(wxCommandEvent &event)
@@ -701,6 +753,7 @@ static void AddToolBars()
 		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Pattern"), ToolImage(_T("pattern")), _("New Pattern..."), NewPatternMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Surface"), ToolImage(_T("surface")), _("New Surface..."), NewSurfaceMenuCallback);
+		heeksCAD->AddFlyoutButton(_("Stock"), ToolImage(_T("stock")), _("New Stock..."), NewStockMenuCallback);
 		AddXmlScriptOpMenuItems();
 
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
@@ -982,6 +1035,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuOperations, _("Script Operation..."), ToolImage(_T("scriptop")), NewScriptOpMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Pattern..."), ToolImage(_T("pattern")), NewPatternMenuCallback);
 	heeksCAD->AddMenuItem(menuOperations, _("Surface..."), ToolImage(_T("surface")), NewSurfaceMenuCallback);
+	heeksCAD->AddMenuItem(menuOperations, _("Stock..."), ToolImage(_T("stock")), NewStockMenuCallback);
 	AddXmlScriptOpMenuItems(menuOperations);
 
 	// Tools menu
@@ -1076,6 +1130,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterReadXMLfunction("Patterns", CPatterns::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Surface", CSurface::ReadFromXMLElement);
 	heeksCAD->RegisterReadXMLfunction("Surfaces", CSurfaces::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Stock", CStock::ReadFromXMLElement);
+	heeksCAD->RegisterReadXMLfunction("Stocks", CStocks::ReadFromXMLElement);
 
 #ifdef WIN32
 	heeksCAD->SetDefaultLayout(wxString(_T("layout2|name=ToolBar;caption=General Tools;state=2108156;dir=1;layer=10;row=0;pos=0;prop=100000;bestw=279;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=GeomBar;caption=Geometry Tools;state=2108156;dir=1;layer=10;row=0;pos=548;prop=100000;bestw=145;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=384;floaty=355;floatw=172;floath=71|name=SolidBar;caption=Solid Tools;state=2108156;dir=1;layer=10;row=0;pos=704;prop=100000;bestw=116;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=444;floaty=368;floatw=143;floath=71|name=ViewingBar;caption=Viewing Tools;state=2108156;dir=1;layer=10;row=0;pos=419;prop=100000;bestw=118;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=480;floaty=399;floatw=145;floath=71|name=Graphics;caption=Graphics;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=800;besth=600;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Objects;caption=Objects;state=2099196;dir=4;layer=1;row=0;pos=0;prop=100000;bestw=300;besth=400;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=204;floaty=327;floatw=318;floath=440|name=Options;caption=Options;state=2099196;dir=4;layer=1;row=0;pos=1;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Input;caption=Input;state=2099196;dir=4;layer=1;row=0;pos=2;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Properties;caption=Properties;state=2099196;dir=4;layer=1;row=0;pos=3;prop=100000;bestw=300;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=MachiningBar;caption=Machining tools;state=2108156;dir=1;layer=10;row=0;pos=290;prop=100000;bestw=118;besth=31;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Program;caption=Program;state=2099198;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Output;caption=Output;state=2099196;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=Print;caption=Print;state=2099198;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=600;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=504|dock_size(4,1,0)=205|dock_size(1,10,0)=33|dock_size(3,0,0)=189|")));
@@ -1193,65 +1249,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 		theApp.m_output_canvas->Clear();
 		theApp.m_print_canvas->Clear();
 
-		std::list<wxString> directories;
-		wxString directory_separator;
-
-		#ifdef WIN32
-			directory_separator = _T("\\");
-		#else
-			directory_separator = _T("/");
-		#endif
-
-		wxStandardPaths standard_paths;
-		directories.push_back( standard_paths.GetUserConfigDir() );	// Look for a user-specific file first
-		directories.push_back( GetDllFolder() );	// And then look in the application-delivered directory
-#ifdef CMAKE_UNIX
-	#ifdef RUNINPLACE
-		directories.push_back( GetResFolder() );
-	#else
-		directories.push_back( _T("/usr/lib/heekscnc") ); //Location if installed by CMAKE
-	#endif
-#endif //CMAKE_UNIX
-		bool tool_table_found = false;
-		bool speed_references_found = false;
-		bool fixtures_found = false;
-
-		for (std::list<wxString>::iterator l_itDirectory = directories.begin();
-			l_itDirectory != directories.end(); l_itDirectory++)
-		{
- 			printf("Looking for default data in '%s'\n", Ttc(l_itDirectory->c_str()));
-
-			// Must be a new file.
-			// Read in any default speed reference or tool table data.
-			std::list<wxString> all_file_names = GetFileNames( l_itDirectory->utf8_str() );
-			std::list<wxString> seed_file_names;
-
-			for (std::list<wxString>::iterator l_itFileName = all_file_names.begin();
-					l_itFileName != all_file_names.end(); l_itFileName++)
-			{
-				if (l_itFileName->Find( _("default") ) != -1)
-				{
-					wxString path;
-					path << *l_itDirectory << directory_separator << *l_itFileName;
-
-					seed_file_names.push_back(path);
-				} // End if - then
-			} // End for
-
-			seed_file_names.sort();	// Sort them so that the user can assign an order alphabetically if they wish.
-			for (std::list<wxString>::const_iterator l_itFile = seed_file_names.begin(); l_itFile != seed_file_names.end(); l_itFile++)
-			{
-				wxString lowercase_file_name( *l_itFile );
-				lowercase_file_name.MakeLower();
-
-				if ((tool_table_found == false) && (lowercase_file_name.Find(_T("tool")) != -1))
-				{
-					printf("Importing data from %s\n",  Ttc(l_itFile->c_str()));
-					heeksCAD->OpenXMLFile( l_itFile->c_str(), theApp.m_program->Tools() );
-					tool_table_found = true;
-				}
-			} // End for
-		} // End for
+		heeksCAD->OpenXMLFile(GetDllFolder() + _T("/default.tooltable"), theApp.m_program->Tools() );
 	} // End if - then
 }
 

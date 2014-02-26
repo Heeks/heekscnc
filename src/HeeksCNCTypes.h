@@ -22,5 +22,7 @@ enum{
 	PatternsType,
 	SurfaceType,
 	SurfacesType,
+	StockType,
+	StocksType,
 	HeeksCNCMaximumType
 };

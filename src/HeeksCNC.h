@@ -69,6 +69,7 @@ public:
 	static void GetNewPatternTools(std::list<Tool*>* t_list);
 	static void GetNewSurfaceTools(std::list<Tool*>* t_list);
 	static void GetNewOperationTools(std::list<Tool*>* t_list);
+	static void GetNewStockTools(std::list<Tool*>* t_list);
 };
 
 extern CHeeksCNCApp theApp;

@@ -69,7 +69,8 @@ void ReselectSketch::Run()
 	heeksCAD->Mark(m_object);
 }
 
-static bool GetSolids(std::list<int>& solids )
+//static
+bool ReselectSolids::GetSolids(std::list<int>& solids )
 {
 	// check for at least one sketch selected
 

@@ -78,7 +78,7 @@ public:
 	//	Constructors.
 	CTool(const wxChar *title, CToolParams::eToolType type, const int tool_number) : m_tool_number(tool_number), m_pToolSolid(NULL)
 	{
-		m_params.set_initial_values();
+        ReadDefaultValues();
 		m_params.m_type = type;
 		if (title != NULL)m_title = title;
 		else m_title = GetMeaningfulName(heeksCAD->GetViewUnits());
@@ -114,9 +114,10 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void KillGLLists(void);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
-
-        bool CanEditString(void)const{return true;}
-        void OnEditString(const wxChar* str);
+    bool CanEditString(void)const{return true;}
+    void OnEditString(const wxChar* str);
+	void WriteDefaultValues();
+	void ReadDefaultValues();
 
 	static CTool *Find( const int tool_number );
 	static int FindTool( const int tool_number );
