@@ -1,4 +1,4 @@
-def tool_defn(self, id, name, params):
+def tool_defn(self, id, params):
     self.write('(TOOL/')
     type = params['type']
     if type == 0:#eDrill = 0,

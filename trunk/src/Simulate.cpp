@@ -105,7 +105,7 @@ const wchar_t* GetOutputFileNameForPython(const wchar_t* in)
 void RunVoxelcutSimulation()
 {
 #ifdef FREE_VERSION
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/buy-heekscnc-1-0"));
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/buy-heekscnc-1-0"));
 #endif
 
 	// write initial.py

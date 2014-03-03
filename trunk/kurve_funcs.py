@@ -238,6 +238,8 @@ def add_CRC_end_line(curve,roll_on_curve,roll_off_curve,radius,direction,crc_end
     crc_end_point.x = crc_end.x 
     crc_end_point.y = crc_end.y 
 
+using_area_for_offset = False
+
 # profile command,
 # direction should be 'left' or 'right' or 'on'
 def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radius = 2.0, roll_on = None, roll_off = None, depthparams = None, extend_at_start = 0.0, extend_at_end = 0.0, lead_in_line_len=0.0,lead_out_line_len= 0.0):
@@ -254,11 +256,28 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         # get tool diameter
         offset = radius + offset_extra
         if use_CRC() == False or (use_CRC()==True and CRC_nominal_path()==True):
-            if direction == "right":
-                offset = -offset
-            offset_success = offset_curve.Offset(offset)
-            if offset_success == False:
-                raise Exception, "couldn't offset kurve " + str(offset_curve)
+            if math.fabs(offset) > 0.00005:
+                if direction == "right":
+                    offset = -offset
+                offset_success = offset_curve.Offset(offset)
+                if offset_success == False:
+                    global using_area_for_offset
+                    if curve.IsClosed() and (using_area_for_offset == False):
+                        cw = curve.IsClockwise()
+                        using_area_for_offset = True
+                        a = area.Area()
+                        a.append(curve)
+                        a.Offset(-offset)
+                        for curve in a.getCurves():
+                            curve_cw = curve.IsClockwise()
+                            if cw != curve_cw:
+                                curve.Reverse()
+                            set_good_start_point(curve, False)
+                            profile(curve, direction, 0.0, 0.0, roll_radius, roll_on, roll_off, depthparams, extend_at_start, extend_at_end, lead_in_line_len, lead_out_line_len)
+                        using_area_for_offset = False
+                        return                    
+                    else:
+                        raise Exception, "couldn't offset kurve " + str(offset_curve)
             
     # extend curve
     if extend_at_start > 0.0:

@@ -28,7 +28,6 @@ void CSurface::WriteXML(TiXmlNode *root)
 	heeksCAD->LinkXMLEndChild( root,  element );
 
 	element->SetDoubleAttribute( "tolerance", m_tolerance);
-	element->SetDoubleAttribute( "minz", m_min_z);
 	element->SetDoubleAttribute( "material_allowance", m_material_allowance);
 	element->SetAttribute( "same_for_posns", m_same_for_each_pattern_position ? 1:0);
 
@@ -51,7 +50,6 @@ HeeksObj* CSurface::ReadFromXMLElement(TiXmlElement* element)
 	CSurface* new_object = new CSurface;
 
 	element->Attribute("tolerance", &new_object->m_tolerance);
-	element->Attribute("minz", &new_object->m_min_z);
 	element->Attribute("material_allowance", &new_object->m_material_allowance);
 	int int_for_bool = 1;
 	if(element->Attribute( "same_for_posns", &int_for_bool))new_object->m_same_for_each_pattern_position = (int_for_bool != 0);
@@ -83,7 +81,6 @@ void CSurface::WriteDefaultValues()
 {
 	CNCConfig config;
 	config.Write(wxString(GetTypeString()) + _T("Tolerance"), m_tolerance);
-	config.Write(wxString(GetTypeString()) + _T("MinZ"), m_min_z);
 	config.Write(wxString(GetTypeString()) + _T("MatAllowance"), m_material_allowance);
 	config.Write(wxString(GetTypeString()) + _T("SameForPositions"), m_same_for_each_pattern_position);
 }
@@ -92,13 +89,11 @@ void CSurface::ReadDefaultValues()
 {
 	CNCConfig config;
 	config.Read(wxString(GetTypeString()) + _T("Tolerance"), &m_tolerance, 0.01);
-	config.Read(wxString(GetTypeString()) + _T("MinZ"), &m_min_z, 0.0);
 	config.Read(wxString(GetTypeString()) + _T("MatAllowance"), &m_material_allowance, 0.0);
 	config.Read(wxString(GetTypeString()) + _T("SameForPositions"), &m_same_for_each_pattern_position, true);
 }
 
 static void on_set_tolerance(double value, HeeksObj* object){((CSurface*)object)->m_tolerance = value; ((CSurface*)object)->WriteDefaultValues();}
-static void on_set_min_z(double value, HeeksObj* object){((CSurface*)object)->m_min_z = value; ((CSurface*)object)->WriteDefaultValues();}
 static void on_set_material_allowance(double value, HeeksObj* object){((CSurface*)object)->m_material_allowance = value; ((CSurface*)object)->WriteDefaultValues();}
 static void on_set_same_for_position(bool value, HeeksObj* object){((CSurface*)object)->m_same_for_each_pattern_position = value; ((CSurface*)object)->WriteDefaultValues();}
 
@@ -107,7 +102,6 @@ void CSurface::GetProperties(std::list<Property *> *list)
 	AddSolidsProperties(list, m_solids);
 
 	list->push_back(new PropertyLength(_("tolerance"), m_tolerance, this, on_set_tolerance));
-	list->push_back(new PropertyLength(_("minimum z"), m_min_z, this, on_set_min_z));
 	list->push_back(new PropertyLength(_("material allowance"), m_material_allowance, this, on_set_material_allowance));
 	list->push_back(new PropertyCheck(_("same for each pattern position"), m_same_for_each_pattern_position, this, on_set_same_for_position));
 

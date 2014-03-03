@@ -118,7 +118,7 @@ void DrillingDlg::OnPointsPick( wxCommandEvent& event )
 
 void DrillingDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/drilling"));
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/drilling"));
 }
 
 bool DrillingDlg::Do(CDrilling* object)

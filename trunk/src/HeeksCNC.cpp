@@ -180,6 +180,7 @@ static void NewProfileOp()
 	if(sketches.size() > 0)sketch = sketches.front();
 
 	CProfile *new_object = new CProfile(sketch, (tools.size()>0)?(*tools.begin()):-1);
+	new_object->SetID(heeksCAD->GetNextID(ProfileType));
 	new_object->AddMissingChildren(); // add the tags container
 
 	if(new_object->Edit())
@@ -218,6 +219,8 @@ static void NewPocketOp()
 	if(sketches.size() > 0)sketch = sketches.front();
 
 	CPocket *new_object = new CPocket(sketch, (tools.size()>0)?(*tools.begin()):-1 );
+	new_object->SetID(heeksCAD->GetNextID(PocketType));
+
 	if(new_object->Edit())
 	{
 		heeksCAD->StartHistory();
@@ -269,6 +272,7 @@ static void NewDrillingOp()
 
 	{
 		CDrilling *new_object = new CDrilling( points, 0, -1 );
+		new_object->SetID(heeksCAD->GetNextID(DrillingType));
 		if(new_object->Edit())
 		{
 			heeksCAD->StartHistory();
@@ -288,6 +292,7 @@ static void NewDrillingOpMenuCallback(wxCommandEvent &event)
 static void NewScriptOpMenuCallback(wxCommandEvent &event)
 {
 	CScriptOp *new_object = new CScriptOp();
+	new_object->SetID(heeksCAD->GetNextID(ScriptOpType));
 	if(new_object->Edit())
 	{
 		heeksCAD->StartHistory();
@@ -301,6 +306,7 @@ static void NewScriptOpMenuCallback(wxCommandEvent &event)
 static void NewPatternMenuCallback(wxCommandEvent &event)
 {
 	CPattern *new_object = new CPattern();
+
 	if(new_object->Edit())
 	{
 		heeksCAD->StartHistory();
@@ -385,8 +391,19 @@ static void NewStockMenuCallback(wxCommandEvent &event)
 
 static void AddNewTool(CToolParams::eToolType type)
 {
+	// find next available tool number
+	int max_tool_number = 0;
+	for(HeeksObj* object = theApp.m_program->Tools()->GetFirstChild(); object; object = theApp.m_program->Tools()->GetNextChild())
+	{
+		if(object->GetType() == ToolType)
+		{
+			int tool_number = ((CTool*)object)->m_tool_number;
+			if(tool_number > max_tool_number)max_tool_number = tool_number;
+		}
+	}
+
 	// Add a new tool.
-	CTool *new_object = new CTool(NULL, type, heeksCAD->GetNextID(ToolType));
+	CTool *new_object = new CTool(NULL, type, max_tool_number + 1);
 	if(new_object->Edit())
 		AddNewObjectUndoablyAndMarkIt(new_object, theApp.m_program->Tools());
 	else
@@ -423,12 +440,6 @@ static void NewChamferMenuCallback(wxCommandEvent &event)
 	AddNewTool(CToolParams::eChamfer);
 }
 
-static void MakeScriptMenuCallback(wxCommandEvent &event)
-{
-	// create the Python program
-	theApp.m_program->RewritePythonProgram();
-}
-
 void CHeeksCNCApp::RunPythonScript()
 {
 	{
@@ -454,7 +465,7 @@ void CHeeksCNCApp::RunPythonScript()
 	}
 
 #ifdef FREE_VERSION
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/buy-heekscnc-1-0"));
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/buy-heekscnc-1-0"));
 #endif
 
 	HeeksPyPostProcess(m_program, m_program->GetOutputFileName(), true );
@@ -762,11 +773,17 @@ static void AddToolBars()
 
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
-		heeksCAD->AddToolBarButton((wxToolBar*)(theApp.m_machiningBar), _("Tool"), ToolImage(_T("drill")), _("New Tool Definition..."), NewDrillMenuCallback);
+		heeksCAD->StartToolBarFlyout(_("Tools"));
+		heeksCAD->AddFlyoutButton(_("drill"), ToolImage(_T("drill")), _("Drill..."), NewDrillMenuCallback);
+		heeksCAD->AddFlyoutButton(_("centredrill"), ToolImage(_T("centredrill")), _("Centre Drill..."), NewCentreDrillMenuCallback);
+		heeksCAD->AddFlyoutButton(_("endmill"), ToolImage(_T("endmill")), _("End Mill..."), NewEndmillMenuCallback);
+		heeksCAD->AddFlyoutButton(_("slotdrill"), ToolImage(_T("slotdrill")), _("Slot Drill..."), NewSlotCutterMenuCallback);
+		heeksCAD->AddFlyoutButton(_("ballmill"), ToolImage(_T("ballmill")), _("Ball End Mill..."), NewBallEndMillMenuCallback);
+		heeksCAD->AddFlyoutButton(_("chamfmill"), ToolImage(_T("chamfmill")), _("Chamfer Mill..."), NewChamferMenuCallback);
+		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Post Processing"));
 		heeksCAD->AddFlyoutButton(_("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Make Python Script"), ToolImage(_T("python")), _("Make Python Script"), MakeScriptMenuCallback);
 		heeksCAD->AddFlyoutButton(_("Run Python Script"), ToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
 		heeksCAD->AddFlyoutButton(_("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
 		heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
@@ -955,7 +972,7 @@ class NewPocketOpTool:public Tool
 class NewDrillingOpTool:public Tool
 {
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("New Drilling Operatio");}
+	const wxChar* GetTitle(){return _("New Drilling Operation");}
 	void Run(){
 		NewDrillingOp();
 	}
@@ -1056,7 +1073,6 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Milling Operation"), ToolImage(_T("ops")), NULL, NULL, menuMillingOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add Other Operation"), ToolImage(_T("ops")), NULL, NULL, menuOperations);
 	heeksCAD->AddMenuItem(menuMachining, _("Add New Tool"), ToolImage(_T("tools")), NULL, NULL, menuTools);
-	heeksCAD->AddMenuItem(menuMachining, _("Make Python Script"), ToolImage(_T("python")), MakeScriptMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Run Python Script"), ToolImage(_T("runpython")), RunScriptMenuCallback);
 	heeksCAD->AddMenuItem(menuMachining, _("Post-Process"), ToolImage(_T("postprocess")), PostProcessMenuCallback);
 #ifdef WIN32

@@ -27,7 +27,5 @@ class depth_params:
                     for i in range(1, layer_count):
                         depth += layer_depth
                         depths.insert(0, depth)
-                        
-        print 'depths = ', depths
                     
         return depths
