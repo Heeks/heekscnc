@@ -71,6 +71,9 @@ class Creator(nc.Creator):
         self.output_g98_and_g99 = True
         self.g98_not_g99 = None # True for G98 ouput, False for G99 output
         self.output_cutviewer_comments = False
+        self.current_fixture = None
+        self.output_fixtures = False
+        self.tool_defn_params = {}
     ############################################################################
     ##  Codes
 
@@ -141,7 +144,7 @@ class Creator(nc.Creator):
     def TAP(self): return('G84')
     def TAP_DEPTH(self, depth): return('K' + (self.fmt.string(depth)))
     def INTERNAL_COOLANT_ON(self): return('M18')
-    def INTERNAL_COOLANT_OFF(self): return('M28')
+    def INTERNAL_COOLANT_OFF(self): return('M9')
 
     def X(self): return('X')
     def Y(self): return('Y')
@@ -196,6 +199,10 @@ class Creator(nc.Creator):
             self.start_of_line = True
             
     def write_spindle(self):
+        if self.output_fixtures:
+            if self.current_fixture == None:
+                self.write(self.SPACE() + 'G54')
+                self.current_fixture = 54
         self.write(self.SPACE())
         self.s.write(self)
 
@@ -308,6 +315,10 @@ class Creator(nc.Creator):
     ##  Tools
 
     def tool_change(self, id):
+        if self.output_cutviewer_comments:
+            import cutviewer
+            if id in self.tool_defn_params:
+                cutviewer.tool_defn(self, id, self.tool_defn_params[id])
         if (self.t != None) and (self.z_for_g53 != None):
             self.write_blocknum()
             self.write('G53 Z' + str(self.z_for_g53) + '\n')
@@ -323,8 +334,7 @@ class Creator(nc.Creator):
 
     def tool_defn(self, id, name='',params=None):
         if self.output_cutviewer_comments:
-            import cutviewer
-            cutviewer.tool_defn(self, id, name, params)
+            self.tool_defn_params[id] = params
         if self.output_tool_definitions:
             self.write_blocknum()
             self.write(self.SPACE() + self.TOOL_DEFINITION())

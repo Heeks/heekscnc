@@ -521,7 +521,7 @@ void ApplySurfaceToText(Python &python, CSurface* surface, std::set<CSurface*> &
 	python << _T("attach.units = ") << theApp.m_program->m_units << _T("\n");
 	python << _T("attach.attach_begin()\n");
 	python << _T("nc.creator.stl = stl") << (int)(surface->m_id) << _T("\n");
-	python << _T("nc.creator.minz = ") << surface->m_min_z << _T("\n");
+	python << _T("nc.creator.minz = -10000.0\n");
 	python << _T("nc.creator.material_allowance = ") << surface->m_material_allowance << _T("\n");
 
 	theApp.m_attached_to_surface = surface;

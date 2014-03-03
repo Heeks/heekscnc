@@ -201,7 +201,7 @@ void ProfileDlg::OnCheckFinishingPass(wxCommandEvent& event)
 
 void ProfileDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/profile"));
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/profile"));
 }
 
 void ProfileDlg::SetSketchOrderAndCombo()
