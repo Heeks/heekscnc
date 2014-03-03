@@ -20,7 +20,6 @@ protected:
 	};
 
 	CLengthCtrl *m_lgthTolerance;
-	CLengthCtrl *m_lgthMinZ;
 	CLengthCtrl *m_lgthMaterialAllowance;
 	wxCheckBox *m_chkSameForEachPosition;
 

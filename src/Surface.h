@@ -14,14 +14,13 @@ class CSurface: public IdNamedObj {
 public:
 	std::list<int> m_solids;
 	double m_tolerance;
-	double m_min_z;
 	double m_material_allowance;
 	bool m_same_for_each_pattern_position;
 	static int number_for_stl_file;
 
 	//	Constructors.
 	CSurface();
-	CSurface(const std::list<int> &solids, double tol, double min_z, double mat_allowance):m_solids(solids), m_tolerance(tol), m_min_z(min_z), m_material_allowance(mat_allowance), m_same_for_each_pattern_position(true){}
+	CSurface(const std::list<int> &solids, double tol, double mat_allowance):m_solids(solids), m_tolerance(tol), m_material_allowance(mat_allowance), m_same_for_each_pattern_position(true){}
 
 	// HeeksObj's virtual functions
     int GetType()const{return SurfaceType;}

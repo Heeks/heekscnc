@@ -65,6 +65,7 @@ class Parser:
         self.arc = 0
         self.q = None
         self.r = None
+        self.drilling = None
 
         while (self.readline()):
             self.a = None
@@ -87,6 +88,7 @@ class Parser:
             self.move = False
             self.height_offset = False
             self.drill = False
+            self.drill_off = False
             self.no_move = False
             
             try:
@@ -101,8 +103,14 @@ class Parser:
                 if self.t != None:
                     if (self.m6 == True) or (self.need_m6_for_t_change == False):
                         self.writer.tool_change( self.t )
+                        
+                if self.drill:
+                    self.drilling = True
+                
+                if self.drill_off:
+                    self.drilling = False
 
-                if (self.drill):
+                if self.drilling:
                     if self.z != None: self.drillz = self.z
                     self.writer.rapid(self.x, self.y, self.r)
                     self.writer.feed(self.x, self.y, self.drillz)

@@ -10,6 +10,7 @@
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "interface/HeeksObj.h"
+#include "interface/HeeksColor.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
 #include "interface/PropertyLength.h"
@@ -24,6 +25,7 @@
 #include "Program.h"
 #include "src/Geom.h"
 #include "DrillingDlg.h"
+#include "Tools.h"
 
 #include <sstream>
 #include <iomanip>
@@ -293,55 +295,62 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 {
 	CDepthOp::glCommands(select, marked, no_color);
 
-	if(marked && !no_color)
+	if(marked)
 	{
-		double l_dHoleDiameter = 12.7;	// Default at half-inch (in mm)
+		if(!no_color)
+		{
+			heeksCAD->GetBackgroundColor().best_black_or_white().glColor();
+		}
 
 		if (m_tool_number > 0)
 		{
-			HeeksObj* Tool = heeksCAD->GetIDObject( ToolType, m_tool_number );
-			if (Tool != NULL)
+			for(HeeksObj* object = theApp.m_program->Tools()->GetFirstChild(); object; object = theApp.m_program->Tools()->GetNextChild())
 			{
-                		l_dHoleDiameter = ((CTool *) Tool)->m_params.m_diameter;
-			} // End if - then
-		} // End if - then
+				if(object->GetType() == ToolType)
+				{
+					CTool* tool= (CTool*)object;
+					if(tool->m_tool_number == m_tool_number)
+					{
 
-		for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
-		{
-			HeeksObj* object = heeksCAD->GetIDObject(PointType, *It);
-			double p[3];
-			if(!object->GetEndPoint(p))continue;
-			gp_Pnt point = make_point(p);
+						for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
+						{
+							HeeksObj* object = heeksCAD->GetIDObject(PointType, *It);
+							double p[3];
+							if(!object->GetEndPoint(p))continue;
+							gp_Pnt point = make_point(p);
 
-			GLdouble start[3], end[3];
+							GLdouble start[3], end[3];
 
-			start[0] = point.X();
-			start[1] = point.Y();
-			start[2] = m_depth_op_params.m_start_depth;
+							start[0] = point.X();
+							start[1] = point.Y();
+							start[2] = m_depth_op_params.m_start_depth;
 
-			end[0] = point.X();
-			end[1] = point.Y();
-			end[2] = m_depth_op_params.m_final_depth;
+							end[0] = point.X();
+							end[1] = point.Y();
+							end[2] = m_depth_op_params.m_final_depth;
 
-			glBegin(GL_LINE_STRIP);
-			glVertex3dv( start );
-			glVertex3dv( end );
-			glEnd();
+							glBegin(GL_LINE_STRIP);
+							glVertex3dv( start );
+							glVertex3dv( end );
+							glEnd();
 
-			std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	point,
-												l_dHoleDiameter / 2,
-												m_depth_op_params.m_final_depth);
+							std::list< CNCPoint > pointsAroundCircle = DrillBitVertices( 	make_point(start), tool->m_params.m_diameter / 2, m_depth_op_params.m_start_depth - m_depth_op_params.m_final_depth);
 
-			glBegin(GL_LINE_STRIP);
-			CNCPoint previous = *(pointsAroundCircle.begin());
-			for (std::list< CNCPoint >::const_iterator l_itPoint = pointsAroundCircle.begin();
-				l_itPoint != pointsAroundCircle.end();
-				l_itPoint++)
-			{
+							glBegin(GL_LINE_STRIP);
+							CNCPoint previous = *(pointsAroundCircle.begin());
+							for (std::list< CNCPoint >::const_iterator l_itPoint = pointsAroundCircle.begin();
+								l_itPoint != pointsAroundCircle.end();
+								l_itPoint++)
+							{
 
-				glVertex3d( l_itPoint->X(), l_itPoint->Y(), l_itPoint->Z() );
+								glVertex3d( l_itPoint->X(), l_itPoint->Y(), l_itPoint->Z() );
+							}
+							glEnd();
+						}
+						break;
+					}
+				}
 			}
-			glEnd();
 		} // End for
 	} // End if - then
 }

@@ -65,5 +65,5 @@ void ScriptOpDlg::OnScriptText( wxCommandEvent& event )
 
 void ScriptOpDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/scriptop"));
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/scriptop"));
 }

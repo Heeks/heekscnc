@@ -17,7 +17,6 @@ SurfaceDlg::SurfaceDlg(wxWindow *parent, HeeksObj* object, const wxString& title
 {
 	// add all the controls to the left side
 	leftControls.push_back(MakeLabelAndControl(_("tolerance"), m_lgthTolerance = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("minimum Z"), m_lgthMinZ = new CLengthCtrl(this)));
 	leftControls.push_back(MakeLabelAndControl(_("material allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
 	leftControls.push_back( HControl( m_chkSameForEachPosition = new wxCheckBox( this, ID_SAME_FOR_EACH_POSITION, _("same for each pattern position") ), wxALL ));
 
@@ -31,7 +30,6 @@ SurfaceDlg::SurfaceDlg(wxWindow *parent, HeeksObj* object, const wxString& title
 void SurfaceDlg::GetDataRaw(HeeksObj* object)
 {
 	((CSurface*)object)->m_tolerance = m_lgthTolerance->GetValue();
-	((CSurface*)object)->m_min_z = m_lgthMinZ->GetValue();
 	((CSurface*)object)->m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	((CSurface*)object)->m_same_for_each_pattern_position = m_chkSameForEachPosition->GetValue();
 	SolidsDlg::GetDataRaw(object);
@@ -40,7 +38,6 @@ void SurfaceDlg::GetDataRaw(HeeksObj* object)
 void SurfaceDlg::SetFromDataRaw(HeeksObj* object)
 {
 	m_lgthTolerance->SetValue(((CSurface*)object)->m_tolerance);
-	m_lgthMinZ->SetValue(((CSurface*)object)->m_min_z);
 	m_lgthMaterialAllowance->SetValue(((CSurface*)object)->m_material_allowance);
 	m_chkSameForEachPosition->SetValue(((CSurface*)object)->m_same_for_each_pattern_position != 0);
 	SolidsDlg::SetFromDataRaw(object);
@@ -54,7 +51,6 @@ void SurfaceDlg::SetPicture(const wxString& name)
 void SurfaceDlg::SetPictureByWindow(wxWindow* w)
 {
 	if(w == m_lgthTolerance)SetPicture(_T("tolerance"));
-	else if(w == m_lgthMinZ)SetPicture(_T("min z"));
 	else if(w == m_lgthMaterialAllowance)SetPicture(_T("material allowance"));
 	else if(w == m_chkSameForEachPosition)
 	{
@@ -66,7 +62,7 @@ void SurfaceDlg::SetPictureByWindow(wxWindow* w)
 
 void SurfaceDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/surface"));
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/surface"));
 }
 
 bool SurfaceDlg::Do(CSurface* object)
