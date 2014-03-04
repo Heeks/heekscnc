@@ -73,6 +73,8 @@ class Creator(nc.Creator):
         self.output_cutviewer_comments = False
         self.current_fixture = None
         self.output_fixtures = False
+        self.output_fixture_on_first_move_after_tool_change = False
+        self.move_done_since_tool_change = False
         self.tool_defn_params = {}
     ############################################################################
     ##  Codes
@@ -200,12 +202,16 @@ class Creator(nc.Creator):
             
     def write_spindle(self):
         if self.output_fixtures:
-            if self.current_fixture == None:
-                self.write(self.SPACE() + 'G54')
-                self.current_fixture = 54
+            if self.output_fixture_on_first_move_after_tool_change == False:
+                self.output_fixture()
         self.write(self.SPACE())
         self.s.write(self)
 
+    def output_fixture(self):
+        if self.current_fixture == None:
+            self.write(self.SPACE() + 'G54')
+            self.current_fixture = 54
+            
     ############################################################################
     ##  Programs
 
@@ -331,6 +337,7 @@ class Creator(nc.Creator):
             self.write_blocknum()
             self.write(self.SPACE() + 'G43' + self.SPACE() + 'D' + str(id) + self.SPACE() + 'H' + str(id) + '\n')
         self.t = id
+        self.move_done_since_tool_change = False
 
     def tool_defn(self, id, name='',params=None):
         if self.output_cutviewer_comments:
@@ -417,6 +424,7 @@ class Creator(nc.Creator):
 
     def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
         self.write_blocknum()
+        self.on_move()
 
         if self.g0123_modal:
             if self.prev_g0123 != self.RAPID():
@@ -479,6 +487,7 @@ class Creator(nc.Creator):
     def feed(self, x=None, y=None, z=None, a=None, b=None, c=None):
         if self.same_xyz(x, y, z, a, b, c): return
         self.write_blocknum()
+        self.on_move()
         if self.g0123_modal:
             if self.prev_g0123 != self.FEED():
                 self.write(self.SPACE() + self.FEED())
@@ -684,6 +693,7 @@ class Creator(nc.Creator):
             return
             
         self.write_blocknum()
+        self.on_move()
         arc_g_code = ''
         if cw: arc_g_code = self.ARC_CW()
         else: arc_g_code = self.ARC_CCW()
@@ -767,6 +777,15 @@ class Creator(nc.Creator):
         self.write(self.SPACE() + self.DWELL(t))
         self.write_misc()
         self.write('\n')
+
+    def on_move(self):
+        print 'in on_move'
+        print 'self.output_fixtures  = ', self.output_fixtures 
+        if self.move_done_since_tool_change == False:
+            if self.output_fixtures:
+                if self.output_fixture_on_first_move_after_tool_change:
+                    self.output_fixture()
+            self.move_done_since_tool_change = True
 
     def rapid_home(self, x=None, y=None, z=None, a=None, b=None, c=None):
         pass
