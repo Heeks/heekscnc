@@ -192,7 +192,7 @@ void PatternDlg::SetPictureByWindow(wxWindow* w)
 
 void PatternDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/pattern"));
+	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/pattern"));
 }
 
 void PatternDlg::OnTextChanged( wxCommandEvent& event )
