@@ -195,7 +195,7 @@ class Creator(recreator.Redirector):
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z
-        if self.x == None or self.y == None or self.z == None:
+        if self.x == None and self.y == None and self.z == None:
             return
         if z == None:
             self.commands.append(RapidXY(self.x, self.y))
@@ -208,7 +208,7 @@ class Creator(recreator.Redirector):
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z
-        if self.x == None or self.y == None or self.z == None:
+        if self.x == None and self.y == None and self.z == None:
             return
         if z == None:
             self.commands.append(FeedXY(self.x, self.y))
@@ -221,7 +221,7 @@ class Creator(recreator.Redirector):
         if x != None: self.x = x
         if y != None: self.y = y
         if z != None: self.z = z
-        if self.x == None or self.y == None or self.z == None:
+        if self.x == None and self.y == None and self.z == None:
             return
         self.commands.append(Arc(self.x, self.y, self.z, i, j, ccw))
         
