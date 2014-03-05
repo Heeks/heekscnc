@@ -219,19 +219,19 @@ void ProfileDlg::SetSketchOrderAndCombo()
 	switch(m_order)
 	{
 	case SketchOrderTypeOpen:
-		m_cmbToolOnSide->SetString (0, _("left"));
-		m_cmbToolOnSide->SetString (1, _("right"));
+		m_cmbToolOnSide->SetString (0, _("Left"));
+		m_cmbToolOnSide->SetString (1, _("Right"));
 		break;
 
 	case SketchOrderTypeCloseCW:
 	case SketchOrderTypeCloseCCW:
-		m_cmbToolOnSide->SetString (0, _("outside"));
-		m_cmbToolOnSide->SetString (1, _("inside"));
+		m_cmbToolOnSide->SetString (0, _("Outside"));
+		m_cmbToolOnSide->SetString (1, _("Inside"));
 		break;
 
 	default:
-		m_cmbToolOnSide->SetString (0, _("outside or left"));
-		m_cmbToolOnSide->SetString (1, _("inside or right"));
+		m_cmbToolOnSide->SetString (0, _("Outside or Left"));
+		m_cmbToolOnSide->SetString (1, _("Inside or Right"));
 		break;
 	}
 }

@@ -1058,7 +1058,7 @@ class Creator(nc.Creator):
             else:
                 if self.g98_not_g99 != False:
                     self.write(self.SPACE() + self.RETRACT_TO_STANDOFF())
-                    self.g98_not_g99 = FALSE                    
+                    self.g98_not_g99 = False                    
     
     # Set the retraction point to the 'standoff' distance above the starting z height.        
         retract_height = depthparams.start_depth + depthparams.rapid_safety_space        
