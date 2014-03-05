@@ -37,11 +37,11 @@ CToolDlg::CToolDlg(wxWindow *parent, CTool* object, const wxString& title, bool 
 	wxString tool_types[] = {_("Drill Bit"), _("Centre Drill Bit"), _("End Mill"), _("Slot Cutter"), _("Ball End Mill"), _("Chamfer"), _("Engraving Bit")};
 	leftControls.push_back(MakeLabelAndControl(_("Tool Type"), m_cmbToolType = new wxComboBox(this, ID_TOOL_TYPE, _T(""), wxDefaultPosition, wxDefaultSize, sizeof(tool_types)/sizeof(CToolParams::eToolType), tool_types)));
 	leftControls.push_back(MakeLabelAndControl(_("Diameter"), m_dblDiameter = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("Tool length offset"), m_dblToolLengthOffset = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("Flat radius"), m_dblFlatRadius = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("Corner radius"), m_dblCornerRadius = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("Cutting edge angle"), m_dblCuttingEdgeAngle = new CDoubleCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("Cutting edge height"), m_dblCuttingEdgeHeight = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Tool Length Offset"), m_dblToolLengthOffset = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Flat Radius"), m_dblFlatRadius = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Corner Radius"), m_dblCornerRadius = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Cutting Edge Angle"), m_dblCuttingEdgeAngle = new CDoubleCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Cutting Edge Height"), m_dblCuttingEdgeHeight = new CLengthCtrl(this)));
 
 	if(top_level)
 	{

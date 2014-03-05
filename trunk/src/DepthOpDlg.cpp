@@ -15,13 +15,13 @@ END_EVENT_TABLE()
 DepthOpDlg::DepthOpDlg(wxWindow *parent, CDepthOp* object, bool drill_pictures, const wxString& title, bool top_level)
 :m_drill_pictures(drill_pictures), SpeedOpDlg(parent, object, false, title, false)
 {
-	leftControls.push_back(MakeLabelAndControl( _("clearance height"), m_lgthClearanceHeight = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl( _("rapid safety space"), m_lgthRapidDownToHeight = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl( _("start depth"), m_lgthStartDepth = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl( _("final depth"), m_lgthFinalDepth = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl( _("step down"), m_lgthStepDown = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl( _("z finish depth"), m_lgthZFinishDepth = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl( _("z through depth"), m_lgthZThruDepth = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl( _("Clearance Height"), m_lgthClearanceHeight = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl( _("Rapid Safety Space"), m_lgthRapidDownToHeight = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl( _("Start Depth"), m_lgthStartDepth = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl( _("Final Depth"), m_lgthFinalDepth = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl( _("Step Down"), m_lgthStepDown = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl( _("Z Finish Depth"), m_lgthZFinishDepth = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl( _("Z Through Depth"), m_lgthZThruDepth = new CLengthCtrl(this)));
 
 	if(top_level)
 	{

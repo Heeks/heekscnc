@@ -26,9 +26,9 @@ SpeedOpDlg::SpeedOpDlg(wxWindow *parent, CSpeedOp* object, bool some_controls_on
 	if(some_controls_on_left)feeds_and_speeds_control_list = &leftControls;
 
 	// add some of the controls to the right side
-	feeds_and_speeds_control_list->push_back(MakeLabelAndControl(_("horizontal feedrate"), m_lgthHFeed = new CLengthCtrl(this)));
-	feeds_and_speeds_control_list->push_back(MakeLabelAndControl(_("vertical feedrate"), m_lgthVFeed = new CLengthCtrl(this)));
-	feeds_and_speeds_control_list->push_back(MakeLabelAndControl(_("spindle speed"), m_dblSpindleSpeed = new CDoubleCtrl(this)));
+	feeds_and_speeds_control_list->push_back(MakeLabelAndControl(_("Horizontal Feedrate"), m_lgthHFeed = new CLengthCtrl(this)));
+	feeds_and_speeds_control_list->push_back(MakeLabelAndControl(_("Vertical Feedrate"), m_lgthVFeed = new CLengthCtrl(this)));
+	feeds_and_speeds_control_list->push_back(MakeLabelAndControl(_("Spindle Speed"), m_dblSpindleSpeed = new CDoubleCtrl(this)));
 
 	if(top_level)
 	{

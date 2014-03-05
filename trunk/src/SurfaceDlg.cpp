@@ -16,9 +16,9 @@ SurfaceDlg::SurfaceDlg(wxWindow *parent, HeeksObj* object, const wxString& title
              : SolidsDlg(parent, object, title, false)
 {
 	// add all the controls to the left side
-	leftControls.push_back(MakeLabelAndControl(_("tolerance"), m_lgthTolerance = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("material allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
-	leftControls.push_back( HControl( m_chkSameForEachPosition = new wxCheckBox( this, ID_SAME_FOR_EACH_POSITION, _("same for each pattern position") ), wxALL ));
+	leftControls.push_back(MakeLabelAndControl(_("Tolerance"), m_lgthTolerance = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Material Allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
+	leftControls.push_back( HControl( m_chkSameForEachPosition = new wxCheckBox( this, ID_SAME_FOR_EACH_POSITION, _("Same for Each Pattern Position") ), wxALL ));
 
 	if(top_level)
 	{

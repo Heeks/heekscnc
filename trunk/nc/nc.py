@@ -31,6 +31,7 @@ class Creator:
 
     def file_open(self, name):
         self.file = open(name, 'w')
+        self.filename = name
 
     def file_close(self):
         self.file.close()

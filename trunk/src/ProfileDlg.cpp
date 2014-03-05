@@ -25,20 +25,20 @@ ProfileDlg::ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title
 	leftControls.clear();
 
 	// add all the controls to the left side
-	wxString tool_on_side_choices[] = {_("left"), _("right"), _("on")};
-	leftControls.push_back(MakeLabelAndControl( _("tool on side"), m_cmbToolOnSide = new wxComboBox(this, ID_TOOL_ON_SIDE, _T(""), wxDefaultPosition, wxDefaultSize, 3, tool_on_side_choices)));
+	wxString tool_on_side_choices[] = {_("Left"), _("Right"), _("On")};
+	leftControls.push_back(MakeLabelAndControl( _("Tool On Side"), m_cmbToolOnSide = new wxComboBox(this, ID_TOOL_ON_SIDE, _T(""), wxDefaultPosition, wxDefaultSize, 3, tool_on_side_choices)));
 
 	SetSketchOrderAndCombo();
 
-	wxString cut_mode_choices[] = {_("conventional"), _("climb")};
-	leftControls.push_back(MakeLabelAndControl(_("cut mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices)));
-	leftControls.push_back(MakeLabelAndControl(_("roll radius"), m_lgthRollRadius = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("offset extra"), m_lgthOffsetExtra = new CLengthCtrl(this)));
-	leftControls.push_back( HControl( m_chkDoFinishingPass = new wxCheckBox( this, ID_DO_FINISHING_PASS, _("do finishing pass") ), wxALL ));
-	leftControls.push_back( HControl( m_chkOnlyFinishingPass = new wxCheckBox( this, ID_ONLY_FINISHING_PASS, _("only finishing pass") ), wxALL ));
-	leftControls.push_back(MakeLabelAndControl(_("finishing feed rate"), m_lgthFinishingFeedrate = new CLengthCtrl(this), &m_staticFinishingFeedrate));
-	leftControls.push_back(MakeLabelAndControl(_("finishing cut mode"), m_cmbFinishingCutMode = new wxComboBox(this, ID_FINISH_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices), &m_staticFinishingCutMode));
-	leftControls.push_back(MakeLabelAndControl(_("finish step down"), m_lgthFinishStepDown = new CLengthCtrl(this), &m_staticFinishStepDown));
+	wxString cut_mode_choices[] = {_("Conventional"), _("Climb")};
+	leftControls.push_back(MakeLabelAndControl(_("Cut Mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices)));
+	leftControls.push_back(MakeLabelAndControl(_("Roll Radius"), m_lgthRollRadius = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Offset Extra"), m_lgthOffsetExtra = new CLengthCtrl(this)));
+	leftControls.push_back( HControl( m_chkDoFinishingPass = new wxCheckBox( this, ID_DO_FINISHING_PASS, _("Do Finishing Pass") ), wxALL ));
+	leftControls.push_back( HControl( m_chkOnlyFinishingPass = new wxCheckBox( this, ID_ONLY_FINISHING_PASS, _("Only Finishing Pass") ), wxALL ));
+	leftControls.push_back(MakeLabelAndControl(_("Finishing Feed Rate"), m_lgthFinishingFeedrate = new CLengthCtrl(this), &m_staticFinishingFeedrate));
+	leftControls.push_back(MakeLabelAndControl(_("Finishing Cut Mode"), m_cmbFinishingCutMode = new wxComboBox(this, ID_FINISH_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices), &m_staticFinishingCutMode));
+	leftControls.push_back(MakeLabelAndControl(_("Finish Step Down"), m_lgthFinishStepDown = new CLengthCtrl(this), &m_staticFinishStepDown));
 
 	for(std::list<HControl>::iterator It = save_leftControls.begin(); It != save_leftControls.end(); It++)
 	{
@@ -103,7 +103,7 @@ void ProfileDlg::SetFromDataRaw(HeeksObj* object)
 
 	}
 
-	m_cmbCutMode->SetValue((((CProfile*)object)->m_profile_params.m_cut_mode == CProfileParams::eClimb) ? _("climb") : _("conventional"));
+	m_cmbCutMode->SetValue((((CProfile*)object)->m_profile_params.m_cut_mode == CProfileParams::eClimb) ? _("Climb") : _("Conventional"));
 
 	m_lgthRollRadius->SetValue(((CProfile*)object)->m_profile_params.m_auto_roll_radius);
 	m_lgthOffsetExtra->SetValue(((CProfile*)object)->m_profile_params.m_offset_extra);
@@ -112,7 +112,7 @@ void ProfileDlg::SetFromDataRaw(HeeksObj* object)
 
 	m_chkOnlyFinishingPass->SetValue(((CProfile*)object)->m_profile_params.m_only_finishing_pass);
 	m_lgthFinishingFeedrate->SetValue(((CProfile*)object)->m_profile_params.m_finishing_h_feed_rate);
-	m_cmbFinishingCutMode->SetValue((((CProfile*)object)->m_profile_params.m_finishing_cut_mode == CProfileParams::eClimb) ? _("climb") : _("conventional"));
+	m_cmbFinishingCutMode->SetValue((((CProfile*)object)->m_profile_params.m_finishing_cut_mode == CProfileParams::eClimb) ? _("Climb") : _("Conventional"));
 	m_lgthFinishStepDown->SetValue(((CProfile*)object)->m_profile_params.m_finishing_step_down);
 
 	EnableControls();
@@ -163,7 +163,7 @@ void ProfileDlg::SetPictureByWindow(wxWindow* w)
 	}
 	else if(w == m_cmbCutMode)
 	{
-		if(m_cmbCutMode->GetValue() == _("climb"))HeeksObjDlg::SetPicture(_T("climb milling"),_T("pocket"));
+		if(m_cmbCutMode->GetValue() == _("Climb"))HeeksObjDlg::SetPicture(_T("climb milling"),_T("pocket"));
 		else HeeksObjDlg::SetPicture(_T("conventional milling"),_T("pocket"));
 	}
 	else if(w == m_lgthRollRadius)SetPicture(_T("roll radius"));
@@ -179,7 +179,7 @@ void ProfileDlg::SetPictureByWindow(wxWindow* w)
 	}
 	else if(w == m_cmbFinishingCutMode)
 	{
-		if(m_cmbFinishingCutMode->GetValue() == _("climb"))HeeksObjDlg::SetPicture(_T("climb milling"),_T("pocket"));
+		if(m_cmbFinishingCutMode->GetValue() == _("Climb"))HeeksObjDlg::SetPicture(_T("climb milling"),_T("pocket"));
 		else HeeksObjDlg::SetPicture(_T("conventional milling"),_T("pocket"));
 	}
 	else if(w == m_lgthFinishStepDown)HeeksObjDlg::SetPicture(_T("step down"),_T("depthop"));

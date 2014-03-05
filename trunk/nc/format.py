@@ -11,6 +11,8 @@ class Format:
         self.round_down = round_down
 
     def string(self, number):
+        if number == None:
+            return 'None'
         f = float(number) * math.pow(10, self.number_of_decimal_places)
         s = str(f)
         

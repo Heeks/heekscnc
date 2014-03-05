@@ -35,11 +35,11 @@ ProgramDlg::ProgramDlg(wxWindow *parent, HeeksObj* object, const wxString& title
 		leftControls.push_back(MakeLabelAndControl(_("Machines"), m_cmbMachines = new wxComboBox(this, ID_MACHINES, _T(""), wxDefaultPosition, wxDefaultSize, machine_array_str)));
 	}
 
-	leftControls.push_back( HControl( m_chkOutputNameFollowsDataName = new wxCheckBox( this, ID_OUTPUT_NAME_FOLLOWS_DATA_NAME, _("Output file name follows data file name") ), wxALL ));
+	leftControls.push_back( HControl( m_chkOutputNameFollowsDataName = new wxCheckBox( this, ID_OUTPUT_NAME_FOLLOWS_DATA_NAME, _("Output File Name Follows Data File Name") ), wxALL ));
 
-	leftControls.push_back(MakeLabelAndControl(_("Output file"), m_txtOutputFile = new wxTextCtrl(this, wxID_ANY)));
+	leftControls.push_back(MakeLabelAndControl(_("Output File"), m_txtOutputFile = new wxTextCtrl(this, wxID_ANY)));
 	wxString units[] = {_("mm"),_("inch") };
-	leftControls.push_back(MakeLabelAndControl(_("Units for nc output"), m_cmbUnits = new wxComboBox(this, ID_UNITS, _T(""), wxDefaultPosition, wxDefaultSize, 2, units)));
+	leftControls.push_back(MakeLabelAndControl(_("Units for NC Output"), m_cmbUnits = new wxComboBox(this, ID_UNITS, _T(""), wxDefaultPosition, wxDefaultSize, 2, units)));
 
 	if(top_level)
 	{
