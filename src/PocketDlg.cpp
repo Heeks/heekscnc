@@ -23,19 +23,19 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, b
 	leftControls.clear();
 
 	// add all the controls to the left side
-	leftControls.push_back(MakeLabelAndControl(_("step over"), m_lgthStepOver = new CLengthCtrl(this)));
-	leftControls.push_back(MakeLabelAndControl(_("material allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Step Over"), m_lgthStepOver = new CLengthCtrl(this)));
+	leftControls.push_back(MakeLabelAndControl(_("Material Allowance"), m_lgthMaterialAllowance = new CLengthCtrl(this)));
 
-	wxString starting_place_choices[] = {_("boundary"), _("center")};
-	leftControls.push_back(MakeLabelAndControl(_("starting place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices)));
+	wxString starting_place_choices[] = {_("Boundary"), _("Center")};
+	leftControls.push_back(MakeLabelAndControl(_("Starting Place"), m_cmbStartingPlace = new wxComboBox(this, ID_STARTING_PLACE, _T(""), wxDefaultPosition, wxDefaultSize, 2, starting_place_choices)));
 
-	wxString cut_mode_choices[] = {_("conventional"), _("climb")};
-	leftControls.push_back(MakeLabelAndControl(_("cut mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices)));
+	wxString cut_mode_choices[] = {_("Conventional"), _("Climb")};
+	leftControls.push_back(MakeLabelAndControl(_("Cut Mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices)));
 
-	leftControls.push_back( HControl( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("use zig zag") ), wxALL ));
-	leftControls.push_back( HControl( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("keep tool down") ), wxALL ));
-	leftControls.push_back(MakeLabelAndControl(_("zig zag angle"), m_dblZigAngle = new CDoubleCtrl(this)));
-	leftControls.push_back( HControl( m_chkZigUnidirectional = new wxCheckBox( this, ID_ZIG_UNIDIRECTIONAL, _("zig unidirectional") ), wxALL ));
+	leftControls.push_back( HControl( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("Use Zig Zag") ), wxALL ));
+	leftControls.push_back( HControl( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("Keep Tool Down") ), wxALL ));
+	leftControls.push_back(MakeLabelAndControl(_("Zig Zag Angle"), m_dblZigAngle = new CDoubleCtrl(this)));
+	leftControls.push_back( HControl( m_chkZigUnidirectional = new wxCheckBox( this, ID_ZIG_UNIDIRECTIONAL, _("Zig Unidirectional") ), wxALL ));
 
 	for(std::list<HControl>::iterator It = save_leftControls.begin(); It != save_leftControls.end(); It++)
 	{
@@ -65,8 +65,8 @@ void PocketDlg::SetFromDataRaw(HeeksObj* object)
 {
 	m_lgthStepOver->SetValue(((CPocket*)object)->m_pocket_params.m_step_over);
 	m_lgthMaterialAllowance->SetValue(((CPocket*)object)->m_pocket_params.m_material_allowance);
-	m_cmbStartingPlace->SetValue((((CPocket*)object)->m_pocket_params.m_starting_place == 0) ? _("boundary") : _("center"));
-	m_cmbCutMode->SetValue((((CPocket*)object)->m_pocket_params.m_cut_mode == CPocketParams::eClimb) ? _("climb") : _("conventional"));
+	m_cmbStartingPlace->SetValue((((CPocket*)object)->m_pocket_params.m_starting_place == 0) ? _("Boundary") : _("Center"));
+	m_cmbCutMode->SetValue((((CPocket*)object)->m_pocket_params.m_cut_mode == CPocketParams::eClimb) ? _("Climb") : _("Conventional"));
 
 	m_chkKeepToolDown->SetValue(((CPocket*)object)->m_pocket_params.m_keep_tool_down_if_poss);
 	m_chkUseZigZag->SetValue(((CPocket*)object)->m_pocket_params.m_use_zig_zag);
@@ -88,12 +88,12 @@ void PocketDlg::SetPictureByWindow(wxWindow* w)
 	else if(w == m_lgthMaterialAllowance)SetPicture(_T("material allowance"));
 	else if(w == m_cmbStartingPlace)
 	{
-		if(m_cmbStartingPlace->GetValue() == _("boundary"))SetPicture(_T("starting boundary"));
+		if(m_cmbStartingPlace->GetValue() == _("Boundary"))SetPicture(_T("starting boundary"));
 		else SetPicture(_T("starting center"));
 	}
 	else if(w == m_cmbCutMode)
 	{
-		if(m_cmbCutMode->GetValue() == _("climb"))SetPicture(_T("climb milling"));
+		if(m_cmbCutMode->GetValue() == _("Climb"))SetPicture(_T("climb milling"));
 		else SetPicture(_T("conventional milling"));
 	}
 	else if(w == m_chkKeepToolDown)

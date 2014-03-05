@@ -468,30 +468,39 @@ void CMachine::ReadBaseXML(TiXmlElement* element)
 {
 } // End ReadBaseXML() method
 
-void ApplyPatternToText(Python &python, int p)
+void ApplyPatternToText(Python &python, int p, std::set<int> &patterns_written)
 {
 	CPattern* pattern = (CPattern*)heeksCAD->GetIDObject(PatternType, p);
 	if(pattern)
 	{
-		// write a transform redirector
-		python << _T("transform.transform_begin([");
-		std::list<gp_Trsf> matrices;
-		pattern->GetMatrices(matrices);
-		for(std::list<gp_Trsf>::iterator It = matrices.begin(); It != matrices.end(); It++)
+		// if pattern not already written
+		if(patterns_written.find(p) == patterns_written.end())
 		{
-			if(It != matrices.begin())python << _T(", ");
-			gp_Trsf &mat = *It;
-			python << _T("area.Matrix([");
-			double m[16];
-			extract(mat, m);
-			for(int i = 0; i<16; i++)
+			// write a pattern definition
+			python << _T("pattern") << p << _T(" = [");
+			std::list<gp_Trsf> matrices;
+			pattern->GetMatrices(matrices);
+			for(std::list<gp_Trsf>::iterator It = matrices.begin(); It != matrices.end(); It++)
 			{
-				if(i>0)python<<_T(", ");
-				python<<m[i];
+				if(It != matrices.begin())python << _T(", ");
+				gp_Trsf &mat = *It;
+				python << _T("area.Matrix([");
+				double m[16];
+				extract(mat, m);
+				for(int i = 0; i<16; i++)
+				{
+					if(i>0)python<<_T(", ");
+					python<<m[i];
+				}
+				python << _T("])");
 			}
-			python << _T("])");
+			python<<_T("]\n");
+
+			patterns_written.insert(p);
 		}
-		python<<_T("])\n");
+
+		// write a transform redirector
+		python << _T("transform.transform_begin(pattern") << p << _T(")\n");
 	}
 }
 
@@ -822,6 +831,7 @@ Python CProgram::RewritePythonProgram()
 	// Write all the operations
 
 	std::set<CSurface*> surfaces_written;
+	std::set<int> patterns_written;
 
 	for (OperationsMap_t::const_iterator l_itOperation = operations.begin(); l_itOperation != operations.end(); l_itOperation++)
 	{
@@ -835,7 +845,7 @@ Python CProgram::RewritePythonProgram()
 			{
 				CSurface* surface = (CSurface*)heeksCAD->GetIDObject(SurfaceType, op->m_surface);
 				if(surface && !surface->m_same_for_each_pattern_position)ApplySurfaceToText(python, surface, surfaces_written);
-				ApplyPatternToText(python, op->m_pattern);
+				ApplyPatternToText(python, op->m_pattern, patterns_written);
 				if(surface && surface->m_same_for_each_pattern_position)ApplySurfaceToText(python, surface, surfaces_written);
 
 				python << op->AppendTextToProgram();

@@ -21,12 +21,12 @@ PatternDlg::PatternDlg(wxWindow *parent, HeeksObj* object, const wxString& title
              : HeeksObjDlg(parent, object, title, false)
 {
 	// add all the controls to the left side
-	leftControls.push_back(MakeLabelAndControl(_("Number of copies A"), m_txtCopies1 = new wxTextCtrl(this, ID_NUM_COPIES_A)));
-	leftControls.push_back(MakeLabelAndControl(_("X shift A"), m_lgthXShift1 = new CLengthCtrl(this, ID_X_SHIFT_A)));
-	leftControls.push_back(MakeLabelAndControl(_("Y shift A"), m_lgthYShift1 = new CLengthCtrl(this, ID_Y_SHIFT_A)));
-	leftControls.push_back(MakeLabelAndControl(_("Number of copies B"), m_txtCopies2 = new wxTextCtrl(this, ID_NUM_COPIES_B)));
-	leftControls.push_back(MakeLabelAndControl(_("X shift B"), m_lgthXShift2 = new CLengthCtrl(this, ID_X_SHIFT_B)));
-	leftControls.push_back(MakeLabelAndControl(_("Y shift B"), m_lgthYShift2 = new CLengthCtrl(this, ID_Y_SHIFT_B)));
+	leftControls.push_back(MakeLabelAndControl(_("Number of Copies A"), m_txtCopies1 = new wxTextCtrl(this, ID_NUM_COPIES_A)));
+	leftControls.push_back(MakeLabelAndControl(_("X Shift A"), m_lgthXShift1 = new CLengthCtrl(this, ID_X_SHIFT_A)));
+	leftControls.push_back(MakeLabelAndControl(_("Y Shift A"), m_lgthYShift1 = new CLengthCtrl(this, ID_Y_SHIFT_A)));
+	leftControls.push_back(MakeLabelAndControl(_("Number of Copies B"), m_txtCopies2 = new wxTextCtrl(this, ID_NUM_COPIES_B)));
+	leftControls.push_back(MakeLabelAndControl(_("X Shift B"), m_lgthXShift2 = new CLengthCtrl(this, ID_X_SHIFT_B)));
+	leftControls.push_back(MakeLabelAndControl(_("Y Shift B"), m_lgthYShift2 = new CLengthCtrl(this, ID_Y_SHIFT_B)));
 
 	if(top_level)
 	{
