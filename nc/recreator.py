@@ -8,10 +8,16 @@ class Redirector(nc.Creator):
         nc.Creator.__init__(self)
 
         self.original = original
-        self.x = original.x * units
-        self.y = original.y * units
-        self.z = original.z * units
+        self.x = None
+        self.y = None
+        self.z = None
+        if original.x != None: self.x = original.x * units
+        if original.y != None: self.y = original.y * units
+        if original.z != None: self.z = original.z * units
         self.imperial = False
+        
+    def cut_path(self):
+        pass
 
     ############################################################################
     ##  Programs
@@ -21,6 +27,18 @@ class Redirector(nc.Creator):
     def write_blocknum(self):
         self.original.write_blocknum()
 
+    def output_fixture(self):
+        self.original.output_fixture()
+        
+    def increment_fixture(self):
+        self.original.increment_fixture()
+
+    def get_fixture(self):
+        return self.original.get_fixture()
+    
+    def set_fixture(self, fixture):
+        self.original.set_fixture(fixture)
+        
     def program_begin(self, id, name=''):
         self.cut_path()
         self.original.program_begin(id, name)
@@ -40,7 +58,7 @@ class Redirector(nc.Creator):
     ############################################################################
     ##  Subprograms
     
-    def sub_begin(self, id, name=''):
+    def sub_begin(self, id, name=None):
         self.cut_path()
         self.original.sub_begin(id, name)
 
@@ -51,6 +69,12 @@ class Redirector(nc.Creator):
     def sub_end(self):
         self.cut_path()
         self.original.sub_end()
+        
+    def disable_output(self):
+        self.original.disable_output()
+        
+    def enable_output(self):
+        self.original.enable_output()
 
     ############################################################################
     ##  Settings
@@ -226,7 +250,10 @@ class Redirector(nc.Creator):
     def pattern(self):
         self.cut_path()
         self.original.pattern()
-
+        
+    def pattern_uses_subroutine(self):
+        return self.original.pattern_uses_subroutine()
+        
     def pocket(self):
         self.cut_path()
         self.original.pocket()

@@ -8,6 +8,11 @@ import area
 import math
 count = 0
 
+class Program:   # stores start and end lines of programs and subroutines
+    def __init__(self):
+        self.start_line = None
+        self.end_line = None
+
 class Parser:
 
     def __init__(self, writer):

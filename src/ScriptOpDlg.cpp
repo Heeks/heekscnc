@@ -22,7 +22,7 @@ ScriptOpDlg::ScriptOpDlg(wxWindow *parent, CScriptOp* object, const wxString& ti
 {
 	{
 		wxBoxSizer *sizer_vertical = new wxBoxSizer(wxVERTICAL);
-		wxStaticText *static_label = new wxStaticText(this, wxID_ANY, _("script"));
+		wxStaticText *static_label = new wxStaticText(this, wxID_ANY, _("Script"));
 		sizer_vertical->Add( static_label, 0, wxRIGHT | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, control_border );
 		sizer_vertical->Add( m_txtScript = new wxTextCtrl(this, ID_SCRIPT_TXT, wxEmptyString, wxDefaultPosition, wxSize(300, 200), wxTE_MULTILINE | wxTE_DONTWRAP | wxTE_RICH | wxTE_RICH2), 1, wxLEFT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, control_border );
 		leftControls.push_back(HControl(sizer_vertical, wxEXPAND | wxALL));
