@@ -322,7 +322,7 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         mat_depth = prev_depth
         
         if len(tags) > 0:
-            split_for_tags(offset_curve, radius, start_depth, depth, depthparams.final_depth)
+            split_for_tags(offset_curve, radius, depthparams.start_depth, depth, depthparams.final_depth)
 
         # make the roll on and roll off kurves
         roll_on_curve = area.Curve()

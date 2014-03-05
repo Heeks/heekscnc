@@ -24,9 +24,6 @@ class Redirector(nc.Creator):
     def write(self, s):
         self.original.write(s)
         
-    def write_blocknum(self):
-        self.original.write_blocknum()
-
     def output_fixture(self):
         self.original.output_fixture()
         
