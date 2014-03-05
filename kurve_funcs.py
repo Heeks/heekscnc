@@ -383,7 +383,9 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         # cut the roll off arc
         cut_curve(roll_off_curve)
 
-        endpoint = roll_off_curve.LastVertex().p
+        endpoint = offset_curve.LastVertex().p
+        if roll_off_curve.getNumVertices() > 0:
+            endpoint = roll_off_curve.LastVertex().p
         
         #add CRC end_line
         if use_CRC():
