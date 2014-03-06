@@ -133,7 +133,7 @@ public:
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("Program");}
 	const wxBitmap &GetIcon();
-	void glCommands(bool select, bool marked, bool no_color){};
+	void glCommands(bool select, bool marked, bool no_color);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void GetProperties(std::list<Property *> *list);
