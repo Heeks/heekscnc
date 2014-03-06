@@ -31,13 +31,7 @@ class Creator(iso_modal.Creator):
             self.write( ('(Created with emc2b post processor ' + str(now.strftime("%Y/%m/%d %H:%M")) + ')' + '\n') )
         else:  
             self.write( ('(Created with emc2b Cutter Radius Compensation post processor ' + str(now.strftime("%Y/%m/%d %H:%M")) + ')' + '\n') )
-
-    def tool_change(self, id):
-        self.write(self.SPACE() + (self.TOOL() % id) + self.SPACE() + 'G43\n')
-        self.t = id
-
-    def comment(self, text):
-        self.write((self.COMMENT(text) + '\n'))
+        iso_modal.Creator.program_begin(self, id, comment)
 
 
 nc.creator = Creator()
