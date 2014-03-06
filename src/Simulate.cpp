@@ -114,15 +114,23 @@ void RunVoxelcutSimulation()
 
 	{
 		std::wofstream ofs(initial_py.c_str());
+
+		ofs << _T("sys.path.insert(0,'") << theApp.GetResFolder().c_str() << _T("')\n");
+		ofs<< _T("import nc.") << theApp.m_program->m_machine.reader.c_str() << _T("\n");
+
 		WriteCoords(ofs);
 		WriteSolids(ofs);
 		WriteTools(ofs);
-		ofs<<"toolpath.load('"<<GetOutputFileNameForPython(theApp.m_program->GetOutputFileName().c_str())<<"')\n";
+
+		ofs<<_T("parser = nc.") << theApp.m_program->m_machine.reader.c_str() << _T(".Parser(toolpath)\n");
+
+		ofs<<_T("parser.Parse('")<<GetOutputFileNameForPython(theApp.m_program->GetOutputFileName().c_str())<<_T("')\n");
+		ofs<<_T("toolpath.rewind()\n");
 	}	
 
 	// Set the working directory to the area that contains the DLL so that
 	// the system can find the voxelcut.bat file correctly.
 	::wxSetWorkingDirectory(theApp.GetDllFolder());
-	wxExecute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\VoxelCut.bat\" ") + theApp.m_program->GetOutputFileName());
+	wxExecute(wxString(_T("\"")) + theApp.GetDllFolder() + _T("\\VoxelCut.bat\""));
 }
 #endif

@@ -51,6 +51,7 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, b
 
 void PocketDlg::GetDataRaw(HeeksObj* object)
 {
+	((CPocket*)object)->m_pocket_params.m_step_over = m_lgthStepOver->GetValue();
 	((CPocket*)object)->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
 	((CPocket*)object)->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
 	((CPocket*)object)->m_pocket_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CPocketParams::eClimb : CPocketParams::eConventional;

@@ -16,6 +16,7 @@ BEGIN_EVENT_TABLE(ProfileDlg, SketchOpDlg)
     EVT_BUTTON(wxID_HELP, ProfileDlg::OnHelp)
     EVT_CHECKBOX(ID_ONLY_FINISHING_PASS, HeeksObjDlg::OnComboOrCheck)
     EVT_COMBOBOX(ID_FINISH_CUT_MODE,HeeksObjDlg::OnComboOrCheck)
+    EVT_COMBOBOX(ID_SKETCH,ProfileDlg::OnSketchCombo)
 END_EVENT_TABLE()
 
 ProfileDlg::ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title, bool top_level)
@@ -28,7 +29,7 @@ ProfileDlg::ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title
 	wxString tool_on_side_choices[] = {_("Left"), _("Right"), _("On")};
 	leftControls.push_back(MakeLabelAndControl( _("Tool On Side"), m_cmbToolOnSide = new wxComboBox(this, ID_TOOL_ON_SIDE, _T(""), wxDefaultPosition, wxDefaultSize, 3, tool_on_side_choices)));
 
-	SetSketchOrderAndCombo();
+	SetSketchOrderAndCombo(((CProfile*)m_object)->m_sketch);
 
 	wxString cut_mode_choices[] = {_("Conventional"), _("Climb")};
 	leftControls.push_back(MakeLabelAndControl(_("Cut Mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices)));
@@ -204,12 +205,12 @@ void ProfileDlg::OnHelp( wxCommandEvent& event )
 	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/profile"));
 }
 
-void ProfileDlg::SetSketchOrderAndCombo()
+void ProfileDlg::SetSketchOrderAndCombo(int s)
 {
 	m_order = SketchOrderTypeUnknown;
 
 	{
-		HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, ((CProfile*)m_object)->m_sketch);
+		HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, s);
 		if((sketch) && (sketch->GetType() == SketchType))
 		{
 			m_order = heeksCAD->GetSketchOrder(sketch);
@@ -234,6 +235,13 @@ void ProfileDlg::SetSketchOrderAndCombo()
 		m_cmbToolOnSide->SetString (1, _("Inside or Right"));
 		break;
 	}
+}
+
+void ProfileDlg::OnSketchCombo( wxCommandEvent& event )
+{
+	int choice = m_cmbToolOnSide->GetSelection();
+	SetSketchOrderAndCombo(	m_cmbSketch->GetSelectedId() );
+	m_cmbToolOnSide->SetSelection(choice);
 }
 
 bool ProfileDlg::Do(CProfile* object)

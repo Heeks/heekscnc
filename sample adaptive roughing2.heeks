@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-<HeeksCAD_Document>
-    <Program machine="nc.iso" output_file="test.tap" program="from nc.nc import *&#x0A;import nc.iso&#x0A;import actp_funcs&#x0A;import sys&#x0A;sys.path.insert(0,&apos;../../libactp/PythonLib&apos;)&#x0A;import actp&#x0A;&#x0A;output(&apos;test.tap&apos;)&#x0A;&#x0A;actp.boundaryclear(21)&#x0A;actp.boundaryadd(-27.5, -27.5)&#x0A;actp.boundaryadd(27.5, -27.5)&#x0A;actp.boundaryadd(27.5, 27.5)&#x0A;actp.boundaryadd(-27.5, 27.5)&#x0A;actp.boundaryadd(-27.5, -27.5)&#x0A;actp.boundarybreak()&#x0A;actp.setstartpoint(-20, -10, 1, 1)&#x0A;actp.setminz(0)&#x0A;actp_funcs.cut(&apos;../../libactp/PythonLib/cone with big cubod base.stl&apos;)&#x0A;">
-        <Operations />
-    </Program>
-</HeeksCAD_Document>

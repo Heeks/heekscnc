@@ -46,16 +46,6 @@ class Parser:
             if self.absolute_flag or self.currentz == None: self.currentz = z
             else: self.currentz = self.currentz + z
 
-#    def add_line(self, x, y, z, a, b, c):
-#        if (x == None and y == None and z == None and a == None and b == None and c == None) : return
-#        self.set_current_pos(x, y, z)
-#        self.writer.add_line(self.currentx, self.currenty, self.currentz, a, b, c)
-
-#    def add_arc(self, x, y, z, i, j, k, r, d):
-#        if (x == None and y == None and z == None and i == None and j == None and k == None and r == None and d == None) : return
-#        self.set_current_pos(x, y, z)
-#        self.writer.add_arc(self.currentx, self.currenty, self.currentz, i, j, k, r, d)
-
     def incremental(self):
         self.absolute_flag = False
 
@@ -162,15 +152,6 @@ class Parser:
                                     c = p0 + (v * 0.5) + (n * d)
                                     i = c.x
                                     j = c.y
-                                    global count
-                                    
-                                    if count == 0 and x > 47:
-                                        print 'x = ', x
-                                        print 'p0 = ', p0.x, ', ', p0.y, '   p1 = ', p1.x, ', ', p1.y
-                                        print 'c = ', c.x, ', ', c.y
-                                        print 'v = ', v.x, ', ', v.y
-                                        print 'n = ', n.x, ', ', n.y
-                                        count += 1
 
                                 else:
                                     i = i + self.oldx

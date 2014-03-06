@@ -93,6 +93,7 @@ class Creator(nc.Creator):
         self.use_this_program_id = None
         self.subroutines_in_own_files = False
         self.pattern_done_with_subroutine = False
+        self.output_comment_before_tool_change = True
         
     ############################################################################
     ##  Codes
@@ -435,6 +436,9 @@ class Creator(nc.Creator):
     ##  Tools
 
     def tool_change(self, id):
+        if self.output_comment_before_tool_change:
+            self.comment('tool change to ' + self.tool_defn_params[id]['name']);
+            
         if self.output_cutviewer_comments:
             import cutviewer
             if id in self.tool_defn_params:
@@ -451,8 +455,7 @@ class Creator(nc.Creator):
         self.move_done_since_tool_change = False
 
     def tool_defn(self, id, name='',params=None):
-        if self.output_cutviewer_comments:
-            self.tool_defn_params[id] = params
+        self.tool_defn_params[id] = params
         if self.output_tool_definitions:
             self.write(self.SPACE() + self.TOOL_DEFINITION())
             self.write(self.SPACE() + ('P%i' % id) + ' ')
