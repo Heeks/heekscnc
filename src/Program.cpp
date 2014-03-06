@@ -138,6 +138,16 @@ void CProgram::CopyFrom(const HeeksObj* object)
 	}
 }
 
+void CProgram::Clear()
+{
+	if (m_nc_code != NULL)m_nc_code->Clear();
+	if (m_operations != NULL)m_operations->Clear();
+	if (m_tools != NULL)m_tools->Clear();
+	if (m_patterns != NULL)m_patterns->Clear();
+	if (m_surfaces != NULL)m_surfaces->Clear();
+	if (m_stocks != NULL)m_stocks->Clear();
+}
+
 CProgram & CProgram::operator= ( const CProgram & rhs )
 {
 	if (this != &rhs)

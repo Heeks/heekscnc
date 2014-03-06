@@ -3,4 +3,10 @@
     <Tool title="3 mm Slot Cutter" tool_number="1" id="5">
         <params diameter="3.00000000" tool_length_offset="127.00000000" automatically_generate_title="1" material="1" type="slot_cutter" corner_radius="0.00000000" flat_radius="0.00000000" cutting_edge_angle="0.00000000" cutting_edge_height="12.00000000" />
     </Tool>
+    <Tool title="4 mm Drill Bit" tool_number="2" id="6">
+        <params diameter="4.00000000" tool_length_offset="100.00000000" automatically_generate_title="1" material="1" type="drill" corner_radius="0.00000000" flat_radius="0.00000000" cutting_edge_angle="0.00000000" cutting_edge_height="50.80000000" />
+    </Tool>
+    <Tool title="6 mm Slot Cutter" tool_number="3" id="7">
+        <params diameter="6.00000000" tool_length_offset="100.00000000" automatically_generate_title="1" material="1" type="slot_cutter" corner_radius="0.00000000" flat_radius="0.00000000" cutting_edge_angle="0.00000000" cutting_edge_height="30.00000000" />
+    </Tool>
 </HeeksCAD_Document>

@@ -493,7 +493,8 @@ Python CTool::AppendTextToProgram()
 	python << _T("'tool length offset':") << this->m_params.m_tool_length_offset;
 	python << _T(", ");
 	python << _T("'type':") << this->m_params.m_type;
-
+	python << _T(", ");
+	python << _T("'name':'") << this->GetMeaningfulName(theApp.m_program->m_units) << _T("'");
 	python << _T("})\n");
 
 	return(python);

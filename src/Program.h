@@ -133,6 +133,7 @@ public:
 	int GetType()const{return ProgramType;}
 	const wxChar* GetTypeString(void)const{return _T("Program");}
 	const wxBitmap &GetIcon();
+	void glCommands(bool select, bool marked, bool no_color){};
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object);
 	void GetProperties(std::list<Property *> *list);
@@ -151,6 +152,7 @@ public:
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 	void GetOnEdit(bool(**callback)(HeeksObj*));
+	void Clear();
 
 	Python RewritePythonProgram();
 	ProgramUserType GetUserType();
