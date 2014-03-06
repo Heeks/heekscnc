@@ -117,6 +117,20 @@ class Incremental:
     
     def Do(self, original, matrix):
         original.incremental()
+        
+class EndCannedCycle:
+    def __init__(self):
+        pass
+    
+    def Do(self, original, matrix):
+        original.end_canned_cycle()
+        
+class Comment:
+    def __init__(self, text):
+        self.text = text
+    
+    def Do(self, original, matrix):
+        original.comment(self.text)
 
 ################################################################################
 matrix_fixtures = {}
@@ -228,12 +242,18 @@ class Creator(recreator.Redirector):
     def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None, rapid_to_clearance=None):
         self.commands.append(Drill(x, y, dwell, depthparams, retract_mode, spindle_mode, internal_coolant_on, rapid_to_clearance))
 
+    def end_canned_cycle(self):
+        self.commands.append(EndCannedCycle())
+        
 #    def absolute(self):
 #        self.commands.append(Absolute())
 
 #    def incremental(self):
 #        self.commands.append(Incremental())
 
+    def comment(self, text):
+        self.commands.append(Comment(text))
+        
 ################################################################################
 
 def transform_begin(matrix_list):

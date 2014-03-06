@@ -49,9 +49,10 @@ public:
 	void SetPictureByWindow(wxWindow* w);
 	void SetPicture(const wxString& name);
 
-	void SetSketchOrderAndCombo();
+	void SetSketchOrderAndCombo(int sketch);
 	void OnCheckFinishingPass( wxCommandEvent& event );
 	void OnHelp( wxCommandEvent& event );
+	void OnSketchCombo( wxCommandEvent& event );
 
     DECLARE_EVENT_TABLE()
 };
