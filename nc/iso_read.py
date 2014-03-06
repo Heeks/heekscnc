@@ -104,6 +104,10 @@ class Parser(nc.Parser):
             self.absolute()
         elif (word == 'G91'):
             self.incremental()
+        elif (word == 'G98'):
+            self.drilling_uses_clearance = True
+        elif (word == 'G99'):
+            self.drilling_uses_clearance = False
         elif (word[0] == 'G') : col = "prep"
         elif (word[0] == 'I'):
             self.col = "axis"

@@ -61,6 +61,8 @@ class Parser:
         self.q = None
         self.r = None
         self.drilling = None
+        self.drilling_uses_clearance = False
+        self.drilling_clearance_height = None
 
         while (self.readline()):
             self.a = None
@@ -98,6 +100,9 @@ class Parser:
                 if self.t != None:
                     if (self.m6 == True) or (self.need_m6_for_t_change == False):
                         self.writer.tool_change( self.t )
+
+                if self.height_offset and (self.z != None):
+                    self.drilling_clearance_height = self.z
                         
                 if self.drill:
                     self.drilling = True
@@ -106,13 +111,13 @@ class Parser:
                     self.drilling = False
 
                 if self.drilling:
+                    rapid_z = self.r
+                    if self.drilling_uses_clearance and (self.drilling_clearance_height != None):
+                        rapid_z = self.drilling_clearance_height
                     if self.z != None: self.drillz = self.z
-                    self.writer.rapid(self.x, self.y, self.r)
+                    self.writer.rapid(self.x, self.y, rapid_z)
                     self.writer.feed(self.x, self.y, self.drillz)
-                    self.writer.feed(self.x, self.y, self.r)
-
-                elif(self.height_offset):
-                    self.writer.rapid(self.x, self.y, self.z)
+                    self.writer.feed(self.x, self.y, rapid_z)
 
                 else:
                     if (self.move and not self.no_move):
