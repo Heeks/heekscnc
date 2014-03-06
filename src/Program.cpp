@@ -52,19 +52,6 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_patte
 	ReadDefaultValues();
 }
 
-const wxBitmap &CProgram::GetIcon()
-{
-	static wxBitmap* icon = NULL;
-	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/program.png")));
-	return *icon;
-}
-
-HeeksObj *CProgram::MakeACopy(void)const
-{
-	return new CProgram(*this);
-}
-
-
 CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
 {
     m_nc_code = NULL;
@@ -104,6 +91,24 @@ CProgram::~CProgram()
 	{
 		theApp.m_program = NULL;
 	}
+}
+
+const wxBitmap &CProgram::GetIcon()
+{
+	static wxBitmap* icon = NULL;
+	if(icon == NULL)icon = new wxBitmap(wxImage(theApp.GetResFolder() + _T("/icons/program.png")));
+	return *icon;
+}
+
+void CProgram::glCommands(bool select, bool marked, bool no_color)
+{
+    if(m_nc_code != NULL)m_nc_code->glCommands(select, marked, no_color);
+    if(m_tools != NULL)m_tools->glCommands(select, marked, no_color);
+}
+
+HeeksObj *CProgram::MakeACopy(void)const
+{
+	return new CProgram(*this);
 }
 
 /**
