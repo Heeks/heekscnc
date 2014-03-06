@@ -71,6 +71,7 @@ class Creator(nc.Creator):
         for i in range(1, 50):
             self.fixture_order.append('54.' + str(i))
         self.output_disabled = False
+        self.z_for_g43 = None
 
         # optional settings
         self.arc_centre_absolute = False
@@ -88,6 +89,7 @@ class Creator(nc.Creator):
         self.output_g43_on_tool_change_line = False
         self.output_internal_coolant_commands = False
         self.output_g98_and_g99 = True
+        self.output_g43_z_before_drilling_if_g98 = True
         self.output_cutviewer_comments = False
         self.output_fixtures = False
         self.use_this_program_id = None
@@ -299,7 +301,7 @@ class Creator(nc.Creator):
 
     def program_end(self):
         if self.z_for_g53 != None:
-            self.write(self.SPACE() + self.MACHINE_COORDINATES() + self.SPACE() + 'Z' + str(self.z_for_g53) + '\n')
+            self.write(self.SPACE() + self.MACHINE_COORDINATES() + self.SPACE() + 'Z' + self.fmt.string(self.z_for_g53) + '\n')
         self.write(self.SPACE() + self.PROGRAM_END() + '\n')
         
         if self.temp_file_to_append_on_close != None:
@@ -446,11 +448,13 @@ class Creator(nc.Creator):
         if (self.t != None) and (self.z_for_g53 != None):
             self.write('G53 Z' + str(self.z_for_g53) + '\n')
         self.write(self.SPACE() + (self.TOOL() % id))
-        if self.output_g43_on_tool_change_line:
+        if self.output_g43_on_tool_change_line == True:
             self.write(self.SPACE() + 'G43')
         self.write('\n')
         if self.output_h_and_d_at_tool_change == True:
-            self.write(self.SPACE() + 'G43' + self.SPACE() + 'D' + str(id) + self.SPACE() + 'H' + str(id) + '\n')
+            if self.output_g43_on_tool_change_line == False:
+                self.write(self.SPACE() + 'G43')
+            self.write(self.SPACE() + 'D' + str(id) + self.SPACE() + 'H' + str(id) + '\n')
         self.t = id
         self.move_done_since_tool_change = False
 
@@ -1016,6 +1020,13 @@ class Creator(nc.Creator):
                 first = False
             
             return
+
+        if self.output_g98_and_g99 == True:
+            if rapid_to_clearance == True:
+                if self.output_g43_z_before_drilling_if_g98:
+                    if self.fmt.string(depthparams.clearance_height) != self.z_for_g43:
+                        self.z_for_g43 = self.fmt.string(depthparams.clearance_height)
+                        self.write(self.SPACE() + 'G43' + self.SPACE() + 'Z' + self.z_for_g43 + '\n')
 
         self.in_canned_cycle = True
         self.write_preps()
