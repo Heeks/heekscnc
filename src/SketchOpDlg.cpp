@@ -16,7 +16,7 @@ END_EVENT_TABLE()
 SketchOpDlg::SketchOpDlg(wxWindow *parent, CDepthOp* object, const wxString& title, bool top_level)
 :DepthOpDlg(parent, object, false, title, false)
 {
-	leftControls.push_back(MakeLabelAndControl(_("sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject()), m_btnSketchPick = new wxButton(this, ID_SKETCH_PICK, _("Pick"))));
+	leftControls.push_back(MakeLabelAndControl(_("Sketches"), m_cmbSketch = new HTypeObjectDropDown(this, ID_SKETCH, SketchType, heeksCAD->GetMainObject()), m_btnSketchPick = new wxButton(this, ID_SKETCH_PICK, _("Pick"))));
 
 	if(top_level)
 	{
