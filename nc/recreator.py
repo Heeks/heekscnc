@@ -292,4 +292,6 @@ class Redirector(nc.Creator):
     def variable_set(self, id, value):
         self.cut_path()
         self.original.variable_set(id, value)
-
+        
+    def set_ocl_cutter(self, cutter):
+        self.original.set_ocl_cutter(cutter)
