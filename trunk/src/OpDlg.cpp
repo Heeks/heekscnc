@@ -29,9 +29,9 @@ OpDlg::OpDlg(wxWindow *parent, COp* object, const wxString& title, bool top_leve
 	leftControls.push_back(MakeLabelAndControl(_("Surface"), m_cmbSurface = new HTypeObjectDropDown(this, ID_SURFACE, SurfaceType, theApp.m_program->Surfaces())));
 
 	// add some of the controls to the right side
-	rightControls.push_back(MakeLabelAndControl(_("comment"), m_txtComment = new wxTextCtrl(this, wxID_ANY)));
-	rightControls.push_back(HControl(m_chkActive = new wxCheckBox( this, wxID_ANY, _("active") ), wxALL));
-	rightControls.push_back(MakeLabelAndControl(_("title"), m_txtTitle = new wxTextCtrl(this, wxID_ANY)));
+	rightControls.push_back(MakeLabelAndControl(_("Comment"), m_txtComment = new wxTextCtrl(this, wxID_ANY)));
+	rightControls.push_back(HControl(m_chkActive = new wxCheckBox( this, wxID_ANY, _("Active") ), wxALL));
+	rightControls.push_back(MakeLabelAndControl(_("Title"), m_txtTitle = new wxTextCtrl(this, wxID_ANY)));
 
 	if(top_level)
 	{
