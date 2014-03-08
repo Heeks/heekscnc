@@ -1321,23 +1321,25 @@ void CHeeksCNCApp::OnFrameDelete()
 
 Python CHeeksCNCApp::SetTool( const int new_tool )
 {
-    Python python;
+	Python python;
 
-    if (m_tool_number != new_tool)
-    {
-        m_tool_number = new_tool;
+	// Select the right tool.
+	CTool *pTool = (CTool *) CTool::Find(new_tool);
+	if (pTool != NULL)
+	{
+		if (m_tool_number != new_tool)
+		{
 
-        // Select the right tool.
-        CTool *pTool = (CTool *) CTool::Find(new_tool);
-        if (pTool != NULL)
-        {
-            python << _T("tool_change( id=") << new_tool << _T(")\n");
-			if(m_attached_to_surface)
-			{
-				python << _T("nc.creator.set_ocl_cutter(") << pTool->OCLDefinition(m_attached_to_surface) << _T(")\n");
-			}
-        } // End if - then
-    }
+			python << _T("tool_change( id=") << new_tool << _T(")\n");
+		}
+
+		if(m_attached_to_surface)
+		{
+			python << _T("nc.creator.set_ocl_cutter(") << pTool->OCLDefinition(m_attached_to_surface) << _T(")\n");
+		}
+	} // End if - then
+
+	m_tool_number = new_tool;
 
     return(python);
 }

@@ -278,6 +278,9 @@ class Redirector(nc.Creator):
         self.cut_path()
         self.original.bore(x, y, self.z2(z), self.z2(zretract), depth, standoff, dwell_Bottom, feed_in, feed_out, stoppos, shift_back, shift_right, backbore, stop)
 
+    def end_canned_cycle(self):
+        self.original.end_canned_cycle()
+        
     ############################################################################
     ##  Misc
 
