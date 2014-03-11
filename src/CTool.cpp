@@ -349,6 +349,7 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 #define XML_STRING_SLOT_CUTTER "slot_cutter"
 #define XML_STRING_BALL_END_MILL "ball_end_mill"
 #define XML_STRING_CHAMFER "chamfer"
+#define XML_STRING_ENGRAVER "engraver"
 
 CToolParams::eToolType GetToolTypeFromString(const char* str)
 {
@@ -358,6 +359,7 @@ CToolParams::eToolType GetToolTypeFromString(const char* str)
 	if(!stricmp(str, XML_STRING_SLOT_CUTTER))return CToolParams::eSlotCutter;
 	if(!stricmp(str, XML_STRING_BALL_END_MILL))return CToolParams::eBallEndMill;
 	if(!stricmp(str, XML_STRING_CHAMFER))return CToolParams::eChamfer;
+	if(!stricmp(str, XML_STRING_ENGRAVER))return CToolParams::eEngravingTool;
 	return CToolParams::eUndefinedToolType;
 }
 
@@ -398,6 +400,8 @@ const char* GetToolTypeXMLString(CToolParams::eToolType t)
 		return XML_STRING_BALL_END_MILL;
 	case CToolParams::eChamfer:
 		return XML_STRING_CHAMFER;
+	case CToolParams::eEngravingTool:
+		return XML_STRING_ENGRAVER;
 	default:
 		return "";
 	}
@@ -1125,15 +1129,51 @@ Python CTool::VoxelcutDefinition()const
 	Python python;
 
 	python << _T("Tool([[Span(Point(");
+//toolpath.tools[4] = Tool([[Span(Point(float(0.5), 0), Vertex(Point(float(3), float(50))), False), GRAY]])
 
 	switch (m_params.m_type)
 	{
-		case CToolParams::eBallEndMill:
 		case CToolParams::eChamfer:
 		case CToolParams::eEngravingTool:
-		default:
+			{
+				double max_cutting_height = 0.0;
+				double radius_at_cutting_height = m_params.m_diameter/2;
+				if(m_params.m_cutting_edge_angle < 0.01 || (m_params.m_diameter/2 < m_params.m_flat_radius))
+				{
+					python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << m_params.m_flat_radius << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY], ");
+					python << _T("[Span(Point(float(") << m_params.m_flat_radius << _T("), ") << m_params.m_cutting_edge_height << _T("), Vertex(Point(float(") << m_params.m_flat_radius << _T("), float(") << m_params.m_cutting_edge_height + 30.0 << _T("))), False), RED]])");
+				}
+				else
+				{
+					double rad_diff = m_params.m_diameter/2 - m_params.m_flat_radius;
+					max_cutting_height = rad_diff / tan(m_params.m_cutting_edge_angle * 0.0174532925199432);
+					radius_at_cutting_height = (m_params.m_cutting_edge_height/max_cutting_height) * rad_diff + m_params.m_flat_radius;
+					if(max_cutting_height > m_params.m_cutting_edge_height)
+					{
+						python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << radius_at_cutting_height << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY],");
+						python << _T("[Span(Point(float(") << radius_at_cutting_height << _T("), float(") << m_params.m_cutting_edge_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T("))), False), GRAY], ");
+						python << _T("[Span(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height + 30.0 << _T("))), False), RED]])");
+					}
+					else
+					{
+						python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T("))), False), GRAY],");
+						python << _T("[Span(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY], ");
+						python << _T("[Span(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height + 30.0 << _T("))), False), RED]])");
+					}
+				}
+			}
+			break;
+		case CToolParams::eBallEndMill:
 			// to do, more than just a cylinder
-			python << _T("float(") << this->m_params.m_diameter/2 << _T("), 0), Vertex(Point(float(") << this->m_params.m_diameter/2 << _T("), 20)), False), GRAY]])");
+		default:
+			if(m_params.m_corner_radius > 0.0001)
+			{
+				python << _T("float(") << m_params.m_diameter/2 - m_params.m_corner_radius << _T("), 0), Vertex(1, Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_corner_radius << _T(")), Point(float(") << m_params.m_diameter/2 - m_params.m_corner_radius << _T("), float(") << m_params.m_corner_radius << _T("), False), GRAY]])");
+			}
+			else
+			{
+				python << _T("float(") << m_params.m_diameter/2 << _T("), 0), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY]])");
+			}
 			break;
 	} // End switch
 
