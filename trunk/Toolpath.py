@@ -78,16 +78,21 @@ class Tool:
         self.cylinders = []
         self.cylinders_calculated = False
         self.calculate_cylinders()
+        self.no_intersections_output = False
         
     def calculate_span_cylinders(self, span, color):
-        sz = span.p.y * toolpath.coords.voxels_per_mm
-        ez = span.v.p.y * toolpath.coords.voxels_per_mm
+        sz = span.p.y
+        ez = span.v.p.y
+        
+        self.no_intersections_output = False
         
         z = sz
         while z < ez:
             # make a line at this z
             intersection_line = area.Span(area.Point(0, z), area.Vertex(0, area.Point(300, z), area.Point(0, 0)), False)
             intersections = span.Intersect(intersection_line)
+            if (len(intersections) == 0) and (self.no_intersections_output == False):
+                self.no_intersections_output = True
             if len(intersections):
                 radius = intersections[0].x * toolpath.coords.voxels_per_mm
                 self.cylinders.append(VoxelCyl(radius, z * toolpath.coords.voxels_per_mm, color))
@@ -96,6 +101,7 @@ class Tool:
     def refine_cylinders(self):
         cur_cylinder = None
         old_cylinders = self.cylinders
+        
         self.cylinders = []
         for cylinder in old_cylinders:
             if cur_cylinder == None:
@@ -107,7 +113,7 @@ class Tool:
                     self.cylinders.append(cur_cylinder)
                     cur_cylinder = cylinder
         if cur_cylinder != None:
-            self.cylinders.append(cur_cylinder)                    
+            self.cylinders.append(cur_cylinder)       
         
     def calculate_cylinders(self):
         self.cylinders = []
@@ -175,6 +181,9 @@ class Toolpath:
         
         index = self.current_line_index - 1
         if index < 0: index = 0
+        if len(self.lines) == 0:
+            return
+        
         tool_number = self.lines[index].tool_number
         
         if tool_number in self.tools:
@@ -192,7 +201,7 @@ class Toolpath:
          
     def cut_line(self, line):
         length = line.Length()
-        num_segments = int(1 + length * self.coords.voxels_per_mm * 0.06)
+        num_segments = int(1 + length * self.coords.voxels_per_mm * 0.2)
         step = length/num_segments
         dv = (line.p1 - line.p0) * (1.0/num_segments)
         for i in range (0, num_segments + 1):
