@@ -88,6 +88,7 @@ Source: "C:\Dev\voxelcut\bitmaps\*.png"; DestDir: "{app}\HeeksCNC\bitmaps"; Flag
 Source: "C:\Program Files (x86)\VoxelCut\wx.*.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Program Files (x86)\VoxelCut\wx*.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+Source: "C:\Dev\HeeksCNCSVN\Toolpath.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 
 [Icons]
 Name: "{group}\HeeksCNC 1.0"; Filename: "{app}\HeeksCAD 1.0.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
