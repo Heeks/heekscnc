@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "interface/ObjList.h"
+#include "interface/IdNamedObjList.h"
 #include "HeeksCNCTypes.h"
 #include "PythonString.h"
 
@@ -68,7 +68,7 @@ public:
 	CXmlScriptOp(const wxString &name, const wxString &bitmap, const wxString &icon, const wxString &script):m_name(name), m_bitmap(bitmap), m_icon(icon), m_script(script){}
 };
 
-class CProgram:public ObjList
+class CProgram:public IdNamedObjList
 {
 private:
 	CNCCode* m_nc_code;						// Access via NCCode() method
