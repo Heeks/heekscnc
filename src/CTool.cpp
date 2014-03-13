@@ -1129,50 +1129,72 @@ Python CTool::VoxelcutDefinition()const
 	Python python;
 
 	python << _T("Tool([[Span(Point(");
-//toolpath.tools[4] = Tool([[Span(Point(float(0.5), 0), Vertex(Point(float(3), float(50))), False), GRAY]])
+
+	double height_above_cutting_edge = 30.0;
+	double r = m_params.m_diameter/2;
+	double h = m_params.m_cutting_edge_height;
 
 	switch (m_params.m_type)
 	{
+	case CToolParams::eDrill:
+		case CToolParams::eCentreDrill:
 		case CToolParams::eChamfer:
 		case CToolParams::eEngravingTool:
 			{
 				double max_cutting_height = 0.0;
-				double radius_at_cutting_height = m_params.m_diameter/2;
-				if(m_params.m_cutting_edge_angle < 0.01 || (m_params.m_diameter/2 < m_params.m_flat_radius))
+				double radius_at_cutting_height = r;
+				if(m_params.m_cutting_edge_angle < 0.01 || (r < m_params.m_flat_radius))
 				{
-					python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << m_params.m_flat_radius << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY], ");
-					python << _T("[Span(Point(float(") << m_params.m_flat_radius << _T("), ") << m_params.m_cutting_edge_height << _T("), Vertex(Point(float(") << m_params.m_flat_radius << _T("), float(") << m_params.m_cutting_edge_height + 30.0 << _T("))), False), RED]])");
+					python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << m_params.m_flat_radius << _T("), float(") << h << _T("))), False), GRAY], ");
+					python << _T("[Span(Point(float(") << m_params.m_flat_radius << _T("), ") << h << _T("), Vertex(Point(float(") << m_params.m_flat_radius << _T("), float(") << h + height_above_cutting_edge << _T("))), False), RED]])");
 				}
 				else
 				{
-					double rad_diff = m_params.m_diameter/2 - m_params.m_flat_radius;
+					double rad_diff = r - m_params.m_flat_radius;
 					max_cutting_height = rad_diff / tan(m_params.m_cutting_edge_angle * 0.0174532925199432);
-					radius_at_cutting_height = (m_params.m_cutting_edge_height/max_cutting_height) * rad_diff + m_params.m_flat_radius;
-					if(max_cutting_height > m_params.m_cutting_edge_height)
+					radius_at_cutting_height = (h/max_cutting_height) * rad_diff + m_params.m_flat_radius;
+					if(max_cutting_height > h)
 					{
-						python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << radius_at_cutting_height << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY],");
-						python << _T("[Span(Point(float(") << radius_at_cutting_height << _T("), float(") << m_params.m_cutting_edge_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T("))), False), GRAY], ");
-						python << _T("[Span(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height + 30.0 << _T("))), False), RED]])");
+						python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << radius_at_cutting_height << _T("), float(") << h << _T("))), False), GRAY],");
+						python << _T("[Span(Point(float(") << radius_at_cutting_height << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << max_cutting_height << _T("))), False), GRAY], ");
+						python << _T("[Span(Point(float(") << r << _T("), float(") << max_cutting_height << _T(")), Vertex(Point(float(") << r << _T("), float(") << max_cutting_height + height_above_cutting_edge << _T("))), False), RED]])");
 					}
 					else
 					{
-						python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T("))), False), GRAY],");
-						python << _T("[Span(Point(float(") << m_params.m_diameter/2 << _T("), float(") << max_cutting_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY], ");
-						python << _T("[Span(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height << _T(")), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height + 30.0 << _T("))), False), RED]])");
+						python << _T("float(") << m_params.m_flat_radius << _T("), 0), Vertex(Point(float(") << r << _T("), float(") << max_cutting_height << _T("))), False), GRAY],");
+						python << _T("[Span(Point(float(") << r << _T("), float(") << max_cutting_height << _T(")), Vertex(Point(float(") << r << _T("), float(") << h << _T("))), False), GRAY], ");
+						python << _T("[Span(Point(float(") << r << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << h + height_above_cutting_edge << _T("))), False), RED]])");
 					}
 				}
 			}
 			break;
 		case CToolParams::eBallEndMill:
-			// to do, more than just a cylinder
+			if(m_params.m_corner_radius > 0.0001)
+			{
+				if(h >= r)
+				{
+					python << _T("0, 0), Vertex(1, Point(float(") << r << _T("), float(") << r << _T(")), Point(0, float(") << r << _T(")), False), GRAY]])");
+					python << _T("[Span(Point(float(") << r << _T("), float(") << r << _T(")), Vertex(Point(float(") << r << _T("), float(") << h << _T("))), False), GRAY], ");
+					python << _T("[Span(Point(float(") << r << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << h + height_above_cutting_edge << _T("))), False), RED]])");
+				}
+				else
+				{
+					double x = sqrt(r*r - (r-h) * (r-h));
+
+					python << _T("0, 0), Vertex(1, Point(float(") << x << _T("), float(") << h << _T(")), Point(0, float(") << r << _T(")), False), GRAY],");
+					python << _T("[Span(Point(float(") << x << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << r << _T("))), False), RED], ");
+					python << _T("[Span(Point(float(") << r << _T("), float(") << r << _T(")), Vertex(Point(float(") << r << _T("), float(") << r + height_above_cutting_edge << _T("))), False), RED]])");
+				}
+			}
+			break;
 		default:
 			if(m_params.m_corner_radius > 0.0001)
 			{
-				python << _T("float(") << m_params.m_diameter/2 - m_params.m_corner_radius << _T("), 0), Vertex(1, Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_corner_radius << _T(")), Point(float(") << m_params.m_diameter/2 - m_params.m_corner_radius << _T("), float(") << m_params.m_corner_radius << _T("), False), GRAY]])");
+				python << _T("float(") << r - m_params.m_corner_radius << _T("), 0), Vertex(1, Point(float(") << r << _T("), float(") << m_params.m_corner_radius << _T(")), Point(float(") << r - m_params.m_corner_radius << _T("), float(") << m_params.m_corner_radius << _T("), False), GRAY]])");
 			}
 			else
 			{
-				python << _T("float(") << m_params.m_diameter/2 << _T("), 0), Vertex(Point(float(") << m_params.m_diameter/2 << _T("), float(") << m_params.m_cutting_edge_height << _T("))), False), GRAY]])");
+				python << _T("float(") << r << _T("), 0), Vertex(Point(float(") << r << _T("), float(") << h << _T("))), False), GRAY]])");
 			}
 			break;
 	} // End switch

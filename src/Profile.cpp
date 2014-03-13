@@ -1233,3 +1233,8 @@ void CProfile::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
 }
+
+void CProfile::Clear()
+{
+	if (m_tags != NULL)m_tags->Clear();
+}

@@ -47,12 +47,16 @@ class VoxelCyl:
         self.z_top = int(z) + 1
         self.color = color
 
-    def cut(self):
-        voxelcut.set_current_color(self.color)
+    def cut(self, rapid):
+        if rapid == True: voxelcut.set_current_color(0x600000)
+        else: voxelcut.set_current_color(self.color)
         voxelcut.remove_cylinder(int(x_for_cut), int(y_for_cut), z_for_cut + int(self.z_bottom), int(x_for_cut), int(y_for_cut), z_for_cut + int(self.z_top), int(self.radius))
         
-    def draw(self):
+    def draw(self, rapid):
 
+        color = self.color
+        if rapid: color = 0x600000
+        
         for i in range(0, 21):
             a = 0.31415926 * i
             x = float(x_for_cut) + self.radius * math.cos(a)
@@ -60,11 +64,11 @@ class VoxelCyl:
             z_bottom = float(z_for_cut) + self.z_bottom
             z_top = float(z_for_cut) + self.z_top
 
-            voxelcut.drawline3d(x, y, z_bottom, x, y, z_top, self.color)
+            voxelcut.drawline3d(x, y, z_bottom, x, y, z_top, color)
             
             if i > 0:
-                voxelcut.drawline3d(prevx, prevy, prevz_bottom, x, y, z_bottom, self.color)
-                voxelcut.drawline3d(prevx, prevy, prevz_top, x, y, z_top, self.color)
+                voxelcut.drawline3d(prevx, prevy, prevz_bottom, x, y, z_bottom, color)
+                voxelcut.drawline3d(prevx, prevy, prevz_top, x, y, z_top, color)
             prevx = x
             prevy = y
             prevz_bottom = z_bottom
@@ -78,21 +82,16 @@ class Tool:
         self.cylinders = []
         self.cylinders_calculated = False
         self.calculate_cylinders()
-        self.no_intersections_output = False
         
     def calculate_span_cylinders(self, span, color):
         sz = span.p.y
         ez = span.v.p.y
-        
-        self.no_intersections_output = False
         
         z = sz
         while z < ez:
             # make a line at this z
             intersection_line = area.Span(area.Point(0, z), area.Vertex(0, area.Point(300, z), area.Point(0, 0)), False)
             intersections = span.Intersect(intersection_line)
-            if (len(intersections) == 0) and (self.no_intersections_output == False):
-                self.no_intersections_output = True
             if len(intersections):
                 radius = intersections[0].x * toolpath.coords.voxels_per_mm
                 self.cylinders.append(VoxelCyl(radius, z * toolpath.coords.voxels_per_mm, color))
@@ -107,7 +106,7 @@ class Tool:
             if cur_cylinder == None:
                 cur_cylinder = cylinder
             else:
-                if cur_cylinder.radius == cylinder.radius:
+                if (cur_cylinder.radius == cylinder.radius) and (cur_cylinder.color == cylinder.color):
                     cur_cylinder.z_top = cylinder.z_top
                 else:
                     self.cylinders.append(cur_cylinder)
@@ -124,25 +123,27 @@ class Tool:
                                   
         self.cylinders_calculated = True
             
-    def cut(self, x, y, z):
+    def cut(self, x, y, z, rapid):
         global x_for_cut
         global y_for_cut
         global z_for_cut
         x_for_cut = x
         y_for_cut = y
         z_for_cut = z
+        
         for cylinder in self.cylinders:
-            cylinder.cut()
+            cylinder.cut(rapid)
             
-    def draw(self, x, y, z):
+    def draw(self, x, y, z, rapid):
         global x_for_cut
         global y_for_cut
         global z_for_cut
         x_for_cut = x
         y_for_cut = y
         z_for_cut = z
+
         for cylinder in self.cylinders:
-            cylinder.draw()
+            cylinder.draw(rapid)
 
 class Toolpath:
     def __init__(self):
@@ -179,25 +180,27 @@ class Toolpath:
     def draw_tool(self):
         voxelcut.drawclear()
         
-        index = self.current_line_index - 1
+        index = self.current_line_index
         if index < 0: index = 0
-        if len(self.lines) == 0:
+        if index >= len(self.lines):
             return
         
         tool_number = self.lines[index].tool_number
+        rapid = self.lines[index].rapid
         
         if tool_number in self.tools:
             x, y, z = self.coords.mm_to_voxels(self.current_point.x, self.current_point.y, self.current_point.z)
-            self.tools[tool_number].draw(x, y, z)
+            self.tools[tool_number].draw(x, y, z, rapid)
         
     def cut_point(self, p):
         x, y, z = self.coords.mm_to_voxels(p.x, p.y, p.z)
-        index = self.current_line_index - 1
+        index = self.current_line_index
         if index < 0: index = 0
         tool_number = self.lines[index].tool_number
+        rapid = self.lines[index].rapid
         
         if tool_number in self.tools:
-            self.tools[tool_number].cut(x, y, z)
+            self.tools[tool_number].cut(x, y, z, rapid)
          
     def cut_line(self, line):
         length = line.Length()
