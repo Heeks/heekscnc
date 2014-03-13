@@ -53,6 +53,15 @@ void CSketchOp::ReadBaseXML(TiXmlElement* element)
 {
 	element->Attribute("sketch", &m_sketch);
 
+	// get old sketch child item
+	TiXmlElement* e = heeksCAD->FirstNamedXMLChildElement(element, "sketch");
+	if(e)
+	{
+		int id = 0;
+		if(e->Attribute("id", &id))
+			m_sketch = id;
+	}
+
 	CDepthOp::ReadBaseXML(element);
 }
 

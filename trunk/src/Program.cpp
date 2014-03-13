@@ -52,7 +52,7 @@ CProgram::CProgram():m_nc_code(NULL), m_operations(NULL), m_tools(NULL), m_patte
 	ReadDefaultValues();
 }
 
-CProgram::CProgram( const CProgram & rhs ) : ObjList(rhs)
+CProgram::CProgram( const CProgram & rhs ) : IdNamedObjList(rhs)
 {
     m_nc_code = NULL;
     m_operations = NULL;
@@ -102,8 +102,17 @@ const wxBitmap &CProgram::GetIcon()
 
 void CProgram::glCommands(bool select, bool marked, bool no_color)
 {
-    if(m_nc_code != NULL)m_nc_code->glCommands(select, marked, no_color);
-    if(m_tools != NULL)m_tools->glCommands(select, marked, no_color);
+    if(m_nc_code != NULL)
+	{
+		if(select)glPushName(m_nc_code->GetIndex());
+		m_nc_code->glCommands(select, marked, no_color);
+		if(select)glPopName();
+	}
+	if(!select)
+	{
+		if(m_tools != NULL)m_tools->glCommands(select, marked, no_color);
+		if(m_operations != NULL)m_operations->glCommands(select, marked, no_color);
+	}
 }
 
 HeeksObj *CProgram::MakeACopy(void)const
@@ -121,7 +130,7 @@ void CProgram::CopyFrom(const HeeksObj* object)
 	if (object->GetType() == GetType())
 	{
 		CProgram *rhs = (CProgram *) object;
-		// ObjList::operator=(*rhs);	// I don't think this will do anything in this case. But it might one day.
+		// IdNamedObjList::operator=(*rhs);	// I don't think this will do anything in this case. But it might one day.
 
 		if ((m_nc_code != NULL) && (rhs->m_nc_code != NULL)) m_nc_code->CopyFrom( rhs->m_nc_code );
 		if ((m_operations != NULL) && (rhs->m_operations != NULL)) m_operations->CopyFrom( rhs->m_operations );
@@ -157,7 +166,7 @@ CProgram & CProgram::operator= ( const CProgram & rhs )
 {
 	if (this != &rhs)
 	{
-		ObjList::operator=(rhs);
+		IdNamedObjList::operator=(rhs);
 		ReloadPointers();
 
 		if ((m_nc_code != NULL) && (rhs.m_nc_code != NULL)) *m_nc_code = *(rhs.m_nc_code);
@@ -331,7 +340,7 @@ void CProgram::GetProperties(std::list<Property *> *list)
 		} // End if - then
 	}
 
-	HeeksObj::GetProperties(list);
+	IdNamedObjList::GetProperties(list);
 }
 
 void CMachine::GetProperties(CProgram *parent, std::list<Property *> *list)
@@ -362,11 +371,19 @@ void CProgram::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_
 {
 	if(marked_object->m_map.size() > 0)
 	{
-			HeeksObj* object = marked_object->m_map.begin()->first;
-			if(object && object->GetType() == NCCodeType)
+		HeeksObj* object = marked_object->m_map.begin()->first;
+		if(object)
+		{
+			switch(object->GetType())
 			{
+			case NCCodeType:
 				((CNCCode*)object)->SetClickMarkPoint(marked_object, ray_start, ray_direction);
+				break;
+			case NCCodeBlockType:
+				((CNCCodeBlock*)object)->SetClickMarkPoint(marked_object, ray_start, ray_direction);
+				break;
 			}
+		}
 	}
 }
 
@@ -419,7 +436,7 @@ bool CProgram::Add(HeeksObj* object, HeeksObj* prev_object)
 		break;
 	}
 
-	return ObjList::Add(object, prev_object);
+	return IdNamedObjList::Add(object, prev_object);
 }
 
 void CProgram::Remove(HeeksObj* object)
@@ -440,7 +457,7 @@ void CProgram::Remove(HeeksObj* object)
 	else if(object == m_surfaces)m_surfaces = NULL;
 	else if(object == m_stocks)m_stocks = NULL;
 
-	ObjList::Remove(object);
+	IdNamedObjList::Remove(object);
 }
 
 // static member function
@@ -794,7 +811,7 @@ Python CProgram::RewritePythonProgram()
 #endif
 
 	// begin program
-	python << _T("program_begin(123, ") << PythonString(_T("Test program")) << _T(")\n");
+	python << _T("program_begin(") << wxString::Format(_T("%d"), m_id) << _T(", ") << PythonString(GetShortString()) << _T(")\n");
 
 	// add any stock commands
 	std::set<int> stock_ids;
@@ -1149,7 +1166,7 @@ bool CProgram::operator==( const CProgram & rhs ) const
 	if (m_script_edited != rhs.m_script_edited) return(false);
 	if (m_units != rhs.m_units) return(false);
 
-	return(ObjList::operator==(rhs));
+	return(IdNamedObjList::operator==(rhs));
 }
 
 bool CMachine::operator==( const CMachine & rhs ) const

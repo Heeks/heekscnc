@@ -295,7 +295,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 {
 	CDepthOp::glCommands(select, marked, no_color);
 
-	if(marked)
+	if(heeksCAD->ObjectMarked(this))
 	{
 		if(!no_color)
 		{

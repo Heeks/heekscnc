@@ -102,6 +102,7 @@ public:
 	void GetOnEdit(bool(**callback)(HeeksObj*));
 	void WriteDefaultValues();
 	void ReadDefaultValues();
+	void Clear();
 
 	// Data access methods.
 	CTags* Tags(){return m_tags;}
