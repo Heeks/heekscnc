@@ -26,10 +26,7 @@ public:
     int GetType()const{return SurfaceType;}
 	const wxChar* GetTypeString(void) const{ return _T("Surface"); }
     HeeksObj *MakeACopy(void)const;
-
     void WriteXML(TiXmlNode *root);
-    static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-
 	void GetProperties(std::list<Property *> *list);
 	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void CopyFrom(const HeeksObj* object);
@@ -38,5 +35,8 @@ public:
 	void WriteDefaultValues();
 	void ReadDefaultValues();
 	void GetOnEdit(bool(**callback)(HeeksObj*));
+	HeeksObj* PreferredPasteTarget();
+
+    static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 }; // End CSurface class definition.
 

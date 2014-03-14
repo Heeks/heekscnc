@@ -3,6 +3,8 @@
 #include <stdafx.h>
 
 #include "Pattern.h"
+#include "Patterns.h"
+#include "Program.h"
 #include "src/Geom.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyDouble.h"
@@ -156,4 +158,9 @@ static bool OnEdit(HeeksObj* object)
 void CPattern::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
+}
+
+HeeksObj* CPattern::PreferredPasteTarget()
+{
+	return theApp.m_program->Patterns();
 }

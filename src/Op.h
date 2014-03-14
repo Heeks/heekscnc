@@ -40,6 +40,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void WriteDefaultValues();
 	void ReadDefaultValues();
+	HeeksObj* PreferredPasteTarget();
 
 	virtual Python AppendTextToProgram();
 	virtual bool UsesTool(){return true;} // some operations don't use the tool number

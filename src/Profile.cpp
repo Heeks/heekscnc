@@ -1113,7 +1113,12 @@ void CProfile::CopyFrom(const HeeksObj* object)
 {
 	if (object->GetType() == GetType())
 	{
-		operator=(*((CProfile*)object));
+		CProfile *rhs = (CProfile *) object;
+
+		if ((m_tags != NULL) && (rhs->m_tags != NULL)) m_tags->CopyFrom( rhs->m_tags );
+
+		m_sketch = rhs->m_sketch;
+		m_profile_params = rhs->m_profile_params;
 	}
 }
 

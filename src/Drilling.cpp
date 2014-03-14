@@ -297,10 +297,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 
 	if(heeksCAD->ObjectMarked(this))
 	{
-		if(!no_color)
-		{
-			heeksCAD->GetBackgroundColor().best_black_or_white().glColor();
-		}
+		heeksCAD->GetBackgroundColor().best_black_or_white().glColor();
 
 		if (m_tool_number > 0)
 		{
