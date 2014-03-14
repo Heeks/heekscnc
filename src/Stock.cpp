@@ -3,6 +3,8 @@
 #include <stdafx.h>
 
 #include "Stock.h"
+#include "Stocks.h"
+#include "Program.h"
 #include "CNCConfig.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/PropertyLength.h"
@@ -118,4 +120,9 @@ static bool OnEdit(HeeksObj* object)
 void CStock::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
+}
+
+HeeksObj* CStock::PreferredPasteTarget()
+{
+	return theApp.m_program->Stocks();
 }

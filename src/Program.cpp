@@ -111,7 +111,7 @@ void CProgram::glCommands(bool select, bool marked, bool no_color)
 	if(!select)
 	{
 		if(m_tools != NULL)m_tools->glCommands(select, marked, no_color);
-		if(m_operations != NULL)m_operations->glCommands(select, marked, no_color);
+		if(m_operations != NULL)m_operations->glCommands(select, false, no_color);
 	}
 }
 

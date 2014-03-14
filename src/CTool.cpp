@@ -988,7 +988,7 @@ TopoDS_Shape CTool::GetShape() const
 
 			gp_Ax2 shaft_position_and_orientation( shaft_start_location, orientation );
 
-			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2) * ((m_params.m_type == CToolParams::eEngravingTool) ? 1.0 : 0.5), shaft_length );
+			BRepPrimAPI_MakeCylinder shaft( shaft_position_and_orientation, (diameter / 2), shaft_length );
 
 			// And a cone for the tip.
 			gp_Ax2 tip_position_and_orientation( shaft_start_location, gp_Dir(0,0,-1) );
@@ -1453,4 +1453,9 @@ void CTool::WriteDefaultValues()
 void CTool::ReadDefaultValues()
 {
 	m_params.set_initial_values();
+}
+
+HeeksObj* CTool::PreferredPasteTarget()
+{
+	return theApp.m_program->Tools();
 }

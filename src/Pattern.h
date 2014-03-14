@@ -33,8 +33,9 @@ public:
 	bool CanAddTo(HeeksObj* owner);
 	const wxBitmap &GetIcon();
 	void GetOnEdit(bool(**callback)(HeeksObj*));
+	HeeksObj* PreferredPasteTarget();
 
-    static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void GetMatrices(std::list<gp_Trsf> &matrices);
 }; // End CPattern class definition.
