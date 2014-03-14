@@ -3,6 +3,8 @@
 #include <stdafx.h>
 
 #include "Surface.h"
+#include "Surfaces.h"
+#include "Program.h"
 #include "CNCConfig.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/PropertyLength.h"
@@ -147,4 +149,9 @@ static bool OnEdit(HeeksObj* object)
 void CSurface::GetOnEdit(bool(**callback)(HeeksObj*))
 {
 	*callback = OnEdit;
+}
+
+HeeksObj* CSurface::PreferredPasteTarget()
+{
+	return theApp.m_program->Surfaces();
 }

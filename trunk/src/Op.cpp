@@ -8,6 +8,7 @@
 
 #include <stdafx.h>
 #include "Op.h"
+#include "Operations.h"
 #include "interface/PropertyInt.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyCheck.h"
@@ -254,3 +255,7 @@ bool COp::operator==(const COp & rhs) const
 	return(IdNamedObjList::operator==(rhs));
 }
 
+HeeksObj* COp::PreferredPasteTarget()
+{
+	return theApp.m_program->Operations();
+}

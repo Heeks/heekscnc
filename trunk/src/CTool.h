@@ -118,6 +118,7 @@ public:
     void OnEditString(const wxChar* str);
 	void WriteDefaultValues();
 	void ReadDefaultValues();
+	HeeksObj* PreferredPasteTarget();
 
 	static CTool *Find( const int tool_number );
 	static int FindTool( const int tool_number );
