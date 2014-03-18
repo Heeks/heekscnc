@@ -1,0 +1,24 @@
+; a bestiary of historical and current EMC2  tool table formats
+T4711 P1 D0.125000 Z+0.511000
+;
+T3 P3 D0.201000 Z+1.273000 ;#7 tap drill ; a double coment
+; a comment
+T1 P1 D0.125000 Z+0.511000 ;1/8 end mill	
+T2 P2 D0.062500 Z+0.100000 ;1/16 end mill
+;
+T99999 P99999 Z+0.100000 ;big tool number
+TOOLNO POCKET       LENGTH    DIAMETER  COMMENT 
+     1      1    +0.511000    0.125000  1/8 end mill
+
+TOOLNO POCKET       LENGTH    DIAMETER  COMMENT
+
+     1      1    +0.511000    0.125000  1/8 end mill
+     2      2    +0.100000    0.062500  1/16 end mill
+TOOLNO POCKET      ZOFFSET      XOFFSET   DIAMETER  FRONTANGLE   BACKANGLE  ORIENT  COMMENT 
+     1      1    +0.100000    +0.000000   0.100000  +95.000000 +155.000000       1  and more comment text
+
+TOOLNO POCKET      ZOFFSET      XOFFSET   DIAMETER  FRONTANGLE   BACKANGLE  ORIENT  COMMENT
+
+     1      1    +0.100000    +0.000000   0.100000  +95.000000 +155.000000       1  and more comment text
+     2      2    +0.000000    +0.000000   0.100000  +85.000000  +25.000000       2  
+     3      3    +0.000000    +0.000000   0.100000 +275.000000 +335.000000       3  

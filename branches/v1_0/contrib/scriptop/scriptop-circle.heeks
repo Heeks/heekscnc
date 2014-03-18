@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<HeeksCAD_Document>
+    <Program machine="emc2" output_file="/tmp/test.tap" output_file_name_follows_data_file_name="1" program='# coding=UTF8&#x0A;# No troubled Microsoft Windows detected&#x0A;import sys&#x0A;sys.path.insert(0,&apos;/home/mah/HeeksCAD/heekscnc&apos;)&#x0A;import math&#x0A;import nc.attach&#x0A;import ocl&#x0A;import ocl_funcs&#x0A;from nc.nc import *&#x0A;import nc.emc2&#x0A;&#x0A;output(&apos;/home/mah/heeks/scriptop-circle.tap&apos;)&#x0A;program_begin(123, &apos;Test program&apos;)&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;#(3 mm Carbide Drill Bit)&#x0A;tool_defn( id=1, name=&apos;3 mm Carbide Drill Bit&apos;, radius=1.5, length=15, gradient=0)&#x0A;#(3 mm Carbide Centre Drill Bit)&#x0A;tool_defn( id=2, name=&apos;3 mm Carbide Centre Drill Bit&apos;, radius=1.5, length=15, gradient=0)&#x0A;#(3 mm Carbide End Mill)&#x0A;tool_defn( id=3, name=&apos;3 mm Carbide End Mill&apos;, radius=1.5, length=15, gradient=-0.1)&#x0A;#(3 mm Carbide Slot Cutter)&#x0A;tool_defn( id=4, name=&apos;3 mm Carbide Slot Cutter&apos;, radius=1.5, length=15, gradient=-0.1)&#x0A;#(3 mm Carbide Ball End Mill)&#x0A;tool_defn( id=5, name=&apos;3 mm Carbide Ball End Mill&apos;, radius=1.5, length=15, gradient=-0.1)&#x0A;#(45 degreee Chamfering Bit)&#x0A;tool_defn( id=6, name=&apos;45 degreee Chamfering Bit&apos;, radius=5, length=50, gradient=0)&#x0A;#(Carbide Turning Tool)&#x0A;tool_defn( id=7, name=&apos;Carbide Turning Tool&apos;, radius=6.35, length=127, gradient=0)&#x0A;#(Touch Probe)&#x0A;tool_defn( id=8, name=&apos;Touch Probe&apos;, radius=2, length=20, gradient=0)&#x0A;#(Tool Length Switch)&#x0A;tool_defn( id=9, name=&apos;Tool Length Switch&apos;, radius=10, length=100, gradient=0)&#x0A;workplane(1)&#x0A;spindle(7000)&#x0A;feedrate_hv(840, 0)&#x0A;flush_nc()&#x0A;clearance = float(5)&#x0A;rapid_down_to_height = float(2)&#x0A;start_depth = float(0)&#x0A;step_down = float(1)&#x0A;final_depth = float(-1)&#x0A;#absolute() mode&#x0A;class script_op_id_1:&#x0A;    sketches = []&#x0A;    points = []&#x0A;    circles = []&#x0A;    circles.append(ocl.Arc(ocl.Point(29,18,0), ocl.Point(29,18,0), ocl.Point(29,13,0), True))&#x0A;    circles.append(ocl.Arc(ocl.Point(38,31,0), ocl.Point(38,31,0), ocl.Point(38,26,0), True))&#x0A;&#x0A;graphics = script_op_id_1()&#x0A;&#x0A;for c in graphics.circles:&#x0A;&#x09;rv = c.c - c.p1&#x0A;&#x09;print &quot;circle at (&quot;,c.c.x,c.c.y,c.c.z,&quot;) radius &quot;,rv.norm()&#x0A;program_end()&#x0A;' units="1" brinell_hardness="15" raw_material_name="" max_spindle_speed="0" safety_height_defined="0" safety_height="0" id="1">
+        <Tools>
+            <Tool title="3 mm Carbide Drill Bit" tool_number="1" id="1">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="0" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide Centre Drill Bit" tool_number="2" id="2">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="1" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="3" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide End Mill" tool_number="3" id="3">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="2" corner_radius="0" flat_radius="1.5" cutting_edge_angle="0" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="-0.1" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide Slot Cutter" tool_number="4" id="4">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="3" corner_radius="0" flat_radius="1.5" cutting_edge_angle="0" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="-0.1" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="3 mm Carbide Ball End Mill" tool_number="5" id="5">
+                <params diameter="3" x_offset="0" tool_length_offset="15" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="4" corner_radius="1.5" flat_radius="0" cutting_edge_angle="0" cutting_edge_height="9" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="-0.1" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="45 degreee Chamfering Bit" tool_number="6" id="6">
+                <params diameter="10" x_offset="0" tool_length_offset="50" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="5" corner_radius="0" flat_radius="0" cutting_edge_angle="45" cutting_edge_height="5" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="Carbide Turning Tool" tool_number="7" id="7">
+                <params diameter="12.7" x_offset="0" tool_length_offset="127" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="6" corner_radius="0" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="Touch Probe" tool_number="8" id="8">
+                <params diameter="4" x_offset="0" tool_length_offset="20" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="7" corner_radius="2" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="0" pitch="1" direction="0" />
+            </Tool>
+            <Tool title="Tool Length Switch" tool_number="9" id="9">
+                <params diameter="20" x_offset="0" tool_length_offset="100" max_advance_per_revolution="0.12" automatically_generate_title="1" material="1" orientation="6" type="8" corner_radius="10" flat_radius="0" cutting_edge_angle="59" cutting_edge_height="50.8" front_angle="95" tool_angle="60" back_angle="25" probe_offset_x="59" probe_offset_y="0" width_over_thickness="1.8" feedrate="0" extrusion_material="0" layer_height="0" temperature="0" filament_diameter="0" flowrate="0" gradient="0" pitch="1" direction="0" />
+            </Tool>
+        </Tools>
+        <Fixtures />
+        <Operations>
+            <ScriptOp script='for c in graphics.circles:&#x0A;&#x09;rv = c.c - c.p1&#x0A;&#x09;print &quot;circle at (&quot;,c.c.x,c.c.y,c.c.z,&quot;) radius &quot;,rv.norm()&#x0A;' emit_depthop_params="1" active="1" title="ScriptOp" execution_order="0" tool_number="10030" id="1">
+                <depthop clear="5" down="1" startdepth="0" depth="-1" r="2" abs_mode="0" />
+                <speedop hfeed="840" vfeed="0" spin="7000" />
+                <Circle col="16711680" r="5" cx="29" cy="13" cz="0" ax="0" ay="0" az="1" id="2">
+                    <Point col="16711680" x="29" y="13" z="0" id="0" />
+                    <Point col="16711680" x="29" y="13" z="0" id="86" />
+                    <Point col="16711680" x="29" y="13" z="0" id="87" />
+                </Circle>
+                <Circle col="16711680" r="5" cx="38" cy="26" cz="0" ax="0" ay="0" az="1" id="3">
+                    <Point col="16711680" x="38" y="26" z="0" id="0" />
+                    <Point col="16711680" x="38" y="26" z="0" id="88" />
+                    <Point col="16711680" x="38" y="26" z="0" id="89" />
+                </Circle>
+            </ScriptOp>
+        </Operations>
+        <SpeedReferences estimate_when_possible="1" id="1">
+            <SpeedReference title="Aluminium (15) with Carbide" surface_speed="182" tool_material="1" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="1" />
+            <SpeedReference title="Aluminium (15) with Carbide" surface_speed="33" tool_material="1" brinell_hardness_of_raw_material="15" raw_material_name="Aluminium" id="2" />
+            <SpeedReference title="Mild Steel (150) with Carbide" surface_speed="182" tool_material="1" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="3" />
+            <SpeedReference title="Mild Steel (150) with Carbide" surface_speed="59" tool_material="1" brinell_hardness_of_raw_material="150" raw_material_name="Mild Steel" id="4" />
+            <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with Carbide" surface_speed="106" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="5" />
+            <SpeedReference title="Alloy Steel &lt; 0.3% carbon (200) with Carbide" surface_speed="24" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &lt; 0.3% carbon" id="6" />
+            <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with Carbide" surface_speed="99" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="7" />
+            <SpeedReference title="Alloy Steel &gt; 0.3% carbon (200) with Carbide" surface_speed="24" tool_material="1" brinell_hardness_of_raw_material="200" raw_material_name="Alloy Steel &gt; 0.3% carbon" id="8" />
+            <CuttingRate title="Brinell (15) at 400 (mm^3/min)" brinell_hardness_of_raw_material="15" max_material_removal_rate="400" id="1" />
+            <CuttingRate title="Brinell (150) at 1600 (mm^3/min)" brinell_hardness_of_raw_material="150" max_material_removal_rate="1600" id="2" />
+        </SpeedReferences>
+        <nccode edited="0" id="1">
+            <ncblock id="0">
+                <text col="comment">(Test program)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N10</text>
+                <text>   </text>
+                <text>G90</text>
+                <text>&#x09; </text>
+                <text col="comment">(Absolute Coordinates)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N20</text>
+                <text>   </text>
+                <text col="prep">G21</text>
+                <text>&#x09; </text>
+                <text col="comment">(Metric Values)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N30</text>
+                <text>   </text>
+                <text>G17</text>
+                <text>&#x09; </text>
+                <text col="comment">(Select XY Plane)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N40</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P1</text>
+                <text> </text>
+                <text col="axis">R1.500</text>
+                <text> </text>
+                <text col="axis">Z15.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N50</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P2</text>
+                <text> </text>
+                <text col="axis">R1.500</text>
+                <text> </text>
+                <text col="axis">Z15.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N60</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P3</text>
+                <text> </text>
+                <text col="axis">R1.500</text>
+                <text> </text>
+                <text col="axis">Z15.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N70</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P4</text>
+                <text> </text>
+                <text col="axis">R1.500</text>
+                <text> </text>
+                <text col="axis">Z15.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N80</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P5</text>
+                <text> </text>
+                <text col="axis">R1.500</text>
+                <text> </text>
+                <text col="axis">Z15.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N90</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P6</text>
+                <text> </text>
+                <text col="axis">R5.000</text>
+                <text> </text>
+                <text col="axis">Z50.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N100</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P7</text>
+                <text> </text>
+                <text col="axis">R6.350</text>
+                <text> </text>
+                <text col="axis">Z127.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N110</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P8</text>
+                <text> </text>
+                <text col="axis">R2.000</text>
+                <text> </text>
+                <text col="axis">Z20.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N120</text>
+                <text>  </text>
+                <text>G10</text>
+                <text> </text>
+                <text>L1</text>
+                <text> </text>
+                <text col="axis">P9</text>
+                <text> </text>
+                <text col="axis">R10.000</text>
+                <text> </text>
+                <text col="axis">Z100.000</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N130</text>
+                <text>  </text>
+                <text>G54</text>
+                <text>&#x09; </text>
+                <text col="comment">(Select Relative Coordinate System)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="blocknum">N140</text>
+                <text>  </text>
+                <text col="misc">M02</text>
+            </ncblock>
+        </nccode>
+    </Program>
+</HeeksCAD_Document>
