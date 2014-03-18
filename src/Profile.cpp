@@ -1119,6 +1119,14 @@ void CProfile::CopyFrom(const HeeksObj* object)
 
 		m_sketch = rhs->m_sketch;
 		m_profile_params = rhs->m_profile_params;
+		m_depth_op_params = rhs->m_depth_op_params;
+		m_speed_op_params = rhs->m_speed_op_params;
+		m_comment = rhs->m_comment;
+		m_active = rhs->m_active;
+		m_tool_number = rhs->m_tool_number;
+		m_operation_type = rhs->m_operation_type;
+		m_pattern = rhs->m_pattern;
+		m_surface = rhs->m_surface;
 	}
 }
 

@@ -1133,6 +1133,7 @@ Python CTool::VoxelcutDefinition()const
 	double height_above_cutting_edge = 30.0;
 	double r = m_params.m_diameter/2;
 	double h = m_params.m_cutting_edge_height;
+	double cr = m_params.m_corner_radius;
 
 	switch (m_params.m_type)
 	{
@@ -1169,11 +1170,10 @@ Python CTool::VoxelcutDefinition()const
 			}
 			break;
 		case CToolParams::eBallEndMill:
-			if(m_params.m_corner_radius > 0.0001)
 			{
 				if(h >= r)
 				{
-					python << _T("0, 0), Vertex(1, Point(float(") << r << _T("), float(") << r << _T(")), Point(0, float(") << r << _T(")), False), GRAY]])");
+					python << _T("0, 0), Vertex(1, Point(float(") << r << _T("), float(") << r << _T(")), Point(0, float(") << r << _T("))), False), GRAY],");
 					python << _T("[Span(Point(float(") << r << _T("), float(") << r << _T(")), Vertex(Point(float(") << r << _T("), float(") << h << _T("))), False), GRAY], ");
 					python << _T("[Span(Point(float(") << r << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << h + height_above_cutting_edge << _T("))), False), RED]])");
 				}
@@ -1181,20 +1181,35 @@ Python CTool::VoxelcutDefinition()const
 				{
 					double x = sqrt(r*r - (r-h) * (r-h));
 
-					python << _T("0, 0), Vertex(1, Point(float(") << x << _T("), float(") << h << _T(")), Point(0, float(") << r << _T(")), False), GRAY],");
-					python << _T("[Span(Point(float(") << x << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << r << _T("))), False), RED], ");
+					python << _T("0, 0), Vertex(1, Point(float(") << x << _T("), float(") << h << _T(")), Point(0, float(") << r << _T("))), False), GRAY],");
+					python << _T("[Span(Point(float(") << x << _T("), float(") << h << _T(")), Vertex(1, Point(float(") << r << _T("), float(") << r << _T(")), Point(0, float(") << r << _T("))), False), RED], ");
 					python << _T("[Span(Point(float(") << r << _T("), float(") << r << _T(")), Vertex(Point(float(") << r << _T("), float(") << r + height_above_cutting_edge << _T("))), False), RED]])");
 				}
 			}
 			break;
 		default:
-			if(m_params.m_corner_radius > 0.0001)
+			if(cr > r)cr = r;
+			if(cr > 0.0001)
 			{
-				python << _T("float(") << r - m_params.m_corner_radius << _T("), 0), Vertex(1, Point(float(") << r << _T("), float(") << m_params.m_corner_radius << _T(")), Point(float(") << r - m_params.m_corner_radius << _T("), float(") << m_params.m_corner_radius << _T("), False), GRAY]])");
+				if(h >= cr)
+				{
+					python << _T("float(") << r-cr << _T("), 0), Vertex(1, Point(float(") << r << _T("), float(") << cr << _T(")), Point(float(") << r-cr << _T("), float(") << cr << _T("))), False), GRAY],");
+					python << _T("[Span(Point(float(") << r << _T("), float(") << r << _T(")), Vertex(Point(float(") << r << _T("), float(") << h << _T("))), False), GRAY], ");
+					python << _T("[Span(Point(float(") << r << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << h + height_above_cutting_edge << _T("))), False), RED]])");
+				}
+				else
+				{
+					double x = (r - cr) + sqrt(cr*cr - (cr-h) * (cr-h));
+
+					python << _T("float(") << r-cr << _T("), 0), Vertex(1, Point(float(") << x << _T("), float(") << h << _T(")), Point(0, float(") << cr << _T("))), False), GRAY],");
+					python << _T("[Span(Point(float(") << x << _T("), float(") << h << _T(")), Vertex(1, Point(float(") << r << _T("), float(") << cr << _T(")), Point(0, float(") << cr << _T("))), False), RED], ");
+					python << _T("[Span(Point(float(") << r << _T("), float(") << cr << _T(")), Vertex(Point(float(") << r << _T("), float(") << cr + height_above_cutting_edge << _T("))), False), RED]])");
+				}
 			}
 			else
 			{
-				python << _T("float(") << r << _T("), 0), Vertex(Point(float(") << r << _T("), float(") << h << _T("))), False), GRAY]])");
+				python << _T("float(") << r << _T("), 0), Vertex(Point(float(") << r << _T("), float(") << h << _T("))), False), GRAY],");
+				python << _T("[Span(Point(float(") << r << _T("), float(") << h << _T(")), Vertex(Point(float(") << r << _T("), float(") << h + height_above_cutting_edge << _T("))), False), RED]])");
 			}
 			break;
 	} // End switch
