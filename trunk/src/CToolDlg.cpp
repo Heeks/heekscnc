@@ -204,9 +204,16 @@ void CToolDlg::EnableAndSetCornerFlatAndAngle(CToolParams::eToolType type)
 			break;
 		case CToolParams::eEndmill:
 		case CToolParams::eSlotCutter:
-		case CToolParams::eBallEndMill:
 			m_dblCornerRadius->Enable();
 			m_dblCornerRadius->SetValue(((CTool*)m_object)->m_params.m_corner_radius);
+			m_dblFlatRadius->Enable(false);
+			m_dblFlatRadius->SetLabel(_T(""));
+			m_dblCuttingEdgeAngle->Enable(false);
+			m_dblCuttingEdgeAngle->SetLabel(_T(""));
+			break;
+		case CToolParams::eBallEndMill:
+			m_dblCornerRadius->Enable(false);
+			m_dblCornerRadius->SetLabel(_T(""));
 			m_dblFlatRadius->Enable(false);
 			m_dblFlatRadius->SetLabel(_T(""));
 			m_dblCuttingEdgeAngle->Enable(false);
