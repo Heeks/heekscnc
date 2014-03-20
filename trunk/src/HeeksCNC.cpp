@@ -521,7 +521,11 @@ static void SendToMachineMenuCallback(wxCommandEvent& event)
 
 static void SaveNcFileMenuCallback(wxCommandEvent& event)
 {
-	wxStandardPaths &sp = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+	wxStandardPaths& sp = wxStandardPaths::Get();
+#else
+	wxStandardPaths sp;
+#endif
     wxString user_docs =sp.GetDocumentsDir();
     wxString ncdir;
     //ncdir =  user_docs + _T("/nc");

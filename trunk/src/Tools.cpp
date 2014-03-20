@@ -98,7 +98,11 @@ class ExportTools: public Tool{
 	const wxChar* GetTitle(){return m_for_default ? _("Save As Default"):_("Export");}
 	void Run()
 	{
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		if (previous_path.Length() == 0) previous_path = _T("default.tooltable");
 
 		if(m_for_default)
@@ -175,7 +179,11 @@ class ImportTools: public Tool{
 	const wxChar* GetTitle(){return m_for_default ? _("Restore Default Tools"):_("Import");}
 	void Run()
 	{
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		if (previous_path.Length() == 0) previous_path = _T("default.tooltable");
 
 		if(m_for_default)

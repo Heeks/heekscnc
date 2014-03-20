@@ -549,7 +549,11 @@ void ApplySurfaceToText(Python &python, CSurface* surface, std::set<CSurface*> &
 			if (object != NULL)solids.push_back(object);
 		} // End for
 
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		wxFileName filepath(standard_paths.GetTempDir().c_str(), wxString::Format(_T("surface%d.stl"), CSurface::number_for_stl_file).c_str());
 		CSurface::number_for_stl_file++;
 
@@ -781,6 +785,7 @@ Python CProgram::RewritePythonProgram()
 		wxMessageBox(_T("Machine post processor name (defined in Program Properties) not found"));
 	} // End if - then
 	else
+
 	{
 		python << _T("from nc.") + m_machine.post + _T(" import *\n");
 		python << _T("\n");
@@ -900,7 +905,11 @@ Python CProgram::RewritePythonProgram()
 		// implementation of wxWidgets).  Rather than showing the truncated program, tell the
 		// user that it has been truncated and where to find it.
 
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		wxFileName file_str(standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 		theApp.m_program_canvas->m_textCtrl->Clear();
@@ -1090,7 +1099,11 @@ wxString CProgram::GetOutputFileName() const
 wxString CProgram::GetBackplotFilePath() const
 {
 	// The xml file is created in the temporary folder
-	wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+	wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+	wxStandardPaths standard_paths;
+#endif
 	wxFileName file_str(standard_paths.GetTempDir().c_str(), _T("backplot.xml"));
 	return file_str.GetFullPath();
 }
@@ -1205,7 +1218,11 @@ void CProgram::ReadDefaultValues()
 	config.Read(_T("ProgramMachine"), &machine_description, _T("LinuxCNC"));
 	m_machine = CProgram::GetMachine(machine_description);
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
-	wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+	wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+	wxStandardPaths standard_paths;
+#endif
 	wxFileName default_path(standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);
 	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);

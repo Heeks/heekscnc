@@ -222,7 +222,11 @@ public:
 
 	void Do(void)
 	{
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
 		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
 
@@ -247,7 +251,11 @@ public:
 	}
 	void ThenDo(void)
 	{
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
 		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
 
@@ -315,7 +323,11 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath, const
 		theApp.m_print_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		wxFileName file_str(standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 		if(!write_python_file(file_str.GetFullPath()))
@@ -386,7 +398,11 @@ void CSendToMachine::SendGCode(const wxChar *gcode)
 		wxBusyCursor wait; // show an hour glass until the end of this function
 
 		// write the ngc file
-		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		wxFileName ngcpath(standard_paths.GetTempDir().c_str(), wxString::Format(_T("heekscnc-%d.ngc"), m_serial));
 		m_serial++;
 		{

@@ -43,14 +43,14 @@ else( UNIX )
 endif( UNIX )
 
 set( heekscnc_HDRS
-    AttachOp.h
     ${HEEKSCADPATH}/interface/Box.h
     CNCPoint.h
     CTool.h
     CToolDlg.h
-    #CuttingRate.h
     DepthOp.h
+	DepthOpDlg
     Drilling.h
+	DrillingDlg.h
     Excellon.h
     ${HEEKSCADPATH}/interface/HDialogs.h
     ${HEEKSCADPATH}/interface/HeeksCADInterface.h
@@ -59,24 +59,31 @@ set( heekscnc_HDRS
     HeeksCNCTypes.h
     ${HEEKSCADPATH}/interface/HeeksColor.h
     ${HEEKSCADPATH}/interface/HeeksObj.h
+    ${HEEKSCADPATH}/interface/HeeksObjDlg.h
+    ${HEEKSCADPATH}/interface/IdNamedObj.h
+    ${HEEKSCADPATH}/interface/IdNamedObjList.h
+    ${HEEKSCADPATH}/interface/InputMode.h
     Interface.h
     ${HEEKSCADPATH}/interface/LeftAndRight.h
-    MachineState.h
     ${HEEKSCADPATH}/interface/MarkedObject.h
     NCCode.h
     ${HEEKSCADPATH}/interface/NiceTextCtrl.h
     ${HEEKSCADPATH}/interface/ObjList.h
     Op.h
+	OpDlg.h
     Operations.h
     OutputCanvas.h
+	Pattern.h
+	PatternDlg.h
+	Patterns.h
     ${HEEKSCADPATH}/interface/PictureFrame.h
     Pocket.h
     PocketDlg.h
-    #Positioning.h
-    #Probing.h
     Profile.h
+	ProfileDlg.h
     Program.h
     ProgramCanvas.h
+	ProgramDlg.h
     ${HEEKSCADPATH}/interface/Property.h
     ${HEEKSCADPATH}/interface/PropertyCheck.h
     ${HEEKSCADPATH}/interface/PropertyChoice.h
@@ -90,33 +97,38 @@ set( heekscnc_HDRS
     ${HEEKSCADPATH}/interface/PropertyVertex.h
     PythonString.h
     PythonStuff.h
-    #RawMaterial.h
     Reselect.h
     ScriptOp.h
+	ScriptOpDlg.h
     Simulate.h
+	SketchOp.h
+	SketchOpDlg.h
+	SolidsDlg.h
     SpeedOp.h
-    #SpeedReference.h
-    #SpeedReferences.h
+	SpeedOpDlg.h
     stdafx.h
+	Stock.h
+	StockDlg.h
+	Stocks.h
     ${HEEKSCADPATH}/interface/strconv.h
+	Surface.h
+	SurfaceDlg.h
+	Surfaces.h
     Tag.h
     Tags.h
-    #Tapping.h
     ${HEEKSCADPATH}/interface/Tool.h
     ${HEEKSCADPATH}/interface/ToolImage.h
     Tools.h
-    #${HEEKSCADPATH}/interface/TransientObject.h
-    #TrsfNCCode.h
    )
 
 set( heekscnc_SRCS
-    AttachOp.cpp
     CNCPoint.cpp
     CTool.cpp
     CToolDlg.cpp
-    #CuttingRate.cpp
     DepthOp.cpp
+	DepthOpDlg.cpp
     Drilling.cpp
+    DrillingDlg.cpp
     Excellon.cpp
     ${HEEKSCADPATH}/src/Geom.cpp
     ${HEEKSCADPATH}/interface/HDialogs.cpp
@@ -124,25 +136,29 @@ set( heekscnc_SRCS
     HeeksCNCInterface.cpp
     ${HEEKSCADPATH}/interface/HeeksColor.cpp
     ${HEEKSCADPATH}/interface/HeeksObj.cpp
+    ${HEEKSCADPATH}/interface/HeeksObjDlg.cpp
+    ${HEEKSCADPATH}/interface/IdNamedObj.cpp
+    ${HEEKSCADPATH}/interface/IdNamedObjList.cpp
     Interface.cpp
     ${HEEKSCADPATH}/interface/LeftAndRight.cpp
-    MachineState.cpp
     ${HEEKSCADPATH}/interface/MarkedObject.cpp
     NCCode.cpp
     ${HEEKSCADPATH}/interface/NiceTextCtrl.cpp
-    ${HEEKSCADPATH}/interface/ObjectCanvas.cpp
     ${HEEKSCADPATH}/interface/ObjList.cpp
     Op.cpp
     Operations.cpp
-    OutputCanvas.cpp
+	OutputCanvas.cpp
+	Pattern.cpp
+	PatternDlg.cpp
+	Patterns.cpp
     ${HEEKSCADPATH}/interface/PictureFrame.cpp
     Pocket.cpp
     PocketDlg.cpp
-    #Positioning.cpp
-    #Probing.cpp
     Profile.cpp
+	ProfileDlg.cpp
     Program.cpp
     ProgramCanvas.cpp
+	ProgramDlg.cpp
     ${HEEKSCADPATH}/interface/PropertyCheck.cpp
     ${HEEKSCADPATH}/interface/PropertyChoice.cpp
     ${HEEKSCADPATH}/interface/PropertyColor.cpp
@@ -158,18 +174,25 @@ set( heekscnc_SRCS
     #RawMaterial.cpp
     Reselect.cpp
     ScriptOp.cpp
+	ScriptOpDlg.cpp
     Simulate.cpp
+	SketchOp.cpp
+	SketchOpDlg.cpp
+	SolidsDlg.cpp
     SpeedOp.cpp
-    #SpeedReference.cpp
-    #SpeedReferences.cpp
+	SpeedOpDlg.cpp
     stdafx.cpp
+	Stock.cpp
+	StockDlg.cpp
+	Stocks.cpp
     ${HEEKSCADPATH}/interface/strconv.cpp
+	Surface.cpp
+	SurfaceDlg.cpp
+	Surfaces.cpp
     Tag.cpp
     Tags.cpp
-    #Tapping.cpp
     ${HEEKSCADPATH}/interface/ToolImage.cpp
     Tools.cpp
-    #${HEEKSCADPATH}/interface/TransientObject.cpp
    )
 
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
