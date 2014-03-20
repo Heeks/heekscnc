@@ -15,11 +15,11 @@
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
 #include <wx/aui/aui.h>
-#include "interface/PropertyString.h"
-#include "interface/PropertyCheck.h"
-#include "interface/PropertyList.h"
-#include "interface/Observer.h"
-#include "interface/ToolImage.h"
+#include "../../interface/PropertyString.h"
+#include "../../interface/PropertyCheck.h"
+#include "../../interface/PropertyList.h"
+#include "../../interface/Observer.h"
+#include "../../interface/ToolImage.h"
 #include "PythonStuff.h"
 #include "Program.h"
 #include "ProgramCanvas.h"
@@ -32,8 +32,8 @@
 #include "CTool.h"
 #include "Operations.h"
 #include "Tools.h"
-#include "interface/strconv.h"
-#include "interface/Tool.h"
+#include "../../interface/strconv.h"
+#include "../../interface/Tool.h"
 #include "CNCPoint.h"
 #include "Excellon.h"
 #include "Tags.h"
@@ -520,7 +520,8 @@ static void SendToMachineMenuCallback(wxCommandEvent& event)
 }
 
 static void SaveNcFileMenuCallback(wxCommandEvent& event)
-{   wxStandardPaths sp;
+{
+	wxStandardPaths &sp = wxStandardPaths::Get();
     wxString user_docs =sp.GetDocumentsDir();
     wxString ncdir;
     //ncdir =  user_docs + _T("/nc");
@@ -528,7 +529,7 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
 	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
     wxString defaultDir = ncdir;
-	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, wxEmptyString, wildcard_string, wxSAVE|wxOVERWRITE_PROMPT);
+	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, wxEmptyString, wildcard_string, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fd.SetFilterIndex(1);
 	if (fd.ShowModal() == wxID_OK)
 	{           
@@ -1350,7 +1351,7 @@ wxString CHeeksCNCApp::GetDllFolder()
 }
 
 wxString CHeeksCNCApp::GetResFolder()
-{wxStandardPaths sp;
+{
 #if defined(WIN32) || defined(RUNINPLACE) //compile with 'RUNINPLACE=yes make' then skip 'sudo make install'
 	#ifdef CMAKE_UNIX
 		return (m_dll_path + _T("/.."));

@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "PatternDlg.h"
-#include "interface/NiceTextCtrl.h"
-#include "interface/PictureFrame.h"
+#include "../../interface/NiceTextCtrl.h"
+#include "../../interface/PictureFrame.h"
 
 BEGIN_EVENT_TABLE(PatternDlg, HeeksObjDlg)
 	EVT_TEXT(ID_NUM_COPIES_A, PatternDlg::OnTextChanged)

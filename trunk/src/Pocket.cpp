@@ -10,15 +10,15 @@
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "Program.h"
-#include "interface/HeeksObj.h"
-#include "interface/PropertyInt.h"
-#include "interface/PropertyDouble.h"
-#include "interface/PropertyLength.h"
-#include "interface/PropertyString.h"
-#include "interface/PropertyChoice.h"
-#include "interface/PropertyVertex.h"
-#include "interface/PropertyCheck.h"
-#include "tinyxml/tinyxml.h"
+#include "../../interface/HeeksObj.h"
+#include "../../interface/PropertyInt.h"
+#include "../../interface/PropertyDouble.h"
+#include "../../interface/PropertyLength.h"
+#include "../../interface/PropertyString.h"
+#include "../../interface/PropertyChoice.h"
+#include "../../interface/PropertyVertex.h"
+#include "../../interface/PropertyCheck.h"
+#include "../../tinyxml/tinyxml.h"
 #include "CTool.h"
 #include "CNCPoint.h"
 #include "PocketDlg.h"
@@ -458,14 +458,14 @@ void CPocket::WriteDefaultValues()
 
 	CNCConfig config;
 	config.Write(_T("StepOver"), m_pocket_params.m_step_over);
-	config.Write(_T("CutMode"), m_pocket_params.m_cut_mode);
+	config.Write(_T("CutMode"), (int)(m_pocket_params.m_cut_mode));
 	config.Write(_T("MaterialAllowance"), m_pocket_params.m_material_allowance);
 	config.Write(_T("FromCenter"), m_pocket_params.m_starting_place);
 	config.Write(_T("KeepToolDown"), m_pocket_params.m_keep_tool_down_if_poss);
 	config.Write(_T("UseZigZag"), m_pocket_params.m_use_zig_zag);
 	config.Write(_T("ZigAngle"), m_pocket_params.m_zig_angle);
 	config.Write(_T("ZigUnidirectional"), m_pocket_params.m_zig_unidirectional);
-	config.Write(_T("DecentStrategy"), m_pocket_params.m_entry_move);
+	config.Write(_T("DecentStrategy"), (int)(m_pocket_params.m_entry_move));
 }
 
 void CPocket::ReadDefaultValues()

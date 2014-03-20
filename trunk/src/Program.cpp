@@ -5,17 +5,17 @@
 #include "stdafx.h"
 #include "Program.h"
 #include "PythonStuff.h"
-#include "tinyxml/tinyxml.h"
+#include "../../tinyxml/tinyxml.h"
 #include "ProgramCanvas.h"
 #include "NCCode.h"
-#include "interface/MarkedObject.h"
-#include "interface/PropertyString.h"
-#include "interface/PropertyFile.h"
-#include "interface/PropertyChoice.h"
-#include "interface/PropertyDouble.h"
-#include "interface/PropertyLength.h"
-#include "interface/PropertyCheck.h"
-#include "interface/Tool.h"
+#include "../../interface/MarkedObject.h"
+#include "../../interface/PropertyString.h"
+#include "../../interface/PropertyFile.h"
+#include "../../interface/PropertyChoice.h"
+#include "../../interface/PropertyDouble.h"
+#include "../../interface/PropertyLength.h"
+#include "../../interface/PropertyCheck.h"
+#include "../../interface/Tool.h"
 #include "Profile.h"
 #include "Pocket.h"
 #include "Drilling.h"
@@ -28,11 +28,11 @@
 #include "Patterns.h"
 #include "Surfaces.h"
 #include "Stocks.h"
-#include "interface/strconv.h"
+#include "../../interface/strconv.h"
 #include "Pattern.h"
 #include "Surface.h"
 #include "Stock.h"
-#include "src/Geom.h"
+#include "../../src/Geom.h"
 #include "ProgramDlg.h"
 
 #include <wx/stdpaths.h>
@@ -549,8 +549,8 @@ void ApplySurfaceToText(Python &python, CSurface* surface, std::set<CSurface*> &
 			if (object != NULL)solids.push_back(object);
 		} // End for
 
-		wxStandardPaths standard_paths;
-		wxFileName filepath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("surface%d.stl"), CSurface::number_for_stl_file).c_str() );
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+		wxFileName filepath(standard_paths.GetTempDir().c_str(), wxString::Format(_T("surface%d.stl"), CSurface::number_for_stl_file).c_str());
 		CSurface::number_for_stl_file++;
 
 		//write stl file
@@ -900,8 +900,8 @@ Python CProgram::RewritePythonProgram()
 		// implementation of wxWidgets).  Rather than showing the truncated program, tell the
 		// user that it has been truncated and where to find it.
 
-		wxStandardPaths standard_paths;
-		wxFileName file_str( standard_paths.GetTempDir().c_str(), _T("post.py"));
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+		wxFileName file_str(standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 		theApp.m_program_canvas->m_textCtrl->Clear();
 		theApp.m_program_canvas->m_textCtrl->AppendText(_("The Python program is too long \n"));
@@ -1090,8 +1090,8 @@ wxString CProgram::GetOutputFileName() const
 wxString CProgram::GetBackplotFilePath() const
 {
 	// The xml file is created in the temporary folder
-	wxStandardPaths standard_paths;
-	wxFileName file_str( standard_paths.GetTempDir().c_str(), _T("backplot.xml"));
+	wxStandardPaths &standard_paths = wxStandardPaths::Get();
+	wxFileName file_str(standard_paths.GetTempDir().c_str(), _T("backplot.xml"));
 	return file_str.GetFullPath();
 }
 
@@ -1205,8 +1205,8 @@ void CProgram::ReadDefaultValues()
 	config.Read(_T("ProgramMachine"), &machine_description, _T("LinuxCNC"));
 	m_machine = CProgram::GetMachine(machine_description);
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
-    wxStandardPaths standard_paths;
-    wxFileName default_path( standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);
+	wxStandardPaths &standard_paths = wxStandardPaths::Get();
+	wxFileName default_path(standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);
 	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );

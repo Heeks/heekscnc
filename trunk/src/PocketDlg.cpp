@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "PocketDlg.h"
-#include "interface/NiceTextCtrl.h"
+#include "../../interface/NiceTextCtrl.h"
 #include "Pocket.h"
 
 BEGIN_EVENT_TABLE(PocketDlg, SketchOpDlg)
@@ -53,7 +53,7 @@ void PocketDlg::GetDataRaw(HeeksObj* object)
 {
 	((CPocket*)object)->m_pocket_params.m_step_over = m_lgthStepOver->GetValue();
 	((CPocket*)object)->m_pocket_params.m_material_allowance = m_lgthMaterialAllowance->GetValue();
-	((CPocket*)object)->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetValue() ? 1:0;
+	((CPocket*)object)->m_pocket_params.m_starting_place = m_cmbStartingPlace->GetSelection();
 	((CPocket*)object)->m_pocket_params.m_cut_mode = (m_cmbCutMode->GetValue().CmpNoCase(_("climb")) == 0) ? CPocketParams::eClimb : CPocketParams::eConventional;
 	((CPocket*)object)->m_pocket_params.m_keep_tool_down_if_poss = m_chkKeepToolDown->GetValue();
 	((CPocket*)object)->m_pocket_params.m_use_zig_zag = m_chkUseZigZag->GetValue();

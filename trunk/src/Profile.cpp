@@ -10,16 +10,16 @@
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "Program.h"
-#include "interface/HeeksObj.h"
-#include "interface/PropertyLength.h"
-#include "interface/PropertyChoice.h"
-#include "interface/PropertyVertex.h"
-#include "interface/PropertyCheck.h"
-#include "interface/PropertyInt.h"
-#include "interface/InputMode.h"
-#include "interface/LeftAndRight.h"
-#include "tinyxml/tinyxml.h"
-#include "interface/Tool.h"
+#include "../../interface/HeeksObj.h"
+#include "../../interface/PropertyLength.h"
+#include "../../interface/PropertyChoice.h"
+#include "../../interface/PropertyVertex.h"
+#include "../../interface/PropertyCheck.h"
+#include "../../interface/PropertyInt.h"
+#include "../../interface/InputMode.h"
+#include "../../interface/LeftAndRight.h"
+#include "../../tinyxml/tinyxml.h"
+#include "../../interface/Tool.h"
 #include "CTool.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
@@ -749,14 +749,14 @@ void CProfile::WriteDefaultValues()
 	CSketchOp::WriteDefaultValues();
 
 	CNCConfig config;
-	config.Write(_T("ToolOnSide"), m_profile_params.m_tool_on_side);
-	config.Write(_T("CutMode"), m_profile_params.m_cut_mode);
+	config.Write(_T("ToolOnSide"), (int)(m_profile_params.m_tool_on_side));
+	config.Write(_T("CutMode"), (int)(m_profile_params.m_cut_mode));
 	config.Write(_T("RollRadius"), m_profile_params.m_auto_roll_radius);
 	config.Write(_T("OffsetExtra"), m_profile_params.m_offset_extra);
 	config.Write(_T("DoFinishPass"), m_profile_params.m_do_finishing_pass);
 	config.Write(_T("OnlyFinishPass"), m_profile_params.m_only_finishing_pass);
 	config.Write(_T("FinishFeedRate"), m_profile_params.m_finishing_h_feed_rate);
-	config.Write(_T("FinishCutMode"), m_profile_params.m_finishing_cut_mode);
+	config.Write(_T("FinishCutMode"), (int)(m_profile_params.m_finishing_cut_mode));
 	config.Write(_T("FinishStepDown"), m_profile_params.m_finishing_step_down);
 	config.Write(_T("EndBeyond"), m_profile_params.m_end_beyond_full_profile);
 

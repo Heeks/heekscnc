@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "interface/HeeksCADInterface.h"
+#include "../../interface/HeeksCADInterface.h"
 #include "CNCPoint.h"
 #include "PythonString.h"
 #include <list>

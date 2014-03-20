@@ -8,7 +8,7 @@
 #ifndef OP_HEADER
 #define OP_HEADER
 
-#include "interface/IdNamedObjList.h"
+#include "../../interface/IdNamedObjList.h"
 #include "PythonStuff.h"
 
 class COp : public IdNamedObjList

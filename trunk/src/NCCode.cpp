@@ -9,14 +9,14 @@
 #include <math.h>
 #include "NCCode.h"
 #include "OutputCanvas.h"
-#include "interface/MarkedObject.h"
-#include "interface/PropertyColor.h"
-#include "interface/PropertyList.h"
-#include "interface/PropertyInt.h"
-#include "interface/Tool.h"
+#include "../../interface/MarkedObject.h"
+#include "../../interface/PropertyColor.h"
+#include "../../interface/PropertyList.h"
+#include "../../interface/PropertyInt.h"
+#include "../../interface/Tool.h"
 #include "CNCConfig.h"
 #include "CTool.h"
-#include "src/Geom.h"
+#include "../../src/Geom.h"
 #include "Program.h"
 
 #include <TopoDS_Shape.hxx>
@@ -28,7 +28,7 @@
 #include <BRepAlgoAPI_Cut.hxx>
 #include <Standard_Failure.hxx>
 #include <StdFail_NotDone.hxx>
-#include "tinyxml/tinyxml.h"
+#include "../../tinyxml/tinyxml.h"
 
 #include <wx/progdlg.h>
 

@@ -5,8 +5,8 @@
 #include "stdafx.h"
 #include "Tags.h"
 #include "Tag.h"
-#include "tinyxml/tinyxml.h"
-#include "interface/Tool.h"
+#include "../../tinyxml/tinyxml.h"
+#include "../../interface/Tool.h"
 
 bool CTags::CanAdd(HeeksObj* object)
 {

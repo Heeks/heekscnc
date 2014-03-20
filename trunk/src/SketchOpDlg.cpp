@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "SketchOpDlg.h"
-#include "interface/PictureFrame.h"
-#include "interface/NiceTextCtrl.h"
+#include "../../interface/PictureFrame.h"
+#include "../../interface/NiceTextCtrl.h"
 #include "SketchOp.h"
 
 BEGIN_EVENT_TABLE(SketchOpDlg, DepthOpDlg)

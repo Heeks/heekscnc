@@ -6,9 +6,9 @@
 #include "Surfaces.h"
 #include "Program.h"
 #include "CNCConfig.h"
-#include "tinyxml/tinyxml.h"
-#include "interface/PropertyLength.h"
-#include "interface/PropertyCheck.h"
+#include "../../tinyxml/tinyxml.h"
+#include "../../interface/PropertyLength.h"
+#include "../../interface/PropertyCheck.h"
 #include "Reselect.h"
 #include "SurfaceDlg.h"
 

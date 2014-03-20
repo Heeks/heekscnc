@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "Stock.h"
 #include "StockDlg.h"
-#include "interface/NiceTextCtrl.h"
+#include "../../interface/NiceTextCtrl.h"
 
 BEGIN_EVENT_TABLE(StockDlg, SolidsDlg)
     EVT_BUTTON(wxID_HELP, StockDlg::OnHelp)
