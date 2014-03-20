@@ -353,13 +353,13 @@ void CToolParams::GetProperties(CTool* parent, std::list<Property *> *list)
 
 CToolParams::eToolType GetToolTypeFromString(const char* str)
 {
-	if(!stricmp(str, XML_STRING_DRILL))return CToolParams::eDrill;
-	if(!stricmp(str, XML_STRING_CENTRE_DRILL))return CToolParams::eCentreDrill;
-	if(!stricmp(str, XML_STRING_END_MILL))return CToolParams::eEndmill;
-	if(!stricmp(str, XML_STRING_SLOT_CUTTER))return CToolParams::eSlotCutter;
-	if(!stricmp(str, XML_STRING_BALL_END_MILL))return CToolParams::eBallEndMill;
-	if(!stricmp(str, XML_STRING_CHAMFER))return CToolParams::eChamfer;
-	if(!stricmp(str, XML_STRING_ENGRAVER))return CToolParams::eEngravingTool;
+	if(!strcasecmp(str, XML_STRING_DRILL))return CToolParams::eDrill;
+	if(!strcasecmp(str, XML_STRING_CENTRE_DRILL))return CToolParams::eCentreDrill;
+	if(!strcasecmp(str, XML_STRING_END_MILL))return CToolParams::eEndmill;
+	if(!strcasecmp(str, XML_STRING_SLOT_CUTTER))return CToolParams::eSlotCutter;
+	if(!strcasecmp(str, XML_STRING_BALL_END_MILL))return CToolParams::eBallEndMill;
+	if(!strcasecmp(str, XML_STRING_CHAMFER))return CToolParams::eChamfer;
+	if(!strcasecmp(str, XML_STRING_ENGRAVER))return CToolParams::eEngravingTool;
 	return CToolParams::eUndefinedToolType;
 }
 
