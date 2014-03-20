@@ -5,8 +5,8 @@
 #include "stdafx.h"
 #include "Operations.h"
 #include "Op.h"
-#include "interface/Tool.h"
-#include "tinyxml/tinyxml.h"
+#include "../../interface/Tool.h"
+#include "../../tinyxml/tinyxml.h"
 #include "Excellon.h"
 
 #include <wx/progdlg.h>

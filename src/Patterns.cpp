@@ -5,10 +5,10 @@
 #include "stdafx.h"
 #include "Patterns.h"
 #include "Program.h"
-#include "interface/PropertyChoice.h"
+#include "../../interface/PropertyChoice.h"
 #include "Pattern.h"
 #include "CNCConfig.h"
-#include "tinyxml/tinyxml.h"
+#include "../../tinyxml/tinyxml.h"
 #include <wx/stdpaths.h>
 
 bool CPatterns::CanAdd(HeeksObj* object)

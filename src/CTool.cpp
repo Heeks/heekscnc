@@ -10,15 +10,15 @@
 #include "CTool.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
-#include "interface/HeeksObj.h"
-#include "interface/HeeksColor.h"
-#include "interface/Tool.h"
-#include "interface/PropertyInt.h"
-#include "interface/PropertyDouble.h"
-#include "interface/PropertyLength.h"
-#include "interface/PropertyChoice.h"
-#include "interface/PropertyString.h"
-#include "tinyxml/tinyxml.h"
+#include "../../interface/HeeksObj.h"
+#include "../../interface/HeeksColor.h"
+#include "../../interface/Tool.h"
+#include "../../interface/PropertyInt.h"
+#include "../../interface/PropertyDouble.h"
+#include "../../interface/PropertyLength.h"
+#include "../../interface/PropertyChoice.h"
+#include "../../interface/PropertyString.h"
+#include "../../tinyxml/tinyxml.h"
 #include "CNCPoint.h"
 #include "PythonStuff.h"
 #include "Program.h"
@@ -113,7 +113,7 @@ void CToolParams::write_values_to_config()
 	config.Write(_T("m_diameter"), m_diameter);
 	config.Write(_T("m_tool_length_offset"), m_tool_length_offset);
 	config.Write(_T("m_automatically_generate_title"), m_automatically_generate_title );
-	config.Write(_T("m_type"), m_type);
+	config.Write(_T("m_type"), (int)m_type);
 	config.Write(_T("m_flat_radius"), m_flat_radius);
 	config.Write(_T("m_corner_radius"), m_corner_radius);
 	config.Write(_T("m_cutting_edge_angle"), m_cutting_edge_angle);

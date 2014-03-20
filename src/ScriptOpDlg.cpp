@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "ScriptOpDlg.h"
-#include "interface/PictureFrame.h"
-#include "interface/NiceTextCtrl.h"
+#include "../../interface/PictureFrame.h"
+#include "../../interface/NiceTextCtrl.h"
 #include "ScriptOp.h"
 #include "Program.h"
 #include "Tools.h"

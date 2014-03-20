@@ -5,11 +5,11 @@
 #include "stdafx.h"
 #include "Tools.h"
 #include "Program.h"
-#include "interface/Tool.h"
-#include "interface/PropertyChoice.h"
+#include "../../interface/Tool.h"
+#include "../../interface/PropertyChoice.h"
 #include "CTool.h"
 #include "CNCConfig.h"
-#include "tinyxml/tinyxml.h"
+#include "../../tinyxml/tinyxml.h"
 #include <wx/stdpaths.h>
 
 bool CTools::CanAdd(HeeksObj* object)
@@ -98,7 +98,7 @@ class ExportTools: public Tool{
 	const wxChar* GetTitle(){return m_for_default ? _("Save As Default"):_("Export");}
 	void Run()
 	{
-		wxStandardPaths standard_paths;
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
 		if (previous_path.Length() == 0) previous_path = _T("default.tooltable");
 
 		if(m_for_default)
@@ -114,7 +114,7 @@ class ExportTools: public Tool{
 				+ _T("*.tool;*.TOOL;*.Tool;")
 				+ _T("*.tools;*.TOOLS;*.Tools;")
 				+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
-				wxSAVE | wxOVERWRITE_PROMPT );
+				wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
 
 			fd.SetFilterIndex(1);
 			if (fd.ShowModal() == wxID_CANCEL) return;
@@ -175,7 +175,7 @@ class ImportTools: public Tool{
 	const wxChar* GetTitle(){return m_for_default ? _("Restore Default Tools"):_("Import");}
 	void Run()
 	{
-		wxStandardPaths standard_paths;
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
 		if (previous_path.Length() == 0) previous_path = _T("default.tooltable");
 
 		if(m_for_default)
@@ -191,7 +191,7 @@ class ImportTools: public Tool{
 				+ _T("*.tool;*.TOOL;*.Tool;")
 				+ _T("*.tools;*.TOOLS;*.Tools;")
 				+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
-				wxOPEN | wxFILE_MUST_EXIST );
+				wxFD_OPEN | wxFD_FILE_MUST_EXIST );
 			fd.SetFilterIndex(1);
 			if (fd.ShowModal() == wxID_CANCEL) return;
 			previous_path = fd.GetPath().c_str();
@@ -229,7 +229,7 @@ static void on_set_title_format(int value, HeeksObj* object, bool from_undo_redo
 	((CTools *)object)->m_title_format = CTools::TitleFormat_t(value);
 
 	CNCConfig config;
-	config.Write(_T("title_format"), ((CTools *)object)->m_title_format);
+	config.Write(_T("title_format"), (int)(((CTools *)object)->m_title_format));
 }
 
 void CTools::GetProperties(std::list<Property *> *list)

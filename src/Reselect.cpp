@@ -4,9 +4,9 @@
 
 #include "stdafx.h"
 #include "Reselect.h"
-#include "interface/PropertyString.h"
-#include "interface/PropertyInt.h"
-#include "interface/ObjList.h"
+#include "../../interface/PropertyString.h"
+#include "../../interface/PropertyInt.h"
+#include "../../interface/ObjList.h"
 
 static bool GetSketches(std::list<int>& sketches )
 {

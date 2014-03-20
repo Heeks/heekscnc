@@ -5,11 +5,11 @@
 #include "Pattern.h"
 #include "Patterns.h"
 #include "Program.h"
-#include "src/Geom.h"
-#include "interface/PropertyInt.h"
-#include "interface/PropertyDouble.h"
+#include "../../src/Geom.h"
+#include "../../interface/PropertyInt.h"
+#include "../../interface/PropertyDouble.h"
 #include "CNCConfig.h"
-#include "tinyxml/tinyxml.h"
+#include "../../tinyxml/tinyxml.h"
 #include "PatternDlg.h"
 
 CPattern::CPattern()

@@ -6,7 +6,7 @@
 #include "Operations.h"
 #include "CTool.h"
 #include "Tools.h"
-#include "interface/HDialogs.h"
+#include "../../interface/HDialogs.h"
 #include <wx/aui/aui.h>
 
 CProgram* CHeeksCNCInterface::GetProgram()

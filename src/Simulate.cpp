@@ -8,9 +8,9 @@
 
 #include "stdafx.h"
 			#ifdef WIN32
-#include "interface/Box.h"
-#include "interface/HeeksObj.h"
-#include "interface/HeeksColor.h"
+#include "../../interface/Box.h"
+#include "../../interface/HeeksObj.h"
+#include "../../interface/HeeksColor.h"
 #include "Program.h"
 #include "CTool.h"
 #include "Tools.h"
@@ -109,11 +109,11 @@ void RunVoxelcutSimulation()
 #endif
 
 	// write initial.py
-	wxStandardPaths standard_paths;
-	wxString initial_py( standard_paths.GetTempDir() + _T("/initial.py"));
+	wxStandardPaths &standard_paths = wxStandardPaths::Get();
+	wxString initial_py(standard_paths.GetTempDir() + _T("/initial.py"));
 
 	{
-		std::wofstream ofs(initial_py.c_str());
+		std::wofstream ofs(Ttc(initial_py.c_str()));
 
 		ofs << _T("sys.path.insert(0,'") << theApp.GetResFolder().c_str() << _T("')\n");
 		ofs<< _T("import nc.") << theApp.m_program->m_machine.reader.c_str() << _T("\n");

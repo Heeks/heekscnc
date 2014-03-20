@@ -8,7 +8,7 @@
 #include <stdafx.h>
 #include "CNCPoint.h"
 
-#include "interface/HeeksCADInterface.h"
+#include "../../interface/HeeksCADInterface.h"
 #include "Program.h"
 
 extern CHeeksCADInterface* heeksCAD;

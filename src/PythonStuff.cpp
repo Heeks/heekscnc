@@ -14,7 +14,7 @@
 #include "OutputCanvas.h"
 #include "Program.h"
 #include "CNCConfig.h"
-#include "interface/PropertyString.h"
+#include "../../interface/PropertyString.h"
 
 //static
 bool CPyProcess::redirect = false;
@@ -222,8 +222,8 @@ public:
 
 	void Do(void)
 	{
-		wxStandardPaths standard_paths;
-		wxFileName errors_path( standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+		wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
 		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
 
 		// clear the error and output files
@@ -247,8 +247,8 @@ public:
 	}
 	void ThenDo(void)
 	{
-		wxStandardPaths standard_paths;
-		wxFileName errors_path( standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+		wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
 		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
 
 		ifstream ifs(Ttc(errors_path.GetFullPath().c_str()));
@@ -315,8 +315,8 @@ bool HeeksPyPostProcess(const CProgram* program, const wxString &filepath, const
 		theApp.m_print_canvas->m_textCtrl->Clear(); // clear the output window
 
 		// write the python file
-		wxStandardPaths standard_paths;
-		wxFileName file_str( standard_paths.GetTempDir().c_str(), _T("post.py"));
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+		wxFileName file_str(standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 		if(!write_python_file(file_str.GetFullPath()))
 		{
@@ -386,8 +386,8 @@ void CSendToMachine::SendGCode(const wxChar *gcode)
 		wxBusyCursor wait; // show an hour glass until the end of this function
 
 		// write the ngc file
-		wxStandardPaths standard_paths;
-		wxFileName ngcpath( standard_paths.GetTempDir().c_str(), wxString::Format(_T("heekscnc-%d.ngc"), m_serial));
+		wxStandardPaths &standard_paths = wxStandardPaths::Get();
+		wxFileName ngcpath(standard_paths.GetTempDir().c_str(), wxString::Format(_T("heekscnc-%d.ngc"), m_serial));
 		m_serial++;
 		{
 			wxFile ofs(ngcpath.GetFullPath(), wxFile::write);

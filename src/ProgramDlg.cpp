@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "Program.h"
 #include "ProgramDlg.h"
-#include "interface/NiceTextCtrl.h"
+#include "../../interface/NiceTextCtrl.h"
 
 enum
 {

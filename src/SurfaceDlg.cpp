@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "Surface.h"
 #include "SurfaceDlg.h"
-#include "interface/NiceTextCtrl.h"
+#include "../../interface/NiceTextCtrl.h"
 
 BEGIN_EVENT_TABLE(SurfaceDlg, SolidsDlg)
     EVT_CHECKBOX(ID_SAME_FOR_EACH_POSITION, HeeksObjDlg::OnComboOrCheck)

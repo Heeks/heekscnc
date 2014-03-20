@@ -2,7 +2,7 @@
 // Copyright (c) 2010, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
-#include "interface/Tool.h"
+#include "../../interface/Tool.h"
 
 class ReselectSketches: public Tool{
 public:
