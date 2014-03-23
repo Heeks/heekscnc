@@ -48,7 +48,7 @@ set( heekscnc_HDRS
     CTool.h
     CToolDlg.h
     DepthOp.h
-	DepthOpDlg
+	DepthOpDlg.h
     Drilling.h
 	DrillingDlg.h
     Excellon.h
@@ -146,6 +146,7 @@ set( heekscnc_SRCS
     ${HEEKSCADPATH}/interface/NiceTextCtrl.cpp
     ${HEEKSCADPATH}/interface/ObjList.cpp
     Op.cpp
+	OpDlg.cpp
     Operations.cpp
 	OutputCanvas.cpp
 	Pattern.cpp
@@ -171,7 +172,6 @@ set( heekscnc_SRCS
     ${HEEKSCADPATH}/interface/PropertyVertex.cpp
     PythonString.cpp
     PythonStuff.cpp
-    #RawMaterial.cpp
     Reselect.cpp
     ScriptOp.cpp
 	ScriptOpDlg.cpp
@@ -209,7 +209,7 @@ install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/h
 file( GLOB icons "${CMAKE_CURRENT_SOURCE_DIR}/../icons/*.png" )
 install( FILES ${icons} DESTINATION share/heekscnc/icons )
 
-file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt")
+file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.xml") 
 install(FILES ${nc} DESTINATION lib/heekscnc/nc )
 
 file( GLOB hcnc_defaults
