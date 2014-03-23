@@ -1274,7 +1274,11 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 		theApp.m_output_canvas->Clear();
 		theApp.m_print_canvas->Clear();
 
-		heeksCAD->OpenXMLFile(GetDllFolder() + _T("/default.tooltable"), theApp.m_program->Tools() );
+		heeksCAD->OpenXMLFile(GetDllFolder() + 
+#ifndef WIN32
+			_T("/heekscnc") + 
+#endif
+			_T("/default.tooltable"), theApp.m_program->Tools() );
 	} // End if - then
 }
 
