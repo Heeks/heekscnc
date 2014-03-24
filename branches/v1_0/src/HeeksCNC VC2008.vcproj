@@ -475,27 +475,27 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\HeeksObjDlg.cpp"
+			RelativePath="..\..\interface\HeeksObjDlg.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\HeeksObjDlg.h"
+			RelativePath="..\..\interface\HeeksObjDlg.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObj.cpp"
+			RelativePath="..\..\interface\IdNamedObj.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObj.h"
+			RelativePath="..\..\interface\IdNamedObj.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObjList.cpp"
+			RelativePath="..\..\interface\IdNamedObjList.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObjList.h"
+			RelativePath="..\..\interface\IdNamedObjList.h"
 			>
 		</File>
 		<File
@@ -987,7 +987,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinystr.cpp"
+			RelativePath="..\..\tinyxml\tinystr.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
@@ -999,27 +999,11 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinystr.h"
+			RelativePath="..\..\tinyxml\tinystr.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxml.cpp"
-			>
-			<FileConfiguration
-				Name="Unicode Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxml.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxmlerror.cpp"
+			RelativePath="..\..\tinyxml\tinyxml.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
@@ -1031,7 +1015,23 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxmlparser.cpp"
+			RelativePath="..\..\tinyxml\tinyxml.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tinyxml\tinyxmlerror.cpp"
+			>
+			<FileConfiguration
+				Name="Unicode Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tinyxml\tinyxmlparser.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
