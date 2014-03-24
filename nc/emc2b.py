@@ -19,7 +19,8 @@ class Creator(iso_modal.Creator):
             return ''
         else:
             return ' '
-        
+
+    def PROGRAM(self): return None
     def PROGRAM_END(self): return( 'T0' + self.SPACE() + 'M06' + self.SPACE() + 'M02')
         
 ############################################################################
