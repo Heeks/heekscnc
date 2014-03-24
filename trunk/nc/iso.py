@@ -52,6 +52,7 @@ class Creator(nc.Creator):
         self.sfmt = Format(number_of_decimal_places = 1)
         self.in_quadrant_splitting = False
         self.in_canned_cycle = False
+        self.first_drill_pos = True
         self.shift_x = 0.0
         self.shift_y = 0.0
         self.shift_z = 0.0        
@@ -89,7 +90,7 @@ class Creator(nc.Creator):
         self.output_g43_on_tool_change_line = False
         self.output_internal_coolant_commands = False
         self.output_g98_and_g99 = True
-        self.output_g43_z_before_drilling_if_g98 = True
+        self.output_g43_z_before_drilling_if_g98 = False
         self.output_cutviewer_comments = False
         self.output_fixtures = False
         self.use_this_program_id = None
@@ -975,6 +976,7 @@ class Creator(nc.Creator):
     #
     def drill(self, x=None, y=None, dwell=None, depthparams = None, retract_mode=None, spindle_mode=None, internal_coolant_on=None, rapid_to_clearance=None):
         if (depthparams.clearance_height == None):        
+            self.first_drill_pos = False
             return
         
         self.write_internal_coolant_commands(internal_coolant_on)
@@ -1019,6 +1021,7 @@ class Creator(nc.Creator):
                 current_z = next_z
                 first = False
             
+            self.first_drill_pos = False
             return
 
         if self.output_g98_and_g99 == True:
@@ -1027,6 +1030,10 @@ class Creator(nc.Creator):
                     if self.fmt.string(depthparams.clearance_height) != self.z_for_g43:
                         self.z_for_g43 = self.fmt.string(depthparams.clearance_height)
                         self.write(self.SPACE() + 'G43' + self.SPACE() + 'Z' + self.z_for_g43 + '\n')
+
+            if self.first_drill_pos ==True and rapid_to_clearance == True:
+                self.rapid(x, y)            
+                self.rapid(z = depthparams.clearance_height)            
 
         self.in_canned_cycle = True
         self.write_preps()
@@ -1106,6 +1113,7 @@ class Creator(nc.Creator):
         self.write_spindle()            
         self.write_misc()    
         self.write('\n')
+        self.first_drill_pos = False
 
     def end_canned_cycle(self):
         if self.in_canned_cycle == False:
@@ -1118,6 +1126,7 @@ class Creator(nc.Creator):
         self.prev_f = '' 
         self.prev_retract = ''
         self.in_canned_cycle = False
+        self.first_drill_pos = True
           
     ############################################################################
     ##  Misc
