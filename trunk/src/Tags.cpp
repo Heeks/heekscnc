@@ -34,34 +34,6 @@ const wxBitmap &CTags::GetIcon()
 	return *icon;
 }
 
-static CTags* object_for_tools = NULL;
-
-class AddTagTool: public Tool
-{
-public:
-	// Tool's virtual functions
-	const wxChar* GetTitle(){return _("Add Tag");}
-
-	void Run()
-	{
-      if (object_for_tools) {
-		CTag* new_object = new CTag();
-		heeksCAD->AddUndoably(new_object, object_for_tools);
-		heeksCAD->ClearMarkedList();
-		heeksCAD->Mark(new_object);
-      }
-	}
-	wxString BitmapPath(){ return _T("addtag");}
-};
-
-static AddTagTool add_tag_tool;
-
-void CTags::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
-{
-	object_for_tools = this;
-	t_list->push_back(&add_tag_tool);
-}
-
 void CTags::WriteXML(TiXmlNode *root)
 {
 	TiXmlElement * element;
