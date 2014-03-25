@@ -126,6 +126,7 @@ public:
 
 	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CProgram *)other)); }
 
+	wxString GetDefaultOutputFilePath()const;
 	wxString GetOutputFileName() const;
 	wxString GetBackplotFilePath() const;
 

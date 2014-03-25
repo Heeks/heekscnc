@@ -1055,6 +1055,14 @@ CMachine CProgram::GetMachine(const wxString& description)
 	return machine;
 }
 
+
+wxString CProgram::GetDefaultOutputFilePath()const
+{
+    wxStandardPaths standard_paths;
+    wxFileName default_path( standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);
+	return default_path.GetFullPath();
+}
+
 /**
 	If the m_output_file_name_follows_data_file_name flag is true then
 	we don't want to use the temporary directory.
@@ -1078,7 +1086,7 @@ wxString CProgram::GetOutputFileName() const
 		else
 		{
 			// The user hasn't assigned a filename yet.  Use the default.
-			return(m_output_file);
+			return GetDefaultOutputFilePath();
 		} // End if - else
 	} // End if - then
 	else
@@ -1196,7 +1204,7 @@ void CProgram::WriteDefaultValues()
 	config.Write(_T("ProgramMotionBlendingTolerance"), m_motion_blending_tolerance );
 	config.Write(_T("ProgramNaiveCamTolerance"), m_naive_cam_tolerance );
 }
-
+	 
 void CProgram::ReadDefaultValues()
 {
 	CNCConfig config;
@@ -1205,9 +1213,7 @@ void CProgram::ReadDefaultValues()
 	config.Read(_T("ProgramMachine"), &machine_description, _T("LinuxCNC"));
 	m_machine = CProgram::GetMachine(machine_description);
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
-    wxStandardPaths standard_paths;
-    wxFileName default_path( standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);
-	config.Read(_T("ProgramOutputFile"), &m_output_file, default_path.GetFullPath().c_str());
+	config.Read(_T("ProgramOutputFile"), &m_output_file, GetDefaultOutputFilePath().c_str());
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
 	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
 	config.Read(_("ProgramMotionBlendingTolerance"), &m_motion_blending_tolerance, 0.0001);
