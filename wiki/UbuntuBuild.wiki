@@ -1,82 +1,8 @@
 #summary How to build for Ubuntu
 #labels Featured
 
-==The latest build instructions (geared towards Ubuntu 10.04) are [http://code.google.com/p/heekscad/wiki/BuildWithCmakeOnUbuntu in the HeeksCAD wiki]==
-*Another page, explaining how to build with the older Makefile system, is [http://code.google.com/p/heekscad/wiki/UbuntuInstallation here]*
+simply run this script file
 
-----
+http://code.google.com/p/heekscnc/source/browse/trunk/INSTALL_HEEKS.bash
 
-===Old instructions===
-First build HeeksCAD for Ubuntu. ( see http://code.google.com/p/heekscad/wiki/CompilingForUbuntu )
-
-go to System->Administration->"Synaptic Package Manager"
-
-get python2.5-dev
-
-Run RapidSVN ( menu Applications->Programming->RapidSVN ) On the RapidSVN menu, choose Repository->Chekcout In the URL box put: http://heekscnc.googlecode.com/svn/trunk/ In the "Destination Directory" box, put: /home/dan/Desktop/HeeksCAD/HeeksCNC ( but replace "dan" with your username ) Click "OK". This should get all the source code files you need.
-
-edit /home/dan/.bashrc  ( you'll have to choose "Show Hidden Files" on the View menu to see it )
-add
-
-export HEEKSCADPATH=/home/dan/Desktop/HeeksCAD
-
-as the last line
-
-
-On the Ubuntu menu, click Applications->Accessories->Terminal. The "Terminal" window appears, with some text like "dan@dan-desktop:~$" in it.
-
-Type: cd Desktop/HeeksCAD/HeeksCNC/src
-
-( if you've already built HeeksCNC, you should type: "make clean"    now because my makefile does not always know which files are out of date )
-
-Then type: make
-
-If it builds OK, the last line should be something like:
-gcc -shared -Wl,-soname,libheekscnc.so.0 -o ../libheekscnc.so.0.5.1 Construction.o DropCutter.o Finite.o HeeksCNC.o HeeksColor.o HeeksObj.o Interface.o kurve.o LinesAndArcs.o Matrix.o ObjList.o offset.o OpMove3D.o OutputCanvas.o Program.o ProgramCanvas.o PropertyCheck.o PropertyChoice.o PropertyColor.o PropertyDouble.o PropertyInt.o PropertyList.o PropertyString.o PythonStuff.o strconv.o LeftAndRight.o MarkedObject.o ToolImage.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o -lstdc++ -lGLU -lGL -lwx_gtk2u_richtext-2.8 -lwx_gtk2u_aui-2.8 -lwx_gtk2u_xrc-2.8 -lwx_gtk2u_qa-2.8 -lwx_gtk2u_html-2.8 -lwx_gtk2u_adv-2.8 -lwx_gtk2u_core-2.8 -lwx_baseu_xml-2.8 -lwx_baseu_net-2.8 -lwx_baseu-2.8 -lwx_gtk2u_gl-2.8 -lpython2.5
-dan@dan-laptop:~/Desktop/HeeksCAD/HeeksCNC/src$ 
-
-You can then run HeeksCAD by typing ../../HeeksCAD or:
-On the Ubuntu menu, go to Places->Desktop Then double click on HeeksCAD folder to open it. You will see HeeksCAD with a blue diamond icon. Double click on the blue diamond icon to run HeeksCAD.
-
-On the menu, do File->Plugins
-You will need to add a new plugin.
-
-Name: HeeksCNC
-
-Filepath: browse for the HeeksCNC.so.0.5.1, ( you have to click "..." to browse )
-It should be at /usr/lib/heekscnc/libheekscnc.so.0.5.1
-
-Then close HeeksCAD and run it again.
-( this will have made an entry in the configuration file /home/dan/.HeeksCAD, you will have to "Show Hidden Files" to see it )
-
-You may also need to build kurve.so, if you want to use the Python script to do profile operations.
-To do this, from terminal type cd Desktop/HeeksCAD/HeeksCNC/kurve
-and then type: make
-This will make kurve.so file in the HeeksCNC folder.
-
-===libarea==
-If you want to use pocket operations you will need to build area.so, from this project http://code.google.com/p/libarea/
-
-1) Run RapidSVN, now using the address http://libarea.googlecode.com/svn/trunk/ and /home/user/Desktop/libarea (and of course replace user with your user name)
-
-2) When done, get a terminal and run 'cd Desktop/libarea' (You should now have a prompt like "something@something libarea$")
-
-3) Run 'make'. It should give no errors and you should have area.so now in the directory, check if you see it if you run 'ls'.
-
-4) Copy it to the HeeksCNC directory, you can do that by running 'cp area.so ../HeeksCAD/HeeksCNC/'
-
-===libactp===
-If you want to use adaptive roughing operations you will need to build actp.so, from this project http://code.google.com/p/libactp/
-
-1) Run RapidSVN, now using the address http://libactp.googlecode.com/svn/trunk/ and /home/user/Desktop/libactp (and of course replace user with your user name)
-
-2) When done, get a terminal and run 'cd Desktop/libactp/PythonLib' (You should now have a prompt like "something@something PythonLib$")
-
-3) Run 'make'. It should give no errors and you should have actp.so now in the directory, check if you see it if you run 'ls'.
-
-4) As of now, HeeksCNC actually searches actp.so in ../../libactp/PythonLib too, so it works without copying it anywhere. To not cause any confusion, it is good to not copy it anywhere. IF you used different directory structure than the one specified in these howtos, copy actp.so to the HeeksCNC directory.
-
-
-If you are having trouble, come and ask some real people on the IRC channel #cam on FreeNode,  quite a few people there have built it, for example:   archivist, celeron55, crotchet1, DanielFalck, fenn, Sliptonic,  or email me danheeks@gmail.com
-
-the #cam IRC channel is logged at http://camlog.archivist.info/
+to do this, you'll need to copy the script file to your computer, open a terminal window, cd to the folder where the script is, do "sudo chmod +x INSTALL_HEEKS.bash" to make it executable, then "./INSTALL_HEEKS.bash" to run it, then type yes and press Enter whenever it asks you for yes/no, and enter your linux computer's password whenever it asks you for a password.
