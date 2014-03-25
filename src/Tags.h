@@ -27,7 +27,6 @@ public:
 	bool CanAddTo(HeeksObj* owner){return owner->GetType() == ProfileType;}
 	bool CanAdd(HeeksObj* object);
 	bool CanBeRemoved(){return false;}
-	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void WriteXML(TiXmlNode *root);
 	bool AutoExpand(){return true;}
 	bool UsesID() { return(false); }
