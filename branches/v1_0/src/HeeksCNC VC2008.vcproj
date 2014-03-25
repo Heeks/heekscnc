@@ -343,7 +343,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;C:\Dev\HeeksCNCSVN\src\Unicode Release\HeeksCNC.dll&quot; C:\Dev\HeeksCNCSVN\HeeksCNC.dll&quot;"
+				CommandLine="copy &quot;C:\Dev\HeeksCADSVN\HeeksCNCSVN\src\Unicode Release\HeeksCNC.dll&quot; C:\Dev\HeeksCADSVN\HeeksCNCSVN\HeeksCNC.dll&quot;"
 			/>
 		</Configuration>
 	</Configurations>
