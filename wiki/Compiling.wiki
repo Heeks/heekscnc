@@ -9,7 +9,7 @@ For Ubuntu build see http://code.google.com/p/heekscnc/wiki/UbuntuBuild
 
 You need to build HeeksCAD ( see http://code.google.com/p/heekscad/wiki/CompilingHeeksCAD1_0forWindows ), because HeeksCNC is an add-in for HeeksCAD.
 
-make a new folder directly under your HeeksCAD1.0 folder, called HeeksCNC1.0. I made this folder "C:\Dev\HeeksCAD1.0\HeeksCNC1.0" right click on the HeeksCNC1.0 folder and do "TortoiseSVN"->"SVN Checkout..." The "URL of repository": http://heekscnc.googlecode.com/svn//branches/v1_0/ The Checkout directory something like: C:\Dev\HeeksCAD1.0\HeeksCNC1.0 Press OK. It should checkout all the HeeksCNC 1.0 source code 
+make a new folder somewhere. I made this folder "C:\Dev\HeeksCNC1.0" right click on the HeeksCNC1.0 folder and do "TortoiseSVN"->"SVN Checkout..." The "URL of repository": http://heekscnc.googlecode.com/svn//branches/v1_0/ The Checkout directory something like: C:\Dev\HeeksCNC1.0 Press OK. It should checkout all the HeeksCNC 1.0 source code 
 
 Open "HeeksCNC VC2008.sln" with Visual Studio 2008 ( Express version is OK too ).
 
