@@ -81,17 +81,6 @@ void CStock::GetProperties(std::list<Property *> *list)
 	IdNamedObj::GetProperties(list);
 }
 
-static ReselectSolids reselect_solids;
-
-void CStock::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
-{
-	reselect_solids.m_solids = &m_solids;
-	reselect_solids.m_object = this;
-	t_list->push_back(&reselect_solids);
-
-	IdNamedObj::GetTools( t_list, p );
-}
-
 void CStock::CopyFrom(const HeeksObj* object)
 {
 	if (object->GetType() == GetType())
