@@ -41,6 +41,24 @@ void CSketchOp::ReloadPointers()
 	CDepthOp::ReloadPointers();
 }
 
+void CSketchOp::GetBox(CBox &box)
+{
+	HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, m_sketch);
+	if (sketch)sketch->GetBox(box);
+}
+
+void CSketchOp::glCommands(bool select, bool marked, bool no_color)
+{
+	CDepthOp::glCommands(select, marked, no_color);
+
+	if (select || marked)
+	{
+		// allow sketch operations to be selected
+		HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, m_sketch);
+		if (sketch)sketch->glCommands(select, marked, no_color);
+	}
+}
+
 void CSketchOp::WriteBaseXML(TiXmlElement *element)
 {
 	// write sketch id

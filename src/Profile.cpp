@@ -848,7 +848,7 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 		python << m_speed_op_params.m_vertical_feed_rate / theApp.m_program->m_units << _T(")\n");
 		python << _T("flush_nc()\n");
 		python << _T("offset_extra = 0.0\n");
-		python << _T("depth_params.step_down = ") << m_profile_params.m_finishing_step_down << _T("\n");
+		python << _T("depthparams.step_down = ") << m_profile_params.m_finishing_step_down << _T("\n");
 	}
 	else
 	{

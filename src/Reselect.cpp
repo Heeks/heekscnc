@@ -7,6 +7,7 @@
 #include "../../interface/PropertyString.h"
 #include "../../interface/PropertyInt.h"
 #include "../../interface/ObjList.h"
+#include "SketchOp.h"
 
 static bool GetSketches(std::list<int>& sketches )
 {
@@ -56,8 +57,9 @@ void ReselectSketch::Run()
 	{
 		if(sketches.size() > 0)m_sketch = sketches.front();
 		else m_sketch = 0;
-		m_object->ReloadPointers();
-		// to do, make undoable with properties
+		HeeksObj* new_copy = m_object->MakeACopy();
+		((CSketchOp*)new_copy)->m_sketch = m_sketch;
+		heeksCAD->CopyUndoably(m_object, new_copy);
 	}
 	else
 	{

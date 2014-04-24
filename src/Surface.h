@@ -28,7 +28,6 @@ public:
     HeeksObj *MakeACopy(void)const;
     void WriteXML(TiXmlNode *root);
 	void GetProperties(std::list<Property *> *list);
-	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
 	const wxBitmap &GetIcon();
