@@ -30,9 +30,9 @@ public:
 
 class ReselectSolids: public Tool{
 public:
-	std::list<int> *m_solids;
+	bool m_stock_not_surface;
 	HeeksObj* m_object;
-	ReselectSolids(): m_solids(NULL), m_object(NULL){}
+	ReselectSolids(bool stock_not_surface): m_stock_not_surface(stock_not_surface), m_object(NULL){}
 
 	static bool GetSolids(std::list<int>& solids );
 

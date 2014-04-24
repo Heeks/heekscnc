@@ -7,6 +7,9 @@
 #include "interface/PropertyString.h"
 #include "interface/PropertyInt.h"
 #include "interface/ObjList.h"
+#include "SketchOp.h"
+#include "Stock.h"
+#include "Surface.h"
 
 static bool GetSketches(std::list<int>& sketches )
 {
@@ -56,8 +59,9 @@ void ReselectSketch::Run()
 	{
 		if(sketches.size() > 0)m_sketch = sketches.front();
 		else m_sketch = 0;
-		m_object->ReloadPointers();
-		// to do, make undoable with properties
+		HeeksObj* new_copy = m_object->MakeACopy();
+		((CSketchOp*)new_copy)->m_sketch = m_sketch;
+		heeksCAD->CopyUndoably(m_object, new_copy);
 	}
 	else
 	{
@@ -95,11 +99,10 @@ void ReselectSolids::Run()
 	heeksCAD->PickObjects(_("Select Solids"), MARKING_FILTER_SOLID | MARKING_FILTER_STL_SOLID);
 	if(GetSolids( solids ))
 	{
-		m_solids->clear();
-		*m_solids = solids;
-		((ObjList*)m_object)->Clear();
-		m_object->ReloadPointers();
-		// to do, make undoable, with properties
+		HeeksObj* new_copy = m_object->MakeACopy();
+		if(m_stock_not_surface)((CStock*)new_copy)->m_solids = solids;
+		else ((CSurface*)new_copy)->m_solids = solids;
+		heeksCAD->CopyUndoably(m_object, new_copy);
 	}
 	else
 	{
