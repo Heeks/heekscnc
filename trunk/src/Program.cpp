@@ -102,17 +102,26 @@ const wxBitmap &CProgram::GetIcon()
 
 void CProgram::glCommands(bool select, bool marked, bool no_color)
 {
-    if(m_nc_code != NULL)
+	if (m_nc_code != NULL)
 	{
-		if(select)glPushName(m_nc_code->GetIndex());
+		int color[4];
+		if (no_color){
+			glGetIntegerv(GL_CURRENT_COLOR, color);
+		}
+		if (select)glPushName(m_nc_code->GetIndex());
 		m_nc_code->glCommands(select, marked, no_color);
-		if(select)glPopName();
+		if (select)glPopName();
+		if (no_color)
+		{
+			glColor3i(color[0], color[1], color[2]);
+		}
 	}
-	if(!select)
+	if (!select)
 	{
-		if(m_tools != NULL)m_tools->glCommands(select, marked, no_color);
-		if(m_operations != NULL)m_operations->glCommands(select, false, no_color);
+		if (m_tools != NULL)m_tools->glCommands(select, marked, no_color);
 	}
+
+	if (m_operations != NULL)m_operations->glCommands(select, false, no_color);
 }
 
 HeeksObj *CProgram::MakeACopy(void)const

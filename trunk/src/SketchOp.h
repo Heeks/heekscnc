@@ -25,6 +25,8 @@ public:
 	CSketchOp( const CSketchOp & rhs );
 
 	// HeeksObj's virtual functions
+	void GetBox(CBox &box);
+	void glCommands(bool select, bool marked, bool no_color);
 	void GetProperties(std::list<Property *> *list);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);

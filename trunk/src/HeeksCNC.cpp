@@ -927,15 +927,32 @@ public:
 			{
 				if(object->GetType() == ProfileType)
 				{
+					CProfile* profile = (CProfile*)object;
 					std::map<int, SketchBox>::iterator FindIt = m_box_map.find(object->GetID());
-					if(FindIt != m_box_map.end())
+					if (FindIt != m_box_map.end())
 					{
 						SketchBox &sketch_box = FindIt->second;
-						for(HeeksObj* tag = ((CProfile*)object)->Tags()->GetFirstChild(); tag; tag = ((CProfile*)object)->Tags()->GetNextChild())
+						for (HeeksObj* tag = profile->Tags()->GetFirstChild(); tag; tag = profile->Tags()->GetNextChild())
 						{
 							((CTag*)tag)->m_pos[0] += sketch_box.m_latest_shift.X();
 							((CTag*)tag)->m_pos[1] += sketch_box.m_latest_shift.Y();
 						}
+
+						profile->m_profile_params.m_start[0] += sketch_box.m_latest_shift.X();
+						profile->m_profile_params.m_start[1] += sketch_box.m_latest_shift.Y();
+						profile->m_profile_params.m_start[2] += sketch_box.m_latest_shift.Z();
+
+						profile->m_profile_params.m_end[0] += sketch_box.m_latest_shift.X();
+						profile->m_profile_params.m_end[1] += sketch_box.m_latest_shift.Y();
+						profile->m_profile_params.m_end[2] += sketch_box.m_latest_shift.Z();
+
+						profile->m_profile_params.m_roll_on_point[0] += sketch_box.m_latest_shift.X();
+						profile->m_profile_params.m_roll_on_point[1] += sketch_box.m_latest_shift.Y();
+						profile->m_profile_params.m_roll_on_point[2] += sketch_box.m_latest_shift.Z();
+
+						profile->m_profile_params.m_roll_off_point[0] += sketch_box.m_latest_shift.X();
+						profile->m_profile_params.m_roll_off_point[1] += sketch_box.m_latest_shift.Y();
+						profile->m_profile_params.m_roll_off_point[2] += sketch_box.m_latest_shift.Z();
 					}
 				}
 			}

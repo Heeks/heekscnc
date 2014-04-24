@@ -295,7 +295,16 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 {
 	CDepthOp::glCommands(select, marked, no_color);
 
-	if(heeksCAD->ObjectMarked(this))
+	if (select)
+	{
+		for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
+		{
+			HeeksObj* point = heeksCAD->GetIDObject(PointType, *It);
+			if (point)point->glCommands(select, marked, no_color);;
+		}
+	}
+
+	else if (heeksCAD->ObjectMarked(this))
 	{
 		heeksCAD->GetBackgroundColor().best_black_or_white().glColor();
 
