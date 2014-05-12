@@ -900,6 +900,7 @@ Python CProgram::RewritePythonProgram()
 				if(surface && surface->m_same_for_each_pattern_position)python << _T("attach.attach_end()\n");
 				if(op->m_pattern != 0)python << _T("transform.transform_end()\n");
 				if(surface && !surface->m_same_for_each_pattern_position)python << _T("attach.attach_end()\n");
+				theApp.m_attached_to_surface = NULL;
 			}
 		}
 	} // End for - operation
