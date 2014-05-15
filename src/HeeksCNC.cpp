@@ -15,11 +15,11 @@
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
 #include <wx/aui/aui.h>
-#include "../../interface/PropertyString.h"
-#include "../../interface/PropertyCheck.h"
-#include "../../interface/PropertyList.h"
-#include "../../interface/Observer.h"
-#include "../../interface/ToolImage.h"
+#include "interface/PropertyString.h"
+#include "interface/PropertyCheck.h"
+#include "interface/PropertyList.h"
+#include "interface/Observer.h"
+#include "interface/ToolImage.h"
 #include "PythonStuff.h"
 #include "Program.h"
 #include "ProgramCanvas.h"
@@ -32,8 +32,8 @@
 #include "CTool.h"
 #include "Operations.h"
 #include "Tools.h"
-#include "../../interface/strconv.h"
-#include "../../interface/Tool.h"
+#include "interface/strconv.h"
+#include "interface/Tool.h"
 #include "CNCPoint.h"
 #include "Excellon.h"
 #include "Tags.h"

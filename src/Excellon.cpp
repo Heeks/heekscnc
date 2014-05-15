@@ -9,9 +9,9 @@
 #include <math.h>
 #include <string.h>
 
-#include "../../interface/HeeksObj.h"
-#include "../../interface/HeeksCADInterface.h"
-#include "../../interface/PropertyChoice.h"
+#include "interface/HeeksObj.h"
+#include "interface/HeeksCADInterface.h"
+#include "interface/PropertyChoice.h"
 #include "Excellon.h"
 #include "Program.h"
 #include "Tools.h"

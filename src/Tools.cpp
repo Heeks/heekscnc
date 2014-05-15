@@ -5,11 +5,11 @@
 #include "stdafx.h"
 #include "Tools.h"
 #include "Program.h"
-#include "../../interface/Tool.h"
-#include "../../interface/PropertyChoice.h"
+#include "interface/Tool.h"
+#include "interface/PropertyChoice.h"
 #include "CTool.h"
 #include "CNCConfig.h"
-#include "../../tinyxml/tinyxml.h"
+#include "tinyxml/tinyxml.h"
 #include <wx/stdpaths.h>
 
 bool CTools::CanAdd(HeeksObj* object)

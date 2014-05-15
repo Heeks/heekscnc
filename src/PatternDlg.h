@@ -5,7 +5,7 @@
 #include "Pattern.h"
 class CLengthCtrl;
 
-#include "../../interface/HeeksObjDlg.h"
+#include "interface/HeeksObjDlg.h"
 
 class PatternDlg : public HeeksObjDlg
 {

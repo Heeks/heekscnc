@@ -2,7 +2,7 @@
 // Copyright (c) 2014, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
-#include "../../interface/HeeksObjDlg.h"
+#include "interface/HeeksObjDlg.h"
 
 class ProgramDlg : public HeeksObjDlg
 {

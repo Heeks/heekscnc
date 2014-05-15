@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "CToolDlg.h"
-#include "../../interface/NiceTextCtrl.h"
+#include "interface/NiceTextCtrl.h"
 
 enum
 {

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../../interface/IdNamedObj.h"
+#include "interface/IdNamedObj.h"
 #include "HeeksCNCTypes.h"
 
 class CPattern: public IdNamedObj {

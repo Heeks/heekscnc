@@ -8,9 +8,9 @@
 
 #include "stdafx.h"
 			#ifdef WIN32
-#include "../../interface/Box.h"
-#include "../../interface/HeeksObj.h"
-#include "../../interface/HeeksColor.h"
+#include "interface/Box.h"
+#include "interface/HeeksObj.h"
+#include "interface/HeeksColor.h"
 #include "Program.h"
 #include "CTool.h"
 #include "Tools.h"

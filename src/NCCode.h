@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "../../interface/HeeksObj.h"
-#include "../../interface/HeeksColor.h"
+#include "interface/HeeksObj.h"
+#include "interface/HeeksColor.h"
 #include "HeeksCNCTypes.h"
 #include "CTool.h"
 

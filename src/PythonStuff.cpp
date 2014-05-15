@@ -14,7 +14,7 @@
 #include "OutputCanvas.h"
 #include "Program.h"
 #include "CNCConfig.h"
-#include "../../interface/PropertyString.h"
+#include "interface/PropertyString.h"
 
 //static
 bool CPyProcess::redirect = false;

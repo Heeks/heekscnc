@@ -8,7 +8,7 @@ class CLengthCtrl;
 class CDoubleCtrl;
 class CObjectIdsCtrl;
 
-#include "../../interface/HeeksObjDlg.h"
+#include "interface/HeeksObjDlg.h"
 
 class CToolDlg : public HeeksObjDlg
 {
