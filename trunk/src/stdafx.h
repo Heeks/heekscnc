@@ -27,9 +27,9 @@ extern "C" {
 }
 
 #include "HeeksCNC.h"
-#include "../../interface/strconv.h"
-#include "../../interface/HeeksObj.h"
-#include "../../tinyxml/tinyxml.h"
+#include "interface/strconv.h"
+#include "interface/HeeksObj.h"
+#include "tinyxml/tinyxml.h"
 
 #include "gp_Pnt.hxx"
 #include <gp_Dir.hxx>

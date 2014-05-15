@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "DrillingDlg.h"
-#include "../../interface/PictureFrame.h"
-#include "../../interface/NiceTextCtrl.h"
+#include "interface/PictureFrame.h"
+#include "interface/NiceTextCtrl.h"
 #include "Drilling.h"
 #include "CTool.h"
 

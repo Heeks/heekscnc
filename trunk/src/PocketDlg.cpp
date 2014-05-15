@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "PocketDlg.h"
-#include "../../interface/NiceTextCtrl.h"
+#include "interface/NiceTextCtrl.h"
 #include "Pocket.h"
 
 BEGIN_EVENT_TABLE(PocketDlg, SketchOpDlg)

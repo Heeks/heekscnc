@@ -5,10 +5,10 @@
 #include "stdafx.h"
 #include "Surfaces.h"
 #include "Program.h"
-#include "../../interface/PropertyChoice.h"
+#include "interface/PropertyChoice.h"
 #include "Surface.h"
 #include "CNCConfig.h"
-#include "../../tinyxml/tinyxml.h"
+#include "tinyxml/tinyxml.h"
 #include <wx/stdpaths.h>
 
 bool CSurfaces::CanAdd(HeeksObj* object)

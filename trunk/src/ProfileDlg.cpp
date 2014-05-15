@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "ProfileDlg.h"
-#include "../../interface/PictureFrame.h"
-#include "../../interface/NiceTextCtrl.h"
+#include "interface/PictureFrame.h"
+#include "interface/NiceTextCtrl.h"
 #include "Profile.h"
 #include "CTool.h"
 

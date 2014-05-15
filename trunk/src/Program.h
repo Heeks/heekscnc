@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../../interface/IdNamedObjList.h"
+#include "interface/IdNamedObjList.h"
 #include "HeeksCNCTypes.h"
 #include "PythonString.h"
 

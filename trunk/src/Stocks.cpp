@@ -5,10 +5,10 @@
 #include "stdafx.h"
 #include "Stocks.h"
 #include "Program.h"
-#include "../../interface/PropertyChoice.h"
+#include "interface/PropertyChoice.h"
 #include "Stock.h"
 #include "CNCConfig.h"
-#include "../../tinyxml/tinyxml.h"
+#include "tinyxml/tinyxml.h"
 #include <wx/stdpaths.h>
 
 bool CStocks::CanAdd(HeeksObj* object)

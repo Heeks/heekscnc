@@ -4,10 +4,10 @@
 
 #include "stdafx.h"
 #include "Tag.h"
-#include "../../tinyxml/tinyxml.h"
-#include "../../interface/PropertyVertex.h"
-#include "../../interface/PropertyLength.h"
-#include "../../interface/Tool.h"
+#include "tinyxml/tinyxml.h"
+#include "interface/PropertyVertex.h"
+#include "interface/PropertyLength.h"
+#include "interface/Tool.h"
 #include "CNCConfig.h"
 
 CTag::CTag(): m_width(10.0),	m_angle(45.0), m_height(4.0){

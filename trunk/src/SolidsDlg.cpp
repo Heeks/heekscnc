@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "SolidsDlg.h"
-#include "../../interface/NiceTextCtrl.h"
+#include "interface/NiceTextCtrl.h"
 #include "Stock.h"
 #include "Reselect.h"
 

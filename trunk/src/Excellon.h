@@ -18,7 +18,7 @@ for isolation milling.
 #include "Drilling.h"
 #include "CNCPoint.h"
 #include "CTool.h"
-#include "../../interface/Property.h"
+#include "interface/Property.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Lin.hxx>

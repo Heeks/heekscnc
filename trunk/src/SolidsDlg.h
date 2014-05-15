@@ -5,7 +5,7 @@
 class CLengthCtrl;
 class CObjectIdsCtrl;
 
-#include "../../interface/HeeksObjDlg.h"
+#include "interface/HeeksObjDlg.h"
 
 class SolidsDlg : public HeeksObjDlg
 {
