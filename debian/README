@@ -1,6 +1,0 @@
-The Debian Package heekscnc
-----------------------------
-
-  After installing the plugin needs to be 'activated' first in HeeksCAD by adding a new plugin and selecting the .so in /usr/lib/heekscnc/
-
- -- Joachim Steiger <ubuntu@hyte.de>  Thu, 07 May 2009 03:11:01 +0200
