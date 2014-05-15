@@ -184,6 +184,9 @@ install( FILES ${icons} DESTINATION share/heekscnc/icons )
 file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.xml") 
 install(FILES ${nc} DESTINATION lib/heekscnc/nc )
 
+file(GLOB ops "${CMAKE_CURRENT_SOURCE_DIR}/../script_ops.xml")
+install(FILES ${ops} DESTINATION share/heekscnc )
+
 file( GLOB hcnc_defaults
                "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
                )
