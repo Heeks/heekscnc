@@ -978,7 +978,9 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 	{
 		if(doc.Error())
 		{
-			wxMessageBox(Ctt(doc.ErrorDesc()));
+			wxString msg(machines_file);
+			msg << Ctt(": ") << Ctt(doc.ErrorDesc());
+			wxMessageBox(msg);
 		}
 		return;
 	}
@@ -1018,7 +1020,9 @@ void CProgram::GetScriptOps(std::vector< CXmlScriptOp > &script_ops)
 	{
 		if(doc.Error())
 		{
-			wxMessageBox(Ctt(doc.ErrorDesc()));
+			wxString msg(script_op_file);
+			msg << Ctt(": ") << Ctt(doc.ErrorDesc());
+			wxMessageBox(msg);
 		}
 		return;
 	}
