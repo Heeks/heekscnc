@@ -9,6 +9,7 @@
 #include <math.h>
 #include "NCCode.h"
 #include "OutputCanvas.h"
+#include "interface/Geom.h"
 #include "interface/MarkedObject.h"
 #include "interface/PropertyColor.h"
 #include "interface/PropertyList.h"
@@ -16,7 +17,6 @@
 #include "interface/Tool.h"
 #include "CNCConfig.h"
 #include "CTool.h"
-#include "src/Geom.h"
 #include "Program.h"
 
 #include <TopoDS_Shape.hxx>
