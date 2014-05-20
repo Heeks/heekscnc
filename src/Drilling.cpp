@@ -9,6 +9,7 @@
 #include "Drilling.h"
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
+#include "interface/Geom.h"
 #include "interface/HeeksObj.h"
 #include "interface/HeeksColor.h"
 #include "interface/PropertyInt.h"
@@ -23,7 +24,6 @@
 #include "Profile.h"
 #include "CNCPoint.h"
 #include "Program.h"
-#include "src/Geom.h"
 #include "DrillingDlg.h"
 #include "Tools.h"
 

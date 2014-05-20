@@ -90,7 +90,9 @@ set( heekscnc_HDRS
     Tools.h
     stdafx.h
    )
+
 set( heekscad_SRCS
+    ${HeeksCAD_SRC_DIR}/interface/Geom.cpp
     ${HeeksCAD_SRC_DIR}/interface/HDialogs.cpp
     ${HeeksCAD_SRC_DIR}/interface/HeeksColor.cpp
     ${HeeksCAD_SRC_DIR}/interface/HeeksObj.cpp
@@ -114,7 +116,6 @@ set( heekscad_SRCS
     ${HeeksCAD_SRC_DIR}/interface/PropertyVertex.cpp
     ${HeeksCAD_SRC_DIR}/interface/ToolImage.cpp
     ${HeeksCAD_SRC_DIR}/interface/strconv.cpp
-    ${HeeksCAD_SRC_DIR}/src/Geom.cpp
     )
 
 set( heekscnc_SRCS
@@ -167,7 +168,7 @@ set( heekscnc_SRCS
     stdafx.cpp
    )
 
-add_library( heekscnc SHARED ${heekscnc_SRCS} ${heekscad_SRCS} ${platform_SRCS} ${heekscnc_HDRS} )
+add_library( heekscnc SHARED ${heekscnc_SRCS} ${heekscad_SRCS} ${platform_SRCS} )
 target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
 set_target_properties( heekscnc PROPERTIES LINK_FLAGS -Wl,-Bsymbolic-functions )

@@ -8,6 +8,7 @@
 #include "tinyxml/tinyxml.h"
 #include "ProgramCanvas.h"
 #include "NCCode.h"
+#include "interface/Geom.h"
 #include "interface/MarkedObject.h"
 #include "interface/PropertyString.h"
 #include "interface/PropertyFile.h"
@@ -32,7 +33,6 @@
 #include "Pattern.h"
 #include "Surface.h"
 #include "Stock.h"
-#include "src/Geom.h"
 #include "ProgramDlg.h"
 
 #include <wx/stdpaths.h>
