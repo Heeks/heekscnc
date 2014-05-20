@@ -25,10 +25,16 @@ find_package ( HeeksCAD REQUIRED )
 
 include(${wxWidgets_USE_FILE})
 
+include_directories ( SYSTEM
+    ${OpenCASCADE_INCLUDE_DIR}
+    )
+
 include_directories (
-    ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-    ${wxWidgets_INCLUDE_DIRS} ${OpenCASCADE_INCLUDE_DIR}
-    ${HeeksCAD_SRC_DIR} ../kurve/geometry ../kurve/messages .
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
+    ${wxWidgets_INCLUDE_DIRS}
+    ${HeeksCAD_SRC_DIR}
+    ../kurve/geometry ../kurve/messages
     )
 set ( LIBRARY_OUTPUT_PATH ../bin )
 
