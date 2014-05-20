@@ -121,7 +121,7 @@ case "$answer2" in
 Yes|yes|Y|y|"") echo "
 Installing the libraries.
 "
-    sudo apt-get install git-core subversion libwxbase2.8-dev cmake build-essential libopencascade-dev libwxgtk2.8-dev libgtkglext1-dev python-dev cmake libboost-python-dev python-wxgtk2.8 python-wxversion libftgl-dev
+    sudo apt-get install git-core subversion libwxbase2.8-dev cmake build-essential libopencascade-dev libwxgtk2.8-dev libgtkglext1-dev python-dev cmake libboost-python-dev python-wxgtk2.8 python-wxversion libftgl-dev dpkg-dev
     ;;
 No|no|N|n) echo "ABORTED installling needed libraries."
     exit 1
@@ -166,11 +166,8 @@ sudo make install
 # area.so is required for pocket operations.
 
 cd $BUILDPATH/$BUILDDIR/heekscad/libarea/
-#make clean # OPTIONAL: only needed if you have previous make -attempts, otherwise, not needed
-cmake .
-make
-sudo make install
-#make clean
+dpkg-buildpackage -b -us -uc
+sudo dpkg -i ../libarea*.deb
 
 # Install opencamlib
 # opencamlib is the replacement for pycam. It's required for zigzag operations.
@@ -182,21 +179,15 @@ make
 sudo make install
 #make clean
 
-# Install heekscnc:
-cd $BUILDPATH/$BUILDDIR/heekscad/heekscnc
-cmake .
-make package
-sudo dpkg -i heekscnc_*.deb # only one .deb to install, but the filename may change
-#make clean
-cp heekscnc_*.deb ~/
-
 # Install heekscad:
 cd $BUILDPATH/$BUILDDIR/heekscad
-cmake .
-make package
-sudo dpkg -i heekscad_*.deb #only one .deb to install, but the filename may change
-#make clean
-cp heekscad_*.deb ~/
+dpkg-buildpackage -b -us -uc
+sudo dpkg -i ../heekscad*.deb
+
+# Install heekscnc:
+cd $BUILDPATH/$BUILDDIR/heekscad/heekscnc
+dpkg-buildpackage -b -us -uc
+sudo dpkg -i ../heekscnc*.deb
 
 # Give command:
 sudo ldconfig
