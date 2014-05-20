@@ -167,7 +167,7 @@ sudo make install
 
 cd $BUILDPATH/$BUILDDIR/heekscad/libarea/
 dpkg-buildpackage -b -us -uc
-sudo dpkg -i ../libarea*.deb
+sudo dpkg -i ../libarea*.deb ../python-area*.deb
 
 # Install opencamlib
 # opencamlib is the replacement for pycam. It's required for zigzag operations.
