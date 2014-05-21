@@ -145,7 +145,6 @@ svn checkout http://heekscad.googlecode.com/svn/trunk/ heekscad
 cd $BUILDPATH/$BUILDDIR/heekscad
 svn checkout http://heekscnc.googlecode.com/svn/trunk/ heekscnc
 svn checkout http://libarea.googlecode.com/svn/trunk/ libarea
-git clone --recursive git://github.com/sliptonic/opencamlib.git
 git clone --recursive git://github.com/aewallin/opencamlib.git
 git clone --recursive git://github.com/tpaviot/oce.git
 sudo ldconfig
