@@ -11,10 +11,17 @@ Vcs-Browser: https://code.google.com/p/heekscnc/source/browse/
 Package: heekscnc
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, python-wxgtk2.8, libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python1.40.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.49.0, python-area, heekscad (>=1.0.0)
-Description: HeeksCNC is an add-on for HeeksCAD http://code.google.com/p/heekscad/.
- The user can add machining operations. These can then be output to NC code.
- The NC code is then shown as red and green lines on the screen.
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-wxgtk2.8, libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python1.40.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.49.0, python-area, heekscad (>= 1.0.0)
+Enhances: heekscad
+Description: HeeksCNC is an add-on for HeeksCAD
+ HeeksCNC adds machining features to HeeksCAD.
+ .
+ Using a 2D (e.g. dxf fies) or 3D model, HeeksCNC allow user to create machining operations.
+ HeeksCNC's post-processing produces G-Code/NC code file which is interpreted and displayed in HeeksCAD.
+ .
+ HeeksCNC features multiple machining operations with many options.
+ .
+ Fast moves are shown as red and in-material moves green lines.
  The NC code is generated using Python script, so it can be configured for different machines.
  .
 
