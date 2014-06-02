@@ -197,5 +197,5 @@ install(FILES ${ops} DESTINATION share/heekscnc )
 file( GLOB hcnc_defaults
                "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
                )
-install( FILES ${hcnc_defaults} DESTINATION lib/heekscnc/ )
+install( FILES ${hcnc_defaults} DESTINATION share/heekscnc/ )
 

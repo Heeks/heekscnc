@@ -57,7 +57,7 @@ public:
 	void OnFrameDelete();
 	wxString GetDllFolder();
 	wxString GetResFolder();
-	wxString GetResourceFilename(wxString resource);
+	wxString GetResourceFilename(const wxString resource, const bool writableOnly = false) const;
 	void RunPythonScript();
 
 	typedef int SymbolType_t;

@@ -107,7 +107,7 @@ class ExportTools: public Tool{
 
 		if(m_for_default)
 		{
-			previous_path = theApp.GetResourceFilename(wxT("default.tooltable"));
+			previous_path = theApp.GetResourceFilename(wxT("default.tooltable"), true);
 		}
 		else
 		{

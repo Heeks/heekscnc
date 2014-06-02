@@ -15,6 +15,7 @@
 #include <wx/stdpaths.h>
 #include <wx/dynlib.h>
 #include <wx/aui/aui.h>
+#include <wx/filename.h>
 #include "interface/PropertyString.h"
 #include "interface/PropertyCheck.h"
 #include "interface/PropertyList.h"
@@ -1390,16 +1391,36 @@ wxString CHeeksCNCApp::GetResFolder()
 #endif
 }
 
-wxString CHeeksCNCApp::GetResourceFilename(wxString resource)
+wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool writableOnly) const
 {
 	wxString filename;
 
-	filename = GetDllFolder() + 
-#ifndef WIN32
-		wxT("/heekscnc") + 
+#ifdef WIN32
+	// Windows
+	filename = GetDllFolder() + wxT("/") + resource;
+#else
+	// Unix
+	// Under Unix, it looks for a user-defined resource first.
+	// According to FreeDesktop XDG standards, HeeksCNC user-defineable resources should be placed in XDG_CONFIG_HOME (usually: ~/.config/heekscnc/)
+	filename = (wxGetenv(wxT("XDG_CONFIG_HOME"))?wxGetenv(wxT("XDG_CONFIG_HOME")):wxFileName::GetHomeDir() + wxT("/.config")) + wxT("/heekscnc/") + resource;
+	// Under Unix user can't save its resources in system (permissions denied), so we always return a user-writable file
+	if(!writableOnly)
+	{
+		// If user-defined file exists, the resource is located
+		if(!wxFileName::FileExists(filename))
+		{
+#if wxCHECK_VERSION(3, 0, 0)
+			wxStandardPaths& sp = wxStandardPaths::Get();
+#else
+			wxStandardPaths sp;
 #endif
-		wxT("/") +
-		resource;
+			// Else it fallbacks to system-wide resource file (installed with HeeksCNC)
+			filename = sp.GetInstallPrefix() + wxT("/share/heekscnc/") + resource;
+			// Note: it should be a good idea to use wxStandardPaths::GetResourcesDir() but it returns HeeksCAD's resource dir (eg. /usr/share/heekscad)
+		}
+	}
+	
+#endif
 	wprintf(wxT("Resource: ") + resource + wxT(" found at: ") + filename + wxT("\n"));
 	return filename;
 }
