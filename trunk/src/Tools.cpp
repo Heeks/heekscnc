@@ -107,7 +107,7 @@ class ExportTools: public Tool{
 
 		if(m_for_default)
 		{
-			previous_path = theApp.GetDllFolder() + _T("/") + previous_path;
+			previous_path = theApp.GetResourceFilename(wxT("default.tooltable"));
 		}
 		else
 		{
@@ -132,7 +132,7 @@ class ExportTools: public Tool{
 		{
 			tools.push_back( tool );
 		} // End for
-
+		wprintf(wxT("Exporting tools as ") + previous_path  + wxT("\n"));
 		heeksCAD->SaveXMLFile( tools, previous_path.c_str(), false );
 	}
 	wxString BitmapPath(){ return _T("export");}
@@ -188,7 +188,7 @@ class ImportTools: public Tool{
 
 		if(m_for_default)
 		{
-			previous_path = theApp.GetDllFolder() + _T("/") + previous_path;
+			previous_path = theApp.GetResourceFilename(wxT("default.tooltable"));
 		}
 		else
 		{
