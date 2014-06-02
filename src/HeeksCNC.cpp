@@ -1291,11 +1291,7 @@ void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 		theApp.m_output_canvas->Clear();
 		theApp.m_print_canvas->Clear();
 
-		heeksCAD->OpenXMLFile(GetDllFolder() + 
-#ifndef WIN32
-			_T("/heekscnc") + 
-#endif
-			_T("/default.tooltable"), theApp.m_program->Tools() );
+		heeksCAD->OpenXMLFile(GetResourceFilename(wxT("default.tooltable")), theApp.m_program->Tools());
 	} // End if - then
 }
 
@@ -1394,6 +1390,19 @@ wxString CHeeksCNCApp::GetResFolder()
 #endif
 }
 
+wxString CHeeksCNCApp::GetResourceFilename(wxString resource)
+{
+	wxString filename;
+
+	filename = GetDllFolder() + 
+#ifndef WIN32
+		wxT("/heekscnc") + 
+#endif
+		wxT("/") +
+		resource;
+	wprintf(wxT("Resource: ") + resource + wxT(" found at: ") + filename + wxT("\n"));
+	return filename;
+}
 
 class MyApp : public wxApp
 {
