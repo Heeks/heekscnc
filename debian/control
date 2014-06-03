@@ -1,7 +1,7 @@
 Source: heekscnc
 Priority: extra
 Maintainer: Romuald Conty <neomilium@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), cmake, libwxgtk2.8-dev, libwxbase2.8-dev, libgtkglext1-dev, libopencascade-dev, heekscad-dev
+Build-Depends: debhelper (>= 8.0.0), cmake, libwxgtk2.8-dev, libwxbase2.8-dev, libgtkglext1-dev, libopencascade-dev, libheekstinyxml-dev, heekscad-dev
 Standards-Version: 3.9.3
 Section: libs
 Homepage: https://code.google.com/p/heekscnc/
@@ -19,9 +19,5 @@ Description: HeeksCNC is an add-on for HeeksCAD
  Using a 2D (e.g. dxf fies) or 3D model, HeeksCNC allow user to create machining operations.
  HeeksCNC's post-processing produces G-Code/NC code file which is interpreted and displayed in HeeksCAD.
  .
- HeeksCNC features multiple machining operations with many options.
+ HeeksCNC features many machining operations like: profile, pocket and drill. It also allow user-defined python script as post-process.
  .
- Fast moves are shown as red and in-material moves green lines.
- The NC code is generated using Python script, so it can be configured for different machines.
- .
-
