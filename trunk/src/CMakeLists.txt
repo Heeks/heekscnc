@@ -22,6 +22,7 @@ else() #look for OpenCASCADE
 endif()
 
 find_package ( HeeksCAD REQUIRED )
+find_package ( libheekstinyxml REQUIRED )
 
 include(${wxWidgets_USE_FILE})
 
@@ -35,6 +36,7 @@ include_directories (
     ${wxWidgets_INCLUDE_DIRS}
     ${HeeksCAD_SRC_DIR}
     ../kurve/geometry ../kurve/messages
+    ${libheekstinyxml_INCLUDE_DIRS}
     )
 set ( LIBRARY_OUTPUT_PATH ../bin )
 
@@ -175,7 +177,7 @@ set( heekscnc_SRCS
    )
 
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${heekscad_SRCS} ${platform_SRCS} )
-target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} )
+target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} ${libheekstinyxml_LIBRARIES} )
 set_target_properties( heekscnc PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
 set_target_properties( heekscnc PROPERTIES LINK_FLAGS -Wl,-Bsymbolic-functions )
 
