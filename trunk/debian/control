@@ -1,7 +1,7 @@
 Source: heekscnc
 Priority: extra
 Maintainer: Romuald Conty <neomilium@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), cmake, libwxgtk2.8-dev, libwxbase2.8-dev, libgtkglext1-dev, libopencascade-dev, libheekstinyxml-dev, heekscad-dev
+Build-Depends: debhelper (>= 7.0.0), cmake, libwxgtk2.8-dev, libwxbase2.8-dev, libgtkglext1-dev, libopencascade-dev, libheekstinyxml-dev, heekscad-dev
 Standards-Version: 3.9.3
 Section: libs
 Homepage: https://code.google.com/p/heekscnc/
