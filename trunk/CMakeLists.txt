@@ -5,7 +5,6 @@ if( ${CMAKE_VERSION} STREQUAL "2.8.2" )
   message( WARNING "CMake/CPack version 2.8.2 will not create working .deb packages!")
 endif( ${CMAKE_VERSION} STREQUAL "2.8.2" )
 
-set( CMAKE_BUILD_TYPE Debug )
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set( BUILD_STARTED_IN_RIGHT_DIR "true" )  #used in src/CMakeLists.txt to print a message
 
