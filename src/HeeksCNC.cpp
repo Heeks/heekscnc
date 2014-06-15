@@ -1372,7 +1372,7 @@ wxString CHeeksCNCApp::GetDllFolder()
 	return m_dll_path;
 }
 
-wxString CHeeksCNCApp::GetResFolder()
+wxString CHeeksCNCApp::GetResFolder() const
 {
 #if defined(WIN32) || defined(RUNINPLACE) //compile with 'RUNINPLACE=yes make' then skip 'sudo make install'
   #ifdef CMAKE_UNIX
