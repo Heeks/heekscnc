@@ -1,9 +1,6 @@
 project( libheekscnc )
 
 cmake_minimum_required( VERSION 2.6 )
-if( NOT DEFINED BUILD_STARTED_IN_RIGHT_DIR )
-  message( FATAL_ERROR "Don't start a build in the src directory. Do a 'cd ..', then run cmake ." )
-endif( NOT DEFINED BUILD_STARTED_IN_RIGHT_DIR )
 
 set ( CMAKE_BUILD_TYPE Debug )
 add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL
