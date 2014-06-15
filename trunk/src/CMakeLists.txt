@@ -187,14 +187,13 @@ install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/h
 file( GLOB icons "${CMAKE_CURRENT_SOURCE_DIR}/../icons/*.png" )
 install( FILES ${icons} DESTINATION share/heekscnc/icons )
 
-file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.xml") 
+file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt") 
 install(FILES ${nc} DESTINATION lib/heekscnc/nc )
 
-file(GLOB ops "${CMAKE_CURRENT_SOURCE_DIR}/../script_ops.xml")
-install(FILES ${ops} DESTINATION share/heekscnc )
-
 file( GLOB hcnc_defaults
-               "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
-               )
+    "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../nc/machines.xml"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../script_ops.xml"
+    )
 install( FILES ${hcnc_defaults} DESTINATION share/heekscnc/ )
 
