@@ -1382,12 +1382,18 @@ wxString CHeeksCNCApp::GetResFolder()
   #endif
 #else
   #ifdef CMAKE_UNIX
-	return (_T("/usr/share/heekscnc"));
-  #else
+	// Unix
+    #if wxCHECK_VERSION(3, 0, 0)
+	wxStandardPaths& sp = wxStandardPaths::Get();
+    #else
+	wxStandardPaths sp;
+    #endif
+	return (sp.GetInstallPrefix() + wxT("/share/heekscnc"));
+  #else // CMAKE_UNIX
+	// Windows
 	return (m_dll_path + _T("/../../share/heekscnc"));
-	//return sp.GetResourcesDir();
-  #endif
-#endif
+  #endif // CMAKE_UNIX
+#endif // defined(WIN32) || defined(RUNINPLACE)
 }
 
 wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool writableOnly) const
