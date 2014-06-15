@@ -1414,13 +1414,8 @@ wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool w
 		// If user-defined file exists, the resource is located
 		if(!wxFileName::FileExists(filename))
 		{
-#if wxCHECK_VERSION(3, 0, 0)
-			wxStandardPaths& sp = wxStandardPaths::Get();
-#else
-			wxStandardPaths sp;
-#endif
 			// Else it fallbacks to system-wide resource file (installed with HeeksCNC)
-			filename = sp.GetInstallPrefix() + wxT("/share/heekscnc/") + resource;
+			filename = GetResFolder() + wxT("/") + resource;
 			// Note: it should be a good idea to use wxStandardPaths::GetResourcesDir() but it returns HeeksCAD's resource dir (eg. /usr/share/heekscad)
 		}
 	}
