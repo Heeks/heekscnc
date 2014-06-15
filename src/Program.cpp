@@ -967,7 +967,7 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 	#ifdef RUNINPLACE
 		if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.xml");
 	#else
-		if(machines_file.Len() == 0)machines_file = _T("/usr/lib/heekscnc/nc/machines.xml");
+		if(machines_file.Len() == 0)machines_file = theApp.GetResourceFilename(wxT("machines.xml"));
 	#endif
 #else
 	if(machines_file.Len() == 0)machines_file = theApp.GetResFolder() + _T("/nc/machines.xml");
@@ -1013,7 +1013,7 @@ void CProgram::GetMachines(std::vector<CMachine> &machines)
 // static
 void CProgram::GetScriptOps(std::vector< CXmlScriptOp > &script_ops)
 {
-	wxString script_op_file = theApp.GetResFolder() + _T("/script_ops.xml");
+	wxString script_op_file = theApp.GetResourceFilename(wxT("script_ops.xml"));
 
 	TiXmlDocument doc(Ttc(script_op_file.c_str()));
 	if (!doc.LoadFile())
