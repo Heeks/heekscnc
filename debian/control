@@ -13,11 +13,13 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, python-wxgtk2.8, libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python1.40.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.49.0, python-area, heekscad (>= 1.0.0)
 Enhances: heekscad
-Description: HeeksCNC is an add-on for HeeksCAD
+Description: CAM add-on for HeeksCAD
  HeeksCNC adds machining features to HeeksCAD.
  .
- Using a 2D (e.g. dxf fies) or 3D model, HeeksCNC allow user to create machining operations.
- HeeksCNC's post-processing produces G-Code/NC code file which is interpreted and displayed in HeeksCAD.
+ Using a 2D (e.g. DXF files) or 3D models, HeeksCNC allow user to create
+ machining operations.
+ HeeksCNC's post-processing produces G-Code/NC code file which is interpreted
+ and displayed in HeeksCAD.
  .
- HeeksCNC features many machining operations like: profile, pocket and drill. It also allow user-defined python script as post-process.
- .
+ HeeksCNC features many machining operations like: profile, pocket and drill.
+ It also allow user-defined python script as post-process.
