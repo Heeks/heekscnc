@@ -11,7 +11,7 @@ Vcs-Browser: https://code.google.com/p/heekscnc/source/browse/
 Package: heekscnc
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, python-wxgtk2.8, libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python1.40.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.49.0, python-area, heekscad (>= 1.0.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-wxgtk2.8, python (>= 2.5), python-area, heekscad (>= 1.0.0)
 Enhances: heekscad
 Description: CAM add-on for HeeksCAD
  HeeksCNC adds machining features to HeeksCAD.
