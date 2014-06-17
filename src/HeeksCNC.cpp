@@ -1408,6 +1408,7 @@ wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool w
 	// Under Unix, it looks for a user-defined resource first.
 	// According to FreeDesktop XDG standards, HeeksCNC user-defineable resources should be placed in XDG_CONFIG_HOME (usually: ~/.config/heekscnc/)
 	filename = (wxGetenv(wxT("XDG_CONFIG_HOME"))?wxGetenv(wxT("XDG_CONFIG_HOME")):wxFileName::GetHomeDir() + wxT("/.config")) + wxT("/heekscnc/") + resource;
+	
 	// Under Unix user can't save its resources in system (permissions denied), so we always return a user-writable file
 	if(!writableOnly)
 	{
@@ -1418,6 +1419,12 @@ wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool w
 			filename = GetResFolder() + wxT("/") + resource;
 			// Note: it should be a good idea to use wxStandardPaths::GetResourcesDir() but it returns HeeksCAD's resource dir (eg. /usr/share/heekscad)
 		}
+	}
+	else
+	{
+		// Writable file is wanted, so ressource directories should exists (ie. mkdir -p ~/.config/heekscnc)
+		wxFileName fn(filename);
+		wxFileName::Mkdir(fn.GetPath(), 0700, wxPATH_MKDIR_FULL);
 	}
 	
 #endif
