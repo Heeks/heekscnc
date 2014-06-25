@@ -6,6 +6,9 @@ class HxmlWriter:
         self.file_out.write('<?xml version="1.0" ?>\n')
         self.file_out.write('<nccode>\n')
         self.t = None
+        self.oldx = None
+        self.oldy = None
+        self.oldz = None
 
     def __del__(self):
         self.file_out.write('</nccode>\n')
@@ -110,9 +113,15 @@ class HxmlWriter:
             self.file_out.write(' y="%.6f"' % y)
         if (z != None) :
             self.file_out.write(' z="%.6f"' % z)
-        if (i != None) : self.file_out.write(' i="%.6f"' % (i - self.oldx))
-        if (j != None) : self.file_out.write(' j="%.6f"' % (j - self.oldy))
-        if (k != None) : self.file_out.write(' k="%.6f"' % (k - self.oldz))
+        if (i != None):
+            if self.oldx == None: print 'arc move "i" without x set!'
+            else: self.file_out.write(' i="%.6f"' % (i - self.oldx))
+        if (j != None):
+            if self.oldy == None: print 'arc move "j" without y set!'
+            else: self.file_out.write(' j="%.6f"' % (j - self.oldy))
+        if (k != None):
+            if self.oldz == None: print 'arc move "k" without z set!'
+            else: self.file_out.write(' k="%.6f"' % (k - self.oldz))
         if (r != None) : self.file_out.write(' r="%.6f"' % r)
         if (d != None) : self.file_out.write(' d="%i"' % d)
         self.file_out.write(' />\n')

@@ -1367,7 +1367,7 @@ Python CHeeksCNCApp::SetTool( const int new_tool )
     return(python);
 }
 
-wxString CHeeksCNCApp::GetDllFolder()
+wxString CHeeksCNCApp::GetDllFolder() const
 {
 	return m_dll_path;
 }

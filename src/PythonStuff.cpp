@@ -130,6 +130,74 @@ void CPyProcess::OnTerminate(int pid, int status)
 
 ////////////////////////////////////////////////////////
 
+static void ClearErrorAndOutputFiles()
+{
+	#if wxCHECK_VERSION(3, 0, 0)
+	wxStandardPaths& standard_paths = wxStandardPaths::Get();
+	#else
+	wxStandardPaths standard_paths;
+	#endif
+	wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
+	wxFileName output_path(standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
+
+	// clear the error and output files
+	{
+		ofstream ofs(Ttc(errors_path.GetFullPath().c_str()));
+	}
+	{
+		ofstream ofs(Ttc(output_path.GetFullPath().c_str()));
+	}
+}
+
+static bool ProcessErrorAndOutputFiles()
+{
+#if wxCHECK_VERSION(3, 0, 0)
+	wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+	wxStandardPaths standard_paths;
+#endif
+	wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
+	wxFileName output_path(standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
+
+	ifstream ifs(Ttc(errors_path.GetFullPath().c_str()));
+	if (!ifs)
+	{
+#ifdef UNICODE
+		std::wostringstream l_ossMessage;
+#else
+		std::ostringstream l_ossMessage;
+#endif
+
+		l_ossMessage << "Could not open '" << errors_path.GetFullPath().c_str() << "' for reading";
+		wxMessageBox(l_ossMessage.str().c_str());
+		return false;
+	}
+
+	char str[1024] = "";
+
+	bool there_were_errors = false;
+	while (!(ifs.eof()))
+	{
+		ifs.getline(str, 1024);
+		if (strlen(str) > 0)
+		{
+			there_were_errors = true;
+			theApp.m_output_canvas->m_textCtrl->AppendText(Ctt(str));
+			theApp.m_output_canvas->m_textCtrl->AppendText(_T("\n"));
+		}
+	}
+
+	if (there_were_errors)
+	{
+		wxFont font(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, _T("Lucida Console"), wxFONTENCODING_SYSTEM);
+		theApp.m_output_canvas->m_textCtrl->SetFont(font);
+		wxMessageBox(_("There were errors!, see Output window"));
+		return false;
+	}
+
+	return true;
+}
+
 class CPyBackPlot : public CPyProcess
 {
 protected:
@@ -148,7 +216,9 @@ public:
 
 	void Do(void)
 	{
-		if(m_busy_cursor == NULL)m_busy_cursor = new wxBusyCursor();
+		ClearErrorAndOutputFiles();
+
+		if (m_busy_cursor == NULL)m_busy_cursor = new wxBusyCursor();
 
 		if (m_program->m_machine.reader == _T("not found"))
 		{
@@ -175,6 +245,9 @@ public:
 	}
 	void ThenDo(void)
 	{
+		if (!ProcessErrorAndOutputFiles())
+			return;
+
 		// there should now be an xml file written
 		wxString xml_file_str = theApp.m_program->GetBackplotFilePath();
 		wxFile ofs(xml_file_str.c_str());
@@ -222,24 +295,16 @@ public:
 
 	void Do(void)
 	{
+		ClearErrorAndOutputFiles();
+
+		wxBusyCursor wait; // show an hour glass until the end of this function
+
 #if wxCHECK_VERSION(3, 0, 0)
 		wxStandardPaths& standard_paths = wxStandardPaths::Get();
 #else
 		wxStandardPaths standard_paths;
 #endif
-		wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
-		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
-
-		// clear the error and output files
-		{
-			ofstream ofs(Ttc(errors_path.GetFullPath().c_str()));
-		}
-		{
-			ofstream ofs(Ttc(output_path.GetFullPath().c_str()));
-		}
-		wxBusyCursor wait; // show an hour glass until the end of this function
-
-		wxFileName path( standard_paths.GetTempDir().c_str(), _T("post.py"));
+		wxFileName path(standard_paths.GetTempDir().c_str(), _T("post.py"));
 
 #ifdef WIN32
         Execute(wxString(_T("\"")) + theApp.GetDllFolder() + wxString(_T("\\post.bat\" \"")) + path.GetFullPath() + wxString(_T("\"")));
@@ -251,52 +316,12 @@ public:
 	}
 	void ThenDo(void)
 	{
-#if wxCHECK_VERSION(3, 0, 0)
-		wxStandardPaths& standard_paths = wxStandardPaths::Get();
-#else
-		wxStandardPaths standard_paths;
-#endif
-		wxFileName errors_path(standard_paths.GetTempDir().c_str(), _T(ERRORS_TXT_FILE_NAME));
-		wxFileName output_path( standard_paths.GetTempDir().c_str(), _T(OUTPUT_TXT_FILE_NAME));
-
-		ifstream ifs(Ttc(errors_path.GetFullPath().c_str()));
-		if(!ifs)
-		{
-	#ifdef UNICODE
-			std::wostringstream l_ossMessage;
-	#else
-			std::ostringstream l_ossMessage;
-	#endif
-
-			l_ossMessage << "Could not open '" << errors_path.GetFullPath().c_str() << "' for reading";
-			wxMessageBox( l_ossMessage.str().c_str() );
+		if (!ProcessErrorAndOutputFiles())
 			return;
-		}
-
-		char str[1024] = "";
-
-		bool there_were_errors = false;
-		while(!(ifs.eof()))
-		{
-			ifs.getline(str, 1024);
-			if(strlen(str)>0)
-			{
-				there_were_errors = true;
-				theApp.m_output_canvas->m_textCtrl->AppendText(Ctt(str));
-				theApp.m_output_canvas->m_textCtrl->AppendText(_T("\n"));
-			}
-		}
-
-		if(there_were_errors)
-		{
-			wxFont font(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, _T("Lucida Console"), wxFONTENCODING_SYSTEM);
-			theApp.m_output_canvas->m_textCtrl->SetFont(font);
-			wxMessageBox(_("There were errors!, see Output window"));
-			return;
-		}
 
 		if (m_include_backplot_processing)
 		{
+			CPyBackPlot::redirect = true;
 			(new CPyBackPlot(m_program, (HeeksObj*)m_program, m_filename))->Do();
 		}
 	}
@@ -365,14 +390,17 @@ bool HeeksPyBackplot(const CProgram* program, HeeksObj* into, const wxString &fi
 {
 	try{
 		theApp.m_output_canvas->m_textCtrl->Clear(); // clear the output window
+		theApp.m_print_canvas->m_textCtrl->Clear(); // clear the output window
 
 		::wxSetWorkingDirectory(theApp.GetDllFolder());
 
 		// call the python file
-		(new CPyBackPlot(program, into, filepath))->Do();
+		CPyBackPlot::redirect = true;
+		CPyBackPlot* p = new CPyBackPlot(program, into, filepath);
+		p->Do();
 
 		// in Windows, at least, executing the bat file was making HeeksCAD change it's Z order
-		heeksCAD->GetMainFrame()->Raise();
+		//heeksCAD->GetMainFrame()->Raise();
 
 		return true;
 	}
