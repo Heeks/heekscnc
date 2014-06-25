@@ -55,7 +55,7 @@ public:
 	void OnDestroyDLL();
 	void GetOptions(std::list<Property *> *list);
 	void OnFrameDelete();
-	wxString GetDllFolder();
+	wxString GetDllFolder() const;
 	wxString GetResFolder() const;
 	wxString GetResourceFilename(const wxString resource, const bool writableOnly = false) const;
 	void RunPythonScript();
