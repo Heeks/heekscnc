@@ -13,7 +13,8 @@ BEGIN_EVENT_TABLE(DepthOpDlg, SpeedOpDlg)
 END_EVENT_TABLE()
 
 DepthOpDlg::DepthOpDlg(wxWindow *parent, CDepthOp* object, bool drill_pictures, const wxString& title, bool top_level)
-:m_drill_pictures(drill_pictures), SpeedOpDlg(parent, object, false, title, false)
+	:SpeedOpDlg(parent, object, false, title, false),
+	m_drill_pictures(drill_pictures) 
 {
 	leftControls.push_back(MakeLabelAndControl( _("Clearance Height"), m_lgthClearanceHeight = new CLengthCtrl(this)));
 	leftControls.push_back(MakeLabelAndControl( _("Rapid Safety Space"), m_lgthRapidDownToHeight = new CLengthCtrl(this)));

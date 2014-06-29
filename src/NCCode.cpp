@@ -674,7 +674,7 @@ void CNCCode::GetOptions(std::list<Property *> *list)
 	list->push_back(nc_options);
 }
 
-CNCCode::CNCCode():m_gl_list(0), m_highlighted_block(NULL), m_user_edited(false)
+CNCCode::CNCCode():m_highlighted_block(NULL), m_gl_list(0), m_user_edited(false)
 {
 	CNCConfig config;
 	config.Read(_T("CNCCode_ArcInterpolationCount"), &CNCCode::s_arc_interpolation_count, 20);

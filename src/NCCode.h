@@ -131,7 +131,6 @@ public:
 
 class CNCCodeBlock:public HeeksObj
 {
-	bool m_formatted;
 public:
 	std::list<ColouredText> m_text;
 	std::list<ColouredPath> m_line_strips;
@@ -152,6 +151,8 @@ public:
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AppendText(wxString& str);
 	void FormatText(wxTextCtrl *textCtrl, bool highlighted, bool force_format);
+private:
+	bool m_formatted;
 };
 
 class CNCCode:public HeeksObj
@@ -180,7 +181,7 @@ public:
 	static int s_arc_interpolation_count;	// How many lines to represent an arc for the glCommands() method?
 
 	CNCCode();
-	CNCCode(const CNCCode &p):m_gl_list(0), m_highlighted_block(NULL){operator=(p);}
+	CNCCode(const CNCCode &p):m_highlighted_block(NULL), m_gl_list(0) {operator=(p);}
 	virtual ~CNCCode();
 
 	const CNCCode &operator=(const CNCCode &p);
