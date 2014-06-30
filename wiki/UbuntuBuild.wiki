@@ -1,8 +1,0 @@
-#summary How to build for Ubuntu
-#labels Featured
-
-simply run this script file
-
-http://code.google.com/p/heekscnc/source/browse/trunk/INSTALL_HEEKS.bash
-
-to do this, you'll need to copy the script file to your computer, open a terminal window, cd to the folder where the script is, do "sudo chmod +x INSTALL_HEEKS.bash" to make it executable, then "./INSTALL_HEEKS.bash" to run it, then type yes and press Enter whenever it asks you for yes/no, and enter your linux computer's password whenever it asks you for a password.
