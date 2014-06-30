@@ -1,0 +1,4 @@
+#summary This page redirects to HeeksCAD wiki page on How-to build/install HeeksCNC on Ubuntu
+#labels Featured,Phase-Deploy
+
+[https://code.google.com/p/heekscad/wiki/HeeksCncUnderUbuntu All instructions are available here]
