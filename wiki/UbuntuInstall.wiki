@@ -1,3 +1,0 @@
-#summary Install on ubuntu
-
-see http://code.google.com/p/heekscad/wiki/InstallingOnUbuntu
