@@ -1,6 +1,0 @@
-#summary celeron55
-
-= WC sign =
-http://heekscnc.googlecode.com/svn/wiki/celeron55/wc_sign_milled_small.jpg
-
-http://code.google.com/p/heekscnc/wiki/celeron55WC
