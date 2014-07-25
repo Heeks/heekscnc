@@ -1145,6 +1145,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// add tick boxes for them all on the view menu
 	wxMenu* window_menu = heeksCAD->GetWindowMenu();
+	window_menu->AppendSeparator();
 	heeksCAD->AddMenuItem(window_menu, _T("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
 	heeksCAD->AddMenuItem(window_menu, _T("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
 	heeksCAD->AddMenuItem(window_menu, _T("Print"), wxBitmap(), OnPrintCanvas, OnUpdatePrintCanvas, NULL, true);
