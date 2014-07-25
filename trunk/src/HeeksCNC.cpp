@@ -1099,12 +1099,12 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #ifdef WIN32
 	heeksCAD->AddMenuItem(menuMachining, _("Simulate"), ToolImage(_T("simulate")), SimulateCallback);
 #endif
-	heeksCAD->AddMenuItem(menuMachining, _("Open NC File"), ToolImage(_T("opennc")), OpenNcFileMenuCallback);
-	heeksCAD->AddMenuItem(menuMachining, _("Save NC File"), ToolImage(_T("savenc")), SaveNcFileMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Open NC File..."), ToolImage(_T("opennc")), OpenNcFileMenuCallback);
+	heeksCAD->AddMenuItem(menuMachining, _("Save NC File as..."), ToolImage(_T("savenc")), SaveNcFileMenuCallback);
 #ifndef WIN32
 	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), ToolImage(_T("tomachine")), SendToMachineMenuCallback);
 #endif
-	frame->GetMenuBar()->Append(menuMachining,  _("Machining"));
+	frame->GetMenuBar()->Append(menuMachining,  _("&Machining"));
 
 	// Help menu
 	wxMenu *menuHelp = new wxMenu;
@@ -1112,15 +1112,15 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	frame->GetMenuBar()->Append(menuHelp,  _("Help"));
 
 	// add the program canvas
-    m_program_canvas = new CProgramCanvas(frame);
+	m_program_canvas = new CProgramCanvas(frame);
 	aui_manager->AddPane(m_program_canvas, wxAuiPaneInfo().Name(_T("Program")).Caption(_T("Program")).Bottom().BestSize(wxSize(600, 200)));
 
 	// add the output canvas
-    m_output_canvas = new COutputCanvas(frame);
+	m_output_canvas = new COutputCanvas(frame);
 	aui_manager->AddPane(m_output_canvas, wxAuiPaneInfo().Name(_T("Output")).Caption(_T("Output")).Bottom().BestSize(wxSize(600, 200)));
 
 	// add the print canvas
-    m_print_canvas = new CPrintCanvas(frame);
+	m_print_canvas = new CPrintCanvas(frame);
 	aui_manager->AddPane(m_print_canvas, wxAuiPaneInfo().Name(_T("Print")).Caption(_T("Print")).Bottom().BestSize(wxSize(600, 200)));
 
 	bool program_visible;
