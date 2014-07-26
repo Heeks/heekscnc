@@ -55,6 +55,8 @@ public:
 	} eType_t;
 
 public:
+	virtual ~PathObject() {}
+
 	static double m_current_x[3];
 	static double m_prev_x[3];
 	double m_x[3];
