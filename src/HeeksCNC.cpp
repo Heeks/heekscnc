@@ -1066,6 +1066,11 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->RegisterAddToolBars(AddToolBars);
 	AddToolBars();
 
+	// Help menu
+	wxMenu *menuHelp = heeksCAD->GetHelpMenu();
+	menuHelp->AppendSeparator();
+	heeksCAD->AddMenuItem(menuHelp, _("Online HeeksCNC Manual"), ToolImage(_T("help")), HelpMenuCallback);
+
 	// Milling Operations menu
 	wxMenu *menuMillingOperations = new wxMenu;
 	heeksCAD->AddMenuItem(menuMillingOperations, _("Profile Operation..."), ToolImage(_T("opprofile")), NewProfileOpMenuCallback);
@@ -1104,12 +1109,7 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 #ifndef WIN32
 	heeksCAD->AddMenuItem(menuMachining, _("Send to Machine"), ToolImage(_T("tomachine")), SendToMachineMenuCallback);
 #endif
-	frame->GetMenuBar()->Append(menuMachining,  _("&Machining"));
-
-	// Help menu
-	wxMenu *menuHelp = new wxMenu;
-	heeksCAD->AddMenuItem(menuHelp, _("Online HeeksCNC Manual"), ToolImage(_T("help")), HelpMenuCallback);
-	frame->GetMenuBar()->Append(menuHelp,  _("Help"));
+	frame->GetMenuBar()->Insert( frame->GetMenuBar()->GetMenuCount()-1, menuMachining,  _("&Machining"));
 
 	// add the program canvas
 	m_program_canvas = new CProgramCanvas(frame);
