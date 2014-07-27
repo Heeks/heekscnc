@@ -1245,9 +1245,9 @@ void CProgram::ReadDefaultValues()
 	config.Read(_T("OutputFileNameFollowsDataFileName"), &m_output_file_name_follows_data_file_name, true);
 	config.Read(_T("ProgramOutputFile"), &m_output_file, GetDefaultOutputFilePath().c_str());
 	config.Read(_T("ProgramUnits"), &m_units, 1.0);
-	config.Read(_("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
-	config.Read(_("ProgramMotionBlendingTolerance"), &m_motion_blending_tolerance, 0.0001);
-	config.Read(_("ProgramNaiveCamTolerance"), &m_naive_cam_tolerance, 0.0001);
+	config.Read(_T("ProgramPathControlMode"), (int *) &m_path_control_mode, (int) ePathControlUndefined );
+	config.Read(_T("ProgramMotionBlendingTolerance"), &m_motion_blending_tolerance, 0.0001);
+	config.Read(_T("ProgramNaiveCamTolerance"), &m_naive_cam_tolerance, 0.0001);
 }
 
 static bool OnEdit(HeeksObj* object)
