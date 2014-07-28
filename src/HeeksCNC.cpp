@@ -764,40 +764,40 @@ static void AddToolBars()
 		theApp.m_machiningBar->SetToolBitmapSize(wxSize(ToolImage::GetBitmapSize(), ToolImage::GetBitmapSize()));
 
 		heeksCAD->StartToolBarFlyout(_("Milling operations"));
-		heeksCAD->AddFlyoutButton(_("Profile"), ToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Pocket"), ToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Profile"), ToolImage(_T("opprofile")), _("New Profile Operation..."), NewProfileOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Pocket"), ToolImage(_T("pocket")), _("New Pocket Operation..."), NewPocketOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Drill"), ToolImage(_T("drilling")), _("New Drill Cycle Operation..."), NewDrillingOpMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Other operations"));
-		heeksCAD->AddFlyoutButton(_("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Pattern"), ToolImage(_T("pattern")), _("New Pattern..."), NewPatternMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Surface"), ToolImage(_T("surface")), _("New Surface..."), NewSurfaceMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Stock"), ToolImage(_T("stock")), _("New Stock..."), NewStockMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("ScriptOp"), ToolImage(_T("scriptop")), _("New Script Operation..."), NewScriptOpMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Pattern"), ToolImage(_T("pattern")), _("New Pattern..."), NewPatternMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Surface"), ToolImage(_T("surface")), _("New Surface..."), NewSurfaceMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Stock"), ToolImage(_T("stock")), _("New Stock..."), NewStockMenuCallback);
 		AddXmlScriptOpMenuItems();
 
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Tools"));
-		heeksCAD->AddFlyoutButton(_("drill"), ToolImage(_T("drill")), _("Drill..."), NewDrillMenuCallback);
-		heeksCAD->AddFlyoutButton(_("centredrill"), ToolImage(_T("centredrill")), _("Centre Drill..."), NewCentreDrillMenuCallback);
-		heeksCAD->AddFlyoutButton(_("endmill"), ToolImage(_T("endmill")), _("End Mill..."), NewEndmillMenuCallback);
-		heeksCAD->AddFlyoutButton(_("slotdrill"), ToolImage(_T("slotdrill")), _("Slot Drill..."), NewSlotCutterMenuCallback);
-		heeksCAD->AddFlyoutButton(_("ballmill"), ToolImage(_T("ballmill")), _("Ball End Mill..."), NewBallEndMillMenuCallback);
-		heeksCAD->AddFlyoutButton(_("chamfmill"), ToolImage(_T("chamfmill")), _("Chamfer Mill..."), NewChamferMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("drill"), ToolImage(_T("drill")), _("Drill..."), NewDrillMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("centredrill"), ToolImage(_T("centredrill")), _("Centre Drill..."), NewCentreDrillMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("endmill"), ToolImage(_T("endmill")), _("End Mill..."), NewEndmillMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("slotdrill"), ToolImage(_T("slotdrill")), _("Slot Drill..."), NewSlotCutterMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("ballmill"), ToolImage(_T("ballmill")), _("Ball End Mill..."), NewBallEndMillMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("chamfmill"), ToolImage(_T("chamfmill")), _("Chamfer Mill..."), NewChamferMenuCallback);
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
 		heeksCAD->StartToolBarFlyout(_("Post Processing"));
-		heeksCAD->AddFlyoutButton(_("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
-		heeksCAD->AddFlyoutButton(_("Run Python Script"), ToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
-		heeksCAD->AddFlyoutButton(_("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
-		heeksCAD->AddFlyoutButton(_("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("PostProcess"), ToolImage(_T("postprocess")), _("Post-Process"), PostProcessMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Run Python Script"), ToolImage(_T("runpython")), _("Run Python Script"), RunScriptMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("OpenNC"), ToolImage(_T("opennc")), _("Open NC File"), OpenNcFileMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("SaveNC"), ToolImage(_T("savenc")), _("Save NC File"), SaveNcFileMenuCallback);
 #ifndef WIN32
-		heeksCAD->AddFlyoutButton(_("Send to Machine"), ToolImage(_T("tomachine")), _("Send to Machine"), SendToMachineMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Send to Machine"), ToolImage(_T("tomachine")), _("Send to Machine"), SendToMachineMenuCallback);
 #endif
-		heeksCAD->AddFlyoutButton(_("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
+		heeksCAD->AddFlyoutButton(_T("Cancel"), ToolImage(_T("cancel")), _("Cancel Python Script"), CancelMenuCallback);
 #ifdef WIN32
-		heeksCAD->AddFlyoutButton(_("Simulate"), ToolImage(_T("simulate")), _("Simulate"), SimulateCallback);
+		heeksCAD->AddFlyoutButton(_T("Simulate"), ToolImage(_T("simulate")), _("Simulate"), SimulateCallback);
 #endif
 		heeksCAD->EndToolBarFlyout((wxToolBar*)(theApp.m_machiningBar));
 
