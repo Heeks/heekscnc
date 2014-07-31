@@ -95,7 +95,7 @@ class ExportTools: public Tool{
 	bool m_for_default;
 
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return m_for_default ? _("Save As Default"):_("Export");}
+	const wxChar* GetTitle(){return m_for_default ? _("Save As Default"):_("Export Tool Table...");}
 	void Run()
 	{
 #if wxCHECK_VERSION(3, 0, 0)
@@ -176,7 +176,7 @@ class ImportTools: public Tool{
 	bool m_for_default;
 
 	// Tool's virtual functions
-	const wxChar* GetTitle(){return m_for_default ? _("Restore Default Tools"):_("Import");}
+	const wxChar* GetTitle(){return m_for_default ? _("Restore Default Tools"):_("Import Tool Table...");}
 	void Run()
 	{
 #if wxCHECK_VERSION(3, 0, 0)
