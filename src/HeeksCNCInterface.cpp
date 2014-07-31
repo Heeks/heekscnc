@@ -77,7 +77,7 @@ void CHeeksCNCInterface::HideMachiningMenu()
 	heeksCAD->RemoveToolBar(theApp.m_machiningBar);
 	wxFrame* frame = heeksCAD->GetMainFrame();
 	wxMenuBar* menu_bar = frame->GetMenuBar();
-	int pos = menu_bar->FindMenu(_("Machining"));
+	int pos = menu_bar->FindMenu(_("&Machining"));
 	if(pos != wxNOT_FOUND)
 		menu_bar->Remove(pos);
 }
