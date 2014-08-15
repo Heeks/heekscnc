@@ -14,15 +14,15 @@ class CStock: public IdNamedObj {
 public:
 	std::list<int> m_solids;
 
-	//	Constructors.
+	// Constructors
 	CStock();
 	CStock(const std::list<int> &solids):m_solids(solids){}
 
 	// HeeksObj's virtual functions
-    int GetType()const{return StockType;}
-	const wxChar* GetTypeString(void) const{ return _T("Stock"); }
-    HeeksObj *MakeACopy(void)const;
-    void WriteXML(TiXmlNode *root);
+	int GetType()const{return StockType;}
+	const wxChar* GetTypeString(void) const{ return _("Stock"); }
+	HeeksObj *MakeACopy(void)const;
+	void WriteXML(TiXmlNode *root);
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
@@ -32,6 +32,6 @@ public:
 	void GetOnEdit(bool(**callback)(HeeksObj*));
 	HeeksObj* PreferredPasteTarget();
 
-    static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 }; // End CStock class definition.
 

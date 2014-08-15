@@ -62,7 +62,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return PocketType;}
-	const wxChar* GetTypeString(void)const{return _T("Pocket");}
+	const wxChar* GetTypeString(void) const { return _("Pocket"); }
 	void glCommands(bool select, bool marked, bool no_color);
 	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);

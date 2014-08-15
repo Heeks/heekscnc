@@ -28,7 +28,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ScriptOpType;}
-	const wxChar* GetTypeString(void)const{return _T("ScriptOp");}
+	const wxChar* GetTypeString(void) const { return _("ScriptOp"); }
 	const wxBitmap &GetIcon();
 	void GetProperties( std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;

@@ -23,10 +23,10 @@ public:
 	CSurface(const std::list<int> &solids, double tol, double mat_allowance):m_solids(solids), m_tolerance(tol), m_material_allowance(mat_allowance), m_same_for_each_pattern_position(true){}
 
 	// HeeksObj's virtual functions
-    int GetType()const{return SurfaceType;}
-	const wxChar* GetTypeString(void) const{ return _T("Surface"); }
-    HeeksObj *MakeACopy(void)const;
-    void WriteXML(TiXmlNode *root);
+	int GetType()const{return SurfaceType;}
+	const wxChar* GetTypeString(void) const { return _("Surface"); }
+	HeeksObj *MakeACopy(void)const;
+	void WriteXML(TiXmlNode *root);
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
@@ -36,6 +36,6 @@ public:
 	void GetOnEdit(bool(**callback)(HeeksObj*));
 	HeeksObj* PreferredPasteTarget();
 
-    static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
+	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 }; // End CSurface class definition.
 

@@ -96,7 +96,7 @@ public:
 
 	 // HeeksObj's virtual functions
         int GetType()const{return ToolType;}
-	const wxChar* GetTypeString(void) const{ return _T("Tool"); }
+	const wxChar* GetTypeString(void) const { return _("Tool"); }
         HeeksObj *MakeACopy(void)const;
 
         void WriteXML(TiXmlNode *root);
