@@ -132,7 +132,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProgramType;}
-	const wxChar* GetTypeString(void)const{return _T("Program");}
+	const wxChar* GetTypeString(void) const { return _("Program"); }
 	const wxBitmap &GetIcon();
 	void glCommands(bool select, bool marked, bool no_color);
 	HeeksObj *MakeACopy(void)const;

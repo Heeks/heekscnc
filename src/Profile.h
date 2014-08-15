@@ -87,7 +87,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return ProfileType;}
-	const wxChar* GetTypeString(void)const{return _T("Profile");}
+	const wxChar* GetTypeString(void) const { return _("Profile"); }
 	void glCommands(bool select, bool marked, bool no_color);
 	const wxBitmap &GetIcon();
 	void GetProperties(std::list<Property *> *list);

@@ -60,7 +60,7 @@ public:
 
 	// HeeksObj's virtual functions
 	virtual int GetType() const {return DrillingType;}
-	const wxChar* GetTypeString(void)const{return _T("Drilling");}
+	const wxChar* GetTypeString(void) const { return _("Drilling"); }
 	void glCommands(bool select, bool marked, bool no_color);
 
 	const wxBitmap &GetIcon();

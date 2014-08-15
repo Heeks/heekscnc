@@ -191,7 +191,7 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return NCCodeType;}
-	const wxChar* GetTypeString(void)const{return _T("NC Code");}
+	const wxChar* GetTypeString(void) const { return _("NC Code"); }
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	const wxBitmap &GetIcon();

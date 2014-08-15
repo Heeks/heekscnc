@@ -24,10 +24,10 @@ public:
 	CPattern(int copies1, double x_shift1, double y_shift1, int copies2, double x_shift2, double y_shift2):m_copies1(copies1), m_x_shift1(x_shift1), m_y_shift1(y_shift1), m_copies2(copies2), m_x_shift2(x_shift2), m_y_shift2(y_shift2){}
 
 	// HeeksObj's virtual functions
-    int GetType()const{return PatternType;}
-	const wxChar* GetTypeString(void) const{ return _T("Pattern"); }
-    HeeksObj *MakeACopy(void)const;
-    void WriteXML(TiXmlNode *root);
+	int GetType() const { return PatternType; }
+	const wxChar* GetTypeString(void) const { return _("Pattern"); }
+	HeeksObj *MakeACopy(void) const;
+	void WriteXML(TiXmlNode *root);
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object);
 	bool CanAddTo(HeeksObj* owner);
