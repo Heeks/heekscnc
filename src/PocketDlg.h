@@ -34,7 +34,7 @@ class PocketDlg : public SketchOpDlg
 	void EnableZigZagControls();
 
 public:
-    PocketDlg(wxWindow *parent, CPocket* object, const wxString& title = wxString(_T("Pocket Operation")), bool top_level = true);
+	PocketDlg(wxWindow *parent, CPocket* object, const wxString& title = wxString(_("Pocket Operation")), bool top_level = true);
 
 	static bool Do(CPocket* object);
 
@@ -47,5 +47,6 @@ public:
 	void OnCheckUseZigZag(wxCommandEvent& event);
 	void OnHelp( wxCommandEvent& event );
 
-    DECLARE_EVENT_TABLE()
+	DECLARE_EVENT_TABLE()
 };
+
