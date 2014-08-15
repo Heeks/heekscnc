@@ -39,7 +39,7 @@ class ProfileDlg : public SketchOpDlg
 	void EnableControls();
 
 public:
-    ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title = wxString(_T("Profile Operation")), bool top_level = true);
+	ProfileDlg(wxWindow *parent, CProfile* object, const wxString& title = wxString(_("Profile Operation")), bool top_level = true);
 
 	static bool Do(CProfile* object);
 
@@ -54,5 +54,6 @@ public:
 	void OnHelp( wxCommandEvent& event );
 	void OnSketchCombo( wxCommandEvent& event );
 
-    DECLARE_EVENT_TABLE()
+	DECLARE_EVENT_TABLE()
 };
+

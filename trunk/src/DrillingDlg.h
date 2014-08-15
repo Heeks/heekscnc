@@ -21,7 +21,7 @@ class DrillingDlg : public DepthOpDlg
 	wxCheckBox *m_chkRapidToClearance;
 
 public:
-    DrillingDlg(wxWindow *parent, CDrilling* object, const wxString& title = wxString(_T("Drilling Operation")), bool top_level = true);
+	DrillingDlg(wxWindow *parent, CDrilling* object, const wxString& title = wxString(_("Drilling Operation")), bool top_level = true);
 
 	static bool Do(CDrilling* object);
 
@@ -34,5 +34,6 @@ public:
 	void OnPointsPick( wxCommandEvent& event );
 	void OnHelp( wxCommandEvent& event );
 
-    DECLARE_EVENT_TABLE()
+	DECLARE_EVENT_TABLE()
 };
+
