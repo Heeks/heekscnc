@@ -1113,15 +1113,15 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// add the program canvas
 	m_program_canvas = new CProgramCanvas(frame);
-	aui_manager->AddPane(m_program_canvas, wxAuiPaneInfo().Name(_T("Program")).Caption(_T("Program")).Bottom().BestSize(wxSize(600, 200)));
+	aui_manager->AddPane(m_program_canvas, wxAuiPaneInfo().Name(_("Program")).Caption(_("Program")).Bottom().BestSize(wxSize(600, 200)));
 
 	// add the output canvas
 	m_output_canvas = new COutputCanvas(frame);
-	aui_manager->AddPane(m_output_canvas, wxAuiPaneInfo().Name(_T("Output")).Caption(_T("Output")).Bottom().BestSize(wxSize(600, 200)));
+	aui_manager->AddPane(m_output_canvas, wxAuiPaneInfo().Name(_("Output")).Caption(_("Output")).Bottom().BestSize(wxSize(600, 200)));
 
 	// add the print canvas
 	m_print_canvas = new CPrintCanvas(frame);
-	aui_manager->AddPane(m_print_canvas, wxAuiPaneInfo().Name(_T("Print")).Caption(_T("Print")).Bottom().BestSize(wxSize(600, 200)));
+	aui_manager->AddPane(m_print_canvas, wxAuiPaneInfo().Name(_("Print")).Caption(_("Print")).Bottom().BestSize(wxSize(600, 200)));
 
 	bool program_visible;
 	bool output_visible;
@@ -1146,10 +1146,10 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	// add tick boxes for them all on the view menu
 	wxMenu* window_menu = heeksCAD->GetWindowMenu();
 	window_menu->AppendSeparator();
-	heeksCAD->AddMenuItem(window_menu, _T("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
-	heeksCAD->AddMenuItem(window_menu, _T("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
-	heeksCAD->AddMenuItem(window_menu, _T("Print"), wxBitmap(), OnPrintCanvas, OnUpdatePrintCanvas, NULL, true);
-	heeksCAD->AddMenuItem(window_menu, _T("Machining"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
+	heeksCAD->AddMenuItem(window_menu, _("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
+	heeksCAD->AddMenuItem(window_menu, _("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
+	heeksCAD->AddMenuItem(window_menu, _("Print"), wxBitmap(), OnPrintCanvas, OnUpdatePrintCanvas, NULL, true);
+	heeksCAD->AddMenuItem(window_menu, _("Machining"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
 	heeksCAD->RegisterHideableWindow(m_print_canvas);
