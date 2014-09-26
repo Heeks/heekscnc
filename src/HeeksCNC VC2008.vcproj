@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(HEEKSCADPATH)&quot;;&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;;../kurve/geometry;../kurve/messages;&quot;$(WXWIN)\lib\vc_dll\mswd&quot;"
+				AdditionalIncludeDirectories="&quot;$(HEEKSCAD1PATH)&quot;;&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;;../kurve/geometry;../kurve/messages;&quot;$(WXWIN)\lib\vc_dll\mswd&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH;WNT;_CRT_SECURE_NO_WARNINGS; WXUSINGDLL;HEEKSCNC;OPEN_SOURCE_GEOMETRY"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,7 +64,7 @@
 				AdditionalDependencies="opengl32.lib glu32.lib comctl32.lib rpcrt4.lib TKVrml.lib TKStl.lib TKBRep.lib TKIGES.lib TKShHealing.lib TKSTEP.lib TKSTEP209.lib TKSTEPAttr.lib TKSTEPBase.lib TKXSBase.lib TKShapeSchema.lib FWOSPlugin.lib PTKernel.lib TKBool.lib TKCAF.lib TKCDF.lib TKDraw.lib TKernel.lib TKFeat.lib TKFillet.lib TKG2d.lib TKG3d.lib TKGeomAlgo.lib TKGeomBase.lib TKHLR.lib TKMath.lib TKOffset.lib TKPCAF.lib TKPrim.lib TKPShape.lib TKService.lib TKTopAlgo.lib TKV2d.lib TKV3d.lib TKMesh.lib TKAdvTools.lib TKCPPExt.lib TKBO.lib TKXDESTEP.lib TKXCAF.lib TKXCAFSchema.lib TKDCAF.lib TKLCAF.lib TKPLCAF.lib wxmsw28d_core.lib wxmsw28d_aui.lib wxmsw28d_gl.lib wxbase28d.lib"
 				OutputFile="..\HeeksCNC.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(HEEKSCADPATH)&quot;;&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(HEEKSCAD1PATH)&quot;;&quot;$(WXWIN)\lib\vc_dll&quot;;&quot;$(CASROOT)\win32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -122,7 +122,7 @@
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;;$(HEEKSCADPATH);../kurve/geometry;../kurve/messages"
+				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\include\msvc&quot;;$(HEEKSCAD1PATH);../kurve/geometry;../kurve/messages"
 				PreprocessorDefinitions="WIN32;__WXMSW__;_WINDOWS;NOPCH;WNT;_CRT_SECURE_NO_WARNINGS;WXUSINGDLL;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;_SECURE_ATL =0;HEEKSCNC;OPEN_SOURCE_GEOMETRY;OP_SKETCHES_AS_CHILDREN"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -205,7 +205,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\lib\vc_dll\mswud&quot;;&quot;$(WXWIN)\include\msvc&quot;;&quot;$(HEEKSCADPATH)&quot;;../kurve/geometry;../kurve/messages;&quot;$(LIBAREA_PATH)&quot;"
+				AdditionalIncludeDirectories="&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)\lib\vc_dll\mswud&quot;;&quot;$(WXWIN)\include\msvc&quot;;&quot;$(HEEKSCAD1PATH)&quot;;../kurve/geometry;../kurve/messages;&quot;$(LIBAREA_PATH)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH;WNT;_CRT_SECURE_NO_WARNINGS;WXUSINGDLL;HEEKSCNC;OPEN_SOURCE_GEOMETRY;HEEKSPLUGIN;STABLE_OPS_ONLY"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -286,7 +286,7 @@
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="./;&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)&quot;;&quot;$(WXWIN)\lib\vc_dll\mswu&quot;;&quot;$(WXWIN)\include\msvc&quot;;&quot;$(HEEKSCADPATH)&quot;;../kurve/geometry;../kurve/messages;&quot;$(LIBAREA_PATH)&quot;"
+				AdditionalIncludeDirectories="./;&quot;$(CASROOT)\inc&quot;;&quot;$(WXWIN)\include&quot;;&quot;$(WXWIN)&quot;;&quot;$(WXWIN)\lib\vc_dll\mswu&quot;;&quot;$(WXWIN)\include\msvc&quot;;&quot;$(HEEKSCAD1PATH)&quot;;../kurve/geometry;../kurve/messages;&quot;$(LIBAREA_PATH)&quot;"
 				PreprocessorDefinitions="WIN32;__WXMSW__;_WINDOWS;NOPCH;WNT;_CRT_SECURE_NO_WARNINGS;WXUSINGDLL;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;_SECURE_ATL =0;HEEKSCNC;OPEN_SOURCE_GEOMETRY;HEEKSPLUGIN;STABLE_OPS_ONLY"
 				StringPooling="false"
 				RuntimeLibrary="2"
@@ -351,7 +351,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\Box.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\Box.h"
 			>
 		</File>
 		<File
@@ -423,19 +423,19 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\src\Geom.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\src\Geom.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HDialogs.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HDialogs.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HDialogs.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HDialogs.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HeeksCADInterface.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HeeksCADInterface.h"
 			>
 		</File>
 		<File
@@ -459,47 +459,47 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HeeksColor.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HeeksColor.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HeeksColor.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HeeksColor.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HeeksObj.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HeeksObj.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HeeksObj.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HeeksObj.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HeeksObjDlg.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HeeksObjDlg.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\HeeksObjDlg.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\HeeksObjDlg.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObj.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\IdNamedObj.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObj.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\IdNamedObj.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObjList.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\IdNamedObjList.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObjList.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\IdNamedObjList.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\HeeksCADSVN\interface\InputMode.h"
+			RelativePath="$(HEEKSCAD1PATH)\HeeksCADSVN\interface\InputMode.h"
 			>
 		</File>
 		<File
@@ -511,19 +511,19 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\LeftAndRight.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\LeftAndRight.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\LeftAndRight.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\LeftAndRight.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\MarkedObject.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\MarkedObject.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\MarkedObject.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\MarkedObject.h"
 			>
 		</File>
 		<File
@@ -535,19 +535,19 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\NiceTextCtrl.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\NiceTextCtrl.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\NiceTextCtrl.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\NiceTextCtrl.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\ObjList.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\ObjList.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\ObjList.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\ObjList.h"
 			>
 		</File>
 		<File
@@ -607,11 +607,11 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PictureFrame.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PictureFrame.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PictureFrame.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PictureFrame.h"
 			>
 		</File>
 		<File
@@ -671,87 +671,87 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\Property.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\Property.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyCheck.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyCheck.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyCheck.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyCheck.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyChoice.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyChoice.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyChoice.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyChoice.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyColor.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyColor.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyColor.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyColor.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyDouble.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyDouble.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyDouble.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyDouble.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyFile.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyFile.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyFile.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyFile.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyInt.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyInt.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyInt.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyInt.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyLength.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyLength.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyLength.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyLength.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyList.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyList.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyList.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyList.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyString.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyString.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyString.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyString.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyVertex.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyVertex.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\PropertyVertex.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\PropertyVertex.h"
 			>
 		</File>
 		<File
@@ -907,7 +907,7 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\strconv.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\strconv.cpp"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -943,7 +943,7 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\strconv.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\strconv.h"
 			>
 		</File>
 		<File
@@ -987,7 +987,7 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\tinyxml\tinystr.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\tinyxml\tinystr.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
@@ -999,27 +999,11 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\tinyxml\tinystr.h"
+			RelativePath="$(HEEKSCAD1PATH)\tinyxml\tinystr.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxml.cpp"
-			>
-			<FileConfiguration
-				Name="Unicode Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxml.h"
-			>
-		</File>
-		<File
-			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxmlerror.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\tinyxml\tinyxml.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
@@ -1031,7 +1015,11 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxmlparser.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\tinyxml\tinyxml.h"
+			>
+		</File>
+		<File
+			RelativePath="$(HEEKSCAD1PATH)\tinyxml\tinyxmlerror.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
@@ -1043,15 +1031,27 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\Tool.h"
+			RelativePath="$(HEEKSCAD1PATH)\tinyxml\tinyxmlparser.cpp"
+			>
+			<FileConfiguration
+				Name="Unicode Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="$(HEEKSCAD1PATH)\interface\Tool.h"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\ToolImage.cpp"
+			RelativePath="$(HEEKSCAD1PATH)\interface\ToolImage.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\interface\ToolImage.h"
+			RelativePath="$(HEEKSCAD1PATH)\interface\ToolImage.h"
 			>
 		</File>
 		<File
