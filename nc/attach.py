@@ -10,6 +10,7 @@ import ocl_funcs
 import nc
 
 attached = False
+units = 1.0
 
 ################################################################################
 class Creator(recreator.Redirector):
@@ -33,7 +34,7 @@ class Creator(recreator.Redirector):
             self.pdcf.setSTL(self.stl)
             self.pdcf.setCutter(self.cutter)
             self.pdcf.setSampling(0.1)
-            self.pdcf.setZ(self.minz)
+            self.pdcf.setZ(self.minz/units)
                     
     def z2(self, z):
         path = ocl.Path()
@@ -43,12 +44,12 @@ class Creator(recreator.Redirector):
         if (self.z>self.minz):
             self.pdcf.setZ(self.z)  # Adjust Z if we have gotten a higher limit (Fix pocketing loosing steps when using attach?)
         else:
-            self.pdcf.setZ(self.minz) # Else use minz
+            self.pdcf.setZ(self.minz/units) # Else use minz
         self.pdcf.setPath(path)
         self.pdcf.run()
         plist = self.pdcf.getCLPoints()
         p = plist[0]
-        return p.z + self.material_allowance
+        return p.z + self.material_allowance/units
         
     def cut_path(self):
         if self.path == None: return
@@ -57,7 +58,7 @@ class Creator(recreator.Redirector):
         if (self.z>self.minz):
             self.pdcf.setZ(self.z)  # Adjust Z if we have gotten a higher limit (Fix pocketing loosing steps when using attach?)
         else:
-            self.pdcf.setZ(self.minz) # Else use minz
+            self.pdcf.setZ(self.minz/units) # Else use minz
             
        # get the points on the surface
         self.pdcf.setPath(self.path)
@@ -76,7 +77,7 @@ class Creator(recreator.Redirector):
         i = 0
         for p in plist:
             if i > 0:
-                self.original.feed(p.x/units, p.y/units, p.z/units + self.material_allowance)
+                self.original.feed(p.x/units, p.y/units, p.z/units + self.material_allowance/units)
             i = i + 1
             
         self.path = ocl.Path()
@@ -115,6 +116,7 @@ def attach_begin():
     if attached == True:
         attach_end()
     nc.creator = Creator(nc.creator)
+    recreator.units = units
     attached = True
     nc.creator.pdcf = None
     nc.creator.path = None
