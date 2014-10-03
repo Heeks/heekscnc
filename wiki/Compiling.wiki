@@ -9,7 +9,9 @@ For Ubuntu build see http://code.google.com/p/heekscnc/wiki/UbuntuBuild
 
 You need to build HeeksCAD ( see http://code.google.com/p/heekscad/wiki/CompilingHeeksCAD1_0forWindows ), because HeeksCNC is an add-in for HeeksCAD.
 
-make a new folder somewhere. I made this folder "C:\Dev\HeeksCNC1.0" right click on the HeeksCNC1.0 folder and do "TortoiseSVN"->"SVN Checkout..." The "URL of repository": http://heekscnc.googlecode.com/svn//branches/v1_0/ The Checkout directory something like: C:\Dev\HeeksCNC1.0 Press OK. It should checkout all the HeeksCNC 1.0 source code 
+make a new folder somewhere. I made this folder "C:\Dev\HeeksCNC1.0" right click on the HeeksCNC1.0 folder and do "TortoiseSVN"->"SVN Checkout..." The "URL of repository": http://heekscnc.googlecode.com/svn//branches/v1_0/ The Checkout directory something like: C:\Dev\HeeksCNC1.0 Press OK. It should checkout all the HeeksCNC 1.0 source code
+
+Set an environment variable called HEEKSCAD1PATH to be the path where HeeksCAD source code is. For me it is set to C:\Dev\HeeksCAD1.0 ( to set an environment variable go to Control Panel -> System and Security -> System -> Advanced system settings -> press "Environment Variables" button -> in "user variable" add new ). ( you must restart Visual Studio for it to know the new environment variable ) 
 
 Open "HeeksCNC VC2008.sln" with Visual Studio 2008 ( Express version is OK too ).
 
@@ -31,11 +33,3 @@ kurve.pyd should have been built and be in the same folder as HeeksCNC.dll
 
 You also need to go to the Google Code projects "opencamlib" and "libarea" and build "ocl.pyd" ( for 3D surface operation ), "area.pyd" ( for pocket operation ) if you want those operations to work.
 Copy them to the same place as your HeeksCNC.dll
-
-HeeksCNC 1.0 is made with
-
-revision 1431 from HeeksCNC
-
-revision 1550 from HeeksCAD
-
-revision 102 from libarea
