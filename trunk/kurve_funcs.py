@@ -348,7 +348,10 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
                 rapid(s.x, s.y)
         
             # rapid down to just above the material
-            rapid(z = mat_depth + depthparams.rapid_safety_space)
+            if endpoint == None:
+                rapid(z = mat_depth + depthparams.rapid_safety_space)
+            else:
+                rapid(z = mat_depth)
 
         # feed down to depth
         mat_depth = depth
@@ -405,7 +408,9 @@ def profile(curve, direction = "on", radius = 1.0, offset_extra = 0.0, roll_radi
         
         if endpoint != s:
             # rapid up to the clearance height
-            rapid(z = depthparams.clearance_height)        
+            rapid(z = depthparams.clearance_height)   
+            
+        prev_depth = depth
 
     rapid(z = depthparams.clearance_height)        
 
