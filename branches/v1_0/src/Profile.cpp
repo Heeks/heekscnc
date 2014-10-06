@@ -430,11 +430,21 @@ Python CProfile::WriteSketchDefn(HeeksObj* sketch, bool reversed )
 		{
 			std::list<HeeksObj*> new_spans2;
 			heeksCAD->SplineToBiarcs(span, new_spans2, CProfile::max_deviation_for_spline_to_arc);
-			for(std::list<HeeksObj*>::iterator It2 = new_spans2.begin(); It2 != new_spans2.end(); It2++)
+			if(reversed)
 			{
-				HeeksObj* s = *It2;
-				if(reversed)new_spans.push_front(s);
-				else new_spans.push_back(s);
+				for(std::list<HeeksObj*>::reverse_iterator It2 = new_spans2.rbegin(); It2 != new_spans2.rend(); It2++)
+				{
+					HeeksObj* s = *It2;
+					new_spans.push_back(s);
+				}
+			}
+			else
+			{
+				for(std::list<HeeksObj*>::iterator It2 = new_spans2.begin(); It2 != new_spans2.end(); It2++)
+				{
+					HeeksObj* s = *It2;
+					new_spans.push_back(s);
+				}
 			}
 		}
 		else
