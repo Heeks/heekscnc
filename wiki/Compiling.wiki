@@ -2,8 +2,7 @@
 
 = Introduction =
 
-For Ubuntu build see http://code.google.com/p/heekscnc/wiki/UbuntuBuild
-
+For Ubuntu build see https://code.google.com/p/heekscnc/wiki/HeeksCncUnderUbuntu
 
 = Details =
 
