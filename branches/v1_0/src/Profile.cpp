@@ -859,6 +859,7 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 		python << _T("flush_nc()\n");
 		python << _T("offset_extra = 0.0\n");
 		python << _T("depthparams.step_down = ") << m_profile_params.m_finishing_step_down << _T("\n");
+		python << _T("depthparams.z_finish_depth = 0.0\n");
 	}
 	else
 	{
