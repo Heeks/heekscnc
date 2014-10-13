@@ -97,6 +97,7 @@ class Creator(nc.Creator):
         self.subroutines_in_own_files = False
         self.pattern_done_with_subroutine = False
         self.output_comment_before_tool_change = True
+        self.output_arcs_as_lines = False
         
     ############################################################################
     ##  Codes
@@ -725,8 +726,10 @@ class Creator(nc.Creator):
 
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         if self.same_xyz(x, y, z): return
-        if self.can_do_helical_arcs == False and self.in_quadrant_splitting == False and (z != None) and (math.fabs(z - self.z) > 0.000001) and (self.fmt.string(z) != self.fmt.string(self.z)):
+        
+        if self.output_arcs_as_lines or self.can_do_helical_arcs == False and self.in_quadrant_splitting == False and (z != None) and (math.fabs(z - self.z) > 0.000001) and (self.fmt.string(z) != self.fmt.string(self.z)):
             # split the helical arc into little line feed moves
+            
             if x == None: x = self.x
             if y == None: y = self.y
             sdx = self.x - i
@@ -741,13 +744,18 @@ class Creator(nc.Creator):
             segments = int(math.fabs(arc_angle / angle_step) + 1)
             angle_step = arc_angle / segments
             angle = angle_start
-            z_step = float(z - self.z)/segments
-            next_z = self.z
+            if z != None:
+                z_step = float(z - self.z)/segments
+                next_z = self.z
+                
             for p in range(0, segments):
                 angle = angle + angle_step
                 next_x = i + radius * math.cos(angle)
                 next_y = j + radius * math.sin(angle)
-                next_z = next_z + z_step
+                if z == None:
+                    next_z = None
+                else:
+                    next_z = next_z + z_step
                 self.feed(next_x, next_y, next_z)
             return
 
