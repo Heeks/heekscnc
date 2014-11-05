@@ -24,6 +24,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: de; MessagesFile: "compiler:Languages\German.isl"
 Name: fr; MessagesFile: "compiler:Languages\French.isl"
 Name: it; MessagesFile: "compiler:Languages\Italian.isl"
+Name: es; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
@@ -43,9 +44,13 @@ Source: "C:\Dev\HeeksCAD1.0\bitmaps\font.glf"; DestDir: "{app}\bitmaps"; Flags: 
 Source: "C:\Dev\HeeksCAD1.0\icons\*.png"; DestDir: "{app}\icons"; Flags: ignoreversion
 Source: "C:\Dev\OCC dlls for HeeksCAD\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\de\*"; DestDir: "{app}\de"; Flags: ignoreversion
-Source: "C:\Dev\HeeksCAD1.0\it\*"; DestDir: "{app}\it"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCAD1.0\es\*"; DestDir: "{app}\es"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\fr\*"; DestDir: "{app}\fr"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCAD1.0\it\*"; DestDir: "{app}\it"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCAD1.0\ko\*"; DestDir: "{app}\ko"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCAD1.0\ru\*"; DestDir: "{app}\ru"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\sk\*"; DestDir: "{app}\sk"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCAD1.0\zh_hk\*"; DestDir: "{app}\zh_hk"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\wxmsw28u_gl_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\wxmsw28u_core_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\wxmsw28u_aui_vc_custom.dll"; DestDir: "{app}"; Flags: ignoreversion
