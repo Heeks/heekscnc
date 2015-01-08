@@ -98,8 +98,12 @@ static PickPos pick_pos;
 void CTag::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	object_for_tools = this;
+#ifndef CMAKE_UNIX
+  // FIXME This is a workaround...
+  // https://code.google.com/p/heekscnc/issues/detail?id=354
+  // This disables the ability to pick a new pos from selected Tag but prevent HeeksCNC from crash.
 	t_list->push_back(&pick_pos);
-
+#endif
 }
 
 void CTag::WriteXML(TiXmlNode *root)
