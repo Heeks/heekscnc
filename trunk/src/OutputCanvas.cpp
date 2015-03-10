@@ -72,7 +72,7 @@ COutputCanvas::COutputCanvas(wxWindow* parent)
 {
 	m_textCtrl = new COutputTextCtrl( this, 100, _T(""),	wxPoint(180,170), wxSize(200,70), wxTE_MULTILINE | wxTE_DONTWRAP | wxTE_RICH | wxTE_RICH2);
 
-#ifdef WIN32
+#if defined WIN32 || not wxCHECK_VERSION(3,0,0)
 	// Ensure the wxTextCtrl object can accept the maximum 
 	// text length allowable for this operating system.
 	// (64kb on Win32) (32kb without this call on Win32)
@@ -115,7 +115,7 @@ CPrintCanvas::CPrintCanvas(wxWindow* parent)
 {
 	m_textCtrl = new wxTextCtrl( this, 100, _T(""),	wxPoint(180,170), wxSize(200,70), wxTE_MULTILINE | wxTE_DONTWRAP | wxTE_RICH | wxTE_RICH2);
 
-#ifdef WIN32
+#if defined WIN32 || not wxCHECK_VERSION(3,0,0)
 	// Ensure the wxTextCtrl object can accept the maximum 
 	// text length allowable for this operating system.
 	// (64kb on Win32) (32kb without this call on Win32)
