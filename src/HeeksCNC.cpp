@@ -1149,7 +1149,8 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	heeksCAD->AddMenuItem(window_menu, _("Program"), wxBitmap(), OnProgramCanvas, OnUpdateProgramCanvas, NULL, true);
 	heeksCAD->AddMenuItem(window_menu, _("Output"), wxBitmap(), OnOutputCanvas, OnUpdateOutputCanvas, NULL, true);
 	heeksCAD->AddMenuItem(window_menu, _("Print"), wxBitmap(), OnPrintCanvas, OnUpdatePrintCanvas, NULL, true);
-	heeksCAD->AddMenuItem(window_menu, _("Machining"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
+	window_menu->AppendSeparator();
+	heeksCAD->AddMenuItem(window_menu, _("Machining Tool Bar"), wxBitmap(), OnMachiningBar, OnUpdateMachiningBar, NULL, true);
 	heeksCAD->RegisterHideableWindow(m_program_canvas);
 	heeksCAD->RegisterHideableWindow(m_output_canvas);
 	heeksCAD->RegisterHideableWindow(m_print_canvas);
