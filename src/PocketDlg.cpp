@@ -58,6 +58,7 @@ void PocketDlg::GetDataRaw(HeeksObj* object)
 	((CPocket*)object)->m_pocket_params.m_keep_tool_down_if_poss = m_chkKeepToolDown->GetValue();
 	((CPocket*)object)->m_pocket_params.m_use_zig_zag = m_chkUseZigZag->GetValue();
 	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag)((CPocket*)object)->m_pocket_params.m_zig_angle = m_dblZigAngle->GetValue();
+	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag)((CPocket*)object)->m_pocket_params.m_zig_unidirectional = m_chkZigUnidirectional->GetValue();
 
 	SketchOpDlg::GetDataRaw(object);
 }
@@ -71,7 +72,8 @@ void PocketDlg::SetFromDataRaw(HeeksObj* object)
 
 	m_chkKeepToolDown->SetValue(((CPocket*)object)->m_pocket_params.m_keep_tool_down_if_poss);
 	m_chkUseZigZag->SetValue(((CPocket*)object)->m_pocket_params.m_use_zig_zag);
-	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag)m_dblZigAngle->SetValue(((CPocket*)object)->m_pocket_params.m_zig_angle);
+	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag) m_dblZigAngle->SetValue(((CPocket*)object)->m_pocket_params.m_zig_angle);
+	if(((CPocket*)object)->m_pocket_params.m_use_zig_zag) m_chkZigUnidirectional->SetValue(((CPocket*)object)->m_pocket_params.m_zig_unidirectional);
 
 	EnableZigZagControls();
 
