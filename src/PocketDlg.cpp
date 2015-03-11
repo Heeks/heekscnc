@@ -32,8 +32,8 @@ PocketDlg::PocketDlg(wxWindow *parent, CPocket* object, const wxString& title, b
 	wxString cut_mode_choices[] = {_("Conventional"), _("Climb")};
 	leftControls.push_back(MakeLabelAndControl(_("Cut Mode"), m_cmbCutMode = new wxComboBox(this, ID_CUT_MODE, _T(""), wxDefaultPosition, wxDefaultSize, 2, cut_mode_choices)));
 
-	leftControls.push_back( HControl( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("Use Zig Zag") ), wxALL ));
 	leftControls.push_back( HControl( m_chkKeepToolDown = new wxCheckBox( this, ID_KEEP_TOOL_DOWN, _("Keep Tool Down") ), wxALL ));
+	leftControls.push_back( HControl( m_chkUseZigZag = new wxCheckBox( this, ID_USE_ZIG_ZAG, _("Use Zig Zag") ), wxALL ));
 	leftControls.push_back(MakeLabelAndControl(_("Zig Zag Angle"), m_dblZigAngle = new CDoubleCtrl(this)));
 	leftControls.push_back( HControl( m_chkZigUnidirectional = new wxCheckBox( this, ID_ZIG_UNIDIRECTIONAL, _("Zig Unidirectional") ), wxALL ));
 
