@@ -9,7 +9,7 @@
 #include <errno.h>
 
 #ifndef WIN32
-	#include <dirent.h>
+#include <dirent.h>
 #endif
 
 #include <wx/stdpaths.h>
@@ -267,7 +267,7 @@ static void NewDrillingOp()
 		HeeksObj* object = *It;
 		if (object->GetType() == PointType)
 		{
-            points.push_back( object->m_id );
+			points.push_back( object->m_id );
 		} // End if - else
 	} // End for
 
@@ -460,9 +460,9 @@ void CHeeksCNCApp::RunPythonScript()
 	unsigned int text_control_length = m_program_canvas->m_textCtrl->GetLastPosition();
 	if (m_program->m_python_program.substr(0,text_control_length) != m_program_canvas->m_textCtrl->GetValue())
 	{
-        // copy the contents of the program canvas to the string
-        m_program->m_python_program.clear();
-        m_program->m_python_program << theApp.m_program_canvas->m_textCtrl->GetValue();
+		// copy the contents of the program canvas to the string
+		m_program->m_python_program.clear();
+		m_program->m_python_program << theApp.m_program_canvas->m_textCtrl->GetValue();
 	}
 
 #ifdef FREE_VERSION
@@ -502,11 +502,11 @@ static void OpenNcFileMenuCallback(wxCommandEvent& event)
 {
 	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
 	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
-    wxFileDialog dialog(theApp.m_output_canvas, _("Open NC file"), wxEmptyString, wxEmptyString, wildcard_string);
-    dialog.CentreOnParent();
+	wxFileDialog dialog(theApp.m_output_canvas, _("Open NC file"), wxEmptyString, wxEmptyString, wildcard_string);
+	dialog.CentreOnParent();
 
-    if (dialog.ShowModal() == wxID_OK)
-    {
+	if (dialog.ShowModal() == wxID_OK)
+	{
 		HeeksPyBackplot(theApp.m_program, theApp.m_program, dialog.GetPath().c_str());
 	}
 }
@@ -527,13 +527,13 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 #else
 	wxStandardPaths sp;
 #endif
-    wxString user_docs =sp.GetDocumentsDir();
-    wxString ncdir;
-    //ncdir =  user_docs + _T("/nc");
-    ncdir =  user_docs; //I was getting tired of having to start out at the root directory in linux
+	wxString user_docs = sp.GetDocumentsDir();
+	wxString ncdir;
+	//ncdir =  user_docs + _T("/nc");
+	ncdir =  user_docs; //I was getting tired of having to start out at the root directory in linux
 	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
 	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
-    wxString defaultDir = ncdir;
+	wxString defaultDir = ncdir;
 	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, wxEmptyString, wildcard_string, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fd.SetFilterIndex(1);
 	if (fd.ShowModal() == wxID_OK)
@@ -546,22 +546,22 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 				wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + nc_file_str);
 				return;
 			}
-               
 
-          if(theApp.m_use_DOS_not_Unix == true)   //DF -added to get DOS line endings HeeksCNC running on Unix 
-            {
-                long line_num= 0;
-                bool ok = true;
-                int nLines = theApp.m_output_canvas->m_textCtrl->GetNumberOfLines();
-            for ( int nLine = 0; ok && nLine < nLines; nLine ++)
-                {   
-                    ok = ofs.Write(theApp.m_output_canvas->m_textCtrl->GetLineText(line_num) + _T("\r\n") );
-                    line_num = line_num+1;
-                }
-            }
 
-            else
-			    ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
+			if(theApp.m_use_DOS_not_Unix == true)   //DF -added to get DOS line endings HeeksCNC running on Unix 
+			{
+				long line_num= 0;
+				bool ok = true;
+				int nLines = theApp.m_output_canvas->m_textCtrl->GetNumberOfLines();
+				for ( int nLine = 0; ok && nLine < nLines; nLine ++)
+				{   
+					ok = ofs.Write(theApp.m_output_canvas->m_textCtrl->GetLineText(line_num) + _T("\r\n") );
+					line_num = line_num+1;
+				}
+			}
+
+			else
+				ofs.Write(theApp.m_output_canvas->m_textCtrl->GetValue());
 		}
 		HeeksPyBackplot(theApp.m_program, theApp.m_program, nc_file_str);
 	}
@@ -574,20 +574,20 @@ static void HelpMenuCallback(wxCommandEvent& event)
 
 // a class to re-use existing "OnButton" functions in a Tool class
 class CCallbackTool: public Tool{
-public:
-	wxString m_title;
-	wxString m_bitmap_path;
-	void(*m_callback)(wxCommandEvent&);
+	public:
+		wxString m_title;
+		wxString m_bitmap_path;
+		void(*m_callback)(wxCommandEvent&);
 
-	CCallbackTool(const wxString& title, const wxString& bitmap_path, void(*callback)(wxCommandEvent&)): m_title(title), m_bitmap_path(bitmap_path), m_callback(callback){}
+		CCallbackTool(const wxString& title, const wxString& bitmap_path, void(*callback)(wxCommandEvent&)): m_title(title), m_bitmap_path(bitmap_path), m_callback(callback){}
 
-	// Tool's virtual functions
-	const wxChar* GetTitle(){return m_title;}
-	void Run(){
-		wxCommandEvent dummy_evt;
-		(*m_callback)(dummy_evt);
-	}
-	wxString BitmapPath(){ return m_bitmap_path;}
+		// Tool's virtual functions
+		const wxChar* GetTitle(){return m_title;}
+		void Run(){
+			wxCommandEvent dummy_evt;
+			(*m_callback)(dummy_evt);
+		}
+		wxString BitmapPath(){ return m_bitmap_path;}
 };
 
 static CCallbackTool new_drill_tool(_("New Drill..."), _T("drill"), NewDrillMenuCallback);
@@ -715,36 +715,36 @@ static void AddXmlScriptOpMenuItems(wxMenu *menu = NULL)
 		void(*onButtonFunction)(wxCommandEvent&) = NULL;
 		switch(i)
 		{
-		case 0:
-			onButtonFunction = NewXmlScriptOpCallback0;
-			break;
-		case 1:
-			onButtonFunction = NewXmlScriptOpCallback1;
-			break;
-		case 2:
-			onButtonFunction = NewXmlScriptOpCallback2;
-			break;
-		case 3:
-			onButtonFunction = NewXmlScriptOpCallback3;
-			break;
-		case 4:
-			onButtonFunction = NewXmlScriptOpCallback4;
-			break;
-		case 5:
-			onButtonFunction = NewXmlScriptOpCallback5;
-			break;
-		case 6:
-			onButtonFunction = NewXmlScriptOpCallback6;
-			break;
-		case 7:
-			onButtonFunction = NewXmlScriptOpCallback7;
-			break;
-		case 8:
-			onButtonFunction = NewXmlScriptOpCallback8;
-			break;
-		case 9:
-			onButtonFunction = NewXmlScriptOpCallback9;
-			break;
+			case 0:
+				onButtonFunction = NewXmlScriptOpCallback0;
+				break;
+			case 1:
+				onButtonFunction = NewXmlScriptOpCallback1;
+				break;
+			case 2:
+				onButtonFunction = NewXmlScriptOpCallback2;
+				break;
+			case 3:
+				onButtonFunction = NewXmlScriptOpCallback3;
+				break;
+			case 4:
+				onButtonFunction = NewXmlScriptOpCallback4;
+				break;
+			case 5:
+				onButtonFunction = NewXmlScriptOpCallback5;
+				break;
+			case 6:
+				onButtonFunction = NewXmlScriptOpCallback6;
+				break;
+			case 7:
+				onButtonFunction = NewXmlScriptOpCallback7;
+				break;
+			case 8:
+				onButtonFunction = NewXmlScriptOpCallback8;
+				break;
+			case 9:
+				onButtonFunction = NewXmlScriptOpCallback9;
+				break;
 		}
 
 		if(menu)
@@ -814,160 +814,160 @@ void OnBuildTexture()
 
 static void ImportExcellonDrillFile( const wxChar *file_path )
 {
-    Excellon drill;
+	Excellon drill;
 
 	wxString message(_("Select how the file is to be interpreted"));
-    wxString caption(_("Excellon drill file interpretation"));
+	wxString caption(_("Excellon drill file interpretation"));
 
-    wxArrayString choices;
+	wxArrayString choices;
 
-    choices.Add(_("Produce drill pattern as described"));
-    choices.Add(_("Produce mirrored drill pattern"));
+	choices.Add(_("Produce drill pattern as described"));
+	choices.Add(_("Produce mirrored drill pattern"));
 
-    wxString choice = ::wxGetSingleChoice( message, caption, choices );
+	wxString choice = ::wxGetSingleChoice( message, caption, choices );
 
-    if (choice == choices[0])
-    {
-        drill.Read( Ttc(file_path), false );
-    }
+	if (choice == choices[0])
+	{
+		drill.Read( Ttc(file_path), false );
+	}
 
-    if (choice == choices[1])
-    {
-        drill.Read( Ttc(file_path), true );
-    }
+	if (choice == choices[1])
+	{
+		drill.Read( Ttc(file_path), true );
+	}
 }
 
 static void UnitsChangedHandler( const double units )
 {
-    // The view units have changed.  See if the user wants the NC output units to change
-    // as well.
+	// The view units have changed.  See if the user wants the NC output units to change
+	// as well.
 
-    if (units != theApp.m_program->m_units)
-    {
-        int response;
-        response = wxMessageBox( _("Would you like to change the NC code generation units too?"), _("Change Units"), wxYES_NO );
-        if (response == wxYES)
-        {
-            theApp.m_program->m_units = units;
-        }
-    }
+	if (units != theApp.m_program->m_units)
+	{
+		int response;
+		response = wxMessageBox( _("Would you like to change the NC code generation units too?"), _("Change Units"), wxYES_NO );
+		if (response == wxYES)
+		{
+			theApp.m_program->m_units = units;
+		}
+	}
 }
 
 class SketchBox{
-public:
-	CBox m_box;
-	gp_Vec m_latest_shift;
+	public:
+		CBox m_box;
+		gp_Vec m_latest_shift;
 
-	SketchBox(const CBox &box);
+		SketchBox(const CBox &box);
 
-	SketchBox(const SketchBox &s)
-	{
-		m_box = s.m_box;
-		m_latest_shift = s.m_latest_shift;
-	}
+		SketchBox(const SketchBox &s)
+		{
+			m_box = s.m_box;
+			m_latest_shift = s.m_latest_shift;
+		}
 
-	void UpdateBoxAndSetShift(const CBox &new_box)
-	{
-		// use Centre
-		double old_centre[3], new_centre[3];
-		m_box.Centre(old_centre);
-		new_box.Centre(new_centre);
-		m_latest_shift = gp_Vec(new_centre[0] - old_centre[0], new_centre[1] - old_centre[1], 0.0);
-		m_box = new_box;
-	}
+		void UpdateBoxAndSetShift(const CBox &new_box)
+		{
+			// use Centre
+			double old_centre[3], new_centre[3];
+			m_box.Centre(old_centre);
+			new_box.Centre(new_centre);
+			m_latest_shift = gp_Vec(new_centre[0] - old_centre[0], new_centre[1] - old_centre[1], 0.0);
+			m_box = new_box;
+		}
 };
 SketchBox::SketchBox(const CBox &box)
-	{
-		m_box = box;
-		m_latest_shift = gp_Vec(0, 0, 0);
-	}
+{
+	m_box = box;
+	m_latest_shift = gp_Vec(0, 0, 0);
+}
 
 class HeeksCADObserver: public Observer
 {
-public:
-	std::map<int, SketchBox> m_box_map;
+	public:
+		std::map<int, SketchBox> m_box_map;
 
-	void OnChanged(const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed, const std::list<HeeksObj*>* modified)
-	{
-		if(added)
+		void OnChanged(const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed, const std::list<HeeksObj*>* modified)
 		{
-			for(std::list<HeeksObj*>::const_iterator It = added->begin(); It != added->end(); It++)
+			if(added)
 			{
-				HeeksObj* object = *It;
-				if(object->GetType() == SketchType)
+				for(std::list<HeeksObj*>::const_iterator It = added->begin(); It != added->end(); It++)
 				{
-					CBox box;
-					object->GetBox(box);
-					m_box_map.insert(std::make_pair(object->GetID(), SketchBox(box)));
-				}
-			}
-		}
-
-		if(modified)
-		{
-			for(std::list<HeeksObj*>::const_iterator It = modified->begin(); It != modified->end(); It++)
-			{
-				HeeksObj* object = *It;
-				if(object->GetType() == SketchType)
-				{
-					CBox new_box;
-					object->GetBox(new_box);
-					std::map<int, SketchBox>::iterator FindIt = m_box_map.find(object->GetID());
-					if(FindIt != m_box_map.end())
+					HeeksObj* object = *It;
+					if(object->GetType() == SketchType)
 					{
-						SketchBox &sketch_box = FindIt->second;
-						sketch_box.UpdateBoxAndSetShift(new_box);
+						CBox box;
+						object->GetBox(box);
+						m_box_map.insert(std::make_pair(object->GetID(), SketchBox(box)));
 					}
 				}
 			}
 
-			// check all the profile operations, so we can move the tags
-			for(HeeksObj* object = theApp.m_program->Operations()->GetFirstChild(); object; object = theApp.m_program->Operations()->GetNextChild())
+			if(modified)
 			{
-				if(object->GetType() == ProfileType)
+				for(std::list<HeeksObj*>::const_iterator It = modified->begin(); It != modified->end(); It++)
 				{
-					CProfile* profile = (CProfile*)object;
-					std::map<int, SketchBox>::iterator FindIt = m_box_map.find(object->GetID());
-					if (FindIt != m_box_map.end())
+					HeeksObj* object = *It;
+					if(object->GetType() == SketchType)
 					{
-						SketchBox &sketch_box = FindIt->second;
-						for (HeeksObj* tag = profile->Tags()->GetFirstChild(); tag; tag = profile->Tags()->GetNextChild())
+						CBox new_box;
+						object->GetBox(new_box);
+						std::map<int, SketchBox>::iterator FindIt = m_box_map.find(object->GetID());
+						if(FindIt != m_box_map.end())
 						{
-							((CTag*)tag)->m_pos[0] += sketch_box.m_latest_shift.X();
-							((CTag*)tag)->m_pos[1] += sketch_box.m_latest_shift.Y();
+							SketchBox &sketch_box = FindIt->second;
+							sketch_box.UpdateBoxAndSetShift(new_box);
 						}
-
-						profile->m_profile_params.m_start[0] += sketch_box.m_latest_shift.X();
-						profile->m_profile_params.m_start[1] += sketch_box.m_latest_shift.Y();
-						profile->m_profile_params.m_start[2] += sketch_box.m_latest_shift.Z();
-
-						profile->m_profile_params.m_end[0] += sketch_box.m_latest_shift.X();
-						profile->m_profile_params.m_end[1] += sketch_box.m_latest_shift.Y();
-						profile->m_profile_params.m_end[2] += sketch_box.m_latest_shift.Z();
-
-						profile->m_profile_params.m_roll_on_point[0] += sketch_box.m_latest_shift.X();
-						profile->m_profile_params.m_roll_on_point[1] += sketch_box.m_latest_shift.Y();
-						profile->m_profile_params.m_roll_on_point[2] += sketch_box.m_latest_shift.Z();
-
-						profile->m_profile_params.m_roll_off_point[0] += sketch_box.m_latest_shift.X();
-						profile->m_profile_params.m_roll_off_point[1] += sketch_box.m_latest_shift.Y();
-						profile->m_profile_params.m_roll_off_point[2] += sketch_box.m_latest_shift.Z();
 					}
 				}
-			}
 
-			for(std::map<int, SketchBox>::iterator It = m_box_map.begin(); It != m_box_map.end(); It++)
-			{
-				SketchBox &sketch_box = It->second;
-				sketch_box.m_latest_shift = gp_Vec(0, 0, 0);
+				// check all the profile operations, so we can move the tags
+				for(HeeksObj* object = theApp.m_program->Operations()->GetFirstChild(); object; object = theApp.m_program->Operations()->GetNextChild())
+				{
+					if(object->GetType() == ProfileType)
+					{
+						CProfile* profile = (CProfile*)object;
+						std::map<int, SketchBox>::iterator FindIt = m_box_map.find(object->GetID());
+						if (FindIt != m_box_map.end())
+						{
+							SketchBox &sketch_box = FindIt->second;
+							for (HeeksObj* tag = profile->Tags()->GetFirstChild(); tag; tag = profile->Tags()->GetNextChild())
+							{
+								((CTag*)tag)->m_pos[0] += sketch_box.m_latest_shift.X();
+								((CTag*)tag)->m_pos[1] += sketch_box.m_latest_shift.Y();
+							}
+
+							profile->m_profile_params.m_start[0] += sketch_box.m_latest_shift.X();
+							profile->m_profile_params.m_start[1] += sketch_box.m_latest_shift.Y();
+							profile->m_profile_params.m_start[2] += sketch_box.m_latest_shift.Z();
+
+							profile->m_profile_params.m_end[0] += sketch_box.m_latest_shift.X();
+							profile->m_profile_params.m_end[1] += sketch_box.m_latest_shift.Y();
+							profile->m_profile_params.m_end[2] += sketch_box.m_latest_shift.Z();
+
+							profile->m_profile_params.m_roll_on_point[0] += sketch_box.m_latest_shift.X();
+							profile->m_profile_params.m_roll_on_point[1] += sketch_box.m_latest_shift.Y();
+							profile->m_profile_params.m_roll_on_point[2] += sketch_box.m_latest_shift.Z();
+
+							profile->m_profile_params.m_roll_off_point[0] += sketch_box.m_latest_shift.X();
+							profile->m_profile_params.m_roll_off_point[1] += sketch_box.m_latest_shift.Y();
+							profile->m_profile_params.m_roll_off_point[2] += sketch_box.m_latest_shift.Z();
+						}
+					}
+				}
+
+				for(std::map<int, SketchBox>::iterator It = m_box_map.begin(); It != m_box_map.end(); It++)
+				{
+					SketchBox &sketch_box = It->second;
+					sketch_box.m_latest_shift = gp_Vec(0, 0, 0);
+				}
 			}
 		}
-	}
 
-	void Clear()
-	{
-		m_box_map.clear();
-	}
+		void Clear()
+		{
+			m_box_map.clear();
+		}
 }heekscad_observer;
 
 class NewProfileOpTool:public Tool
@@ -1015,13 +1015,13 @@ static void GetMarkedListTools(std::list<Tool*>& t_list)
 	{
 		switch(*It)
 		{
-		case SketchType:
-			t_list.push_back(new NewProfileOpTool);
-			t_list.push_back(new NewPocketOpTool);
-			break;
-		case PointType:
-			t_list.push_back(new NewDrillingOpTool);
-			break;
+			case SketchType:
+				t_list.push_back(new NewProfileOpTool);
+				t_list.push_back(new NewPocketOpTool);
+				break;
+			case PointType:
+				t_list.push_back(new NewDrillingOpTool);
+				break;
 		}
 	}
 }
@@ -1048,15 +1048,15 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// About box, stuff
 	heeksCAD->AddToAboutBox(wxString(_T("\n\n")) + _("HeeksCNC is the free machining add-on to HeeksCAD")
-		+ _T("\n") + _T("          http://code.google.com/p/heekscnc/")
-		+ _T("\n") + _("Written by Dan Heeks, Hirutso Enni, Perttu Ahola, David Nicholls")
-		+ _T("\n") + _("With help from archivist, crotchet1, DanielFalck, fenn, Sliptonic")
-		+ _T("\n\n") + _("geometry code, donated by Geoff Hawkesford, Camtek GmbH http://www.peps.de/")
-		+ _T("\n") + _("pocketing code from http://code.google.com/p/libarea/ , derived from the kbool library written by Klaas Holwerda http://boolean.klaasholwerda.nl/bool.html")
-		+ _T("\n") + _("Zig zag code from opencamlib http://code.google.com/p/opencamlib/")
-		+ _T("\n\n") + _("This HeeksCNC software installation is restricted by the GPL license http://www.gnu.org/licenses/gpl-3.0.txt")
-		+ _T("\n") + _("  which means it is free and open source, and must stay that way")
-		);
+			+ _T("\n") + _T("          http://code.google.com/p/heekscnc/")
+			+ _T("\n") + _("Written by Dan Heeks, Hirutso Enni, Perttu Ahola, David Nicholls")
+			+ _T("\n") + _("With help from archivist, crotchet1, DanielFalck, fenn, Sliptonic")
+			+ _T("\n\n") + _("geometry code, donated by Geoff Hawkesford, Camtek GmbH http://www.peps.de/")
+			+ _T("\n") + _("pocketing code from http://code.google.com/p/libarea/ , derived from the kbool library written by Klaas Holwerda http://boolean.klaasholwerda.nl/bool.html")
+			+ _T("\n") + _("Zig zag code from opencamlib http://code.google.com/p/opencamlib/")
+			+ _T("\n\n") + _("This HeeksCNC software installation is restricted by the GPL license http://www.gnu.org/licenses/gpl-3.0.txt")
+			+ _T("\n") + _("  which means it is free and open source, and must stay that way")
+			);
 
 	// add menus and toolbars
 	wxFrame* frame = heeksCAD->GetMainFrame();
@@ -1181,24 +1181,24 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 
 	// Import functions.
 	{
-        std::list<wxString> file_extensions;
-        file_extensions.push_back(_T("cnc"));
-        file_extensions.push_back(_T("drl"));
-        file_extensions.push_back(_T("drill"));
-        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportExcellonDrillFile ))
-        {
-            printf("Failed to register handler for Excellon dril files\n");
-        }
+		std::list<wxString> file_extensions;
+		file_extensions.push_back(_T("cnc"));
+		file_extensions.push_back(_T("drl"));
+		file_extensions.push_back(_T("drill"));
+		if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportExcellonDrillFile ))
+		{
+			printf("Failed to register handler for Excellon dril files\n");
+		}
 	}
 	{
-        std::list<wxString> file_extensions;
-        file_extensions.push_back(_T("tool"));
-        file_extensions.push_back(_T("tools"));
-        file_extensions.push_back(_T("tooltable"));
-        if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportToolsFile ))
-        {
-            printf("Failed to register handler for Tool Table files\n");
-        }
+		std::list<wxString> file_extensions;
+		file_extensions.push_back(_T("tool"));
+		file_extensions.push_back(_T("tools"));
+		file_extensions.push_back(_T("tooltable"));
+		if (! heeksCAD->RegisterFileOpenHandler( file_extensions, ImportToolsFile ))
+		{
+			printf("Failed to register handler for Tool Table files\n");
+		}
 	}
 
 	heeksCAD->RegisterObserver(&heekscad_observer);
@@ -1243,7 +1243,7 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 	std::list<wxString>	results;
 
 	DIR *pdir = opendir(p_szRoot);	// Look in the current directory for files
-				// whose names begin with "default."
+	// whose names begin with "default."
 	if (pdir != NULL)
 	{
 		struct dirent *pent = NULL;
@@ -1257,8 +1257,6 @@ std::list<wxString> CHeeksCNCApp::GetFileNames( const char *p_szRoot ) const
 	return(results);
 } // End of GetFileNames() method
 #endif
-
-
 
 void CHeeksCNCApp::OnNewOrOpen(bool open, int res)
 {
@@ -1296,8 +1294,7 @@ void on_set_use_clipper(bool value, HeeksObj* object)
 
 void on_set_use_DOS(bool value, HeeksObj* object)
 {
-    theApp.m_use_DOS_not_Unix = value;
-
+	theApp.m_use_DOS_not_Unix = value;
 }
 
 void CHeeksCNCApp::GetOptions(std::list<Property *> *list){
@@ -1332,7 +1329,7 @@ void CHeeksCNCApp::OnFrameDelete()
 	CSpeedOp::WriteToConfig();
 	CSendToMachine::WriteToConfig();
 	config.Write(_T("UseClipperNotBoolean"), m_use_Clipper_not_Boolean);
-    config.Write(_T("UseDOSNotUnix"), m_use_DOS_not_Unix);
+	config.Write(_T("UseDOSNotUnix"), m_use_DOS_not_Unix);
 }
 
 Python CHeeksCNCApp::SetTool( const int new_tool )
@@ -1357,7 +1354,7 @@ Python CHeeksCNCApp::SetTool( const int new_tool )
 
 	m_tool_number = new_tool;
 
-    return(python);
+	return(python);
 }
 
 wxString CHeeksCNCApp::GetDllFolder() const
@@ -1368,24 +1365,24 @@ wxString CHeeksCNCApp::GetDllFolder() const
 wxString CHeeksCNCApp::GetResFolder() const
 {
 #if defined(WIN32) || defined(RUNINPLACE) //compile with 'RUNINPLACE=yes make' then skip 'sudo make install'
-  #ifdef CMAKE_UNIX
-	return (m_dll_path + _T("/.."));
-  #else
-	return m_dll_path;
-  #endif
+	#ifdef CMAKE_UNIX
+		return (m_dll_path + _T("/.."));
+	#else
+		return m_dll_path;
+	#endif
 #else
-  #ifdef CMAKE_UNIX
-	// Unix
-    #if wxCHECK_VERSION(3, 0, 0)
-	wxStandardPaths& sp = wxStandardPaths::Get();
-    #else
-	wxStandardPaths sp;
-    #endif
-	return (sp.GetInstallPrefix() + wxT("/share/heekscnc"));
-  #else // CMAKE_UNIX
-	// Windows
-	return (m_dll_path + _T("/../../share/heekscnc"));
-  #endif // CMAKE_UNIX
+	#ifdef CMAKE_UNIX
+		// Unix
+		#if wxCHECK_VERSION(3, 0, 0)
+			wxStandardPaths& sp = wxStandardPaths::Get();
+		#else
+			wxStandardPaths sp;
+		#endif
+		return (sp.GetInstallPrefix() + wxT("/share/heekscnc"));
+	#else // CMAKE_UNIX
+		// Windows
+		return (m_dll_path + _T("/../../share/heekscnc"));
+	#endif // CMAKE_UNIX
 #endif // defined(WIN32) || defined(RUNINPLACE)
 }
 
@@ -1401,7 +1398,7 @@ wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool w
 	// Under Unix, it looks for a user-defined resource first.
 	// According to FreeDesktop XDG standards, HeeksCNC user-defineable resources should be placed in XDG_CONFIG_HOME (usually: ~/.config/heekscnc/)
 	filename = (wxGetenv(wxT("XDG_CONFIG_HOME")) ? wxString(wxGetenv(wxT("XDG_CONFIG_HOME"))) : wxFileName::GetHomeDir() + wxT("/.config"));
-  filename += wxT("/heekscnc/") + resource;
+	filename += wxT("/heekscnc/") + resource;
 
 	// Under Unix user can't save its resources in system (permissions denied), so we always return a user-writable file
 	if(!writableOnly)
@@ -1420,7 +1417,7 @@ wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool w
 		wxFileName fn(filename);
 		wxFileName::Mkdir(fn.GetPath(), 0700, wxPATH_MKDIR_FULL);
 	}
-	
+
 #endif
 	wprintf(wxT("Resource: ") + resource + wxT(" found at: ") + filename + wxT("\n"));
 	return filename;
@@ -1428,45 +1425,37 @@ wxString CHeeksCNCApp::GetResourceFilename(const wxString resource, const bool w
 
 class MyApp : public wxApp
 {
+	public:
 
- public:
+		virtual bool OnInit(void);
+};
 
-   virtual bool OnInit(void);
+bool MyApp::OnInit(void)
+{
+	return true;
+}
 
- };
-
- bool MyApp::OnInit(void)
-
- {
-
-   return true;
-
- }
-
-
- DECLARE_APP(MyApp)
-
- IMPLEMENT_APP(MyApp)
-
+DECLARE_APP(MyApp)
+IMPLEMENT_APP(MyApp)
 
 wxString HeeksCNCType( const int type )
 {
-    switch (type)
-    {
-    case ProgramType:       return(_("Program"));
-	case NCCodeBlockType:       return(_("NCCodeBlock"));
-	case NCCodeType:       return(_("NCCode"));
-	case OperationsType:       return(_("Operations"));
-	case ProfileType:       return(_("Profile"));
-	case PocketType:       return(_("Pocket"));
-	case DrillingType:       return(_("Drilling"));
-	case ToolType:       return(_("Tool"));
-	case ToolsType:       return(_("Tools"));
-	case TagsType:       return(_("Tags"));
-	case TagType:       return(_("Tag"));
-	case ScriptOpType:       return(_("ScriptOp"));
+	switch (type)
+	{
+		case ProgramType:       return(_("Program"));
+		case NCCodeBlockType:       return(_("NCCodeBlock"));
+		case NCCodeType:       return(_("NCCode"));
+		case OperationsType:       return(_("Operations"));
+		case ProfileType:       return(_("Profile"));
+		case PocketType:       return(_("Pocket"));
+		case DrillingType:       return(_("Drilling"));
+		case ToolType:       return(_("Tool"));
+		case ToolsType:       return(_("Tools"));
+		case TagsType:       return(_("Tags"));
+		case TagType:       return(_("Tag"));
+		case ScriptOpType:       return(_("ScriptOp"));
 
-	default:
-        return(_T("")); // Indicates that this function could not make the conversion.
-    } // End switch
+		default:
+								 return(_T("")); // Indicates that this function could not make the conversion.
+	} // End switch
 } // End HeeksCNCType() routine
