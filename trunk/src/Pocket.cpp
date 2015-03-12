@@ -353,7 +353,7 @@ Python CPocket::AppendTextToProgram()
 	CTool *pTool = CTool::Find( m_tool_number );
 	if (pTool == NULL)
 	{
-		wxMessageBox(_T("Cannot generate GCode for pocket without a tool assigned"));
+		wxMessageBox(_("Cannot generate G-Code for pocket without a tool assigned"));
 		return python;
 	} // End if - then
 
@@ -363,7 +363,7 @@ Python CPocket::AppendTextToProgram()
 	HeeksObj* object = heeksCAD->GetIDObject(SketchType, m_sketch);
 
 	if(object == NULL) {
-		wxMessageBox(wxString::Format(_("Pocket operation - Sketch doesn't exist")));
+		wxMessageBox(_("Pocket operation - Sketch doesn't exist"));
 		return python;
 	}
 
