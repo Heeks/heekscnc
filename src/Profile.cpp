@@ -836,7 +836,7 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 	CTool *pTool = CTool::Find( m_tool_number );
 	if (pTool == NULL)
 	{
-		if(!finishing_pass)wxMessageBox(_T("Cannot generate GCode for profile without a tool assigned"));
+		if(!finishing_pass) wxMessageBox(_("Cannot generate G-Code for profile without a tool assigned"));
 		return(python);
 	} // End if - then
 
