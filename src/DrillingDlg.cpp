@@ -37,9 +37,9 @@ DrillingDlg::DrillingDlg(wxWindow *parent, CDrilling* object, const wxString& ti
 	leftControls.push_back(MakeLabelAndControl(_("Points"), m_idsPoints = new CObjectIdsCtrl(this), m_btnPointsPick = new wxButton(this, ID_POINTS_PICK, _("Pick"))));
 	leftControls.push_back(MakeLabelAndControl(_("Dwell"), m_dblDwell = new CDoubleCtrl(this)));
 	leftControls.push_back( HControl( m_chkFeedRetract = new wxCheckBox( this, ID_FEED_RETRACT, _("Feed Retract") ), wxALL ));
+	leftControls.push_back( HControl( m_chkRapidToClearance = new wxCheckBox( this, ID_RAPID_TO_CLEARANCE, _("Rapid to Clearance") ), wxALL ));
 	leftControls.push_back( HControl( m_chkStopSpindleAtBottom = new wxCheckBox( this, ID_STOP_SPINDLE, _("Stop Spindle at Bottom") ), wxALL ));
 	leftControls.push_back( HControl( m_chkInternalCoolantOn = new wxCheckBox( this, ID_INTERNAL_COOLANT_ON, _("Interal Coolant On") ), wxALL ));
-	leftControls.push_back( HControl( m_chkRapidToClearance = new wxCheckBox( this, ID_RAPID_TO_CLEARANCE, _("Rapid to Clearance") ), wxALL ));
 
 	for(std::list<HControl>::iterator It = save_leftControls.begin(); It != save_leftControls.end(); It++)
 	{
