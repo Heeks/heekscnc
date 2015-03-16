@@ -500,9 +500,22 @@ static void SimulateCallback(wxCommandEvent &event)
 
 static void OpenNcFileMenuCallback(wxCommandEvent& event)
 {
-	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
-	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
-	wxFileDialog dialog(theApp.m_output_canvas, _("Open NC file"), wxEmptyString, wxEmptyString, wildcard_string);
+	// Default directory
+	wxString defaultDir = wxEmptyString;
+	if(heeksCAD->GetProjectFileName().IsOk()) // Project have already been opened/saved from/to a file
+	{
+		// Extract default directory from project filename
+		defaultDir = heeksCAD->GetProjectFileName().GetPath();
+	}
+
+	// Default extension filter
+	wxFileName defaultFileName(theApp.m_program->GetOutputFileName());
+	wxString wildcard_string = wxString::Format(wxT("%s (*.%s)|*.%s|%s (%s)|%s"), 
+			_("NC files"), defaultFileName.GetExt().c_str(), defaultFileName.GetExt().c_str(),
+			_("All files"), wxFileSelectorDefaultWildcardStr, wxFileSelectorDefaultWildcardStr
+			);
+
+	wxFileDialog dialog(theApp.m_output_canvas, _("Open NC file"), defaultDir, wxEmptyString, wildcard_string);
 	dialog.CentreOnParent();
 
 	if (dialog.ShowModal() == wxID_OK)
@@ -527,14 +540,24 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 #else
 	wxStandardPaths sp;
 #endif
-	wxString user_docs = sp.GetDocumentsDir();
-	wxString ncdir;
-	//ncdir =  user_docs + _T("/nc");
-	ncdir =  user_docs; //I was getting tired of having to start out at the root directory in linux
-	wxString ext_str(_T("*.*")); // to do, use the machine's NC extension
-	wxString wildcard_string = wxString(_("NC files")) + _T(" |") + ext_str;
-	wxString defaultDir = ncdir;
-	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, wxEmptyString, wildcard_string, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	// Default directory
+	wxString defaultDir = sp.GetDocumentsDir();
+	if(heeksCAD->GetProjectFileName().IsOk()) // Project have already been opened/saved from/to a file
+	{
+    	// Extract default directory from project filename
+		defaultDir = heeksCAD->GetProjectFileName().GetPath();
+	}
+
+    // Default filename
+	wxFileName defaultFileName(theApp.m_program->GetOutputFileName());
+
+	// Default extension filter
+	wxString wildcard_string = wxString::Format(wxT("%s (%s)|%s|%s (*.%s)|*.%s"), 
+			_("All files"), wxFileSelectorDefaultWildcardStr, wxFileSelectorDefaultWildcardStr,
+			_("NC files"), defaultFileName.GetExt().c_str(), defaultFileName.GetExt().c_str()
+			);
+
+	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, defaultFileName.GetFullName(), wildcard_string, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	fd.SetFilterIndex(1);
 	if (fd.ShowModal() == wxID_OK)
 	{           
@@ -546,7 +569,6 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 				wxMessageBox(wxString(_("Couldn't open file")) + _T(" - ") + nc_file_str);
 				return;
 			}
-
 
 			if(theApp.m_use_DOS_not_Unix == true)   //DF -added to get DOS line endings HeeksCNC running on Unix 
 			{
