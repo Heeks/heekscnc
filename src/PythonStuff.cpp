@@ -447,7 +447,7 @@ void CSendToMachine::SendGCode(const wxChar *gcode)
 #ifdef WIN32
         Execute(wxString(_T("\"")) + theApp.GetDllFolder() +wxString(_T("\\")) + m_command + wxString(_T("\" \"")) + ngcpath.GetFullPath() + wxString(_T("\"")));
 #else
-        wxString sendto_cmdline = m_command + wxString(_T(" ")) + ngcpath.GetFullPath();
+        wxString sendto_cmdline = m_command + wxT(" \"") + ngcpath.GetFullPath() + wxT("\"");
         wxLogDebug(_T("executing '%s')"), sendto_cmdline.c_str());
 		Execute(sendto_cmdline);
 #endif
