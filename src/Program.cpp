@@ -1231,7 +1231,7 @@ wxString CProgram::GetDefaultOutputFilePath()const
 #else
 	wxStandardPaths standard_paths;
 #endif
-	wxFileName default_path(standard_paths.GetTempDir().c_str(), wxString(_T("test")) + m_machine.suffix);
+	wxFileName default_path = wxFileName::CreateTempFileName(standard_paths.GetTempDir() + wxT("/heekscnc-")) + m_machine.suffix;
 	return default_path.GetFullPath();
 }
 
