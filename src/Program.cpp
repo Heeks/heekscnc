@@ -1086,24 +1086,20 @@ wxString CProgram::GetOutputFileName() const
 {
 	if (m_output_file_name_follows_data_file_name)
 	{
-		if (heeksCAD->GetFileFullPath())
+		if(heeksCAD->GetProjectFileName().IsOk())
 		{
-			wxString path(heeksCAD->GetFileFullPath());
-			int offset = -1;
-			if ((offset = path.Find('.', true)) != wxNOT_FOUND)
-			{
-				path.Remove(offset); // chop off the end.
-			} // End if - then
-
-			path << m_machine.suffix.c_str();
-			return(path);
-		} // End if - then
+			return heeksCAD->GetProjectFileName().GetPath(wxPATH_GET_SEPARATOR) + heeksCAD->GetProjectFileName().GetName() + m_machine.suffix;
+		}
 		else
 		{
-			// The user hasn't assigned a filename yet.  Use the default.
-			return GetDefaultOutputFilePath();
-		} // End if - else
-	} // End if - then
+#if wxCHECK_VERSION(3, 0, 0)
+			wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+			wxStandardPaths standard_paths;
+#endif
+			return wxFileName(standard_paths.GetTempDir(), heeksCAD->GetProjectTitle() + m_machine.suffix).GetFullPath();
+		}
+	}
 	else
 	{
 		return(m_output_file);
