@@ -425,7 +425,13 @@ void CSendToMachine::SendGCode(const wxChar *gcode)
 	{
 		wxBusyCursor wait; // show an hour glass until the end of this function
 
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 		wxFileName ngcpath(theApp.m_program->GetOutputFileName());
+		ngcpath.SetPath(standard_paths.GetTempDir());
 
 		// Append a number to 'prevent' from overwriting a file on machine
 		// FIXME Reset m_serial on new project (or opened)
