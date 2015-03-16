@@ -425,14 +425,17 @@ void CSendToMachine::SendGCode(const wxChar *gcode)
 	{
 		wxBusyCursor wait; // show an hour glass until the end of this function
 
-		// write the ngc file
-#if wxCHECK_VERSION(3, 0, 0)
-		wxStandardPaths& standard_paths = wxStandardPaths::Get();
-#else
-		wxStandardPaths standard_paths;
-#endif
-		wxFileName ngcpath(standard_paths.GetTempDir().c_str(), wxString::Format(_T("heekscnc-%d.ngc"), m_serial));
+		wxFileName ngcpath(theApp.m_program->GetOutputFileName());
+
+		// Append a number to 'prevent' from overwriting a file on machine
+		// FIXME Reset m_serial on new project (or opened)
+		if(m_serial)
+		{
+			ngcpath.SetName(ngcpath.GetName() + wxString::Format(wxT("-%d"), m_serial));
+		}
 		m_serial++;
+
+		// write the ngc file
 		{
 			wxFile ofs(ngcpath.GetFullPath(), wxFile::write);
 			if(!ofs.IsOpened())
