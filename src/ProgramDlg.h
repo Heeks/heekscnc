@@ -12,7 +12,7 @@ class ProgramDlg : public HeeksObjDlg
 	wxComboBox *m_cmbUnits;
 
 public:
-    ProgramDlg(wxWindow *parent, HeeksObj* object, const wxString& title = wxString(_T("Program")), bool top_level = true);
+    ProgramDlg(wxWindow *parent, HeeksObj* object, const wxString& title = wxString(_("Program")), bool top_level = true);
 
 	// HeeksObjDlg virtual functions
 	void GetDataRaw(HeeksObj* object);
