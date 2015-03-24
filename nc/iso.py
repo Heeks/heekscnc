@@ -610,7 +610,7 @@ class Creator(nc.Creator):
                 self.write(self.SPACE() + self.FEED())
                 self.prev_g0123 = self.FEED()
         else:
-            self.write(self.FEED())
+            self.write(self.SPACE() + self.FEED())
         self.write_preps()
         dx = dy = dz = 0
         if (x != None):
@@ -825,7 +825,7 @@ class Creator(nc.Creator):
                 self.write(self.SPACE() + arc_g_code)
                 self.prev_g0123 = arc_g_code
         else:
-            self.write(arc_g_code)
+            self.write(self.SPACE() + arc_g_code)
         self.write_preps()
         if (x != None):
             dx = x - self.x
