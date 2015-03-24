@@ -1,3 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Machine post="emc2b" reader="iso_read" suffix=".ngc" description="LinuxCNC"/>
 <Machine post="siegkx1" reader="iso_read" suffix=".tap" description="Mach3 Machine Controller"/>
+<Machine post="DeckelFP4Ma" reader="iso_read" suffix=".ngc" description="Deckel FP4Ma"/>
