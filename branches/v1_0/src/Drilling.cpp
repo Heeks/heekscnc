@@ -321,6 +321,7 @@ void CDrilling::glCommands(bool select, bool marked, bool no_color)
 						for (std::list<int>::iterator It = m_points.begin(); It != m_points.end(); It++)
 						{
 							HeeksObj* object = heeksCAD->GetIDObject(PointType, *It);
+							if(object == NULL)continue;
 							double p[3];
 							if(!object->GetEndPoint(p))continue;
 							gp_Pnt point = make_point(p);
