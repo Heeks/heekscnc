@@ -146,7 +146,8 @@ bool DrillingDlg::Do(CDrilling* object)
 				for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
 				{
 					HeeksObj* object = *It;
-					ids.push_back(object->GetID());
+					if(object->GetType() == PointType)
+						ids.push_back(object->GetID());
 				}
 			}
 
