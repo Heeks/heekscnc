@@ -81,6 +81,12 @@ class Creator(recreator.Redirector):
             i = i + 1
             
         self.path = ocl.Path()
+        
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
+        if z != None:
+            if z < self.z:
+                return
+        recreator.Redirector.rapid(self, x, y, z, a, b, c)
 
     def feed(self, x=None, y=None, z=None, a=None, b=None, c=None):
         px = self.x
