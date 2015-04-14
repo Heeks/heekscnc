@@ -5,5 +5,5 @@ import sys
 
 class Parser(hpgl.Parser):
     def __init__(self, writer):
-        hpgl.ParserHgpl2d.__init__(self, writer)
+        hpgl.Parser.__init__(self, writer)
         self.units_to_mm = 0.25
