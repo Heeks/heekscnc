@@ -30,9 +30,9 @@ class Parser(num_reader.NumReader):
                     if self.f > 40: color = "rapid"
                     else: color = "feed"
                     self.add_word(color)
-                    self.begin_path(color)
-                    self.add_line(int(x) * self.units_to_mm, int(y) * self.units_to_mm, int(z) * self.units_to_mm)
-                    self.end_path()
+                    self.writer.begin_path(color)
+                    self.writer.add_line(int(x) * self.units_to_mm, int(y) * self.units_to_mm, int(z) * self.units_to_mm)
+                    self.writer.end_path()
                     self.x = int(x)
                     self.y = int(y)
                     self.z = int(z)

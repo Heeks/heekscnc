@@ -6,8 +6,8 @@ import math
 
 class NumReader(nc.Parser):
 
-    def __init__(self):
-        nc.Parser.__init__(self)
+    def __init__(self, writer):
+        nc.Parser.__init__(self, writer)
 
     def get_number(self):
         number = ''
@@ -33,14 +33,14 @@ class NumReader(nc.Parser):
         return number
 
     def add_word(self, color):
-        self.add_text(self.parse_word, color)
+        self.writer.add_text(self.parse_word, color, None)
         self.parse_word = ""
 
-    def Parse(self, name, oname=None):
-        self.files_open(name,oname)
+    def Parse(self, name):
+        self.file_in = open(name, 'r')
 
         while self.readline():
-            self.begin_ncblock()
+            self.writer.begin_ncblock()
 
             self.parse_word = ""
             self.line_index = 0
@@ -54,9 +54,10 @@ class NumReader(nc.Parser):
 
                 self.line_index = self.line_index + 1
  
-            self.add_text(self.parse_word, None)
+            self.writer.add_text(self.parse_word, None, None)
 
-            self.end_ncblock()
+            self.writer.end_ncblock()
 
-        self.files_close()
+        self.file_in.close()
+
 

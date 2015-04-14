@@ -24,13 +24,13 @@ class Parser(num_reader.NumReader):
                 if up: color = "rapid"
                 else: color = "feed"
                 self.add_word(color)
-                self.begin_path(color)
+                self.writer.begin_path(color)
                 if up: z = self.up_z
                 else: z = self.down_z
                 if self.up != up:
-                    self.add_line(self.x * self.units_to_mm, self.y * self.units_to_mm, z)
-                self.add_line(int(x) * self.units_to_mm, int(y) * self.units_to_mm, z)
-                self.end_path()
+                    self.writer.add_line(self.x * self.units_to_mm, self.y * self.units_to_mm, z)
+                self.writer.add_line(int(x) * self.units_to_mm, int(y) * self.units_to_mm, z)
+                self.writer.end_path()
                 self.up = up
                 self.x = int(x)
                 self.y = int(y)
@@ -44,10 +44,10 @@ class Parser(num_reader.NumReader):
                 a = self.get_number()
                 if len(a) > 0:
                     self.add_word("feed")
-                    self.begin_path("feed")
+                    self.writer.begin_path("feed")
                     z = self.down_z
                     if self.up:
-                        self.add_line(self.x * self.units_to_mm, self.y * self.units_to_mm, z)
+                        self.writer.add_line(self.x * self.units_to_mm, self.y * self.units_to_mm, z)
 
                     sdx = self.x - int(cx)
                     sdy = self.y - int(cy)
@@ -64,8 +64,8 @@ class Parser(num_reader.NumReader):
                     if int(a) > 0: d = 1
                     else: d = -1
 
-                    self.add_arc(ex * self.units_to_mm, ey * self.units_to_mm, i = int(-sdx) * self.units_to_mm, j = int(-sdy) * self.units_to_mm, d = d)
-                    self.end_path()
+                    self.writer.add_arc(ex * self.units_to_mm, ey * self.units_to_mm, 0.0, i = int(-sdx) * self.units_to_mm, j = int(-sdy) * self.units_to_mm, d = d)
+                    self.writer.end_path()
                     self.up = False
                     self.x = int(ex)
                     self.y = int(ey)
