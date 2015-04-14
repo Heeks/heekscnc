@@ -5,17 +5,17 @@
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{621BF3C2-49FC-4430-B36F-B62BA01C84A4}
-AppName=HeeksCNC 1.0
-AppVerName=HeeksCNC 1.0
+AppId={{E2AD568F-B663-4086-9383-B064FF0C777D}
+AppName=HeeksCNC 1.1
+AppVerName=HeeksCNC 1.1
 AppPublisher=Heeks Software
 AppPublisherURL=http://heeks.net/
 AppSupportURL=http://code.google.com/p/heekscnc/
 AppUpdatesURL=http://code.google.com/p/heekscnc/
-DefaultDirName={pf}\HeeksCNC 1.0
-DefaultGroupName=HeeksCNC 1.0
+DefaultDirName={pf}\HeeksCNC 1.1
+DefaultGroupName=HeeksCNC 1.1
 DisableProgramGroupPage=yes
-OutputBaseFilename=HeeksCNC 1.0
+OutputBaseFilename=HeeksCNC 1.1
 Compression=lzma
 SolidCompression=yes
 
@@ -37,7 +37,7 @@ Name: "{app}\HeeksCNC"; Permissions: users-modify
 Name: "{app}\HeeksCNC\nc"; Permissions: users-modify
 
 [Files]
-Source: "C:\Dev\HeeksCAD1.0\HeeksCAD.exe"; DestDir: "{app}"; DestName: "HeeksCAD 1.0.exe"; Flags: ignoreversion
+Source: "C:\Dev\HeeksCAD1.0\HeeksCAD.exe"; DestDir: "{app}"; DestName: "HeeksCAD 1.1.exe"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\bitmaps\*.png"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\bitmaps\angle\*.png"; DestDir: "{app}\bitmaps\angle"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCAD1.0\bitmaps\font.glf"; DestDir: "{app}\bitmaps"; Flags: ignoreversion
@@ -99,14 +99,14 @@ Source: "C:\Program Files (x86)\VoxelCut\wx*.dll"; DestDir: "{app}\HeeksCNC"; Fl
 Source: "C:\Dev\HeeksCNC1.0\Toolpath.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 
 [Icons]
-Name: "{group}\HeeksCNC 1.0"; Filename: "{app}\HeeksCAD 1.0.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
-Name: "{commondesktop}\HeeksCNC 1.0"; Filename: "{app}\HeeksCAD 1.0.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Tasks: desktopicon
+Name: "{group}\HeeksCNC 1.1"; Filename: "{app}\HeeksCAD 1.1.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"
+Name: "{commondesktop}\HeeksCNC 1.1"; Filename: "{app}\HeeksCAD 1.1.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\HeeksCAD 1.0.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Description: "{cm:LaunchProgram,HeeksCNC}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\HeeksCAD 1.1.exe"; WorkingDir: "{app}"; Parameters: "HeeksCNC/HeeksCNC.dll"; Description: "{cm:LaunchProgram,HeeksCNC}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
-Root: HKCU; Subkey: "Software\HeeksCAD 1.0"; Flags: uninsdeletekeyifempty
-Root: HKCU; Subkey: "Software\HeeksCNC 1.0"; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\HeeksCAD 1.1"; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\HeeksCNC 1.1"; Flags: uninsdeletekeyifempty
 
 
