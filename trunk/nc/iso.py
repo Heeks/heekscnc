@@ -98,6 +98,7 @@ class Creator(nc.Creator):
         self.pattern_done_with_subroutine = False
         self.output_comment_before_tool_change = True
         self.output_arcs_as_lines = False
+        self.m_codes_on_their_own_line = False
         
     ############################################################################
     ##  Codes
@@ -209,21 +210,27 @@ class Creator(nc.Creator):
         self.f.write(self)
 
     def write_preps(self):
+        i = 0
         if self.g_plane.str:
+            i += 1
             self.write(self.SPACE())
         self.g_plane.write(self)
         for g in self.g_list:
-            self.write(self.SPACE() + g)
+            if i > 0:
+                self.write('\n' if self.m_codes_on_their_own_line else self.SPACE())
+            self.write(g)
+            i += 1
         self.g_list = []
 
     def write_misc(self):
         if (len(self.m)):
-            self.write(self.SPACE())
+            self.write('\n' if self.m_codes_on_their_own_line else self.SPACE())
             self.write(self.m.pop())
 
     def write_spindle(self):
-        self.write(self.SPACE())
-        self.s.write(self)
+        if self.s.str:
+            self.write('\n' if self.m_codes_on_their_own_line else self.SPACE())
+            self.s.write(self)
 
     def output_fixture(self):
         if self.current_fixture != self.fixture_wanted:
@@ -727,7 +734,7 @@ class Creator(nc.Creator):
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         if self.same_xyz(x, y, z): return
         
-        if self.output_arcs_as_lines or self.can_do_helical_arcs == False and self.in_quadrant_splitting == False and (z != None) and (math.fabs(z - self.z) > 0.000001) and (self.fmt.string(z) != self.fmt.string(self.z)):
+        if self.output_arcs_as_lines or (self.can_do_helical_arcs == False and self.in_quadrant_splitting == False and (z != None) and (math.fabs(z - self.z) > 0.000001) and (self.fmt.string(z) != self.fmt.string(self.z))):
             # split the helical arc into little line feed moves
             
             if x == None: x = self.x
