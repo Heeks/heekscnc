@@ -5,3 +5,4 @@
 <Machine post="hpgl2d" reader="hpgl2d_read" suffix=".tap" description="HPGL2D"/>
 <Machine post="hpgl2dv" reader="hpgl2dv_read" suffix=".tap" description="HPGL2DV"/>
 <Machine post="hpgl3d" reader="hpgl3d_read" suffix=".tap" description="HPGL3D"/>
+<Machine post="ReichenbacherRanc323" reader="iso_read" suffix=".ngc" description="Reichenbacher ranc 323"/>
