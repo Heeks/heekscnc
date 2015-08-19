@@ -83,7 +83,6 @@ Source: "C:\Dev\HeeksCNC1.0\bitmaps\profile\*.png"; DestDir: "{app}\HeeksCNC\bit
 Source: "C:\Dev\HeeksCNC1.0\bitmaps\surface\*.png"; DestDir: "{app}\HeeksCNC\bitmaps\surface"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNC1.0\icons\*.png"; DestDir: "{app}\HeeksCNC\icons"; Flags: ignoreversion
 Source: "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Program Files (x86)\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Dev\HeeksCNC1.0\dist\*"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\python26\python.exe"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
@@ -93,8 +92,8 @@ Source: "C:\Dev\voxelcut\area.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignorevers
 Source: "C:\Dev\voxelcut\voxelcut.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 Source: "C:\Dev\voxelcut\*.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 Source: "C:\Dev\voxelcut\bitmaps\*.png"; DestDir: "{app}\HeeksCNC\bitmaps"; Flags: ignoreversion
-Source: "C:\Program Files (x86)\VoxelCut\wx.*.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
-Source: "C:\Program Files (x86)\VoxelCut\wx*.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Dev\voxelcut\dist\wx.*.pyd"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
+Source: "C:\Dev\voxelcut\dist\wx*.dll"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 Source: "C:\Dev\HeeksCNC1.0\Toolpath.py"; DestDir: "{app}\HeeksCNC"; Flags: ignoreversion; Permissions: users-modify
 
