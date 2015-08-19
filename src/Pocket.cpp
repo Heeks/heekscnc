@@ -379,7 +379,7 @@ Python CPocket::AppendTextToProgram()
 				heeksCAD->ObjectAreaString(object, python);
 				WritePocketPython(python);
 			}
-			break;
+			return python;
 		}
 	}
 
