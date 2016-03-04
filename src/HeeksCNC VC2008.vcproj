@@ -343,7 +343,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;C:\Dev\HeeksCNCSVN\src\Unicode Release\HeeksCNC.dll&quot; C:\Dev\HeeksCNCSVN\HeeksCNC.dll&quot;"
+				CommandLine="copy &quot;C:\Dev\heekscnc\trunk\src\Unicode Release\HeeksCNC.dll&quot; C:\Dev\heekscnc\trunk\HeeksCNC.dll&quot;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -423,7 +423,7 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\src\Geom.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\Geom.cpp"
 			>
 		</File>
 		<File
@@ -475,31 +475,31 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\HeeksObjDlg.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\HeeksObjDlg.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\HeeksObjDlg.h"
+			RelativePath="$(HEEKSCADPATH)\interface\HeeksObjDlg.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObj.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObj.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObj.h"
+			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObj.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObjList.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObjList.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\IdNamedObjList.h"
+			RelativePath="$(HEEKSCADPATH)\interface\IdNamedObjList.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\interface\InputMode.h"
+			RelativePath="$(HEEKSCADPATH)\interface\InputMode.h"
 			>
 		</File>
 		<File
@@ -987,7 +987,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinystr.cpp"
+			RelativePath="$(HEEKSCADPATH)\tinyxml\tinystr.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
@@ -999,27 +999,11 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinystr.h"
+			RelativePath="$(HEEKSCADPATH)\tinyxml\tinystr.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxml.cpp"
-			>
-			<FileConfiguration
-				Name="Unicode Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxml.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxmlerror.cpp"
+			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxml.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"
@@ -1031,7 +1015,23 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\HeeksCADSVN\tinyxml\tinyxmlparser.cpp"
+			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxml.h"
+			>
+		</File>
+		<File
+			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxmlerror.cpp"
+			>
+			<FileConfiguration
+				Name="Unicode Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="$(HEEKSCADPATH)\tinyxml\tinyxmlparser.cpp"
 			>
 			<FileConfiguration
 				Name="Unicode Release|Win32"

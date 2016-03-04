@@ -109,7 +109,11 @@ void RunVoxelcutSimulation()
 #endif
 
 	// write initial.py
-	wxStandardPaths &standard_paths = wxStandardPaths::Get();
+#if wxCHECK_VERSION(3, 0, 0)
+		wxStandardPaths& standard_paths = wxStandardPaths::Get();
+#else
+		wxStandardPaths standard_paths;
+#endif
 	wxString initial_py(standard_paths.GetTempDir() + _T("/initial.py"));
 
 	{
