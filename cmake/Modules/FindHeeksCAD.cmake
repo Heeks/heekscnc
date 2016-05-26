@@ -10,6 +10,7 @@
 
 IF(NOT HeeksCAD_FOUND)
   SET( SEARCH_PATHS
+    "/usr/include/heekscad"
     "/usr/local/share/heekscad"
     "/usr/share/heekscad"
     "${CMAKE_SOURCE_DIR}/heekscad"
