@@ -322,7 +322,8 @@ const wxBitmap &CPocket::GetIcon()
 
 void CPocket::WritePocketPython(Python &python)
 {
-	// start - assume we are at a suitable clearance height
+	// rapid to clearance height
+	python << _T("rapid(z = depthparams.clearance_height)\n");
 
 	// make a parameter of area_funcs.pocket() eventually
 	// 0..plunge, 1..ramp, 2..helical
