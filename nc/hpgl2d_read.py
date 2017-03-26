@@ -64,7 +64,7 @@ class Parser(num_reader.NumReader):
                     if int(a) > 0: d = 1
                     else: d = -1
 
-                    self.writer.add_arc(ex * self.units_to_mm, ey * self.units_to_mm, 0.0, i = int(-sdx) * self.units_to_mm, j = int(-sdy) * self.units_to_mm, d = d)
+                    self.writer.add_arc(ex * self.units_to_mm, ey * self.units_to_mm, 0.0, int(-sdx) * self.units_to_mm, int(-sdy) * self.units_to_mm, d)
                     self.writer.end_path()
                     self.up = False
                     self.x = int(ex)
