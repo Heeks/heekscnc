@@ -50,26 +50,5 @@ else( CMAKE_SIZEOF_VOID_P equal 4 )
   set(PKG_ARCH amd64)
 endif( CMAKE_SIZEOF_VOID_P equal 4 )
 
-#-------------------- package generation -------------------------
-set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "HeeksCAD Developers <heekscad-devel@googlegroups.com>")
-set(CPACK_PACKAGE_NAME "heekscnc")
-set(CPACK_PACKAGE_VERSION_MAJOR 1)
-set(CPACK_PACKAGE_VERSION_MINOR 0)
-set(CPACK_PACKAGE_VERSION_PATCH 0)
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_beta-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}_${PKG_ARCH}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "HeeksCNC, CNC machining add-in for HeeksCAD
- HeeksCNC is a CNC machining (CAM) add-in for HeeksCAD. It produces
- g-code for CNC machines, such as those run by linuxcnc.org's EMC2")
-set(CPACK_DEBIAN_PACKAGE_SECTION "science")
-set(CPACK_DEBIAN_PACKAGE_VERSION "")
-
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "python-wxgtk2.8, libgtkglext1 (>= 1.2), python (>= 2.5), libboost-python1.40.0 | libboost-python1.42.0, python" )
-set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "heekscad (>= 0.15.1), libopencascade-ocaf-6.3.0")
-
 #--------------- these are down here so that the package version vars above are visible -------------
 add_subdirectory( src )
-set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CPACK_PACKAGE_FILE_NAME}.deb" )
-
-#------------- include(CPack) should be the last line in this file
-include(CPack)
