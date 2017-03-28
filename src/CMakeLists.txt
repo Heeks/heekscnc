@@ -2,7 +2,6 @@ project( libheekscnc )
 
 cmake_minimum_required( VERSION 2.6 )
 
-set ( CMAKE_BUILD_TYPE Debug )
 add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL
                   -DOPEN_SOURCE_GEOMETRY -DWXUSINGDLL )
 find_package( wxWidgets REQUIRED COMPONENTS base core gl )
