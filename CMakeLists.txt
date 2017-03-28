@@ -44,11 +44,11 @@ list( REMOVE_ITEM hcnc_py
 )
 install( FILES ${hcnc_py} DESTINATION lib/heekscnc )
 
-if( CMAKE_SIZEOF_VOID_P equal 4 )
+if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
   set(PKG_ARCH i386)
-else( CMAKE_SIZEOF_VOID_P equal 4 )
+else( CMAKE_SIZEOF_VOID_P EQUAL 4 )
   set(PKG_ARCH amd64)
-endif( CMAKE_SIZEOF_VOID_P equal 4 )
+endif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
 
 #--------------- these are down here so that the package version vars above are visible -------------
 add_subdirectory( src )
