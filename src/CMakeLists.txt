@@ -94,7 +94,7 @@ set( heekscnc_HDRS
     Tags.h
     Tools.h
     stdafx.h
-   )
+    )
 
 set( heekscad_SRCS
     ${HeeksCAD_SRC_DIR}/interface/Geom.cpp
@@ -171,7 +171,7 @@ set( heekscnc_SRCS
     Tags.cpp
     Tools.cpp
     stdafx.cpp
-   )
+    )
 
 add_library( heekscnc SHARED ${heekscnc_SRCS} ${heekscad_SRCS} ${platform_SRCS} )
 target_link_libraries( heekscnc ${wxWidgets_LIBRARIES}  ${OpenCASCADE_LIBRARIES} ${libheekstinyxml_LIBRARIES} )
