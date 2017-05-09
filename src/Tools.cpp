@@ -120,7 +120,6 @@ class ExportTools: public Tool{
 				+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
 				wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
 
-			fd.SetFilterIndex(1);
 			if (fd.ShowModal() == wxID_CANCEL) return;
 			previous_path = fd.GetPath().c_str();
 		}
@@ -200,7 +199,6 @@ class ImportTools: public Tool{
 				+ _T("*.tools;*.TOOLS;*.Tools;")
 				+ _T("*.tooltable;*.TOOLTABLE;*.ToolTable;"),
 				wxFD_OPEN | wxFD_FILE_MUST_EXIST );
-			fd.SetFilterIndex(1);
 			if (fd.ShowModal() == wxID_CANCEL) return;
 			previous_path = fd.GetPath().c_str();
 		}

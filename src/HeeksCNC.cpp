@@ -558,7 +558,6 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 			);
 
 	wxFileDialog fd(theApp.m_output_canvas, _("Save NC file"), defaultDir, defaultFileName.GetFullName(), wildcard_string, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-	fd.SetFilterIndex(1);
 	if (fd.ShowModal() == wxID_OK)
 	{           
 		wxString nc_file_str = fd.GetPath().c_str();

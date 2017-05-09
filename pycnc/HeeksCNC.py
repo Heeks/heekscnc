@@ -69,7 +69,6 @@ class HeeksCNC:
         import wx
         dialog = wx.FileDialog(self.cad.frame, "Save NC file", wildcard = "NC files" + " |*.*", style = wx.FD_SAVE + wx.FD_OVERWRITE_PROMPT)
         dialog.CentreOnParent()
-        dialog.SetFilterIndex(1)
         
         if dialog.ShowModal() == wx.ID_OK:
             nc_file_str = dialog.GetPath()
