@@ -35,7 +35,7 @@ void StockDlg::SetFromDataRaw(HeeksObj* object)
 
 void StockDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/stock"));
+	::wxLaunchDefaultBrowser(_T("http://sites.google.com/site/heekscad/help/stock"));
 }
 
 bool StockDlg::Do(CStock* object)

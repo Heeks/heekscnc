@@ -466,7 +466,7 @@ void CHeeksCNCApp::RunPythonScript()
 	}
 
 #ifdef FREE_VERSION
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/buy-heekscnc-1-0"));
+	::wxLaunchDefaultBrowser(_T("http://sites.google.com/site/heekscad/help/buy-heekscnc-1-0"));
 #endif
 
 	HeeksPyPostProcess(m_program, m_program->GetOutputFileName(), true );
@@ -590,7 +590,7 @@ static void SaveNcFileMenuCallback(wxCommandEvent& event)
 
 static void HelpMenuCallback(wxCommandEvent& event)
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/help"));
+	::wxLaunchDefaultBrowser(_T("http://sites.google.com/site/heekscad/help"));
 }
 
 // a class to re-use existing "OnButton" functions in a Tool class
@@ -1070,9 +1070,9 @@ void CHeeksCNCApp::OnStartUp(CHeeksCADInterface* h, const wxString& dll_path)
 	// About box, stuff
 	heeksCAD->AddToAboutBox(wxString(_T("\n\n")) + _("HeeksCNC is the free machining add-on to HeeksCAD")
 			+ _T("\n") + _T("          http://code.google.com/p/heekscnc/")
-			+ _T("\n") + _("Written by Dan Heeks, Hirutso Enni, Perttu Ahola, David Nicholls")
+			+ _T("\n") + _("Written by Dan Heeks ( danheeks@gmail.com ), Hirutso Enni, Perttu Ahola, David Nicholls")
 			+ _T("\n") + _("With help from archivist, crotchet1, DanielFalck, fenn, Sliptonic")
-			+ _T("\n\n") + _("geometry code, donated by Geoff Hawkesford, Camtek GmbH http://www.peps.de/")
+			+ _T("\n\n") + _("geometry code, donated by Geoff Hawkesford")
 			+ _T("\n") + _("pocketing code from http://code.google.com/p/libarea/ , derived from the kbool library written by Klaas Holwerda http://boolean.klaasholwerda.nl/bool.html")
 			+ _T("\n") + _("Zig zag code from opencamlib http://code.google.com/p/opencamlib/")
 			+ _T("\n\n") + _("This HeeksCNC software installation is restricted by the GPL license http://www.gnu.org/licenses/gpl-3.0.txt")

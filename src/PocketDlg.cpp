@@ -134,7 +134,7 @@ void PocketDlg::EnableZigZagControls()
 
 void PocketDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/pocket"));
+	::wxLaunchDefaultBrowser(_T("http://sites.google.com/site/heekscad/help/pocket"));
 }
 
 bool PocketDlg::Do(CPocket* object)

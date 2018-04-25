@@ -235,5 +235,5 @@ void CToolDlg::EnableAndSetCornerFlatAndAngle(CToolParams::eToolType type)
 
 void CToolDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/tool"));
+	::wxLaunchDefaultBrowser(_T("http://sites.google.com/site/heekscad/help/tool"));
 }

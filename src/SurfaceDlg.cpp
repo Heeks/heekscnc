@@ -62,7 +62,7 @@ void SurfaceDlg::SetPictureByWindow(wxWindow* w)
 
 void SurfaceDlg::OnHelp( wxCommandEvent& event )
 {
-	::wxLaunchDefaultBrowser(_T("http://heeks.net/help/surface"));
+	::wxLaunchDefaultBrowser(_T("http://sites.google.com/site/heekscad/help/surface"));
 }
 
 bool SurfaceDlg::Do(CSurface* object)

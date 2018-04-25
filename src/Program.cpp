@@ -820,7 +820,7 @@ Python CProgram::RewritePythonProgram()
 	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
 	python << _T("comment('***********    MADE WITH FREE VERSION OF HEEKSCNC!   ***********\\n')\n");
 	python << _T("comment('***********                    ***********\\n')\n");
-	python << _T("comment('***********    www.heeks.net   ***********\\n')\n");
+	python << _T("comment('***********    http://sites.google.com/site/heekscad/home   ***********\\n')\n");
 	python << _T("comment('***********                    ***********\\n')\n");
 #endif
 
