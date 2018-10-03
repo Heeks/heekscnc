@@ -1086,9 +1086,16 @@ wxString CProgram::GetOutputFileName() const
 {
 	if (m_output_file_name_follows_data_file_name)
 	{
-		if(heeksCAD->GetProjectFileName().IsOk())
+		wxFileName project_file_name = heeksCAD->GetProjectFileName();
+
+		if(project_file_name.IsOk())
 		{
-			return heeksCAD->GetProjectFileName().GetPath(wxPATH_GET_SEPARATOR) + heeksCAD->GetProjectFileName().GetName() + m_machine.suffix;
+			wxString return_str;
+#ifdef WIN32
+			return_str = project_file_name.GetVolume() + _T(":");
+#endif
+			return_str.append(project_file_name.GetPath(wxPATH_GET_SEPARATOR) + project_file_name.GetName() + m_machine.suffix);
+			return return_str;
 		}
 		else
 		{
