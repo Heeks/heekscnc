@@ -13,16 +13,16 @@ class Format:
     def string(self, number):
         if number == None:
             return 'None'
-        f = float(number) * math.pow(10, self.number_of_decimal_places)
-        s = str(f)
+        multiplier = math.pow(10, self.number_of_decimal_places)
+        
+        f = float(number) * multiplier
         
         if self.round_down == False:
             if f < 0: f = f - .5
             else: f = f + .5
-            s = str(number)
-            
-        if math.fabs(f) < 1.0:
-            s = '0'
+
+        f = int(f) / multiplier
+        s = str(f)
             
         minus = False
         if s[0] == '-':
