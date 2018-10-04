@@ -734,6 +734,11 @@ class Creator(nc.Creator):
     def arc(self, cw, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
         if self.same_xyz(x, y, z): return
         
+        if (self.fmt.string(i) == self.fmt.string(self.x) and self.fmt.string(j) == self.fmt.string(self.y)) or (self.fmt.string(i) == self.fmt.string(x if x != None else self.x) and self.fmt.string(j) == self.fmt.string(y if y != None else self.y)):
+            # if arc has zero radius, output an line instead
+            self.feed(x, y, z)
+            return
+        
         if self.output_arcs_as_lines or (self.can_do_helical_arcs == False and self.in_quadrant_splitting == False and (z != None) and (math.fabs(z - self.z) > 0.000001) and (self.fmt.string(z) != self.fmt.string(self.z))):
             # split the helical arc into little line feed moves
             
