@@ -850,6 +850,10 @@ Python CProfile::AppendTextToProgram(bool finishing_pass)
 			python << m_profile_params.m_auto_roll_radius / theApp.m_program->m_units;
 			python << _T(")\n");
 		}
+		else
+		{
+			python << _T("roll_radius = None\n");
+		}
 	}
 
 	if(finishing_pass)
