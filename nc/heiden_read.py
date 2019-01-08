@@ -55,7 +55,6 @@ class Parser(nc.Parser):
 
         add_alpha_words_as_one(words, alpha_words)
 
-        print words
         return words
        
     def ParseWord(self, word):
@@ -64,7 +63,6 @@ class Parser(nc.Parser):
         if (word[0] == 'F'):
             self.col = "axis"
             if word == 'FMAX':
-                print 'FMAX found'
                 self.rapid = True
                 self.path_col = "rapid"
                 self.col = "rapid"
