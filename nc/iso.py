@@ -446,7 +446,7 @@ class Creator(nc.Creator):
     ############################################################################
     ##  Tools
 
-    def tool_change(self, id):
+    def tool_change(self, id, newline = True):
         if self.output_comment_before_tool_change:
             self.comment('tool change to ' + self.tool_defn_params[id]['name']);
             
@@ -459,11 +459,12 @@ class Creator(nc.Creator):
         self.write(self.SPACE() + (self.TOOL() % id))
         if self.output_g43_on_tool_change_line == True:
             self.write(self.SPACE() + 'G43')
-        self.write('\n')
-        if self.output_h_and_d_at_tool_change == True:
-            if self.output_g43_on_tool_change_line == False:
-                self.write(self.SPACE() + 'G43')
-            self.write(self.SPACE() + 'D' + str(id) + self.SPACE() + 'H' + str(id) + '\n')
+        if newline:
+            self.write('\n')
+            if self.output_h_and_d_at_tool_change == True:
+                if self.output_g43_on_tool_change_line == False:
+                    self.write(self.SPACE() + 'G43')
+                self.write(self.SPACE() + 'D' + str(id) + self.SPACE() + 'H' + str(id) + '\n')
         self.t = id
         self.move_done_since_tool_change = False
 
@@ -547,7 +548,7 @@ class Creator(nc.Creator):
     ############################################################################
     ##  Moves
 
-    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None ):
+    def rapid(self, x=None, y=None, z=None, a=None, b=None, c=None, newline = True ):
         if self.same_xyz(x, y, z, a, b, c): return
         self.on_move()
 
@@ -607,7 +608,7 @@ class Creator(nc.Creator):
             self.c = c
         self.write_spindle()
         self.write_misc()
-        self.write('\n')
+        if newline: self.write('\n')
 
     def feed(self, x=None, y=None, z=None, a=None, b=None, c=None):
         if self.same_xyz(x, y, z, a, b, c): return

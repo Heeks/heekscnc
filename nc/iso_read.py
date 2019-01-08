@@ -15,20 +15,13 @@ class Parser(nc.Parser):
     def __init__(self, writer):
         nc.Parser.__init__(self, writer)
 
-        self.pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
-        self.arc_centre_absolute = False
-        self.arc_centre_positive = False
-        self.oldx = None
-        self.oldy = None
-        self.oldz = None
-
         #if ( or ! or ; at least one space or a letter followed by some character or not followed by a +/- followed by decimal, with a possible decimal point
          #  followed by a possible deimcal, or a letter followed by # with a decimal . deimcal
         # add your character here > [(!;] for comments char
         # then look for the 'comment' function towards the end of the file and add another elif
         
     def ParseWord(self, word):
-        word == word.upper()
+        word = word.upper()
         if (word[0] == 'A'):
             self.col = "axis"
             self.a = eval(word[1:])

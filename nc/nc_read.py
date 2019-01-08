@@ -6,6 +6,7 @@
 ################################################################################
 import area
 import math
+import re
 count = 0
 
 class Program:   # stores start and end lines of programs and subroutines
@@ -20,9 +21,15 @@ class Parser:
         self.currentx = None
         self.currenty = None
         self.currentz = None
+        self.oldx = None
+        self.oldy = None
+        self.oldz = None
         self.absolute_flag = True
+        self.arc_centre_absolute = False
+        self.arc_centre_positive = False
         self.drillz = None
         self.need_m6_for_t_change = True
+        self.pattern_main = re.compile('([(!;].*|\s+|[a-zA-Z0-9_:](?:[+-])?\d*(?:\.\d*)?|\w\#\d+|\(.*?\)|\#\d+\=(?:[+-])?\d*(?:\.\d*)?)')
         
     def __del__(self):
         self.file_in.close()
@@ -51,6 +58,10 @@ class Parser:
 
     def absolute(self):
         self.absolute_flag = True
+        
+    def lineToWords(self):
+        # default implementation uses regular expressions, which are a bit hard to understand
+        return self.pattern_main.findall(self.line)
         
     def Parse(self, name):
         self.file_in = open(name, 'r')
@@ -88,7 +99,7 @@ class Parser:
             self.drill_off = False
             self.no_move = False
             
-            words = self.pattern_main.findall(self.line)
+            words = self.lineToWords()
             for word in words:
                 self.col = None
                 self.cdata = False

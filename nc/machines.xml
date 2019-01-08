@@ -6,3 +6,4 @@
 <Machine post="hpgl2dv" reader="hpgl2dv_read" suffix=".tap" description="HPGL2DV"/>
 <Machine post="hpgl3d" reader="hpgl3d_read" suffix=".tap" description="HPGL3D"/>
 <Machine post="mc1000vf" reader="iso_read" suffix=".txt" description="MC-1000VF"/>
+<Machine post="heiden" reader="heiden_read" suffix=".h" description="Heidenhain"/>
