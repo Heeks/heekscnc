@@ -29,21 +29,16 @@ class Creator(iso.Creator):
         iso.Creator.__init__(self)
         self.output_tool_definitions = False
         self.drillExpanded = True # to do: implement drill cycle, but for now just do linear moves
-        self.output_block_numbers = False
+        self.output_block_numbers = True
         self.start_block_number = 1
         self.block_number_increment = 1
         self.output_spindle_speed_on_tool_change_line = True
         self.s = Address('S', fmt = Format(number_of_decimal_places = 2))
         self.spindle_dir_for_next_move = None
+        self.output_arcs_as_lines = False
         
     def BLOCK(self): return('%i')
-
-    def SPACE(self):
-        if self.start_of_line == True:
-            self.start_of_line = False
-            return ''
-        else:
-            return ' '
+    def SPACE_STR(self): return ' '
 
     # ignore these ISO outputs
     def imperial(self): pass
@@ -120,10 +115,16 @@ class Creator(iso.Creator):
         self.write('C X' + self.fmt.string(self.x) + ' Y' + self.fmt.string(self.y) + (' DR-' if cw else ' DR+') + '\n')
 
     def arc_cw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.heidenhain_arc(x, y, i, j, True)
+        if self.output_arcs_as_lines:
+            iso.Creator.arc_cw(self, x, y, z, i, j, k, r)
+        else:
+            self.heidenhain_arc(x, y, i, j, True)
 
     def arc_ccw(self, x=None, y=None, z=None, i=None, j=None, k=None, r=None):
-        self.heidenhain_arc(x, y, i, j, False)
+        if self.output_arcs_as_lines:
+            iso.Creator.arc_ccw(self, x, y, z, i, j, k, r)
+        else:
+            self.heidenhain_arc(x, y, i, j, False)
 
 
 nc.creator = Creator()
