@@ -48,12 +48,14 @@ class Creator(iso.Creator):
     def polar(self, on=True): pass
     def set_plane(self, plane): pass
 
-    def PROGRAM_END(self): return( 'M30\nEND PGM' + self.SPACE() + '0011' + self.SPACE() + 'MM')
+    def PROGRAM_END(self): return( 'M30\nEND PGM' + self.SPACE() + self.id_string + self.SPACE() + 'MM')
  
     def program_begin(self, id, name=''):
         if self.use_this_program_id:
             id = self.use_this_program_id
-        self.write('BEGIN PGM' + self.SPACE() + '0011' + self.SPACE() + 'MM')
+            
+        self.id_string = Format(add_leading_zeros = 4).string(id)
+        self.write('BEGIN PGM' + self.SPACE() + self.id_string + self.SPACE() + 'MM')
         self.write('\n')
         
         self.program_id = id
