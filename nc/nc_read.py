@@ -168,8 +168,8 @@ class Parser:
                                 j = c.y
 
                             else:
-                                i = i + self.oldx
-                                j = j + self.oldy
+                                if self.oldx != None: i = i + self.oldx
+                                if self.oldy != None: j = j + self.oldy
                         if self.arc == -1:
                             self.writer.arc_cw(self.x, self.y, self.z, i, j, k)
                         else:
