@@ -376,7 +376,15 @@ Python CPocket::AppendTextToProgram()
 		case CircleType:
 		case AreaType:
 			{
-				heeksCAD->ObjectAreaString(object, python);
+				if(theApp.m_program->m_units != 1.0)
+				{
+					HeeksObj* copy_object = object->MakeACopy();
+					double c[3] = {0.0,0.0,0.0};
+					heeksCAD->ScaleObject(copy_object, c, 1.0/theApp.m_program->m_units);
+					heeksCAD->ObjectAreaString(copy_object, python);
+				}
+				else
+					heeksCAD->ObjectAreaString(object, python);
 				WritePocketPython(python);
 			}
 			return python;
