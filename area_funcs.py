@@ -7,28 +7,97 @@ import kurve_funcs
 area_for_feed_possible = None
 tool_radius_for_pocket = None
 
+def rapid_to_start(need_rapid, vertex, rapid_safety_space, current_start_depth):
+        # rapid to start XY, then down
+        if need_rapid:
+            rapid(vertex.p.x, vertex.p.y)
+            rapid(z = current_start_depth + rapid_safety_space)
+
+
+def ramp_in(curve, need_rapid, p, rapid_safety_space, current_start_depth, final_depth):
+    prev_p = p
+    # lets see if we can make it cut on a ramp
+    # add enough vertices for a ramp of 45 degrees, so length of:
+    rampStartDepth = current_start_depth + rapid_safety_space;
+    rampEndDepth = final_depth
+    rampDepth = rampEndDepth - rampStartDepth
+    rampLength = math.fabs(rampDepth)
+    
+    origVertices = curve.getVertices()
+    origSpans = curve.GetSpans()
+    revVertices = list(reversed(origVertices))
+    if len(origSpans) > 1:
+        reverseRampVertices = [revVertices[0]]
+        # the spans tell us about the lengths
+        countedLength = 0.0
+        countedVertices = 1
+        while countedLength < rampLength:
+            for (span, vertex) in zip(reversed(origSpans), revVertices[1:]):
+                vlen = span.Length()
+                countedLength = countedLength + vlen
+                countedVertices = countedVertices+1
+                if vlen > 0.0:
+                    reverseRampVertices.append(vertex)
+                if countedLength > rampLength:
+                    break
+
+        rampVertices = list(reversed(reverseRampVertices))
+        rampCurve = area.Curve()
+        for vertex in rampVertices:
+            rampCurve.append(vertex)
+        
+        rampSpans = rampCurve.GetSpans()
+        
+        # compute z offsets
+        
+        if countedLength == 0.0:
+            raise NameError('bugger, zero length of ramp should be %f,  but %d spans and %d original spans and %d vertices, %d rampVertices' % (rampLength, len(rampSpans), len(origSpans), len(origVertices), len(reverseRampVertices)))
+        
+        zProgress = [0.0]
+        zFactor = 1.0/countedLength
+        lastZProgress = 0.0
+        for (span, vertex) in zip(rampSpans, rampVertices[1:]):
+            vlen = span.Length()
+            zp = lastZProgress+vlen*zFactor
+            lastZProgress = zp
+            zProgress.append(zp)
+                
+        
+        
+        rapid_to_start(need_rapid, rampVertices[0], rapid_safety_space, current_start_depth)
+        
+        # do the ramp
+        for (vertex, zProgress) in zip(rampVertices, zProgress):
+            z = rampStartDepth + zProgress*rampDepth
+            if vertex.type == 1:
+                arc_ccw(vertex.p.x, vertex.p.y, z, i = vertex.c.x, j = vertex.c.y)
+            elif vertex.type == -1:
+                arc_cw(vertex.p.x, vertex.p.y, z, i = vertex.c.x, j = vertex.c.y)
+            else:
+                feed(vertex.p.x, vertex.p.y, z)
+            prev_p = vertex.p
+    else:
+        rapid_to_start(need_rapid, origVertices[0], rapid_safety_space, current_start_depth)
+        feed(z = final_depth)
+        prev_p = origVertices[0].p
+    return prev_p
+
 def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, final_depth):
     prev_p = p
     first = True
-
+    
+    prev_p = ramp_in(curve, need_rapid, p, rapid_safety_space, current_start_depth, final_depth)
+    
     for vertex in curve.getVertices():
-        if need_rapid and first:
-            # rapid across
-            rapid(vertex.p.x, vertex.p.y)
-            ##rapid down
-            rapid(z = current_start_depth + rapid_safety_space)
-            #feed down
-            feed(z = final_depth)
-            first = False
+        if vertex.type == 1:
+            arc_ccw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
+        elif vertex.type == -1:
+            arc_cw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
         else:
-            if vertex.type == 1:
-                arc_ccw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
-            elif vertex.type == -1:
-                arc_cw(vertex.p.x, vertex.p.y, i = vertex.c.x, j = vertex.c.y)
-            else:
-                feed(vertex.p.x, vertex.p.y)
+            feed(vertex.p.x, vertex.p.y)
         prev_p = vertex.p
     return prev_p
+
 
 def area_distance(a, old_area):
     best_dist = None
