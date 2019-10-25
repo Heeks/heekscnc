@@ -125,7 +125,7 @@ public:
 	const ColouredPath &operator=(const ColouredPath& c);
 
 	void Clear();
-	void glCommands();
+	void glCommands(bool select);
 	void GetBox(CBox &box);
 	void WriteXML(TiXmlNode *root);
 	void ReadFromXMLElement(TiXmlElement* pElem);
@@ -138,8 +138,9 @@ public:
 	std::list<ColouredPath> m_line_strips;
 	long m_from_pos, m_to_pos; // position of block in text ctrl
 	static double multiplier;
+	PathObject* m_prev_object;
 
-	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1), m_formatted(false) {}
+	CNCCodeBlock():m_from_pos(-1), m_to_pos(-1), m_formatted(false), m_prev_object(NULL) {}
 
 	void WriteNCCode(wxTextFile &f, double ox, double oy);
 
@@ -149,6 +150,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	void WriteXML(TiXmlNode *root);
+	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AppendText(wxString& str);
@@ -177,13 +179,14 @@ public:
 
 	std::list<CNCCodeBlock*> m_blocks;
 	int m_gl_list;
+	int m_select_gl_list;
 	CBox m_box;
 	bool m_user_edited; // set, if the user has edited the nc code
 	static PathObject* prev_po;
 	static int s_arc_interpolation_count;	// How many lines to represent an arc for the glCommands() method?
 
 	CNCCode();
-	CNCCode(const CNCCode &p):m_highlighted_block(NULL), m_gl_list(0) {operator=(p);}
+	CNCCode(const CNCCode &p):m_highlighted_block(NULL), m_gl_list(0), m_select_gl_list(0) {operator=(p);}
 	virtual ~CNCCode();
 
 	const CNCCode &operator=(const CNCCode &p);
@@ -214,6 +217,7 @@ public:
 	void SetTextCtrl(wxTextCtrl *textCtrl);
 	void FormatBlocks(wxTextCtrl *textCtrl, int i0, int i1);
 	void HighlightBlock(long pos);
+	CNCCodeBlock* GetHighlightedBlock(){return m_highlighted_block;}
 	void SetHighlightedBlock(CNCCodeBlock* block);
 
 	std::list< std::pair<PathObject *, CTool *> > GetPaths() const;

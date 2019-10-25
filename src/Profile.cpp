@@ -937,28 +937,28 @@ void CProfile::glCommands(bool select, bool marked, bool no_color)
 			// draw roll on point
 			if(!m_profile_params.m_auto_roll_on)
 			{
-				glColor3ub(0, 200, 200);
+				if(!no_color)glColor3ub(0, 200, 200);
 				glRasterPos3dv(m_profile_params.m_roll_on_point);
 				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
 			}
 			// draw roll off point
 			if(!m_profile_params.m_auto_roll_on)
 			{
-				glColor3ub(255, 128, 0);
+				if(!no_color)glColor3ub(255, 128, 0);
 				glRasterPos3dv(m_profile_params.m_roll_off_point);
 				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
 			}
 			// draw start point
 			if(m_profile_params.m_start_given)
 			{
-				glColor3ub(128, 0, 255);
+				if(!no_color)glColor3ub(128, 0, 255);
 				glRasterPos3dv(m_profile_params.m_start);
 				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
 			}
 			// draw end point
 			if(m_profile_params.m_end_given)
 			{
-				glColor3ub(200, 200, 0);
+				if(!no_color)glColor3ub(200, 200, 0);
 				glRasterPos3dv(m_profile_params.m_end);
 				glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
 			}

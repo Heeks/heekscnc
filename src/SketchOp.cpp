@@ -18,7 +18,7 @@
 #include "interface/Tool.h"
 #include "CTool.h"
 #include "Reselect.h"
-
+#include "src/Picking.h"
 
 CSketchOp & CSketchOp::operator= ( const CSketchOp & rhs )
 {
@@ -57,9 +57,8 @@ void CSketchOp::glCommands(bool select, bool marked, bool no_color)
 		HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, m_sketch);
 		if (sketch)
 		{
-			if (select)glPushName(sketch->GetIndex());
+			if(select)SetPickingColor(sketch->GetIndex());
 			sketch->glCommands(select, marked, no_color);
-			if (select)glPopName();
 		}
 	}
 }

@@ -52,11 +52,11 @@ void CTag::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked)
 	{
-		glColor3ub(0, 0, 0);
+		if(!no_color)glColor3ub(0, 0, 0);
 		glRasterPos2dv(m_pos);
 		glBitmap(16, 5, 8, 3, 10.0, 0.0, bmp16);
 
-		glColor3ub(0, 0, 255);
+		if(!no_color)glColor3ub(0, 0, 255);
 		glRasterPos2dv(m_pos);
 		glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
 	}

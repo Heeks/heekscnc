@@ -34,6 +34,7 @@
 #include "Surface.h"
 #include "Stock.h"
 #include "ProgramDlg.h"
+#include "src/Picking.h"
 
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
@@ -104,17 +105,7 @@ void CProgram::glCommands(bool select, bool marked, bool no_color)
 {
 	if (m_nc_code != NULL)
 	{
-		int color[4];
-		if (no_color){
-			glGetIntegerv(GL_CURRENT_COLOR, color);
-		}
-		if (select)glPushName(m_nc_code->GetIndex());
 		m_nc_code->glCommands(select, marked, no_color);
-		if (select)glPopName();
-		if (no_color)
-		{
-			glColor3i(color[0], color[1], color[2]);
-		}
 	}
 	if (!select)
 	{

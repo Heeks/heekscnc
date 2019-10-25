@@ -18,6 +18,7 @@
 #include "CNCConfig.h"
 #include "CTool.h"
 #include "Program.h"
+#include "src/Picking.h"
 
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Solid.hxx>
@@ -331,9 +332,9 @@ void ColouredPath::Clear()
 	m_points.clear();
 }
 
-void ColouredPath::glCommands()
+void ColouredPath::glCommands(bool select)
 {
-	CNCCode::Color(m_color_type).glColor();
+	if(!select)CNCCode::Color(m_color_type).glColor();
 	glBegin(GL_LINE_STRIP);
 	for(std::list< PathObject* >::iterator It = m_points.begin(); It != m_points.end(); It++)
 	{
@@ -445,10 +446,20 @@ void CNCCodeBlock::glCommands(bool select, bool marked, bool no_color)
 {
 	if(marked)glLineWidth(3);
 
+	// remember the previous object, for single block rendering
+	if(m_prev_object == NULL)
+	{
+		m_prev_object = CNCCode::prev_po;
+	}
+	else
+	{
+		CNCCode::prev_po = m_prev_object;
+	}
+
 	for(std::list<ColouredPath>::iterator It = m_line_strips.begin(); It != m_line_strips.end(); It++)
 	{
 		ColouredPath& line_strip = *It;
-		line_strip.glCommands();
+		line_strip.glCommands(no_color);
 	}
 
 	if(marked)glLineWidth(1);
@@ -674,7 +685,7 @@ void CNCCode::GetOptions(std::list<Property *> *list)
 	list->push_back(nc_options);
 }
 
-CNCCode::CNCCode():m_highlighted_block(NULL), m_gl_list(0), m_user_edited(false)
+CNCCode::CNCCode():m_highlighted_block(NULL), m_gl_list(0), m_select_gl_list(0), m_user_edited(false)
 {
 	CNCConfig config;
 	config.Read(_T("CNCCode_ArcInterpolationCount"), &CNCCode::s_arc_interpolation_count, 20);
@@ -713,26 +724,50 @@ void CNCCode::Clear()
 
 void CNCCode::glCommands(bool select, bool marked, bool no_color)
 {
-	if(m_gl_list)
+	if(select)
 	{
-		glCallList(m_gl_list);
-	}
-	else{
-		m_gl_list = glGenLists(1);
-		glNewList(m_gl_list, GL_COMPILE_AND_EXECUTE);
-
-		// render all the blocks
-		CNCCode::prev_po = NULL;
-
-		for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
+		if(m_select_gl_list)
 		{
-			CNCCodeBlock* block = *It;
-			glPushName(block->GetIndex());
-			block->glCommands(true, block == m_highlighted_block, false);
-			glPopName();
+			glCallList(m_select_gl_list);
 		}
+		else{
+			m_select_gl_list = glGenLists(1);
+			glNewList(m_select_gl_list, GL_COMPILE_AND_EXECUTE);
 
-		glEndList();
+			// render all the blocks
+			CNCCode::prev_po = NULL;
+
+			for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
+			{
+				CNCCodeBlock* block = *It;
+				SetPickingColor(block->GetIndex());
+				block->glCommands(select, block == m_highlighted_block, true);
+			}
+
+			glEndList();
+		}
+	}
+	else
+	{
+		if(m_gl_list)
+		{
+			glCallList(m_gl_list);
+		}
+		else{
+			m_gl_list = glGenLists(1);
+			glNewList(m_gl_list, GL_COMPILE_AND_EXECUTE);
+
+			// render all the blocks
+			CNCCode::prev_po = NULL;
+
+			for(std::list<CNCCodeBlock*>::iterator It = m_blocks.begin(); It != m_blocks.end(); It++)
+			{
+				CNCCodeBlock* block = *It;
+				block->glCommands(select, block == m_highlighted_block, false);
+			}
+
+			glEndList();
+		}
 	}
 }
 
@@ -823,6 +858,21 @@ void CNCCode::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_s
 	}
 }
 
+void CNCCodeBlock::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction)
+{
+	
+	CNCCode* code = theApp.m_program->NCCode();
+	if(code)
+	{
+		code->SetHighlightedBlock(this);
+		int from_pos = code->GetHighlightedBlock()->m_from_pos;
+		int to_pos = code->GetHighlightedBlock()->m_to_pos;
+		code->DestroyGLLists();
+		theApp.m_output_canvas->m_textCtrl->ShowPosition(from_pos);
+		theApp.m_output_canvas->m_textCtrl->SetSelection(from_pos, to_pos);
+	}
+}
+
 //static
 HeeksObj* CNCCode::ReadFromXMLElement(TiXmlElement* element)
 {
@@ -862,6 +912,11 @@ void CNCCode::DestroyGLLists(void)
 		glDeleteLists(m_gl_list, 1);
 		m_gl_list = 0;
 	}
+	if (m_select_gl_list)
+	{
+		glDeleteLists(m_select_gl_list, 1);
+		m_select_gl_list = 0;
+	}	
 }
 
 void CNCCode::SetTextCtrl(wxTextCtrl *textCtrl)
