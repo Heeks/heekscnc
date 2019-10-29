@@ -3,22 +3,144 @@ from nc.nc import *
 import math
 import kurve_funcs
 
+# ramping parameters
+ramp_angle = 6
+ramp_start_above_height = 0.2
+helix_diameter_factor = 0.7
+helix_ramp_direction = 1 #  1 for clockwise,  -1 for anti-clockwise
+
 # some globals, to save passing variables as parameters too much
 area_for_feed_possible = None
 tool_radius_for_pocket = None
 
-def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, final_depth):
+ramp_h_angles_to_try = [0,90,180,270,45,135,225,315]
+
+def check_ramp_angle():
+    if ramp_angle < 0.1:
+        raise Exception, 'Invalid Ramp Angle: ' + str(ramp_angle) + ', must be at least 0.1 degrees!'
+    if ramp_angle > 89.9:
+        raise Exception, 'Invalid Ramp Angle: ' + str(ramp_angle) + ', must be no more than 89.9 degrees!'
+
+def GetRampStartGivenAngle(p, h_angle, ramp_depth):
+    ramp_length = ramp_depth / math.tan(math.radians(float(ramp_angle)))
+    r_angle = math.radians(h_angle)
+    p1 = p + area.Point(ramp_length * math.cos(r_angle), ramp_length * math.sin(r_angle))
+    obround = make_obround(p, p1, tool_radius_for_pocket)
+    a = area.Area(area_for_feed_possible)
+    obround.Subtract(a)
+    if obround.num_curves() > 0:
+        return None
+    return p1
+
+def GetRampStart(p, ramp_depth):
+    for h_angle in ramp_h_angles_to_try:
+        ramp_start = GetRampStartGivenAngle(p, h_angle, ramp_depth)
+        if ramp_start != None:
+            return ramp_start
+    return None    
+
+def do_ramp_entry_move(p, rapid_safety_space, current_start_depth, final_depth):
+    check_ramp_angle()
+    ramp_depth = float(ramp_start_above_height) + current_start_depth - final_depth
+    ramp_start_point = GetRampStart(p, ramp_depth)
+    if ramp_start_point == None:
+        raise Exception, 'could not fit ramp entry in pocket operation at X' + str(p.x) + ' Y' + str(p.y)
+    else:
+        # rapid across
+        rapid(ramp_start_point.x, ramp_start_point.y)
+        # rapid down
+        rapid(z = current_start_depth + rapid_safety_space)
+        # feed down
+        feed(z = current_start_depth + ramp_start_above_height)
+        #feed across and down
+        feed(p.x, p.y, final_depth)
+        
+def GetHelixRampCircleCentreGivenAngle(p, h_angle, circle_radius):
+    if helix_diameter_factor < 0.1:
+        raise Exception, 'Invalid helix_diameter_factor: ' + str(helix_diameter_factor) + ', must be at least 0.1'
+    if helix_diameter_factor > 1.0:
+        raise Exception, 'Invalid helix_diameter_factor: ' + str(helix_diameter_factor) + ', must be no more than 1.0'
+    centre = p + area.Point(math.cos(math.radians(helix_diameter_factor)), math.sin(math.radians(helix_diameter_factor))) * circle_radius
+    circle = make_circle(centre, circle_radius + tool_radius_for_pocket)
+    a = area.Area(area_for_feed_possible)
+    circle.Subtract(a)
+    if circle.num_curves() > 0:
+        return None
+    return centre
+        
+def GetHelixRampCircleCentre(p, circle_radius):
+    for h_angle in ramp_h_angles_to_try:
+        c = GetHelixRampCircleCentreGivenAngle(p, h_angle, circle_radius)
+        if c != None:
+            return c
+    return None    
+        
+def do_helix_entry_move(p, rapid_safety_space, current_start_depth, final_depth):
+    check_ramp_angle()
+    circle_radius = float(helix_diameter_factor) * tool_radius_for_pocket
+    circle_centre = GetHelixRampCircleCentre(p, circle_radius)
+    if circle_centre == None:
+        raise Exception, 'could not fit helical ramp entry in pocket operation at X' + str(p.x) + ' Y' + str(p.y)
+    ramp_depth = float(ramp_start_above_height) + current_start_depth - final_depth
+    ramp_length = ramp_depth / math.tan(math.radians(float(ramp_angle)))
+    circle_circumference = 2 * math.pi * circle_radius
+    helix_total_angle = ramp_length / circle_radius # gives angle in radians
+    far_point = p + (circle_centre - p) * 2
+    angle = 0
+    positions_and_depths = []
+    add_far = False
+    depth = final_depth
+    
+    while helix_total_angle > angle:
+        if add_far:
+            positions_and_depths.append((far_point, depth))
+        else:
+            positions_and_depths.append((p, depth))
+        add_far = not add_far
+        depth += math.pi * circle_radius * math.tan(math.radians(float(ramp_angle)))
+        angle = float(angle) + math.pi
+        
+    start_angle = math.atan2(p.y - circle_centre.y, p.x - circle_centre.x)
+    if helix_ramp_direction > 0:
+        final_angle = start_angle - helix_total_angle
+    else:
+        final_angle = start_angle + helix_total_angle
+    
+    final_pos = circle_centre + area.Point(math.cos(final_angle) * circle_radius, math.sin(final_angle) * circle_radius)
+    
+    # rapid across
+    rapid(final_pos.x, final_pos.y)
+    # rapid down
+    rapid(z = current_start_depth + rapid_safety_space)
+    # feed down
+    feed(z = current_start_depth + ramp_start_above_height)
+    
+    for pos_and_depth in reversed(positions_and_depths):
+        pos = pos_and_depth[0]
+        depth = pos_and_depth[1]
+        #spiral around and down
+        if helix_ramp_direction > 0:
+            arc_ccw(pos.x, pos.y, depth, circle_centre.x, circle_centre.y)
+        else:
+            arc_cw(pos.x, pos.y, depth, circle_centre.x, circle_centre.y)
+        
+def cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, final_depth, entry_style = 'plunge'):
     prev_p = p
     first = True
 
     for vertex in curve.getVertices():
         if need_rapid and first:
-            # rapid across
-            rapid(vertex.p.x, vertex.p.y)
-            ##rapid down
-            rapid(z = current_start_depth + rapid_safety_space)
-            #feed down
-            feed(z = final_depth)
+            if entry_style == 'ramp':
+                do_ramp_entry_move(vertex.p, rapid_safety_space, current_start_depth, final_depth)
+            elif entry_style == 'helical':
+                do_helix_entry_move(vertex.p, rapid_safety_space, current_start_depth, final_depth)
+            else:
+                # rapid across
+                rapid(vertex.p.x, vertex.p.y)
+                ##rapid down
+                rapid(z = current_start_depth + rapid_safety_space)
+                #feed down
+                feed(z = final_depth)
             first = False
         else:
             if vertex.type == 1:
@@ -68,6 +190,15 @@ def make_obround(p0, p1, radius):
     obround.append(c)
     return obround
 
+def make_circle(p, radius):
+    circle = area.Area()
+    c = area.Curve()
+    c.append(p + area.Point(radius, 0))
+    c.append(area.Vertex(1, p + area.Point(-radius, 0), p))
+    c.append(area.Vertex(1, p + area.Point(radius, 0), p))
+    circle.append(c)
+    return circle    
+
 def feed_possible(p0, p1):
     if p0 == p1:
         return True
@@ -78,8 +209,8 @@ def feed_possible(p0, p1):
         return False
     return True
 
-def cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss):
-    p = area.Point(0, 0)
+def cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, clearance_height, keep_tool_down_if_poss, entry_style):
+    p = None
     first = True
     for curve in curve_list:
         need_rapid = True
@@ -93,7 +224,7 @@ def cut_curvelist1(curve_list, rapid_safety_space, current_start_depth, depth, c
                 need_rapid = False
         if need_rapid:
             rapid(z = clearance_height)
-        p = cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, depth)
+        p = cut_curve(curve, need_rapid, p, rapid_safety_space, current_start_depth, depth, entry_style)
         first = False
 
     rapid(z = clearance_height)
@@ -358,10 +489,10 @@ def zigzag(a, stepover, zig_unidirectional):
 
     reorder_zigs()
 
-def pocket(a,tool_radius, extra_offset, stepover, depthparams, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional'):
+def pocket(a,tool_radius, extra_offset, stepover, depthparams, from_center, keep_tool_down_if_poss, use_zig_zag, zig_angle, zig_unidirectional = False,start_point=None, cut_mode = 'conventional', entry_style = 'plunge'):
     global tool_radius_for_pocket
     global area_for_feed_possible
-
+    
     #if len(a.getCurves()) > 1:
     #    for crv in a.getCurves():
     #        ar = area.Area()
@@ -422,7 +553,7 @@ def pocket(a,tool_radius, extra_offset, stepover, depthparams, from_center, keep
 
     if start_point==None:
         for depth in depths:
-            cut_curvelist1(curve_list, depthparams.rapid_safety_space, current_start_depth, depth, depthparams.clearance_height, keep_tool_down_if_poss)
+            cut_curvelist1(curve_list, depthparams.rapid_safety_space, current_start_depth, depth, depthparams.clearance_height, keep_tool_down_if_poss, entry_style)
             current_start_depth = depth
 
     else:

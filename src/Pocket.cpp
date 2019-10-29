@@ -340,6 +340,20 @@ void CPocket::WritePocketPython(Python &python)
 	python << _T(",") << (m_pocket_params.m_zig_unidirectional ? _T("True") : _T("False"));
 	python << _T(", None"); // start point
 	python << _T(",") << ((m_pocket_params.m_cut_mode == CPocketParams::eClimb) ? _T("'climb'") : _T("'conventional'"));
+	python << _T(",");
+	switch(m_pocket_params.m_entry_move)
+	{
+	case CPocketParams::eHelical:
+		python << _T("'helical'");
+		break;
+	case CPocketParams::eRamp:
+		python << _T("'ramp'");
+		break;
+	default:
+		python << _T("'plunge'");
+		break;
+	}
+
 	python << _T(")\n");
 
 	// rapid back up to clearance plane
