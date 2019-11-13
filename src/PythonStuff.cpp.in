@@ -233,7 +233,7 @@ public:
 					wxString path(theApp.GetDllFolder() +_T("/"));
 				#else
 					#ifdef CMAKE_UNIX
-						wxString path(_T("/usr/lib/heekscnc/"));
+						wxString path(_T("/usr/@LIB_INSTALL_DIR@/heekscnc/"));
 					#else
 						wxString path(theApp.GetDllFolder() + _T("/../heekscnc/"));
 					#endif

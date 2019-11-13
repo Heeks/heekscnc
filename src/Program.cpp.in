@@ -714,12 +714,12 @@ Python CProgram::RewritePythonProgram()
 	#ifdef RUNINPLACE
 	        python << _T("sys.path.insert(0,'") << theApp.GetResFolder() << _T("/')\n");
 	#else
-	        python << _T("sys.path.insert(0,'/usr/lib/heekscnc/')\n");
+	        python << _T("sys.path.insert(0,'/usr/@LIB_INSTALL_DIR@/heekscnc/')\n");
 	#endif
 #else
 #ifndef WIN32
 #ifndef RUNINPLACE
-	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/lib/heekscnc/")) << _T(")\n");
+	python << _T("sys.path.insert(0,") << PythonString(_T("/usr/local/@LIB_INSTALL_DIR@/heekscnc/")) << _T(")\n");
 #endif
 #endif
 	python << _T("sys.path.insert(0,") << PythonString(theApp.GetResFolder()) << _T(")\n");
