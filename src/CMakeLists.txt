@@ -4,6 +4,8 @@ cmake_minimum_required( VERSION 2.6 )
 
 add_definitions ( -Wall -DHEEKSPLUGIN -DHEEKSCNC -DUNICODE -DTIXML_USE_STL
                   -DOPEN_SOURCE_GEOMETRY -DWXUSINGDLL )
+configure_file( "PythonStuff.cpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/PythonStuff.cpp" )
+configure_file( "Program.cpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp" )
 find_package( wxWidgets REQUIRED COMPONENTS base core gl )
 
 #find OCE or OpenCASCADE
@@ -180,7 +182,7 @@ set_target_properties( heekscnc PROPERTIES LINK_FLAGS -Wl,-Bsymbolic-functions )
 
 #---------------- the lines below tell cmake what files get installed where.---------------------
 #------------------- this is used for 'make install' and 'make package' -------------------------
-install( TARGETS heekscnc DESTINATION lib )
+install( TARGETS heekscnc DESTINATION ${LIB_INSTALL_DIR} )
 
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bitmaps/" DESTINATION share/heekscnc/bitmaps/ PATTERN .svn EXCLUDE )
 
@@ -188,7 +190,7 @@ file( GLOB icons "${CMAKE_CURRENT_SOURCE_DIR}/../icons/*.png" )
 install( FILES ${icons} DESTINATION share/heekscnc/icons )
 
 file(GLOB nc "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/../nc/*.txt") 
-install(FILES ${nc} DESTINATION lib/heekscnc/nc )
+install(FILES ${nc} DESTINATION ${LIB_INSTALL_DIR}/heekscnc/nc )
 
 file( GLOB hcnc_defaults
     "${CMAKE_CURRENT_SOURCE_DIR}/../default.*"
