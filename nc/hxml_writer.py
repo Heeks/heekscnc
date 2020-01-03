@@ -114,13 +114,13 @@ class HxmlWriter:
         if (z != None) :
             self.file_out.write(' z="%.6f"' % z)
         if (i != None):
-            if self.oldx == None: print 'arc move "i" without x set!'
+            if self.oldx == None: print('arc move "i" without x set!')
             else: self.file_out.write(' i="%.6f"' % (i - self.oldx))
         if (j != None):
-            if self.oldy == None: print 'arc move "j" without y set!'
+            if self.oldy == None: print('arc move "j" without y set!')
             else: self.file_out.write(' j="%.6f"' % (j - self.oldy))
         if (k != None):
-            if self.oldz == None: print 'arc move "k" without z set!'
+            if self.oldz == None: print('arc move "k" without z set!')
             else: self.file_out.write(' k="%.6f"' % (k - self.oldz))
         if (r != None) : self.file_out.write(' r="%.6f"' % r)
         if (d != None) : self.file_out.write(' d="%i"' % d)
