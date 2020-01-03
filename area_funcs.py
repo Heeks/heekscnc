@@ -17,9 +17,9 @@ ramp_h_angles_to_try = [0,90,180,270,45,135,225,315]
 
 def check_ramp_angle():
     if ramp_angle < 0.1:
-        raise Exception, 'Invalid Ramp Angle: ' + str(ramp_angle) + ', must be at least 0.1 degrees!'
+        raise Exception('Invalid Ramp Angle: ' + str(ramp_angle) + ', must be at least 0.1 degrees!')
     if ramp_angle > 89.9:
-        raise Exception, 'Invalid Ramp Angle: ' + str(ramp_angle) + ', must be no more than 89.9 degrees!'
+        raise Exception('Invalid Ramp Angle: ' + str(ramp_angle) + ', must be no more than 89.9 degrees!')
 
 def GetRampStartGivenAngle(p, h_angle, ramp_depth):
     ramp_length = ramp_depth / math.tan(math.radians(float(ramp_angle)))
@@ -44,7 +44,7 @@ def do_ramp_entry_move(p, rapid_safety_space, current_start_depth, final_depth):
     ramp_depth = float(ramp_start_above_height) + current_start_depth - final_depth
     ramp_start_point = GetRampStart(p, ramp_depth)
     if ramp_start_point == None:
-        raise Exception, 'could not fit ramp entry in pocket operation at X' + str(p.x) + ' Y' + str(p.y)
+        raise Exception('could not fit ramp entry in pocket operation at X' + str(p.x) + ' Y' + str(p.y))
     else:
         # rapid across
         rapid(ramp_start_point.x, ramp_start_point.y)
@@ -57,9 +57,9 @@ def do_ramp_entry_move(p, rapid_safety_space, current_start_depth, final_depth):
         
 def GetHelixRampCircleCentreGivenAngle(p, h_angle, circle_radius):
     if helix_diameter_factor < 0.1:
-        raise Exception, 'Invalid helix_diameter_factor: ' + str(helix_diameter_factor) + ', must be at least 0.1'
+        raise Exception('Invalid helix_diameter_factor: ' + str(helix_diameter_factor) + ', must be at least 0.1')
     if helix_diameter_factor > 1.0:
-        raise Exception, 'Invalid helix_diameter_factor: ' + str(helix_diameter_factor) + ', must be no more than 1.0'
+        raise Exception('Invalid helix_diameter_factor: ' + str(helix_diameter_factor) + ', must be no more than 1.0')
     centre = p + area.Point(math.cos(math.radians(helix_diameter_factor)), math.sin(math.radians(helix_diameter_factor))) * circle_radius
     circle = make_circle(centre, circle_radius + tool_radius_for_pocket)
     a = area.Area(area_for_feed_possible)
@@ -80,7 +80,7 @@ def do_helix_entry_move(p, rapid_safety_space, current_start_depth, final_depth)
     circle_radius = float(helix_diameter_factor) * tool_radius_for_pocket
     circle_centre = GetHelixRampCircleCentre(p, circle_radius)
     if circle_centre == None:
-        raise Exception, 'could not fit helical ramp entry in pocket operation at X' + str(p.x) + ' Y' + str(p.y)
+        raise Exception('could not fit helical ramp entry in pocket operation at X' + str(p.x) + ' Y' + str(p.y))
     ramp_depth = float(ramp_start_above_height) + current_start_depth - final_depth
     ramp_length = ramp_depth / math.tan(math.radians(float(ramp_angle)))
     circle_circumference = 2 * math.pi * circle_radius
