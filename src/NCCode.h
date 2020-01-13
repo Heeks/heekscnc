@@ -151,7 +151,7 @@ public:
 	void GetBox(CBox &box);
 	void WriteXML(TiXmlNode *root);
 	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
-
+	int PickPriority(){ return 2; }; // 2 for edges
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	void AppendText(wxString& str);
 	void FormatText(wxTextCtrl *textCtrl, bool highlighted, bool force_format);
