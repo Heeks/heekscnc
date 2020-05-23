@@ -57,8 +57,9 @@ void CSketchOp::glCommands(bool select, bool marked, bool no_color)
 		HeeksObj* sketch = heeksCAD->GetIDObject(SketchType, m_sketch);
 		if (sketch)
 		{
-			if(select)SetPickingColor(sketch->GetIndex());
-			sketch->glCommands(select, marked, no_color);
+			if(!no_color)// test to see if this sketch gets drawn over the actual sketch
+				glColor3ub(0,0,255);
+			sketch->glCommands(false, marked, true); // don't mark the lines and arcs as selectable objects
 		}
 	}
 }
