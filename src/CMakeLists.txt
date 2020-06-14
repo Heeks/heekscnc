@@ -109,7 +109,7 @@ set( heekscad_SRCS
     ${HeeksCAD_SRC_DIR}/interface/MarkedObject.cpp
     ${HeeksCAD_SRC_DIR}/interface/NiceTextCtrl.cpp
     ${HeeksCAD_SRC_DIR}/interface/ObjList.cpp
-    ${HeeksCAD_SRC_DIR}/src/Picking.cpp
+    ${HeeksCAD_SRC_DIR}/interface/Picking.cpp
     ${HeeksCAD_SRC_DIR}/interface/PictureFrame.cpp
     ${HeeksCAD_SRC_DIR}/interface/PropertyCheck.cpp
     ${HeeksCAD_SRC_DIR}/interface/PropertyChoice.cpp

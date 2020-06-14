@@ -10,12 +10,13 @@
 #include "NCCode.h"
 #include "interface/Geom.h"
 #include "interface/MarkedObject.h"
-#include "interface/PropertyString.h"
-#include "interface/PropertyFile.h"
+#include "interface/Picking.h"
+#include "interface/PropertyCheck.h"
 #include "interface/PropertyChoice.h"
 #include "interface/PropertyDouble.h"
+#include "interface/PropertyFile.h"
 #include "interface/PropertyLength.h"
-#include "interface/PropertyCheck.h"
+#include "interface/PropertyString.h"
 #include "interface/Tool.h"
 #include "Profile.h"
 #include "Pocket.h"
@@ -34,7 +35,6 @@
 #include "Surface.h"
 #include "Stock.h"
 #include "ProgramDlg.h"
-#include "src/Picking.h"
 
 #include <wx/stdpaths.h>
 #include <wx/filename.h>

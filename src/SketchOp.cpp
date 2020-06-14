@@ -10,15 +10,15 @@
 #include "CNCConfig.h"
 #include "ProgramCanvas.h"
 #include "Program.h"
-#include "interface/PropertyInt.h"
+#include "interface/Picking.h"
 #include "interface/PropertyDouble.h"
+#include "interface/PropertyInt.h"
 #include "interface/PropertyLength.h"
 #include "interface/PropertyString.h"
 #include "tinyxml/tinyxml.h"
 #include "interface/Tool.h"
 #include "CTool.h"
 #include "Reselect.h"
-#include "src/Picking.h"
 
 CSketchOp & CSketchOp::operator= ( const CSketchOp & rhs )
 {

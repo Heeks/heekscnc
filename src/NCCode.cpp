@@ -11,14 +11,14 @@
 #include "OutputCanvas.h"
 #include "interface/Geom.h"
 #include "interface/MarkedObject.h"
+#include "interface/Picking.h"
 #include "interface/PropertyColor.h"
-#include "interface/PropertyList.h"
 #include "interface/PropertyInt.h"
+#include "interface/PropertyList.h"
 #include "interface/Tool.h"
 #include "CNCConfig.h"
 #include "CTool.h"
 #include "Program.h"
-#include "src/Picking.h"
 
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Solid.hxx>
