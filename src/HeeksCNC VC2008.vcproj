@@ -607,11 +607,11 @@
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\src\Picking.cpp"
+			RelativePath="$(HEEKSCADPATH)\interface\Picking.cpp"
 			>
 		</File>
 		<File
-			RelativePath="$(HEEKSCADPATH)\src\Picking.h"
+			RelativePath="$(HEEKSCADPATH)\interface\Picking.h"
 			>
 		</File>
 		<File
